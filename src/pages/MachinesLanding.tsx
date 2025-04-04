@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -23,7 +22,7 @@ const MachinesLanding = () => {
 
   const { data: machines = [], isLoading } = useMachines();
   
-  // Predefined machine types based on the provided list
+  // Predefined machine types that match our created pages
   const vendingMachines = [
     {
       id: '1',
