@@ -1,23 +1,33 @@
-
 import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import CTASection from '@/components/common/CTASection';
 import { Server, HardDrive, Ruler, Weight, Plug, ThermometerSnowflake, DollarSign } from 'lucide-react';
 import Wifi from '@/components/ui/Wifi';
+import { getMachineBySlug } from '@/services/cms';
+import { CMSMachine } from '@/types/cms';
 
 const MachineDetail = () => {
   const { machineId, machineType } = useParams<{ machineType: string, machineId: string }>();
 
-  const machineData = {
+  const { data: machine, isLoading, error } = useQuery({
+    queryKey: ['machine', machineType, machineId],
+    queryFn: () => getMachineBySlug(machineType || '', machineId || ''),
+    enabled: !!machineType && !!machineId,
+  });
+
+  const machineData: CMSMachine = machine || {
+    id: '1',
+    slug: machineId || 'default',
     title: "Smart Vending Machine",
-    type: "vending",
+    type: machineType || "vending",
     temperature: "ambient",
     description: "Advanced touchscreen vending solution for ambient products with real-time inventory tracking and multiple payment options.",
     images: [
-      "https://images.unsplash.com/photo-1525610553991-2bede1a236e2",
-      "https://images.unsplash.com/photo-1623039405147-547794f92e9e",
-      "https://images.unsplash.com/photo-1627843240167-b1f9440fc173"
+      { url: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2", alt: "Smart Vending Machine - Front View" },
+      { url: "https://images.unsplash.com/photo-1623039405147-547794f92e9e", alt: "Smart Vending Machine - Side View" },
+      { url: "https://images.unsplash.com/photo-1627843240167-b1f9440fc173", alt: "Smart Vending Machine - Interior" }
     ],
     specs: {
       dimensions: "72\"H x 39\"W x 36\"D",
@@ -45,20 +55,42 @@ const MachineDetail = () => {
       {
         title: "Corporate Office",
         description: "Deployed in Fortune 500 headquarters providing snacks and essentials to employees",
-        image: "https://images.unsplash.com/photo-1577412647305-991150c7d163"
+        image: { url: "https://images.unsplash.com/photo-1577412647305-991150c7d163", alt: "Corporate office deployment" }
       },
       {
         title: "University Campus",
         description: "Network of machines across campus providing 24/7 access to convenience items for students",
-        image: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a"
+        image: { url: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a", alt: "University campus deployment" }
       },
       {
         title: "Transit Hub",
         description: "High-traffic location offering on-the-go refreshments and necessities to travelers",
-        image: "https://images.unsplash.com/photo-1568438350562-2cae6d394ad0"
+        image: { url: "https://images.unsplash.com/photo-1568438350562-2cae6d394ad0", alt: "Transit hub deployment" }
       }
     ]
   };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="py-24 text-center">
+          <div className="animate-pulse rounded-md bg-gray-200 h-8 w-1/4 mx-auto mb-4"></div>
+          <div className="animate-pulse rounded-md bg-gray-200 h-4 w-1/2 mx-auto"></div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="py-24 text-center text-red-500">
+          <h2 className="text-2xl font-bold mb-4">Error Loading Machine Details</h2>
+          <p>Unable to load machine information. Please try again later.</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -75,7 +107,7 @@ const MachineDetail = () => {
                   )}
                 </div>
                 <span className="text-vending-blue font-medium">
-                  {machineType?.charAt(0).toUpperCase()}{machineType?.slice(1)} | {machineData.temperature.charAt(0).toUpperCase()}{machineData.temperature.slice(1)}
+                  {machineData.type.charAt(0).toUpperCase()}{machineData.type.slice(1)} | {machineData.temperature.charAt(0).toUpperCase()}{machineData.temperature.slice(1)}
                 </span>
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-vending-blue-dark">
@@ -96,8 +128,8 @@ const MachineDetail = () => {
             <div className="relative">
               <div className="bg-white rounded-lg shadow-xl overflow-hidden">
                 <img 
-                  src={machineData.images[0]} 
-                  alt={machineData.title} 
+                  src={machineData.images[0]?.url} 
+                  alt={machineData.images[0]?.alt || machineData.title} 
                   className="w-full h-auto object-cover"
                 />
               </div>
@@ -115,64 +147,80 @@ const MachineDetail = () => {
           <div className="bg-vending-gray rounded-lg shadow-md p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-medium mb-3 flex items-center">
-                    <Ruler className="mr-2 h-5 w-5 text-vending-blue" />
-                    Dimensions
-                  </h3>
-                  <p className="text-gray-700">{machineData.specs.dimensions}</p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium mb-3 flex items-center">
-                    <Weight className="mr-2 h-5 w-5 text-vending-blue" />
-                    Weight
-                  </h3>
-                  <p className="text-gray-700">{machineData.specs.weight}</p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium mb-3 flex items-center">
-                    <Plug className="mr-2 h-5 w-5 text-vending-blue" />
-                    Power Requirements
-                  </h3>
-                  <p className="text-gray-700">{machineData.specs.powerRequirements}</p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium mb-3 flex items-center">
-                    <ThermometerSnowflake className="mr-2 h-5 w-5 text-vending-blue" />
-                    Temperature
-                  </h3>
-                  <p className="text-gray-700">{machineData.specs.temperature}</p>
-                </div>
+                {machineData.specs.dimensions && (
+                  <div>
+                    <h3 className="text-lg font-medium mb-3 flex items-center">
+                      <Ruler className="mr-2 h-5 w-5 text-vending-blue" />
+                      Dimensions
+                    </h3>
+                    <p className="text-gray-700">{machineData.specs.dimensions}</p>
+                  </div>
+                )}
+                {machineData.specs.weight && (
+                  <div>
+                    <h3 className="text-lg font-medium mb-3 flex items-center">
+                      <Weight className="mr-2 h-5 w-5 text-vending-blue" />
+                      Weight
+                    </h3>
+                    <p className="text-gray-700">{machineData.specs.weight}</p>
+                  </div>
+                )}
+                {machineData.specs.powerRequirements && (
+                  <div>
+                    <h3 className="text-lg font-medium mb-3 flex items-center">
+                      <Plug className="mr-2 h-5 w-5 text-vending-blue" />
+                      Power Requirements
+                    </h3>
+                    <p className="text-gray-700">{machineData.specs.powerRequirements}</p>
+                  </div>
+                )}
+                {machineData.specs.temperature && (
+                  <div>
+                    <h3 className="text-lg font-medium mb-3 flex items-center">
+                      <ThermometerSnowflake className="mr-2 h-5 w-5 text-vending-blue" />
+                      Temperature
+                    </h3>
+                    <p className="text-gray-700">{machineData.specs.temperature}</p>
+                  </div>
+                )}
               </div>
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-medium mb-3 flex items-center">
-                    <Server className="mr-2 h-5 w-5 text-vending-blue" />
-                    Capacity
-                  </h3>
-                  <p className="text-gray-700">{machineData.specs.capacity}</p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium mb-3 flex items-center">
-                    <Wifi className="mr-2 h-5 w-5 text-vending-blue" />
-                    Connectivity
-                  </h3>
-                  <p className="text-gray-700">{machineData.specs.connectivity}</p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium mb-3 flex items-center">
-                    <DollarSign className="mr-2 h-5 w-5 text-vending-blue" />
-                    Cost
-                  </h3>
-                  <p className="text-gray-700">{machineData.specs.priceRange}</p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium mb-3 flex items-center">
-                    <HardDrive className="mr-2 h-5 w-5 text-vending-blue" />
-                    Payment Options
-                  </h3>
-                  <p className="text-gray-700">{machineData.specs.paymentOptions}</p>
-                </div>
+                {machineData.specs.capacity && (
+                  <div>
+                    <h3 className="text-lg font-medium mb-3 flex items-center">
+                      <Server className="mr-2 h-5 w-5 text-vending-blue" />
+                      Capacity
+                    </h3>
+                    <p className="text-gray-700">{machineData.specs.capacity}</p>
+                  </div>
+                )}
+                {machineData.specs.connectivity && (
+                  <div>
+                    <h3 className="text-lg font-medium mb-3 flex items-center">
+                      <Wifi className="mr-2 h-5 w-5 text-vending-blue" />
+                      Connectivity
+                    </h3>
+                    <p className="text-gray-700">{machineData.specs.connectivity}</p>
+                  </div>
+                )}
+                {machineData.specs.priceRange && (
+                  <div>
+                    <h3 className="text-lg font-medium mb-3 flex items-center">
+                      <DollarSign className="mr-2 h-5 w-5 text-vending-blue" />
+                      Cost
+                    </h3>
+                    <p className="text-gray-700">{machineData.specs.priceRange}</p>
+                  </div>
+                )}
+                {machineData.specs.paymentOptions && (
+                  <div>
+                    <h3 className="text-lg font-medium mb-3 flex items-center">
+                      <HardDrive className="mr-2 h-5 w-5 text-vending-blue" />
+                      Payment Options
+                    </h3>
+                    <p className="text-gray-700">{machineData.specs.paymentOptions}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -226,8 +274,8 @@ const MachineDetail = () => {
             {machineData.deploymentExamples.map((example, index) => (
               <div key={index} className="bg-white rounded-lg overflow-hidden shadow-md">
                 <img 
-                  src={example.image} 
-                  alt={example.title}
+                  src={example.image.url} 
+                  alt={example.image.alt || example.title}
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-6">
@@ -248,8 +296,8 @@ const MachineDetail = () => {
             {machineData.images.slice(0, 3).map((image, index) => (
               <img 
                 key={index}
-                src={image}
-                alt={`${machineData.title} - View ${index + 1}`}
+                src={image.url}
+                alt={image.alt || `${machineData.title} - View ${index + 1}`}
                 className="w-full h-64 object-cover rounded-lg shadow-md"
               />
             ))}

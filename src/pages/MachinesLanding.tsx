@@ -1,89 +1,21 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import CTASection from '@/components/common/CTASection';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Server, HardDrive, Wifi } from 'lucide-react';
+import { getMachines } from '@/services/cms';
+import { CMSMachine } from '@/types/cms';
 
 const MachinesLanding = () => {
   const [filter, setFilter] = useState<string | null>(null);
 
-  // Machine types data
-  const machines = [
-    {
-      title: "Smart Vending Machine",
-      description: "Interactive touchscreen vending for ambient products",
-      image: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2",
-      path: "/machines/vending/smart-vending",
-      type: "vending",
-      temperature: "ambient",
-      features: ["Touchscreen", "Cashless Payment", "Cloud Connectivity"]
-    },
-    {
-      title: "Refrigerated Beverage Machine",
-      description: "Temperature-controlled vending for cold drinks and perishables",
-      image: "https://images.unsplash.com/photo-1597393353415-b3730f3719fe",
-      path: "/machines/vending/refrigerated-beverage",
-      type: "vending",
-      temperature: "refrigerated",
-      features: ["Temperature Control", "Energy Efficient", "Digital Display"]
-    },
-    {
-      title: "Frozen Food Dispenser",
-      description: "Deep freeze vending for ice cream and frozen meals",
-      image: "https://images.unsplash.com/photo-1563379926898-05f4575a45d8",
-      path: "/machines/vending/frozen-food",
-      type: "vending",
-      temperature: "frozen",
-      features: ["Deep Freeze", "Multi-Zone Temperature", "Backup Power"]
-    },
-    {
-      title: "Wall Mounted Dispenser",
-      description: "Space-saving wall-mounted vending solution",
-      image: "https://images.unsplash.com/photo-1611174743517-4d463abd9040",
-      path: "/machines/vending/wall-mounted",
-      type: "vending",
-      temperature: "ambient",
-      features: ["Space-Saving", "ADA Compliant", "Low Power Consumption"]
-    },
-    {
-      title: "High Capacity Vending",
-      description: "Large capacity machine for high traffic locations",
-      image: "https://images.unsplash.com/photo-1589803162840-9863428c1cf6",
-      path: "/machines/vending/high-capacity",
-      type: "vending",
-      temperature: "ambient",
-      features: ["High Capacity", "Multiple Product Categories", "Modular Design"]
-    },
-    {
-      title: "Smart Locker Small",
-      description: "Compact smart lockers for secure item pickup",
-      image: "https://images.unsplash.com/photo-1621964275191-ccc01ef2134c",
-      path: "/machines/lockers/smart-locker-small",
-      type: "locker",
-      temperature: "ambient",
-      features: ["Secure Access", "Compact Design", "LED Indicators"]
-    },
-    {
-      title: "Refrigerated Locker System",
-      description: "Temperature-controlled lockers for food delivery and grocery pickup",
-      image: "https://images.unsplash.com/photo-1600494603989-9650cf6ddd3d",
-      path: "/machines/lockers/refrigerated-lockers",
-      type: "locker",
-      temperature: "refrigerated",
-      features: ["Temperature Monitoring", "Individual Compartments", "Mobile Notifications"]
-    },
-    {
-      title: "Frozen Storage Lockers",
-      description: "Deep-freeze lockers for ice cream and frozen food pickup",
-      image: "https://images.unsplash.com/photo-1579619087996-47ee11a113fd",
-      path: "/machines/lockers/frozen-storage",
-      type: "locker",
-      temperature: "frozen",
-      features: ["Ultra-Low Temperature", "Insulated Compartments", "Power Backup"]
-    }
-  ];
+  // Fetch machines using React Query
+  const { data: machines = [], isLoading, error } = useQuery({
+    queryKey: ['machines'],
+    queryFn: () => getMachines(),
+  });
 
   const filteredMachines = filter 
     ? machines.filter(machine => {
@@ -96,6 +28,46 @@ const MachinesLanding = () => {
         return true;
       })
     : machines;
+
+  // Fallback to static data if CMS data is not available yet
+  const displayMachines = filteredMachines.length > 0 ? filteredMachines : [
+    {
+      id: '1',
+      slug: 'smart-vending',
+      title: "Smart Vending Machine",
+      description: "Interactive touchscreen vending for ambient products",
+      images: [{ url: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2", alt: "Smart Vending Machine" }],
+      type: "vending",
+      temperature: "ambient",
+      features: ["Touchscreen", "Cashless Payment", "Cloud Connectivity"],
+      specs: {},
+      deploymentExamples: []
+    },
+    {
+      id: '2',
+      slug: 'refrigerated-beverage',
+      title: "Refrigerated Beverage Machine",
+      description: "Temperature-controlled vending for cold drinks and perishables",
+      images: [{ url: "https://images.unsplash.com/photo-1597393353415-b3730f3719fe", alt: "Refrigerated Beverage Machine" }],
+      type: "vending",
+      temperature: "refrigerated",
+      features: ["Temperature Control", "Energy Efficient", "Digital Display"],
+      specs: {},
+      deploymentExamples: []
+    },
+    {
+      id: '3',
+      slug: 'frozen-food',
+      title: "Frozen Food Dispenser",
+      description: "Deep freeze vending for ice cream and frozen meals",
+      images: [{ url: "https://images.unsplash.com/photo-1563379926898-05f4575a45d8", alt: "Frozen Food Dispenser" }],
+      type: "vending",
+      temperature: "frozen",
+      features: ["Deep Freeze", "Multi-Zone Temperature", "Backup Power"],
+      specs: {},
+      deploymentExamples: []
+    }
+  ] as CMSMachine[];
 
   return (
     <Layout>
@@ -182,6 +154,20 @@ const MachinesLanding = () => {
         </div>
       </section>
 
+      {/* Loading and Error States */}
+      {isLoading && (
+        <div className="py-12 text-center">
+          <div className="animate-pulse rounded-md bg-gray-200 h-8 w-1/4 mx-auto mb-4"></div>
+          <div className="animate-pulse rounded-md bg-gray-200 h-4 w-1/2 mx-auto"></div>
+        </div>
+      )}
+
+      {error && (
+        <div className="py-12 text-center text-red-500">
+          <p>Error loading machines. Please try again later.</p>
+        </div>
+      )}
+
       {/* Machine Types Grid */}
       <section className="py-16 bg-vending-gray">
         <div className="container-wide">
@@ -207,12 +193,12 @@ const MachinesLanding = () => {
           )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredMachines.map((machine, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+            {displayMachines.map((machine) => (
+              <div key={machine.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="relative h-48">
                   <img 
-                    src={machine.image} 
-                    alt={machine.title} 
+                    src={machine.images[0]?.url} 
+                    alt={machine.images[0]?.alt || machine.title} 
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-0 right-0 bg-vending-teal/90 text-white px-3 py-1 rounded-bl-lg text-sm font-medium">
@@ -246,7 +232,7 @@ const MachinesLanding = () => {
                   </div>
                   
                   <Button asChild variant="outline" className="w-full">
-                    <Link to={machine.path} className="flex items-center justify-center">
+                    <Link to={`/machines/${machine.type}/${machine.slug}`} className="flex items-center justify-center">
                       View Specifications <ChevronRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>

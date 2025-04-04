@@ -2,6 +2,9 @@
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { getProductTypes } from '@/services/cms';
+import { CMSProductType } from '@/types/cms';
 
 interface ProductCardProps {
   title: string;
@@ -32,7 +35,14 @@ const ProductCard = ({ title, description, image, path }: ProductCardProps) => {
 };
 
 const ProductTypesSection = () => {
-  const productTypes = [
+  // Fetch featured product types from CMS
+  const { data: cmsProductTypes = [], isLoading } = useQuery({
+    queryKey: ['productTypes', { featured: true, limit: 4 }],
+    queryFn: () => getProductTypes(),
+  });
+
+  // Fallback data if CMS data is not yet available
+  const staticProductTypes = [
     {
       title: "Grocery",
       description: "Automate grocery sales with temperature-controlled vending for snacks, drinks, and everyday essentials.",
@@ -58,6 +68,16 @@ const ProductTypesSection = () => {
       path: "/products/cosmetics"
     }
   ];
+
+  // If we have CMS data, transform it to the format the component expects
+  const productTypes = cmsProductTypes.length > 0 
+    ? cmsProductTypes.map((product: CMSProductType) => ({
+        title: product.title,
+        description: product.description,
+        image: product.image.url,
+        path: `/products/${product.slug}`
+      }))
+    : staticProductTypes;
   
   return (
     <section className="py-16 md:py-24">
@@ -76,17 +96,32 @@ const ProductTypesSection = () => {
           </Button>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {productTypes.map((product, index) => (
-            <ProductCard 
-              key={index}
-              title={product.title}
-              description={product.description}
-              image={product.image}
-              path={product.path}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-lg overflow-hidden shadow-md bg-white p-4">
+                <div className="animate-pulse">
+                  <div className="bg-gray-300 h-48 w-full mb-4"></div>
+                  <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-300 rounded w-full mb-4"></div>
+                  <div className="h-10 bg-gray-300 rounded w-full"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {productTypes.map((product, index) => (
+              <ProductCard 
+                key={index}
+                title={product.title}
+                description={product.description}
+                image={product.image}
+                path={product.path}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
