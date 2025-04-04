@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import CTASection from '@/components/common/CTASection';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, Server, HardDrive, Wifi } from 'lucide-react';
+import { ChevronRight, Server, HardDrive } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { getMachines } from '@/services/cms';
 import { CMSMachine } from '@/types/cms';
 
@@ -12,70 +14,167 @@ const MachinesLanding = () => {
   const [filter, setFilter] = useState<string | null>(null);
   const location = useLocation();
 
-  useEffect(() => {
+  // Scroll to section if hash is present in URL
+  useState(() => {
     if (location.hash) {
       const element = document.getElementById(location.hash.substring(1));
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
-  }, [location]);
+  });
 
-  const { data: machines = [], isLoading, error } = useQuery({
+  const { data: machines = [], isLoading } = useQuery({
     queryKey: ['machines'],
     queryFn: () => getMachines(),
   });
-
-  const filteredMachines = filter 
-    ? machines.filter(machine => {
-        if (filter.includes('vending') || filter.includes('locker')) {
-          return machine.type === filter;
-        }
-        if (['ambient', 'refrigerated', 'frozen'].includes(filter)) {
-          return machine.temperature === filter;
-        }
-        return true;
-      })
-    : machines;
-
-  const displayMachines = filteredMachines.length > 0 ? filteredMachines : [
+  
+  // Predefined machine types based on the provided list
+  const vendingMachines = [
     {
       id: '1',
-      slug: 'smart-vending',
-      title: "Smart Vending Machine",
-      description: "Interactive touchscreen vending for ambient products",
-      images: [{ url: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2", alt: "Smart Vending Machine" }],
+      title: "Option-4 - Refrigerated",
+      description: "Full-size refrigerated vending machine with multiple temperature zones",
+      image: "https://images.unsplash.com/photo-1597393353415-b3730f3719fe",
       type: "vending",
-      temperature: "ambient",
-      features: ["Touchscreen", "Cashless Payment", "Cloud Connectivity"],
-      specs: {},
-      deploymentExamples: []
+      temperature: "refrigerated",
+      slug: "option-4-refrigerated"
     },
     {
       id: '2',
-      slug: 'refrigerated-beverage',
-      title: "Refrigerated Beverage Machine",
-      description: "Temperature-controlled vending for cold drinks and perishables",
-      images: [{ url: "https://images.unsplash.com/photo-1597393353415-b3730f3719fe", alt: "Refrigerated Beverage Machine" }],
+      title: "Option-2, Wall Mount XL",
+      description: "Extra large wall-mounted vending solution for high capacity needs",
+      image: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2",
       type: "vending",
-      temperature: "refrigerated",
-      features: ["Temperature Control", "Energy Efficient", "Digital Display"],
-      specs: {},
-      deploymentExamples: []
+      temperature: "ambient",
+      slug: "option-2-wall-mount-xl"
     },
     {
       id: '3',
-      slug: 'frozen-food',
-      title: "Frozen Food Dispenser",
-      description: "Deep freeze vending for ice cream and frozen meals",
-      images: [{ url: "https://images.unsplash.com/photo-1563379926898-05f4575a45d8", alt: "Frozen Food Dispenser" }],
+      title: "Option-2, Wall Mount",
+      description: "Space-efficient wall-mounted vending machine for standard applications",
+      image: "https://images.unsplash.com/photo-1572635148818-ef6fd45eb394",
       type: "vending",
-      temperature: "frozen",
-      features: ["Deep Freeze", "Multi-Zone Temperature", "Backup Power"],
-      specs: {},
-      deploymentExamples: []
-    }
-  ] as CMSMachine[];
+      temperature: "ambient",
+      slug: "option-2-wall-mount"
+    },
+    {
+      id: '4',
+      title: "DIVI-SS",
+      description: "Stainless steel vending solution with advanced touchscreen interface",
+      image: "https://images.unsplash.com/photo-1627998792088-f8016b438988",
+      type: "vending",
+      temperature: "ambient",
+      slug: "divi-ss"
+    },
+    {
+      id: '5',
+      title: "DIVI-WP",
+      description: "Weather-protected vending system for outdoor installations",
+      image: "https://images.unsplash.com/photo-1557034362-4ec717153f8f",
+      type: "vending",
+      temperature: "ambient",
+      slug: "divi-wp"
+    },
+    {
+      id: '6',
+      title: "DIVI-WS",
+      description: "Wall-mounted slim profile vending machine for tight spaces",
+      image: "https://images.unsplash.com/photo-1627395637580-988089c61818",
+      type: "vending",
+      temperature: "ambient",
+      slug: "divi-ws"
+    },
+    {
+      id: '7',
+      title: "DIVI-SP",
+      description: "Space-saving profile vending machine with flexible configuration options",
+      image: "https://images.unsplash.com/photo-1621964275191-ccc01ef2134c",
+      type: "vending",
+      temperature: "ambient",
+      slug: "divi-sp"
+    },
+    {
+      id: '8',
+      title: "Combi 3000",
+      description: "Combination vending system with multiple product categories and payment options",
+      image: "https://images.unsplash.com/photo-1527256351016-8ad33ff833fc",
+      type: "vending",
+      temperature: "multi",
+      slug: "combi-3000"
+    },
+  ];
+  
+  const smartLockers = [
+    {
+      id: '9',
+      title: "10-cell temperature controlled locker",
+      description: "Compact temperature-controlled locker system with 10 individual compartments",
+      image: "https://images.unsplash.com/photo-1604754742629-3e5728249d73",
+      type: "locker",
+      temperature: "controlled",
+      slug: "10-cell-temperature-controlled"
+    },
+    {
+      id: '10',
+      title: "21-cell temperature controlled locker",
+      description: "Large capacity temperature-controlled locker system with 21 individual compartments",
+      image: "https://images.unsplash.com/photo-1534723328310-e82dad3ee43f",
+      type: "locker",
+      temperature: "controlled",
+      slug: "21-cell-temperature-controlled"
+    },
+  ];
+
+  // Use CMS data when available, otherwise use predefined data
+  const displayVendingMachines = machines.length > 0 
+    ? machines.filter(machine => machine.type === 'vending')
+    : vendingMachines;
+    
+  const displayLockers = machines.length > 0 
+    ? machines.filter(machine => machine.type === 'locker')
+    : smartLockers;
+
+  const renderMachineCard = (machine: CMSMachine | any) => {
+    const machineImage = machine.images?.[0]?.url || machine.image;
+    const machineAlt = machine.images?.[0]?.alt || machine.title;
+    
+    return (
+      <Card key={machine.id} className="overflow-hidden hover:shadow-xl transition-shadow">
+        <div className="relative h-48">
+          <img 
+            src={machineImage} 
+            alt={machineAlt} 
+            className="w-full h-full object-cover"
+          />
+          {machine.temperature && (
+            <div className="absolute top-0 right-0 bg-vending-teal/90 text-white px-3 py-1 rounded-bl-lg text-sm font-medium">
+              {machine.temperature.charAt(0).toUpperCase() + machine.temperature.slice(1)}
+            </div>
+          )}
+        </div>
+        <CardContent className="p-6">
+          <div className="flex items-start mb-2">
+            <div className="bg-vending-blue-light p-2 rounded-full mr-3">
+              {machine.type === 'vending' ? (
+                <Server className="h-4 w-4 text-vending-blue" />
+              ) : (
+                <HardDrive className="h-4 w-4 text-vending-blue" />
+              )}
+            </div>
+            <h3 className="text-xl font-semibold">{machine.title}</h3>
+          </div>
+          <p className="text-gray-600 mb-4">{machine.description}</p>
+          
+          <Button asChild variant="outline" className="w-full">
+            <Link to={`/machines/${machine.type}/${machine.slug}`} className="flex items-center justify-center">
+              View Specifications <ChevronRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <Layout>
@@ -84,14 +183,19 @@ const MachinesLanding = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl sm:text-5xl font-bold leading-tight text-vending-blue-dark mb-6">
-                Compatible Machine Types
+                Our Machines
               </h1>
               <p className="text-xl text-gray-700 mb-8 max-w-2xl">
-                Our software integrates with a wide variety of vending machines and smart lockers to meet your specific business requirements and location constraints.
+                Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs.
               </p>
-              <Button asChild className="btn-primary">
-                <Link to="/contact">Request a Demo</Link>
-              </Button>
+              <div className="flex flex-wrap gap-4">
+                <Button asChild variant="default" className="btn-primary">
+                  <a href="#vending-machines">Vending Machines</a>
+                </Button>
+                <Button asChild variant="outline" className="btn-outline">
+                  <a href="#smart-lockers">Smart Lockers</a>
+                </Button>
+              </div>
             </div>
             <div className="relative">
               <img 
@@ -107,277 +211,106 @@ const MachinesLanding = () => {
         </div>
       </section>
 
-      <section id="machine-catalogue" className="bg-white py-8 border-b border-gray-200 sticky top-[72px] z-10 shadow-sm">
-        <div className="container-wide">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <h2 className="text-2xl font-bold text-vending-blue-dark mb-4 md:mb-0">Machine Catalogue</h2>
-            
-            <div className="flex flex-wrap gap-2">
-              <Button 
-                variant={filter === null ? "default" : "outline"}
-                onClick={() => setFilter(null)}
-                className="whitespace-nowrap"
-              >
-                All Machines
-              </Button>
-              <Button 
-                variant={filter === "vending" ? "default" : "outline"} 
-                onClick={() => setFilter("vending")}
-                className="whitespace-nowrap"
-              >
-                Vending Machines
-              </Button>
-              <Button 
-                variant={filter === "locker" ? "default" : "outline"} 
-                onClick={() => setFilter("locker")}
-                className="whitespace-nowrap"
-              >
-                Smart Lockers
-              </Button>
-              <Button 
-                variant={filter === "ambient" ? "default" : "outline"} 
-                onClick={() => setFilter("ambient")}
-                className="whitespace-nowrap"
-              >
-                Ambient
-              </Button>
-              <Button 
-                variant={filter === "refrigerated" ? "default" : "outline"} 
-                onClick={() => setFilter("refrigerated")}
-                className="whitespace-nowrap"
-              >
-                Refrigerated
-              </Button>
-              <Button 
-                variant={filter === "frozen" ? "default" : "outline"} 
-                onClick={() => setFilter("frozen")}
-                className="whitespace-nowrap"
-              >
-                Frozen
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {isLoading && (
-        <div className="py-12 text-center">
-          <div className="animate-pulse rounded-md bg-gray-200 h-8 w-1/4 mx-auto mb-4"></div>
-          <div className="animate-pulse rounded-md bg-gray-200 h-4 w-1/2 mx-auto"></div>
-        </div>
-      )}
-
-      {error && (
-        <div className="py-12 text-center text-red-500">
-          <p>Error loading machines. Please try again later.</p>
-        </div>
-      )}
-
+      {/* Vending Machines Section */}
       <section id="vending-machines" className="py-16 bg-vending-gray">
         <div className="container-wide">
-          {filter && (
-            <div className="mb-8 flex justify-between items-center">
-              <div className="bg-white rounded-lg px-4 py-2 inline-flex items-center">
-                <span className="font-medium mr-2">Filtering by:</span>
-                <span className="bg-vending-blue-light text-vending-blue px-3 py-1 rounded-full flex items-center">
-                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                  <button 
-                    onClick={() => setFilter(null)} 
-                    className="ml-2 text-vending-blue hover:text-vending-blue-dark"
-                  >
-                    &times;
-                  </button>
-                </span>
-              </div>
-              
-              <p className="text-sm text-gray-600">
-                Showing {filteredMachines.length} of {machines.length} machines
-              </p>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">Vending Machines</h2>
+            <p className="subtitle mx-auto">
+              A comprehensive selection of vending machines to suit various environments and product requirements.
+            </p>
+          </div>
+          
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white rounded-lg shadow-md p-6 h-80">
+                  <div className="animate-pulse">
+                    <div className="bg-gray-300 h-40 w-full mb-4"></div>
+                    <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-1/2 mb-6"></div>
+                    <div className="h-10 bg-gray-300 rounded w-full"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {displayVendingMachines.map((machine) => renderMachineCard(machine))}
             </div>
           )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {displayMachines.map((machine) => (
-              <div key={machine.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                <div className="relative h-48">
-                  <img 
-                    src={machine.images[0]?.url} 
-                    alt={machine.images[0]?.alt || machine.title} 
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-0 right-0 bg-vending-teal/90 text-white px-3 py-1 rounded-bl-lg text-sm font-medium">
-                    {machine.temperature.charAt(0).toUpperCase() + machine.temperature.slice(1)}
-                  </div>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-start mb-2">
-                    <div className="bg-vending-blue-light p-2 rounded-full mr-3">
-                      {machine.type === 'vending' ? (
-                        <Server className="h-4 w-4 text-vending-blue" />
-                      ) : (
-                        <HardDrive className="h-4 w-4 text-vending-blue" />
-                      )}
-                    </div>
-                    <h3 className="text-xl font-semibold">{machine.title}</h3>
-                  </div>
-                  <p className="text-gray-600 mb-4">{machine.description}</p>
-                  
-                  <div className="mb-4">
-                    <div className="flex flex-wrap gap-2">
-                      {machine.features.map((feature, i) => (
-                        <span 
-                          key={i}
-                          className="text-xs bg-vending-gray text-gray-700 px-2 py-1 rounded-full"
-                        >
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <Button asChild variant="outline" className="w-full">
-                    <Link to={`/machines/${machine.type}/${machine.slug}`} className="flex items-center justify-center">
-                      View Specifications <ChevronRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
+      {/* Smart Lockers Section */}
       <section id="smart-lockers" className="py-16 bg-white">
         <div className="container-wide">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">Smart Lockers</h2>
             <p className="subtitle mx-auto">
-              Secure, automated storage solutions for pickups, returns, and contactless delivery.
+              Secure, temperature-controlled locker solutions for automated pickup and delivery.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div className="bg-vending-gray p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold mb-3">24/7 Pickup Solutions</h3>
-              <p className="text-gray-700 mb-4">
-                Enable customers to pick up orders any time without staff assistance, perfect for BOPIS and e-commerce integrations.
-              </p>
-              <img 
-                src="https://images.unsplash.com/photo-1534723328310-e82dad3ee43f" 
-                alt="Pickup solution" 
-                className="w-full h-48 object-cover rounded-lg" 
-              />
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {[1, 2].map((i) => (
+                <div key={i} className="bg-vending-gray rounded-lg shadow-md p-6 h-80">
+                  <div className="animate-pulse">
+                    <div className="bg-gray-300 h-40 w-full mb-4"></div>
+                    <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-1/2 mb-6"></div>
+                    <div className="h-10 bg-gray-300 rounded w-full"></div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="bg-vending-gray p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold mb-3">Flexible Configurations</h3>
-              <p className="text-gray-700 mb-4">
-                Modular designs with multiple compartment sizes to accommodate everything from small parcels to large packages.
-              </p>
-              <img 
-                src="https://images.unsplash.com/photo-1604754742629-3e5728249d73" 
-                alt="Flexible configurations" 
-                className="w-full h-48 object-cover rounded-lg" 
-              />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {displayLockers.map((locker) => renderMachineCard(locker))}
             </div>
-          </div>
+          )}
         </div>
       </section>
 
-      <section id="mixed-solutions" className="py-16 bg-vending-gray">
+      {/* Features Section */}
+      <section className="py-16 bg-vending-blue-dark text-white">
         <div className="container-wide">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">Mixed Machine Solutions</h2>
-            <p className="subtitle mx-auto">
-              Combinations of vending machines and smart lockers to create comprehensive retail automation solutions.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-vending-gray p-8 rounded-lg">
-              <div className="bg-white p-3 rounded-full w-14 h-14 flex items-center justify-center text-vending-blue mb-4">
-                <Wifi className="h-8 w-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Wireless Connectivity</h3>
-              <p className="text-gray-700">
-                Connect machines via WiFi, cellular, or Bluetooth for real-time inventory tracking and payment processing in any location.
-              </p>
-              <img 
-                src="https://images.unsplash.com/photo-1558478551-1a378f63328e" 
-                alt="Wireless connectivity" 
-                className="w-full h-48 object-cover rounded-lg mt-6" 
-              />
-            </div>
-            
-            <div className="bg-vending-gray p-8 rounded-lg">
-              <div className="bg-white p-3 rounded-full w-14 h-14 flex items-center justify-center text-vending-blue mb-4">
-                <Server className="h-8 w-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Protocol Adaptability</h3>
-              <p className="text-gray-700">
-                Our system supports MDB, DEX, and custom protocols to ensure compatibility with both legacy and next-generation vending equipment.
-              </p>
-              <img 
-                src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31" 
-                alt="Protocol adaptability" 
-                className="w-full h-48 object-cover rounded-lg mt-6" 
-              />
-            </div>
-            
-            <div className="bg-vending-gray p-8 rounded-lg">
-              <div className="bg-white p-3 rounded-full w-14 h-14 flex items-center justify-center text-vending-blue mb-4">
-                <HardDrive className="h-8 w-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Hardware Management</h3>
-              <p className="text-gray-700">
-                Remote diagnostics, troubleshooting, and machine-learning based maintenance predictions help maximize uptime and revenue.
-              </p>
-              <img 
-                src="https://images.unsplash.com/photo-1531297484001-80022131f5a1" 
-                alt="Hardware management" 
-                className="w-full h-48 object-cover rounded-lg mt-6" 
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="cost-models" className="py-16 bg-vending-blue-dark text-white">
-        <div className="container-wide">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold mb-6">Flexible Cost Models</h2>
+              <h2 className="text-3xl font-bold mb-6">Software Compatible with All Machine Types</h2>
               <p className="text-lg opacity-90 mb-6">
-                Our platform offers various acquisition models including purchase, lease, revenue share, and custom hybrid arrangements to fit your business needs.
+                Our platform integrates seamlessly with all our machine types, providing a unified management experience regardless of your hardware mix.
               </p>
               <ul className="space-y-3 mb-8">
                 <li className="flex items-start">
                   <svg className="h-6 w-6 text-vending-teal flex-shrink-0 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>No upfront capital expenditure options available</span>
+                  <span>Single dashboard to manage all your machines</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="h-6 w-6 text-vending-teal flex-shrink-0 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Revenue share models that align our success with yours</span>
+                  <span>Real-time inventory tracking across your entire fleet</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="h-6 w-6 text-vending-teal flex-shrink-0 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Custom arrangements for enterprises and multi-location deployments</span>
+                  <span>Unified payment processing and reporting</span>
                 </li>
               </ul>
-              <Button asChild variant="secondary">
-                <Link to="/machines/costs">Explore Cost Options</Link>
+              <Button asChild className="btn-secondary">
+                <Link to="/technology">Learn More About Our Technology</Link>
               </Button>
             </div>
             
             <div className="relative">
               <img 
-                src="https://images.unsplash.com/photo-1633158829585-23ba8f7c8caf" 
-                alt="Cost models" 
+                src="https://images.unsplash.com/photo-1581092921461-7d56631a4ab9" 
+                alt="Software dashboard" 
                 className="rounded-lg shadow-xl"
               />
             </div>

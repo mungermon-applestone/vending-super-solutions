@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -81,9 +80,7 @@ const Header = () => {
 
   const machineTypes = [
     { title: "Vending Machines", path: "/machines#vending-machines" },
-    { title: "Lockers", path: "/machines#smart-lockers" },
-    { title: "Mixed Machine Solutions", path: "/machines#mixed-solutions" },
-    { title: "Costs", path: "/machines#cost-models" },
+    { title: "Smart Lockers", path: "/machines#smart-lockers" },
   ];
 
   const technologyItems = [
