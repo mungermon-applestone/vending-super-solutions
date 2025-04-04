@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,16 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Vending software custom colors
+				vending: {
+					'blue': '#0066B3',
+					'blue-dark': '#004B85',
+					'blue-light': '#EBF3FB',
+					'teal': '#00A0B0',
+					'teal-light': '#E6F7F9',
+					'gray': '#F8F9FA',
+					'gray-dark': '#4A5568',
 				}
 			},
 			borderRadius: {
@@ -84,11 +95,33 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					from: {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					to: {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'fade-out': {
+					from: {
+						opacity: '1',
+						transform: 'translateY(0)'
+					},
+					to: {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out',
+				'fade-out': 'fade-out 0.5s ease-out'
 			}
 		}
 	},
