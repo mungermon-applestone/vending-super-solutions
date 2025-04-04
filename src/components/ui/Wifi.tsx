@@ -1,7 +1,7 @@
 
 import { LucideProps } from 'lucide-react';
 
-const Wifi = (props: LucideProps) => {
+export const Wifi = (props: LucideProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
