@@ -7,13 +7,13 @@
  */
 
 // Base URL for your CMS API
-export const CMS_API_URL = process.env.CMS_API_URL || 'https://your-cms-api.example.com';
+export const CMS_API_URL = import.meta.env.VITE_CMS_API_URL || 'https://your-cms-api.example.com';
 
 // API key or token for authenticating with the CMS
-export const CMS_API_KEY = process.env.CMS_API_KEY || '';
+export const CMS_API_KEY = import.meta.env.VITE_CMS_API_KEY || '';
 
 // Content preview settings
-export const CMS_PREVIEW_MODE = process.env.CMS_PREVIEW_MODE === 'true' || false;
+export const CMS_PREVIEW_MODE = import.meta.env.VITE_CMS_PREVIEW_MODE === 'true' || false;
 
 // Content model IDs or types
 export const CMS_MODELS = {
@@ -33,7 +33,7 @@ export const IMAGE_TRANSFORMATIONS = {
 };
 
 // Environment flag to check if we're in development mode
-export const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
+export const IS_DEVELOPMENT = import.meta.env.DEV;
 
 // Fallback image if CMS image is missing
 export const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1481495278953-0a688f58e194';
