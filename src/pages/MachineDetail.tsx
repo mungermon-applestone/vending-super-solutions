@@ -1,5 +1,5 @@
+
 import { useParams } from 'react-router-dom';
-import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import CTASection from '@/components/common/CTASection';
@@ -8,7 +8,6 @@ import Wifi from '@/components/ui/Wifi';
 
 const MachineDetail = () => {
   const { machineId, machineType } = useParams<{ machineType: string, machineId: string }>();
-  const [activeTab, setActiveTab] = useState('specs');
 
   const machineData = {
     title: "Smart Vending Machine",
@@ -61,125 +60,6 @@ const MachineDetail = () => {
     ]
   };
 
-  const renderContent = () => {
-    switch(activeTab) {
-      case 'specs':
-        return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-medium mb-3 flex items-center">
-                  <Ruler className="mr-2 h-5 w-5 text-vending-blue" />
-                  Dimensions
-                </h3>
-                <p className="text-gray-700">{machineData.specs.dimensions}</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium mb-3 flex items-center">
-                  <Weight className="mr-2 h-5 w-5 text-vending-blue" />
-                  Weight
-                </h3>
-                <p className="text-gray-700">{machineData.specs.weight}</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium mb-3 flex items-center">
-                  <Plug className="mr-2 h-5 w-5 text-vending-blue" />
-                  Power Requirements
-                </h3>
-                <p className="text-gray-700">{machineData.specs.powerRequirements}</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium mb-3 flex items-center">
-                  <ThermometerSnowflake className="mr-2 h-5 w-5 text-vending-blue" />
-                  Temperature
-                </h3>
-                <p className="text-gray-700">{machineData.specs.temperature}</p>
-              </div>
-            </div>
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-medium mb-3 flex items-center">
-                  <Server className="mr-2 h-5 w-5 text-vending-blue" />
-                  Capacity
-                </h3>
-                <p className="text-gray-700">{machineData.specs.capacity}</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium mb-3 flex items-center">
-                  <Wifi className="mr-2 h-5 w-5 text-vending-blue" />
-                  Connectivity
-                </h3>
-                <p className="text-gray-700">{machineData.specs.connectivity}</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium mb-3 flex items-center">
-                  <DollarSign className="mr-2 h-5 w-5 text-vending-blue" />
-                  Cost
-                </h3>
-                <p className="text-gray-700">{machineData.specs.priceRange}</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-medium mb-3 flex items-center">
-                  <HardDrive className="mr-2 h-5 w-5 text-vending-blue" />
-                  Payment Options
-                </h3>
-                <p className="text-gray-700">{machineData.specs.paymentOptions}</p>
-              </div>
-            </div>
-          </div>
-        );
-      case 'features':
-        return (
-          <div>
-            <ul className="space-y-4">
-              {machineData.features.map((feature, index) => (
-                <li key={index} className="flex items-start">
-                  <svg className="h-5 w-5 text-vending-teal mt-1 flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-700">{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-vending-gray p-6 rounded-lg">
-                <h3 className="text-lg font-medium mb-3">Customization Options</h3>
-                <p className="text-gray-700">
-                  This machine can be customized with your branding, specific product configurations, and optional features like cashless payment systems.
-                </p>
-              </div>
-              <div className="bg-vending-gray p-6 rounded-lg">
-                <h3 className="text-lg font-medium mb-3">Software Compatibility</h3>
-                <p className="text-gray-700">
-                  Fully compatible with our vending management software, providing real-time inventory tracking, sales analytics, and remote management.
-                </p>
-              </div>
-            </div>
-          </div>
-        );
-      case 'examples':
-        return (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {machineData.deploymentExamples.map((example, index) => (
-              <div key={index} className="bg-white rounded-lg overflow-hidden shadow-md">
-                <img 
-                  src={example.image} 
-                  alt={example.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-2">{example.title}</h3>
-                  <p className="text-gray-600">{example.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        );
-      default:
-        return <div>Loading...</div>;
-    }
-  };
-
   return (
     <Layout>
       <section className="py-12 md:py-16 bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
@@ -226,43 +106,142 @@ const MachineDetail = () => {
         </div>
       </section>
       
-      <section className="bg-white py-4 border-b border-gray-200 sticky top-[72px] z-10 shadow-sm">
+      {/* Specifications Section */}
+      <section className="py-12 bg-white" id="specifications">
         <div className="container-wide">
-          <div className="flex space-x-1 overflow-x-auto">
-            <Button 
-              variant={activeTab === 'specs' ? "default" : "ghost"} 
-              onClick={() => setActiveTab('specs')}
-              className="whitespace-nowrap"
-            >
-              Specifications
-            </Button>
-            <Button 
-              variant={activeTab === 'features' ? "default" : "ghost"} 
-              onClick={() => setActiveTab('features')}
-              className="whitespace-nowrap"
-            >
-              Features
-            </Button>
-            <Button 
-              variant={activeTab === 'examples' ? "default" : "ghost"} 
-              onClick={() => setActiveTab('examples')}
-              className="whitespace-nowrap"
-            >
-              Deployment Examples
-            </Button>
+          <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center text-vending-blue-dark">
+            Specifications
+          </h2>
+          <div className="bg-vending-gray rounded-lg shadow-md p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-medium mb-3 flex items-center">
+                    <Ruler className="mr-2 h-5 w-5 text-vending-blue" />
+                    Dimensions
+                  </h3>
+                  <p className="text-gray-700">{machineData.specs.dimensions}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium mb-3 flex items-center">
+                    <Weight className="mr-2 h-5 w-5 text-vending-blue" />
+                    Weight
+                  </h3>
+                  <p className="text-gray-700">{machineData.specs.weight}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium mb-3 flex items-center">
+                    <Plug className="mr-2 h-5 w-5 text-vending-blue" />
+                    Power Requirements
+                  </h3>
+                  <p className="text-gray-700">{machineData.specs.powerRequirements}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium mb-3 flex items-center">
+                    <ThermometerSnowflake className="mr-2 h-5 w-5 text-vending-blue" />
+                    Temperature
+                  </h3>
+                  <p className="text-gray-700">{machineData.specs.temperature}</p>
+                </div>
+              </div>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-medium mb-3 flex items-center">
+                    <Server className="mr-2 h-5 w-5 text-vending-blue" />
+                    Capacity
+                  </h3>
+                  <p className="text-gray-700">{machineData.specs.capacity}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium mb-3 flex items-center">
+                    <Wifi className="mr-2 h-5 w-5 text-vending-blue" />
+                    Connectivity
+                  </h3>
+                  <p className="text-gray-700">{machineData.specs.connectivity}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium mb-3 flex items-center">
+                    <DollarSign className="mr-2 h-5 w-5 text-vending-blue" />
+                    Cost
+                  </h3>
+                  <p className="text-gray-700">{machineData.specs.priceRange}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium mb-3 flex items-center">
+                    <HardDrive className="mr-2 h-5 w-5 text-vending-blue" />
+                    Payment Options
+                  </h3>
+                  <p className="text-gray-700">{machineData.specs.paymentOptions}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
       
-      <section className="py-12 bg-vending-gray">
+      {/* Features Section */}
+      <section className="py-12 bg-vending-gray" id="features">
         <div className="container-wide">
+          <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center text-vending-blue-dark">
+            Features
+          </h2>
           <div className="bg-white rounded-lg shadow-md p-8">
-            {renderContent()}
+            <div>
+              <ul className="space-y-4">
+                {machineData.features.map((feature, index) => (
+                  <li key={index} className="flex items-start">
+                    <svg className="h-5 w-5 text-vending-teal mt-1 flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-vending-gray p-6 rounded-lg">
+                  <h3 className="text-lg font-medium mb-3">Customization Options</h3>
+                  <p className="text-gray-700">
+                    This machine can be customized with your branding, specific product configurations, and optional features like cashless payment systems.
+                  </p>
+                </div>
+                <div className="bg-vending-gray p-6 rounded-lg">
+                  <h3 className="text-lg font-medium mb-3">Software Compatibility</h3>
+                  <p className="text-gray-700">
+                    Fully compatible with our vending management software, providing real-time inventory tracking, sales analytics, and remote management.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
       
-      <section className="py-12 bg-white">
+      {/* Deployment Examples Section */}
+      <section className="py-12 bg-white" id="deployment-examples">
+        <div className="container-wide">
+          <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center text-vending-blue-dark">
+            Deployment Examples
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {machineData.deploymentExamples.map((example, index) => (
+              <div key={index} className="bg-white rounded-lg overflow-hidden shadow-md">
+                <img 
+                  src={example.image} 
+                  alt={example.title}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold mb-2">{example.title}</h3>
+                  <p className="text-gray-600">{example.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      
+      {/* Additional Views Section */}
+      <section className="py-12 bg-vending-gray">
         <div className="container-wide">
           <h2 className="text-2xl font-bold mb-8 text-center text-vending-blue-dark">Additional Views</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -278,7 +257,8 @@ const MachineDetail = () => {
         </div>
       </section>
       
-      <section className="py-12 bg-vending-gray">
+      {/* Contact Section */}
+      <section className="py-12 bg-white">
         <div className="container-wide max-w-4xl">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="p-8">
