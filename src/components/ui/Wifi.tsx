@@ -24,6 +24,5 @@ const Wifi: React.FC<WifiProps> = ({ className }) => {
   );
 };
 
-// Export as both default and named export to maintain compatibility
 export { Wifi };
 export default Wifi;
