@@ -6,7 +6,7 @@ import ProductFeaturesList from '@/components/products/ProductFeaturesList';
 import ProductExamples from '@/components/products/ProductExamples';
 import ProductVideoSection from '@/components/products/ProductVideoSection';
 import CTASection from '@/components/common/CTASection';
-import { Nutrition, ShoppingBag, ShieldCheck, Tags, Truck, Clock } from 'lucide-react';
+import { Utensils, ShoppingBag, ShieldCheck, Tags, Truck, Clock } from 'lucide-react';
 
 // This is a sample implementation for the Grocery product type page
 // In a real implementation, you would fetch this data from an API or CMS
@@ -45,7 +45,7 @@ const ProductDetail = () => {
       {
         title: "Nutritional Information Display",
         description: "Help customers make informed choices with detailed nutritional information, ingredient lists, and allergen warnings displayed on the touchscreen interface.",
-        icon: <Nutrition className="h-6 w-6 text-vending-teal" />,
+        icon: <Utensils className="h-6 w-6 text-vending-teal" />,
         screenshot: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b"
       },
       {
