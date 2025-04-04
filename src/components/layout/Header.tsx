@@ -80,18 +80,18 @@ const Header = () => {
   ];
 
   const machineTypes = [
-    { title: "Vending Machines", path: "/machines/vending" },
-    { title: "Lockers", path: "/machines/lockers" },
-    { title: "Mixed Machine Solutions", path: "/machines/mixed" },
-    { title: "Costs", path: "/machines/costs" },
+    { title: "Vending Machines", path: "/machines#vending-machines" },
+    { title: "Lockers", path: "/machines#smart-lockers" },
+    { title: "Mixed Machine Solutions", path: "/machines#mixed-solutions" },
+    { title: "Costs", path: "/machines#cost-models" },
   ];
 
   const technologyItems = [
-    { title: "Architecture", path: "/technology/architecture" },
-    { title: "Security", path: "/technology/security" },
-    { title: "Third-party integrations", path: "/technology/integrations" },
-    { title: "Payments", path: "/technology/payments" },
-    { title: "Live Inventory", path: "/technology/inventory" },
+    { title: "Architecture", path: "/technology#architecture" },
+    { title: "Security", path: "/technology#security" },
+    { title: "Third-party integrations", path: "/technology#integrations" },
+    { title: "Payments", path: "/technology#payments" },
+    { title: "Live Inventory", path: "/technology#inventory" },
   ];
 
   const aboutItems = [

@@ -1,478 +1,446 @@
 
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
 import CTASection from '@/components/common/CTASection';
-import { Server, ShieldCheck, Globe, Wifi, Plug, HardDrive } from 'lucide-react';
+import { Wifi } from '@/components/ui/Wifi';
+import { 
+  ShieldCheck, 
+  Network, 
+  CreditCard, 
+  BarChart4, 
+  CheckCircle, 
+  ArrowDownToLine, 
+  UploadCloud, 
+  Settings 
+} from 'lucide-react';
 
 const TechnologyLanding = () => {
-  const [activeTab, setActiveTab] = useState("architecture");
+  const location = useLocation();
+
+  // Handle scrolling to anchor when hash changes
+  useEffect(() => {
+    if (location.hash) {
+      const element = document.getElementById(location.hash.substring(1));
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [location]);
 
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="py-16 bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
+      <section className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light py-16">
         <div className="container-wide">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl sm:text-5xl font-bold leading-tight text-vending-blue-dark mb-6">
-                Our Technology Platform
+                Enterprise-Grade Technology
               </h1>
               <p className="text-xl text-gray-700 mb-8 max-w-2xl">
-                Our vending management system is built on a robust, scalable architecture with security, flexibility, and reliability at its core.
+                Our platform is built with security, scalability, and flexibility in mind. 
+                Connect any machine to our cloud infrastructure and unlock powerful retail automation capabilities.
               </p>
-              <Button asChild className="btn-primary">
-                <a href="#tech-details">Explore Our Technology</a>
-              </Button>
+              <div className="flex flex-wrap gap-4">
+                <a href="#architecture" className="btn-secondary">Architecture</a>
+                <a href="#security" className="btn-secondary">Security</a>
+                <a href="#integrations" className="btn-secondary">Integrations</a>
+              </div>
             </div>
             <div className="relative">
               <img 
-                src="https://images.unsplash.com/photo-1518770660439-4636190af475" 
+                src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31" 
                 alt="Technology platform" 
                 className="rounded-lg shadow-xl"
               />
               <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
-                <p className="font-bold">Enterprise-grade architecture</p>
+                <p className="font-bold">Cloud-native architecture</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Technology Overview - Architecture */}
-      <section id="tech-details" className="py-16 bg-white">
+      {/* Architecture Section */}
+      <section id="architecture" className="py-16 bg-white">
         <div className="container-wide">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4 text-vending-blue-dark">Technology Overview</h2>
+            <h2 className="text-3xl font-bold mb-4">Cloud-Native Architecture</h2>
             <p className="subtitle mx-auto">
-              Our platform is designed for technical excellence, security, and flexibility to support diverse vending operations.
+              Our platform connects your machines to the cloud, enabling real-time monitoring, 
+              data analysis, and seamless integration with your business systems.
             </p>
           </div>
-          
-          {/* Architecture Section */}
-          <div className="bg-vending-gray p-8 rounded-lg shadow-md mb-16">
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="md:w-1/2">
-                <div className="flex items-center mb-6">
-                  <div className="bg-vending-blue p-2 rounded-full mr-3">
-                    <Server className="h-5 w-5 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-vending-blue-dark">Architecture</h3>
+
+          <div className="relative py-12 px-4">
+            <div className="absolute inset-0 flex justify-center items-center opacity-5">
+              <Wifi className="w-full max-w-3xl h-auto" />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+              <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+                <div className="bg-vending-blue-light p-3 rounded-full w-14 h-14 flex items-center justify-center text-vending-blue mb-4">
+                  <Network className="h-8 w-8" />
                 </div>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Cloud-Native Platform</h4>
-                    <p className="text-gray-700">
-                      Built on a modern microservices architecture hosted in secure cloud environments, our platform provides enterprise-grade reliability and scalability.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Open Standards</h4>
-                    <p className="text-gray-700">
-                      We use industry-standard protocols and APIs to ensure compatibility with your existing systems and avoid vendor lock-in.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Hardware Agnostic</h4>
-                    <p className="text-gray-700">
-                      Our platform integrates with virtually any vending hardware through standard protocols like MDB, DEX, and custom interfaces as needed.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Edge Computing</h4>
-                    <p className="text-gray-700">
-                      Local processing ensures your machines continue to operate even during network outages, with automatic synchronization when connectivity is restored.
-                    </p>
-                  </div>
-                </div>
+                <h3 className="text-xl font-semibold mb-3">Edge Computing</h3>
+                <p className="text-gray-700">
+                  Local processing at the machine level ensures continued operation even during connectivity interruptions.
+                </p>
+                <ul className="mt-4 space-y-2">
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                    <span>Offline transaction capability</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                    <span>Local data caching</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                    <span>Secure boot process</span>
+                  </li>
+                </ul>
               </div>
               
-              <div className="md:w-1/2">
-                <img 
-                  src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6" 
-                  alt="System architecture" 
-                  className="w-full h-auto rounded-lg shadow-md"
-                />
-                
-                <div className="mt-6 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                  <h4 className="font-semibold text-lg mb-4">Technical Specifications</h4>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>99.99% uptime SLA with geographic redundancy</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Kubernetes-orchestrated microservices for reliability</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>REST and GraphQL APIs for system integration</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Local caching with offline operation capabilities</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Event-driven architecture for real-time updates</span>
-                    </li>
-                  </ul>
+              <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+                <div className="bg-vending-blue-light p-3 rounded-full w-14 h-14 flex items-center justify-center text-vending-blue mb-4">
+                  <UploadCloud className="h-8 w-8" />
                 </div>
+                <h3 className="text-xl font-semibold mb-3">Cloud Backend</h3>
+                <p className="text-gray-700">
+                  Serverless architecture ensures automatic scaling and high availability for your retail automation platform.
+                </p>
+                <ul className="mt-4 space-y-2">
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                    <span>99.99% uptime SLA</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                    <span>Automatic scaling</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                    <span>Multi-region redundancy</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+                <div className="bg-vending-blue-light p-3 rounded-full w-14 h-14 flex items-center justify-center text-vending-blue mb-4">
+                  <ArrowDownToLine className="h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">APIs & Webhooks</h3>
+                <p className="text-gray-700">
+                  Comprehensive API suite allows seamless integration with your existing systems and third-party services.
+                </p>
+                <ul className="mt-4 space-y-2">
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                    <span>RESTful and GraphQL APIs</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                    <span>Real-time event notifications</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                    <span>Standard OAuth2 authentication</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
-          
-          {/* Security Section */}
-          <div className="bg-vending-gray p-8 rounded-lg shadow-md mb-16">
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="md:w-1/2">
-                <div className="flex items-center mb-6">
-                  <div className="bg-vending-blue p-2 rounded-full mr-3">
-                    <ShieldCheck className="h-5 w-5 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-vending-blue-dark">Security</h3>
-                </div>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Enterprise-Grade Security</h4>
-                    <p className="text-gray-700">
-                      Our platform is built with security as a foundational principle, with encryption at rest and in transit, role-based access controls, and regular security audits.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Compliance</h4>
-                    <p className="text-gray-700">
-                      We maintain compliance with PCI DSS, GDPR, CCPA, and other regulatory requirements to ensure your data is handled securely and responsibly.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Privacy</h4>
-                    <p className="text-gray-700">
-                      Your customer data is protected with industry-leading security practices, with clear privacy policies and data minimization principles.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Physical Security</h4>
-                    <p className="text-gray-700">
-                      Machine access is controlled through secure authentication methods, with tamper detection and automated alerts for suspicious activities.
-                    </p>
-                  </div>
-                </div>
+        </div>
+      </section>
+
+      {/* Security Section */}
+      <section id="security" className="py-16 bg-vending-gray">
+        <div className="container-wide">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Enterprise Security</h2>
+            <p className="subtitle mx-auto">
+              Our platform meets the highest industry standards for data protection, 
+              network security, and compliance requirements.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white p-8 rounded-lg shadow-md">
+              <div className="bg-vending-blue-light p-3 rounded-full w-14 h-14 flex items-center justify-center text-vending-blue mb-4">
+                <ShieldCheck className="h-8 w-8" />
               </div>
-              
-              <div className="md:w-1/2">
-                <img 
-                  src="https://images.unsplash.com/photo-1563986768609-322da13575f3" 
-                  alt="Security infrastructure" 
-                  className="w-full h-auto rounded-lg shadow-md"
-                />
-                
-                <div className="mt-6 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                  <h4 className="font-semibold text-lg mb-4">Security Features</h4>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>End-to-end encryption for all data</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Multi-factor authentication for admin access</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Regular penetration testing and security audits</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Automatic security patches and updates</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>SOC 2 Type II certified infrastructure</span>
-                    </li>
-                  </ul>
+              <h3 className="text-xl font-semibold mb-3">Data Protection</h3>
+              <p className="text-gray-700 mb-4">
+                End-to-end encryption for all data in transit and at rest, with regular security audits and penetration testing.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>AES-256 encryption</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Role-based access control</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Secure key management</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Regular security audits</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div className="bg-white p-8 rounded-lg shadow-md">
+              <div className="bg-vending-blue-light p-3 rounded-full w-14 h-14 flex items-center justify-center text-vending-blue mb-4">
+                <CreditCard className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Compliance</h3>
+              <p className="text-gray-700 mb-4">
+                Our platform meets industry standards and regulatory requirements for secure payment processing and data handling.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>PCI DSS Level 1 certified</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>GDPR compliant</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>SOC 2 Type II audited</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>HIPAA compliance available</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Integration Section */}
+      <section id="integrations" className="py-16 bg-white">
+        <div className="container-wide">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Third-Party Integrations</h2>
+            <p className="subtitle mx-auto">
+              Connect your vending operations with your existing business systems and third-party services 
+              for seamless data flow and process automation.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="bg-vending-gray p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-3">ERP Systems</h3>
+              <p className="text-gray-700 mb-4">
+                Bidirectional integration with major ERP systems including SAP, Oracle, and Microsoft Dynamics.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Inventory synchronization</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Financial data integration</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Master data management</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div className="bg-vending-gray p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-3">CRM Platforms</h3>
+              <p className="text-gray-700 mb-4">
+                Connect customer data with Salesforce, HubSpot, and other major CRM platforms.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Customer profile integration</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Purchase history tracking</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Loyalty program integration</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div className="bg-vending-gray p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-3">Marketing Tools</h3>
+              <p className="text-gray-700 mb-4">
+                Connect with email marketing, SMS, and digital advertising platforms.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Campaign automation</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Promotion management</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Customer segment targeting</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Payments Section */}
+      <section id="payments" className="py-16 bg-vending-gray">
+        <div className="container-wide">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Flexible Payment Processing</h2>
+            <p className="subtitle mx-auto">
+              Accept all major payment methods and integrate with your preferred payment processor.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white p-8 rounded-lg shadow-md">
+              <div className="bg-vending-blue-light p-3 rounded-full w-14 h-14 flex items-center justify-center text-vending-blue mb-4">
+                <CreditCard className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Payment Methods</h3>
+              <p className="text-gray-700 mb-4">
+                Support for all major payment types to maximize convenience and sales.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Credit & debit cards</span>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Mobile wallets</span>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>QR code payments</span>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>NFC tap-to-pay</span>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Loyalty programs</span>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Gift cards</span>
                 </div>
               </div>
             </div>
-          </div>
-          
-          {/* Integrations Section */}
-          <div className="bg-vending-gray p-8 rounded-lg shadow-md mb-16">
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="md:w-1/2">
-                <div className="flex items-center mb-6">
-                  <div className="bg-vending-blue p-2 rounded-full mr-3">
-                    <Globe className="h-5 w-5 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-vending-blue-dark">Third-Party Integrations</h3>
-                </div>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Open API Platform</h4>
-                    <p className="text-gray-700">
-                      Our comprehensive API allows seamless integration with your existing business systems, including ERP, CRM, and accounting software.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Pre-Built Connectors</h4>
-                    <p className="text-gray-700">
-                      We offer ready-to-use integrations with popular platforms like Salesforce, SAP, Oracle, and Microsoft Dynamics to accelerate implementation.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Custom Integration Support</h4>
-                    <p className="text-gray-700">
-                      Our professional services team can build custom integrations for your unique requirements and legacy systems.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Webhooks and Events</h4>
-                    <p className="text-gray-700">
-                      Real-time event notifications allow your systems to react immediately to changes in inventory, sales, and machine status.
-                    </p>
-                  </div>
-                </div>
+            
+            <div className="bg-white p-8 rounded-lg shadow-md">
+              <div className="bg-vending-blue-light p-3 rounded-full w-14 h-14 flex items-center justify-center text-vending-blue mb-4">
+                <Settings className="h-8 w-8" />
               </div>
-              
-              <div className="md:w-1/2">
-                <img 
-                  src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7" 
-                  alt="System integrations" 
-                  className="w-full h-auto rounded-lg shadow-md"
-                />
-                
-                <div className="mt-6 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                  <h4 className="font-semibold text-lg mb-4">Integration Partners</h4>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="flex items-center justify-center p-4 bg-gray-50 rounded">
-                      <span className="font-medium text-gray-600">Salesforce</span>
-                    </div>
-                    <div className="flex items-center justify-center p-4 bg-gray-50 rounded">
-                      <span className="font-medium text-gray-600">SAP</span>
-                    </div>
-                    <div className="flex items-center justify-center p-4 bg-gray-50 rounded">
-                      <span className="font-medium text-gray-600">Oracle</span>
-                    </div>
-                    <div className="flex items-center justify-center p-4 bg-gray-50 rounded">
-                      <span className="font-medium text-gray-600">Microsoft</span>
-                    </div>
-                    <div className="flex items-center justify-center p-4 bg-gray-50 rounded">
-                      <span className="font-medium text-gray-600">Slack</span>
-                    </div>
-                    <div className="flex items-center justify-center p-4 bg-gray-50 rounded">
-                      <span className="font-medium text-gray-600">Zapier</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <h3 className="text-xl font-semibold mb-3">Payment Processors</h3>
+              <p className="text-gray-700 mb-4">
+                Integration with major payment processors or use our built-in processing solution.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Stripe, Square, PayPal integration</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Built-in processing available</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Competitive transaction rates</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Chargeback protection</span>
+                </li>
+              </ul>
             </div>
           </div>
-          
-          {/* Payments Section */}
-          <div className="bg-vending-gray p-8 rounded-lg shadow-md mb-16">
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="md:w-1/2">
-                <div className="flex items-center mb-6">
-                  <div className="bg-vending-blue p-2 rounded-full mr-3">
-                    <HardDrive className="h-5 w-5 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-vending-blue-dark">Payments</h3>
-                </div>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Multiple Payment Options</h4>
-                    <p className="text-gray-700">
-                      Support for credit/debit cards, mobile payments (Apple Pay, Google Pay), cash, loyalty programs, and custom payment methods.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Cashless First</h4>
-                    <p className="text-gray-700">
-                      Our platform prioritizes digital payment methods for convenience, security, and operational efficiency, while still supporting cash where needed.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Secure Processing</h4>
-                    <p className="text-gray-700">
-                      PCI-compliant payment processing with tokenization and encryption to protect sensitive financial information.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Settlement and Reporting</h4>
-                    <p className="text-gray-700">
-                      Comprehensive financial reporting with flexible settlement options and integration with major accounting systems.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="md:w-1/2">
-                <img 
-                  src="https://images.unsplash.com/photo-1601597111158-2fceff292cdc" 
-                  alt="Payment systems" 
-                  className="w-full h-auto rounded-lg shadow-md"
-                />
-                
-                <div className="mt-6 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                  <h4 className="font-semibold text-lg mb-4">Payment Features</h4>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Contactless payment support (NFC)</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Mobile wallet integration (Apple Pay, Google Pay)</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>QR code payment options</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Subscription and account-based payments</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Real-time payment validation</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+        </div>
+      </section>
+
+      {/* Inventory Section */}
+      <section id="inventory" className="py-16 bg-white">
+        <div className="container-wide">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Live Inventory Management</h2>
+            <p className="subtitle mx-auto">
+              Real-time tracking and management of your inventory across all machines.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-vending-gray p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-3">Real-time Monitoring</h3>
+              <p className="text-gray-700">
+                Track inventory levels across your entire fleet in real-time, with alerts for low stock and other conditions.
+              </p>
+            </div>
+            
+            <div className="bg-vending-gray p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-3">Predictive Analytics</h3>
+              <p className="text-gray-700">
+                AI-powered demand forecasting helps optimize stock levels and reduce waste.
+              </p>
+            </div>
+            
+            <div className="bg-vending-gray p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-3">Route Optimization</h3>
+              <p className="text-gray-700">
+                Intelligent routing for restocking and maintenance based on real inventory needs.
+              </p>
             </div>
           </div>
-          
-          {/* Live Inventory Section */}
-          <div className="bg-vending-gray p-8 rounded-lg shadow-md">
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="md:w-1/2">
-                <div className="flex items-center mb-6">
-                  <div className="bg-vending-blue p-2 rounded-full mr-3">
-                    <Plug className="h-5 w-5 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-vending-blue-dark">Live Inventory</h3>
-                </div>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Real-Time Tracking</h4>
-                    <p className="text-gray-700">
-                      Monitor inventory levels across all machines in real-time, with alerts for low stock, expiring products, and sales trends.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Predictive Analytics</h4>
-                    <p className="text-gray-700">
-                      AI-powered demand forecasting helps optimize restocking schedules and product mix based on historical sales data and external factors.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Automated Replenishment</h4>
-                    <p className="text-gray-700">
-                      Set inventory thresholds for automatic reordering, with integration to your supply chain management system.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">Smart Planogramming</h4>
-                    <p className="text-gray-700">
-                      Optimize product placement and pricing based on sales data and machine capacity to maximize revenue and minimize restocking frequency.
-                    </p>
-                  </div>
-                </div>
+
+          <div className="mt-12 bg-white p-8 rounded-lg shadow-md border border-gray-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold">Data-Driven Decision Making</h3>
+              <div className="bg-vending-blue-light p-3 rounded-full flex items-center justify-center text-vending-blue">
+                <BarChart4 className="h-6 w-6" />
               </div>
-              
-              <div className="md:w-1/2">
-                <img 
-                  src="https://images.unsplash.com/photo-1519389950473-47ba0277781c" 
-                  alt="Inventory management" 
-                  className="w-full h-auto rounded-lg shadow-md"
-                />
-                
-                <div className="mt-6 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                  <h4 className="font-semibold text-lg mb-4">Inventory Features</h4>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Product expiration tracking and alerts</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Temperature monitoring for refrigerated units</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Visual planogram designer and optimizer</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Mobile inventory management app</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="h-5 w-5 text-vending-teal flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Waste reduction through smart rotation</span>
-                    </li>
-                  </ul>
-                </div>
+            </div>
+            <p className="text-gray-700 mb-6">
+              Turn your vending data into actionable insights with comprehensive reporting and analytics.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-vending-gray p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Sales Analytics</h4>
+                <p className="text-sm text-gray-600">Track performance across products, locations, and time periods.</p>
+              </div>
+              <div className="bg-vending-gray p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Inventory Optimization</h4>
+                <p className="text-sm text-gray-600">Identify optimal stock levels for each product and location.</p>
+              </div>
+              <div className="bg-vending-gray p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Consumer Behavior</h4>
+                <p className="text-sm text-gray-600">Understand purchasing patterns and preferences.</p>
+              </div>
+              <div className="bg-vending-gray p-4 rounded-lg">
+                <h4 className="font-medium mb-2">Machine Performance</h4>
+                <p className="text-sm text-gray-600">Monitor uptime, technical issues, and service needs.</p>
               </div>
             </div>
           </div>

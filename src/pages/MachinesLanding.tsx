@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import CTASection from '@/components/common/CTASection';
@@ -10,8 +10,17 @@ import { CMSMachine } from '@/types/cms';
 
 const MachinesLanding = () => {
   const [filter, setFilter] = useState<string | null>(null);
+  const location = useLocation();
 
-  // Fetch machines using React Query
+  useEffect(() => {
+    if (location.hash) {
+      const element = document.getElementById(location.hash.substring(1));
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [location]);
+
   const { data: machines = [], isLoading, error } = useQuery({
     queryKey: ['machines'],
     queryFn: () => getMachines(),
@@ -29,7 +38,6 @@ const MachinesLanding = () => {
       })
     : machines;
 
-  // Fallback to static data if CMS data is not available yet
   const displayMachines = filteredMachines.length > 0 ? filteredMachines : [
     {
       id: '1',
@@ -71,7 +79,6 @@ const MachinesLanding = () => {
 
   return (
     <Layout>
-      {/* Hero Section */}
       <section className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light py-16">
         <div className="container-wide">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -100,8 +107,7 @@ const MachinesLanding = () => {
         </div>
       </section>
 
-      {/* Filter Navigation */}
-      <section className="bg-white py-8 border-b border-gray-200 sticky top-[72px] z-10 shadow-sm">
+      <section id="machine-catalogue" className="bg-white py-8 border-b border-gray-200 sticky top-[72px] z-10 shadow-sm">
         <div className="container-wide">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <h2 className="text-2xl font-bold text-vending-blue-dark mb-4 md:mb-0">Machine Catalogue</h2>
@@ -154,7 +160,6 @@ const MachinesLanding = () => {
         </div>
       </section>
 
-      {/* Loading and Error States */}
       {isLoading && (
         <div className="py-12 text-center">
           <div className="animate-pulse rounded-md bg-gray-200 h-8 w-1/4 mx-auto mb-4"></div>
@@ -168,8 +173,7 @@ const MachinesLanding = () => {
         </div>
       )}
 
-      {/* Machine Types Grid */}
-      <section className="py-16 bg-vending-gray">
+      <section id="vending-machines" className="py-16 bg-vending-gray">
         <div className="container-wide">
           {filter && (
             <div className="mb-8 flex justify-between items-center">
@@ -243,13 +247,48 @@ const MachinesLanding = () => {
         </div>
       </section>
 
-      {/* Integration Features */}
-      <section className="py-16 bg-white">
+      <section id="smart-lockers" className="py-16 bg-white">
         <div className="container-wide">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">Hardware Agnostic Integration</h2>
+            <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">Smart Lockers</h2>
             <p className="subtitle mx-auto">
-              Our software platform integrates with virtually any vending hardware through our open standards and flexible connectivity options.
+              Secure, automated storage solutions for pickups, returns, and contactless delivery.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div className="bg-vending-gray p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold mb-3">24/7 Pickup Solutions</h3>
+              <p className="text-gray-700 mb-4">
+                Enable customers to pick up orders any time without staff assistance, perfect for BOPIS and e-commerce integrations.
+              </p>
+              <img 
+                src="https://images.unsplash.com/photo-1534723328310-e82dad3ee43f" 
+                alt="Pickup solution" 
+                className="w-full h-48 object-cover rounded-lg" 
+              />
+            </div>
+            <div className="bg-vending-gray p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold mb-3">Flexible Configurations</h3>
+              <p className="text-gray-700 mb-4">
+                Modular designs with multiple compartment sizes to accommodate everything from small parcels to large packages.
+              </p>
+              <img 
+                src="https://images.unsplash.com/photo-1604754742629-3e5728249d73" 
+                alt="Flexible configurations" 
+                className="w-full h-48 object-cover rounded-lg" 
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="mixed-solutions" className="py-16 bg-vending-gray">
+        <div className="container-wide">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">Mixed Machine Solutions</h2>
+            <p className="subtitle mx-auto">
+              Combinations of vending machines and smart lockers to create comprehensive retail automation solutions.
             </p>
           </div>
           
@@ -302,8 +341,7 @@ const MachinesLanding = () => {
         </div>
       </section>
 
-      {/* Cost Section Preview */}
-      <section className="py-16 bg-vending-blue-dark text-white">
+      <section id="cost-models" className="py-16 bg-vending-blue-dark text-white">
         <div className="container-wide">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -347,7 +385,6 @@ const MachinesLanding = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
       <CTASection />
     </Layout>
   );
