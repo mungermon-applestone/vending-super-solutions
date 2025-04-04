@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import CTASection from '@/components/common/CTASection';
@@ -6,19 +7,20 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight, Server, HardDrive } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useMachines } from '@/hooks/useCMSData';
+import { Wifi } from '@/components/ui/Wifi';
 
 const MachinesLanding = () => {
   const location = useLocation();
 
   // Scroll to section if hash is present in URL
-  useState(() => {
+  useEffect(() => {
     if (location.hash) {
       const element = document.getElementById(location.hash.substring(1));
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
-  });
+  }, [location.hash]);
 
   const { data: machines = [], isLoading } = useMachines();
   
@@ -171,6 +173,7 @@ const MachinesLanding = () => {
 
   return (
     <Layout>
+      {/* Hero Section */}
       <section className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light py-16">
         <div className="container-wide">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -228,8 +231,8 @@ const MachinesLanding = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {displayVendingMachines.map((machine) => renderMachineCard(machine))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {vendingMachines.map(renderMachineCard)}
             </div>
           )}
         </div>
@@ -260,7 +263,7 @@ const MachinesLanding = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {displayLockers.map((locker) => renderMachineCard(locker))}
+              {smartLockers.map(renderMachineCard)}
             </div>
           )}
         </div>
@@ -293,6 +296,10 @@ const MachinesLanding = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>Unified payment processing and reporting</span>
+                </li>
+                <li className="flex items-start">
+                  <Wifi className="h-6 w-6 text-vending-teal flex-shrink-0 mr-2" />
+                  <span>Wireless connectivity for remote management</span>
                 </li>
               </ul>
               <Button asChild className="btn-secondary">
