@@ -1,4 +1,3 @@
-
 import { 
   TrendingUp,
   ShoppingBag,
@@ -16,7 +15,6 @@ import {
   Zap,
   Smartphone,
   CreditCard,
-  database,
   Database,
   Share2,
   RefreshCcw,
