@@ -19,6 +19,8 @@ import CaseStudies from "./pages/CaseStudies";
 import CaseStudyDetail from "./pages/CaseStudyDetail";
 import Contact from "./pages/Contact";
 import Partner from "./pages/Partner";
+import BusinessGoalsLanding from "./pages/BusinessGoalsLanding";
+import BusinessGoalDetail from "./pages/BusinessGoalDetail";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +45,8 @@ const App = () => (
           <Route path="/case-studies/:slug" element={<CaseStudyDetail />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/partner" element={<Partner />} />
+          <Route path="/goals" element={<BusinessGoalsLanding />} />
+          <Route path="/goals/:goalSlug" element={<BusinessGoalDetail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
