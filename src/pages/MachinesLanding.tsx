@@ -1,17 +1,14 @@
 
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import CTASection from '@/components/common/CTASection';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Server, HardDrive } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { getMachines } from '@/services/cms';
-import { CMSMachine } from '@/types/cms';
+import { useMachines } from '@/hooks/useCMSData';
 
 const MachinesLanding = () => {
-  const [filter, setFilter] = useState<string | null>(null);
   const location = useLocation();
 
   // Scroll to section if hash is present in URL
@@ -24,10 +21,7 @@ const MachinesLanding = () => {
     }
   });
 
-  const { data: machines = [], isLoading } = useQuery({
-    queryKey: ['machines'],
-    queryFn: () => getMachines(),
-  });
+  const { data: machines = [], isLoading } = useMachines();
   
   // Predefined machine types based on the provided list
   const vendingMachines = [
@@ -135,7 +129,7 @@ const MachinesLanding = () => {
     ? machines.filter(machine => machine.type === 'locker')
     : smartLockers;
 
-  const renderMachineCard = (machine: CMSMachine | any) => {
+  const renderMachineCard = (machine) => {
     const machineImage = machine.images?.[0]?.url || machine.image;
     const machineAlt = machine.images?.[0]?.alt || machine.title;
     

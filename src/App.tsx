@@ -23,6 +23,18 @@ import Partner from "./pages/Partner";
 import BusinessGoalsLanding from "./pages/BusinessGoalsLanding";
 import BusinessGoalDetail from "./pages/BusinessGoalDetail";
 
+// Import individual machine pages
+import Option4Refrigerated from "./pages/machines/Option4Refrigerated";
+import Option2WallMountXL from "./pages/machines/Option2WallMountXL";
+import Option2WallMount from "./pages/machines/Option2WallMount";
+import DiviSS from "./pages/machines/DiviSS";
+import DiviWP from "./pages/machines/DiviWP";
+import DiviWS from "./pages/machines/DiviWS";
+import DiviSP from "./pages/machines/DiviSP";
+import Combi3000 from "./pages/machines/Combi3000";
+import Locker10Cell from "./pages/machines/Locker10Cell";
+import Locker21Cell from "./pages/machines/Locker21Cell";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -37,7 +49,22 @@ const App = () => (
             <Route path="/products" element={<ProductsLanding />} />
             <Route path="/products/:productType" element={<ProductDetail />} />
             <Route path="/machines" element={<MachinesLanding />} />
+            
+            {/* General machine detail page (falling back to CMS data) */}
             <Route path="/machines/:machineType/:machineId" element={<MachineDetail />} />
+            
+            {/* Individual machine pages with specific content */}
+            <Route path="/machines/vending/option-4-refrigerated" element={<Option4Refrigerated />} />
+            <Route path="/machines/vending/option-2-wall-mount-xl" element={<Option2WallMountXL />} />
+            <Route path="/machines/vending/option-2-wall-mount" element={<Option2WallMount />} />
+            <Route path="/machines/vending/divi-ss" element={<DiviSS />} />
+            <Route path="/machines/vending/divi-wp" element={<DiviWP />} />
+            <Route path="/machines/vending/divi-ws" element={<DiviWS />} />
+            <Route path="/machines/vending/divi-sp" element={<DiviSP />} />
+            <Route path="/machines/vending/combi-3000" element={<Combi3000 />} />
+            <Route path="/machines/locker/10-cell-temperature-controlled" element={<Locker10Cell />} />
+            <Route path="/machines/locker/21-cell-temperature-controlled" element={<Locker21Cell />} />
+            
             <Route path="/technology" element={<TechnologyLanding />} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />

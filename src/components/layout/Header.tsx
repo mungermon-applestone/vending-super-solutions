@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,24 @@ const Header = () => {
     { title: "Customer Satisfaction", path: "/goals/customer-satisfaction" },
   ];
 
+  const vendingMachines = [
+    { title: "Option-4 - Refrigerated", path: "/machines/vending/option-4-refrigerated" },
+    { title: "Option-2, Wall Mount XL", path: "/machines/vending/option-2-wall-mount-xl" },
+    { title: "Option-2, Wall Mount", path: "/machines/vending/option-2-wall-mount" },
+    { title: "DIVI-SS", path: "/machines/vending/divi-ss" },
+    { title: "DIVI-WP", path: "/machines/vending/divi-wp" },
+    { title: "DIVI-WS", path: "/machines/vending/divi-ws" },
+    { title: "DIVI-SP", path: "/machines/vending/divi-sp" },
+    { title: "Combi 3000", path: "/machines/vending/combi-3000" },
+  ];
+
+  const smartLockers = [
+    { title: "10-cell temperature controlled", path: "/machines/locker/10-cell-temperature-controlled" },
+    { title: "21-cell temperature controlled", path: "/machines/locker/21-cell-temperature-controlled" },
+  ];
+
   const machineTypes = [
+    { title: "All Machines", path: "/machines" },
     { title: "Vending Machines", path: "/machines#vending-machines" },
     { title: "Smart Lockers", path: "/machines#smart-lockers" },
   ];
@@ -123,7 +141,9 @@ const Header = () => {
             <nav className="hidden lg:flex space-x-1">
               <Dropdown title="Products" items={productTypes} />
               <Dropdown title="Business Goals" items={businessGoals} />
-              <Dropdown title="Machines" items={machineTypes} />
+              <Dropdown title="Machine Types" items={machineTypes} />
+              <Dropdown title="Vending Machines" items={vendingMachines} />
+              <Dropdown title="Smart Lockers" items={smartLockers} />
               <Dropdown title="Technology" items={technologyItems} />
               <Dropdown title="About" items={aboutItems} />
               <Link to="/blog" className="nav-link">
@@ -188,6 +208,34 @@ const Header = () => {
               <div className="border-b border-gray-200 pb-2">
                 <p className="font-medium mb-2">Machine Types</p>
                 {machineTypes.map((item, i) => (
+                  <Link 
+                    key={i} 
+                    to={item.path} 
+                    className="block py-1.5 pl-3 text-sm text-vending-gray-dark hover:text-vending-blue"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item.title}
+                  </Link>
+                ))}
+              </div>
+              
+              <div className="border-b border-gray-200 pb-2">
+                <p className="font-medium mb-2">Vending Machines</p>
+                {vendingMachines.map((item, i) => (
+                  <Link 
+                    key={i} 
+                    to={item.path} 
+                    className="block py-1.5 pl-3 text-sm text-vending-gray-dark hover:text-vending-blue"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item.title}
+                  </Link>
+                ))}
+              </div>
+              
+              <div className="border-b border-gray-200 pb-2">
+                <p className="font-medium mb-2">Smart Lockers</p>
+                {smartLockers.map((item, i) => (
                   <Link 
                     key={i} 
                     to={item.path} 
