@@ -271,6 +271,88 @@ export type Database = {
           },
         ]
       }
+      product_type_feature_images: {
+        Row: {
+          alt: string
+          created_at: string
+          feature_id: string
+          height: number | null
+          id: string
+          updated_at: string
+          url: string
+          width: number | null
+        }
+        Insert: {
+          alt: string
+          created_at?: string
+          feature_id: string
+          height?: number | null
+          id?: string
+          updated_at?: string
+          url: string
+          width?: number | null
+        }
+        Update: {
+          alt?: string
+          created_at?: string
+          feature_id?: string
+          height?: number | null
+          id?: string
+          updated_at?: string
+          url?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_type_feature_images_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "product_type_features"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_type_features: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number
+          icon: string | null
+          id: string
+          product_type_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          product_type_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          product_type_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_type_features_product_type_id_fkey"
+            columns: ["product_type_id"]
+            isOneToOne: false
+            referencedRelation: "product_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_type_images: {
         Row: {
           alt: string

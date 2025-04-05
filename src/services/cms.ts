@@ -1,3 +1,4 @@
+
 import { 
   CMSMachine, 
   CMSProductType, 
@@ -165,6 +166,20 @@ async function fetchFromCMS<T>(contentType: string, params: Record<string, any> 
             id,
             benefit,
             display_order
+          ),
+          product_type_features (
+            id,
+            title,
+            description,
+            icon,
+            display_order,
+            product_type_feature_images (
+              id,
+              url,
+              alt,
+              width,
+              height
+            )
           )
         `)
         .eq('visible', true);
@@ -197,6 +212,31 @@ async function fetchFromCMS<T>(contentType: string, params: Record<string, any> 
           ? productType.product_type_images[0] 
           : null;
         
+        // Sort and transform features
+        const features = productType.product_type_features ? 
+          [...productType.product_type_features]
+            .sort((a, b) => a.display_order - b.display_order)
+            .map(feature => {
+              // Get the screenshot for this feature if available
+              const screenshot = feature.product_type_feature_images && 
+                feature.product_type_feature_images.length > 0 ? 
+                feature.product_type_feature_images[0] : 
+                null;
+              
+              return {
+                title: feature.title,
+                description: feature.description,
+                icon: feature.icon || undefined,
+                screenshot: screenshot ? {
+                  url: screenshot.url,
+                  alt: screenshot.alt,
+                  width: screenshot.width,
+                  height: screenshot.height
+                } : undefined
+              };
+            }) : 
+          [];
+        
         // Transform to our CMSProductType
         return {
           id: productType.id,
@@ -210,7 +250,7 @@ async function fetchFromCMS<T>(contentType: string, params: Record<string, any> 
             height: image.height
           } : { url: "https://via.placeholder.com/800x600", alt: "Placeholder image" },
           benefits: sortedBenefits.map(b => b.benefit),
-          features: [], // We'll implement features in a future update
+          features: features,
           examples: []  // We'll implement examples in a future update
         } as unknown as T;
       });
