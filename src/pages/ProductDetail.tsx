@@ -1,5 +1,5 @@
 
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ProductFeaturesList from '@/components/products/ProductFeaturesList';
@@ -7,20 +7,39 @@ import ProductExamples from '@/components/products/ProductExamples';
 import ProductVideoSection from '@/components/products/ProductVideoSection';
 import CTASection from '@/components/common/CTASection';
 import { Utensils, ShoppingBag, ShieldCheck, Tags, Truck, Clock } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { getProductTypeBySlug } from '@/services/cms';
+import { CMSProductType } from '@/types/cms';
+import { useEffect } from 'react';
 
-// This is a sample implementation for the Grocery product type page
-// In a real implementation, you would fetch this data from an API or CMS
 const ProductDetail = () => {
+  const navigate = useNavigate();
   const { productType } = useParams<{ productType: string }>();
   
-  // Default to grocery if no product type is specified
-  const currentProductType = productType || 'grocery';
+  // Fetch product type data from CMS
+  const { data: productTypeData, isLoading, error } = useQuery({
+    queryKey: ['productType', productType],
+    queryFn: () => getProductTypeBySlug(productType || ''),
+    enabled: !!productType
+  });
   
-  // Sample data for grocery vending
-  const groceryData = {
-    title: "Grocery",
+  // Redirect to 404 if product type doesn't exist and we're done loading
+  useEffect(() => {
+    if (!isLoading && !productTypeData && !error) {
+      navigate('/not-found', { replace: true });
+    }
+  }, [isLoading, productTypeData, error, navigate]);
+  
+  // Sample data for grocery vending as fallback
+  const groceryData: CMSProductType = {
+    id: productType || 'grocery',
+    slug: productType || 'grocery',
+    title: productType ? productType.charAt(0).toUpperCase() + productType.slice(1) : "Grocery",
     description: "Our vending software helps you sell packaged foods, snacks, drinks, and everyday essentials with robust inventory management and temperature monitoring.",
-    image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a",
+    image: {
+      url: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a",
+      alt: "Grocery vending"
+    },
     benefits: [
       "Real-time inventory tracking and automated reordering",
       "Temperature monitoring and alerts for refrigerated items",
@@ -34,25 +53,37 @@ const ProductDetail = () => {
         title: "Smart Inventory Management",
         description: "Track inventory levels in real-time, set automatic reorder points, and receive alerts when stock runs low. Our system uses predictive analytics to help you optimize your product mix and reduce waste.",
         icon: <ShoppingBag className="h-6 w-6 text-vending-teal" />,
-        screenshot: "https://images.unsplash.com/photo-1460925895917-afdab827c52f"
+        screenshot: {
+          url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
+          alt: "Inventory Management"
+        }
       },
       {
         title: "Temperature Monitoring",
         description: "Ensure food safety with continuous temperature monitoring for refrigerated items. Receive immediate alerts if temperatures fall outside safe ranges to prevent product spoilage.",
         icon: <ShieldCheck className="h-6 w-6 text-vending-teal" />,
-        screenshot: "https://images.unsplash.com/photo-1606248897732-2c5ffe759c04"
+        screenshot: {
+          url: "https://images.unsplash.com/photo-1606248897732-2c5ffe759c04",
+          alt: "Temperature Monitoring"
+        }
       },
       {
         title: "Nutritional Information Display",
         description: "Help customers make informed choices with detailed nutritional information, ingredient lists, and allergen warnings displayed on the touchscreen interface.",
         icon: <Utensils className="h-6 w-6 text-vending-teal" />,
-        screenshot: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b"
+        screenshot: {
+          url: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b",
+          alt: "Nutritional Information"
+        }
       },
       {
         title: "Dynamic Pricing",
         description: "Implement flexible pricing strategies including time-based discounts, bundle offers, and loyalty rewards to increase sales and reduce waste of perishable items.",
         icon: <Tags className="h-6 w-6 text-vending-teal" />,
-        screenshot: "https://images.unsplash.com/photo-1553729459-efe14ef6055d"
+        screenshot: {
+          url: "https://images.unsplash.com/photo-1553729459-efe14ef6055d",
+          alt: "Dynamic Pricing"
+        }
       },
       {
         title: "Supply Chain Integration",
@@ -69,47 +100,84 @@ const ProductDetail = () => {
       {
         title: "Campus Convenience",
         description: "University deployed grocery vending machines across campus, providing 24/7 access to essentials for students.",
-        image: "https://images.unsplash.com/photo-1607492138996-7141257a4b67"
+        image: {
+          url: "https://images.unsplash.com/photo-1607492138996-7141257a4b67",
+          alt: "Campus Convenience"
+        }
       },
       {
         title: "Workplace Pantry",
         description: "Tech company replaced traditional break room with smart vending solution, offering healthy snacks and meal options.",
-        image: "https://images.unsplash.com/photo-1567521464027-f35b1f9447e2"
+        image: {
+          url: "https://images.unsplash.com/photo-1567521464027-f35b1f9447e2",
+          alt: "Workplace Pantry"
+        }
       },
       {
         title: "Apartment Complex Convenience",
         description: "Residential building installed grocery vending in the lobby, giving residents access to essentials without leaving the building.",
-        image: "https://images.unsplash.com/photo-1559553156-2e97137af16f"
+        image: {
+          url: "https://images.unsplash.com/photo-1559553156-2e97137af16f",
+          alt: "Apartment Complex"
+        }
       }
     ],
     video: {
       title: "See Grocery Vending in Action",
       description: "Watch how our grocery vending solutions provide convenience and accessibility for consumers while offering robust management tools for operators.",
-      thumbnailImage: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2"
+      thumbnailImage: {
+        url: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2",
+        alt: "Grocery Vending Video"
+      }
     }
   };
   
-  // In a real implementation, you would dynamically load data based on the product type
-  // For demo purposes, we're just using the grocery data
+  // Use CMS data if available, otherwise use fallback
+  const currentProductData = productTypeData || groceryData;
+  
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container-wide py-16">
+          <div className="animate-pulse">
+            <div className="h-12 bg-gray-200 rounded w-1/3 mb-6"></div>
+            <div className="h-6 bg-gray-200 rounded w-3/4 mb-10"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <div className="h-4 bg-gray-200 rounded w-full"></div>
+                <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+              </div>
+              <div className="h-64 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
   
   return (
     <Layout>
       <ProductHeroSection 
-        productType={groceryData.title}
-        description={groceryData.description}
-        image={groceryData.image}
-        benefits={groceryData.benefits}
+        productType={currentProductData.title}
+        description={currentProductData.description}
+        image={currentProductData.image.url}
+        benefits={currentProductData.benefits}
       />
       
-      <ProductFeaturesList features={groceryData.features} />
+      <ProductFeaturesList features={currentProductData.features} />
       
-      <ProductExamples examples={groceryData.examples} />
+      {currentProductData.examples && currentProductData.examples.length > 0 && (
+        <ProductExamples examples={currentProductData.examples} />
+      )}
       
-      <ProductVideoSection
-        title={groceryData.video.title}
-        description={groceryData.video.description}
-        thumbnailImage={groceryData.video.thumbnailImage}
-      />
+      {currentProductData.video && (
+        <ProductVideoSection
+          title={currentProductData.video.title}
+          description={currentProductData.video.description}
+          thumbnailImage={currentProductData.video.thumbnailImage.url}
+        />
+      )}
       
       <CTASection />
     </Layout>

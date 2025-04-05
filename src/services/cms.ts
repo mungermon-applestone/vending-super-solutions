@@ -1,4 +1,3 @@
-
 import { 
   CMSMachine, 
   CMSProductType, 
@@ -147,8 +146,74 @@ async function fetchFromCMS<T>(contentType: string, params: Record<string, any> 
         } as unknown as T;
       });
     } else if (contentType === 'product-types') {
-      // Similar approach for product types (stubbed for now)
-      return [] as T[];
+      let query = supabase
+        .from('product_types')
+        .select(`
+          id,
+          slug,
+          title,
+          description,
+          visible,
+          product_type_images (
+            id,
+            url,
+            alt,
+            width,
+            height
+          ),
+          product_type_benefits (
+            id,
+            benefit,
+            display_order
+          )
+        `)
+        .eq('visible', true);
+      
+      // Apply filters if present
+      if (params.slug) {
+        query = query.eq('slug', params.slug);
+      }
+      
+      const { data, error } = await query.order('title');
+      
+      if (error) {
+        console.error('Error fetching product types:', error);
+        throw error;
+      }
+
+      if (!data) {
+        return [] as T[];
+      }
+
+      // Transform the Supabase response to match our CMS types
+      return data.map(productType => {
+        // Sort benefits by display_order
+        const sortedBenefits = productType.product_type_benefits ? 
+          [...productType.product_type_benefits].sort((a, b) => a.display_order - b.display_order) : 
+          [];
+
+        // Get the main image (assuming there's only one for now)
+        const image = productType.product_type_images && productType.product_type_images.length > 0 
+          ? productType.product_type_images[0] 
+          : null;
+        
+        // Transform to our CMSProductType
+        return {
+          id: productType.id,
+          slug: productType.slug,
+          title: productType.title,
+          description: productType.description,
+          image: image ? {
+            url: image.url,
+            alt: image.alt,
+            width: image.width,
+            height: image.height
+          } : { url: "https://via.placeholder.com/800x600", alt: "Placeholder image" },
+          benefits: sortedBenefits.map(b => b.benefit),
+          features: [], // We'll implement features in a future update
+          examples: []  // We'll implement examples in a future update
+        } as unknown as T;
+      });
     } else if (contentType === 'testimonials') {
       // Testimonials implementation
       return [] as T[];

@@ -35,9 +35,9 @@ const ProductCard = ({ title, description, image, path }: ProductCardProps) => {
 };
 
 const ProductTypesSection = () => {
-  // Fetch featured product types from CMS
-  const { data: cmsProductTypes = [], isLoading } = useQuery({
-    queryKey: ['productTypes', { featured: true, limit: 4 }],
+  // Fetch product types from CMS
+  const { data: productTypes = [], isLoading } = useQuery({
+    queryKey: ['productTypes'],
     queryFn: () => getProductTypes(),
   });
 
@@ -69,15 +69,18 @@ const ProductTypesSection = () => {
     }
   ];
 
-  // If we have CMS data, transform it to the format the component expects
-  const productTypes = cmsProductTypes.length > 0 
-    ? cmsProductTypes.map((product: CMSProductType) => ({
+  // Transform CMS data to the format the component expects
+  const displayProductTypes = productTypes.length > 0 
+    ? productTypes.map((product: CMSProductType) => ({
         title: product.title,
         description: product.description,
         image: product.image.url,
         path: `/products/${product.slug}`
       }))
     : staticProductTypes;
+  
+  // Only show the first 4 product types in this section
+  const featuredProductTypes = displayProductTypes.slice(0, 4);
   
   return (
     <section className="py-16 md:py-24">
@@ -111,7 +114,7 @@ const ProductTypesSection = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {productTypes.map((product, index) => (
+            {featuredProductTypes.map((product, index) => (
               <ProductCard 
                 key={index}
                 title={product.title}
