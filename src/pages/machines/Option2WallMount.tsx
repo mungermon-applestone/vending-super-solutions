@@ -1,9 +1,13 @@
 
 import React from 'react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
+import { useMachine } from '@/hooks/useCMSData';
 
 const Option2WallMount = () => {
-  const machineData = {
+  const { data: machine, isLoading, error } = useMachine('vending', 'option-2-wall-mount');
+
+  // Define a fallback/default machine data in case the API call fails
+  const fallbackMachineData = {
     id: '3',
     slug: 'option-2-wall-mount',
     title: "Option-2, Wall Mount",
@@ -48,6 +52,16 @@ const Option2WallMount = () => {
       }
     ]
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    console.error("Error loading machine data:", error);
+  }
+
+  const machineData = machine || fallbackMachineData;
 
   return <MachinePageTemplate machine={machineData} />;
 };
