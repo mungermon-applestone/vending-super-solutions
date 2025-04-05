@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Check, ShoppingBag, ShieldCheck, Utensils, Tags, Truck, Clock } from 'lucide-react';
 import { CMSFeature } from '@/types/cms';
 

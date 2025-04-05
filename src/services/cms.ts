@@ -1,4 +1,3 @@
-
 import { 
   CMSMachine, 
   CMSProductType, 
@@ -215,8 +214,8 @@ async function fetchFromCMS<T>(contentType: string, params: Record<string, any> 
         // Sort and transform features
         const features = productType.product_type_features ? 
           [...productType.product_type_features]
-            .sort((a, b) => a.display_order - b.display_order)
-            .map(feature => {
+            .sort((a: any, b: any) => a.display_order - b.display_order)
+            .map((feature: any) => {
               // Get the screenshot for this feature if available
               const screenshot = feature.product_type_feature_images && 
                 feature.product_type_feature_images.length > 0 ? 
