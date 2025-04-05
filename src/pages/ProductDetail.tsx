@@ -1,5 +1,6 @@
 
 import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ProductFeaturesList from '@/components/products/ProductFeaturesList';
@@ -9,24 +10,21 @@ import CTASection from '@/components/common/CTASection';
 import { Utensils, ShoppingBag, ShieldCheck, Tags, Truck, Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getProductTypeBySlug } from '@/services/cms';
+import { useProductType } from '@/hooks/useCMSData';
 import { CMSProductType, CMSFeature } from '@/types/cms';
-import { useEffect } from 'react';
+import { ReactNode } from 'react';
 
 const ProductDetail = () => {
   const navigate = useNavigate();
   const { productType } = useParams<{ productType: string }>();
   
-  // Fetch product type data from CMS
-  const { data: productTypeData, isLoading, error } = useQuery({
-    queryKey: ['productType', productType],
-    queryFn: () => getProductTypeBySlug(productType || ''),
-    enabled: !!productType
-  });
+  // Use the hook from useCMSData
+  const { data: productTypeData, isLoading, error } = useProductType(productType);
   
   // Redirect to 404 if product type doesn't exist and we're done loading
   useEffect(() => {
     if (!isLoading && !productTypeData && !error) {
-      navigate('/not-found', { replace: true });
+      navigate('/404', { replace: true });
     }
   }, [isLoading, productTypeData, error, navigate]);
   
@@ -52,7 +50,7 @@ const ProductDetail = () => {
       {
         title: "Smart Inventory Management",
         description: "Track inventory levels in real-time, set automatic reorder points, and receive alerts when stock runs low. Our system uses predictive analytics to help you optimize your product mix and reduce waste.",
-        icon: "ShoppingBag",
+        icon: <ShoppingBag className="h-6 w-6 text-vending-teal" />,
         screenshot: {
           url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
           alt: "Inventory Management"
@@ -61,7 +59,7 @@ const ProductDetail = () => {
       {
         title: "Temperature Monitoring",
         description: "Ensure food safety with continuous temperature monitoring for refrigerated items. Receive immediate alerts if temperatures fall outside safe ranges to prevent product spoilage.",
-        icon: "ShieldCheck",
+        icon: <ShieldCheck className="h-6 w-6 text-vending-teal" />,
         screenshot: {
           url: "https://images.unsplash.com/photo-1606248897732-2c5ffe759c04",
           alt: "Temperature Monitoring"
@@ -70,7 +68,7 @@ const ProductDetail = () => {
       {
         title: "Nutritional Information Display",
         description: "Help customers make informed choices with detailed nutritional information, ingredient lists, and allergen warnings displayed on the touchscreen interface.",
-        icon: "Utensils",
+        icon: <Utensils className="h-6 w-6 text-vending-teal" />,
         screenshot: {
           url: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b",
           alt: "Nutritional Information"
@@ -79,7 +77,7 @@ const ProductDetail = () => {
       {
         title: "Dynamic Pricing",
         description: "Implement flexible pricing strategies including time-based discounts, bundle offers, and loyalty rewards to increase sales and reduce waste of perishable items.",
-        icon: "Tags",
+        icon: <Tags className="h-6 w-6 text-vending-teal" />,
         screenshot: {
           url: "https://images.unsplash.com/photo-1553729459-efe14ef6055d",
           alt: "Dynamic Pricing"
@@ -88,12 +86,12 @@ const ProductDetail = () => {
       {
         title: "Supply Chain Integration",
         description: "Seamlessly connect with your suppliers for automated ordering, delivery scheduling, and inventory reconciliation to streamline your operations.",
-        icon: "Truck"
+        icon: <Truck className="h-6 w-6 text-vending-teal" />
       },
       {
         title: "Expiration Date Tracking",
         description: "Track product expiration dates to ensure freshness, automate price reductions for items nearing expiration, and minimize waste through smart inventory rotation.",
-        icon: "Clock"
+        icon: <Clock className="h-6 w-6 text-vending-teal" />
       }
     ],
     examples: [
@@ -132,45 +130,8 @@ const ProductDetail = () => {
     }
   };
   
-  // Process features to replace string icon names with actual icon components
-  const processFeatures = (features: CMSFeature[]): CMSFeature[] => {
-    return features.map(feature => {
-      let iconComponent;
-      
-      switch (feature.icon) {
-        case 'ShoppingBag':
-          iconComponent = <ShoppingBag className="h-6 w-6 text-vending-teal" />;
-          break;
-        case 'ShieldCheck':
-          iconComponent = <ShieldCheck className="h-6 w-6 text-vending-teal" />;
-          break;
-        case 'Utensils':
-          iconComponent = <Utensils className="h-6 w-6 text-vending-teal" />;
-          break;
-        case 'Tags':
-          iconComponent = <Tags className="h-6 w-6 text-vending-teal" />;
-          break;
-        case 'Truck':
-          iconComponent = <Truck className="h-6 w-6 text-vending-teal" />;
-          break;
-        case 'Clock':
-          iconComponent = <Clock className="h-6 w-6 text-vending-teal" />;
-          break;
-        default:
-          iconComponent = undefined;
-      }
-      
-      return {
-        ...feature,
-        icon: iconComponent
-      };
-    });
-  };
-  
   // Use CMS data if available, otherwise use fallback
   const currentProductData = productTypeData || groceryData;
-  // Process the features to replace string icons with React components
-  const processedFeatures = processFeatures(currentProductData.features);
   
   if (isLoading) {
     return (
@@ -202,7 +163,7 @@ const ProductDetail = () => {
         benefits={currentProductData.benefits}
       />
       
-      <ProductFeaturesList features={processedFeatures} />
+      <ProductFeaturesList features={currentProductData.features} />
       
       {currentProductData.examples && currentProductData.examples.length > 0 && (
         <ProductExamples examples={currentProductData.examples} />

@@ -41,7 +41,7 @@ export interface CMSMachine {
   id: string;
   slug: string;
   title: string;
-  type: "vending" | "locker";  // Update this to be a union type instead of just string
+  type: "vending" | "locker";
   temperature: string;
   description: string;
   images: CMSImage[];

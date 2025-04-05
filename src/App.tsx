@@ -76,7 +76,8 @@ const App = () => (
             <Route path="/partner" element={<Partner />} />
             <Route path="/goals" element={<BusinessGoalsLanding />} />
             <Route path="/goals/:goalSlug" element={<BusinessGoalDetail />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/404" element={<NotFound />} />
+            {/* Catch-all route for non-existent routes */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

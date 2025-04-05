@@ -29,6 +29,7 @@ export function useProductType(slug: string | undefined) {
     queryKey: ['productType', slug],
     queryFn: () => cmsService.getProductTypeBySlug(slug || ''),
     enabled: !!slug,
+    retry: false, // Don't retry if the product type doesn't exist
   });
 }
 
