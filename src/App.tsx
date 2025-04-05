@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CMSProvider } from "@/context/CMSContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -35,7 +35,14 @@ import Combi3000 from "./pages/machines/Combi3000";
 import Locker10Cell from "./pages/machines/Locker10Cell";
 import Locker21Cell from "./pages/machines/Locker21Cell";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1, // Only retry once
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -76,8 +83,9 @@ const App = () => (
             <Route path="/partner" element={<Partner />} />
             <Route path="/goals" element={<BusinessGoalsLanding />} />
             <Route path="/goals/:goalSlug" element={<BusinessGoalDetail />} />
+            
+            {/* Handle 404 routes - don't redirect to /404 */}
             <Route path="/404" element={<NotFound />} />
-            {/* Catch-all route for non-existent routes */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

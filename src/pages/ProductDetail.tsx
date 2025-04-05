@@ -8,8 +8,6 @@ import ProductExamples from '@/components/products/ProductExamples';
 import ProductVideoSection from '@/components/products/ProductVideoSection';
 import CTASection from '@/components/common/CTASection';
 import { Utensils, ShoppingBag, ShieldCheck, Tags, Truck, Clock } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { getProductTypeBySlug } from '@/services/cms';
 import { useProductType } from '@/hooks/useCMSData';
 import { CMSProductType, CMSFeature } from '@/types/cms';
 import { ReactNode } from 'react';
@@ -19,14 +17,15 @@ const ProductDetail = () => {
   const { productType } = useParams<{ productType: string }>();
   
   // Use the hook from useCMSData
-  const { data: productTypeData, isLoading, error } = useProductType(productType);
+  const { data: productTypeData, isLoading, error, isError } = useProductType(productType);
   
   // Redirect to 404 if product type doesn't exist and we're done loading
   useEffect(() => {
-    if (!isLoading && !productTypeData && !error) {
-      navigate('/404', { replace: true });
+    if (!isLoading && (!productTypeData || isError)) {
+      console.log(`Product type "${productType}" not found, redirecting to 404`);
+      navigate('*', { replace: true });
     }
-  }, [isLoading, productTypeData, error, navigate]);
+  }, [isLoading, productTypeData, isError, productType, navigate]);
   
   // Sample data for grocery vending as fallback
   const groceryData: CMSProductType = {
