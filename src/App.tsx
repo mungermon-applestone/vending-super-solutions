@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -54,7 +53,20 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/products" element={<ProductsLanding />} />
+            
+            {/* Specific product type routes */}
+            <Route path="/products/grocery" element={<ProductDetail />} />
+            <Route path="/products/vape" element={<ProductDetail />} />
+            <Route path="/products/cannabis" element={<ProductDetail />} />
+            <Route path="/products/fresh-food" element={<ProductDetail />} />
+            <Route path="/products/cosmetics" element={<ProductDetail />} />
+            <Route path="/products/collectibles" element={<ProductDetail />} />
+            <Route path="/products/otc" element={<ProductDetail />} />
+            <Route path="/products/swag" element={<ProductDetail />} />
+            
+            {/* Keep the dynamic route as fallback for any other product types */}
             <Route path="/products/:productType" element={<ProductDetail />} />
+            
             <Route path="/machines" element={<MachinesLanding />} />
             
             {/* General machine detail page (falling back to CMS data) */}

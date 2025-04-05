@@ -27,12 +27,20 @@ export function useProductTypes() {
 export function useProductType(slug: string | undefined) {
   return useQuery({
     queryKey: ['productType', slug],
-    queryFn: () => cmsService.getProductTypeBySlug(slug || ''),
-    enabled: !!slug,
+    queryFn: () => {
+      // If slug is undefined, try to extract it from the URL
+      let productSlug = slug;
+      if (!productSlug) {
+        const pathParts = window.location.pathname.split('/');
+        productSlug = pathParts[pathParts.length - 1];
+      }
+      console.log("Fetching product type with slug:", productSlug);
+      return cmsService.getProductTypeBySlug(productSlug || '');
+    },
+    enabled: true, // Always enable to work with URL-based product types too
     retry: false, // Don't retry if the product type doesn't exist
     refetchOnWindowFocus: false, // Don't automatically refetch on window focus
     retryOnMount: false, // Don't retry when component remounts
-    // Remove the useErrorBoundary option as it's not supported in the current version
   });
 }
 
