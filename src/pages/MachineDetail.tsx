@@ -1,3 +1,4 @@
+
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
@@ -21,7 +22,7 @@ const MachineDetail = () => {
     id: '1',
     slug: machineId || 'default',
     title: "Smart Vending Machine",
-    type: machineType || "vending",
+    type: (machineType || "vending") as "vending" | "locker", // Cast to the union type
     temperature: "ambient",
     description: "Advanced touchscreen vending solution for ambient products with real-time inventory tracking and multiple payment options.",
     images: [
