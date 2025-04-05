@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +9,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ProductsLanding from "./pages/ProductsLanding";
 import ProductDetail from "./pages/ProductDetail";
+import ProductEditor from "./pages/ProductEditor";
 import MachinesLanding from "./pages/MachinesLanding";
 import MachineDetail from "./pages/MachineDetail";
 import TechnologyLanding from "./pages/TechnologyLanding";
@@ -53,6 +55,10 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/products" element={<ProductsLanding />} />
+            
+            {/* Admin routes for product editing */}
+            <Route path="/admin/products/new" element={<ProductEditor />} />
+            <Route path="/admin/products/edit/:productSlug" element={<ProductEditor />} />
             
             {/* Specific product type routes */}
             <Route path="/products/grocery" element={<ProductDetail />} />
