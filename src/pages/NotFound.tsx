@@ -21,12 +21,17 @@ const NotFound = () => {
           <p className="text-xl text-gray-700 mb-8">
             We couldn't find the page you were looking for.
           </p>
-          <Link 
-            to="/" 
-            className="inline-flex items-center justify-center bg-vending-blue hover:bg-vending-blue-dark text-white font-medium py-3 px-6 rounded-md transition-colors"
-          >
-            Return to Home
-          </Link>
+          <div className="space-y-4">
+            <p className="text-gray-600">
+              The page at <span className="font-mono bg-gray-100 px-2 py-1 rounded">{location.pathname}</span> doesn't exist.
+            </p>
+            <Link 
+              to="/" 
+              className="inline-flex items-center justify-center bg-vending-blue hover:bg-vending-blue-dark text-white font-medium py-3 px-6 rounded-md transition-colors"
+            >
+              Return to Home
+            </Link>
+          </div>
         </div>
       </div>
     </Layout>

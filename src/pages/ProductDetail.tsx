@@ -9,7 +9,7 @@ import ProductVideoSection from '@/components/products/ProductVideoSection';
 import CTASection from '@/components/common/CTASection';
 import { Utensils, ShoppingBag, ShieldCheck, Tags, Truck, Clock } from 'lucide-react';
 import { useProductType } from '@/hooks/useCMSData';
-import { CMSProductType, CMSFeature } from '@/types/cms';
+import { CMSProductType } from '@/types/cms';
 import { ReactNode } from 'react';
 
 const ProductDetail = () => {
@@ -19,13 +19,15 @@ const ProductDetail = () => {
   // Use the hook from useCMSData
   const { data: productTypeData, isLoading, error, isError } = useProductType(productType);
   
-  // Redirect to 404 if product type doesn't exist and we're done loading
+  // Only redirect to 404 if we're sure the product type doesn't exist
+  // Don't redirect if there's a network error (as those might be temporary)
   useEffect(() => {
-    if (!isLoading && (!productTypeData || isError)) {
+    // We only handle non-network errors here (like 404 not found)
+    if (!isLoading && isError && !error?.message?.includes('fetch')) {
       console.log(`Product type "${productType}" not found, redirecting to 404`);
-      navigate('*', { replace: true });
+      navigate('/404', { replace: true });
     }
-  }, [isLoading, productTypeData, isError, productType, navigate]);
+  }, [isLoading, productTypeData, isError, error, productType, navigate]);
   
   // Sample data for grocery vending as fallback
   const groceryData: CMSProductType = {

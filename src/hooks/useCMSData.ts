@@ -30,6 +30,9 @@ export function useProductType(slug: string | undefined) {
     queryFn: () => cmsService.getProductTypeBySlug(slug || ''),
     enabled: !!slug,
     retry: false, // Don't retry if the product type doesn't exist
+    refetchOnWindowFocus: false, // Don't automatically refetch on window focus
+    retryOnMount: false, // Don't retry when component remounts
+    useErrorBoundary: false, // Don't use error boundary for this query
   });
 }
 
