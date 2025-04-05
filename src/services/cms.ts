@@ -8,6 +8,7 @@ import {
 import { IS_DEVELOPMENT } from '@/config/cms';
 import { mockMachines, mockProductTypes } from '@/data/mockCmsData';
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 
 // Use mock data in development mode if needed
 const useMockData = IS_DEVELOPMENT && false; // Set to true to use mock data instead of Supabase
@@ -112,16 +113,16 @@ async function fetchFromCMS<T>(contentType: string, params: Record<string, any> 
       // Transform the Supabase response to match our CMS types
       return data.map(machine => {
         // Sort related data by display_order
-        const sortedImages = [...machine.machine_images].sort((a, b) => a.display_order - b.display_order);
-        const sortedFeatures = [...machine.machine_features].sort((a, b) => a.display_order - b.display_order);
-        const sortedExamples = [...machine.deployment_examples].sort((a, b) => a.display_order - b.display_order);
+        const sortedImages = machine.machine_images ? [...machine.machine_images].sort((a, b) => a.display_order - b.display_order) : [];
+        const sortedFeatures = machine.machine_features ? [...machine.machine_features].sort((a, b) => a.display_order - b.display_order) : [];
+        const sortedExamples = machine.deployment_examples ? [...machine.deployment_examples].sort((a, b) => a.display_order - b.display_order) : [];
         
         // Transform to our CMSMachine type
         return {
           id: machine.id,
           slug: machine.slug,
           title: machine.title,
-          type: machine.type,
+          type: machine.type as "vending" | "locker", // Cast to the specific union type
           temperature: machine.temperature,
           description: machine.description,
           images: sortedImages.map(img => ({
@@ -130,10 +131,10 @@ async function fetchFromCMS<T>(contentType: string, params: Record<string, any> 
             width: img.width,
             height: img.height
           })),
-          specs: machine.machine_specs.reduce((acc, spec) => {
+          specs: machine.machine_specs?.reduce((acc: Record<string, string>, spec) => {
             acc[spec.key] = spec.value;
             return acc;
-          }, {} as Record<string, string>),
+          }, {} as Record<string, string>) || {},
           features: sortedFeatures.map(f => f.feature),
           deploymentExamples: sortedExamples.map(ex => ({
             title: ex.title,

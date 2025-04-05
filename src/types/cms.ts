@@ -39,8 +39,8 @@ export interface CMSMachine {
   id: string;
   slug: string;
   title: string;
-  type: string;
-  temperature: "ambient" | "refrigerated" | "frozen";
+  type: "vending" | "locker";  // Update this to be a union type instead of just string
+  temperature: string;
   description: string;
   images: CMSImage[];
   specs: CMSSpecs;

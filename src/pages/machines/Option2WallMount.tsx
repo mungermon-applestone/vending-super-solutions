@@ -61,6 +61,7 @@ const Option2WallMount = () => {
     console.error("Error loading machine data:", error);
   }
 
+  // Make sure we have the machine data, otherwise use the fallback
   const machineData = machine || fallbackMachineData;
 
   return <MachinePageTemplate machine={machineData} />;
