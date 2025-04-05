@@ -16,18 +16,20 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { productType } = useParams<{ productType: string }>();
   
+  console.log("ProductDetail rendering for product type:", productType);
+  
   // Use the hook from useCMSData
   const { data: productTypeData, isLoading, error, isError } = useProductType(productType);
   
-  // Only redirect to 404 if we're sure the product type doesn't exist
-  // Don't redirect if there's a network error (as those might be temporary)
+  // Handle 404s for non-existent product types
   useEffect(() => {
     // We only handle non-network errors here (like 404 not found)
-    if (!isLoading && isError && !error?.message?.includes('fetch')) {
-      console.log(`Product type "${productType}" not found, redirecting to 404`);
+    // And only redirect after we've tried loading and know the product doesn't exist
+    if (!isLoading && isError) {
+      console.log(`Product type "${productType}" not found, showing 404`);
       navigate('/404', { replace: true });
     }
-  }, [isLoading, productTypeData, isError, error, productType, navigate]);
+  }, [isLoading, isError, productType, navigate]);
   
   // Sample data for grocery vending as fallback
   const groceryData: CMSProductType = {
@@ -153,6 +155,10 @@ const ProductDetail = () => {
         </div>
       </Layout>
     );
+  }
+  
+  if (isError) {
+    return null; // Return null as we're redirecting in the effect
   }
   
   return (

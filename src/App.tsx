@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -83,7 +84,8 @@ const App = () => (
             <Route path="/goals" element={<BusinessGoalsLanding />} />
             <Route path="/goals/:goalSlug" element={<BusinessGoalDetail />} />
             
-            {/* Handle 404 routes - as catch-all */}
+            {/* Create a dedicated 404 route and a catch-all */}
+            <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
