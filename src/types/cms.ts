@@ -1,6 +1,8 @@
 
 // Content types that will be stored in the CMS
 
+import { ReactNode } from 'react';
+
 export interface CMSImage {
   url: string;
   alt: string;
@@ -11,7 +13,7 @@ export interface CMSImage {
 export interface CMSFeature {
   title: string;
   description: string;
-  icon?: string;
+  icon?: ReactNode | string;
   screenshot?: CMSImage;
 }
 

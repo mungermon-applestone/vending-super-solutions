@@ -1,15 +1,9 @@
 
 import { Check } from 'lucide-react';
-
-interface ProductFeature {
-  title: string;
-  description: string;
-  icon?: React.ReactNode;
-  screenshot?: string;
-}
+import { CMSFeature } from '@/types/cms';
 
 interface ProductFeaturesListProps {
-  features: ProductFeature[];
+  features: CMSFeature[];
 }
 
 const ProductFeaturesList = ({ features }: ProductFeaturesListProps) => {
@@ -42,8 +36,8 @@ const ProductFeaturesList = ({ features }: ProductFeaturesListProps) => {
                 <div className="relative">
                   <div className="bg-white rounded-lg shadow-md overflow-hidden">
                     <img 
-                      src={feature.screenshot} 
-                      alt={feature.title}
+                      src={feature.screenshot.url} 
+                      alt={feature.screenshot.alt || feature.title}
                       className="w-full h-auto object-cover"
                     />
                   </div>

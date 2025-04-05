@@ -1,14 +1,9 @@
 
 import { ArrowRight } from 'lucide-react';
-
-interface Example {
-  title: string;
-  description: string;
-  image: string;
-}
+import { CMSExample } from '@/types/cms';
 
 interface ProductExamplesProps {
-  examples: Example[];
+  examples: CMSExample[];
 }
 
 const ProductExamples = ({ examples }: ProductExamplesProps) => {
@@ -26,8 +21,8 @@ const ProductExamples = ({ examples }: ProductExamplesProps) => {
           {examples.map((example, index) => (
             <div key={index} className="bg-white rounded-lg overflow-hidden shadow-md">
               <img 
-                src={example.image} 
-                alt={example.title}
+                src={example.image.url} 
+                alt={example.image.alt || example.title}
                 className="w-full h-64 object-cover"
               />
               <div className="p-6">
