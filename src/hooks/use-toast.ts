@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -168,7 +169,14 @@ function toast({ ...props }: Toast) {
   }
 }
 
-function useToast() {
+// Define and export the UseToastReturn type
+export type UseToastReturn = {
+  toast: typeof toast;
+  dismiss: (toastId?: string) => void;
+  toasts: ToasterToast[];
+};
+
+function useToast(): UseToastReturn {
   const [state, setState] = React.useState<State>(memoryState)
 
   React.useEffect(() => {
