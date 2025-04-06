@@ -8,8 +8,15 @@ const AdminControls = () => {
   const { productType } = useParams();
   const location = useLocation();
   
-  // Determine if we're on a product detail page
-  const isProductDetailPage = location.pathname.startsWith('/products/') && productType;
+  // Determine if we're on a product detail page by checking both the path pattern
+  // and if productType is defined
+  const isProductDetailPage = location.pathname.includes('/products/') && !!productType;
+  
+  console.log("AdminControls rendering with:", {
+    location: location.pathname,
+    productType,
+    isProductDetailPage
+  });
 
   return (
     <div className="fixed bottom-8 right-8 flex flex-col gap-2 z-50">

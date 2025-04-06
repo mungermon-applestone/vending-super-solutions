@@ -1,9 +1,8 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { CMSProvider } from "@/context/CMSContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -36,6 +35,18 @@ import Combi3000 from "./pages/machines/Combi3000";
 import Locker10Cell from "./pages/machines/Locker10Cell";
 import Locker21Cell from "./pages/machines/Locker21Cell";
 
+// Create a route logger component
+const RouteLogger = () => {
+  const location = useLocation();
+  
+  React.useEffect(() => {
+    console.log(`Route changed to: ${location.pathname}`);
+    console.log(`Route params:`, location);
+  }, [location]);
+  
+  return null;
+};
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -52,6 +63,7 @@ const App = () => (
       <Sonner />
       <CMSProvider>
         <BrowserRouter>
+          <RouteLogger />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/products" element={<ProductsLanding />} />

@@ -11,6 +11,7 @@ import { Utensils, ShoppingBag, ShieldCheck, Tags, Truck, Clock } from 'lucide-r
 import { useProductType } from '@/hooks/useCMSData';
 import { CMSProductType } from '@/types/cms';
 import { ReactNode } from 'react';
+import AdminControls from '@/components/admin/AdminControls';
 
 const ProductDetail = () => {
   const navigate = useNavigate();
@@ -18,8 +19,18 @@ const ProductDetail = () => {
   
   console.log("ProductDetail rendering for product type:", productType);
   
-  // Use the hook from useCMSData
+  // Use the hook from useCMSData with clearer enabled condition
   const { data: productTypeData, isLoading, error, isError } = useProductType(productType);
+  
+  // Log what we're receiving from the API to help debug
+  useEffect(() => {
+    console.log("Product data from API:", {
+      productTypeData,
+      isLoading,
+      error,
+      slug: productType
+    });
+  }, [productTypeData, isLoading, error, productType]);
   
   // Create a mapping of fallback data for specific product types
   const productFallbacks: Record<string, CMSProductType> = {
@@ -235,6 +246,9 @@ const ProductDetail = () => {
       )}
       
       <CTASection />
+      
+      {/* Always include AdminControls */}
+      <AdminControls />
     </Layout>
   );
 };

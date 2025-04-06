@@ -27,20 +27,24 @@ export function useProductTypes() {
 export function useProductType(slug: string | undefined) {
   return useQuery({
     queryKey: ['productType', slug],
-    queryFn: () => {
+    queryFn: async () => {
       // If slug is undefined, try to extract it from the URL
       let productSlug = slug;
       if (!productSlug) {
         const pathParts = window.location.pathname.split('/');
         productSlug = pathParts[pathParts.length - 1];
       }
-      console.log("Fetching product type with slug:", productSlug);
-      return cmsService.getProductTypeBySlug(productSlug || '');
+      console.log(`useProductType hook fetching product type with slug: ${productSlug}`);
+      
+      // Call the CMS service and add extra logging
+      const result = await cmsService.getProductTypeBySlug(productSlug || '');
+      console.log(`useProductType hook received result for ${productSlug}:`, result);
+      return result;
     },
-    enabled: true, // Always enable to work with URL-based product types too
-    retry: false, // Don't retry if the product type doesn't exist
-    refetchOnWindowFocus: false, // Don't automatically refetch on window focus
-    retryOnMount: false, // Don't retry when component remounts
+    enabled: !!slug, // Only fetch when we have a slug
+    retry: 1, // Retry once if it fails
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    staleTime: 1000 * 60 * 5, // Data remains fresh for 5 minutes
   });
 }
 
