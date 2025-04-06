@@ -19,7 +19,7 @@ interface ProductEditorFormProps {
 
 const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const toast = useToast(); // Don't destructure, use the whole object
   const [isLoading, setIsLoading] = useState(false);
   const { isCreating, form, onSubmit } = useProductEditorForm(productSlug, setIsLoading, toast, navigate);
 
