@@ -8,6 +8,18 @@ export const createProduct = async (data: ProductFormData, toast: UseToastReturn
   console.log('[productService] Creating product with data:', data);
   
   try {
+    // Check if a product with this slug already exists
+    const { data: existingProduct, error: checkError } = await supabase
+      .from('product_types')
+      .select('id')
+      .eq('slug', data.slug)
+      .maybeSingle();
+    
+    if (existingProduct) {
+      console.error(`[productService] Product with slug "${data.slug}" already exists`);
+      throw new Error(`A product with the slug "${data.slug}" already exists`);
+    }
+    
     // Create the product type
     const { data: newProductType, error: createError } = await supabase
       .from('product_types')
@@ -51,18 +63,34 @@ export const updateProduct = async (data: ProductFormData, originalSlug: string,
     // First get the product ID from the original slug
     const { data: productData, error: fetchError } = await supabase
       .from('product_types')
-      .select('id')
+      .select('id, slug')
       .eq('slug', originalSlug)
-      .maybeSingle(); // Changed from .single() to .maybeSingle() to handle not found case
+      .maybeSingle();
 
-    // If the product doesn't exist, create a new one instead
-    if (fetchError || !productData) {
-      console.log(`[productService] Product with slug "${originalSlug}" not found, creating new product instead`);
-      return await createProduct(data, toast);
+    // If the product doesn't exist, throw an error
+    if (!productData) {
+      console.error(`[productService] Product with slug "${originalSlug}" not found`);
+      throw new Error(`Product with slug "${originalSlug}" not found`);
     }
 
     const productId = productData.id;
     console.log('[productService] Found product ID for update:', productId);
+
+    // If the slug is being changed, check that the new slug doesn't already exist
+    // (skip this check if the slug isn't changing)
+    if (data.slug !== originalSlug) {
+      const { data: existingWithNewSlug, error: slugCheckError } = await supabase
+        .from('product_types')
+        .select('id')
+        .eq('slug', data.slug)
+        .neq('id', productId) // Exclude the current product
+        .maybeSingle();
+      
+      if (existingWithNewSlug) {
+        console.error(`[productService] Cannot update: slug "${data.slug}" already in use by another product`);
+        throw new Error(`The slug "${data.slug}" is already in use by another product`);
+      }
+    }
 
     // Update the product type
     const { error: updateError } = await supabase

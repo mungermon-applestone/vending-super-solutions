@@ -46,30 +46,36 @@ export const useProductEditorForm = (
   useEffect(() => {
     if (existingProduct && !isCreating) {
       console.log('[useProductEditorForm] Populating form with product data:', existingProduct);
+      
+      // Reset form with data from existing product
       form.reset({
-        title: existingProduct.title,
-        slug: existingProduct.slug,
-        description: existingProduct.description,
+        title: existingProduct.title || '',
+        slug: existingProduct.slug || '',
+        description: existingProduct.description || '',
         image: {
-          url: existingProduct.image.url,
-          alt: existingProduct.image.alt
+          url: existingProduct.image?.url || '',
+          alt: existingProduct.image?.alt || ''
         },
-        benefits: existingProduct.benefits.length > 0 ? existingProduct.benefits : [''],
-        features: existingProduct.features.length > 0 ? existingProduct.features.map(feature => ({
-          title: feature.title,
-          description: feature.description,
-          icon: feature.icon as string || 'check',
-          screenshotUrl: feature.screenshot?.url || '',
-          screenshotAlt: feature.screenshot?.alt || ''
-        })) : [
-          {
-            title: '',
-            description: '',
-            icon: 'check',
-            screenshotUrl: '',
-            screenshotAlt: ''
-          }
-        ]
+        benefits: existingProduct.benefits && existingProduct.benefits.length > 0 
+          ? existingProduct.benefits 
+          : [''],
+        features: existingProduct.features && existingProduct.features.length > 0 
+          ? existingProduct.features.map(feature => ({
+              title: feature.title || '',
+              description: feature.description || '',
+              icon: feature.icon || 'check',
+              screenshotUrl: feature.screenshot?.url || '',
+              screenshotAlt: feature.screenshot?.alt || ''
+            })) 
+          : [
+              {
+                title: '',
+                description: '',
+                icon: 'check',
+                screenshotUrl: '',
+                screenshotAlt: ''
+              }
+            ]
       });
     }
   }, [existingProduct, isCreating, form]);

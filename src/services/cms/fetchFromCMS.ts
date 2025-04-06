@@ -1,4 +1,3 @@
-
 import { IS_DEVELOPMENT } from '@/config/cms';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -203,39 +202,37 @@ async function fetchProductTypes<T>(params: Record<string, any> = {}): Promise<T
     if (hasSlug) {
       console.log(`[CMS Service] Filtering product types by slug: ${params.slug}`);
       
-      // Try with two different slug formats to catch inconsistencies in the data
-      // First try with the exact slug
-      let { data: exactMatch, error: exactError } = await query.eq('slug', params.slug).order('title');
+      // First just try with the exact slug match
+      let { data: exactMatch, error: exactError } = await query.eq('slug', params.slug);
       
       if (exactError) {
         console.error('[CMS Service] Error with exact slug match:', exactError);
         throw exactError;
       }
       
-      // If no exact match is found, try checking for the related slug
-      // For example, if "grocery" doesn't match, try "grocery-vending"
-      if (!exactMatch || exactMatch.length === 0) {
-        console.log(`[CMS Service] No exact match for '${params.slug}', trying related slugs`);
-        
-        let { data: relatedMatch, error: relatedError } = await query
-          .ilike('slug', `%${params.slug}%`)
-          .order('title');
-          
-        if (relatedError) {
-          console.error('[CMS Service] Error with related slug match:', relatedError);
-          throw relatedError;
-        }
-        
-        if (relatedMatch && relatedMatch.length > 0) {
-          console.log(`[CMS Service] Found related match: ${relatedMatch[0].slug}`);
-          return transformProductTypeData<T>(relatedMatch);
-        } else {
-          console.log(`[CMS Service] No matches found for slug pattern: %${params.slug}%`);
-          return [] as T[];
-        }
+      if (exactMatch && exactMatch.length > 0) {
+        console.log(`[CMS Service] Found exact match for slug '${params.slug}'`);
+        return transformProductTypeData<T>(exactMatch);
       }
       
-      return transformProductTypeData<T>(exactMatch);
+      // No exact match found, try related slugs
+      console.log(`[CMS Service] No exact match for '${params.slug}', trying related slugs`);
+      
+      let { data: relatedMatch, error: relatedError } = await query
+        .ilike('slug', `%${params.slug}%`);
+        
+      if (relatedError) {
+        console.error('[CMS Service] Error with related slug match:', relatedError);
+        throw relatedError;
+      }
+      
+      if (relatedMatch && relatedMatch.length > 0) {
+        console.log(`[CMS Service] Found related match: ${relatedMatch[0].slug}`);
+        return transformProductTypeData<T>(relatedMatch);
+      } else {
+        console.log(`[CMS Service] No matches found for slug pattern: %${params.slug}%`);
+        return [] as T[];
+      }
     } else {
       // Get all product types
       const { data, error } = await query.order('title');
