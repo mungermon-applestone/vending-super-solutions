@@ -286,7 +286,9 @@ export async function getProductTypes(): Promise<CMSProductType[]> {
 }
 
 export async function getProductTypeBySlug(slug: string): Promise<CMSProductType | null> {
+  console.log(`Attempting to fetch product type with slug: ${slug}`);
   const productTypes = await fetchFromCMS<CMSProductType>('product-types', { slug });
+  console.log(`Found ${productTypes.length} product types for slug ${slug}:`, productTypes);
   return productTypes.length > 0 ? productTypes[0] : null;
 }
 
