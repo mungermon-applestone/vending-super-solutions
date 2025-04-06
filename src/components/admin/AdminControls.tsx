@@ -5,12 +5,17 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Edit } from 'lucide-react';
 
 const AdminControls = () => {
-  const { productType } = useParams();
+  const params = useParams();
   const location = useLocation();
   
-  // Determine if we're on a product detail page by checking both the path pattern
-  // and if productType is defined
-  const isProductDetailPage = location.pathname.includes('/products/') && !!productType;
+  // Extract product slug from URL or params
+  const productType = params.productType || location.pathname.split('/').pop();
+  
+  // Determine if we're on a product detail page
+  const isProductDetailPage = 
+    location.pathname.includes('/products/') && 
+    productType && 
+    productType !== 'products';
   
   console.log("AdminControls rendering with:", {
     location: location.pathname,

@@ -37,11 +37,16 @@ export function useProductType(slug: string | undefined) {
       console.log(`useProductType hook fetching product type with slug: ${productSlug}`);
       
       // Call the CMS service and add extra logging
-      const result = await cmsService.getProductTypeBySlug(productSlug || '');
-      console.log(`useProductType hook received result for ${productSlug}:`, result);
-      return result;
+      try {
+        const result = await cmsService.getProductTypeBySlug(productSlug || '');
+        console.log(`useProductType hook received result for ${productSlug}:`, result);
+        return result;
+      } catch (error) {
+        console.error(`Error fetching product type ${productSlug}:`, error);
+        throw error;
+      }
     },
-    enabled: !!slug, // Only fetch when we have a slug
+    enabled: !!slug || window.location.pathname.includes('/products/'), // Enable on product pages even without explicit slug
     retry: 1, // Retry once if it fails
     refetchOnWindowFocus: false, // Don't refetch on window focus
     staleTime: 1000 * 60 * 5, // Data remains fresh for 5 minutes
