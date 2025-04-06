@@ -53,11 +53,12 @@ export const updateProduct = async (data: ProductFormData, originalSlug: string,
       .from('product_types')
       .select('id')
       .eq('slug', originalSlug)
-      .single();
+      .maybeSingle(); // Changed from .single() to .maybeSingle() to handle not found case
 
+    // If the product doesn't exist, create a new one instead
     if (fetchError || !productData) {
-      console.error('[productService] Error finding product to update:', fetchError);
-      throw new Error(fetchError?.message || `Product with slug "${originalSlug}" not found`);
+      console.log(`[productService] Product with slug "${originalSlug}" not found, creating new product instead`);
+      return await createProduct(data, toast);
     }
 
     const productId = productData.id;

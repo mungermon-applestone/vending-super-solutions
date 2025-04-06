@@ -5,8 +5,7 @@ import type { UseToastReturn } from '@/hooks/use-toast';
 import { NavigateFunction } from 'react-router-dom';
 import { useProductType } from '@/hooks/useCMSData';
 import { ProductFormData } from '@/types/forms';
-import { createProduct } from '@/services/productService';
-import { updateProduct } from '@/services/productService';
+import { createProduct, updateProduct } from '@/services/productService';
 
 export const useProductEditorForm = (
   productSlug: string | undefined,
