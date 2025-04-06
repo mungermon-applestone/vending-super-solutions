@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -20,6 +19,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash, Plus, Save } from 'lucide-react';
 import { useProductType } from '@/hooks/useCMSData';
 
+interface ProductEditorProps {
+  productSlug?: string;
+}
+
 interface ProductFormData {
   title: string;
   slug: string;
@@ -38,9 +41,7 @@ interface ProductFormData {
   }[];
 }
 
-const ProductEditor = () => {
-  const { productSlug } = useParams();
-  const navigate = useNavigate();
+const ProductEditor = ({ productSlug }: ProductEditorProps) => {
   const { toast } = useToast();
   
   const [isLoading, setIsLoading] = useState(false);
