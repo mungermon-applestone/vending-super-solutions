@@ -28,25 +28,25 @@ export function useProductType(slug: string | undefined) {
   return useQuery({
     queryKey: ['productType', slug],
     queryFn: async () => {
-      // If slug is undefined, try to extract it from the URL
-      let productSlug = slug;
-      if (!productSlug) {
-        const pathParts = window.location.pathname.split('/');
-        productSlug = pathParts[pathParts.length - 1];
+      // If slug is undefined or empty, don't proceed
+      if (!slug) {
+        console.warn('useProductType called with empty slug');
+        return null;
       }
-      console.log(`useProductType hook fetching product type with slug: ${productSlug}`);
+      
+      console.log(`useProductType hook fetching product type with slug: ${slug}`);
       
       // Call the CMS service and add extra logging
       try {
-        const result = await cmsService.getProductTypeBySlug(productSlug || '');
-        console.log(`useProductType hook received result for ${productSlug}:`, result);
+        const result = await cmsService.getProductTypeBySlug(slug);
+        console.log(`useProductType hook received result for ${slug}:`, result);
         return result;
       } catch (error) {
-        console.error(`Error fetching product type ${productSlug}:`, error);
+        console.error(`Error fetching product type ${slug}:`, error);
         throw error;
       }
     },
-    enabled: !!slug || window.location.pathname.includes('/products/'), // Enable on product pages even without explicit slug
+    enabled: !!slug, // Only run query when slug is available
     retry: 1, // Retry once if it fails
     refetchOnWindowFocus: false, // Don't refetch on window focus
     staleTime: 1000 * 60 * 5, // Data remains fresh for 5 minutes

@@ -1,15 +1,13 @@
 
 import React from 'react';
-import { Link, useParams, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Edit } from 'lucide-react';
+import { useProductTypeFromUrl } from '@/hooks/useProductTypeFromUrl';
 
 const AdminControls = () => {
-  const params = useParams();
   const location = useLocation();
-  
-  // Extract product slug from URL or params
-  const productType = params.productType || location.pathname.split('/').pop();
+  const productType = useProductTypeFromUrl();
   
   // Determine if we're on a product detail page
   const isProductDetailPage = 
