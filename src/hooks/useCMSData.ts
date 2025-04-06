@@ -61,7 +61,7 @@ export function useProductType(slug: string | undefined) {
     retry: 1,                             // Reduced retry attempts 
     refetchOnWindowFocus: false,          // Don't refetch on window focus
     staleTime: 1000 * 30,                 // Data remains fresh for 30 seconds (reduced from 5 minutes)
-    cacheTime: 1000 * 60,                 // Cache for 1 minute
+    gcTime: 1000 * 60,                    // Cache for 1 minute (replaced cacheTime with gcTime)
   });
 }
 
