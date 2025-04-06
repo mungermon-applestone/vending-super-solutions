@@ -22,9 +22,9 @@ export async function fetchFromCMS<T>(contentType: string, params: Record<string
       case 'product-types':
         return fetchProductTypes<T>(params);
       case 'testimonials':
-        return fetchTestimonials<T>(params);
+        return fetchTestimonials<T>();
       case 'business-goals':
-        return fetchBusinessGoals<T>(params);
+        return fetchBusinessGoals<T>();
       default:
         console.warn(`[CMS Service] Unknown content type: ${contentType}`);
         return [] as T[];
