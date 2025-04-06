@@ -5,8 +5,6 @@ import {
   CMSTestimonial, 
   CMSBusinessGoal 
 } from '@/types/cms';
-import { IS_DEVELOPMENT } from '@/config/cms';
-import { mockMachines, mockProductTypes } from '@/data/mockCmsData';
 import { fetchFromCMS } from '@/services/cms/fetchFromCMS';
 
 export async function getMachines(filters: Record<string, any> = {}): Promise<CMSMachine[]> {
