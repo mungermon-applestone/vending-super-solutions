@@ -42,12 +42,12 @@ interface ProductFormData {
 }
 
 const ProductEditor = ({ productSlug }: ProductEditorProps) => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(!productSlug);
 
-  // Fetch existing product data if editing
   const { data: existingProduct, isLoading: isLoadingProduct } = useProductType(productSlug);
   
   const form = useForm<ProductFormData>({
@@ -72,7 +72,6 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
     }
   });
 
-  // Populate form with existing product data when loaded
   useEffect(() => {
     if (existingProduct && !isCreating) {
       form.reset({
@@ -138,7 +137,6 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
     
     try {
       if (isCreating) {
-        // Create new product type
         const { data: newProductType, error: createError } = await supabase
           .from('product_types')
           .insert({
@@ -154,7 +152,6 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
           throw new Error(createError?.message || 'Failed to create product type');
         }
 
-        // Insert product image
         if (data.image.url) {
           await supabase
             .from('product_type_images')
@@ -165,7 +162,6 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
             });
         }
 
-        // Insert benefits
         const benefitsToInsert = data.benefits.filter(benefit => benefit.trim() !== '');
         if (benefitsToInsert.length > 0) {
           await supabase
@@ -179,7 +175,6 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
             );
         }
 
-        // Insert features
         for (let i = 0; i < data.features.length; i++) {
           const feature = data.features[i];
           if (feature.title.trim() !== '') {
@@ -200,7 +195,6 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
               continue;
             }
 
-            // Insert screenshot if provided
             if (feature.screenshotUrl) {
               await supabase
                 .from('product_type_feature_images')
@@ -221,7 +215,6 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
         navigate(`/products/${data.slug}`);
 
       } else if (existingProduct) {
-        // Update existing product
         const { error: updateError } = await supabase
           .from('product_types')
           .update({
@@ -236,7 +229,6 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
           throw new Error(updateError.message);
         }
 
-        // Get product ID
         const { data: productData } = await supabase
           .from('product_types')
           .select('id')
@@ -247,14 +239,12 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
           throw new Error('Product not found');
         }
 
-        // Update image
         const { data: existingImages } = await supabase
           .from('product_type_images')
           .select('id')
           .eq('product_type_id', productData.id);
 
         if (existingImages && existingImages.length > 0) {
-          // Update existing image
           await supabase
             .from('product_type_images')
             .update({
@@ -264,7 +254,6 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
             })
             .eq('id', existingImages[0].id);
         } else if (data.image.url) {
-          // Insert new image
           await supabase
             .from('product_type_images')
             .insert({
@@ -274,14 +263,11 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
             });
         }
 
-        // Update benefits
-        // First delete all existing benefits
         await supabase
           .from('product_type_benefits')
           .delete()
           .eq('product_type_id', productData.id);
 
-        // Then insert new benefits
         const benefitsToInsert = data.benefits.filter(benefit => benefit.trim() !== '');
         if (benefitsToInsert.length > 0) {
           await supabase
@@ -295,14 +281,11 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
             );
         }
 
-        // Update features
-        // First get all existing features
         const { data: existingFeatures } = await supabase
           .from('product_type_features')
           .select('id')
           .eq('product_type_id', productData.id);
 
-        // Delete all existing features (will cascade delete screenshots)
         if (existingFeatures && existingFeatures.length > 0) {
           await supabase
             .from('product_type_features')
@@ -310,7 +293,6 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
             .eq('product_type_id', productData.id);
         }
 
-        // Insert new features
         for (let i = 0; i < data.features.length; i++) {
           const feature = data.features[i];
           if (feature.title.trim() !== '') {
@@ -331,7 +313,6 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
               continue;
             }
 
-            // Insert screenshot if provided
             if (feature.screenshotUrl) {
               await supabase
                 .from('product_type_feature_images')
@@ -349,11 +330,9 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
           description: `${data.title} has been updated successfully.`
         });
 
-        // Navigate to new slug if it was changed
         if (data.slug !== productSlug) {
           navigate(`/products/${data.slug}`);
         } else {
-          // Refresh the page to see the updated product
           window.location.reload();
         }
       }
@@ -411,7 +390,6 @@ const ProductEditor = ({ productSlug }: ProductEditorProps) => {
                         placeholder="product-slug" 
                         {...field}
                         onChange={(e) => {
-                          // Convert to URL-friendly format
                           const value = e.target.value
                             .toLowerCase()
                             .replace(/\s+/g, '-')
