@@ -5,198 +5,324 @@ import type { UseToastReturn } from '@/hooks/use-toast';
 
 // Create a new product
 export const createProduct = async (data: ProductFormData, toast: UseToastReturn) => {
-  // Create the product type
-  const { data: newProductType, error: createError } = await supabase
-    .from('product_types')
-    .insert({
-      title: data.title,
-      slug: data.slug,
-      description: data.description,
-      visible: true
-    })
-    .select('id')
-    .single();
+  console.log('[productService] Creating product with data:', data);
+  
+  try {
+    // Create the product type
+    const { data: newProductType, error: createError } = await supabase
+      .from('product_types')
+      .insert({
+        title: data.title,
+        slug: data.slug,
+        description: data.description,
+        visible: true
+      })
+      .select('id')
+      .single();
 
-  if (createError || !newProductType) {
-    throw new Error(createError?.message || 'Failed to create product type');
+    if (createError || !newProductType) {
+      console.error('[productService] Error creating product:', createError);
+      throw new Error(createError?.message || 'Failed to create product type');
+    }
+
+    console.log('[productService] Created product type:', newProductType);
+
+    // Add product image
+    await addProductImage(data, newProductType.id);
+    
+    // Add product benefits
+    await addProductBenefits(data, newProductType.id);
+    
+    // Add product features
+    await addProductFeatures(data, newProductType.id);
+    
+    return newProductType.id;
+  } catch (error) {
+    console.error('[productService] Error in createProduct:', error);
+    throw error;
   }
-
-  // Add product image
-  await addProductImage(data, newProductType.id);
-  
-  // Add product benefits
-  await addProductBenefits(data, newProductType.id);
-  
-  // Add product features
-  await addProductFeatures(data, newProductType.id);
-  
-  return newProductType.id;
 };
 
 // Update an existing product
 export const updateProduct = async (data: ProductFormData, originalSlug: string, toast: UseToastReturn) => {
-  // Update the product type
-  const { error: updateError } = await supabase
-    .from('product_types')
-    .update({
-      title: data.title,
-      slug: data.slug,
-      description: data.description,
-      updated_at: new Date().toISOString()
-    })
-    .eq('slug', originalSlug);
+  console.log('[productService] Updating product:', originalSlug, 'with data:', data);
+  
+  try {
+    // First get the product ID from the original slug
+    const { data: productData, error: fetchError } = await supabase
+      .from('product_types')
+      .select('id')
+      .eq('slug', originalSlug)
+      .single();
 
-  if (updateError) {
-    throw new Error(updateError.message);
+    if (fetchError || !productData) {
+      console.error('[productService] Error finding product to update:', fetchError);
+      throw new Error(fetchError?.message || `Product with slug "${originalSlug}" not found`);
+    }
+
+    const productId = productData.id;
+    console.log('[productService] Found product ID for update:', productId);
+
+    // Update the product type
+    const { error: updateError } = await supabase
+      .from('product_types')
+      .update({
+        title: data.title,
+        slug: data.slug,
+        description: data.description,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', productId);
+
+    if (updateError) {
+      console.error('[productService] Error updating product:', updateError);
+      throw new Error(updateError.message);
+    }
+
+    console.log('[productService] Product type updated successfully');
+    
+    // Update product image
+    await updateProductImage(data, productId);
+    
+    // Update product benefits
+    await updateProductBenefits(data, productId);
+    
+    // Update product features
+    await updateProductFeatures(data, productId);
+    
+    return productId;
+  } catch (error) {
+    console.error('[productService] Error in updateProduct:', error);
+    throw error;
   }
-
-  // Get the product ID
-  const { data: productData } = await supabase
-    .from('product_types')
-    .select('id')
-    .eq('slug', data.slug)
-    .single();
-
-  if (!productData) {
-    throw new Error('Product not found');
-  }
-
-  // Update product image
-  await updateProductImage(data, productData.id);
-  
-  // Update product benefits
-  await updateProductBenefits(data, productData.id);
-  
-  // Update product features
-  await updateProductFeatures(data, productData.id);
-  
-  return productData.id;
 };
 
 // Helper functions for product operations
 const addProductImage = async (data: ProductFormData, productId: string) => {
-  if (data.image.url) {
-    await supabase
-      .from('product_type_images')
-      .insert({
-        product_type_id: productId,
-        url: data.image.url,
-        alt: data.image.alt || data.title
-      });
+  console.log('[productService] Adding image for product:', productId);
+  
+  try {
+    if (data.image.url) {
+      await supabase
+        .from('product_type_images')
+        .insert({
+          product_type_id: productId,
+          url: data.image.url,
+          alt: data.image.alt || data.title
+        });
+      console.log('[productService] Image added successfully');
+    } else {
+      console.log('[productService] No image URL provided, skipping image creation');
+    }
+  } catch (error) {
+    console.error('[productService] Error adding product image:', error);
+    throw error;
   }
 };
 
 const addProductBenefits = async (data: ProductFormData, productId: string) => {
-  const benefitsToInsert = data.benefits.filter(benefit => benefit.trim() !== '');
+  console.log('[productService] Adding benefits for product:', productId);
   
-  if (benefitsToInsert.length > 0) {
-    await supabase
-      .from('product_type_benefits')
-      .insert(
-        benefitsToInsert.map((benefit, index) => ({
-          product_type_id: productId,
-          benefit,
-          display_order: index
-        }))
-      );
+  try {
+    const benefitsToInsert = data.benefits.filter(benefit => benefit.trim() !== '');
+    
+    if (benefitsToInsert.length > 0) {
+      const { data: insertedBenefits, error } = await supabase
+        .from('product_type_benefits')
+        .insert(
+          benefitsToInsert.map((benefit, index) => ({
+            product_type_id: productId,
+            benefit,
+            display_order: index
+          }))
+        );
+        
+      if (error) {
+        console.error('[productService] Error inserting benefits:', error);
+        throw error;
+      }
+      console.log('[productService] Benefits added successfully');
+    } else {
+      console.log('[productService] No benefits to insert');
+    }
+  } catch (error) {
+    console.error('[productService] Error adding product benefits:', error);
+    throw error;
   }
 };
 
 const addProductFeatures = async (data: ProductFormData, productId: string) => {
-  for (let i = 0; i < data.features.length; i++) {
-    const feature = data.features[i];
-    if (feature.title.trim() !== '') {
-      const { data: newFeature, error: featureError } = await supabase
-        .from('product_type_features')
-        .insert({
-          product_type_id: productId,
-          title: feature.title,
-          description: feature.description,
-          icon: feature.icon || 'check',
-          display_order: i
-        })
-        .select('id')
-        .single();
-
-      if (featureError || !newFeature) {
-        console.error('Failed to create feature:', featureError);
-        continue;
-      }
-
-      if (feature.screenshotUrl) {
-        await supabase
-          .from('product_type_feature_images')
+  console.log('[productService] Adding features for product:', productId);
+  
+  try {
+    for (let i = 0; i < data.features.length; i++) {
+      const feature = data.features[i];
+      if (feature.title.trim() !== '') {
+        const { data: newFeature, error: featureError } = await supabase
+          .from('product_type_features')
           .insert({
-            feature_id: newFeature.id,
-            url: feature.screenshotUrl,
-            alt: feature.screenshotAlt || feature.title
-          });
+            product_type_id: productId,
+            title: feature.title,
+            description: feature.description,
+            icon: feature.icon || 'check',
+            display_order: i
+          })
+          .select('id')
+          .single();
+
+        if (featureError || !newFeature) {
+          console.error('[productService] Failed to create feature:', featureError);
+          continue;
+        }
+
+        if (feature.screenshotUrl) {
+          const { error: imageError } = await supabase
+            .from('product_type_feature_images')
+            .insert({
+              feature_id: newFeature.id,
+              url: feature.screenshotUrl,
+              alt: feature.screenshotAlt || feature.title
+            });
+            
+          if (imageError) {
+            console.error('[productService] Failed to add feature image:', imageError);
+          }
+        }
       }
     }
+    console.log('[productService] Features added successfully');
+  } catch (error) {
+    console.error('[productService] Error adding product features:', error);
+    throw error;
   }
 };
 
 const updateProductImage = async (data: ProductFormData, productId: string) => {
-  const { data: existingImages } = await supabase
-    .from('product_type_images')
-    .select('id')
-    .eq('product_type_id', productId);
+  console.log('[productService] Updating image for product:', productId);
+  
+  try {
+    const { data: existingImages, error: fetchError } = await supabase
+      .from('product_type_images')
+      .select('id')
+      .eq('product_type_id', productId);
+      
+    if (fetchError) {
+      console.error('[productService] Error fetching existing images:', fetchError);
+      throw fetchError;
+    }
 
-  if (existingImages && existingImages.length > 0) {
-    await supabase
-      .from('product_type_images')
-      .update({
-        url: data.image.url,
-        alt: data.image.alt || data.title,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', existingImages[0].id);
-  } else if (data.image.url) {
-    await supabase
-      .from('product_type_images')
-      .insert({
-        product_type_id: productId,
-        url: data.image.url,
-        alt: data.image.alt || data.title
-      });
+    if (existingImages && existingImages.length > 0) {
+      const { error: updateError } = await supabase
+        .from('product_type_images')
+        .update({
+          url: data.image.url,
+          alt: data.image.alt || data.title,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingImages[0].id);
+        
+      if (updateError) {
+        console.error('[productService] Error updating image:', updateError);
+        throw updateError;
+      }
+      console.log('[productService] Image updated successfully');
+    } else if (data.image.url) {
+      const { error: insertError } = await supabase
+        .from('product_type_images')
+        .insert({
+          product_type_id: productId,
+          url: data.image.url,
+          alt: data.image.alt || data.title
+        });
+        
+      if (insertError) {
+        console.error('[productService] Error inserting new image:', insertError);
+        throw insertError;
+      }
+      console.log('[productService] New image added successfully');
+    } else {
+      console.log('[productService] No image URL provided, skipping image update/creation');
+    }
+  } catch (error) {
+    console.error('[productService] Error updating product image:', error);
+    throw error;
   }
 };
 
 const updateProductBenefits = async (data: ProductFormData, productId: string) => {
-  await supabase
-    .from('product_type_benefits')
-    .delete()
-    .eq('product_type_id', productId);
-
-  const benefitsToInsert = data.benefits.filter(benefit => benefit.trim() !== '');
-  if (benefitsToInsert.length > 0) {
-    await supabase
+  console.log('[productService] Updating benefits for product:', productId);
+  
+  try {
+    // Delete existing benefits
+    const { error: deleteError } = await supabase
       .from('product_type_benefits')
-      .insert(
-        benefitsToInsert.map((benefit, index) => ({
-          product_type_id: productId,
-          benefit,
-          display_order: index
-        }))
-      );
+      .delete()
+      .eq('product_type_id', productId);
+      
+    if (deleteError) {
+      console.error('[productService] Error deleting existing benefits:', deleteError);
+      throw deleteError;
+    }
+
+    const benefitsToInsert = data.benefits.filter(benefit => benefit.trim() !== '');
+    if (benefitsToInsert.length > 0) {
+      const { error: insertError } = await supabase
+        .from('product_type_benefits')
+        .insert(
+          benefitsToInsert.map((benefit, index) => ({
+            product_type_id: productId,
+            benefit,
+            display_order: index
+          }))
+        );
+        
+      if (insertError) {
+        console.error('[productService] Error inserting updated benefits:', insertError);
+        throw insertError;
+      }
+      console.log('[productService] Benefits updated successfully');
+    } else {
+      console.log('[productService] No benefits to insert after update');
+    }
+  } catch (error) {
+    console.error('[productService] Error updating product benefits:', error);
+    throw error;
   }
 };
 
 const updateProductFeatures = async (data: ProductFormData, productId: string) => {
-  // Get existing features
-  const { data: existingFeatures } = await supabase
-    .from('product_type_features')
-    .select('id')
-    .eq('product_type_id', productId);
-
-  // Delete existing features
-  if (existingFeatures && existingFeatures.length > 0) {
-    await supabase
+  console.log('[productService] Updating features for product:', productId);
+  
+  try {
+    // Get existing features
+    const { data: existingFeatures, error: fetchError } = await supabase
       .from('product_type_features')
-      .delete()
+      .select('id')
       .eq('product_type_id', productId);
-  }
+      
+    if (fetchError) {
+      console.error('[productService] Error fetching existing features:', fetchError);
+      throw fetchError;
+    }
 
-  // Add new features
-  await addProductFeatures(data, productId);
+    // Delete existing features
+    if (existingFeatures && existingFeatures.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('product_type_features')
+        .delete()
+        .eq('product_type_id', productId);
+        
+      if (deleteError) {
+        console.error('[productService] Error deleting existing features:', deleteError);
+        throw deleteError;
+      }
+    }
+
+    // Add new features
+    await addProductFeatures(data, productId);
+    console.log('[productService] Features updated successfully');
+  } catch (error) {
+    console.error('[productService] Error updating product features:', error);
+    throw error;
+  }
 };

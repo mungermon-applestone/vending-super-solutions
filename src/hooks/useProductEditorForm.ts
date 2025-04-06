@@ -17,6 +17,9 @@ export const useProductEditorForm = (
   const [isCreating, setIsCreating] = useState(!productSlug);
   const { data: existingProduct, isLoading: isLoadingProduct } = useProductType(productSlug);
 
+  console.log('[useProductEditorForm] Initialized with productSlug:', productSlug);
+  console.log('[useProductEditorForm] Existing product data:', existingProduct);
+
   // Set up form with default values
   const form = useForm<ProductFormData>({
     defaultValues: {
@@ -43,7 +46,7 @@ export const useProductEditorForm = (
   // Populate form with existing product data when available
   useEffect(() => {
     if (existingProduct && !isCreating) {
-      console.log('Populating form with product data:', existingProduct);
+      console.log('[useProductEditorForm] Populating form with product data:', existingProduct);
       form.reset({
         title: existingProduct.title,
         slug: existingProduct.slug,
@@ -74,31 +77,37 @@ export const useProductEditorForm = (
 
   // Form submission handler
   const onSubmit = async (data: ProductFormData) => {
+    console.log('[useProductEditorForm] Form submitted with data:', data);
     setIsLoading(true);
     
     try {
       if (isCreating) {
+        console.log('[useProductEditorForm] Creating new product');
         await createProduct(data, toast);
         toast.toast({
           title: "Product created",
           description: `${data.title} has been created successfully.`
         });
         navigate(`/products/${data.slug}`);
-      } else if (existingProduct) {
-        await updateProduct(data, productSlug!, toast);
+      } else if (productSlug) { // Make sure we have the original slug
+        console.log(`[useProductEditorForm] Updating product: ${productSlug}`);
+        await updateProduct(data, productSlug, toast);
         toast.toast({
           title: "Product updated",
           description: `${data.title} has been updated successfully.`
         });
         
+        // Navigate to the new slug if it changed
         if (data.slug !== productSlug) {
+          console.log(`[useProductEditorForm] Slug changed from ${productSlug} to ${data.slug}, navigating to new URL`);
           navigate(`/products/${data.slug}`);
         } else {
+          console.log('[useProductEditorForm] Slug unchanged, reloading page');
           window.location.reload();
         }
       }
     } catch (error) {
-      console.error('Error saving product:', error);
+      console.error('[useProductEditorForm] Error saving product:', error);
       toast.toast({
         title: "Error",
         description: `Failed to save product: ${error instanceof Error ? error.message : 'Unknown error'}`,
