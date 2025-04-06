@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { UseToastReturn } from '@/hooks/use-toast';
+import type { UseToastReturn } from '@/hooks/use-toast';
 import { NavigateFunction } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useProductType } from '@/hooks/useCMSData';
@@ -79,7 +79,7 @@ export const useProductEditorForm = (
       }
     } catch (error) {
       console.error('Error saving product:', error);
-      toast({
+      toast.toast({
         title: "Error",
         description: `Failed to save product: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
@@ -130,7 +130,7 @@ export const useProductEditorForm = (
 
     await insertFeatures(data.features, newProductType.id);
 
-    toast({
+    toast.toast({
       title: "Product created",
       description: `${data.title} has been created successfully.`
     });
@@ -172,7 +172,7 @@ export const useProductEditorForm = (
     // Handle features update
     await updateProductFeatures(data, productData.id);
 
-    toast({
+    toast.toast({
       title: "Product updated",
       description: `${data.title} has been updated successfully.`
     });
