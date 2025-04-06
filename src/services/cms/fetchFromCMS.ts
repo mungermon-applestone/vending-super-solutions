@@ -1,3 +1,4 @@
+
 import { IS_DEVELOPMENT } from '@/config/cms';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -202,8 +203,8 @@ async function fetchProductTypes<T>(params: Record<string, any> = {}): Promise<T
     if (hasSlug) {
       console.log(`[CMS Service] Filtering product types by slug: ${params.slug}`);
       
-      // First just try with the exact slug match
-      let { data: exactMatch, error: exactError } = await query.eq('slug', params.slug);
+      // First try with the exact slug match
+      const { data: exactMatch, error: exactError } = await query.eq('slug', params.slug.toLowerCase());
       
       if (exactError) {
         console.error('[CMS Service] Error with exact slug match:', exactError);
@@ -211,28 +212,44 @@ async function fetchProductTypes<T>(params: Record<string, any> = {}): Promise<T
       }
       
       if (exactMatch && exactMatch.length > 0) {
-        console.log(`[CMS Service] Found exact match for slug '${params.slug}'`);
+        console.log(`[CMS Service] Found exact match for slug '${params.slug}'`, exactMatch);
         return transformProductTypeData<T>(exactMatch);
       }
       
-      // No exact match found, try related slugs
-      console.log(`[CMS Service] No exact match for '${params.slug}', trying related slugs`);
+      // No exact match found, try related slugs (case-insensitive)
+      console.log(`[CMS Service] No exact match for '${params.slug}', trying case-insensitive match`);
       
-      let { data: relatedMatch, error: relatedError } = await query
-        .ilike('slug', `%${params.slug}%`);
+      const { data: caseInsensitiveMatch, error: caseError } = await query
+        .ilike('slug', params.slug.toLowerCase());
         
-      if (relatedError) {
-        console.error('[CMS Service] Error with related slug match:', relatedError);
-        throw relatedError;
+      if (caseError) {
+        console.error('[CMS Service] Error with case-insensitive slug match:', caseError);
+        throw caseError;
       }
       
-      if (relatedMatch && relatedMatch.length > 0) {
-        console.log(`[CMS Service] Found related match: ${relatedMatch[0].slug}`);
-        return transformProductTypeData<T>(relatedMatch);
-      } else {
-        console.log(`[CMS Service] No matches found for slug pattern: %${params.slug}%`);
-        return [] as T[];
+      if (caseInsensitiveMatch && caseInsensitiveMatch.length > 0) {
+        console.log(`[CMS Service] Found case-insensitive match: ${caseInsensitiveMatch[0].slug}`, caseInsensitiveMatch);
+        return transformProductTypeData<T>(caseInsensitiveMatch);
       }
+      
+      // Try very fuzzy match as last resort
+      console.log(`[CMS Service] No case-insensitive match, trying fuzzy match for: ${params.slug}`);
+      
+      const { data: fuzzyMatch, error: fuzzyError } = await query
+        .ilike('slug', `%${params.slug.toLowerCase().replace(/-/g, '%')}%`);
+        
+      if (fuzzyError) {
+        console.error('[CMS Service] Error with fuzzy slug match:', fuzzyError);
+        throw fuzzyError;
+      }
+      
+      if (fuzzyMatch && fuzzyMatch.length > 0) {
+        console.log(`[CMS Service] Found fuzzy match: ${fuzzyMatch[0].slug}`, fuzzyMatch);
+        return transformProductTypeData<T>(fuzzyMatch);
+      }
+      
+      console.log(`[CMS Service] No matches found for slug: ${params.slug}`);
+      return [] as T[];
     } else {
       // Get all product types
       const { data, error } = await query.order('title');

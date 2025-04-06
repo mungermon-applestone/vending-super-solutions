@@ -14,10 +14,14 @@ export const useProductEditorForm = (
   navigate: NavigateFunction
 ) => {
   const [isCreating, setIsCreating] = useState(!productSlug);
-  const { data: existingProduct, isLoading: isLoadingProduct } = useProductType(productSlug);
+  const { data: existingProduct, isLoading: isLoadingProduct, error } = useProductType(productSlug);
 
   console.log('[useProductEditorForm] Initialized with productSlug:', productSlug);
   console.log('[useProductEditorForm] Existing product data:', existingProduct);
+  
+  if (error) {
+    console.error('[useProductEditorForm] Error loading product data:', error);
+  }
 
   // Set up form with default values
   const form = useForm<ProductFormData>({
@@ -78,8 +82,18 @@ export const useProductEditorForm = (
               }
             ]
       });
+    } else if (productSlug && !existingProduct && !isLoadingProduct) {
+      // If we have a slug but no product was found, and we're not still loading,
+      // show an error toast and set to creating mode
+      console.log('[useProductEditorForm] No existing product found for slug:', productSlug);
+      toast.toast({
+        title: "Product not found",
+        description: `No product found with slug "${productSlug}". Creating a new product instead.`,
+        variant: "destructive"
+      });
+      setIsCreating(true);
     }
-  }, [existingProduct, isCreating, form]);
+  }, [existingProduct, isCreating, isLoadingProduct, form, productSlug, toast]);
 
   // Form submission handler
   const onSubmit = async (data: ProductFormData) => {
