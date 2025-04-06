@@ -11,9 +11,10 @@ const AdminControls = () => {
   
   // Determine if we're on a product detail page
   const isProductDetailPage = 
-    location.pathname.includes('/products/') && 
+    (location.pathname.includes('/products/') && 
     productType && 
-    productType !== 'products';
+    productType !== 'products') ||
+    location.pathname.includes('/admin/products/edit/');
   
   console.log("AdminControls rendering with:", {
     location: location.pathname,

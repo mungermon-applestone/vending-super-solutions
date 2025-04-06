@@ -2,6 +2,9 @@
 import { useQuery } from '@tanstack/react-query';
 import * as cmsService from '@/services/cms';
 
+/**
+ * Hook to fetch machines with optional filters
+ */
 export function useMachines(filters: Record<string, any> = {}) {
   return useQuery({
     queryKey: ['machines', filters],
@@ -9,6 +12,9 @@ export function useMachines(filters: Record<string, any> = {}) {
   });
 }
 
+/**
+ * Hook to fetch a specific machine by type and ID
+ */
 export function useMachine(type: string | undefined, id: string | undefined) {
   return useQuery({
     queryKey: ['machine', type, id],
@@ -17,6 +23,9 @@ export function useMachine(type: string | undefined, id: string | undefined) {
   });
 }
 
+/**
+ * Hook to fetch all product types
+ */
 export function useProductTypes() {
   return useQuery({
     queryKey: ['productTypes'],
@@ -24,35 +33,40 @@ export function useProductTypes() {
   });
 }
 
+/**
+ * Hook to fetch a specific product type by slug with improved error handling
+ */
 export function useProductType(slug: string | undefined) {
   return useQuery({
     queryKey: ['productType', slug],
     queryFn: async () => {
       // If slug is undefined or empty, don't proceed
       if (!slug) {
-        console.warn('useProductType called with empty slug');
+        console.warn('[useCMSData] useProductType called with empty slug');
         return null;
       }
       
-      console.log(`useProductType hook fetching product type with slug: ${slug}`);
+      console.log(`[useCMSData] useProductType hook fetching product type with slug: ${slug}`);
       
-      // Call the CMS service and add extra logging
       try {
         const result = await cmsService.getProductTypeBySlug(slug);
-        console.log(`useProductType hook received result for ${slug}:`, result);
+        console.log(`[useCMSData] useProductType hook received result for ${slug}:`, result);
         return result;
       } catch (error) {
-        console.error(`Error fetching product type ${slug}:`, error);
+        console.error(`[useCMSData] Error fetching product type ${slug}:`, error);
         throw error;
       }
     },
-    enabled: !!slug, // Only run query when slug is available
-    retry: 1, // Retry once if it fails
-    refetchOnWindowFocus: false, // Don't refetch on window focus
-    staleTime: 1000 * 60 * 5, // Data remains fresh for 5 minutes
+    enabled: !!slug && slug.trim() !== '', // Only run query when slug is available and not empty
+    retry: 2,                              // Retry twice if it fails
+    refetchOnWindowFocus: false,           // Don't refetch on window focus
+    staleTime: 1000 * 60 * 5,              // Data remains fresh for 5 minutes
   });
 }
 
+/**
+ * Hook to fetch all testimonials
+ */
 export function useTestimonials() {
   return useQuery({
     queryKey: ['testimonials'],
@@ -60,6 +74,9 @@ export function useTestimonials() {
   });
 }
 
+/**
+ * Hook to fetch all business goals
+ */
 export function useBusinessGoals() {
   return useQuery({
     queryKey: ['businessGoals'],
@@ -67,6 +84,9 @@ export function useBusinessGoals() {
   });
 }
 
+/**
+ * Hook to fetch a specific business goal by slug
+ */
 export function useBusinessGoal(slug: string | undefined) {
   return useQuery({
     queryKey: ['businessGoal', slug],
