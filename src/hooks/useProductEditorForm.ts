@@ -63,7 +63,8 @@ export const useProductEditorForm = (
           ? existingProduct.features.map(feature => ({
               title: feature.title || '',
               description: feature.description || '',
-              icon: feature.icon || 'check',
+              // Ensure icon is always a string
+              icon: typeof feature.icon === 'string' ? feature.icon : 'check',
               screenshotUrl: feature.screenshot?.url || '',
               screenshotAlt: feature.screenshot?.alt || ''
             })) 
