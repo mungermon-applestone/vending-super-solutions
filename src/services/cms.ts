@@ -27,18 +27,33 @@ export async function getProductTypes(): Promise<CMSProductType[]> {
 }
 
 export async function getProductTypeBySlug(slug: string): Promise<CMSProductType | null> {
-  console.log(`Attempting to fetch product type with slug: ${slug}`);
+  console.log(`[cms.ts] Attempting to fetch product type with slug: "${slug}"`);
   if (!slug || slug.trim() === '') {
-    console.warn("Empty slug passed to getProductTypeBySlug");
+    console.warn("[cms.ts] Empty slug passed to getProductTypeBySlug");
     return null;
   }
   
   try {
-    const productTypes = await fetchFromCMS<CMSProductType>('product-types', { slug });
-    console.log(`Found ${productTypes.length} product types for slug ${slug}:`, productTypes);
-    return productTypes.length > 0 ? productTypes[0] : null;
+    // Normalize the slug - lowercase, trim whitespace
+    const normalizedSlug = slug.toLowerCase().trim();
+    console.log(`[cms.ts] Normalized slug for search: "${normalizedSlug}"`);
+    
+    const productTypes = await fetchFromCMS<CMSProductType>('product-types', { 
+      slug: normalizedSlug,
+      exactMatch: true // Add a flag to ensure we get exact match
+    });
+    
+    console.log(`[cms.ts] Found ${productTypes.length} product types for slug "${normalizedSlug}":`, productTypes);
+    
+    if (productTypes.length > 0) {
+      console.log(`[cms.ts] Successfully retrieved product type: ${productTypes[0].title}`);
+      return productTypes[0];
+    }
+    
+    console.log(`[cms.ts] No product found with slug "${normalizedSlug}"`);
+    return null;
   } catch (error) {
-    console.error(`Error fetching product type by slug ${slug}:`, error);
+    console.error(`[cms.ts] Error fetching product type by slug "${slug}":`, error);
     return null;
   }
 }

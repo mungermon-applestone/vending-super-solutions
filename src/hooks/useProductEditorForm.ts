@@ -18,6 +18,7 @@ export const useProductEditorForm = (
 
   console.log('[useProductEditorForm] Initialized with productSlug:', productSlug);
   console.log('[useProductEditorForm] Existing product data:', existingProduct);
+  console.log('[useProductEditorForm] Is loading product:', isLoadingProduct);
   
   if (error) {
     console.error('[useProductEditorForm] Error loading product data:', error);
@@ -82,6 +83,8 @@ export const useProductEditorForm = (
               }
             ]
       });
+      
+      console.log('[useProductEditorForm] Form populated with data:', form.getValues());
     } else if (productSlug && !existingProduct && !isLoadingProduct) {
       // If we have a slug but no product was found, and we're not still loading,
       // show an error toast and set to creating mode
@@ -122,7 +125,8 @@ export const useProductEditorForm = (
           console.log(`[useProductEditorForm] Slug changed from ${productSlug} to ${data.slug}, navigating to new URL`);
           navigate(`/products/${data.slug}`);
         } else {
-          console.log('[useProductEditorForm] Slug unchanged, reloading page');
+          console.log('[useProductEditorForm] Slug unchanged, reloading current page');
+          // Use window.location.reload() to force a complete reload of the page
           window.location.reload();
         }
       }

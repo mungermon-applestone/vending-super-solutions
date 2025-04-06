@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
@@ -19,10 +19,10 @@ const ProductDetail = () => {
   console.log("ProductDetail rendering for product type:", productType);
   
   // Use the hook from useCMSData with clearer enabled condition
-  const { data: productTypeData, isLoading, error } = useProductType(productType);
+  const { data: productTypeData, isLoading, error, refetch } = useProductType(productType);
   
   // Log what we're receiving from the API to help debug
-  React.useEffect(() => {
+  useEffect(() => {
     console.log("Product data from API:", {
       productTypeData,
       isLoading,
@@ -34,6 +34,14 @@ const ProductDetail = () => {
       console.error("Error loading product data:", error);
     }
   }, [productTypeData, isLoading, error, productType]);
+  
+  // Force refetch when product type changes
+  useEffect(() => {
+    if (productType) {
+      console.log(`ProductDetail: Product type changed to ${productType}, refetching data`);
+      refetch();
+    }
+  }, [productType, refetch]);
   
   // Use CMS data if available, otherwise try fallbacks, default to grocery
   const fallbackData = productFallbacks[productType] || productFallbacks['grocery'];

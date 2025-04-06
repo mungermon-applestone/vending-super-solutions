@@ -1,5 +1,5 @@
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 
 /**
@@ -19,10 +19,11 @@ export const useProductTypeFromUrl = () => {
     
     // Second priority: Extract from path
     const pathParts = location.pathname.split('/');
-    const lastPart = pathParts[pathParts.length - 1];
-    if (lastPart && lastPart !== 'products') {
-      console.log("[useProductTypeFromUrl] Using productType extracted from path:", lastPart);
-      return lastPart;
+    const pathMatch = pathParts.find(part => part === 'products');
+    if (pathMatch && pathParts.indexOf(pathMatch) + 1 < pathParts.length) {
+      const productTypeFromPath = pathParts[pathParts.indexOf(pathMatch) + 1];
+      console.log("[useProductTypeFromUrl] Using productType extracted from path:", productTypeFromPath);
+      return productTypeFromPath;
     }
 
     // Third priority: Check if we're on an edit page
@@ -39,6 +40,12 @@ export const useProductTypeFromUrl = () => {
     console.log("[useProductTypeFromUrl] No productType found in URL, using default empty string");
     return '';
   }, [params.productType, location.pathname]);
+
+  // Add effect to log URL changes
+  useEffect(() => {
+    console.log("[useProductTypeFromUrl] URL changed:", location.pathname);
+    console.log("[useProductTypeFromUrl] Extracted product type:", productType);
+  }, [location.pathname, productType]);
 
   return productType;
 };

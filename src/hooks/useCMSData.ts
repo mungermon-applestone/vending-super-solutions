@@ -58,9 +58,10 @@ export function useProductType(slug: string | undefined) {
       }
     },
     enabled: !!slug && slug.trim() !== '', // Only run query when slug is available and not empty
-    retry: 2,                              // Retry twice if it fails
-    refetchOnWindowFocus: false,           // Don't refetch on window focus
-    staleTime: 1000 * 60 * 5,              // Data remains fresh for 5 minutes
+    retry: 1,                             // Reduced retry attempts 
+    refetchOnWindowFocus: false,          // Don't refetch on window focus
+    staleTime: 1000 * 30,                 // Data remains fresh for 30 seconds (reduced from 5 minutes)
+    cacheTime: 1000 * 60,                 // Cache for 1 minute
   });
 }
 

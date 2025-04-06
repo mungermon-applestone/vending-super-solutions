@@ -1,4 +1,3 @@
-
 import { IS_DEVELOPMENT } from '@/config/cms';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -12,7 +11,7 @@ const useMockData = IS_DEVELOPMENT && false; // Set to true to use mock data ins
  * @returns Promise resolving to the requested data
  */
 export async function fetchFromCMS<T>(contentType: string, params: Record<string, any> = {}): Promise<T[]> {
-  console.log(`[CMS Service] Fetching ${contentType} with params:`, params);
+  console.log(`[fetchFromCMS] Fetching ${contentType} with params:`, params);
   
   try {
     // Delegate to the appropriate handler based on content type
@@ -26,11 +25,11 @@ export async function fetchFromCMS<T>(contentType: string, params: Record<string
       case 'business-goals':
         return fetchBusinessGoals<T>();
       default:
-        console.warn(`[CMS Service] Unknown content type: ${contentType}`);
+        console.warn(`[fetchFromCMS] Unknown content type: ${contentType}`);
         return [] as T[];
     }
   } catch (error) {
-    console.error(`[CMS Service] Error fetching ${contentType}:`, error);
+    console.error(`[fetchFromCMS] Error fetching ${contentType}:`, error);
     throw error;
   }
 }
@@ -40,11 +39,9 @@ export async function fetchFromCMS<T>(contentType: string, params: Record<string
  */
 async function fetchMachines<T>(params: Record<string, any> = {}): Promise<T[]> {
   if (useMockData) {
-    // Implementation for mock data would go here
     return [] as T[];
   }
   
-  // Real implementation using Supabase
   try {
     let query = supabase
       .from('machines')
@@ -84,7 +81,6 @@ async function fetchMachines<T>(params: Record<string, any> = {}): Promise<T[]> 
       `)
       .eq('visible', true);
     
-    // Apply filters if present
     if (params.type) {
       query = query.eq('type', params.type);
     }
@@ -103,19 +99,16 @@ async function fetchMachines<T>(params: Record<string, any> = {}): Promise<T[]> 
       throw error;
     }
 
-    // Transform the Supabase response to match our CMS types
     return data.map(machine => {
-      // Sort related data by display_order
       const sortedImages = machine.machine_images ? [...machine.machine_images].sort((a, b) => a.display_order - b.display_order) : [];
       const sortedFeatures = machine.machine_features ? [...machine.machine_features].sort((a, b) => a.display_order - b.display_order) : [];
       const sortedExamples = machine.deployment_examples ? [...machine.deployment_examples].sort((a, b) => a.display_order - b.display_order) : [];
       
-      // Transform to our CMSMachine type
       return {
         id: machine.id,
         slug: machine.slug,
         title: machine.title,
-        type: machine.type as "vending" | "locker", // Cast to the specific union type
+        type: machine.type as "vending" | "locker",
         temperature: machine.temperature,
         description: machine.description,
         images: sortedImages.map(img => ({
@@ -140,27 +133,24 @@ async function fetchMachines<T>(params: Record<string, any> = {}): Promise<T[]> 
       } as unknown as T;
     });
   } catch (error) {
-    console.error('[CMS Service] Error fetching machines:', error);
+    console.error('[fetchFromCMS] Error fetching machines:', error);
     throw error;
   }
 }
 
 /**
- * Fetch product types from the CMS with better error handling
+ * Fetch product types from the CMS with improved slug matching
  */
 async function fetchProductTypes<T>(params: Record<string, any> = {}): Promise<T[]> {
   if (useMockData) {
-    // Implementation for mock data would go here
     return [] as T[];
   }
   
-  // Real implementation using Supabase
   try {
-    console.log('[CMS Service] Fetching product types with params:', params);
+    console.log('[fetchFromCMS] Fetching product types with params:', params);
     
-    // Check if we're looking for a specific slug
     const hasSlug = params.slug && params.slug.trim() !== '';
-    console.log(`[CMS Service] Looking for specific slug: ${hasSlug ? params.slug : 'No'}`);
+    console.log(`[fetchFromCMS] Looking for specific slug: ${hasSlug ? params.slug : 'No'}`);
     
     let query = supabase
       .from('product_types')
@@ -199,76 +189,74 @@ async function fetchProductTypes<T>(params: Record<string, any> = {}): Promise<T
       `)
       .eq('visible', true);
     
-    // Apply filters if present
     if (hasSlug) {
-      console.log(`[CMS Service] Filtering product types by slug: ${params.slug}`);
+      const normalizedSlug = params.slug.toLowerCase().trim();
+      console.log(`[fetchFromCMS] Searching for product with normalized slug: "${normalizedSlug}"`);
       
-      // First try with the exact slug match
-      const { data: exactMatch, error: exactError } = await query.eq('slug', params.slug.toLowerCase());
+      const { data: exactMatch, error: exactError } = await query.eq('slug', normalizedSlug);
       
       if (exactError) {
-        console.error('[CMS Service] Error with exact slug match:', exactError);
+        console.error('[fetchFromCMS] Error with exact slug match:', exactError);
         throw exactError;
       }
       
       if (exactMatch && exactMatch.length > 0) {
-        console.log(`[CMS Service] Found exact match for slug '${params.slug}'`, exactMatch);
+        console.log(`[fetchFromCMS] Found exact match for slug '${normalizedSlug}':`, exactMatch[0].title);
         return transformProductTypeData<T>(exactMatch);
       }
       
-      // No exact match found, try related slugs (case-insensitive)
-      console.log(`[CMS Service] No exact match for '${params.slug}', trying case-insensitive match`);
-      
-      const { data: caseInsensitiveMatch, error: caseError } = await query
-        .ilike('slug', params.slug.toLowerCase());
+      if (!params.exactMatch) {
+        console.log(`[fetchFromCMS] No exact match for '${normalizedSlug}', trying case-insensitive match`);
         
-      if (caseError) {
-        console.error('[CMS Service] Error with case-insensitive slug match:', caseError);
-        throw caseError;
-      }
-      
-      if (caseInsensitiveMatch && caseInsensitiveMatch.length > 0) {
-        console.log(`[CMS Service] Found case-insensitive match: ${caseInsensitiveMatch[0].slug}`, caseInsensitiveMatch);
-        return transformProductTypeData<T>(caseInsensitiveMatch);
-      }
-      
-      // Try very fuzzy match as last resort
-      console.log(`[CMS Service] No case-insensitive match, trying fuzzy match for: ${params.slug}`);
-      
-      const { data: fuzzyMatch, error: fuzzyError } = await query
-        .ilike('slug', `%${params.slug.toLowerCase().replace(/-/g, '%')}%`);
+        const { data: caseInsensitiveMatch, error: caseError } = await query
+          .ilike('slug', normalizedSlug);
+          
+        if (caseError) {
+          console.error('[fetchFromCMS] Error with case-insensitive slug match:', caseError);
+          throw caseError;
+        }
         
-      if (fuzzyError) {
-        console.error('[CMS Service] Error with fuzzy slug match:', fuzzyError);
-        throw fuzzyError;
+        if (caseInsensitiveMatch && caseInsensitiveMatch.length > 0) {
+          console.log(`[fetchFromCMS] Found case-insensitive match: ${caseInsensitiveMatch[0].slug}`, caseInsensitiveMatch[0].title);
+          return transformProductTypeData<T>(caseInsensitiveMatch);
+        }
+        
+        console.log(`[fetchFromCMS] No case-insensitive match, trying fuzzy match for: ${normalizedSlug}`);
+        
+        const { data: fuzzyMatch, error: fuzzyError } = await query
+          .ilike('slug', `%${normalizedSlug.replace(/-/g, '%')}%`);
+          
+        if (fuzzyError) {
+          console.error('[fetchFromCMS] Error with fuzzy slug match:', fuzzyError);
+          throw fuzzyError;
+        }
+        
+        if (fuzzyMatch && fuzzyMatch.length > 0) {
+          console.log(`[fetchFromCMS] Found fuzzy match: ${fuzzyMatch[0].slug}`, fuzzyMatch[0].title);
+          return transformProductTypeData<T>(fuzzyMatch);
+        }
       }
       
-      if (fuzzyMatch && fuzzyMatch.length > 0) {
-        console.log(`[CMS Service] Found fuzzy match: ${fuzzyMatch[0].slug}`, fuzzyMatch);
-        return transformProductTypeData<T>(fuzzyMatch);
-      }
-      
-      console.log(`[CMS Service] No matches found for slug: ${params.slug}`);
+      console.log(`[fetchFromCMS] No matches found for slug: ${normalizedSlug}`);
       return [] as T[];
     } else {
-      // Get all product types
       const { data, error } = await query.order('title');
       
       if (error) {
-        console.error('[CMS Service] Supabase error fetching product types:', error);
+        console.error('[fetchFromCMS] Supabase error fetching product types:', error);
         throw new Error(`Failed to fetch product types: ${error.message}`);
       }
 
       if (!data || data.length === 0) {
-        console.warn('[CMS Service] No product types found');
+        console.warn('[fetchFromCMS] No product types found');
         return [] as T[];
       }
 
-      console.log(`[CMS Service] Found ${data.length} product types`);
+      console.log(`[fetchFromCMS] Found ${data.length} product types`);
       return transformProductTypeData<T>(data);
     }
   } catch (error) {
-    console.error('[CMS Service] Error processing product types:', error);
+    console.error('[fetchFromCMS] Error processing product types:', error);
     throw error;
   }
 }
@@ -282,22 +270,18 @@ function transformProductTypeData<T>(data: any[]): T[] {
   }
   
   return data.map(productType => {
-    // Sort benefits by display_order
     const sortedBenefits = productType.product_type_benefits ? 
       [...productType.product_type_benefits].sort((a, b) => a.display_order - b.display_order) : 
       [];
 
-    // Get the main image (assuming there's only one for now)
     const image = productType.product_type_images && productType.product_type_images.length > 0 
       ? productType.product_type_images[0] 
       : null;
     
-    // Sort and transform features
     const features = productType.product_type_features ? 
       [...productType.product_type_features]
         .sort((a: any, b: any) => a.display_order - b.display_order)
         .map((feature: any) => {
-          // Get the screenshot for this feature if available
           const screenshot = feature.product_type_feature_images && 
             feature.product_type_feature_images.length > 0 ? 
             feature.product_type_feature_images[0] : 
@@ -317,7 +301,6 @@ function transformProductTypeData<T>(data: any[]): T[] {
         }) : 
       [];
     
-    // Transform to our CMSProductType
     return {
       id: productType.id,
       slug: productType.slug,
@@ -331,7 +314,7 @@ function transformProductTypeData<T>(data: any[]): T[] {
       } : { url: "https://via.placeholder.com/800x600", alt: "Placeholder image" },
       benefits: sortedBenefits.map((b: any) => b.benefit),
       features: features,
-      examples: []  // We'll implement examples in a future update
+      examples: []
     } as unknown as T;
   });
 }
@@ -340,7 +323,6 @@ function transformProductTypeData<T>(data: any[]): T[] {
  * Fetch testimonials from the CMS
  */
 async function fetchTestimonials<T>(): Promise<T[]> {
-  // Testimonials implementation
   return [] as T[];
 }
 
@@ -348,6 +330,5 @@ async function fetchTestimonials<T>(): Promise<T[]> {
  * Fetch business goals from the CMS
  */
 async function fetchBusinessGoals<T>(): Promise<T[]> {
-  // Business goals implementation
   return [] as T[];
 }
