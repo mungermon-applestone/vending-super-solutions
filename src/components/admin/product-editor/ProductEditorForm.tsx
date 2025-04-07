@@ -23,6 +23,9 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { isCreating, form, onSubmit } = useProductEditorForm(productSlug, setIsLoading, toast, navigate);
 
+  console.log('[ProductEditorForm] Rendering form, isLoading:', isLoading);
+  console.log('[ProductEditorForm] Form values:', form.getValues());
+
   return (
     <div className="container py-10">
       <h1 className="text-3xl font-bold mb-6">

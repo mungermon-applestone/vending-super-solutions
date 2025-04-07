@@ -31,7 +31,10 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input placeholder="Product Title" {...field} />
+                <Input 
+                  placeholder="Product Title" 
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

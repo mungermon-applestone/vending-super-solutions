@@ -45,7 +45,8 @@ export const useProductEditorForm = (
           screenshotAlt: ''
         }
       ]
-    }
+    },
+    mode: 'onBlur' // Add this to ensure form validates on blur instead of just on submit
   });
 
   // Populate form with existing product data when available
