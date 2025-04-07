@@ -16,6 +16,7 @@ export const useProductEditorForm = (
 ) => {
   const [isCreating, setIsCreating] = useState(!productSlug);
   const { data: existingProduct, isLoading: isLoadingProduct, error } = useProductType(productSlug);
+  const [formKey, setFormKey] = useState(0); // Add a key to force re-render
 
   console.log('[useProductEditorForm] Initialized with productSlug:', productSlug);
   console.log('[useProductEditorForm] isCreating mode:', isCreating);
@@ -85,6 +86,11 @@ export const useProductEditorForm = (
       });
       
       console.log('[useProductEditorForm] Form reset with values:', form.getValues());
+      
+      // Force a re-render after populating the form
+      setTimeout(() => {
+        setFormKey(prev => prev + 1);
+      }, 100);
     } else if (productSlug && !existingProduct && !isLoadingProduct) {
       console.log('[useProductEditorForm] No existing product found for slug:', productSlug);
       toast.toast({
@@ -109,10 +115,13 @@ export const useProductEditorForm = (
           title: "Product created",
           description: `${data.title} has been created successfully.`
         });
-        navigate(`/products/${data.slug}`);
+        navigate(`/admin/products`);
       } else if (productSlug) {
         console.log(`[useProductEditorForm] Updating product: ${productSlug}`);
+        console.log('[useProductEditorForm] Form data for update:', data);
+        
         await updateProduct(data, productSlug, toast);
+        
         toast.toast({
           title: "Product updated",
           description: `${data.title} has been updated successfully.`
@@ -122,10 +131,10 @@ export const useProductEditorForm = (
         if (data.slug !== productSlug) {
           console.log(`[useProductEditorForm] Slug changed from ${productSlug} to ${data.slug}, navigating to new URL`);
           registerSlugChange(productSlug, data.slug);
-          navigate(`/products/${data.slug}`);
+          navigate(`/admin/products`);
         } else {
-          console.log('[useProductEditorForm] Slug unchanged, reloading current page');
-          window.location.reload();
+          console.log('[useProductEditorForm] Update successful, navigating to products list');
+          navigate(`/admin/products`);
         }
       }
     } catch (error) {
@@ -145,5 +154,6 @@ export const useProductEditorForm = (
     isLoadingProduct,
     form,
     onSubmit,
+    formKey,
   };
 };

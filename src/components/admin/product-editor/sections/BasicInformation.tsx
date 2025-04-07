@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { 
   FormField,
@@ -24,8 +24,9 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
   const [description, setDescription] = useState(form.getValues('description'));
 
   // Update React Hook Form whenever local state changes
-  const updateFormValues = () => {
-    form.setValue('title', title);
+  useEffect(() => {
+    // We need this effect to ensure form values are set properly
+    form.setValue('title', title, { shouldDirty: true, shouldTouch: true });
     
     // Apply slug formatting rules
     const formattedSlug = slug
@@ -33,9 +34,16 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '');
     
-    form.setValue('slug', formattedSlug);
-    form.setValue('description', description);
-  };
+    form.setValue('slug', formattedSlug, { shouldDirty: true, shouldTouch: true });
+    form.setValue('description', description, { shouldDirty: true, shouldTouch: true });
+    
+    // Log updated form values after setting
+    console.log('[BasicInformation] Updated form values:', {
+      title: form.getValues('title'),
+      slug: form.getValues('slug'),
+      description: form.getValues('description')
+    });
+  }, [title, slug, description, form]);
 
   // Log current values for debugging
   console.log('[BasicInformation] Rendering with local state values:', {
@@ -59,7 +67,6 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
               value={title}
               onChange={(e) => {
                 setTitle(e.target.value);
-                updateFormValues();
               }}
               className="mt-1 w-full"
             />
@@ -82,7 +89,6 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                   .replace(/\s+/g, '-')
                   .replace(/[^a-z0-9-]/g, '');
                 setSlug(value);
-                updateFormValues();
               }}
               className="mt-1 w-full"
             />
@@ -101,7 +107,6 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
               value={description}
               onChange={(e) => {
                 setDescription(e.target.value);
-                updateFormValues();
               }}
               className="mt-1 w-full min-h-[100px]"
             />
