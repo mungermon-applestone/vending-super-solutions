@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import type { UseToastReturn } from '@/hooks/use-toast';
@@ -25,7 +24,7 @@ export const useProductEditorForm = (
     console.error('[useProductEditorForm] Error loading product data:', error);
   }
 
-  // Set up form with default values
+  // Set up form with default values and proper form mode
   const form = useForm<ProductFormData>({
     defaultValues: {
       title: '',
@@ -46,7 +45,7 @@ export const useProductEditorForm = (
         }
       ]
     },
-    mode: 'onBlur' // Add this to ensure form validates on blur instead of just on submit
+    mode: 'onChange', // Change to onChange for better real-time feedback
   });
 
   // Populate form with existing product data when available
@@ -84,9 +83,25 @@ export const useProductEditorForm = (
                 screenshotAlt: ''
               }
             ]
+      }, { 
+        // Keep form state synchronized with values to avoid stale state issues
+        keepDefaultValues: false,
+        keepErrors: false,
+        keepDirty: false,
+        keepIsSubmitted: false,
+        keepTouched: false,
+        keepIsValid: false,
+        keepSubmitCount: false
       });
       
       console.log('[useProductEditorForm] Form populated with data:', form.getValues());
+      
+      // Force a rerender of the form fields
+      setTimeout(() => {
+        Object.keys(form.getValues()).forEach(key => {
+          form.trigger(key as any);
+        });
+      }, 100);
     } else if (productSlug && !existingProduct && !isLoadingProduct) {
       // If we have a slug but no product was found, and we're not still loading,
       // show an error toast and set to creating mode

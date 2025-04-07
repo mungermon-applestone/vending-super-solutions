@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +26,15 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   console.log('[ProductEditorForm] Rendering form, isLoading:', isLoading);
   console.log('[ProductEditorForm] Form values:', form.getValues());
 
+  // Add an effect to monitor form state changes
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      console.log(`[ProductEditorForm] Form field "${name}" changed via ${type}:`, value);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form]);
+
   return (
     <div className="container py-10">
       <h1 className="text-3xl font-bold mb-6">
@@ -33,7 +42,14 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
       </h1>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form 
+          onSubmit={form.handleSubmit(onSubmit)} 
+          className="space-y-8"
+          onClick={(e) => {
+            // This helps debug any click issues that might interfere with input focus
+            console.log('[ProductEditorForm] Click on form element:', e.target);
+          }}
+        >
           <BasicInformation form={form} />
           <ProductImage form={form} />
           <ProductBenefits form={form} />
