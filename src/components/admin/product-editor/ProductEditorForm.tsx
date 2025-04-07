@@ -26,14 +26,47 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   // Use our aggressive form editable hook
   useKeepFormsEditable();
 
+  // Force component to re-render after a short delay to ensure form is editable
+  const [key, setKey] = useState(0);
+  useEffect(() => {
+    // Force re-render after a short delay
+    const timer = setTimeout(() => {
+      setKey(prev => prev + 1);
+      console.log('[ProductEditorForm] Forcing component re-render to ensure editability');
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     console.log('[ProductEditorForm] Component mounted. Mode:', isCreating ? 'create' : 'edit');
     console.log('[ProductEditorForm] Product slug:', productSlug);
     console.log('[ProductEditorForm] Initial form values:', form.getValues());
+    
+    // Direct approach as a backup
+    const makeAllFieldsEditable = () => {
+      const inputs = document.querySelectorAll('input, textarea, select');
+      inputs.forEach(input => {
+        if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) {
+          input.readOnly = false;
+          input.disabled = false;
+          input.setAttribute('data-forced-editable', 'true');
+        }
+        if (input instanceof HTMLSelectElement) {
+          input.disabled = false;
+          input.setAttribute('data-forced-editable', 'true');
+        }
+      });
+      console.log('[ProductEditorForm] Directly made all fields editable:', inputs.length);
+    };
+    
+    // Run immediately and after a delay
+    makeAllFieldsEditable();
+    setTimeout(makeAllFieldsEditable, 1000);
   }, [isCreating, form, productSlug]);
 
   return (
-    <div className="container py-10">
+    <div className="container py-10" key={key}>
       <h1 className="text-3xl font-bold mb-6">
         {isCreating ? 'Create New Product' : `Edit Product: ${form.watch('title') || 'Loading...'}`}
       </h1>
@@ -49,7 +82,7 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/admin/products')}
               disabled={isLoading}
             >
               Cancel

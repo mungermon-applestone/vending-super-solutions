@@ -18,6 +18,12 @@ interface BasicInformationProps {
 }
 
 const BasicInformation = ({ form }: BasicInformationProps) => {
+  console.log('[BasicInformation] Rendering with form values:', {
+    title: form.watch('title'),
+    slug: form.watch('slug'),
+    description: form.watch('description')
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -36,6 +42,8 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                   {...field} 
                   readOnly={false}
                   disabled={false}
+                  data-force-editable="true"
+                  className="editable-input"
                 />
               </FormControl>
               <FormMessage />
@@ -55,6 +63,8 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                   {...field}
                   readOnly={false}
                   disabled={false}
+                  data-force-editable="true"
+                  className="editable-input"
                   onChange={(e) => {
                     const value = e.target.value
                       .toLowerCase()
@@ -78,10 +88,11 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
               <FormControl>
                 <Textarea 
                   placeholder="Describe the product category..." 
-                  className="min-h-[100px]"
+                  className="min-h-[100px] editable-input"
                   {...field}
                   readOnly={false}
                   disabled={false}
+                  data-force-editable="true"
                 />
               </FormControl>
               <FormMessage />
