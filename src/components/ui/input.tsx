@@ -13,18 +13,6 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
         )}
         ref={ref}
         {...props}
-        onFocus={(e) => {
-          console.log('[Input] Focus event:', e.target.name || 'unnamed', 'Value:', e.target.value);
-          if (props.onFocus) {
-            props.onFocus(e);
-          }
-        }}
-        onChange={(e) => {
-          console.log('[Input] onChange event:', e.target.name || 'unnamed', 'Value:', e.target.value);
-          if (props.onChange) {
-            props.onChange(e);
-          }
-        }}
       />
     )
   }

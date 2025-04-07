@@ -18,13 +18,6 @@ interface BasicInformationProps {
 }
 
 const BasicInformation = ({ form }: BasicInformationProps) => {
-  // Add debugging to see when component re-renders
-  console.log('[BasicInformation] Rendering with form values:', {
-    title: form.watch('title'),
-    slug: form.watch('slug'),
-    description: form.watch('description')
-  });
-
   return (
     <Card>
       <CardHeader>
@@ -34,25 +27,15 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
         <FormField
           control={form.control}
           name="title"
-          render={({ field }) => {
-            console.log('[BasicInformation] Rendering title field with value:', field.value);
-            return (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Product Title" 
-                    {...field}
-                    onChange={(e) => {
-                      console.log('[BasicInformation] Title onChange:', e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input placeholder="Product Title" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
         <FormField
@@ -66,12 +49,10 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                   placeholder="product-slug" 
                   {...field}
                   onChange={(e) => {
-                    console.log('[BasicInformation] Slug onChange before processing:', e.target.value);
                     const value = e.target.value
                       .toLowerCase()
                       .replace(/\s+/g, '-')
                       .replace(/[^a-z0-9-]/g, '');
-                    console.log('[BasicInformation] Slug onChange after processing:', value);
                     field.onChange(value);
                   }} 
                 />
@@ -92,10 +73,6 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                   placeholder="Describe the product category..." 
                   className="min-h-[100px]"
                   {...field}
-                  onChange={(e) => {
-                    console.log('[BasicInformation] Description onChange:', e.target.value);
-                    field.onChange(e);
-                  }}
                 />
               </FormControl>
               <FormMessage />

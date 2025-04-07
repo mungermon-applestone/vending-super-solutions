@@ -19,7 +19,7 @@ interface ProductEditorFormProps {
 
 const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const navigate = useNavigate();
-  const toast = useToast(); // Don't destructure, use the whole object
+  const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const { isCreating, form, onSubmit } = useProductEditorForm(productSlug, setIsLoading, toast, navigate);
 
@@ -42,14 +42,7 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
       </h1>
 
       <Form {...form}>
-        <form 
-          onSubmit={form.handleSubmit(onSubmit)} 
-          className="space-y-8"
-          onClick={(e) => {
-            // This helps debug any click issues that might interfere with input focus
-            console.log('[ProductEditorForm] Click on form element:', e.target);
-          }}
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <BasicInformation form={form} />
           <ProductImage form={form} />
           <ProductBenefits form={form} />
