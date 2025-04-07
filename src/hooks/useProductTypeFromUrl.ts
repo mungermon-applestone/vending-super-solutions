@@ -1,54 +1,98 @@
 
 import { useMemo, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { normalizeSlug, mapUrlSlugToDatabaseSlug } from '@/services/cms/utils/slugMatching';
+import { 
+  normalizeSlug, 
+  mapUrlSlugToDatabaseSlug, 
+  parseSlugWithUUID,
+  extractUUID
+} from '@/services/cms/utils/slugMatching';
 
 /**
  * Custom hook to extract the product type from URL parameters or path
- * @returns The product type extracted from the URL
+ * Supports both traditional slugs and UUID-enhanced slugs
+ * @returns The product type extracted from the URL and UUID if available
  */
 export const useProductTypeFromUrl = () => {
   const params = useParams<{ productType: string }>();
   const location = useLocation();
 
-  const productType = useMemo(() => {
+  const productInfo = useMemo(() => {
     // First priority: Check URL params
     if (params.productType) {
       console.log("[useProductTypeFromUrl] Using productType from URL params:", params.productType);
-      return normalizeSlug(params.productType);
+      
+      // Parse the combined slug if it contains UUID
+      const { slug, uuid } = parseSlugWithUUID(params.productType);
+      console.log(`[useProductTypeFromUrl] Parsed slug: "${slug}", UUID: "${uuid || 'none'}"`);
+      
+      return { 
+        slug: normalizeSlug(slug || params.productType),
+        uuid 
+      };
     }
     
     // Second priority: Extract from path for product pages
-    // This specifically targets URLs like /products/grocery
+    // This specifically targets URLs like /products/grocery or /products/grocery--uuid
     const pathParts = location.pathname.split('/');
     if (pathParts.length >= 3 && pathParts[1] === 'products') {
       const productTypeFromPath = pathParts[2];
       console.log("[useProductTypeFromUrl] Extracted product type from products path:", productTypeFromPath);
-      console.log("[useProductTypeFromUrl] Normalized slug:", normalizeSlug(productTypeFromPath));
-      console.log("[useProductTypeFromUrl] Database mapped slug:", mapUrlSlugToDatabaseSlug(normalizeSlug(productTypeFromPath)));
-      return normalizeSlug(productTypeFromPath);
+      
+      // Parse the combined slug if it contains UUID
+      const { slug, uuid } = parseSlugWithUUID(productTypeFromPath);
+      console.log(`[useProductTypeFromUrl] Parsed slug: "${slug}", UUID: "${uuid || 'none'}"`);
+      
+      const normalizedSlug = normalizeSlug(slug || productTypeFromPath);
+      const mappedSlug = mapUrlSlugToDatabaseSlug(normalizedSlug);
+      
+      console.log("[useProductTypeFromUrl] Normalized slug:", normalizedSlug);
+      console.log("[useProductTypeFromUrl] Database mapped slug:", mappedSlug);
+      
+      return { 
+        slug: normalizedSlug,
+        uuid 
+      };
     }
 
     // Third priority: Check if we're on an edit page
     if (location.pathname.includes('/admin/products/edit/')) {
       const editPathParts = location.pathname.split('/');
-      const editProductType = editPathParts[editPathParts.length - 1];
-      if (editProductType) {
-        console.log("[useProductTypeFromUrl] Using productType from edit path:", editProductType);
-        return normalizeSlug(editProductType);
+      const lastPathPart = editPathParts[editPathParts.length - 1];
+      
+      if (lastPathPart) {
+        console.log("[useProductTypeFromUrl] Using productType from edit path:", lastPathPart);
+        
+        // Check if it's a UUID directly or a slug--uuid format
+        const uuid = extractUUID(lastPathPart);
+        
+        if (uuid) {
+          return {
+            slug: normalizeSlug(lastPathPart.replace(uuid, '').replace('--', '')),
+            uuid
+          };
+        }
+        
+        return { 
+          slug: normalizeSlug(lastPathPart),
+          uuid: null
+        };
       }
     }
 
     // Fallback
     console.log("[useProductTypeFromUrl] No productType found in URL, using default empty string");
-    return '';
+    return { 
+      slug: '',
+      uuid: null 
+    };
   }, [params.productType, location.pathname]);
 
   // Add effect to log URL changes
   useEffect(() => {
     console.log("[useProductTypeFromUrl] URL changed:", location.pathname);
-    console.log("[useProductTypeFromUrl] Extracted product type:", productType);
-  }, [location.pathname, productType]);
+    console.log("[useProductTypeFromUrl] Extracted product info:", productInfo);
+  }, [location.pathname, productInfo]);
 
-  return productType;
+  return productInfo;
 };

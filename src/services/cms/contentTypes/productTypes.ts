@@ -11,7 +11,10 @@ export async function fetchProductTypes<T>(params: Record<string, any> = {}): Pr
     console.log('[fetchProductTypes] Fetching product types with params:', params);
     
     const hasSlug = params.slug && params.slug.trim() !== '';
+    const hasUUID = params.uuid && params.uuid.trim() !== '';
+    
     console.log(`[fetchProductTypes] Looking for specific slug: ${hasSlug ? params.slug : 'No'}`);
+    console.log(`[fetchProductTypes] Looking for specific UUID: ${hasUUID ? params.uuid : 'No'}`);
     
     let query = supabase
       .from('product_types')
@@ -50,11 +53,29 @@ export async function fetchProductTypes<T>(params: Record<string, any> = {}): Pr
       `)
       .eq('visible', true);
     
-    if (hasSlug) {
+    if (hasUUID) {
+      // UUID is most specific, so use it first
+      console.log(`[fetchProductTypes] Searching by UUID: ${params.uuid}`);
+      const { data, error } = await query.eq('id', params.uuid);
+      
+      if (error) {
+        console.error('[fetchProductTypes] Supabase error fetching by UUID:', error);
+        throw error;
+      }
+      
+      if (!data || data.length === 0) {
+        console.warn(`[fetchProductTypes] No product found with UUID: ${params.uuid}`);
+        return [] as T[];
+      }
+      
+      console.log(`[fetchProductTypes] Found product by UUID: ${data[0].title}`);
+      return transformProductTypeData<T>(data);
+    } else if (hasSlug) {
       // If we have a slug, map it to its database counterpart if necessary
       const mappedSlug = mapUrlSlugToDatabaseSlug(params.slug);
       return await searchBySlug<T>(query, mappedSlug, params.exactMatch);
     } else {
+      // Normal case: return all visible product types
       const { data, error } = await query.order('title');
       
       if (error) {
@@ -222,6 +243,78 @@ export async function fetchProductTypeBySlug<T>(slug: string): Promise<T | null>
     return transformed.length > 0 ? transformed[0] : null;
   } catch (error) {
     console.error(`[fetchProductTypeBySlug] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return null;
+  }
+}
+
+/**
+ * Direct fetch a single product type by UUID - the most reliable identifier
+ */
+export async function fetchProductTypeByUUID<T>(uuid: string): Promise<T | null> {
+  try {
+    console.log(`[fetchProductTypeByUUID] Directly fetching product type with UUID: "${uuid}"`);
+    
+    if (!uuid || uuid.trim() === '') {
+      console.warn("[fetchProductTypeByUUID] Empty UUID provided");
+      return null;
+    }
+    
+    const { data, error } = await supabase
+      .from('product_types')
+      .select(`
+        id,
+        slug,
+        title,
+        description,
+        visible,
+        product_type_images (
+          id,
+          url,
+          alt,
+          width,
+          height
+        ),
+        product_type_benefits (
+          id,
+          benefit,
+          display_order
+        ),
+        product_type_features (
+          id,
+          title,
+          description,
+          icon,
+          display_order,
+          product_type_feature_images (
+            id,
+            url,
+            alt,
+            width,
+            height
+          )
+        )
+      `)
+      .eq('visible', true)
+      .eq('id', uuid)
+      .maybeSingle();
+    
+    if (error) {
+      console.error(`[fetchProductTypeByUUID] Error fetching product type: ${error.message}`);
+      throw error;
+    }
+    
+    if (!data) {
+      console.warn(`[fetchProductTypeByUUID] No product type found with UUID: "${uuid}"`);
+      return null;
+    }
+    
+    console.log(`[fetchProductTypeByUUID] Successfully found product type: "${data.title}"`);
+    
+    // Transform the single product type
+    const transformed = transformProductTypeData<T>([data]);
+    return transformed.length > 0 ? transformed[0] : null;
+  } catch (error) {
+    console.error(`[fetchProductTypeByUUID] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return null;
   }
 }

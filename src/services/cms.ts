@@ -6,7 +6,7 @@ import {
   CMSBusinessGoal 
 } from '@/types/cms';
 import { fetchFromCMS } from '@/services/cms/fetchFromCMS';
-import { fetchProductTypeBySlug } from '@/services/cms/contentTypes/productTypes';
+import { fetchProductTypeBySlug, fetchProductTypeByUUID } from '@/services/cms/contentTypes/productTypes';
 import { normalizeSlug, mapUrlSlugToDatabaseSlug } from '@/services/cms/utils/slugMatching';
 
 export async function getMachines(filters: Record<string, any> = {}): Promise<CMSMachine[]> {
@@ -67,6 +67,34 @@ export async function getProductTypeBySlug(slug: string): Promise<CMSProductType
     return null;
   } catch (error) {
     console.error(`[cms.ts] Error fetching product type by slug "${slug}":`, error);
+    return null;
+  }
+}
+
+/**
+ * Get a product type by its UUID (most reliable method)
+ */
+export async function getProductTypeByUUID(uuid: string): Promise<CMSProductType | null> {
+  console.log(`[cms.ts] Attempting to fetch product type with UUID: "${uuid}"`);
+  
+  if (!uuid || uuid.trim() === '') {
+    console.warn("[cms.ts] Empty UUID passed to getProductTypeByUUID");
+    return null;
+  }
+  
+  try {
+    // Use our direct method specifically for UUID lookups
+    const productType = await fetchProductTypeByUUID<CMSProductType>(uuid);
+    
+    if (productType) {
+      console.log(`[cms.ts] Successfully retrieved product type by UUID: ${productType.title}`);
+      return productType;
+    }
+    
+    console.log(`[cms.ts] Could not find product type with UUID "${uuid}"`);
+    return null;
+  } catch (error) {
+    console.error(`[cms.ts] Error fetching product type by UUID "${uuid}":`, error);
     return null;
   }
 }

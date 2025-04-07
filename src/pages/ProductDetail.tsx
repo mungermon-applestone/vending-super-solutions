@@ -14,9 +14,9 @@ import { productFallbacks } from '@/data/productFallbacks';
 
 const ProductDetail = () => {
   const navigate = useNavigate();
-  const productType = useProductTypeFromUrl();
+  const productInfo = useProductTypeFromUrl();
   
-  console.log("ProductDetail rendering for product type:", productType);
+  console.log("ProductDetail rendering for product type:", productInfo);
   
   // Use the hook from useCMSData with clearer enabled condition
   const { 
@@ -25,7 +25,7 @@ const ProductDetail = () => {
     error, 
     isError,
     refetch 
-  } = useProductType(productType);
+  } = useProductType(productInfo.slug, productInfo.uuid);
   
   // Log what we're receiving from the API to help debug
   useEffect(() => {
@@ -33,7 +33,8 @@ const ProductDetail = () => {
       productTypeData,
       isLoading,
       error,
-      slug: productType
+      slug: productInfo.slug,
+      uuid: productInfo.uuid
     });
     
     if (error) {
@@ -41,21 +42,21 @@ const ProductDetail = () => {
     }
     
     // If we have a product type but no data and we're not loading, log this issue
-    if (productType && !productTypeData && !isLoading) {
-      console.warn(`ProductDetail: Product type "${productType}" requested but no data returned`);
+    if (productInfo.slug && !productTypeData && !isLoading) {
+      console.warn(`ProductDetail: Product type "${productInfo.slug}" requested but no data returned`);
     }
-  }, [productTypeData, isLoading, error, productType]);
+  }, [productTypeData, isLoading, error, productInfo]);
   
-  // Force refetch when product type changes
+  // Force refetch when product info changes
   useEffect(() => {
-    if (productType) {
-      console.log(`ProductDetail: Product type changed to ${productType}, refetching data`);
+    if (productInfo.slug || productInfo.uuid) {
+      console.log(`ProductDetail: Product info changed, refetching data`);
       refetch();
     }
-  }, [productType, refetch]);
+  }, [productInfo, refetch]);
   
   // Use CMS data if available, otherwise try fallbacks, default to grocery
-  const fallbackData = productFallbacks[productType] || productFallbacks['grocery'];
+  const fallbackData = productFallbacks[productInfo.slug] || productFallbacks['grocery'];
   const currentProductData = productTypeData || fallbackData;
   
   console.log("ProductDetail using data:", {
