@@ -22,38 +22,10 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { isCreating, form, onSubmit } = useProductEditorForm(productSlug, setIsLoading, toast, navigate);
 
-  // Add debugging information
   useEffect(() => {
-    console.log('[ProductEditorForm] Mounting with mode:', isCreating ? 'create' : 'edit');
-    console.log('[ProductEditorForm] Initial form values:', form.getValues());
+    console.log('[ProductEditorForm] Component mounted. Mode:', isCreating ? 'create' : 'edit');
     console.log('[ProductEditorForm] Product slug:', productSlug);
-    
-    // Check DOM for input fields after render
-    const checkFormFields = () => {
-      const formFields = document.querySelectorAll('input, textarea');
-      console.log('[ProductEditorForm] Found form fields:', formFields.length);
-      formFields.forEach((field, index) => {
-        const inputElement = field as HTMLInputElement | HTMLTextAreaElement;
-        const isReadOnly = inputElement.readOnly;
-        const isDisabled = inputElement.disabled;
-        console.log(`[ProductEditorForm] Field ${index}: readOnly=${isReadOnly}, disabled=${isDisabled}, name=${inputElement.getAttribute('name')}`);
-        
-        // Force all inputs to be editable if we're in the product editor form
-        if (document.location.pathname.includes('/admin/products/')) {
-          inputElement.readOnly = false;
-          inputElement.disabled = false;
-          console.log(`[ProductEditorForm] Forced field ${index} to be editable`);
-        }
-      });
-    };
-    
-    // Run initial check and setup a periodic check
-    checkFormFields();
-    const interval = setInterval(checkFormFields, 2000);
-    
-    return () => {
-      clearInterval(interval);
-    };
+    console.log('[ProductEditorForm] Initial form values:', form.getValues());
   }, [isCreating, form, productSlug]);
 
   return (
