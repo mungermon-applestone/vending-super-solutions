@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for slug matching and normalization
  */
@@ -10,7 +9,7 @@ const slugMappings: Record<string, string> = {
   'cannabis': 'cannabis-vending',
   'vape': 'vape-vending',
   'cosmetics': 'cosmetics-vending',
-  'otc': 'otc-vending',
+  'otc': 'over-the-counter-pharma-vending',  // Updated to correct database slug
 };
 
 // Map for the reverse lookup (database slug to URL slug)
@@ -20,7 +19,7 @@ const reverseMappings: Record<string, string> = {
   'cannabis-vending': 'cannabis',
   'vape-vending': 'vape',
   'cosmetics-vending': 'cosmetics',
-  'otc-vending': 'otc',
+  'over-the-counter-pharma-vending': 'otc',  // Updated to match the correct database slug
 };
 
 /**
@@ -95,6 +94,11 @@ export function getSlugVariations(slug: string): string[] {
   const mappedSlug = mapUrlSlugToDatabaseSlug(normalizedSlug);
   if (mappedSlug !== normalizedSlug) {
     variationsSet.add(mappedSlug);
+  }
+  
+  // Special case for OTC - always include the exact database slug
+  if (normalizedSlug === 'otc' || normalizedSlug === 'otc-vending') {
+    variationsSet.add('over-the-counter-pharma-vending');
   }
   
   // Add/remove -vending suffix for both original and mapped slugs
