@@ -3,6 +3,13 @@
  * Utility functions for slug matching and normalization
  */
 
+// Map of URL slugs to database slugs
+const slugMappings: Record<string, string> = {
+  'grocery': 'grocery-vending',
+  'cannabis': 'cannabis-vending',
+  'vape': 'vape-vending'
+};
+
 /**
  * Normalize a slug by converting to lowercase, trimming and handling special cases
  * @param slug The slug to normalize
@@ -21,6 +28,24 @@ export function normalizeSlug(slug: string): string {
     // If decoding fails (e.g., not encoded), return the original normalized string
     return normalized;
   }
+}
+
+/**
+ * Map a URL slug to its corresponding database slug if a mapping exists
+ * @param slug The URL slug to map
+ * @returns The database slug or the original slug if no mapping exists
+ */
+export function mapUrlSlugToDatabaseSlug(slug: string): string {
+  const normalizedSlug = normalizeSlug(slug);
+  console.log(`[slugMatching] Mapping URL slug: "${normalizedSlug}" to database slug`);
+  
+  if (slugMappings[normalizedSlug]) {
+    console.log(`[slugMatching] Found mapping: "${normalizedSlug}" -> "${slugMappings[normalizedSlug]}"`);
+    return slugMappings[normalizedSlug];
+  }
+  
+  console.log(`[slugMatching] No mapping found for slug: "${normalizedSlug}", using as-is`);
+  return normalizedSlug;
 }
 
 /**

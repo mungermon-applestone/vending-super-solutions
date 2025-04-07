@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { transformProductTypeData } from '../utils/transformers';
-import { normalizeSlug, logSlugSearch, logSlugResult } from '../utils/slugMatching';
+import { normalizeSlug, mapUrlSlugToDatabaseSlug, logSlugSearch, logSlugResult } from '../utils/slugMatching';
 
 /**
  * Fetch product types from the CMS with improved slug matching
@@ -51,7 +51,9 @@ export async function fetchProductTypes<T>(params: Record<string, any> = {}): Pr
       .eq('visible', true);
     
     if (hasSlug) {
-      return await searchBySlug<T>(query, params.slug, params.exactMatch);
+      // If we have a slug, map it to its database counterpart if necessary
+      const mappedSlug = mapUrlSlugToDatabaseSlug(params.slug);
+      return await searchBySlug<T>(query, mappedSlug, params.exactMatch);
     } else {
       const { data, error } = await query.order('title');
       
@@ -159,7 +161,9 @@ export async function fetchProductTypeBySlug<T>(slug: string): Promise<T | null>
       return null;
     }
     
-    const normalizedSlug = normalizeSlug(slug);
+    // Map URL slug to database slug if needed
+    const mappedSlug = mapUrlSlugToDatabaseSlug(slug);
+    console.log(`[fetchProductTypeBySlug] Using mapped slug: "${mappedSlug}" for database query`);
     
     const { data, error } = await supabase
       .from('product_types')
@@ -197,7 +201,7 @@ export async function fetchProductTypeBySlug<T>(slug: string): Promise<T | null>
         )
       `)
       .eq('visible', true)
-      .eq('slug', normalizedSlug)
+      .eq('slug', mappedSlug)
       .maybeSingle();
     
     if (error) {
@@ -206,7 +210,7 @@ export async function fetchProductTypeBySlug<T>(slug: string): Promise<T | null>
     }
     
     if (!data) {
-      console.warn(`[fetchProductTypeBySlug] No product type found with slug: "${normalizedSlug}"`);
+      console.warn(`[fetchProductTypeBySlug] No product type found with slug: "${mappedSlug}"`);
       return null;
     }
     

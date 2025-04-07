@@ -7,7 +7,7 @@ import {
 } from '@/types/cms';
 import { fetchFromCMS } from '@/services/cms/fetchFromCMS';
 import { fetchProductTypeBySlug } from '@/services/cms/contentTypes/productTypes';
-import { normalizeSlug } from '@/services/cms/utils/slugMatching';
+import { normalizeSlug, mapUrlSlugToDatabaseSlug } from '@/services/cms/utils/slugMatching';
 
 export async function getMachines(filters: Record<string, any> = {}): Promise<CMSMachine[]> {
   return await fetchFromCMS<CMSMachine>('machines', filters);
@@ -36,21 +36,24 @@ export async function getProductTypeBySlug(slug: string): Promise<CMSProductType
   }
   
   try {
-    // Use our direct method for maximum reliability
+    // Map the URL slug to database slug
     const normalizedSlug = normalizeSlug(slug);
-    console.log(`[cms.ts] Fetching product with normalized slug: "${normalizedSlug}"`);
+    const mappedSlug = mapUrlSlugToDatabaseSlug(normalizedSlug);
+    console.log(`[cms.ts] Fetching product with mapped slug: "${mappedSlug}" (original: "${slug}")`);
     
-    const productType = await fetchProductTypeBySlug<CMSProductType>(normalizedSlug);
+    // Use our direct method for maximum reliability
+    const productType = await fetchProductTypeBySlug<CMSProductType>(mappedSlug);
     
     if (productType) {
       console.log(`[cms.ts] Successfully retrieved product type: ${productType.title}`);
       console.log('[cms.ts] Product type data:', productType);
+      return productType;
     } else {
-      console.log(`[cms.ts] No product found with slug "${normalizedSlug}", trying fallback method`);
+      console.log(`[cms.ts] No product found with mapped slug "${mappedSlug}", trying fallback method`);
       
       // Fallback to the traditional method
       const productTypes = await fetchFromCMS<CMSProductType>('product-types', { 
-        slug: normalizedSlug,
+        slug: mappedSlug,
         exactMatch: true
       });
       
@@ -60,7 +63,8 @@ export async function getProductTypeBySlug(slug: string): Promise<CMSProductType
       }
     }
     
-    return productType;
+    console.log(`[cms.ts] Could not find product type with slug "${slug}" or mapped slug "${mappedSlug}"`);
+    return null;
   } catch (error) {
     console.error(`[cms.ts] Error fetching product type by slug "${slug}":`, error);
     return null;
