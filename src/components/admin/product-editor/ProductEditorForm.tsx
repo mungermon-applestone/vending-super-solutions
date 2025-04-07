@@ -11,6 +11,7 @@ import ProductImage from './sections/ProductImage';
 import ProductBenefits from './sections/ProductBenefits';
 import ProductFeatures from './sections/ProductFeatures';
 import { useProductEditorForm } from '@/hooks/useProductEditorForm';
+import useKeepFormsEditable from '@/hooks/useKeepFormsEditable';
 
 interface ProductEditorFormProps {
   productSlug?: string;
@@ -21,32 +22,14 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const { isCreating, form, onSubmit } = useProductEditorForm(productSlug, setIsLoading, toast, navigate);
+  
+  // Use our aggressive form editable hook
+  useKeepFormsEditable();
 
   useEffect(() => {
     console.log('[ProductEditorForm] Component mounted. Mode:', isCreating ? 'create' : 'edit');
     console.log('[ProductEditorForm] Product slug:', productSlug);
     console.log('[ProductEditorForm] Initial form values:', form.getValues());
-    
-    // Direct approach to ensure form fields are editable
-    const ensureEditableFields = () => {
-      setTimeout(() => {
-        const formElements = document.querySelectorAll('input, textarea, select');
-        console.log(`[ProductEditorForm] Found ${formElements.length} form elements to make editable`);
-        
-        formElements.forEach(element => {
-          if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
-            element.readOnly = false;
-            element.disabled = false;
-            console.log(`[ProductEditorForm] Made ${element.name || element.id || 'unnamed'} editable`);
-          } else if (element instanceof HTMLSelectElement) {
-            element.disabled = false;
-            console.log(`[ProductEditorForm] Made ${element.name || element.id || 'unnamed'} editable`);
-          }
-        });
-      }, 300); // Short delay to ensure the form is rendered
-    };
-    
-    ensureEditableFields();
   }, [isCreating, form, productSlug]);
 
   return (
