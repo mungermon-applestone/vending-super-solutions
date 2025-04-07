@@ -18,7 +18,7 @@ interface ProductEditorFormProps {
 
 const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const { isCreating, form, onSubmit } = useProductEditorForm(productSlug, setIsLoading, toast, navigate);
 

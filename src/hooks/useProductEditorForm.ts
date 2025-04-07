@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import type { UseToastReturn } from '@/hooks/use-toast';
+import { useToast, type UseToastReturn } from '@/hooks/use-toast';
 import { NavigateFunction } from 'react-router-dom';
 import { useProductType } from '@/hooks/useCMSData';
 import { ProductFormData } from '@/types/forms';
