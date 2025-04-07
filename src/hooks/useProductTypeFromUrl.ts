@@ -18,12 +18,12 @@ export const useProductTypeFromUrl = () => {
       return normalizeSlug(params.productType);
     }
     
-    // Second priority: Extract from path
+    // Second priority: Extract from path for product pages
+    // This specifically targets URLs like /products/grocery
     const pathParts = location.pathname.split('/');
-    const pathMatch = pathParts.find(part => part === 'products');
-    if (pathMatch && pathParts.indexOf(pathMatch) + 1 < pathParts.length) {
-      const productTypeFromPath = pathParts[pathParts.indexOf(pathMatch) + 1];
-      console.log("[useProductTypeFromUrl] Using productType extracted from path:", productTypeFromPath);
+    if (pathParts.length >= 3 && pathParts[1] === 'products') {
+      const productTypeFromPath = pathParts[2];
+      console.log("[useProductTypeFromUrl] Extracted product type from products path:", productTypeFromPath);
       return normalizeSlug(productTypeFromPath);
     }
 

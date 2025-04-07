@@ -23,6 +23,7 @@ export async function getMachineBySlug(type: string, id: string): Promise<CMSMac
 }
 
 export async function getProductTypes(): Promise<CMSProductType[]> {
+  console.log("[cms.ts] Fetching all product types");
   return await fetchFromCMS<CMSProductType>('product-types');
 }
 
@@ -35,17 +36,21 @@ export async function getProductTypeBySlug(slug: string): Promise<CMSProductType
   }
   
   try {
-    // Use our new direct method for maximum reliability
-    const productType = await fetchProductTypeBySlug<CMSProductType>(slug);
+    // Use our direct method for maximum reliability
+    const normalizedSlug = normalizeSlug(slug);
+    console.log(`[cms.ts] Fetching product with normalized slug: "${normalizedSlug}"`);
+    
+    const productType = await fetchProductTypeBySlug<CMSProductType>(normalizedSlug);
     
     if (productType) {
       console.log(`[cms.ts] Successfully retrieved product type: ${productType.title}`);
+      console.log('[cms.ts] Product type data:', productType);
     } else {
-      console.log(`[cms.ts] No product found with slug "${slug}", falling back to regular search`);
+      console.log(`[cms.ts] No product found with slug "${normalizedSlug}", trying fallback method`);
       
       // Fallback to the traditional method
       const productTypes = await fetchFromCMS<CMSProductType>('product-types', { 
-        slug: slug,
+        slug: normalizedSlug,
         exactMatch: true
       });
       

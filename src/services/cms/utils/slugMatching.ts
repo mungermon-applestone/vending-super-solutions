@@ -4,13 +4,23 @@
  */
 
 /**
- * Normalize a slug by converting to lowercase and trimming
+ * Normalize a slug by converting to lowercase, trimming and handling special cases
  * @param slug The slug to normalize
  * @returns Normalized slug
  */
 export function normalizeSlug(slug: string): string {
   if (!slug) return '';
-  return slug.toLowerCase().trim();
+  
+  // Convert to lowercase and trim whitespace
+  const normalized = slug.toLowerCase().trim();
+  
+  // Handle URL-encoded characters if any
+  try {
+    return decodeURIComponent(normalized);
+  } catch (e) {
+    // If decoding fails (e.g., not encoded), return the original normalized string
+    return normalized;
+  }
 }
 
 /**

@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import * as cmsService from '@/services/cms';
 import { normalizeSlug } from '@/services/cms/utils/slugMatching';
@@ -69,10 +68,11 @@ export function useProductType(slug: string | undefined) {
       }
     },
     enabled: !!slug && slug.trim() !== '', // Only run query when slug is available and not empty
-    retry: 1,                             // Reduced retry attempts 
-    refetchOnWindowFocus: false,          // Don't refetch on window focus
-    staleTime: 1000 * 30,                 // Data remains fresh for 30 seconds (reduced from 5 minutes)
-    gcTime: 1000 * 60,                    // Cache for 1 minute
+    retry: 2,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
   });
 }
 

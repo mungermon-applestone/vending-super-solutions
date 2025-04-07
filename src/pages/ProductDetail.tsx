@@ -60,7 +60,10 @@ const ProductDetail = () => {
   
   console.log("ProductDetail using data:", {
     isUsingFallbackData: !productTypeData,
-    currentProductData
+    currentProductData: {
+      title: currentProductData.title,
+      description: currentProductData?.description?.substring(0, 50) + '...'
+    }
   });
   
   if (isLoading) {

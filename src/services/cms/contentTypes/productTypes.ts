@@ -8,10 +8,10 @@ import { normalizeSlug, logSlugSearch, logSlugResult } from '../utils/slugMatchi
  */
 export async function fetchProductTypes<T>(params: Record<string, any> = {}): Promise<T[]> {  
   try {
-    console.log('[fetchFromCMS] Fetching product types with params:', params);
+    console.log('[fetchProductTypes] Fetching product types with params:', params);
     
     const hasSlug = params.slug && params.slug.trim() !== '';
-    console.log(`[fetchFromCMS] Looking for specific slug: ${hasSlug ? params.slug : 'No'}`);
+    console.log(`[fetchProductTypes] Looking for specific slug: ${hasSlug ? params.slug : 'No'}`);
     
     let query = supabase
       .from('product_types')
@@ -56,27 +56,26 @@ export async function fetchProductTypes<T>(params: Record<string, any> = {}): Pr
       const { data, error } = await query.order('title');
       
       if (error) {
-        console.error('[fetchFromCMS] Supabase error fetching product types:', error);
+        console.error('[fetchProductTypes] Supabase error fetching product types:', error);
         throw new Error(`Failed to fetch product types: ${error.message}`);
       }
 
       if (!data || data.length === 0) {
-        console.warn('[fetchFromCMS] No product types found');
+        console.warn('[fetchProductTypes] No product types found');
         return [] as T[];
       }
 
-      console.log(`[fetchFromCMS] Found ${data.length} product types`);
+      console.log(`[fetchProductTypes] Found ${data.length} product types:`, data.map(item => item.title));
       return transformProductTypeData<T>(data);
     }
   } catch (error) {
-    console.error('[fetchFromCMS] Error processing product types:', error);
+    console.error('[fetchProductTypes] Error processing product types:', error);
     throw error;
   }
 }
 
 /**
  * Search for product types by slug using progressively less strict matching
- * with simplified and focused retrieval approach
  */
 async function searchBySlug<T>(
   query: any, 
@@ -86,73 +85,70 @@ async function searchBySlug<T>(
   const normalizedSlug = normalizeSlug(slugParam);
   logSlugSearch(normalizedSlug, 'Searching for product');
   
-  // 1. Try exact match first - most reliable approach
+  // 1. Try exact match first
+  console.log(`[searchBySlug] Trying exact match for slug '${normalizedSlug}'`);
   const { data: exactMatch, error: exactError } = await query
     .eq('slug', normalizedSlug);
   
   if (exactError) {
-    console.error('[fetchFromCMS] Error with exact slug match:', exactError);
+    console.error('[searchBySlug] Error with exact slug match:', exactError);
     throw exactError;
   }
   
   logSlugResult(normalizedSlug, exactMatch, "Exact");
   
   if (exactMatch && exactMatch.length > 0) {
-    console.log(`[fetchFromCMS] Found exact match for slug '${normalizedSlug}'`);
-    // Return only first exact match for more reliable result
-    return transformProductTypeData<T>([exactMatch[0]]);
+    console.log(`[searchBySlug] Found exact match for slug '${normalizedSlug}'`, exactMatch);
+    return transformProductTypeData<T>(exactMatch);
   }
   
-  // If exactMatch is required and we didn't find one, return empty array
   if (exactMatchOnly) {
-    console.log(`[fetchFromCMS] No exact match for '${normalizedSlug}' and exactMatch required`);
+    console.log(`[searchBySlug] No exact match for '${normalizedSlug}' and exactMatch required`);
     return [] as T[];
   }
   
   // 2. Try case-insensitive match
-  console.log(`[fetchFromCMS] No exact match for '${normalizedSlug}', trying case-insensitive match`);
+  console.log(`[searchBySlug] No exact match for '${normalizedSlug}', trying case-insensitive match`);
   
   const { data: caseInsensitiveMatch, error: caseError } = await query
     .ilike('slug', normalizedSlug);
     
   if (caseError) {
-    console.error('[fetchFromCMS] Error with case-insensitive slug match:', caseError);
+    console.error('[searchBySlug] Error with case-insensitive slug match:', caseError);
     throw caseError;
   }
   
   logSlugResult(normalizedSlug, caseInsensitiveMatch, "Case-insensitive");
   
   if (caseInsensitiveMatch && caseInsensitiveMatch.length > 0) {
-    console.log(`[fetchFromCMS] Found case-insensitive match: ${caseInsensitiveMatch[0].slug}`);
-    // Return only first case-insensitive match for reliability
-    return transformProductTypeData<T>([caseInsensitiveMatch[0]]);
+    console.log(`[searchBySlug] Found case-insensitive match for: ${normalizedSlug}`);
+    return transformProductTypeData<T>(caseInsensitiveMatch);
   }
   
-  // 3. Try fuzzy match as last resort, but only if we need to
-  console.log(`[fetchFromCMS] No case-insensitive match, trying fuzzy match for: ${normalizedSlug}`);
+  // 3. Try fuzzy match as last resort
+  console.log(`[searchBySlug] No case-insensitive match, trying fuzzy match for: ${normalizedSlug}`);
   
   const { data: fuzzyMatch, error: fuzzyError } = await query
     .ilike('slug', `%${normalizedSlug}%`);
     
   if (fuzzyError) {
-    console.error('[fetchFromCMS] Error with fuzzy slug match:', fuzzyError);
+    console.error('[searchBySlug] Error with fuzzy slug match:', fuzzyError);
     throw fuzzyError;
   }
   
   logSlugResult(normalizedSlug, fuzzyMatch, "Fuzzy");
   
   if (fuzzyMatch && fuzzyMatch.length > 0) {
-    console.log(`[fetchFromCMS] Found fuzzy match: ${fuzzyMatch[0].slug}`);
-    // Return only first fuzzy match for reliability
-    return transformProductTypeData<T>([fuzzyMatch[0]]);
+    console.log(`[searchBySlug] Found fuzzy match for: ${normalizedSlug}`);
+    return transformProductTypeData<T>(fuzzyMatch);
   }
   
-  console.log(`[fetchFromCMS] No matches found for slug: ${normalizedSlug}`);
+  console.log(`[searchBySlug] No matches found for slug: ${normalizedSlug}`);
   return [] as T[];
 }
 
 /**
- * Fetch a single product type by slug - focused method for direct use
+ * Direct fetch a single product type by slug - optimized for reliability
  */
 export async function fetchProductTypeBySlug<T>(slug: string): Promise<T | null> {
   try {
@@ -165,7 +161,6 @@ export async function fetchProductTypeBySlug<T>(slug: string): Promise<T | null>
     
     const normalizedSlug = normalizeSlug(slug);
     
-    // Direct query with exact match for maximum reliability
     const { data, error } = await supabase
       .from('product_types')
       .select(`
@@ -216,6 +211,7 @@ export async function fetchProductTypeBySlug<T>(slug: string): Promise<T | null>
     }
     
     console.log(`[fetchProductTypeBySlug] Successfully found product type: "${data.title}"`);
+    console.log('[fetchProductTypeBySlug] Retrieved data:', data);
     
     // Transform the single product type
     const transformed = transformProductTypeData<T>([data]);
