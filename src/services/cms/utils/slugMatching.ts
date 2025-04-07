@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for slug matching and normalization
  */
@@ -10,7 +11,7 @@ const slugMappings: Record<string, string> = {
   'vape': 'vape-vending',
   'cosmetics': 'cosmetics-vending',
   'otc': 'over-the-counter-pharma-vending',
-  'collectibles': 'collectibles-vending'  // Added mapping for collectibles
+  'collectibles': 'toys-cards-collectibles'  // Updated to match the database slug
 };
 
 // Map for the reverse lookup (database slug to URL slug)
@@ -21,7 +22,7 @@ const reverseMappings: Record<string, string> = {
   'vape-vending': 'vape',
   'cosmetics-vending': 'cosmetics',
   'over-the-counter-pharma-vending': 'otc',
-  'collectibles-vending': 'collectibles' // Added reverse mapping for collectibles
+  'toys-cards-collectibles': 'collectibles' // Updated to match the URL slug
 };
 
 // Track historical slugs that may have changed - maps old slugs to current slugs
