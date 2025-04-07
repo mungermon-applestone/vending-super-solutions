@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { transformProductTypeData } from '../utils/transformers';
 import { normalizeSlug, mapUrlSlugToDatabaseSlug, logSlugSearch, logSlugResult } from '../utils/slugMatching';
@@ -123,6 +122,26 @@ async function searchBySlug<T>(
   if (exactMatch && exactMatch.length > 0) {
     console.log(`[searchBySlug] Found exact match for slug '${normalizedSlug}'`, exactMatch);
     return transformProductTypeData<T>(exactMatch);
+  }
+  
+  // 1b. Try with and without -vending suffix
+  let alternativeSlug = normalizedSlug;
+  if (normalizedSlug.endsWith('-vending')) {
+    alternativeSlug = normalizedSlug.replace('-vending', '');
+  } else {
+    alternativeSlug = `${normalizedSlug}-vending`;
+  }
+  
+  console.log(`[searchBySlug] Trying alternative slug: '${alternativeSlug}'`);
+  const { data: alternativeMatch, error: altError } = await query
+    .eq('slug', alternativeSlug);
+    
+  if (altError) {
+    console.error('[searchBySlug] Error with alternative slug match:', altError);
+    // Continue to next strategy
+  } else if (alternativeMatch && alternativeMatch.length > 0) {
+    console.log(`[searchBySlug] Found match with alternative slug '${alternativeSlug}'`);
+    return transformProductTypeData<T>(alternativeMatch);
   }
   
   if (exactMatchOnly) {

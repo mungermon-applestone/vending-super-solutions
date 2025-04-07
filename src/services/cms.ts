@@ -41,29 +41,48 @@ export async function getProductTypeBySlug(slug: string): Promise<CMSProductType
     const mappedSlug = mapUrlSlugToDatabaseSlug(normalizedSlug);
     console.log(`[cms.ts] Fetching product with mapped slug: "${mappedSlug}" (original: "${slug}")`);
     
-    // Use our direct method for maximum reliability
-    const productType = await fetchProductTypeBySlug<CMSProductType>(mappedSlug);
+    // First try with the mapped slug
+    let productType = await fetchProductTypeBySlug<CMSProductType>(mappedSlug);
     
     if (productType) {
       console.log(`[cms.ts] Successfully retrieved product type: ${productType.title}`);
-      console.log('[cms.ts] Product type data:', productType);
       return productType;
-    } else {
-      console.log(`[cms.ts] No product found with mapped slug "${mappedSlug}", trying fallback method`);
+    } 
+    
+    // If that fails, try with the original slug
+    console.log(`[cms.ts] No product found with mapped slug "${mappedSlug}", trying with original slug "${normalizedSlug}"`);
+    productType = await fetchProductTypeBySlug<CMSProductType>(normalizedSlug);
+    
+    if (productType) {
+      console.log(`[cms.ts] Successfully retrieved product type with original slug: ${productType.title}`);
+      return productType;
+    }
+    
+    // Try without the -vending suffix if it has one
+    if (mappedSlug.endsWith('-vending')) {
+      const withoutSuffix = mappedSlug.replace('-vending', '');
+      console.log(`[cms.ts] Trying without -vending suffix: "${withoutSuffix}"`);
+      productType = await fetchProductTypeBySlug<CMSProductType>(withoutSuffix);
       
-      // Fallback to the traditional method
-      const productTypes = await fetchFromCMS<CMSProductType>('product-types', { 
-        slug: mappedSlug,
-        exactMatch: true
-      });
-      
-      if (productTypes.length > 0) {
-        console.log(`[cms.ts] Fallback successfully retrieved product type: ${productTypes[0].title}`);
-        return productTypes[0];
+      if (productType) {
+        console.log(`[cms.ts] Found product with slug without -vending suffix: ${productType.title}`);
+        return productType;
       }
     }
     
-    console.log(`[cms.ts] Could not find product type with slug "${slug}" or mapped slug "${mappedSlug}"`);
+    // As a last resort, try a fuzzy search
+    console.log(`[cms.ts] All direct lookups failed, trying fallback method with fuzzy search`);
+    const productTypes = await fetchFromCMS<CMSProductType>('product-types', { 
+      slug: mappedSlug,
+      exactMatch: false // Allow fuzzy matching as last resort
+    });
+    
+    if (productTypes.length > 0) {
+      console.log(`[cms.ts] Fallback found product type via fuzzy search: ${productTypes[0].title}`);
+      return productTypes[0];
+    }
+    
+    console.log(`[cms.ts] Could not find product type with any slug variation of "${slug}"`);
     return null;
   } catch (error) {
     console.error(`[cms.ts] Error fetching product type by slug "${slug}":`, error);

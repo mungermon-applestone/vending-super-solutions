@@ -68,6 +68,7 @@ export function useProductType(slug: string | undefined, uuid: string | null = n
       console.log(`[useCMSData] useProductType hook fetching product type with slug: "${normalizedSlug}"`);
       
       try {
+        // Enhanced product lookup with multiple fallback strategies
         const result = await cmsService.getProductTypeBySlug(normalizedSlug);
         
         if (result) {
