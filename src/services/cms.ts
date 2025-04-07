@@ -1,4 +1,3 @@
-
 import { 
   CMSMachine, 
   CMSProductType, 
@@ -7,7 +6,11 @@ import {
 } from '@/types/cms';
 import { fetchFromCMS } from '@/services/cms/fetchFromCMS';
 import { fetchProductTypeBySlug, fetchProductTypeByUUID } from '@/services/cms/contentTypes/productTypes';
-import { normalizeSlug, mapUrlSlugToDatabaseSlug } from '@/services/cms/utils/slugMatching';
+import { 
+  normalizeSlug, 
+  mapUrlSlugToDatabaseSlug, 
+  getSlugVariations 
+} from '@/services/cms/utils/slugMatching';
 
 export async function getMachines(filters: Record<string, any> = {}): Promise<CMSMachine[]> {
   return await fetchFromCMS<CMSMachine>('machines', filters);
@@ -36,44 +39,21 @@ export async function getProductTypeBySlug(slug: string): Promise<CMSProductType
   }
   
   try {
-    // Map the URL slug to database slug
-    const normalizedSlug = normalizeSlug(slug);
-    const mappedSlug = mapUrlSlugToDatabaseSlug(normalizedSlug);
-    console.log(`[cms.ts] Fetching product with mapped slug: "${mappedSlug}" (original: "${slug}")`);
-    
-    // First try with the mapped slug
-    let productType = await fetchProductTypeBySlug<CMSProductType>(mappedSlug);
+    // Direct lookup with improved slug handling
+    console.log(`[cms.ts] Using enhanced slug lookup for: "${slug}"`);
+    const productType = await fetchProductTypeBySlug<CMSProductType>(slug);
     
     if (productType) {
       console.log(`[cms.ts] Successfully retrieved product type: ${productType.title}`);
       return productType;
-    } 
-    
-    // If that fails, try with the original slug
-    console.log(`[cms.ts] No product found with mapped slug "${mappedSlug}", trying with original slug "${normalizedSlug}"`);
-    productType = await fetchProductTypeBySlug<CMSProductType>(normalizedSlug);
-    
-    if (productType) {
-      console.log(`[cms.ts] Successfully retrieved product type with original slug: ${productType.title}`);
-      return productType;
     }
     
-    // Try without the -vending suffix if it has one
-    if (mappedSlug.endsWith('-vending')) {
-      const withoutSuffix = mappedSlug.replace('-vending', '');
-      console.log(`[cms.ts] Trying without -vending suffix: "${withoutSuffix}"`);
-      productType = await fetchProductTypeBySlug<CMSProductType>(withoutSuffix);
-      
-      if (productType) {
-        console.log(`[cms.ts] Found product with slug without -vending suffix: ${productType.title}`);
-        return productType;
-      }
-    }
+    console.log(`[cms.ts] Could not find product type with slug "${slug}" after trying all variations`);
     
     // As a last resort, try a fuzzy search
     console.log(`[cms.ts] All direct lookups failed, trying fallback method with fuzzy search`);
     const productTypes = await fetchFromCMS<CMSProductType>('product-types', { 
-      slug: mappedSlug,
+      slug: slug,
       exactMatch: false // Allow fuzzy matching as last resort
     });
     

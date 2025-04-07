@@ -1,6 +1,12 @@
 import { supabase } from '@/integrations/supabase/client';
 import { transformProductTypeData } from '../utils/transformers';
-import { normalizeSlug, mapUrlSlugToDatabaseSlug, logSlugSearch, logSlugResult } from '../utils/slugMatching';
+import { 
+  normalizeSlug, 
+  mapUrlSlugToDatabaseSlug, 
+  getSlugVariations,
+  logSlugSearch, 
+  logSlugResult 
+} from '../utils/slugMatching';
 
 /**
  * Fetch product types from the CMS with improved slug matching
@@ -201,65 +207,68 @@ export async function fetchProductTypeBySlug<T>(slug: string): Promise<T | null>
       return null;
     }
     
-    // Map URL slug to database slug if needed
-    const mappedSlug = mapUrlSlugToDatabaseSlug(slug);
-    console.log(`[fetchProductTypeBySlug] Using mapped slug: "${mappedSlug}" for database query`);
+    // Try all slug variations (original, mapped, with/without -vending suffix)
+    const slugVariations = getSlugVariations(slug);
     
-    const { data, error } = await supabase
-      .from('product_types')
-      .select(`
-        id,
-        slug,
-        title,
-        description,
-        visible,
-        product_type_images (
+    for (const variation of slugVariations) {
+      console.log(`[fetchProductTypeBySlug] Trying variation: "${variation}"`);
+      
+      const { data, error } = await supabase
+        .from('product_types')
+        .select(`
           id,
-          url,
-          alt,
-          width,
-          height
-        ),
-        product_type_benefits (
-          id,
-          benefit,
-          display_order
-        ),
-        product_type_features (
-          id,
+          slug,
           title,
           description,
-          icon,
-          display_order,
-          product_type_feature_images (
+          visible,
+          product_type_images (
             id,
             url,
             alt,
             width,
             height
+          ),
+          product_type_benefits (
+            id,
+            benefit,
+            display_order
+          ),
+          product_type_features (
+            id,
+            title,
+            description,
+            icon,
+            display_order,
+            product_type_feature_images (
+              id,
+              url,
+              alt,
+              width,
+              height
+            )
           )
-        )
-      `)
-      .eq('visible', true)
-      .eq('slug', mappedSlug)
-      .maybeSingle();
-    
-    if (error) {
-      console.error(`[fetchProductTypeBySlug] Error fetching product type: ${error.message}`);
-      throw error;
+        `)
+        .eq('visible', true)
+        .eq('slug', variation)
+        .maybeSingle();
+      
+      if (error) {
+        console.error(`[fetchProductTypeBySlug] Error fetching product type with slug "${variation}": ${error.message}`);
+        // Try next variation instead of throwing
+        continue;
+      }
+      
+      if (data) {
+        console.log(`[fetchProductTypeBySlug] Successfully found product type: "${data.title}" with slug variation "${variation}"`);
+        
+        // Transform the single product type
+        const transformed = transformProductTypeData<T>([data]);
+        return transformed.length > 0 ? transformed[0] : null;
+      }
     }
     
-    if (!data) {
-      console.warn(`[fetchProductTypeBySlug] No product type found with slug: "${mappedSlug}"`);
-      return null;
-    }
-    
-    console.log(`[fetchProductTypeBySlug] Successfully found product type: "${data.title}"`);
-    console.log('[fetchProductTypeBySlug] Retrieved data:', data);
-    
-    // Transform the single product type
-    const transformed = transformProductTypeData<T>([data]);
-    return transformed.length > 0 ? transformed[0] : null;
+    console.warn(`[fetchProductTypeBySlug] No product type found with any slug variations tried: ${slugVariations.join(', ')}`);
+    return null;
   } catch (error) {
     console.error(`[fetchProductTypeBySlug] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return null;

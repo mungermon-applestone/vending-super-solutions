@@ -1,16 +1,25 @@
-
 /**
  * Utility functions for slug matching and normalization
  */
 
 // Map of URL slugs to database slugs
+// This is a one-way mapping from URL slug to database slug
 const slugMappings: Record<string, string> = {
   'grocery': 'grocery-vending',
   'cannabis': 'cannabis-vending',
   'vape': 'vape-vending',
   'cosmetics': 'cosmetics-vending',
   'otc': 'otc-vending',
-  'otc-vending': 'otc', // Add reverse mapping to handle both cases
+};
+
+// Map for the reverse lookup (database slug to URL slug)
+// This helps avoid circular references
+const reverseMappings: Record<string, string> = {
+  'grocery-vending': 'grocery',
+  'cannabis-vending': 'cannabis',
+  'vape-vending': 'vape',
+  'cosmetics-vending': 'cosmetics',
+  'otc-vending': 'otc',
 };
 
 /**
@@ -49,6 +58,48 @@ export function mapUrlSlugToDatabaseSlug(slug: string): string {
   
   console.log(`[slugMatching] No mapping found for slug: "${normalizedSlug}", using as-is`);
   return normalizedSlug;
+}
+
+/**
+ * Map a database slug to its corresponding URL slug
+ * @param slug The database slug to map
+ * @returns The URL slug or the original slug if no mapping exists
+ */
+export function mapDatabaseSlugToUrlSlug(slug: string): string {
+  const normalizedSlug = normalizeSlug(slug);
+  
+  if (reverseMappings[normalizedSlug]) {
+    console.log(`[slugMatching] Reverse mapping: "${normalizedSlug}" -> "${reverseMappings[normalizedSlug]}"`);
+    return reverseMappings[normalizedSlug];
+  }
+  
+  return normalizedSlug;
+}
+
+/**
+ * Get all possible slug variations to try
+ * @param slug The original slug
+ * @returns Array of possible slug variations to try
+ */
+export function getSlugVariations(slug: string): string[] {
+  const normalizedSlug = normalizeSlug(slug);
+  const variations = [normalizedSlug];
+  
+  // Add mapped version if exists
+  const mappedSlug = mapUrlSlugToDatabaseSlug(normalizedSlug);
+  if (mappedSlug !== normalizedSlug) {
+    variations.push(mappedSlug);
+  }
+  
+  // Add/remove -vending suffix
+  if (normalizedSlug.endsWith('-vending')) {
+    variations.push(normalizedSlug.replace('-vending', ''));
+  } else {
+    variations.push(`${normalizedSlug}-vending`);
+  }
+  
+  console.log(`[slugMatching] Generated variations for "${slug}":`, variations);
+  return [...new Set(variations)]; // Remove duplicates
 }
 
 /**

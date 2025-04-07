@@ -1,7 +1,6 @@
-
 import { useQuery } from '@tanstack/react-query';
 import * as cmsService from '@/services/cms';
-import { normalizeSlug } from '@/services/cms/utils/slugMatching';
+import { normalizeSlug, getSlugVariations } from '@/services/cms/utils/slugMatching';
 
 /**
  * Hook to fetch machines with optional filters
@@ -68,7 +67,7 @@ export function useProductType(slug: string | undefined, uuid: string | null = n
       console.log(`[useCMSData] useProductType hook fetching product type with slug: "${normalizedSlug}"`);
       
       try {
-        // Enhanced product lookup with multiple fallback strategies
+        // Enhanced product lookup with improved slug handling
         const result = await cmsService.getProductTypeBySlug(normalizedSlug);
         
         if (result) {
