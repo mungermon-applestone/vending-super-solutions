@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { 
   FormField,
@@ -18,10 +18,30 @@ interface BasicInformationProps {
 }
 
 const BasicInformation = ({ form }: BasicInformationProps) => {
-  console.log('[BasicInformation] Rendering with form values:', {
-    title: form.watch('title'),
-    slug: form.watch('slug'),
-    description: form.watch('description')
+  // Use local state for form values to ensure editability
+  const [title, setTitle] = useState(form.getValues('title'));
+  const [slug, setSlug] = useState(form.getValues('slug'));
+  const [description, setDescription] = useState(form.getValues('description'));
+
+  // Update React Hook Form whenever local state changes
+  const updateFormValues = () => {
+    form.setValue('title', title);
+    
+    // Apply slug formatting rules
+    const formattedSlug = slug
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+    
+    form.setValue('slug', formattedSlug);
+    form.setValue('description', description);
+  };
+
+  // Log current values for debugging
+  console.log('[BasicInformation] Rendering with local state values:', {
+    title,
+    slug,
+    description
   });
 
   return (
@@ -30,75 +50,68 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
         <CardTitle>Basic Information</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="Product Title" 
-                  {...field} 
-                  readOnly={false}
-                  disabled={false}
-                  data-force-editable="true"
-                  className="editable-input"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="space-y-4">
+          <div>
+            <FormLabel htmlFor="title">Title</FormLabel>
+            <Input
+              id="title"
+              placeholder="Product Title"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                updateFormValues();
+              }}
+              className="mt-1 w-full"
+            />
+            {form.formState.errors.title && (
+              <p className="text-sm text-red-500 mt-1">
+                {form.formState.errors.title.message}
+              </p>
+            )}
+          </div>
 
-        <FormField
-          control={form.control}
-          name="slug"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Slug (URL-friendly name)</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="product-slug" 
-                  {...field}
-                  readOnly={false}
-                  disabled={false}
-                  data-force-editable="true"
-                  className="editable-input"
-                  onChange={(e) => {
-                    const value = e.target.value
-                      .toLowerCase()
-                      .replace(/\s+/g, '-')
-                      .replace(/[^a-z0-9-]/g, '');
-                    field.onChange(value);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <div>
+            <FormLabel htmlFor="slug">Slug (URL-friendly name)</FormLabel>
+            <Input
+              id="slug"
+              placeholder="product-slug"
+              value={slug}
+              onChange={(e) => {
+                const value = e.target.value
+                  .toLowerCase()
+                  .replace(/\s+/g, '-')
+                  .replace(/[^a-z0-9-]/g, '');
+                setSlug(value);
+                updateFormValues();
+              }}
+              className="mt-1 w-full"
+            />
+            {form.formState.errors.slug && (
+              <p className="text-sm text-red-500 mt-1">
+                {form.formState.errors.slug.message}
+              </p>
+            )}
+          </div>
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Describe the product category..." 
-                  className="min-h-[100px] editable-input"
-                  {...field}
-                  readOnly={false}
-                  disabled={false}
-                  data-force-editable="true"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <div>
+            <FormLabel htmlFor="description">Description</FormLabel>
+            <Textarea
+              id="description"
+              placeholder="Describe the product..."
+              value={description}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                updateFormValues();
+              }}
+              className="mt-1 w-full min-h-[100px]"
+            />
+            {form.formState.errors.description && (
+              <p className="text-sm text-red-500 mt-1">
+                {form.formState.errors.description.message}
+              </p>
+            )}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
