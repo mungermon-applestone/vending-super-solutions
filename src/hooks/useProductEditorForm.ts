@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { type UseToastReturn } from '@/hooks/use-toast';
+import { UseToastReturn } from '@/hooks/use-toast';
 import { NavigateFunction } from 'react-router-dom';
 import { useProductType } from '@/hooks/useCMSData';
 import { ProductFormData } from '@/types/forms';
@@ -18,6 +18,7 @@ export const useProductEditorForm = (
   const { data: existingProduct, isLoading: isLoadingProduct, error } = useProductType(productSlug);
 
   console.log('[useProductEditorForm] Initialized with productSlug:', productSlug);
+  console.log('[useProductEditorForm] isCreating mode:', isCreating);
   console.log('[useProductEditorForm] Existing product data:', existingProduct);
   
   if (error) {
@@ -84,6 +85,21 @@ export const useProductEditorForm = (
                 }
               ]
         });
+        
+        // Force the form to be editable by accessing the DOM elements directly after reset
+        setTimeout(() => {
+          const formElements = document.querySelectorAll('input, textarea');
+          console.log(`[useProductEditorForm] Found ${formElements.length} form elements after reset`);
+          
+          formElements.forEach(element => {
+            const inputElement = element as HTMLInputElement | HTMLTextAreaElement;
+            if (inputElement) {
+              inputElement.readOnly = false;
+              inputElement.disabled = false;
+              console.log(`[useProductEditorForm] Made element ${inputElement.name || inputElement.id} editable`);
+            }
+          });
+        }, 500);
         
         console.log('[useProductEditorForm] Form reset with values:', form.getValues());
       } else {

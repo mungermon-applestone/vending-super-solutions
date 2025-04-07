@@ -18,34 +18,48 @@ const ProductEditorPage = () => {
     console.log('[ProductEditorPage] Page mounted with productSlug:', productSlug);
     console.log(`[ProductEditorPage] Form mode: ${productSlug ? 'edit existing' : 'create new'}`);
     
-    // Check DOM for input fields
-    setTimeout(() => {
-      const inputs = document.querySelectorAll('input');
-      const textareas = document.querySelectorAll('textarea');
-      
-      console.log(`[ProductEditorPage] Found ${inputs.length} inputs and ${textareas.length} textareas`);
-      
-      inputs.forEach((input, i) => {
-        console.log(`[ProductEditorPage] Input #${i}:`, {
-          id: input.id,
-          name: input.name,
-          type: input.type,
-          value: input.value,
-          readOnly: input.readOnly,
-          disabled: input.disabled
-        });
+    // Add MutationObserver to detect DOM changes and ensure inputs remain editable
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList' || mutation.type === 'attributes') {
+          const inputs = document.querySelectorAll('input');
+          const textareas = document.querySelectorAll('textarea');
+          
+          console.log(`[ProductEditorPage] DOM changed, ensuring ${inputs.length} inputs and ${textareas.length} textareas are editable`);
+          
+          // Force all inputs to be editable
+          inputs.forEach((input) => {
+            if (input.readOnly || input.disabled) {
+              console.log(`[ProductEditorPage] Making input editable:`, input.name || input.id);
+              input.readOnly = false;
+              input.disabled = false;
+            }
+          });
+          
+          // Force all textareas to be editable
+          textareas.forEach((textarea) => {
+            if (textarea.readOnly || textarea.disabled) {
+              console.log(`[ProductEditorPage] Making textarea editable:`, textarea.name || textarea.id);
+              textarea.readOnly = false;
+              textarea.disabled = false;
+            }
+          });
+        }
       });
-      
-      textareas.forEach((textarea, i) => {
-        console.log(`[ProductEditorPage] Textarea #${i}:`, {
-          id: textarea.id,
-          name: textarea.name,
-          value: textarea.value,
-          readOnly: textarea.readOnly,
-          disabled: textarea.disabled
-        });
-      });
-    }, 2000);
+    });
+    
+    // Start observing the document
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['readonly', 'disabled']
+    });
+    
+    // Cleanup function to disconnect observer
+    return () => {
+      observer.disconnect();
+    };
   }, [productSlug]);
   
   return (

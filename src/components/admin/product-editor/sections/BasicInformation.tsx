@@ -25,21 +25,33 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
   useEffect(() => {
     console.log('[BasicInformation] Component mounted');
     
-    // Log refs after render
-    setTimeout(() => {
-      console.log('[BasicInformation] Title input ref:', titleRef.current);
+    // Force inputs to be editable
+    const makeInputsEditable = () => {
+      console.log('[BasicInformation] Ensuring inputs are editable');
       if (titleRef.current) {
-        console.log('[BasicInformation] Title readOnly:', titleRef.current.readOnly);
-        console.log('[BasicInformation] Title disabled:', titleRef.current.disabled);
-        console.log('[BasicInformation] Title value:', titleRef.current.value);
+        titleRef.current.readOnly = false;
+        titleRef.current.disabled = false;
+        console.log('[BasicInformation] Title input made editable:', titleRef.current.value);
       }
       
-      console.log('[BasicInformation] Slug input ref:', slugRef.current);
       if (slugRef.current) {
-        console.log('[BasicInformation] Slug readOnly:', slugRef.current.readOnly);
-        console.log('[BasicInformation] Slug disabled:', slugRef.current.disabled);
+        slugRef.current.readOnly = false;
+        slugRef.current.disabled = false;
+        console.log('[BasicInformation] Slug input made editable:', slugRef.current.value);
       }
-    }, 500);
+      
+      if (descriptionRef.current) {
+        descriptionRef.current.readOnly = false;
+        descriptionRef.current.disabled = false;
+        console.log('[BasicInformation] Description input made editable:', descriptionRef.current.value);
+      }
+    };
+    
+    // Run immediately and then every second to ensure inputs remain editable
+    makeInputsEditable();
+    const interval = setInterval(makeInputsEditable, 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -58,14 +70,24 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                 <Input 
                   placeholder="Product Title" 
                   {...field} 
-                  ref={titleRef}
+                  ref={(e) => {
+                    titleRef.current = e;
+                    if (e) {
+                      e.readOnly = false;
+                      e.disabled = false;
+                    }
+                  }}
                   readOnly={false}
                   disabled={false}
-                  onClick={(e) => {
-                    console.log('[BasicInformation] Title input clicked', e.currentTarget.value);
-                  }}
                   onFocus={(e) => {
                     console.log('[BasicInformation] Title input focused', e.currentTarget.value);
+                    e.currentTarget.readOnly = false;
+                    e.currentTarget.disabled = false;
+                  }}
+                  onClick={(e) => {
+                    console.log('[BasicInformation] Title input clicked');
+                    e.currentTarget.readOnly = false;
+                    e.currentTarget.disabled = false;
                   }}
                 />
               </FormControl>
@@ -84,7 +106,13 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                 <Input 
                   placeholder="product-slug" 
                   {...field}
-                  ref={slugRef}
+                  ref={(e) => {
+                    slugRef.current = e;
+                    if (e) {
+                      e.readOnly = false;
+                      e.disabled = false;
+                    }
+                  }}
                   readOnly={false}
                   disabled={false}
                   onChange={(e) => {
@@ -95,8 +123,10 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                     field.onChange(value);
                     console.log('[BasicInformation] Slug changed to:', value);
                   }}
-                  onClick={(e) => {
-                    console.log('[BasicInformation] Slug input clicked', e.currentTarget.value);
+                  onFocus={(e) => {
+                    console.log('[BasicInformation] Slug input focused', e.currentTarget.value);
+                    e.currentTarget.readOnly = false;
+                    e.currentTarget.disabled = false;
                   }}
                 />
               </FormControl>
@@ -116,11 +146,19 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                   placeholder="Describe the product category..." 
                   className="min-h-[100px]"
                   {...field}
-                  ref={descriptionRef}
+                  ref={(e) => {
+                    descriptionRef.current = e;
+                    if (e) {
+                      e.readOnly = false;
+                      e.disabled = false;
+                    }
+                  }}
                   readOnly={false}
                   disabled={false}
-                  onClick={(e) => {
-                    console.log('[BasicInformation] Description input clicked', e.currentTarget.value);
+                  onFocus={(e) => {
+                    console.log('[BasicInformation] Description input focused', e.currentTarget.value);
+                    e.currentTarget.readOnly = false;
+                    e.currentTarget.disabled = false;
                   }}
                 />
               </FormControl>

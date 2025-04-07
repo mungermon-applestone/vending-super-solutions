@@ -28,35 +28,32 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
     console.log('[ProductEditorForm] Initial form values:', form.getValues());
     console.log('[ProductEditorForm] Product slug:', productSlug);
     
-    // Check if form fields are read-only
-    setTimeout(() => {
+    // Check DOM for input fields after render
+    const checkFormFields = () => {
       const formFields = document.querySelectorAll('input, textarea');
       console.log('[ProductEditorForm] Found form fields:', formFields.length);
       formFields.forEach((field, index) => {
-        const isReadOnly = (field as HTMLInputElement).readOnly;
-        const isDisabled = (field as HTMLInputElement).disabled;
-        console.log(`[ProductEditorForm] Field ${index}: readOnly=${isReadOnly}, disabled=${isDisabled}, name=${field.getAttribute('name')}`);
-      });
-    }, 1000);
-    
-    // Register event handlers to track form interactions
-    const formElement = document.querySelector('form');
-    if (formElement) {
-      const handleFormClick = (e: Event) => {
-        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-          console.log('[ProductEditorForm] Input clicked:', 
-            e.target.name || e.target.id, 
-            'Current value:', e.target.value,
-            'ReadOnly:', e.target.readOnly,
-            'Disabled:', e.target.disabled);
+        const inputElement = field as HTMLInputElement | HTMLTextAreaElement;
+        const isReadOnly = inputElement.readOnly;
+        const isDisabled = inputElement.disabled;
+        console.log(`[ProductEditorForm] Field ${index}: readOnly=${isReadOnly}, disabled=${isDisabled}, name=${inputElement.getAttribute('name')}`);
+        
+        // Force all inputs to be editable if we're in the product editor form
+        if (document.location.pathname.includes('/admin/products/')) {
+          inputElement.readOnly = false;
+          inputElement.disabled = false;
+          console.log(`[ProductEditorForm] Forced field ${index} to be editable`);
         }
-      };
-      
-      formElement.addEventListener('click', handleFormClick);
-      return () => {
-        formElement.removeEventListener('click', handleFormClick);
-      };
-    }
+      });
+    };
+    
+    // Run initial check and setup a periodic check
+    checkFormFields();
+    const interval = setInterval(checkFormFields, 2000);
+    
+    return () => {
+      clearInterval(interval);
+    };
   }, [isCreating, form, productSlug]);
 
   return (
