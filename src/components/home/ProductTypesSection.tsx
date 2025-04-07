@@ -1,10 +1,10 @@
-
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getProductTypes } from '@/services/cms';
 import { CMSProductType } from '@/types/cms';
+import { normalizeSlug } from '@/services/cms/utils/slugMatching';
 
 interface ProductCardProps {
   title: string;
@@ -35,13 +35,11 @@ const ProductCard = ({ title, description, image, path }: ProductCardProps) => {
 };
 
 const ProductTypesSection = () => {
-  // Fetch product types from CMS
   const { data: productTypes = [], isLoading } = useQuery({
     queryKey: ['productTypes'],
     queryFn: () => getProductTypes(),
   });
 
-  // Fallback data if CMS data is not yet available
   const staticProductTypes = [
     {
       title: "Grocery",
@@ -69,17 +67,15 @@ const ProductTypesSection = () => {
     }
   ];
 
-  // Transform CMS data to the format the component expects
   const displayProductTypes = productTypes.length > 0 
     ? productTypes.map((product: CMSProductType) => ({
         title: product.title,
         description: product.description,
         image: product.image.url,
-        path: `/products/${product.slug}`
+        path: `/products/${normalizeSlug(product.slug)}`
       }))
     : staticProductTypes;
   
-  // Only show the first 4 product types in this section
   const featuredProductTypes = displayProductTypes.slice(0, 4);
   
   return (

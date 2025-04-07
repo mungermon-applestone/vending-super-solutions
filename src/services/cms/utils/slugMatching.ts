@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for slug matching and normalization
  */
@@ -7,7 +6,8 @@
 const slugMappings: Record<string, string> = {
   'grocery': 'grocery-vending',
   'cannabis': 'cannabis-vending',
-  'vape': 'vape-vending'
+  'vape': 'vape-vending',
+  'cosmetics': 'cosmetics-vending'
 };
 
 /**

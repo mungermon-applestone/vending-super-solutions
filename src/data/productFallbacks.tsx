@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { CMSProductType } from '@/types/cms';
-import { ShoppingBag, ShieldCheck, Utensils, Tags, Truck, Clock } from 'lucide-react';
+import { ShoppingBag, ShieldCheck, Utensils, Tags, Truck, Clock, Sparkles, ThumbsUp } from 'lucide-react';
 
 // Create a mapping of fallback data for specific product types
 export const productFallbacks: Record<string, CMSProductType> = {
@@ -149,6 +148,62 @@ export const productFallbacks: Record<string, CMSProductType> = {
       thumbnailImage: {
         url: "https://images.unsplash.com/photo-1595402507356-b7417a2e31f6",
         alt: "Vape Vending Video"
+      }
+    }
+  },
+  'cosmetics': {
+    id: 'cosmetics',
+    slug: 'cosmetics',
+    title: "Cosmetics",
+    description: "Premium vending solutions for beauty and skincare products with sophisticated product display options and detailed information kiosks.",
+    image: {
+      url: "https://images.unsplash.com/photo-1596462502278-27bfdc403348",
+      alt: "Cosmetics products"
+    },
+    benefits: [
+      "Temperature-controlled storage for sensitive products",
+      "High-resolution product displays with zoom capability",
+      "Detailed ingredient and usage information",
+      "Touchless dispensing options for hygiene",
+      "Product recommendation system based on customer preferences",
+      "Integrated product testing and sampling features"
+    ],
+    features: [
+      {
+        title: "Premium Product Display",
+        description: "Showcase cosmetics with high-definition screens and 360° product views to highlight details and packaging.",
+        icon: <Sparkles className="h-6 w-6 text-vending-teal" />,
+        screenshot: {
+          url: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9",
+          alt: "Premium cosmetics display"
+        }
+      },
+      {
+        title: "Product Information Kiosk",
+        description: "Interactive touchscreen provides detailed information about ingredients, application methods, and benefits of each product.",
+        icon: <ThumbsUp className="h-6 w-6 text-vending-teal" />,
+        screenshot: {
+          url: "https://images.unsplash.com/photo-1596462502278-27bfdc403348",
+          alt: "Product information kiosk"
+        }
+      }
+    ],
+    examples: [
+      {
+        title: "Mall Beauty Station",
+        description: "Self-service beauty product vending machine offering premium cosmetics in high-traffic shopping areas.",
+        image: {
+          url: "https://images.unsplash.com/photo-1607602132700-068673eea729",
+          alt: "Mall Beauty Station"
+        }
+      }
+    ],
+    video: {
+      title: "Cosmetics Vending Innovation",
+      description: "See how our cosmetics vending solutions are transforming the beauty retail landscape with interactive features and premium product displays.",
+      thumbnailImage: {
+        url: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796",
+        alt: "Cosmetics Vending Video"
       }
     }
   }
