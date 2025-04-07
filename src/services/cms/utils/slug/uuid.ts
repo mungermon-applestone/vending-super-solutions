@@ -2,6 +2,9 @@
  * Utilities for working with UUIDs in slugs
  */
 
+// Import from normalize.ts using ES modules import syntax
+import { normalizeSlug } from './normalize';
+
 /**
  * Extract and normalize a UUID from a mixed string format
  * This allows for product identification by UUID even if the slug changes
@@ -28,7 +31,6 @@ export function extractUUID(input: string): string | null {
  * @returns Combined slug with UUID
  */
 export function createSlugWithUUID(slug: string, uuid: string): string {
-  const { normalizeSlug } = require('./normalize');
   const normalizedSlug = normalizeSlug(slug);
   return `${normalizedSlug}--${uuid}`;
 }
@@ -42,8 +44,6 @@ export function parseSlugWithUUID(combinedSlug: string): {slug: string, uuid: st
   if (!combinedSlug) {
     return { slug: '', uuid: null };
   }
-  
-  const { normalizeSlug } = require('./normalize');
   
   // Try to extract UUID from combined format
   const parts = combinedSlug.split('--');
