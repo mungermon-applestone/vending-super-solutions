@@ -22,6 +22,18 @@ export async function fetchProductTypes<T>(params: Record<string, any> = {}): Pr
     console.log(`[fetchProductTypes] Looking for specific slug: ${hasSlug ? params.slug : 'No'}`);
     console.log(`[fetchProductTypes] Looking for specific UUID: ${hasUUID ? params.uuid : 'No'}`);
     
+    // DEBUG: Log the Supabase connection status to verify connectivity
+    try {
+      const { data: healthCheck, error: healthError } = await supabase.from('product_types').select('count(*)');
+      if (healthError) {
+        console.error('[fetchProductTypes] DEBUG: Supabase connection issue:', healthError);
+      } else {
+        console.log('[fetchProductTypes] DEBUG: Supabase connection healthy, product_types table accessible');
+      }
+    } catch (err) {
+      console.error('[fetchProductTypes] DEBUG: Error checking Supabase connection:', err);
+    }
+    
     let query = supabase
       .from('product_types')
       .select(`
@@ -156,6 +168,25 @@ async function searchBySlug<T>(
     return [] as T[];
   }
   
+  // DEBUG: Try a direct query that bypasses some of the complexity to see if the record exists
+  try {
+    console.log(`[searchBySlug] DEBUG: Performing direct query to check if '${normalizedSlug}' exists`);
+    const { data: debugMatch, error: debugError } = await supabase
+      .from('product_types')
+      .select('id, title, slug, visible')
+      .eq('visible', true);
+      
+    if (debugError) {
+      console.error('[searchBySlug] DEBUG: Error with debug query:', debugError);
+    } else {
+      console.log('[searchBySlug] DEBUG: All product types in database:', 
+        debugMatch.map(pt => ({ id: pt.id, title: pt.title, slug: pt.slug, visible: pt.visible }))
+      );
+    }
+  } catch (err) {
+    console.error('[searchBySlug] DEBUG: Error with direct database query:', err);
+  }
+  
   // 2. Try case-insensitive match
   console.log(`[searchBySlug] No exact match for '${normalizedSlug}', trying case-insensitive match`);
   
@@ -210,6 +241,24 @@ export async function fetchProductTypeBySlug<T>(slug: string): Promise<T | null>
     
     // Try all slug variations (original, mapped, with/without -vending suffix)
     const slugVariations = getSlugVariations(slug);
+    
+    // DEBUG: For debugging purposes, let's get all products to see what's available
+    try {
+      const { data: allProducts, error: debugError } = await supabase
+        .from('product_types')
+        .select('id, title, slug, visible')
+        .eq('visible', true);
+        
+      if (debugError) {
+        console.error('[fetchProductTypeBySlug] DEBUG: Error getting all products:', debugError);
+      } else {
+        console.log('[fetchProductTypeBySlug] DEBUG: All available products in database:', 
+          allProducts.map(p => ({ id: p.id, title: p.title, slug: p.slug, visible: p.visible }))
+        );
+      }
+    } catch (err) {
+      console.error('[fetchProductTypeBySlug] DEBUG: Exception getting all products:', err);
+    }
     
     for (const variation of slugVariations) {
       console.log(`[fetchProductTypeBySlug] Trying variation: "${variation}"`);

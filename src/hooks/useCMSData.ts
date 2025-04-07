@@ -79,6 +79,13 @@ export function useProductType(slug: string | undefined, uuid: string | null = n
           });
         } else {
           console.warn(`[useCMSData] No product found for slug "${normalizedSlug}"`);
+          
+          // DEBUG: Let's try to get all product types to see what's available
+          console.log('[useCMSData] DEBUG: Fetching all product types to check available options');
+          const allTypes = await cmsService.getProductTypes();
+          console.log('[useCMSData] DEBUG: Available product types:', 
+            allTypes.map(pt => ({ title: pt.title, slug: pt.slug, id: pt.id }))
+          );
         }
         
         return result;

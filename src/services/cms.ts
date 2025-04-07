@@ -1,4 +1,3 @@
-
 import { 
   CMSMachine, 
   CMSProductType, 
@@ -62,6 +61,13 @@ export async function getProductTypeBySlug(slug: string): Promise<CMSProductType
       console.log(`[cms.ts] Fallback found product type via fuzzy search: ${productTypes[0].title}`);
       return productTypes[0];
     }
+    
+    // DEBUG: Let's try to get all product types to see what's available
+    console.log('[cms.ts] DEBUG: Getting all product types to check available options');
+    const allTypes = await getProductTypes();
+    console.log('[cms.ts] DEBUG: Available product types:', 
+      allTypes.map(pt => ({ title: pt.title, slug: pt.slug, id: pt.id }))
+    );
     
     console.log(`[cms.ts] Could not find product type with any slug variation of "${slug}"`);
     return null;
