@@ -6,6 +6,8 @@ import {
   CMSBusinessGoal 
 } from '@/types/cms';
 import { fetchFromCMS } from '@/services/cms/fetchFromCMS';
+import { fetchProductTypeBySlug } from '@/services/cms/contentTypes/productTypes';
+import { normalizeSlug } from '@/services/cms/utils/slugMatching';
 
 export async function getMachines(filters: Record<string, any> = {}): Promise<CMSMachine[]> {
   return await fetchFromCMS<CMSMachine>('machines', filters);
@@ -26,30 +28,34 @@ export async function getProductTypes(): Promise<CMSProductType[]> {
 
 export async function getProductTypeBySlug(slug: string): Promise<CMSProductType | null> {
   console.log(`[cms.ts] Attempting to fetch product type with slug: "${slug}"`);
+  
   if (!slug || slug.trim() === '') {
     console.warn("[cms.ts] Empty slug passed to getProductTypeBySlug");
     return null;
   }
   
   try {
-    // Normalize the slug - lowercase, trim whitespace
-    const normalizedSlug = slug.toLowerCase().trim();
-    console.log(`[cms.ts] Normalized slug for search: "${normalizedSlug}"`);
+    // Use our new direct method for maximum reliability
+    const productType = await fetchProductTypeBySlug<CMSProductType>(slug);
     
-    const productTypes = await fetchFromCMS<CMSProductType>('product-types', { 
-      slug: normalizedSlug,
-      exactMatch: true // Add a flag to ensure we get exact match
-    });
-    
-    console.log(`[cms.ts] Found ${productTypes.length} product types for slug "${normalizedSlug}":`, productTypes);
-    
-    if (productTypes.length > 0) {
-      console.log(`[cms.ts] Successfully retrieved product type: ${productTypes[0].title}`);
-      return productTypes[0];
+    if (productType) {
+      console.log(`[cms.ts] Successfully retrieved product type: ${productType.title}`);
+    } else {
+      console.log(`[cms.ts] No product found with slug "${slug}", falling back to regular search`);
+      
+      // Fallback to the traditional method
+      const productTypes = await fetchFromCMS<CMSProductType>('product-types', { 
+        slug: slug,
+        exactMatch: true
+      });
+      
+      if (productTypes.length > 0) {
+        console.log(`[cms.ts] Fallback successfully retrieved product type: ${productTypes[0].title}`);
+        return productTypes[0];
+      }
     }
     
-    console.log(`[cms.ts] No product found with slug "${normalizedSlug}"`);
-    return null;
+    return productType;
   } catch (error) {
     console.error(`[cms.ts] Error fetching product type by slug "${slug}":`, error);
     return null;

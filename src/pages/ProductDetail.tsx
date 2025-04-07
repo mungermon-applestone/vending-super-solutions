@@ -19,7 +19,13 @@ const ProductDetail = () => {
   console.log("ProductDetail rendering for product type:", productType);
   
   // Use the hook from useCMSData with clearer enabled condition
-  const { data: productTypeData, isLoading, error, refetch } = useProductType(productType);
+  const { 
+    data: productTypeData, 
+    isLoading, 
+    error, 
+    isError,
+    refetch 
+  } = useProductType(productType);
   
   // Log what we're receiving from the API to help debug
   useEffect(() => {
@@ -32,6 +38,11 @@ const ProductDetail = () => {
     
     if (error) {
       console.error("Error loading product data:", error);
+    }
+    
+    // If we have a product type but no data and we're not loading, log this issue
+    if (productType && !productTypeData && !isLoading) {
+      console.warn(`ProductDetail: Product type "${productType}" requested but no data returned`);
     }
   }, [productTypeData, isLoading, error, productType]);
   
@@ -46,6 +57,11 @@ const ProductDetail = () => {
   // Use CMS data if available, otherwise try fallbacks, default to grocery
   const fallbackData = productFallbacks[productType] || productFallbacks['grocery'];
   const currentProductData = productTypeData || fallbackData;
+  
+  console.log("ProductDetail using data:", {
+    isUsingFallbackData: !productTypeData,
+    currentProductData
+  });
   
   if (isLoading) {
     return (

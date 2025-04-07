@@ -1,6 +1,7 @@
 
 import { useMemo, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
+import { normalizeSlug } from '@/services/cms/utils/slugMatching';
 
 /**
  * Custom hook to extract the product type from URL parameters or path
@@ -14,7 +15,7 @@ export const useProductTypeFromUrl = () => {
     // First priority: Check URL params
     if (params.productType) {
       console.log("[useProductTypeFromUrl] Using productType from URL params:", params.productType);
-      return params.productType;
+      return normalizeSlug(params.productType);
     }
     
     // Second priority: Extract from path
@@ -23,7 +24,7 @@ export const useProductTypeFromUrl = () => {
     if (pathMatch && pathParts.indexOf(pathMatch) + 1 < pathParts.length) {
       const productTypeFromPath = pathParts[pathParts.indexOf(pathMatch) + 1];
       console.log("[useProductTypeFromUrl] Using productType extracted from path:", productTypeFromPath);
-      return productTypeFromPath;
+      return normalizeSlug(productTypeFromPath);
     }
 
     // Third priority: Check if we're on an edit page
@@ -32,7 +33,7 @@ export const useProductTypeFromUrl = () => {
       const editProductType = editPathParts[editPathParts.length - 1];
       if (editProductType) {
         console.log("[useProductTypeFromUrl] Using productType from edit path:", editProductType);
-        return editProductType;
+        return normalizeSlug(editProductType);
       }
     }
 

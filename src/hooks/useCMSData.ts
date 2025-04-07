@@ -1,6 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import * as cmsService from '@/services/cms';
+import { normalizeSlug } from '@/services/cms/utils/slugMatching';
 
 /**
  * Hook to fetch machines with optional filters
@@ -46,14 +47,24 @@ export function useProductType(slug: string | undefined) {
         return null;
       }
       
-      console.log(`[useCMSData] useProductType hook fetching product type with slug: ${slug}`);
+      const normalizedSlug = normalizeSlug(slug);
+      console.log(`[useCMSData] useProductType hook fetching product type with slug: "${normalizedSlug}"`);
       
       try {
-        const result = await cmsService.getProductTypeBySlug(slug);
-        console.log(`[useCMSData] useProductType hook received result for ${slug}:`, result);
+        const result = await cmsService.getProductTypeBySlug(normalizedSlug);
+        
+        if (result) {
+          console.log(`[useCMSData] useProductType hook received result for "${normalizedSlug}":`, { 
+            title: result.title,
+            slug: result.slug
+          });
+        } else {
+          console.warn(`[useCMSData] No product found for slug "${normalizedSlug}"`);
+        }
+        
         return result;
       } catch (error) {
-        console.error(`[useCMSData] Error fetching product type ${slug}:`, error);
+        console.error(`[useCMSData] Error fetching product type "${normalizedSlug}":`, error);
         throw error;
       }
     },
@@ -61,7 +72,7 @@ export function useProductType(slug: string | undefined) {
     retry: 1,                             // Reduced retry attempts 
     refetchOnWindowFocus: false,          // Don't refetch on window focus
     staleTime: 1000 * 30,                 // Data remains fresh for 30 seconds (reduced from 5 minutes)
-    gcTime: 1000 * 60,                    // Cache for 1 minute (replaced cacheTime with gcTime)
+    gcTime: 1000 * 60,                    // Cache for 1 minute
   });
 }
 
