@@ -9,7 +9,8 @@ const slugMappings: Record<string, string> = {
   'cannabis': 'cannabis-vending',
   'vape': 'vape-vending',
   'cosmetics': 'cosmetics-vending',
-  'otc': 'over-the-counter-pharma-vending',  // Updated to correct database slug
+  'otc': 'over-the-counter-pharma-vending',
+  'collectibles': 'collectibles-vending'  // Added mapping for collectibles
 };
 
 // Map for the reverse lookup (database slug to URL slug)
@@ -19,7 +20,14 @@ const reverseMappings: Record<string, string> = {
   'cannabis-vending': 'cannabis',
   'vape-vending': 'vape',
   'cosmetics-vending': 'cosmetics',
-  'over-the-counter-pharma-vending': 'otc',  // Updated to match the correct database slug
+  'over-the-counter-pharma-vending': 'otc',
+  'collectibles-vending': 'collectibles' // Added reverse mapping for collectibles
+};
+
+// Track historical slugs that may have changed - maps old slugs to current slugs
+// This allows products to be found even if their slug has changed
+const historicalSlugs: Record<string, string> = {
+  // Example: 'old-product-slug': 'new-product-slug'
 };
 
 /**
@@ -51,9 +59,24 @@ export function mapUrlSlugToDatabaseSlug(slug: string): string {
   const normalizedSlug = normalizeSlug(slug);
   console.log(`[slugMatching] Mapping URL slug: "${normalizedSlug}" to database slug`);
   
+  // Check for direct mapping
   if (slugMappings[normalizedSlug]) {
     console.log(`[slugMatching] Found mapping: "${normalizedSlug}" -> "${slugMappings[normalizedSlug]}"`);
     return slugMappings[normalizedSlug];
+  }
+  
+  // Check historical slugs if no direct mapping found
+  if (historicalSlugs[normalizedSlug]) {
+    const currentSlug = historicalSlugs[normalizedSlug];
+    console.log(`[slugMatching] Found historical mapping: "${normalizedSlug}" -> "${currentSlug}"`);
+    
+    // If the current slug has a database mapping, use that
+    if (slugMappings[currentSlug]) {
+      return slugMappings[currentSlug];
+    }
+    
+    // Otherwise return the current slug
+    return currentSlug;
   }
   
   console.log(`[slugMatching] No mapping found for slug: "${normalizedSlug}", using as-is`);
@@ -77,6 +100,21 @@ export function mapDatabaseSlugToUrlSlug(slug: string): string {
 }
 
 /**
+ * Register a slug change to help with lookups
+ * @param oldSlug The previous slug
+ * @param newSlug The new slug
+ */
+export function registerSlugChange(oldSlug: string, newSlug: string): void {
+  if (!oldSlug || !newSlug || oldSlug === newSlug) return;
+  
+  const normalizedOld = normalizeSlug(oldSlug);
+  const normalizedNew = normalizeSlug(newSlug);
+  
+  console.log(`[slugMatching] Registering slug change: "${normalizedOld}" -> "${normalizedNew}"`);
+  historicalSlugs[normalizedOld] = normalizedNew;
+}
+
+/**
  * Get all possible slug variations to try
  * @param slug The original slug
  * @returns Array of possible slug variations to try
@@ -94,6 +132,17 @@ export function getSlugVariations(slug: string): string[] {
   const mappedSlug = mapUrlSlugToDatabaseSlug(normalizedSlug);
   if (mappedSlug !== normalizedSlug) {
     variationsSet.add(mappedSlug);
+  }
+  
+  // Check historical slugs
+  if (historicalSlugs[normalizedSlug]) {
+    const currentSlug = historicalSlugs[normalizedSlug];
+    variationsSet.add(currentSlug);
+    
+    // If the current slug has a database mapping, add that too
+    if (slugMappings[currentSlug]) {
+      variationsSet.add(slugMappings[currentSlug]);
+    }
   }
   
   // Special case for OTC - always include the exact database slug

@@ -1,7 +1,7 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
 import type { UseToastReturn } from '@/hooks/use-toast';
+import { registerSlugChange } from '@/services/cms/utils/slugMatching';
 
 // Create a new product
 export const createProduct = async (data: ProductFormData, toast: UseToastReturn) => {
@@ -90,6 +90,10 @@ export const updateProduct = async (data: ProductFormData, originalSlug: string,
         console.error(`[productService] Cannot update: slug "${data.slug}" already in use by another product`);
         throw new Error(`The slug "${data.slug}" is already in use by another product`);
       }
+      
+      // Register the slug change for future lookups
+      registerSlugChange(originalSlug, data.slug);
+      console.log(`[productService] Registered slug change: "${originalSlug}" -> "${data.slug}"`);
     }
 
     // Update the product type

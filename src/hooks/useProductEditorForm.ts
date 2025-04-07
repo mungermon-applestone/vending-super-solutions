@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import type { UseToastReturn } from '@/hooks/use-toast';
@@ -6,6 +5,7 @@ import { NavigateFunction } from 'react-router-dom';
 import { useProductType } from '@/hooks/useCMSData';
 import { ProductFormData } from '@/types/forms';
 import { createProduct, updateProduct } from '@/services/productService';
+import { registerSlugChange } from '@/services/cms/utils/slugMatching';
 
 export const useProductEditorForm = (
   productSlug: string | undefined,
@@ -123,6 +123,8 @@ export const useProductEditorForm = (
         // Navigate to the new slug if it changed
         if (data.slug !== productSlug) {
           console.log(`[useProductEditorForm] Slug changed from ${productSlug} to ${data.slug}, navigating to new URL`);
+          // Register the slug change in memory for this session
+          registerSlugChange(productSlug, data.slug);
           navigate(`/products/${data.slug}`);
         } else {
           console.log('[useProductEditorForm] Slug unchanged, reloading current page');
