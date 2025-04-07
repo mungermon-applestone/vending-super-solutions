@@ -24,6 +24,7 @@ import Contact from "./pages/Contact";
 import Partner from "./pages/Partner";
 import BusinessGoalsLanding from "./pages/BusinessGoalsLanding";
 import BusinessGoalDetail from "./pages/BusinessGoalDetail";
+import AdminProducts from "./pages/AdminProducts";
 
 // Import individual machine pages
 import Option4Refrigerated from "./pages/machines/Option4Refrigerated";
@@ -70,7 +71,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/products" element={<ProductsLanding />} />
             
-            {/* Admin routes for product editing */}
+            {/* Admin routes */}
+            <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/products/new" element={<ProductEditor />} />
             <Route path="/admin/products/edit/:productSlug" element={<ProductEditor />} />
             

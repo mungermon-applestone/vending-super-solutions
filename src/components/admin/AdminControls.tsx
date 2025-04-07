@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Edit } from 'lucide-react';
+import { PlusCircle, Edit, List } from 'lucide-react';
 import { useProductTypeFromUrl } from '@/hooks/useProductTypeFromUrl';
 
 const AdminControls = () => {
@@ -16,22 +16,39 @@ const AdminControls = () => {
     productInfo.slug !== 'products') ||
     location.pathname.includes('/admin/products/edit/');
   
+  // Determine if we're already on the admin products page
+  const isAdminProductsPage = location.pathname === '/admin/products';
+  
   console.log("AdminControls rendering with:", {
     location: location.pathname,
     productType: productInfo,
-    isProductDetailPage
+    isProductDetailPage,
+    isAdminProductsPage
   });
 
   return (
     <div className="fixed bottom-8 right-8 flex flex-col gap-2 z-50">
-      {isProductDetailPage ? (
+      {/* Always show Admin Products link unless we're already on that page */}
+      {!isAdminProductsPage && (
+        <Button asChild className="bg-purple-600 hover:bg-purple-700 shadow-lg">
+          <Link to="/admin/products" className="flex items-center gap-2">
+            <List size={16} /> Manage Products
+          </Link>
+        </Button>
+      )}
+      
+      {/* Show Edit Product button on product detail pages */}
+      {isProductDetailPage && !location.pathname.includes('/admin/products/edit/') && (
         <Button asChild className="bg-blue-600 hover:bg-blue-700 shadow-lg">
           <Link to={`/admin/products/edit/${productInfo.slug}`} className="flex items-center gap-2">
             <Edit size={16} /> Edit Product
           </Link>
         </Button>
-      ) : (
-        <Button asChild className="bg-blue-600 hover:bg-blue-700 shadow-lg">
+      )}
+      
+      {/* Show New Product button only on the admin products page */}
+      {isAdminProductsPage && (
+        <Button asChild className="bg-green-600 hover:bg-green-700 shadow-lg">
           <Link to="/admin/products/new" className="flex items-center gap-2">
             <PlusCircle size={16} /> New Product
           </Link>
