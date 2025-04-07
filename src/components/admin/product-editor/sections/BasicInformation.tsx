@@ -18,10 +18,36 @@ interface BasicInformationProps {
 }
 
 const BasicInformation = ({ form }: BasicInformationProps) => {
-  // Use local state for form values to ensure editability
-  const [title, setTitle] = useState(form.getValues('title'));
-  const [slug, setSlug] = useState(form.getValues('slug'));
-  const [description, setDescription] = useState(form.getValues('description'));
+  // Initialize state with form values
+  const [title, setTitle] = useState(form.getValues('title') || '');
+  const [slug, setSlug] = useState(form.getValues('slug') || '');
+  const [description, setDescription] = useState(form.getValues('description') || '');
+
+  // Update local state when form values change (especially when populated from API)
+  useEffect(() => {
+    console.log('[BasicInformation] Form values changed, updating local state:', {
+      formTitle: form.getValues('title'),
+      formSlug: form.getValues('slug'),
+      formDescription: form.getValues('description')
+    });
+    
+    // Only update if the form values are not empty and different from current state
+    const formTitle = form.getValues('title');
+    const formSlug = form.getValues('slug');
+    const formDescription = form.getValues('description');
+    
+    if (formTitle && formTitle !== title) {
+      setTitle(formTitle);
+    }
+    
+    if (formSlug && formSlug !== slug) {
+      setSlug(formSlug);
+    }
+    
+    if (formDescription && formDescription !== description) {
+      setDescription(formDescription);
+    }
+  }, [form.formState.defaultValues]);
 
   // Update React Hook Form whenever local state changes
   useEffect(() => {

@@ -20,7 +20,7 @@ const ProductEditorPage = () => {
   
   return (
     <Layout>
-      <ProductEditorForm productSlug={productSlug} />
+      <ProductEditorForm key={productSlug || 'new'} productSlug={productSlug} />
     </Layout>
   );
 };

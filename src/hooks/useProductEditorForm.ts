@@ -55,6 +55,7 @@ export const useProductEditorForm = (
     if (existingProduct && !isCreating) {
       console.log('[useProductEditorForm] Populating form with product data:', existingProduct);
       
+      // First reset the form to clear any previous data
       form.reset({
         title: existingProduct.title || '',
         slug: existingProduct.slug || '',
@@ -87,9 +88,15 @@ export const useProductEditorForm = (
       
       console.log('[useProductEditorForm] Form reset with values:', form.getValues());
       
+      // Force field updates separately to ensure they're applied
+      if (existingProduct.title) form.setValue('title', existingProduct.title);
+      if (existingProduct.slug) form.setValue('slug', existingProduct.slug);
+      if (existingProduct.description) form.setValue('description', existingProduct.description);
+      
       // Force a re-render after populating the form
       setTimeout(() => {
         setFormKey(prev => prev + 1);
+        console.log('[useProductEditorForm] Forced re-render with new formKey:', formKey + 1);
       }, 100);
     } else if (productSlug && !existingProduct && !isLoadingProduct) {
       console.log('[useProductEditorForm] No existing product found for slug:', productSlug);
