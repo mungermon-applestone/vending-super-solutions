@@ -24,6 +24,24 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const { isCreating, form, onSubmit } = useProductEditorForm(productSlug, setIsLoading, toast, navigate);
 
   console.log('[ProductEditorForm] Re-rendering with form values:', form.getValues());
+  
+  // Add event listeners to help debug form issues
+  React.useEffect(() => {
+    const formElement = document.querySelector('form');
+    if (formElement) {
+      console.log('[ProductEditorForm] Found form element, adding debug listeners');
+      
+      const handleFormClick = (e: Event) => {
+        console.log('[ProductEditorForm] Form clicked:', e.target);
+      };
+      
+      formElement.addEventListener('click', handleFormClick);
+      
+      return () => {
+        formElement.removeEventListener('click', handleFormClick);
+      };
+    }
+  }, []);
 
   return (
     <div className="container py-10">
