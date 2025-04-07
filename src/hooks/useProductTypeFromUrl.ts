@@ -1,7 +1,7 @@
 
 import { useMemo, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { normalizeSlug } from '@/services/cms/utils/slugMatching';
+import { normalizeSlug, mapUrlSlugToDatabaseSlug } from '@/services/cms/utils/slugMatching';
 
 /**
  * Custom hook to extract the product type from URL parameters or path
@@ -24,6 +24,8 @@ export const useProductTypeFromUrl = () => {
     if (pathParts.length >= 3 && pathParts[1] === 'products') {
       const productTypeFromPath = pathParts[2];
       console.log("[useProductTypeFromUrl] Extracted product type from products path:", productTypeFromPath);
+      console.log("[useProductTypeFromUrl] Normalized slug:", normalizeSlug(productTypeFromPath));
+      console.log("[useProductTypeFromUrl] Database mapped slug:", mapUrlSlugToDatabaseSlug(normalizeSlug(productTypeFromPath)));
       return normalizeSlug(productTypeFromPath);
     }
 

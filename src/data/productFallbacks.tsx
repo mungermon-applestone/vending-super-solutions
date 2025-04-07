@@ -1,6 +1,6 @@
 import React from 'react';
 import { CMSProductType } from '@/types/cms';
-import { ShoppingBag, ShieldCheck, Utensils, Tags, Truck, Clock, Sparkles, ThumbsUp } from 'lucide-react';
+import { ShoppingBag, ShieldCheck, Utensils, Tags, Truck, Clock, Sparkles, ThumbsUp, Pill } from 'lucide-react';
 
 // Create a mapping of fallback data for specific product types
 export const productFallbacks: Record<string, CMSProductType> = {
@@ -204,6 +204,62 @@ export const productFallbacks: Record<string, CMSProductType> = {
       thumbnailImage: {
         url: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796",
         alt: "Cosmetics Vending Video"
+      }
+    }
+  },
+  'otc': {
+    id: 'otc',
+    slug: 'otc',
+    title: "OTC Products",
+    description: "Secure and compliant vending solutions for over-the-counter medications and health products with temperature control and expiration tracking.",
+    image: {
+      url: "https://images.unsplash.com/photo-1584362917165-526a968579e8",
+      alt: "OTC products"
+    },
+    benefits: [
+      "Compliant with pharmacy regulations",
+      "Secure product dispensing with verification",
+      "Temperature-controlled storage for sensitive medications",
+      "Expiration date tracking and automatic removal",
+      "Product information display for dosage and usage",
+      "Integration with pharmacy management systems"
+    ],
+    features: [
+      {
+        title: "Medication Safety Features",
+        description: "Built-in verification systems ensure proper handling and dispensing of OTC medications with appropriate usage guidelines displayed.",
+        icon: <Pill className="h-6 w-6 text-vending-teal" />,
+        screenshot: {
+          url: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae",
+          alt: "Medication safety features"
+        }
+      },
+      {
+        title: "Compliance Management",
+        description: "Automated tracking of medication regulations and sales restrictions to ensure full compliance with local and federal laws.",
+        icon: <ShieldCheck className="h-6 w-6 text-vending-teal" />,
+        screenshot: {
+          url: "https://images.unsplash.com/photo-1576602976047-174e57a47881",
+          alt: "Compliance management"
+        }
+      }
+    ],
+    examples: [
+      {
+        title: "24/7 Pharmacy Access",
+        description: "Pharmacy chain extended hours of operation with OTC medication vending machines in accessible locations.",
+        image: {
+          url: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88",
+          alt: "24/7 Pharmacy Access"
+        }
+      }
+    ],
+    video: {
+      title: "Next-Generation OTC Dispensing",
+      description: "See how our OTC vending solutions are transforming medication accessibility while maintaining strict compliance standards.",
+      thumbnailImage: {
+        url: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de",
+        alt: "OTC Vending Video"
       }
     }
   }
