@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import type { UseToastReturn } from '@/hooks/use-toast';
@@ -18,13 +19,12 @@ export const useProductEditorForm = (
 
   console.log('[useProductEditorForm] Initialized with productSlug:', productSlug);
   console.log('[useProductEditorForm] Existing product data:', existingProduct);
-  console.log('[useProductEditorForm] Is loading product:', isLoadingProduct);
   
   if (error) {
     console.error('[useProductEditorForm] Error loading product data:', error);
   }
 
-  // Set up form with default values and proper form mode
+  // Set up form with default values
   const form = useForm<ProductFormData>({
     defaultValues: {
       title: '',
@@ -45,7 +45,7 @@ export const useProductEditorForm = (
         }
       ]
     },
-    mode: 'onChange', // Change to onChange for better real-time feedback
+    mode: 'onChange',
   });
 
   // Populate form with existing product data when available
@@ -53,7 +53,6 @@ export const useProductEditorForm = (
     if (existingProduct && !isCreating) {
       console.log('[useProductEditorForm] Populating form with product data:', existingProduct);
       
-      // Reset form with data from existing product
       form.reset({
         title: existingProduct.title || '',
         slug: existingProduct.slug || '',
@@ -69,7 +68,6 @@ export const useProductEditorForm = (
           ? existingProduct.features.map(feature => ({
               title: feature.title || '',
               description: feature.description || '',
-              // Ensure icon is always a string
               icon: typeof feature.icon === 'string' ? feature.icon : 'check',
               screenshotUrl: feature.screenshot?.url || '',
               screenshotAlt: feature.screenshot?.alt || ''
@@ -83,28 +81,10 @@ export const useProductEditorForm = (
                 screenshotAlt: ''
               }
             ]
-      }, { 
-        // Keep form state synchronized with values to avoid stale state issues
-        keepDefaultValues: false,
-        keepErrors: false,
-        keepDirty: false,
-        keepIsSubmitted: false,
-        keepTouched: false,
-        keepIsValid: false,
-        keepSubmitCount: false
       });
       
-      console.log('[useProductEditorForm] Form populated with data:', form.getValues());
-      
-      // Force a rerender of the form fields
-      setTimeout(() => {
-        Object.keys(form.getValues()).forEach(key => {
-          form.trigger(key as any);
-        });
-      }, 100);
+      console.log('[useProductEditorForm] Form reset with values:', form.getValues());
     } else if (productSlug && !existingProduct && !isLoadingProduct) {
-      // If we have a slug but no product was found, and we're not still loading,
-      // show an error toast and set to creating mode
       console.log('[useProductEditorForm] No existing product found for slug:', productSlug);
       toast.toast({
         title: "Product not found",
@@ -129,7 +109,7 @@ export const useProductEditorForm = (
           description: `${data.title} has been created successfully.`
         });
         navigate(`/products/${data.slug}`);
-      } else if (productSlug) { // Make sure we have the original slug
+      } else if (productSlug) {
         console.log(`[useProductEditorForm] Updating product: ${productSlug}`);
         await updateProduct(data, productSlug, toast);
         toast.toast({
@@ -140,12 +120,10 @@ export const useProductEditorForm = (
         // Navigate to the new slug if it changed
         if (data.slug !== productSlug) {
           console.log(`[useProductEditorForm] Slug changed from ${productSlug} to ${data.slug}, navigating to new URL`);
-          // Register the slug change in memory for this session
           registerSlugChange(productSlug, data.slug);
           navigate(`/products/${data.slug}`);
         } else {
           console.log('[useProductEditorForm] Slug unchanged, reloading current page');
-          // Use window.location.reload() to force a complete reload of the page
           window.location.reload();
         }
       }

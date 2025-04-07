@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,22 +23,12 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { isCreating, form, onSubmit } = useProductEditorForm(productSlug, setIsLoading, toast, navigate);
 
-  console.log('[ProductEditorForm] Rendering form, isLoading:', isLoading);
-  console.log('[ProductEditorForm] Form values:', form.getValues());
-
-  // Add an effect to monitor form state changes
-  useEffect(() => {
-    const subscription = form.watch((value, { name, type }) => {
-      console.log(`[ProductEditorForm] Form field "${name}" changed via ${type}:`, value);
-    });
-    
-    return () => subscription.unsubscribe();
-  }, [form]);
+  console.log('[ProductEditorForm] Re-rendering with form values:', form.getValues());
 
   return (
     <div className="container py-10">
       <h1 className="text-3xl font-bold mb-6">
-        {isCreating ? 'Create New Product' : `Edit Product: ${form.watch('title')}`}
+        {isCreating ? 'Create New Product' : `Edit Product: ${form.watch('title') || 'Loading...'}`}
       </h1>
 
       <Form {...form}>

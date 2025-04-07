@@ -47,14 +47,17 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
               <FormControl>
                 <Input 
                   placeholder="product-slug" 
-                  {...field}
+                  value={field.value || ''}
                   onChange={(e) => {
                     const value = e.target.value
                       .toLowerCase()
                       .replace(/\s+/g, '-')
                       .replace(/[^a-z0-9-]/g, '');
                     field.onChange(value);
-                  }} 
+                  }}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
                 />
               </FormControl>
               <FormMessage />
@@ -72,7 +75,11 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                 <Textarea 
                   placeholder="Describe the product category..." 
                   className="min-h-[100px]"
-                  {...field}
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
                 />
               </FormControl>
               <FormMessage />
