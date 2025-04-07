@@ -7,18 +7,18 @@ import { useProductTypeFromUrl } from '@/hooks/useProductTypeFromUrl';
 
 const AdminControls = () => {
   const location = useLocation();
-  const productType = useProductTypeFromUrl();
+  const productInfo = useProductTypeFromUrl();
   
   // Determine if we're on a product detail page
   const isProductDetailPage = 
     (location.pathname.includes('/products/') && 
-    productType && 
-    productType !== 'products') ||
+    productInfo.slug && 
+    productInfo.slug !== 'products') ||
     location.pathname.includes('/admin/products/edit/');
   
   console.log("AdminControls rendering with:", {
     location: location.pathname,
-    productType,
+    productType: productInfo,
     isProductDetailPage
   });
 
@@ -26,7 +26,7 @@ const AdminControls = () => {
     <div className="fixed bottom-8 right-8 flex flex-col gap-2 z-50">
       {isProductDetailPage ? (
         <Button asChild className="bg-blue-600 hover:bg-blue-700 shadow-lg">
-          <Link to={`/admin/products/edit/${productType}`} className="flex items-center gap-2">
+          <Link to={`/admin/products/edit/${productInfo.slug}`} className="flex items-center gap-2">
             <Edit size={16} /> Edit Product
           </Link>
         </Button>
