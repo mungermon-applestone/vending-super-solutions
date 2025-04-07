@@ -2,14 +2,11 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-// Simplify the Input component to its most basic form
-const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
-  ({ className, type, ...props }, ref) => {
-    // Log to troubleshoot focus and change events
-    React.useEffect(() => {
-      console.log('[Input] Component mounted with props:', { type, ...props });
-    }, [type, props]);
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {}
 
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, ...props }, ref) => {
     return (
       <input
         type={type}

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { 
   FormField,
@@ -18,11 +18,6 @@ interface BasicInformationProps {
 }
 
 const BasicInformation = ({ form }: BasicInformationProps) => {
-  // Add debug logging
-  useEffect(() => {
-    console.log('[BasicInformation] Component mounted with form values:', form.getValues());
-  }, [form]);
-
   return (
     <Card>
       <CardHeader>
@@ -32,87 +27,57 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
         <FormField
           control={form.control}
           name="title"
-          render={({ field }) => {
-            console.log('[BasicInformation] Rendering title field with value:', field.value);
-            return (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Product Title" 
-                    {...field} 
-                    onChange={(e) => {
-                      console.log('[BasicInformation] Title changed:', e.target.value);
-                      field.onChange(e);
-                    }}
-                    onFocus={() => console.log('[BasicInformation] Title field focused')}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input placeholder="Product Title" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
         <FormField
           control={form.control}
           name="slug"
-          render={({ field }) => {
-            console.log('[BasicInformation] Rendering slug field with value:', field.value);
-            return (
-              <FormItem>
-                <FormLabel>Slug (URL-friendly name)</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="product-slug" 
-                    value={field.value || ''}
-                    onChange={(e) => {
-                      console.log('[BasicInformation] Slug changed:', e.target.value);
-                      const value = e.target.value
-                        .toLowerCase()
-                        .replace(/\s+/g, '-')
-                        .replace(/[^a-z0-9-]/g, '');
-                      field.onChange(value);
-                    }}
-                    onFocus={() => console.log('[BasicInformation] Slug field focused')}
-                    onBlur={field.onBlur}
-                    name={field.name}
-                    ref={field.ref}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Slug (URL-friendly name)</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="product-slug" 
+                  {...field}
+                  onChange={(e) => {
+                    const value = e.target.value
+                      .toLowerCase()
+                      .replace(/\s+/g, '-')
+                      .replace(/[^a-z0-9-]/g, '');
+                    field.onChange(value);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
         <FormField
           control={form.control}
           name="description"
-          render={({ field }) => {
-            console.log('[BasicInformation] Rendering description field with value:', field.value ? 'has value' : 'empty');
-            return (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    placeholder="Describe the product category..." 
-                    className="min-h-[100px]"
-                    value={field.value || ''}
-                    onChange={(e) => {
-                      console.log('[BasicInformation] Description changed');
-                      field.onChange(e);
-                    }}
-                    onFocus={() => console.log('[BasicInformation] Description field focused')}
-                    onBlur={field.onBlur}
-                    name={field.name}
-                    ref={field.ref}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Describe the product category..." 
+                  className="min-h-[100px]"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
       </CardContent>
     </Card>

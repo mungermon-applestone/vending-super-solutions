@@ -1,8 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Save } from 'lucide-react';
 import { Form } from '@/components/ui/form';
@@ -19,29 +18,32 @@ interface ProductEditorFormProps {
 
 const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const navigate = useNavigate();
-  const toast = useToast();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const { isCreating, form, onSubmit } = useProductEditorForm(productSlug, setIsLoading, toast, navigate);
 
-  console.log('[ProductEditorForm] Re-rendering with form values:', form.getValues());
-  
-  // Add event listeners to help debug form issues
-  React.useEffect(() => {
+  // Add debugging information
+  useEffect(() => {
+    console.log('[ProductEditorForm] Mounting with mode:', isCreating ? 'create' : 'edit');
+    console.log('[ProductEditorForm] Initial form values:', form.getValues());
+    
+    // Register event handlers to track form interactions
     const formElement = document.querySelector('form');
     if (formElement) {
-      console.log('[ProductEditorForm] Found form element, adding debug listeners');
-      
       const handleFormClick = (e: Event) => {
-        console.log('[ProductEditorForm] Form clicked:', e.target);
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          console.log('[ProductEditorForm] Input clicked:', 
+            e.target.name || e.target.id, 
+            'Current value:', e.target.value);
+        }
       };
       
       formElement.addEventListener('click', handleFormClick);
-      
       return () => {
         formElement.removeEventListener('click', handleFormClick);
       };
     }
-  }, []);
+  }, [isCreating, form]);
 
   return (
     <div className="container py-10">

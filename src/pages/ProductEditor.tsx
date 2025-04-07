@@ -13,50 +13,11 @@ const ProductEditorPage = () => {
   
   console.log(`[ProductEditorPage] Rendering editor for product: ${productSlug || 'new product'}`);
   
-  // Enhanced debugging for input issues
+  // Add a useEffect to check the route and form mode
   useEffect(() => {
-    console.log('[ProductEditorPage] Component mounted, checking for input focus issues...');
-    
-    // Check for any global event handlers that might be interfering with form inputs
-    const inputElements = document.querySelectorAll('input, textarea');
-    console.log(`[ProductEditorPage] Found ${inputElements.length} input/textarea elements on page`);
-    
-    // Log when an input receives focus and track input values
-    const handleFocus = (e: Event) => {
-      console.log('[ProductEditorPage] Input focus event:', e.target);
-    };
-    
-    const handleChange = (e: Event) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        console.log(`[ProductEditorPage] Input changed: ${e.target.name || 'unnamed'} = ${e.target.value}`);
-      }
-    };
-    
-    // Add debug event listeners
-    inputElements.forEach(el => {
-      el.addEventListener('focus', handleFocus);
-      el.addEventListener('input', handleChange);
-    });
-    
-    // Test if direct DOM manipulation works
-    setTimeout(() => {
-      console.log('[ProductEditorPage] Testing direct DOM access for inputs...');
-      const titleInput = document.querySelector('input[name="title"]');
-      if (titleInput) {
-        console.log('[ProductEditorPage] Found title input directly in DOM');
-      } else {
-        console.log('[ProductEditorPage] Could not find title input in DOM');
-      }
-    }, 2000);
-    
-    return () => {
-      // Clean up listeners
-      inputElements.forEach(el => {
-        el.removeEventListener('focus', handleFocus);
-        el.removeEventListener('input', handleChange);
-      });
-    };
-  }, []);
+    console.log('[ProductEditorPage] Page mounted with productSlug:', productSlug);
+    console.log(`[ProductEditorPage] Form mode: ${productSlug ? 'edit existing' : 'create new'}`);
+  }, [productSlug]);
   
   return (
     <Layout>
