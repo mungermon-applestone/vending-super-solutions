@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for slug matching and normalization
  */
@@ -83,23 +84,33 @@ export function mapDatabaseSlugToUrlSlug(slug: string): string {
  */
 export function getSlugVariations(slug: string): string[] {
   const normalizedSlug = normalizeSlug(slug);
-  const variations = [normalizedSlug];
   
-  // Add mapped version if exists
+  // Start with an empty set to avoid duplicates
+  const variationsSet = new Set<string>();
+  
+  // Add the normalized original slug
+  variationsSet.add(normalizedSlug);
+  
+  // Add mapped version if exists (URL slug to database slug)
   const mappedSlug = mapUrlSlugToDatabaseSlug(normalizedSlug);
   if (mappedSlug !== normalizedSlug) {
-    variations.push(mappedSlug);
+    variationsSet.add(mappedSlug);
   }
   
-  // Add/remove -vending suffix
+  // Add/remove -vending suffix for both original and mapped slugs
   if (normalizedSlug.endsWith('-vending')) {
-    variations.push(normalizedSlug.replace('-vending', ''));
+    // If it ends with -vending, also try without it
+    variationsSet.add(normalizedSlug.replace('-vending', ''));
   } else {
-    variations.push(`${normalizedSlug}-vending`);
+    // If it doesn't end with -vending, also try with it
+    variationsSet.add(`${normalizedSlug}-vending`);
   }
+  
+  // Convert Set back to array
+  const variations = Array.from(variationsSet);
   
   console.log(`[slugMatching] Generated variations for "${slug}":`, variations);
-  return [...new Set(variations)]; // Remove duplicates
+  return variations;
 }
 
 /**
