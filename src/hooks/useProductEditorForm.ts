@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import type { UseToastReturn } from '@/hooks/use-toast';
 import { NavigateFunction } from 'react-router-dom';
 import { useProductType } from '@/hooks/useCMSData';
 import { ProductFormData } from '@/types/forms';
-import { createProduct, updateProduct } from '@/services/productService';
+import { createProduct, updateProduct } from '@/services/product';
 import { registerSlugChange } from '@/services/cms/utils/slugMatching';
 
 export const useProductEditorForm = (
