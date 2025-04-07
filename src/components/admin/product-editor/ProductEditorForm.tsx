@@ -26,6 +26,18 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   useEffect(() => {
     console.log('[ProductEditorForm] Mounting with mode:', isCreating ? 'create' : 'edit');
     console.log('[ProductEditorForm] Initial form values:', form.getValues());
+    console.log('[ProductEditorForm] Product slug:', productSlug);
+    
+    // Check if form fields are read-only
+    setTimeout(() => {
+      const formFields = document.querySelectorAll('input, textarea');
+      console.log('[ProductEditorForm] Found form fields:', formFields.length);
+      formFields.forEach((field, index) => {
+        const isReadOnly = (field as HTMLInputElement).readOnly;
+        const isDisabled = (field as HTMLInputElement).disabled;
+        console.log(`[ProductEditorForm] Field ${index}: readOnly=${isReadOnly}, disabled=${isDisabled}, name=${field.getAttribute('name')}`);
+      });
+    }, 1000);
     
     // Register event handlers to track form interactions
     const formElement = document.querySelector('form');
@@ -34,7 +46,9 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
         if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
           console.log('[ProductEditorForm] Input clicked:', 
             e.target.name || e.target.id, 
-            'Current value:', e.target.value);
+            'Current value:', e.target.value,
+            'ReadOnly:', e.target.readOnly,
+            'Disabled:', e.target.disabled);
         }
       };
       
@@ -43,7 +57,7 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
         formElement.removeEventListener('click', handleFormClick);
       };
     }
-  }, [isCreating, form]);
+  }, [isCreating, form, productSlug]);
 
   return (
     <div className="container py-10">

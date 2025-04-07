@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useToast, type UseToastReturn } from '@/hooks/use-toast';
+import { type UseToastReturn } from '@/hooks/use-toast';
 import { NavigateFunction } from 'react-router-dom';
 import { useProductType } from '@/hooks/useCMSData';
 import { ProductFormData } from '@/types/forms';
@@ -53,37 +53,42 @@ export const useProductEditorForm = (
     if (existingProduct && !isCreating) {
       console.log('[useProductEditorForm] Populating form with product data:', existingProduct);
       
-      form.reset({
-        title: existingProduct.title || '',
-        slug: existingProduct.slug || '',
-        description: existingProduct.description || '',
-        image: {
-          url: existingProduct.image?.url || '',
-          alt: existingProduct.image?.alt || ''
-        },
-        benefits: existingProduct.benefits && existingProduct.benefits.length > 0 
-          ? existingProduct.benefits 
-          : [''],
-        features: existingProduct.features && existingProduct.features.length > 0 
-          ? existingProduct.features.map(feature => ({
-              title: feature.title || '',
-              description: feature.description || '',
-              icon: typeof feature.icon === 'string' ? feature.icon : 'check',
-              screenshotUrl: feature.screenshot?.url || '',
-              screenshotAlt: feature.screenshot?.alt || ''
-            })) 
-          : [
-              {
-                title: '',
-                description: '',
-                icon: 'check',
-                screenshotUrl: '',
-                screenshotAlt: ''
-              }
-            ]
-      });
-      
-      console.log('[useProductEditorForm] Form reset with values:', form.getValues());
+      // Verify form control exists before trying to set values
+      if (form) {
+        form.reset({
+          title: existingProduct.title || '',
+          slug: existingProduct.slug || '',
+          description: existingProduct.description || '',
+          image: {
+            url: existingProduct.image?.url || '',
+            alt: existingProduct.image?.alt || ''
+          },
+          benefits: existingProduct.benefits && existingProduct.benefits.length > 0 
+            ? existingProduct.benefits 
+            : [''],
+          features: existingProduct.features && existingProduct.features.length > 0 
+            ? existingProduct.features.map(feature => ({
+                title: feature.title || '',
+                description: feature.description || '',
+                icon: typeof feature.icon === 'string' ? feature.icon : 'check',
+                screenshotUrl: feature.screenshot?.url || '',
+                screenshotAlt: feature.screenshot?.alt || ''
+              })) 
+            : [
+                {
+                  title: '',
+                  description: '',
+                  icon: 'check',
+                  screenshotUrl: '',
+                  screenshotAlt: ''
+                }
+              ]
+        });
+        
+        console.log('[useProductEditorForm] Form reset with values:', form.getValues());
+      } else {
+        console.error('[useProductEditorForm] Form control is not available');
+      }
     } else if (productSlug && !existingProduct && !isLoadingProduct) {
       console.log('[useProductEditorForm] No existing product found for slug:', productSlug);
       toast.toast({
