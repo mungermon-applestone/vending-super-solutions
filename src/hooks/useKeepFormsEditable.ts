@@ -15,14 +15,25 @@ export const useKeepFormsEditable = () => {
       console.log(`[useKeepFormsEditable] Found ${formElements.length} form elements to make editable`);
       
       formElements.forEach((element, index) => {
-        const inputElement = element as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
-        const wasReadOnly = inputElement.readOnly;
-        const wasDisabled = inputElement.disabled;
-        
-        if (wasReadOnly || wasDisabled) {
-          console.log(`[useKeepFormsEditable] Making element ${index} (${inputElement.name || inputElement.id || 'unnamed'}) editable`);
-          inputElement.readOnly = false;
-          inputElement.disabled = false;
+        // Handle each element type appropriately
+        if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+          // Input and textarea elements have readOnly property
+          const wasReadOnly = element.readOnly;
+          const wasDisabled = element.disabled;
+          
+          if (wasReadOnly || wasDisabled) {
+            console.log(`[useKeepFormsEditable] Making ${element.tagName.toLowerCase()} ${index} (${element.name || element.id || 'unnamed'}) editable`);
+            element.readOnly = false;
+            element.disabled = false;
+          }
+        } else if (element instanceof HTMLSelectElement) {
+          // Select elements only have disabled property
+          const wasDisabled = element.disabled;
+          
+          if (wasDisabled) {
+            console.log(`[useKeepFormsEditable] Making select ${index} (${element.name || element.id || 'unnamed'}) editable`);
+            element.disabled = false;
+          }
         }
       });
     };
