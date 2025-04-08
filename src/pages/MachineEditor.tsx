@@ -27,7 +27,7 @@ const MachineEditor = () => {
       toast({
         title: isCreating ? "Machine created" : "Machine updated",
         description: `The machine was ${isCreating ? 'created' : 'updated'} successfully.`,
-        variant: "success",
+        variant: "default",
       });
       
       navigate('/admin/machines');

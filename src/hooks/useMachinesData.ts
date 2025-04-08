@@ -49,7 +49,7 @@ export function useCreateMachine() {
       toast({
         title: "Machine created",
         description: "The machine was created successfully",
-        variant: "success",
+        variant: "default",
       });
     },
     onError: (error) => {
@@ -78,7 +78,7 @@ export function useUpdateMachine() {
       toast({
         title: "Machine updated",
         description: "The machine was updated successfully",
-        variant: "success",
+        variant: "default",
       });
     },
     onError: (error) => {
@@ -105,7 +105,7 @@ export function useDeleteMachine() {
       toast({
         title: "Machine deleted",
         description: "The machine was deleted successfully",
-        variant: "success",
+        variant: "default",
       });
     },
     onError: (error) => {
