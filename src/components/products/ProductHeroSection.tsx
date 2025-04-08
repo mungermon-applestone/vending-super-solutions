@@ -24,7 +24,7 @@ const ProductHeroSection = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-vending-blue-dark">
-              {productType} Vending Solutions
+              {productType}
             </h1>
             <p className="text-lg text-gray-700 mb-8">
               {description}
@@ -52,7 +52,7 @@ const ProductHeroSection = ({
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
               <img 
                 src={image} 
-                alt={`${productType} Vending Solution`} 
+                alt={`${productType}`} 
                 className="w-full h-auto object-cover"
               />
             </div>
