@@ -73,7 +73,14 @@ const updateProductBenefits = async (data: ProductFormData, productId: string) =
       throw deleteError;
     }
 
-    const benefitsToInsert = data.benefits.filter(benefit => benefit.trim() !== '');
+    // Process benefits - filter out empty ones and deduplicate
+    let benefitsToInsert = data.benefits
+      .filter(benefit => benefit.trim() !== '')
+      .map(benefit => benefit.trim());
+    
+    // Deduplicate benefits before inserting
+    benefitsToInsert = [...new Set(benefitsToInsert)];
+    
     if (benefitsToInsert.length > 0) {
       const { error: insertError } = await supabase
         .from('product_type_benefits')

@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
 import type { UseToastReturn } from '@/hooks/use-toast';
@@ -157,7 +158,13 @@ const addProductBenefits = async (data: ProductFormData, productId: string) => {
   console.log('[productService] Adding benefits for product:', productId);
   
   try {
-    const benefitsToInsert = data.benefits.filter(benefit => benefit.trim() !== '');
+    // Process benefits - filter out empty ones and deduplicate
+    let benefitsToInsert = data.benefits
+      .filter(benefit => benefit.trim() !== '')
+      .map(benefit => benefit.trim());
+    
+    // Deduplicate benefits before inserting
+    benefitsToInsert = [...new Set(benefitsToInsert)];
     
     if (benefitsToInsert.length > 0) {
       const { data: insertedBenefits, error } = await supabase

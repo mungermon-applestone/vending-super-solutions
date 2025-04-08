@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { 
   FormField,
@@ -10,7 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash } from 'lucide-react';
+import { Plus, Trash, AlertCircle } from 'lucide-react';
 import { ProductFormData } from '@/types/forms';
 
 interface ProductBenefitsProps {
@@ -30,11 +30,65 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     }
   };
 
+  // Check for duplicate benefits and set form errors
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name?.startsWith('benefits')) {
+        const benefits = form.getValues('benefits');
+        
+        // Look for duplicates
+        const duplicates = new Map();
+        benefits.forEach((benefit, index) => {
+          if (benefit.trim()) {
+            const normalizedBenefit = benefit.trim().toLowerCase();
+            if (duplicates.has(normalizedBenefit)) {
+              // Set error on current field
+              form.setError(`benefits.${index}`, { 
+                type: 'duplicate', 
+                message: 'Duplicate benefit' 
+              });
+              
+              // Set error on the original field
+              form.setError(`benefits.${duplicates.get(normalizedBenefit)}`, { 
+                type: 'duplicate', 
+                message: 'Duplicate benefit' 
+              });
+            } else {
+              duplicates.set(normalizedBenefit, index);
+              // Clear error if it was previously set
+              form.clearErrors(`benefits.${index}`);
+            }
+          }
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  // Find unique benefit count to provide user feedback
+  const uniqueBenefitsCount = new Set(
+    form.watch('benefits')
+      .filter(benefit => benefit.trim() !== '')
+      .map(benefit => benefit.trim().toLowerCase())
+  ).size;
+
+  const totalBenefitsCount = form.watch('benefits').filter(benefit => benefit.trim() !== '').length;
+  const hasDuplicates = uniqueBenefitsCount < totalBenefitsCount;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex justify-between">
-          <span>Benefits</span>
+          <div className="flex items-center gap-2">
+            <span>Benefits</span>
+            {hasDuplicates && (
+              <div className="flex items-center text-destructive text-sm gap-1">
+                <AlertCircle className="h-4 w-4" />
+                <span>Duplicate benefits found</span>
+              </div>
+            )}
+          </div>
           <Button 
             type="button" 
             onClick={addBenefit} 
