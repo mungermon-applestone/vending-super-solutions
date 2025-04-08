@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -13,6 +12,8 @@ import ProductDetail from "./pages/ProductDetail";
 import ProductEditor from "./pages/ProductEditor";
 import MachinesLanding from "./pages/MachinesLanding";
 import MachineDetail from "./pages/MachineDetail";
+import MachineEditor from "./pages/MachineEditor";
+import AdminMachines from "./pages/AdminMachines";
 import TechnologyLanding from "./pages/TechnologyLanding";
 import AboutUs from "./pages/AboutUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -80,6 +81,9 @@ const App = () => (
             <Route path="/admin/business-goals" element={<AdminBusinessGoals />} />
             <Route path="/admin/business-goals/new" element={<BusinessGoalEditor />} />
             <Route path="/admin/business-goals/edit/:goalSlug" element={<BusinessGoalEditor />} />
+            <Route path="/admin/machines" element={<AdminMachines />} />
+            <Route path="/admin/machines/new" element={<MachineEditor />} />
+            <Route path="/admin/machines/edit/:machineId" element={<MachineEditor />} />
             
             {/* Specific product type routes */}
             <Route path="/products/grocery" element={<ProductDetail />} />
