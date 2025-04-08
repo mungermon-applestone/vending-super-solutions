@@ -20,9 +20,10 @@ interface GoalBenefitsProps {
 }
 
 const GoalBenefits: React.FC<GoalBenefitsProps> = ({ form }) => {
-  const { fields, append, remove } = useFieldArray({
+  // Using the correct generic type to ensure TypeScript knows this is a string array
+  const { fields, append, remove } = useFieldArray<BusinessGoalFormData>({
     control: form.control,
-    name: "benefits" as const  // Using type assertion to ensure TypeScript recognizes this as valid
+    name: "benefits" // This is correct, as benefits is a key in BusinessGoalFormData
   });
 
   return (
@@ -66,7 +67,7 @@ const GoalBenefits: React.FC<GoalBenefitsProps> = ({ form }) => {
           variant="outline"
           size="sm"
           className="mt-2"
-          onClick={() => append("")}  // Using an empty string as the default value
+          onClick={() => append("") /* This is correct since benefits is a string array */}
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Benefit
