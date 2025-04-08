@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as cmsService from '@/services/cms';
 import { CMSMachine } from '@/types/cms';
@@ -10,7 +9,12 @@ import { toast } from '@/components/ui/use-toast';
 export function useMachines(filters: Record<string, any> = {}) {
   return useQuery({
     queryKey: ['machines', filters],
-    queryFn: () => cmsService.getMachines(filters),
+    queryFn: async () => {
+      console.log("Fetching machines with filters:", filters);
+      const machines = await cmsService.getMachines(filters);
+      console.log("Fetched machines:", machines);
+      return machines;
+    },
   });
 }
 

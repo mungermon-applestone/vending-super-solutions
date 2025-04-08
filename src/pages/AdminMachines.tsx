@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -12,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
 import { useMachines, useDeleteMachine } from '@/hooks/useMachinesData';
-import { Loader2, Plus, Pencil, Eye, Trash2, Server, Package, Download } from 'lucide-react';
+import { Loader2, Plus, Pencil, Eye, Trash2, Server, Package, Download, RefreshCcw } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,7 +31,7 @@ const AdminMachines = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [machineToDelete, setMachineToDelete] = useState<{id: string, title: string} | null>(null);
 
-  const { data: machines, isLoading } = useMachines();
+  const { data: machines = [], isLoading, refetch } = useMachines();
   const deleteMutation = useDeleteMachine();
 
   const handleDeleteClick = (machine: any) => {
@@ -58,6 +57,14 @@ const AdminMachines = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleRefresh = () => {
+    refetch();
+    toast({
+      title: "Refreshing...",
+      description: "Refreshing machines data from the database",
+    });
   };
 
   const getMachineTypeIcon = (type: string) => {
@@ -94,6 +101,9 @@ const AdminMachines = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Machines Management</h1>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={handleRefresh} title="Refresh data">
+              <RefreshCcw className="h-4 w-4 mr-2" /> Refresh
+            </Button>
             <Button variant="outline" asChild>
               <Link to="/admin/machines/migrate">
                 <Download className="h-4 w-4 mr-2" /> Import Sample Data
@@ -113,6 +123,11 @@ const AdminMachines = () => {
           </div>
         ) : machines && machines.length > 0 ? (
           <div className="bg-white rounded-md shadow overflow-x-auto">
+            <div className="p-4 border-b">
+              <p className="text-sm text-gray-500">
+                Showing {machines.length} machine{machines.length !== 1 && 's'}
+              </p>
+            </div>
             <Table>
               <TableHeader>
                 <TableRow>

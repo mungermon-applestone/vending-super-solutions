@@ -311,118 +311,131 @@ const machinePlaceholderData: MachinePlaceholder[] = [
 export const migrateMachinesData = async () => {
   try {
     console.log("Starting machine data migration...");
+    let successCount = 0;
     
     for (const machineData of machinePlaceholderData) {
       console.log(`Processing machine: ${machineData.title}`);
       
-      // Create the machine record
-      const { data: machine, error: machineError } = await supabase
-        .from('machines')
-        .insert({
-          title: machineData.title,
-          slug: machineData.slug,
-          type: machineData.type,
-          temperature: machineData.temperature,
-          description: machineData.description,
-          visible: true
-        })
-        .select('id')
-        .single();
-      
-      if (machineError) {
-        console.error(`Error creating machine ${machineData.title}:`, machineError);
-        continue;
-      }
-      
-      console.log(`Created machine with ID: ${machine.id}`);
-      
-      // Add machine images
-      if (machineData.images.length > 0) {
-        const imageInserts = machineData.images.map((image, index) => ({
-          machine_id: machine.id,
-          url: image.url,
-          alt: image.alt || machineData.title,
-          width: image.width || 800,
-          height: image.height || 600,
-          display_order: index
-        }));
+      try {
+        // Create the machine record
+        const { data: machine, error: machineError } = await supabase
+          .from('machines')
+          .insert({
+            title: machineData.title,
+            slug: machineData.slug,
+            type: machineData.type,
+            temperature: machineData.temperature,
+            description: machineData.description,
+            visible: true
+          })
+          .select('id')
+          .single();
         
-        const { error: imageError } = await supabase
-          .from('machine_images')
-          .insert(imageInserts);
-        
-        if (imageError) {
-          console.error(`Error adding images for machine ${machineData.title}:`, imageError);
-        } else {
-          console.log(`Added ${imageInserts.length} images for machine ${machineData.title}`);
+        if (machineError) {
+          console.error(`Error creating machine ${machineData.title}:`, machineError);
+          continue;
         }
-      }
-      
-      // Add machine specs
-      if (machineData.specs) {
-        const specInserts = Object.entries(machineData.specs)
-          .filter(([_, value]) => value !== undefined)
-          .map(([key, value]) => ({
+        
+        console.log(`Created machine with ID: ${machine.id}`);
+        
+        // Add machine images
+        if (machineData.images.length > 0) {
+          const imageInserts = machineData.images.map((image, index) => ({
             machine_id: machine.id,
-            key,
-            value
+            url: image.url,
+            alt: image.alt || machineData.title,
+            width: image.width || 800,
+            height: image.height || 600,
+            display_order: index
           }));
-        
-        const { error: specError } = await supabase
-          .from('machine_specs')
-          .insert(specInserts);
-        
-        if (specError) {
-          console.error(`Error adding specs for machine ${machineData.title}:`, specError);
-        } else {
-          console.log(`Added ${specInserts.length} specs for machine ${machineData.title}`);
+          
+          const { error: imageError } = await supabase
+            .from('machine_images')
+            .insert(imageInserts);
+          
+          if (imageError) {
+            console.error(`Error adding images for machine ${machineData.title}:`, imageError);
+          } else {
+            console.log(`Added ${imageInserts.length} images for machine ${machineData.title}`);
+          }
         }
-      }
-      
-      // Add machine features
-      if (machineData.features.length > 0) {
-        const featureInserts = machineData.features.map((feature, index) => ({
-          machine_id: machine.id,
-          feature,
-          display_order: index
-        }));
         
-        const { error: featureError } = await supabase
-          .from('machine_features')
-          .insert(featureInserts);
-        
-        if (featureError) {
-          console.error(`Error adding features for machine ${machineData.title}:`, featureError);
-        } else {
-          console.log(`Added ${featureInserts.length} features for machine ${machineData.title}`);
+        // Add machine specs
+        if (machineData.specs) {
+          const specInserts = Object.entries(machineData.specs)
+            .filter(([_, value]) => value !== undefined)
+            .map(([key, value]) => ({
+              machine_id: machine.id,
+              key,
+              value
+            }));
+          
+          const { error: specError } = await supabase
+            .from('machine_specs')
+            .insert(specInserts);
+          
+          if (specError) {
+            console.error(`Error adding specs for machine ${machineData.title}:`, specError);
+          } else {
+            console.log(`Added ${specInserts.length} specs for machine ${machineData.title}`);
+          }
         }
-      }
-      
-      // Add deployment examples
-      if (machineData.deploymentExamples.length > 0) {
-        const exampleInserts = machineData.deploymentExamples.map((example, index) => ({
-          machine_id: machine.id,
-          title: example.title,
-          description: example.description,
-          image_url: example.image.url,
-          image_alt: example.image.alt,
-          display_order: index
-        }));
         
-        const { error: exampleError } = await supabase
-          .from('deployment_examples')
-          .insert(exampleInserts);
-        
-        if (exampleError) {
-          console.error(`Error adding deployment examples for machine ${machineData.title}:`, exampleError);
-        } else {
-          console.log(`Added ${exampleInserts.length} deployment examples for machine ${machineData.title}`);
+        // Add machine features
+        if (machineData.features.length > 0) {
+          const featureInserts = machineData.features.map((feature, index) => ({
+            machine_id: machine.id,
+            feature,
+            display_order: index
+          }));
+          
+          const { error: featureError } = await supabase
+            .from('machine_features')
+            .insert(featureInserts);
+          
+          if (featureError) {
+            console.error(`Error adding features for machine ${machineData.title}:`, featureError);
+          } else {
+            console.log(`Added ${featureInserts.length} features for machine ${machineData.title}`);
+          }
         }
+        
+        // Add deployment examples
+        if (machineData.deploymentExamples.length > 0) {
+          const exampleInserts = machineData.deploymentExamples.map((example, index) => ({
+            machine_id: machine.id,
+            title: example.title,
+            description: example.description,
+            image_url: example.image.url,
+            image_alt: example.image.alt,
+            display_order: index
+          }));
+          
+          const { error: exampleError } = await supabase
+            .from('deployment_examples')
+            .insert(exampleInserts);
+          
+          if (exampleError) {
+            console.error(`Error adding deployment examples for machine ${machineData.title}:`, exampleError);
+          } else {
+            console.log(`Added ${exampleInserts.length} deployment examples for machine ${machineData.title}`);
+          }
+        }
+        
+        // Increment success counter
+        successCount++;
+      } catch (machineError) {
+        console.error(`Error processing machine ${machineData.title}:`, machineError);
+        // Continue with next machine despite error
       }
     }
     
-    console.log("Machine data migration completed successfully");
-    return { success: true, message: "Migration completed successfully" };
+    console.log(`Machine data migration completed. ${successCount} out of ${machinePlaceholderData.length} machines imported successfully`);
+    return { 
+      success: true, 
+      message: `Migration completed successfully. ${successCount} out of ${machinePlaceholderData.length} machines were imported.`,
+      count: successCount
+    };
   } catch (error) {
     console.error("Error during machine data migration:", error);
     return { success: false, message: "Migration failed", error };

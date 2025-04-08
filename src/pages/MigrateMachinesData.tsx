@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { Loader2, Check, AlertTriangle } from 'lucide-react';
+import { Loader2, Check, AlertTriangle, Database } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { migrateMachinesData } from '@/utils/machineMigration';
@@ -14,6 +14,7 @@ const MigrateMachinesData = () => {
   const [result, setResult] = useState<{
     success?: boolean;
     message?: string;
+    count?: number;
     error?: any;
   } | null>(null);
 
@@ -30,7 +31,7 @@ const MigrateMachinesData = () => {
       if (migrationResult.success) {
         toast({
           title: "Migration Successful",
-          description: "Machine data has been successfully imported",
+          description: `${migrationResult.count || 0} machines were successfully imported`,
           variant: "default",
         });
       } else {
@@ -105,6 +106,12 @@ const MigrateMachinesData = () => {
                         </h3>
                         <p className={`text-sm mt-1 ${result.success ? 'text-green-700' : 'text-red-700'}`}>
                           {result.message}
+                          {result.success && result.count !== undefined && (
+                            <span className="block mt-1">
+                              <Database className="inline h-4 w-4 mr-1" /> 
+                              {result.count} machines were imported into the database
+                            </span>
+                          )}
                         </p>
                       </div>
                     </div>
