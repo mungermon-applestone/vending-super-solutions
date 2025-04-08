@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -86,10 +85,8 @@ const MachineEditor = () => {
     },
   });
 
-  // Populate form when editing an existing machine
   useEffect(() => {
     if (machine && !isCreating) {
-      // Extract the images, specs, and features from the machine
       const images = machine.machine_images?.map(img => ({
         url: img.url,
         alt: img.alt,
@@ -137,7 +134,6 @@ const MachineEditor = () => {
     }
   };
 
-  // Helper functions to add/remove dynamic form items
   const addImage = () => {
     const currentImages = form.getValues('images') || [];
     form.setValue('images', [...currentImages, { url: '', alt: '' }]);
@@ -199,7 +195,6 @@ const MachineEditor = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Basic Information Section */}
                 <Card>
                   <CardContent className="pt-6">
                     <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
@@ -305,7 +300,6 @@ const MachineEditor = () => {
                   </CardContent>
                 </Card>
 
-                {/* Images Section */}
                 <Card>
                   <CardContent className="pt-6">
                     <div className="flex justify-between items-center mb-4">
@@ -363,7 +357,6 @@ const MachineEditor = () => {
                 </Card>
               </div>
 
-              {/* Specifications Section */}
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-center mb-4">
@@ -411,7 +404,7 @@ const MachineEditor = () => {
                               <FormItem>
                                 <FormLabel>Value</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="72" x 80" x 35"" {...field} />
+                                  <Input placeholder='72" x 80" x 35"' {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -424,7 +417,6 @@ const MachineEditor = () => {
                 </CardContent>
               </Card>
 
-              {/* Features Section */}
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-center mb-4">
