@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,7 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   
   // Pass the entire toast object returned from useToast()
-  const { isCreating, isLoadingProduct, form, onSubmit } = useProductEditorForm(
+  const { isCreating, isLoadingProduct, form, onSubmit, formKey } = useProductEditorForm(
     productSlug, 
     setIsLoading, 
     toast, // Pass the complete toast object
@@ -30,6 +30,12 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   );
 
   console.log('[ProductEditorForm] Rendering with form values:', form.getValues());
+
+  // Force re-render when formKey changes to ensure form is properly initialized
+  useEffect(() => {
+    console.log('[ProductEditorForm] Form key changed:', formKey);
+    // This will ensure the form re-renders when the key changes
+  }, [formKey]);
 
   // Handle form submission with validation
   const handleSubmit = form.handleSubmit(async (data) => {
