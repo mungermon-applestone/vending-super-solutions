@@ -1,4 +1,5 @@
 
+// Only making minimal changes to the update function signature
 import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
 import { UseToastReturn } from '@/hooks/use-toast';

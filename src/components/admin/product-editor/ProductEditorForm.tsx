@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -21,36 +21,24 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   
-  // Use a local key to force remounts when needed
-  const [localFormKey, setLocalFormKey] = useState(0);
-  
-  // Pass the entire toast object returned from useToast()
-  const { isCreating, isLoadingProduct, form, onSubmit, formKey } = useProductEditorForm(
+  // Use the product editor form hook
+  const { 
+    isCreating, 
+    isLoadingProduct, 
+    form,
+    onSubmit
+  } = useProductEditorForm(
     productSlug, 
     setIsLoading, 
-    toast, // Pass the complete toast object
+    toast, 
     navigate
   );
 
   console.log('[ProductEditorForm] Rendering with form values:', form.getValues());
 
-  // Force re-render when formKey changes to ensure form is properly initialized
-  useEffect(() => {
-    console.log('[ProductEditorForm] Form key changed:', formKey);
-    // Force a re-render of this component when the formKey changes
-    setLocalFormKey(prevKey => prevKey + 1);
-  }, [formKey]);
-
-  // Handle form submission with validation
+  // Handle form submission
   const handleSubmit = form.handleSubmit(async (data) => {
     console.log('[ProductEditorForm] Form submission with data:', data);
-    
-    // Ensure the form is marked as dirty for submission
-    Object.keys(data).forEach(field => {
-      // @ts-ignore - We need to access fields dynamically
-      form.setValue(field, data[field], { shouldDirty: true, shouldTouch: true });
-    });
-    
     await onSubmit(data);
   });
 
@@ -69,7 +57,7 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   }
 
   return (
-    <div className="container py-10" key={`form-container-${localFormKey}`}>
+    <div className="container py-10">
       <h1 className="text-3xl font-bold mb-6">
         {isCreating ? 'Create New Product' : `Edit Product: ${form.watch('title') || 'Loading...'}`}
       </h1>
@@ -77,8 +65,7 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
       <Form {...form}>
         <form 
           onSubmit={handleSubmit} 
-          className="space-y-8" 
-          key={`form-element-${localFormKey}`}
+          className="space-y-8"
         >
           <BasicInformation form={form} />
           <ProductImage form={form} />
