@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
 import { useMachines, useDeleteMachine } from '@/hooks/useMachinesData';
-import { Loader2, Plus, Pencil, Eye, Trash2, Server, Package } from 'lucide-react';
+import { Loader2, Plus, Pencil, Eye, Trash2, Server, Package, Download } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -94,6 +94,11 @@ const AdminMachines = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Machines Management</h1>
           <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link to="/admin/machines/migrate">
+                <Download className="h-4 w-4 mr-2" /> Import Sample Data
+              </Link>
+            </Button>
             <Button asChild>
               <Link to="/admin/machines/new">
                 <Plus className="h-4 w-4 mr-2" /> Add New Machine
@@ -170,11 +175,18 @@ const AdminMachines = () => {
         ) : (
           <div className="bg-white rounded-md shadow p-8 text-center">
             <p className="text-gray-500 mb-4">No machines found</p>
-            <Button asChild>
-              <Link to="/admin/machines/new">
-                <Plus className="h-4 w-4 mr-2" /> Add Your First Machine
-              </Link>
-            </Button>
+            <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 justify-center">
+              <Button variant="outline" asChild>
+                <Link to="/admin/machines/migrate">
+                  <Download className="h-4 w-4 mr-2" /> Import Sample Data
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link to="/admin/machines/new">
+                  <Plus className="h-4 w-4 mr-2" /> Add Your First Machine
+                </Link>
+              </Button>
+            </div>
           </div>
         )}
       </div>

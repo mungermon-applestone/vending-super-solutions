@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -13,6 +14,7 @@ import ProductEditor from "./pages/ProductEditor";
 import MachinesLanding from "./pages/MachinesLanding";
 import MachineDetail from "./pages/MachineDetail";
 import MachineEditor from "./pages/MachineEditor";
+import MigrateMachinesData from "./pages/MigrateMachinesData";
 import AdminMachines from "./pages/AdminMachines";
 import TechnologyLanding from "./pages/TechnologyLanding";
 import AboutUs from "./pages/AboutUs";
@@ -84,6 +86,7 @@ const App = () => (
             <Route path="/admin/machines" element={<AdminMachines />} />
             <Route path="/admin/machines/new" element={<MachineEditor />} />
             <Route path="/admin/machines/edit/:machineId" element={<MachineEditor />} />
+            <Route path="/admin/machines/migrate" element={<MigrateMachinesData />} />
             
             {/* Specific product type routes */}
             <Route path="/products/grocery" element={<ProductDetail />} />
