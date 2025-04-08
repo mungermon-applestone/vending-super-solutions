@@ -9,6 +9,8 @@ import CTASection from '@/components/common/CTASection';
 import { businessGoalsData } from '@/data/businessGoalsData';
 import { useBusinessGoal } from '@/hooks/useCMSData';
 import { Skeleton } from "@/components/ui/skeleton";
+import { CMSFeature, CMSBusinessGoal } from '@/types/cms';
+import { ArrowDownToLine, BarChart3, Building2, RefreshCcw, Users } from 'lucide-react';
 
 const BusinessGoalDetail = () => {
   const { goalSlug } = useParams<{ goalSlug: string }>();
@@ -53,23 +55,74 @@ const BusinessGoalDetail = () => {
     console.error("Error loading business goal:", error);
   }
 
-  // Adapt the CMS goal data structure to match what the components expect
-  const heroImage = cmsGoal?.image?.url || currentGoal.heroImage;
+  // Adapt the CMS data to match the component requirements
+  const getIcon = () => {
+    if (cmsGoal) {
+      // If we have CMS data, use its icon or provide a default
+      switch (cmsGoal.icon) {
+        case 'Building2': return <Building2 className="h-6 w-6 text-white" />;
+        case 'Users': return <Users className="h-6 w-6 text-white" />;
+        case 'BarChart3': return <BarChart3 className="h-6 w-6 text-white" />;
+        case 'RefreshCcw': return <RefreshCcw className="h-6 w-6 text-white" />;
+        case 'ArrowDownToLine': return <ArrowDownToLine className="h-6 w-6 text-white" />;
+        default: return <BarChart3 className="h-6 w-6 text-white" />;
+      }
+    } else {
+      // Use the fallback goal's icon
+      return currentGoal.icon;
+    }
+  };
+
+  // Get the appropriate description
+  const description = cmsGoal?.description || (fallbackGoal?.heroDescription || '');
+
+  // Get the appropriate image URL
+  const imageUrl = cmsGoal?.image?.url || (fallbackGoal?.heroImage || '');
+
+  // Adapt features for the BusinessGoalFeatures component
+  const adaptedFeatures = cmsGoal ? cmsGoal.features.map((feature: CMSFeature) => ({
+    title: feature.title,
+    description: feature.description,
+    icon: feature.icon ? getIcon() : <BarChart3 className="h-6 w-6 text-white" /> // Provide default icon if none exists
+  })) : currentGoal.features;
+
+  // Adapt case studies or provide empty array if none exist
+  const adaptedCaseStudies = cmsGoal ? (cmsGoal.caseStudies || []).map(study => ({
+    title: study.title,
+    description: study.description,
+    image: study.image.url,
+    slug: study.title.toLowerCase().replace(/\s+/g, '-'), // Generate a slug from the title
+    results: ['Successful implementation'] // Default result
+  })) : currentGoal.caseStudies;
+
+  // Default integrations if none provided
+  const defaultIntegrations = [
+    {
+      name: "Analytics",
+      description: "Track performance metrics",
+      icon: <BarChart3 className="h-6 w-6 text-vending-blue" />
+    },
+    {
+      name: "Customer Data",
+      description: "Understand your users",
+      icon: <Users className="h-6 w-6 text-vending-blue" />
+    }
+  ];
   
   return (
     <Layout>
       <BusinessGoalHero 
         title={currentGoal.title}
-        description={currentGoal.description || currentGoal.heroDescription}
-        icon={currentGoal.icon}
-        image={heroImage}
+        description={description}
+        icon={getIcon()}
+        image={imageUrl}
       />
       
-      <BusinessGoalFeatures features={currentGoal.features} />
+      <BusinessGoalFeatures features={adaptedFeatures} />
       
-      <BusinessGoalCaseStudies caseStudies={currentGoal.caseStudies} />
+      <BusinessGoalCaseStudies caseStudies={adaptedCaseStudies} />
       
-      <BusinessGoalIntegrations integrations={currentGoal.integrations} />
+      <BusinessGoalIntegrations integrations={cmsGoal ? defaultIntegrations : currentGoal.integrations} />
       
       <CTASection />
     </Layout>
