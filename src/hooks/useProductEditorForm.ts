@@ -11,14 +11,12 @@ import { registerSlugChange } from '@/services/cms/utils/slugMatching';
 export const useProductEditorForm = (
   productSlug: string | undefined,
   setIsLoading: (isLoading: boolean) => void,
-  toastObj: { toast: UseToastReturn['toast'] }, // Update the parameter type here
+  toastObj: UseToastReturn, // Fix the type here
   navigate: NavigateFunction
 ) => {
   const [isCreating, setIsCreating] = useState(!productSlug);
   const { data: existingProduct, isLoading: isLoadingProduct, error } = useProductType(productSlug);
   const [formKey, setFormKey] = useState(0); // Add a key to force re-render
-
-  const { toast } = toastObj; // Extract the toast function
 
   console.log('[useProductEditorForm] Initialized with productSlug:', productSlug);
   console.log('[useProductEditorForm] isCreating mode:', isCreating);
@@ -102,14 +100,14 @@ export const useProductEditorForm = (
       }, 100);
     } else if (productSlug && !existingProduct && !isLoadingProduct) {
       console.log('[useProductEditorForm] No existing product found for slug:', productSlug);
-      toast({
+      toastObj.toast({
         title: "Product not found",
         description: `No product found with slug "${productSlug}". Creating a new product instead.`,
         variant: "destructive"
       });
       setIsCreating(true);
     }
-  }, [existingProduct, isCreating, isLoadingProduct, form, productSlug, toast]);
+  }, [existingProduct, isCreating, isLoadingProduct, form, productSlug, toastObj, formKey]);
 
   // Form submission handler
   const onSubmit = async (data: ProductFormData) => {
@@ -119,22 +117,13 @@ export const useProductEditorForm = (
     try {
       if (isCreating) {
         console.log('[useProductEditorForm] Creating new product');
-        await createProduct(data, { toast });
-        toast({
-          title: "Product created",
-          description: `${data.title} has been created successfully.`
-        });
+        await createProduct(data, toastObj);
         navigate(`/admin/products`);
       } else if (productSlug) {
         console.log(`[useProductEditorForm] Updating product: ${productSlug}`);
         console.log('[useProductEditorForm] Form data for update:', data);
         
-        await updateProduct(data, productSlug, { toast });
-        
-        toast({
-          title: "Product updated",
-          description: `${data.title} has been updated successfully.`
-        });
+        await updateProduct(data, productSlug, toastObj);
         
         // Navigate to the new slug if it changed
         if (data.slug !== productSlug) {
@@ -148,11 +137,7 @@ export const useProductEditorForm = (
       }
     } catch (error) {
       console.error('[useProductEditorForm] Error saving product:', error);
-      toast({
-        title: "Error",
-        description: `Failed to save product: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        variant: "destructive"
-      });
+      // Error toast is handled in the service functions
     } finally {
       setIsLoading(false);
     }
