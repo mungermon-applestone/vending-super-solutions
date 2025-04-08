@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -87,20 +88,23 @@ const MachineEditor = () => {
 
   useEffect(() => {
     if (machine && !isCreating) {
-      const images = machine.machine_images?.map(img => ({
+      // Extract the images from the machine's images array
+      const images = machine.images?.map(img => ({
         url: img.url,
         alt: img.alt,
-        width: img.width,
-        height: img.height,
+        width: img.width || undefined,
+        height: img.height || undefined,
       })) || [{ url: '', alt: '' }];
       
-      const specs = machine.machine_specs?.map(spec => ({
-        key: spec.key,
-        value: spec.value,
+      // Convert the specs object to an array of key-value pairs
+      const specs = Object.entries(machine.specs || {}).map(([key, value]) => ({
+        key,
+        value,
       })) || [{ key: '', value: '' }];
       
-      const features = machine.machine_features?.map(feature => ({
-        text: feature.feature,
+      // Map the features array to the expected format
+      const features = machine.features?.map(feature => ({
+        text: feature,
       })) || [{ text: '' }];
       
       form.reset({
