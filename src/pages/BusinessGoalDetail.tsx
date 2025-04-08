@@ -131,6 +131,9 @@ const BusinessGoalDetail = () => {
     }
   ];
   
+  // Use the fallback goal's integrations or default integrations if using CMS data
+  const integrations = cmsGoal ? defaultIntegrations : (fallbackGoal?.integrations as Integration[]);
+  
   return (
     <Layout>
       <BusinessGoalHero 
@@ -145,7 +148,7 @@ const BusinessGoalDetail = () => {
       <BusinessGoalCaseStudies caseStudies={adaptedCaseStudies} />
       
       <BusinessGoalIntegrations 
-        integrations={cmsGoal ? defaultIntegrations : (currentGoal.integrations as Integration[])} 
+        integrations={integrations} 
       />
       
       <CTASection />
