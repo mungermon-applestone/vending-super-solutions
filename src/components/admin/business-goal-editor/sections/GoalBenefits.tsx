@@ -22,7 +22,7 @@ interface GoalBenefitsProps {
 const GoalBenefits: React.FC<GoalBenefitsProps> = ({ form }) => {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "benefits"
+    name: "benefits"  // This matches the benefits field in BusinessGoalFormData
   });
 
   return (
