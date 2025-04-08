@@ -16,6 +16,9 @@ export function transformProductTypeData<T>(data: any[]): T[] {
       [...productType.product_type_benefits].sort((a, b) => a.display_order - b.display_order) : 
       [];
 
+    // Get unique benefits by creating a Set of them
+    const uniqueBenefits = [...new Set(sortedBenefits.map((b: any) => b.benefit))];
+
     const image = productType.product_type_images && productType.product_type_images.length > 0 
       ? productType.product_type_images[0] 
       : null;
@@ -54,7 +57,7 @@ export function transformProductTypeData<T>(data: any[]): T[] {
         width: image.width,
         height: image.height
       } : { url: "https://via.placeholder.com/800x600", alt: "Placeholder image" },
-      benefits: sortedBenefits.map((b: any) => b.benefit),
+      benefits: uniqueBenefits,
       features: features,
       examples: []
     } as unknown as T;
