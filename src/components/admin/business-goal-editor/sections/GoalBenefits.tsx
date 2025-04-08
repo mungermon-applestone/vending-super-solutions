@@ -22,7 +22,7 @@ interface GoalBenefitsProps {
 const GoalBenefits: React.FC<GoalBenefitsProps> = ({ form }) => {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "benefits"  // This name matches the benefits field in BusinessGoalFormData
+    name: "benefits" as const  // Using type assertion to ensure TypeScript recognizes this as valid
   });
 
   return (
@@ -66,7 +66,7 @@ const GoalBenefits: React.FC<GoalBenefitsProps> = ({ form }) => {
           variant="outline"
           size="sm"
           className="mt-2"
-          onClick={() => append("")}
+          onClick={() => append("")}  // Using an empty string as the default value
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Benefit
