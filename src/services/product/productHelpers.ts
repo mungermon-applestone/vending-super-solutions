@@ -3,7 +3,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
 
 /**
- * Add a product image
+ * Helper function to process benefits before database operations
+ * Filters empty benefits and removes duplicates while preserving order
+ */
+export const processBenefits = (benefits: string[]): string[] => {
+  // Filter out empty benefits and trim whitespace
+  const filteredBenefits = benefits
+    .filter(benefit => benefit.trim() !== '')
+    .map(benefit => benefit.trim());
+  
+  // Deduplicate while preserving original order
+  const seen = new Set<string>();
+  return filteredBenefits.filter(benefit => {
+    const normalized = benefit.toLowerCase();
+    if (seen.has(normalized)) {
+      return false;
+    }
+    seen.add(normalized);
+    return true;
+  });
+};
+
+/**
+ * Add product image to the database
  */
 export const addProductImage = async (data: ProductFormData, productId: string) => {
   console.log('[productService] Adding image for product:', productId);
@@ -28,16 +50,17 @@ export const addProductImage = async (data: ProductFormData, productId: string) 
 };
 
 /**
- * Add product benefits
+ * Add product benefits to the database
  */
 export const addProductBenefits = async (data: ProductFormData, productId: string) => {
   console.log('[productService] Adding benefits for product:', productId);
   
   try {
-    const benefitsToInsert = data.benefits.filter(benefit => benefit.trim() !== '');
+    // Process benefits - filter out empty ones and deduplicate
+    const benefitsToInsert = processBenefits(data.benefits);
     
     if (benefitsToInsert.length > 0) {
-      const { data: insertedBenefits, error } = await supabase
+      const { error } = await supabase
         .from('product_type_benefits')
         .insert(
           benefitsToInsert.map((benefit, index) => ({
@@ -62,7 +85,7 @@ export const addProductBenefits = async (data: ProductFormData, productId: strin
 };
 
 /**
- * Add product features
+ * Add product features to the database
  */
 export const addProductFeatures = async (data: ProductFormData, productId: string) => {
   console.log('[productService] Adding features for product:', productId);
@@ -111,7 +134,7 @@ export const addProductFeatures = async (data: ProductFormData, productId: strin
 };
 
 /**
- * Update product image
+ * Update product image in the database
  */
 export const updateProductImage = async (data: ProductFormData, productId: string) => {
   console.log('[productService] Updating image for product:', productId);
@@ -166,7 +189,7 @@ export const updateProductImage = async (data: ProductFormData, productId: strin
 };
 
 /**
- * Update product benefits
+ * Update product benefits in the database
  */
 export const updateProductBenefits = async (data: ProductFormData, productId: string) => {
   console.log('[productService] Updating benefits for product:', productId);
@@ -183,7 +206,9 @@ export const updateProductBenefits = async (data: ProductFormData, productId: st
       throw deleteError;
     }
 
-    const benefitsToInsert = data.benefits.filter(benefit => benefit.trim() !== '');
+    // Process benefits - filter out empty ones and deduplicate
+    const benefitsToInsert = processBenefits(data.benefits);
+    
     if (benefitsToInsert.length > 0) {
       const { error: insertError } = await supabase
         .from('product_type_benefits')
@@ -210,7 +235,7 @@ export const updateProductBenefits = async (data: ProductFormData, productId: st
 };
 
 /**
- * Update product features
+ * Update product features in the database
  */
 export const updateProductFeatures = async (data: ProductFormData, productId: string) => {
   console.log('[productService] Updating features for product:', productId);
@@ -240,11 +265,40 @@ export const updateProductFeatures = async (data: ProductFormData, productId: st
       }
     }
 
-    // Add new features
+    // Add new features using the shared helper
     await addProductFeatures(data, productId);
     console.log('[productService] Features updated successfully');
   } catch (error) {
     console.error('[productService] Error updating product features:', error);
+    throw error;
+  }
+};
+
+/**
+ * Check if a product with the specified slug exists
+ */
+export const checkProductSlugExists = async (slug: string, excludeId?: string): Promise<boolean> => {
+  try {
+    let query = supabase
+      .from('product_types')
+      .select('id')
+      .eq('slug', slug);
+    
+    // If we're excluding a specific product ID (e.g., for updates)
+    if (excludeId) {
+      query = query.neq('id', excludeId);
+    }
+    
+    const { data, error } = await query.maybeSingle();
+    
+    if (error) {
+      console.error('[productService] Error checking slug existence:', error);
+      throw error;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error('[productService] Error in checkProductSlugExists:', error);
     throw error;
   }
 };
