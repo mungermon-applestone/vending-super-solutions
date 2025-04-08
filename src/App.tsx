@@ -25,6 +25,8 @@ import Partner from "./pages/Partner";
 import BusinessGoalsLanding from "./pages/BusinessGoalsLanding";
 import BusinessGoalDetail from "./pages/BusinessGoalDetail";
 import AdminProducts from "./pages/AdminProducts";
+import AdminBusinessGoals from "./pages/AdminBusinessGoals";
+import BusinessGoalEditor from "./pages/BusinessGoalEditor";
 
 // Import individual machine pages
 import Option4Refrigerated from "./pages/machines/Option4Refrigerated";
@@ -75,6 +77,9 @@ const App = () => (
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/products/new" element={<ProductEditor />} />
             <Route path="/admin/products/edit/:productSlug" element={<ProductEditor />} />
+            <Route path="/admin/business-goals" element={<AdminBusinessGoals />} />
+            <Route path="/admin/business-goals/new" element={<BusinessGoalEditor />} />
+            <Route path="/admin/business-goals/edit/:goalSlug" element={<BusinessGoalEditor />} />
             
             {/* Specific product type routes */}
             <Route path="/products/grocery" element={<ProductDetail />} />
