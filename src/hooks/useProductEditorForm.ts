@@ -11,12 +11,12 @@ import { registerSlugChange } from '@/services/cms/utils/slugMatching';
 export const useProductEditorForm = (
   productSlug: string | undefined,
   setIsLoading: (isLoading: boolean) => void,
-  toast: UseToastReturn, // Use the complete UseToastReturn type
+  toast: UseToastReturn,
   navigate: NavigateFunction
 ) => {
   const [isCreating, setIsCreating] = useState(!productSlug);
   const { data: existingProduct, isLoading: isLoadingProduct, error } = useProductType(productSlug);
-  const [formKey, setFormKey] = useState(0); // Add a key to force re-render
+  const [formKey, setFormKey] = useState(Date.now()); // Use timestamp for more unique keys
 
   console.log('[useProductEditorForm] Initialized with productSlug:', productSlug);
   console.log('[useProductEditorForm] isCreating mode:', isCreating);
@@ -55,20 +55,23 @@ export const useProductEditorForm = (
     if (existingProduct && !isCreating) {
       console.log('[useProductEditorForm] Populating form with product data:', existingProduct);
       
-      // First reset the form to clear any previous data
+      // Deep clone the data to avoid reference issues
+      const productData = JSON.parse(JSON.stringify(existingProduct));
+      
+      // Reset the form with the cloned data
       form.reset({
-        title: existingProduct.title || '',
-        slug: existingProduct.slug || '',
-        description: existingProduct.description || '',
+        title: productData.title || '',
+        slug: productData.slug || '',
+        description: productData.description || '',
         image: {
-          url: existingProduct.image?.url || '',
-          alt: existingProduct.image?.alt || ''
+          url: productData.image?.url || '',
+          alt: productData.image?.alt || ''
         },
-        benefits: existingProduct.benefits && existingProduct.benefits.length > 0 
-          ? existingProduct.benefits 
+        benefits: productData.benefits && productData.benefits.length > 0 
+          ? [...productData.benefits] 
           : [''],
-        features: existingProduct.features && existingProduct.features.length > 0 
-          ? existingProduct.features.map(feature => ({
+        features: productData.features && productData.features.length > 0 
+          ? productData.features.map(feature => ({
               title: feature.title || '',
               description: feature.description || '',
               icon: typeof feature.icon === 'string' ? feature.icon : 'check',
@@ -84,20 +87,16 @@ export const useProductEditorForm = (
                 screenshotAlt: ''
               }
             ]
+      }, { 
+        keepDirty: false,
+        keepValues: false
       });
       
       console.log('[useProductEditorForm] Form reset with values:', form.getValues());
       
-      // Force field updates separately to ensure they're applied
-      if (existingProduct.title) form.setValue('title', existingProduct.title);
-      if (existingProduct.slug) form.setValue('slug', existingProduct.slug);
-      if (existingProduct.description) form.setValue('description', existingProduct.description);
-      
-      // Force a re-render after populating the form
-      setTimeout(() => {
-        setFormKey(prev => prev + 1);
-        console.log('[useProductEditorForm] Forced re-render with new formKey:', formKey + 1);
-      }, 100);
+      // Force a re-render after populating the form by updating the form key
+      setFormKey(Date.now());
+      console.log('[useProductEditorForm] Updated form key to force re-render:', formKey);
     } else if (productSlug && !existingProduct && !isLoadingProduct) {
       console.log('[useProductEditorForm] No existing product found for slug:', productSlug);
       toast.toast({
@@ -107,7 +106,7 @@ export const useProductEditorForm = (
       });
       setIsCreating(true);
     }
-  }, [existingProduct, isCreating, isLoadingProduct, form, productSlug, toast, formKey]);
+  }, [existingProduct, isCreating, isLoadingProduct, form, productSlug, toast]);
 
   // Form submission handler
   const onSubmit = async (data: ProductFormData) => {

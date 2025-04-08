@@ -21,6 +21,9 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   
+  // Use a local key to force remounts when needed
+  const [localFormKey, setLocalFormKey] = useState(0);
+  
   // Pass the entire toast object returned from useToast()
   const { isCreating, isLoadingProduct, form, onSubmit, formKey } = useProductEditorForm(
     productSlug, 
@@ -34,7 +37,8 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   // Force re-render when formKey changes to ensure form is properly initialized
   useEffect(() => {
     console.log('[ProductEditorForm] Form key changed:', formKey);
-    // This will ensure the form re-renders when the key changes
+    // Force a re-render of this component when the formKey changes
+    setLocalFormKey(prevKey => prevKey + 1);
   }, [formKey]);
 
   // Handle form submission with validation
@@ -44,7 +48,7 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
     // Ensure the form is marked as dirty for submission
     Object.keys(data).forEach(field => {
       // @ts-ignore - We need to access fields dynamically
-      form.setValue(field, data[field], { shouldDirty: true });
+      form.setValue(field, data[field], { shouldDirty: true, shouldTouch: true });
     });
     
     await onSubmit(data);
@@ -65,13 +69,17 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   }
 
   return (
-    <div className="container py-10">
+    <div className="container py-10" key={`form-container-${localFormKey}`}>
       <h1 className="text-3xl font-bold mb-6">
         {isCreating ? 'Create New Product' : `Edit Product: ${form.watch('title') || 'Loading...'}`}
       </h1>
 
       <Form {...form}>
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form 
+          onSubmit={handleSubmit} 
+          className="space-y-8" 
+          key={`form-element-${localFormKey}`}
+        >
           <BasicInformation form={form} />
           <ProductImage form={form} />
           <ProductBenefits form={form} />
