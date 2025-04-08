@@ -9,8 +9,30 @@ import CTASection from '@/components/common/CTASection';
 import { businessGoalsData } from '@/data/businessGoalsData';
 import { useBusinessGoal } from '@/hooks/useCMSData';
 import { Skeleton } from "@/components/ui/skeleton";
-import { CMSFeature, CMSBusinessGoal } from '@/types/cms';
+import { CMSFeature, CMSBusinessGoal, CMSExample } from '@/types/cms';
 import { ArrowDownToLine, BarChart3, Building2, RefreshCcw, Users } from 'lucide-react';
+import { ReactNode } from 'react';
+
+// Define interfaces for component props to match expected types
+interface Feature {
+  title: string;
+  description: string;
+  icon: ReactNode;
+}
+
+interface CaseStudy {
+  title: string;
+  description: string;
+  image: string;
+  slug: string;
+  results: string[];
+}
+
+interface Integration {
+  name: string;
+  description: string;
+  icon: ReactNode;
+}
 
 const BusinessGoalDetail = () => {
   const { goalSlug } = useParams<{ goalSlug: string }>();
@@ -55,21 +77,17 @@ const BusinessGoalDetail = () => {
     console.error("Error loading business goal:", error);
   }
 
-  // Adapt the CMS data to match the component requirements
-  const getIcon = () => {
-    if (cmsGoal) {
-      // If we have CMS data, use its icon or provide a default
-      switch (cmsGoal.icon) {
-        case 'Building2': return <Building2 className="h-6 w-6 text-white" />;
-        case 'Users': return <Users className="h-6 w-6 text-white" />;
-        case 'BarChart3': return <BarChart3 className="h-6 w-6 text-white" />;
-        case 'RefreshCcw': return <RefreshCcw className="h-6 w-6 text-white" />;
-        case 'ArrowDownToLine': return <ArrowDownToLine className="h-6 w-6 text-white" />;
-        default: return <BarChart3 className="h-6 w-6 text-white" />;
-      }
-    } else {
-      // Use the fallback goal's icon
-      return currentGoal.icon;
+  // Convert string icon to React component
+  const iconToComponent = (iconName?: string): ReactNode => {
+    if (!iconName) return <BarChart3 className="h-6 w-6 text-white" />;
+    
+    switch (iconName) {
+      case 'Building2': return <Building2 className="h-6 w-6 text-white" />;
+      case 'Users': return <Users className="h-6 w-6 text-white" />;
+      case 'BarChart3': return <BarChart3 className="h-6 w-6 text-white" />;
+      case 'RefreshCcw': return <RefreshCcw className="h-6 w-6 text-white" />;
+      case 'ArrowDownToLine': return <ArrowDownToLine className="h-6 w-6 text-white" />;
+      default: return <BarChart3 className="h-6 w-6 text-white" />;
     }
   };
 
@@ -79,24 +97,28 @@ const BusinessGoalDetail = () => {
   // Get the appropriate image URL
   const imageUrl = cmsGoal?.image?.url || (fallbackGoal?.heroImage || '');
 
-  // Adapt features for the BusinessGoalFeatures component
-  const adaptedFeatures = cmsGoal ? cmsGoal.features.map((feature: CMSFeature) => ({
-    title: feature.title,
-    description: feature.description,
-    icon: feature.icon ? getIcon() : <BarChart3 className="h-6 w-6 text-white" /> // Provide default icon if none exists
-  })) : currentGoal.features;
+  // Adapt features from CMS data to match Feature interface
+  const adaptedFeatures: Feature[] = cmsGoal 
+    ? cmsGoal.features.map((feature: CMSFeature): Feature => ({
+        title: feature.title,
+        description: feature.description,
+        icon: iconToComponent(feature.icon as string)
+      })) 
+    : (currentGoal.features as Feature[]);
 
-  // Adapt case studies or provide empty array if none exist
-  const adaptedCaseStudies = cmsGoal ? (cmsGoal.caseStudies || []).map(study => ({
-    title: study.title,
-    description: study.description,
-    image: study.image.url,
-    slug: study.title.toLowerCase().replace(/\s+/g, '-'), // Generate a slug from the title
-    results: ['Successful implementation'] // Default result
-  })) : currentGoal.caseStudies;
+  // Adapt case studies from CMS data to match CaseStudy interface
+  const adaptedCaseStudies: CaseStudy[] = cmsGoal 
+    ? (cmsGoal.caseStudies || []).map((study: CMSExample): CaseStudy => ({
+        title: study.title,
+        description: study.description,
+        image: study.image.url,
+        slug: study.title.toLowerCase().replace(/\s+/g, '-'),
+        results: ['Successful implementation']
+      }))
+    : (currentGoal.caseStudies as CaseStudy[]);
 
-  // Default integrations if none provided
-  const defaultIntegrations = [
+  // Default integrations when using CMS data
+  const defaultIntegrations: Integration[] = [
     {
       name: "Analytics",
       description: "Track performance metrics",
@@ -114,7 +136,7 @@ const BusinessGoalDetail = () => {
       <BusinessGoalHero 
         title={currentGoal.title}
         description={description}
-        icon={getIcon()}
+        icon={cmsGoal ? iconToComponent(cmsGoal.icon) : currentGoal.icon}
         image={imageUrl}
       />
       
@@ -122,7 +144,9 @@ const BusinessGoalDetail = () => {
       
       <BusinessGoalCaseStudies caseStudies={adaptedCaseStudies} />
       
-      <BusinessGoalIntegrations integrations={cmsGoal ? defaultIntegrations : currentGoal.integrations} />
+      <BusinessGoalIntegrations 
+        integrations={cmsGoal ? defaultIntegrations : (currentGoal.integrations as Integration[])} 
+      />
       
       <CTASection />
     </Layout>
