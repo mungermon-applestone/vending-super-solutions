@@ -22,7 +22,7 @@ interface ProductEditorFormProps {
 
 const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const isCreating = !productSlug;
   
@@ -87,11 +87,11 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
     try {
       if (isCreating) {
         console.log('[ProductEditorForm] Creating new product');
-        await createProduct(data, { toast });
+        await createProduct(data, toast);
         navigate('/admin/products');
       } else if (productSlug) {
         console.log(`[ProductEditorForm] Updating product: ${productSlug}`);
-        await updateProduct(data, productSlug, { toast });
+        await updateProduct(data, productSlug, toast);
         navigate('/admin/products');
       }
     } catch (error) {

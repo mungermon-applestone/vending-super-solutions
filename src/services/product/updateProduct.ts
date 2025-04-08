@@ -173,7 +173,7 @@ const updateProductFeatures = async (data: ProductFormData, productId: string) =
 /**
  * Update an existing product
  */
-export const updateProduct = async (data: ProductFormData, originalSlug: string, toastObj: { toast: UseToastReturn['toast'] }) => {
+export const updateProduct = async (data: ProductFormData, originalSlug: string, toastObj: UseToastReturn) => {
   console.log('[productService] Updating product:', originalSlug, 'with data:', data);
   
   try {
