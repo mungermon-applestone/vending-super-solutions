@@ -311,13 +311,41 @@ const machinePlaceholderData: MachinePlaceholder[] = [
 export const migrateMachinesData = async () => {
   try {
     console.log("Starting machine data migration...");
-    let successCount = 0;
+    const existingMachines = await supabase.from('machines').select('slug');
+    console.log("Existing machines:", existingMachines.data);
     
+    let successCount = 0;
+    let failureCount = 0;
+    let skippedCount = 0;
+    let errors = [];
+    
+    // Process each machine sequentially using for...of to prevent race conditions
     for (const machineData of machinePlaceholderData) {
-      console.log(`Processing machine: ${machineData.title}`);
-      
       try {
-        // Create the machine record
+        console.log(`Processing machine: ${machineData.title} (${machineData.slug})`);
+        
+        // Check if machine with this slug already exists
+        const { data: existingMachine, error: checkError } = await supabase
+          .from('machines')
+          .select('id, slug')
+          .eq('slug', machineData.slug)
+          .maybeSingle();
+          
+        if (checkError) {
+          console.error(`Error checking for existing machine ${machineData.slug}:`, checkError);
+          errors.push(`Failed to check existence of ${machineData.title}: ${checkError.message}`);
+          failureCount++;
+          continue;
+        }
+        
+        // If machine already exists, skip it
+        if (existingMachine) {
+          console.log(`Machine with slug ${machineData.slug} already exists, skipping.`);
+          skippedCount++;
+          continue;
+        }
+        
+        // Create the machine record with explicit insert values
         const { data: machine, error: machineError } = await supabase
           .from('machines')
           .insert({
@@ -333,6 +361,15 @@ export const migrateMachinesData = async () => {
         
         if (machineError) {
           console.error(`Error creating machine ${machineData.title}:`, machineError);
+          errors.push(`Failed to create ${machineData.title}: ${machineError.message}`);
+          failureCount++;
+          continue;
+        }
+        
+        if (!machine || !machine.id) {
+          console.error(`Failed to get ID for new machine ${machineData.title}`);
+          errors.push(`Failed to get ID for new machine ${machineData.title}`);
+          failureCount++;
           continue;
         }
         
@@ -355,6 +392,8 @@ export const migrateMachinesData = async () => {
           
           if (imageError) {
             console.error(`Error adding images for machine ${machineData.title}:`, imageError);
+            errors.push(`Failed to add images for ${machineData.title}: ${imageError.message}`);
+            // Continue despite image error
           } else {
             console.log(`Added ${imageInserts.length} images for machine ${machineData.title}`);
           }
@@ -370,14 +409,18 @@ export const migrateMachinesData = async () => {
               value
             }));
           
-          const { error: specError } = await supabase
-            .from('machine_specs')
-            .insert(specInserts);
-          
-          if (specError) {
-            console.error(`Error adding specs for machine ${machineData.title}:`, specError);
-          } else {
-            console.log(`Added ${specInserts.length} specs for machine ${machineData.title}`);
+          if (specInserts.length > 0) {
+            const { error: specError } = await supabase
+              .from('machine_specs')
+              .insert(specInserts);
+            
+            if (specError) {
+              console.error(`Error adding specs for machine ${machineData.title}:`, specError);
+              errors.push(`Failed to add specs for ${machineData.title}: ${specError.message}`);
+              // Continue despite spec error
+            } else {
+              console.log(`Added ${specInserts.length} specs for machine ${machineData.title}`);
+            }
           }
         }
         
@@ -395,6 +438,8 @@ export const migrateMachinesData = async () => {
           
           if (featureError) {
             console.error(`Error adding features for machine ${machineData.title}:`, featureError);
+            errors.push(`Failed to add features for ${machineData.title}: ${featureError.message}`);
+            // Continue despite feature error
           } else {
             console.log(`Added ${featureInserts.length} features for machine ${machineData.title}`);
           }
@@ -417,6 +462,8 @@ export const migrateMachinesData = async () => {
           
           if (exampleError) {
             console.error(`Error adding deployment examples for machine ${machineData.title}:`, exampleError);
+            errors.push(`Failed to add deployment examples for ${machineData.title}: ${exampleError.message}`);
+            // Continue despite example error
           } else {
             console.log(`Added ${exampleInserts.length} deployment examples for machine ${machineData.title}`);
           }
@@ -424,20 +471,48 @@ export const migrateMachinesData = async () => {
         
         // Increment success counter
         successCount++;
+        console.log(`Successfully processed machine: ${machineData.title}`);
       } catch (machineError) {
-        console.error(`Error processing machine ${machineData.title}:`, machineError);
+        console.error(`Unexpected error processing machine ${machineData.title}:`, machineError);
+        errors.push(`Unexpected error with ${machineData.title}: ${machineError.message || 'Unknown error'}`);
+        failureCount++;
         // Continue with next machine despite error
       }
     }
     
-    console.log(`Machine data migration completed. ${successCount} out of ${machinePlaceholderData.length} machines imported successfully`);
+    // Fetch the current machine count from the database to verify
+    const { data: finalMachines, error: finalError } = await supabase
+      .from('machines')
+      .select('id, title, slug')
+      .order('title');
+      
+    if (finalError) {
+      console.error("Error verifying final machine count:", finalError);
+    } else {
+      console.log(`Final machine count in database: ${finalMachines?.length || 0}`);
+      console.log("Machines in database:", finalMachines);
+    }
+    
+    console.log(`Migration summary: 
+      - Total machines in placeholder data: ${machinePlaceholderData.length}
+      - Successfully imported: ${successCount}
+      - Failed: ${failureCount}
+      - Skipped (already exist): ${skippedCount}
+      - Final count in database: ${finalMachines?.length || 'Unknown'}`);
+    
     return { 
-      success: true, 
-      message: `Migration completed successfully. ${successCount} out of ${machinePlaceholderData.length} machines were imported.`,
-      count: successCount
+      success: successCount > 0, 
+      message: `Migration completed. ${successCount} machines were imported successfully, ${failureCount} failed, ${skippedCount} skipped.`,
+      count: successCount,
+      errors: errors.length > 0 ? errors : undefined,
+      machinesInDb: finalMachines || []
     };
   } catch (error) {
     console.error("Error during machine data migration:", error);
-    return { success: false, message: "Migration failed", error };
+    return { 
+      success: false, 
+      message: "Migration failed with an unexpected error", 
+      error: error instanceof Error ? error.message : String(error) 
+    };
   }
 };

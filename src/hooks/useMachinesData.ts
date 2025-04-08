@@ -8,6 +8,8 @@ import { toast } from '@/components/ui/use-toast';
  * Hook to fetch all machines with optional filters
  */
 export function useMachines(filters: Record<string, any> = {}) {
+  const queryClient = useQueryClient();
+  
   return useQuery({
     queryKey: ['machines', filters],
     queryFn: async () => {
@@ -17,9 +19,21 @@ export function useMachines(filters: Record<string, any> = {}) {
         console.log("[useMachines] Fetched machines:", machines);
         console.log(`[useMachines] Total machines fetched: ${machines.length}`);
         
-        if (machines.length <= 1) {
-          console.warn("[useMachines] Warning: Only one or zero machines returned. This might indicate an issue.");
-          console.log("[useMachines] Sample machine data:", machines[0]);
+        // Log each machine for debugging
+        machines.forEach((machine, index) => {
+          console.log(`[useMachines] Machine ${index + 1}:`, {
+            id: machine.id,
+            title: machine.title,
+            type: machine.type,
+            slug: machine.slug
+          });
+        });
+        
+        if (machines.length === 0) {
+          console.warn("[useMachines] No machines found. This might indicate an issue with data access or migration.");
+        } else if (machines.length === 1) {
+          console.warn("[useMachines] Only one machine returned. This might indicate an issue.");
+          console.log("[useMachines] Single machine data:", machines[0]);
         }
         
         return machines;
@@ -28,6 +42,8 @@ export function useMachines(filters: Record<string, any> = {}) {
         throw error;
       }
     },
+    staleTime: 1000 * 60, // 1 minute
+    refetchOnWindowFocus: true,
   });
 }
 

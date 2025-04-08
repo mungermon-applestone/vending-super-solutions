@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { transformMachineData } from '../utils/transformers';
 
@@ -7,6 +6,7 @@ import { transformMachineData } from '../utils/transformers';
  */
 export async function fetchMachines<T>(params: Record<string, any> = {}): Promise<T[]> {
   try {
+    console.log('[fetchMachines] Starting fetch with params:', params);
     let query = supabase
       .from('machines')
       .select(`
@@ -62,15 +62,50 @@ export async function fetchMachines<T>(params: Record<string, any> = {}): Promis
       query = query.eq('id', params.id);
     }
     
+    // Print the final query for debugging
+    console.log('[fetchMachines] Running query with filters:', params);
+    
     const { data, error } = await query.order('title');
     
     if (error) {
+      console.error('[fetchMachines] Error fetching machines:', error);
       throw error;
     }
 
-    return transformMachineData<T>(data);
+    // Log raw data before transformation
+    console.log(`[fetchMachines] Raw data received: ${data?.length || 0} machines`);
+    if (data?.length > 0) {
+      console.log('[fetchMachines] First machine sample:', {
+        id: data[0].id,
+        title: data[0].title,
+        slug: data[0].slug
+      });
+    } else {
+      console.warn('[fetchMachines] No machines found in database');
+    }
+
+    // Check for possible RLS issues
+    if (!data || data.length === 0) {
+      console.warn('[fetchMachines] Empty result may indicate RLS policy issues - checking table access');
+      
+      // Try a simple count query to verify basic table access
+      const { count, error: countError } = await supabase
+        .from('machines')
+        .select('*', { count: 'exact', head: true });
+      
+      if (countError) {
+        console.error('[fetchMachines] Error accessing machines table:', countError);
+      } else {
+        console.log(`[fetchMachines] Total count in machines table (may be filtered by RLS): ${count}`);
+      }
+    }
+
+    const transformed = transformMachineData<T>(data);
+    console.log(`[fetchMachines] Transformed data: ${transformed.length} machines`);
+    
+    return transformed;
   } catch (error) {
-    console.error('[fetchFromCMS] Error fetching machines:', error);
+    console.error('[fetchMachines] Error fetching machines:', error);
     throw error;
   }
 }
