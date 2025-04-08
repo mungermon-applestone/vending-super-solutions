@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { BusinessGoalFormData } from '@/types/forms';
 
@@ -42,7 +43,7 @@ export const addBusinessGoalImage = async (
     return;
   }
   
-  // For business goals, we store the image URL directly in the business_goals table
+  // Update image fields in business_goals table
   const { error } = await supabase
     .from('business_goals')
     .update({
@@ -80,7 +81,7 @@ export const addBusinessGoalBenefits = async (
     benefit,
     display_order: index
   }));
-  
+
   const { error } = await supabase
     .from('business_goal_benefits')
     .insert(benefitsToInsert);
@@ -164,7 +165,7 @@ export const updateBusinessGoalImage = async (
 ): Promise<void> => {
   console.log('[businessGoalService] Updating business goal image');
   
-  // For business goals, we update the image URL directly in the business_goals table
+  // Update image fields in business_goals table
   const { error } = await supabase
     .from('business_goals')
     .update({

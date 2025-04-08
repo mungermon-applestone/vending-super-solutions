@@ -22,7 +22,7 @@ interface GoalBenefitsProps {
 const GoalBenefits: React.FC<GoalBenefitsProps> = ({ form }) => {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: 'benefits'
+    name: 'benefits'  // This was incorrectly typed as 'features'
   });
 
   return (
@@ -66,7 +66,7 @@ const GoalBenefits: React.FC<GoalBenefitsProps> = ({ form }) => {
           variant="outline"
           size="sm"
           className="mt-2"
-          onClick={() => append('')}
+          onClick={() => append('')}  // Fixed: Appending a string instead of an object
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Benefit

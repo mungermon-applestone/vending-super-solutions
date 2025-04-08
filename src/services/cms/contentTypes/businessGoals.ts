@@ -31,7 +31,7 @@ export async function fetchBusinessGoals<T>(): Promise<T[]> {
     // For each business goal, fetch associated data
     for (const goal of goals) {
       // Fetch benefits
-      const { data: benefits, error: benefitsError } = await supabase
+      const { data: benefitsData, error: benefitsError } = await supabase
         .from('business_goal_benefits')
         .select('benefit')
         .eq('business_goal_id', goal.id)
@@ -42,6 +42,9 @@ export async function fetchBusinessGoals<T>(): Promise<T[]> {
         // Continue with the next goal
         continue;
       }
+      
+      // Extract benefits or default to empty array
+      const benefits = benefitsData ? benefitsData.map(b => b.benefit) : [];
       
       // Fetch features
       const { data: features, error: featuresError } = await supabase
@@ -93,7 +96,7 @@ export async function fetchBusinessGoals<T>(): Promise<T[]> {
           url: goal.image_url || '',
           alt: goal.image_alt || goal.title
         },
-        benefits: (benefits || []).map(b => b.benefit),
+        benefits: benefits,
         features: enhancedFeatures,
         caseStudies: [] // We'll need to implement this if case studies become a requirement
       };
@@ -136,7 +139,7 @@ export async function fetchBusinessGoalBySlug<T>(slug: string): Promise<T | null
     }
     
     // Fetch benefits
-    const { data: benefits, error: benefitsError } = await supabase
+    const { data: benefitsData, error: benefitsError } = await supabase
       .from('business_goal_benefits')
       .select('benefit')
       .eq('business_goal_id', goal.id)
@@ -146,6 +149,9 @@ export async function fetchBusinessGoalBySlug<T>(slug: string): Promise<T | null
       console.error(`[fetchBusinessGoalBySlug] Error fetching benefits for goal ${goal.id}:`, benefitsError);
       // Continue anyway
     }
+    
+    // Extract benefits or default to empty array
+    const benefits = benefitsData ? benefitsData.map(b => b.benefit) : [];
     
     // Fetch features
     const { data: features, error: featuresError } = await supabase
@@ -196,7 +202,7 @@ export async function fetchBusinessGoalBySlug<T>(slug: string): Promise<T | null
         url: goal.image_url || '',
         alt: goal.image_alt || goal.title
       },
-      benefits: (benefits || []).map(b => b.benefit),
+      benefits: benefits,
       features: enhancedFeatures,
       caseStudies: [] // We'll need to implement this if case studies become a requirement
     };
