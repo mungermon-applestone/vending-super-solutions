@@ -173,7 +173,7 @@ const updateProductFeatures = async (data: ProductFormData, productId: string) =
 /**
  * Update an existing product
  */
-export const updateProduct = async (data: ProductFormData, originalSlug: string, toast: UseToastReturn) => {
+export const updateProduct = async (data: ProductFormData, originalSlug: string, toastObj: { toast: UseToastReturn['toast'] }) => {
   console.log('[productService] Updating product:', originalSlug, 'with data:', data);
   
   try {
@@ -240,7 +240,7 @@ export const updateProduct = async (data: ProductFormData, originalSlug: string,
     // Update product features
     await updateProductFeatures(data, productId);
     
-    toast.toast({
+    toastObj.toast({
       title: "Product updated",
       description: `${data.title} has been updated successfully.`
     });
@@ -248,7 +248,7 @@ export const updateProduct = async (data: ProductFormData, originalSlug: string,
     return productId;
   } catch (error) {
     console.error('[productService] Error in updateProduct:', error);
-    toast.toast({
+    toastObj.toast({
       title: "Error",
       description: `Failed to update product: ${error instanceof Error ? error.message : 'Unknown error'}`,
       variant: "destructive"
