@@ -1,8 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { 
+  FormField,
+  FormItem,
   FormLabel,
+  FormControl,
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,65 +18,20 @@ interface BasicInformationProps {
 }
 
 const BasicInformation = ({ form }: BasicInformationProps) => {
-  // Initialize state with form values
-  const [title, setTitle] = useState(form.getValues('title') || '');
-  const [slug, setSlug] = useState(form.getValues('slug') || '');
-  const [description, setDescription] = useState(form.getValues('description') || '');
+  // Log the current form values for debugging
+  console.log('[BasicInformation] Current form values:', {
+    title: form.watch('title'),
+    slug: form.watch('slug'),
+    description: form.watch('description')
+  });
 
-  // Update local state when form values change (especially when populated from API)
-  useEffect(() => {
-    console.log('[BasicInformation] Form values changed, updating local state:', {
-      formTitle: form.getValues('title'),
-      formSlug: form.getValues('slug'),
-      formDescription: form.getValues('description')
-    });
-    
-    // Only update if the form values are not empty and different from current state
-    const formTitle = form.getValues('title');
-    const formSlug = form.getValues('slug');
-    const formDescription = form.getValues('description');
-    
-    if (formTitle && formTitle !== title) {
-      setTitle(formTitle);
-    }
-    
-    if (formSlug && formSlug !== slug) {
-      setSlug(formSlug);
-    }
-    
-    if (formDescription && formDescription !== description) {
-      setDescription(formDescription);
-    }
-  }, [form.formState.defaultValues]);
-
-  // Update React Hook Form whenever local state changes
-  useEffect(() => {
-    // We need this effect to ensure form values are set properly
-    form.setValue('title', title, { shouldDirty: true, shouldTouch: true });
-    
-    // Apply slug formatting rules
-    const formattedSlug = slug
+  // Create a slug formatter function
+  const formatSlug = (value: string) => {
+    return value
       .toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '');
-    
-    form.setValue('slug', formattedSlug, { shouldDirty: true, shouldTouch: true });
-    form.setValue('description', description, { shouldDirty: true, shouldTouch: true });
-    
-    // Log updated form values after setting
-    console.log('[BasicInformation] Updated form values:', {
-      title: form.getValues('title'),
-      slug: form.getValues('slug'),
-      description: form.getValues('description')
-    });
-  }, [title, slug, description, form]);
-
-  // Log current values for debugging
-  console.log('[BasicInformation] Rendering with local state values:', {
-    title,
-    slug,
-    description
-  });
+  };
 
   return (
     <Card>
@@ -81,63 +40,75 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-4">
-          <div>
-            <FormLabel htmlFor="title">Title</FormLabel>
-            <Input
-              id="title"
-              placeholder="Product Title"
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-              }}
-              className="mt-1 w-full"
-            />
-            {form.formState.errors.title && (
-              <p className="text-sm text-red-500 mt-1">
-                {form.formState.errors.title.message}
-              </p>
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel htmlFor="title">Title</FormLabel>
+                <FormControl>
+                  <Input
+                    id="title"
+                    placeholder="Product Title"
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      
+                      // Auto-generate slug if slug is empty
+                      const currentSlug = form.getValues('slug');
+                      if (!currentSlug) {
+                        form.setValue('slug', formatSlug(e.target.value), {
+                          shouldDirty: true
+                        });
+                      }
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-          </div>
+          />
 
-          <div>
-            <FormLabel htmlFor="slug">Slug (URL-friendly name)</FormLabel>
-            <Input
-              id="slug"
-              placeholder="product-slug"
-              value={slug}
-              onChange={(e) => {
-                const value = e.target.value
-                  .toLowerCase()
-                  .replace(/\s+/g, '-')
-                  .replace(/[^a-z0-9-]/g, '');
-                setSlug(value);
-              }}
-              className="mt-1 w-full"
-            />
-            {form.formState.errors.slug && (
-              <p className="text-sm text-red-500 mt-1">
-                {form.formState.errors.slug.message}
-              </p>
+          <FormField
+            control={form.control}
+            name="slug"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel htmlFor="slug">Slug (URL-friendly name)</FormLabel>
+                <FormControl>
+                  <Input
+                    id="slug"
+                    placeholder="product-slug"
+                    {...field}
+                    onChange={(e) => {
+                      const formattedValue = formatSlug(e.target.value);
+                      field.onChange(formattedValue);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-          </div>
+          />
 
-          <div>
-            <FormLabel htmlFor="description">Description</FormLabel>
-            <Textarea
-              id="description"
-              placeholder="Describe the product..."
-              value={description}
-              onChange={(e) => {
-                setDescription(e.target.value);
-              }}
-              className="mt-1 w-full min-h-[100px]"
-            />
-            {form.formState.errors.description && (
-              <p className="text-sm text-red-500 mt-1">
-                {form.formState.errors.description.message}
-              </p>
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel htmlFor="description">Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    id="description"
+                    placeholder="Describe the product..."
+                    className="min-h-[100px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-          </div>
+          />
         </div>
       </CardContent>
     </Card>

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,6 @@ import ProductImage from './sections/ProductImage';
 import ProductBenefits from './sections/ProductBenefits';
 import ProductFeatures from './sections/ProductFeatures';
 import { useProductEditorForm } from '@/hooks/useProductEditorForm';
-import useKeepFormsEditable from '@/hooks/useKeepFormsEditable';
 
 interface ProductEditorFormProps {
   productSlug?: string;
@@ -19,59 +18,26 @@ interface ProductEditorFormProps {
 
 const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const navigate = useNavigate();
-  const toast = useToast();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const { isCreating, isLoadingProduct, form, onSubmit, formKey } = useProductEditorForm(productSlug, setIsLoading, toast, navigate);
-  
-  // Use our aggressive form editable hook
-  useKeepFormsEditable();
+  const { isCreating, isLoadingProduct, form, onSubmit } = useProductEditorForm(
+    productSlug, 
+    setIsLoading, 
+    toast, 
+    navigate
+  );
 
-  useEffect(() => {
-    console.log('[ProductEditorForm] Component mounted or updated with formKey:', formKey);
-    console.log('[ProductEditorForm] Mode:', isCreating ? 'create' : 'edit');
-    console.log('[ProductEditorForm] Product slug:', productSlug);
-    console.log('[ProductEditorForm] Form values:', form.getValues());
-    
-    // Direct approach as a backup
-    const makeAllFieldsEditable = () => {
-      const inputs = document.querySelectorAll('input, textarea, select');
-      inputs.forEach(input => {
-        if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) {
-          input.readOnly = false;
-          input.disabled = false;
-          input.setAttribute('data-forced-editable', 'true');
-        }
-        if (input instanceof HTMLSelectElement) {
-          input.disabled = false;
-          input.setAttribute('data-forced-editable', 'true');
-        }
-      });
-      console.log('[ProductEditorForm] Directly made all fields editable:', inputs.length);
-    };
-    
-    // Run immediately and after a delay
-    makeAllFieldsEditable();
-    setTimeout(makeAllFieldsEditable, 1000);
-  }, [isCreating, form, productSlug, formKey]);
+  console.log('[ProductEditorForm] Rendering with form values:', form.getValues());
 
   // Handle form submission with validation
   const handleSubmit = form.handleSubmit(async (data) => {
     console.log('[ProductEditorForm] Form submission with data:', data);
-    // Log form state for debugging
-    console.log('[ProductEditorForm] Form state on submit:', {
-      isDirty: form.formState.isDirty,
-      dirtyFields: form.formState.dirtyFields,
-      touchedFields: form.formState.touchedFields,
-    });
     
-    // Make sure the form is marked as dirty to ensure submission works
-    if (!form.formState.isDirty) {
-      console.log('[ProductEditorForm] Form not dirty, manually marking as dirty');
-      Object.keys(data).forEach(field => {
-        // @ts-ignore - We need to access fields dynamically
-        form.setValue(field, data[field], { shouldDirty: true });
-      });
-    }
+    // Ensure the form is marked as dirty for submission
+    Object.keys(data).forEach(field => {
+      // @ts-ignore - We need to access fields dynamically
+      form.setValue(field, data[field], { shouldDirty: true });
+    });
     
     await onSubmit(data);
   });
@@ -116,10 +82,6 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
               type="submit" 
               disabled={isLoading} 
               className="gap-2"
-              onClick={() => {
-                console.log('[ProductEditorForm] Save button clicked');
-                console.log('[ProductEditorForm] Current form values:', form.getValues());
-              }}
             >
               {isLoading ? 'Saving...' : <><Save className="h-4 w-4" /> Save Product</>}
             </Button>

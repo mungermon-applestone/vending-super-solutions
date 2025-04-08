@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import ProductEditorForm from '@/components/admin/product-editor/ProductEditorForm';
@@ -13,14 +13,9 @@ const ProductEditorPage = () => {
   
   console.log(`[ProductEditorPage] Rendering editor for product: ${productSlug || 'new product'}`);
   
-  // Force rerender on mount to help with form reactivity
-  useEffect(() => {
-    console.log('[ProductEditorPage] Component mounted');
-  }, []);
-  
   return (
     <Layout>
-      <ProductEditorForm key={productSlug || 'new'} productSlug={productSlug} />
+      <ProductEditorForm key={`editor-${productSlug || 'new'}`} productSlug={productSlug} />
     </Layout>
   );
 };
