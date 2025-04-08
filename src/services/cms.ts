@@ -13,6 +13,7 @@ import {
   mapUrlSlugToDatabaseSlug, 
   getSlugVariations 
 } from '@/services/cms/utils/slugMatching';
+import { fetchMachineById, createMachine, updateMachine, deleteMachine } from '@/services/cms/contentTypes/machines';
 
 export async function getMachines(filters: Record<string, any> = {}): Promise<CMSMachine[]> {
   return await fetchFromCMS<CMSMachine>('machines', filters);
@@ -25,6 +26,22 @@ export async function getMachineBySlug(type: string, id: string): Promise<CMSMac
   });
   
   return machines.length > 0 ? machines[0] : null;
+}
+
+export async function getMachineById(id: string): Promise<CMSMachine | null> {
+  return await fetchMachineById<CMSMachine>(id);
+}
+
+export async function createNewMachine(machineData: any): Promise<string> {
+  return await createMachine(machineData);
+}
+
+export async function updateExistingMachine(id: string, machineData: any): Promise<boolean> {
+  return await updateMachine(id, machineData);
+}
+
+export async function removeExistingMachine(id: string): Promise<boolean> {
+  return await deleteMachine(id);
 }
 
 export async function getProductTypes(): Promise<CMSProductType[]> {

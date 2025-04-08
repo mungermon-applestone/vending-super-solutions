@@ -4,7 +4,6 @@ import Layout from '@/components/layout/Layout';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
 import BusinessGoalFeatures from '@/components/businessGoals/BusinessGoalFeatures';
 import BusinessGoalCaseStudies from '@/components/businessGoals/BusinessGoalCaseStudies';
-import BusinessGoalIntegrations from '@/components/businessGoals/BusinessGoalIntegrations';
 import CTASection from '@/components/common/CTASection';
 import { businessGoalsData } from '@/data/businessGoalsData';
 import { useBusinessGoal } from '@/hooks/useCMSData';
@@ -26,12 +25,6 @@ interface CaseStudy {
   image: string;
   slug: string;
   results: string[];
-}
-
-interface Integration {
-  name: string;
-  description: string;
-  icon: ReactNode;
 }
 
 const BusinessGoalDetail = () => {
@@ -116,23 +109,9 @@ const BusinessGoalDetail = () => {
         results: ['Successful implementation']
       }))
     : (currentGoal.caseStudies as CaseStudy[]);
-
-  // Default integrations when using CMS data
-  const defaultIntegrations: Integration[] = [
-    {
-      name: "Analytics",
-      description: "Track performance metrics",
-      icon: <BarChart3 className="h-6 w-6 text-vending-blue" />
-    },
-    {
-      name: "Customer Data",
-      description: "Understand your users",
-      icon: <Users className="h-6 w-6 text-vending-blue" />
-    }
-  ];
   
-  // Use the fallback goal's integrations or default integrations if using CMS data
-  const integrations = cmsGoal ? defaultIntegrations : (fallbackGoal?.integrations as Integration[]);
+  // Determine if we should show case studies section
+  const showCaseStudies = adaptedCaseStudies && adaptedCaseStudies.length > 0;
   
   return (
     <Layout>
@@ -145,11 +124,10 @@ const BusinessGoalDetail = () => {
       
       <BusinessGoalFeatures features={adaptedFeatures} />
       
-      <BusinessGoalCaseStudies caseStudies={adaptedCaseStudies} />
-      
-      <BusinessGoalIntegrations 
-        integrations={integrations} 
-      />
+      {/* Only show case studies section if there are case studies to display */}
+      {showCaseStudies && (
+        <BusinessGoalCaseStudies caseStudies={adaptedCaseStudies} />
+      )}
       
       <CTASection />
     </Layout>
