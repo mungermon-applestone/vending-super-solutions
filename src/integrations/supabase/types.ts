@@ -9,12 +9,131 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      business_goal_benefits: {
+        Row: {
+          benefit: string
+          business_goal_id: string
+          created_at: string
+          display_order: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          benefit: string
+          business_goal_id: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          benefit?: string
+          business_goal_id?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_goal_benefits_business_goal_id_fkey"
+            columns: ["business_goal_id"]
+            isOneToOne: false
+            referencedRelation: "business_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_goal_feature_images: {
+        Row: {
+          alt: string
+          created_at: string
+          feature_id: string
+          height: number | null
+          id: string
+          updated_at: string
+          url: string
+          width: number | null
+        }
+        Insert: {
+          alt: string
+          created_at?: string
+          feature_id: string
+          height?: number | null
+          id?: string
+          updated_at?: string
+          url: string
+          width?: number | null
+        }
+        Update: {
+          alt?: string
+          created_at?: string
+          feature_id?: string
+          height?: number | null
+          id?: string
+          updated_at?: string
+          url?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_goal_feature_images_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "business_goal_features"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_goal_features: {
+        Row: {
+          business_goal_id: string
+          created_at: string
+          description: string
+          display_order: number
+          icon: string | null
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          business_goal_id: string
+          created_at?: string
+          description: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          business_goal_id?: string
+          created_at?: string
+          description?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_goal_features_business_goal_id_fkey"
+            columns: ["business_goal_id"]
+            isOneToOne: false
+            referencedRelation: "business_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_goals: {
         Row: {
           created_at: string
           description: string
           icon: string | null
           id: string
+          image_alt: string | null
+          image_url: string | null
           slug: string
           title: string
           updated_at: string
@@ -25,6 +144,8 @@ export type Database = {
           description: string
           icon?: string | null
           id?: string
+          image_alt?: string | null
+          image_url?: string | null
           slug: string
           title: string
           updated_at?: string
@@ -35,6 +156,8 @@ export type Database = {
           description?: string
           icon?: string | null
           id?: string
+          image_alt?: string | null
+          image_url?: string | null
           slug?: string
           title?: string
           updated_at?: string

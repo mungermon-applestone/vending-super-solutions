@@ -82,6 +82,7 @@ export const addBusinessGoalBenefits = async (
     display_order: index
   }));
 
+  // Insert the benefits into the database
   const { error } = await supabase
     .from('business_goal_benefits')
     .insert(benefitsToInsert);
