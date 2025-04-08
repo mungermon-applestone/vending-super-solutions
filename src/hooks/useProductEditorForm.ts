@@ -11,7 +11,7 @@ import { registerSlugChange } from '@/services/cms/utils/slugMatching';
 export const useProductEditorForm = (
   productSlug: string | undefined,
   setIsLoading: (isLoading: boolean) => void,
-  toastObj: UseToastReturn, // Fix the type here
+  toast: UseToastReturn, // Use the complete UseToastReturn type
   navigate: NavigateFunction
 ) => {
   const [isCreating, setIsCreating] = useState(!productSlug);
@@ -100,14 +100,14 @@ export const useProductEditorForm = (
       }, 100);
     } else if (productSlug && !existingProduct && !isLoadingProduct) {
       console.log('[useProductEditorForm] No existing product found for slug:', productSlug);
-      toastObj.toast({
+      toast.toast({
         title: "Product not found",
         description: `No product found with slug "${productSlug}". Creating a new product instead.`,
         variant: "destructive"
       });
       setIsCreating(true);
     }
-  }, [existingProduct, isCreating, isLoadingProduct, form, productSlug, toastObj, formKey]);
+  }, [existingProduct, isCreating, isLoadingProduct, form, productSlug, toast, formKey]);
 
   // Form submission handler
   const onSubmit = async (data: ProductFormData) => {
@@ -117,13 +117,13 @@ export const useProductEditorForm = (
     try {
       if (isCreating) {
         console.log('[useProductEditorForm] Creating new product');
-        await createProduct(data, toastObj);
+        await createProduct(data, toast);
         navigate(`/admin/products`);
       } else if (productSlug) {
         console.log(`[useProductEditorForm] Updating product: ${productSlug}`);
         console.log('[useProductEditorForm] Form data for update:', data);
         
-        await updateProduct(data, productSlug, toastObj);
+        await updateProduct(data, productSlug, toast);
         
         // Navigate to the new slug if it changed
         if (data.slug !== productSlug) {

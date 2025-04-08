@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
-import type { UseToastReturn } from '@/hooks/use-toast';
+import { UseToastReturn } from '@/hooks/use-toast';
 import { registerSlugChange } from '@/services/cms/utils/slugMatching';
 
 // Helper functions for updating products
@@ -172,7 +172,7 @@ const updateProductFeatures = async (data: ProductFormData, productId: string) =
 /**
  * Update an existing product
  */
-export const updateProduct = async (data: ProductFormData, originalSlug: string, toastObj: UseToastReturn) => {
+export const updateProduct = async (data: ProductFormData, originalSlug: string, toast: UseToastReturn) => {
   console.log('[productService] Updating product:', originalSlug, 'with data:', data);
   
   try {
@@ -239,7 +239,7 @@ export const updateProduct = async (data: ProductFormData, originalSlug: string,
     // Update product features
     await updateProductFeatures(data, productId);
     
-    toastObj.toast({
+    toast.toast({
       title: "Product updated",
       description: `${data.title} has been updated successfully.`
     });
@@ -247,7 +247,7 @@ export const updateProduct = async (data: ProductFormData, originalSlug: string,
     return productId;
   } catch (error) {
     console.error('[productService] Error in updateProduct:', error);
-    toastObj.toast({
+    toast.toast({
       title: "Error",
       description: `Failed to update product: ${error instanceof Error ? error.message : 'Unknown error'}`,
       variant: "destructive"

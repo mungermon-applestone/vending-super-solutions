@@ -1,8 +1,6 @@
-
 import { ProductFormData } from '@/types/forms';
-import { toast } from '@/components/ui/use-toast';
+import { UseToastReturn } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import type { UseToastReturn } from '@/hooks/use-toast';
 
 /**
  * Create a new product in the database
