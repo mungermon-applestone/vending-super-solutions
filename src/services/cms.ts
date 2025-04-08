@@ -1,3 +1,4 @@
+
 import { 
   CMSMachine, 
   CMSProductType, 
@@ -6,6 +7,7 @@ import {
 } from '@/types/cms';
 import { fetchFromCMS } from '@/services/cms/fetchFromCMS';
 import { fetchProductTypeBySlug, fetchProductTypeByUUID } from '@/services/cms/contentTypes/productTypes';
+import { fetchBusinessGoalBySlug } from '@/services/cms/contentTypes/businessGoals';
 import { 
   normalizeSlug, 
   mapUrlSlugToDatabaseSlug, 
@@ -114,6 +116,28 @@ export async function getBusinessGoals(): Promise<CMSBusinessGoal[]> {
 }
 
 export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGoal | null> {
-  const goals = await fetchFromCMS<CMSBusinessGoal>('business-goals', { slug });
-  return goals.length > 0 ? goals[0] : null;
+  console.log(`[cms.ts] Attempting to fetch business goal with slug: "${slug}"`);
+  
+  if (!slug || slug.trim() === '') {
+    console.warn("[cms.ts] Empty slug passed to getBusinessGoalBySlug");
+    return null;
+  }
+  
+  try {
+    // Use the direct method to get a business goal by slug
+    const businessGoal = await fetchBusinessGoalBySlug<CMSBusinessGoal>(slug);
+    
+    if (businessGoal) {
+      console.log(`[cms.ts] Successfully retrieved business goal: ${businessGoal.title}`);
+      return businessGoal;
+    }
+    
+    // Fallback to using fetchFromCMS if direct method fails
+    console.log(`[cms.ts] Direct lookup failed, trying fallback method`);
+    const goals = await fetchFromCMS<CMSBusinessGoal>('business-goals', { slug });
+    return goals.length > 0 ? goals[0] : null;
+  } catch (error) {
+    console.error(`[cms.ts] Error fetching business goal by slug "${slug}":`, error);
+    return null;
+  }
 }
