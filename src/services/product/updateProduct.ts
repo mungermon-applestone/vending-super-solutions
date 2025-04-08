@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
 import type { UseToastReturn } from '@/hooks/use-toast';
@@ -8,7 +7,7 @@ import { updateProductImage, updateProductBenefits, updateProductFeatures } from
 /**
  * Update an existing product
  */
-export const updateProduct = async (data: ProductFormData, originalSlug: string, toast: UseToastReturn) => {
+export const updateProduct = async (data: ProductFormData, originalSlug: string, { toast }: UseToastReturn) => {
   console.log('[productService] Updating product:', originalSlug, 'with data:', data);
   
   try {

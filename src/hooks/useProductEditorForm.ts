@@ -11,12 +11,14 @@ import { registerSlugChange } from '@/services/cms/utils/slugMatching';
 export const useProductEditorForm = (
   productSlug: string | undefined,
   setIsLoading: (isLoading: boolean) => void,
-  toast: UseToastReturn,
+  toastObj: { toast: UseToastReturn['toast'] }, // Update the parameter type here
   navigate: NavigateFunction
 ) => {
   const [isCreating, setIsCreating] = useState(!productSlug);
   const { data: existingProduct, isLoading: isLoadingProduct, error } = useProductType(productSlug);
   const [formKey, setFormKey] = useState(0); // Add a key to force re-render
+
+  const { toast } = toastObj; // Extract the toast function
 
   console.log('[useProductEditorForm] Initialized with productSlug:', productSlug);
   console.log('[useProductEditorForm] isCreating mode:', isCreating);
@@ -100,7 +102,7 @@ export const useProductEditorForm = (
       }, 100);
     } else if (productSlug && !existingProduct && !isLoadingProduct) {
       console.log('[useProductEditorForm] No existing product found for slug:', productSlug);
-      toast.toast({
+      toast({
         title: "Product not found",
         description: `No product found with slug "${productSlug}". Creating a new product instead.`,
         variant: "destructive"
@@ -117,8 +119,8 @@ export const useProductEditorForm = (
     try {
       if (isCreating) {
         console.log('[useProductEditorForm] Creating new product');
-        await createProduct(data, toast);
-        toast.toast({
+        await createProduct(data, { toast });
+        toast({
           title: "Product created",
           description: `${data.title} has been created successfully.`
         });
@@ -127,9 +129,9 @@ export const useProductEditorForm = (
         console.log(`[useProductEditorForm] Updating product: ${productSlug}`);
         console.log('[useProductEditorForm] Form data for update:', data);
         
-        await updateProduct(data, productSlug, toast);
+        await updateProduct(data, productSlug, { toast });
         
-        toast.toast({
+        toast({
           title: "Product updated",
           description: `${data.title} has been updated successfully.`
         });
@@ -146,7 +148,7 @@ export const useProductEditorForm = (
       }
     } catch (error) {
       console.error('[useProductEditorForm] Error saving product:', error);
-      toast.toast({
+      toast({
         title: "Error",
         description: `Failed to save product: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"

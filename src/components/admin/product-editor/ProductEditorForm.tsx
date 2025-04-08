@@ -20,10 +20,12 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Pass the entire toast object returned from useToast() instead of just the toast function
   const { isCreating, isLoadingProduct, form, onSubmit } = useProductEditorForm(
     productSlug, 
     setIsLoading, 
-    toast, 
+    { toast }, // Pass the toast object correctly
     navigate
   );
 
