@@ -2,14 +2,15 @@
 import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { Loader2, Check, AlertTriangle, Database } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Loader2, Check, AlertTriangle, Database, RefreshCcw } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { migrateMachinesData } from '@/utils/machineMigration';
 import { Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 
 const MigrateMachinesData = () => {
-  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<{
     success?: boolean;
@@ -25,7 +26,12 @@ const MigrateMachinesData = () => {
     setResult(null);
     
     try {
+      // Clear any cached machine data before migration
+      queryClient.invalidateQueries({ queryKey: ['machines'] });
+      console.log("Starting machine data migration...");
+      
       const migrationResult = await migrateMachinesData();
+      console.log("Migration completed with result:", migrationResult);
       setResult(migrationResult);
       
       if (migrationResult.success) {
@@ -34,6 +40,9 @@ const MigrateMachinesData = () => {
           description: `${migrationResult.count || 0} machines were successfully imported`,
           variant: "default",
         });
+        
+        // Invalidate queries to ensure fresh data is fetched
+        queryClient.invalidateQueries({ queryKey: ['machines'] });
       } else {
         toast({
           title: "Migration Failed",
@@ -57,6 +66,17 @@ const MigrateMachinesData = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const handleCheckDatabase = () => {
+    // Invalidate all machine-related queries to force a fresh fetch
+    queryClient.invalidateQueries({ queryKey: ['machines'] });
+    
+    toast({
+      title: "Cache Cleared",
+      description: "Machine data cache has been cleared. You can now check the admin page.",
+      variant: "default",
+    });
   };
 
   return (
@@ -113,6 +133,29 @@ const MigrateMachinesData = () => {
                             </span>
                           )}
                         </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {result?.success && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mt-4">
+                    <div className="flex">
+                      <RefreshCcw className="h-5 w-5 text-blue-500 mt-0.5 mr-2" />
+                      <div>
+                        <h3 className="font-medium text-blue-800">Next Steps</h3>
+                        <p className="text-sm text-blue-700 mt-1">
+                          After migration, you may need to clear the data cache before the new machines appear in the admin interface.
+                          Click the button below to clear the cache, then check the admin page.
+                        </p>
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          className="mt-2"
+                          onClick={handleCheckDatabase}
+                        >
+                          <RefreshCcw className="h-4 w-4 mr-2" /> Clear Cache & Refresh Data
+                        </Button>
                       </div>
                     </div>
                   </div>

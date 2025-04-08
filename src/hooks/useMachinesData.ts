@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as cmsService from '@/services/cms';
 import { CMSMachine } from '@/types/cms';
@@ -10,10 +11,22 @@ export function useMachines(filters: Record<string, any> = {}) {
   return useQuery({
     queryKey: ['machines', filters],
     queryFn: async () => {
-      console.log("Fetching machines with filters:", filters);
-      const machines = await cmsService.getMachines(filters);
-      console.log("Fetched machines:", machines);
-      return machines;
+      console.log("[useMachines] Fetching machines with filters:", filters);
+      try {
+        const machines = await cmsService.getMachines(filters);
+        console.log("[useMachines] Fetched machines:", machines);
+        console.log(`[useMachines] Total machines fetched: ${machines.length}`);
+        
+        if (machines.length <= 1) {
+          console.warn("[useMachines] Warning: Only one or zero machines returned. This might indicate an issue.");
+          console.log("[useMachines] Sample machine data:", machines[0]);
+        }
+        
+        return machines;
+      } catch (error) {
+        console.error("[useMachines] Error fetching machines:", error);
+        throw error;
+      }
     },
   });
 }
@@ -24,7 +37,17 @@ export function useMachines(filters: Record<string, any> = {}) {
 export function useMachineById(id: string | undefined) {
   return useQuery({
     queryKey: ['machine', id],
-    queryFn: () => cmsService.getMachineById(id || ''),
+    queryFn: async () => {
+      console.log("[useMachineById] Fetching machine with ID:", id);
+      try {
+        const machine = await cmsService.getMachineById(id || '');
+        console.log("[useMachineById] Fetched machine:", machine);
+        return machine;
+      } catch (error) {
+        console.error("[useMachineById] Error fetching machine by ID:", error);
+        throw error;
+      }
+    },
     enabled: !!id && id.trim() !== '',
   });
 }
@@ -35,7 +58,17 @@ export function useMachineById(id: string | undefined) {
 export function useMachineBySlug(type: string | undefined, slug: string | undefined) {
   return useQuery({
     queryKey: ['machine', type, slug],
-    queryFn: () => cmsService.getMachineBySlug(type || '', slug || ''),
+    queryFn: async () => {
+      console.log("[useMachineBySlug] Fetching machine with type/slug:", type, slug);
+      try {
+        const machine = await cmsService.getMachineBySlug(type || '', slug || '');
+        console.log("[useMachineBySlug] Fetched machine:", machine);
+        return machine;
+      } catch (error) {
+        console.error("[useMachineBySlug] Error fetching machine by slug:", error);
+        throw error;
+      }
+    },
     enabled: !!type && !!slug,
   });
 }
