@@ -38,8 +38,9 @@ interface MachinePlaceholder {
   }>;
 }
 
-// Sample machine data from the existing pages
+// Sample machine data from the existing pages and static data
 const machinePlaceholderData: MachinePlaceholder[] = [
+  // Original placeholder data
   {
     id: '1',
     slug: 'option-4-refrigerated',
@@ -302,6 +303,262 @@ const machinePlaceholderData: MachinePlaceholder[] = [
         title: "Grocery Order Pickup",
         description: "Mixed temperature zones for various grocery items",
         image: { url: "https://images.unsplash.com/photo-1542838132-92c53300491e", alt: "Grocery store deployment" }
+      }
+    ]
+  },
+  // Adding machines from the static data in useMachinesData.ts
+  {
+    id: '6',
+    slug: 'divi-wp',
+    title: "DIVI-WP",
+    type: "vending",
+    temperature: "ambient",
+    description: "Weather-protected vending system for outdoor installations.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1557034362-4ec717153f8f", alt: "DIVI-WP" }
+    ],
+    specs: {
+      dimensions: "72\"H x 45\"W x 36\"D",
+      weight: "680 lbs (empty)",
+      capacity: "Up to 350 items depending on configuration",
+      powerRequirements: "120V, 6 amps",
+      temperature: "Ambient with weather protection",
+      connectivity: "WiFi, Cellular",
+      paymentOptions: "Credit card, mobile payment, cash",
+      screen: "15\" Weatherproof Touchscreen Display",
+      manufacturer: "VendTech Solutions",
+      priceRange: "$10,500 - $14,000 (purchase) or leasing options available"
+    },
+    features: [
+      "Weather-resistant housing",
+      "Anti-vandalism reinforcement",
+      "Temperature-regulated interior",
+      "Solar power option available",
+      "Remote monitoring system",
+      "High-visibility LED lighting",
+      "Rust-proof components",
+      "All-season operation capability",
+      "External digital advertising display option"
+    ],
+    deploymentExamples: [
+      {
+        title: "Public Park",
+        description: "All-weather refreshment access for park visitors",
+        image: { url: "https://images.unsplash.com/photo-1500964757637-c85e8a162699", alt: "Park deployment" }
+      },
+      {
+        title: "Transit Station",
+        description: "Convenient refreshments for commuters in all weather conditions",
+        image: { url: "https://images.unsplash.com/photo-1529179307417-ca83d482a186", alt: "Transit station deployment" }
+      },
+      {
+        title: "Beach Promenade",
+        description: "Seaside refreshments resistant to salt air and sun exposure",
+        image: { url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e", alt: "Beach deployment" }
+      }
+    ]
+  },
+  {
+    id: '7',
+    slug: 'divi-ws',
+    title: "DIVI-WS",
+    type: "vending",
+    temperature: "ambient",
+    description: "Wall-mounted slim profile vending machine for tight spaces.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1627395637580-988089c61818", alt: "DIVI-WS" }
+    ],
+    specs: {
+      dimensions: "60\"H x 30\"W x 10\"D",
+      weight: "280 lbs (empty)",
+      capacity: "Up to 150 items depending on configuration",
+      powerRequirements: "110V, 2 amps",
+      temperature: "Ambient (room temperature)",
+      connectivity: "WiFi",
+      paymentOptions: "Credit card, mobile payment",
+      screen: "10\" HD Touchscreen Display",
+      manufacturer: "VendTech Solutions",
+      priceRange: "$6,000 - $8,500 (purchase) or leasing options available"
+    },
+    features: [
+      "Ultra-slim wall-mounted profile",
+      "Tool-less product loading",
+      "Flexible planogram configuration",
+      "Energy-efficient operation",
+      "Whisper-quiet dispensing mechanism",
+      "Customizable front panel design",
+      "Low power consumption mode",
+      "Simple installation requirements",
+      "Remote inventory management"
+    ],
+    deploymentExamples: [
+      {
+        title: "Hospital Hallways",
+        description: "Space-efficient refreshments in medical facilities",
+        image: { url: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d", alt: "Hospital hallway deployment" }
+      },
+      {
+        title: "Office Kitchen",
+        description: "Compact snack options in corporate environments",
+        image: { url: "https://images.unsplash.com/photo-1577412647305-991150c7d163", alt: "Office kitchen deployment" }
+      },
+      {
+        title: "Hotel Room Floors",
+        description: "Convenient guest access without dedicated vending rooms",
+        image: { url: "https://images.unsplash.com/photo-1629140727571-9b5c6f6267b4", alt: "Hotel hallway deployment" }
+      }
+    ]
+  },
+  {
+    id: '8',
+    slug: 'divi-sp',
+    title: "DIVI-SP",
+    type: "vending",
+    temperature: "ambient",
+    description: "Space-saving profile vending machine with flexible configuration options.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1621964275191-ccc01ef2134c", alt: "DIVI-SP" }
+    ],
+    specs: {
+      dimensions: "68\"H x 28\"W x 30\"D",
+      weight: "450 lbs (empty)",
+      capacity: "Up to 250 items depending on configuration",
+      powerRequirements: "110V, 3 amps",
+      temperature: "Ambient (room temperature)",
+      connectivity: "WiFi, Ethernet",
+      paymentOptions: "Credit card, mobile payment, employee badge",
+      screen: "12\" Touchscreen Display",
+      manufacturer: "VendTech Solutions",
+      priceRange: "$7,800 - $10,200 (purchase) or leasing options available"
+    },
+    features: [
+      "Compact footprint design",
+      "Modular shelf configuration",
+      "Digital product display",
+      "Advanced anti-jam system",
+      "Cloud-based inventory tracking",
+      "Programmable promotional pricing",
+      "Multi-payment options",
+      "Energy-efficient cooling",
+      "Remote diagnostics"
+    ],
+    deploymentExamples: [
+      {
+        title: "Small Retail",
+        description: "Space-efficient retail automation solution",
+        image: { url: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a", alt: "Small retail deployment" }
+      },
+      {
+        title: "School Cafeteria",
+        description: "Compact refreshment options for educational facilities",
+        image: { url: "https://images.unsplash.com/photo-1562564055-71e051d33c19", alt: "School cafeteria deployment" }
+      },
+      {
+        title: "Apartment Complex",
+        description: "Resident convenience center in multi-unit housing",
+        image: { url: "https://images.unsplash.com/photo-1460317442991-0ec209397118", alt: "Apartment complex deployment" }
+      }
+    ]
+  },
+  {
+    id: '9',
+    slug: 'combi-3000',
+    title: "Combi 3000",
+    type: "vending",
+    temperature: "multi",
+    description: "Combination vending system with multiple product categories.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1527256351016-8ad33ff833fc", alt: "Combi 3000" }
+    ],
+    specs: {
+      dimensions: "72\"H x 41\"W x 38\"D",
+      weight: "800 lbs (empty)",
+      capacity: "Up to 500 items with mixed temperature zones",
+      powerRequirements: "120V, 12 amps",
+      temperature: "Multi-zone (refrigerated, frozen, and ambient)",
+      connectivity: "WiFi, Ethernet, Cellular backup",
+      paymentOptions: "Credit card, mobile payment, cash, loyalty programs",
+      screen: "21.5\" HD Touchscreen Display",
+      manufacturer: "VendTech Solutions",
+      priceRange: "$14,500 - $18,000 (purchase) or leasing options available"
+    },
+    features: [
+      "Multiple temperature zones",
+      "Dual delivery system",
+      "Category management software",
+      "Smart energy management",
+      "Elevator delivery system",
+      "Contactless interface option",
+      "Intelligent restocking alerts",
+      "Flexible planogram design",
+      "Integrated marketing display system"
+    ],
+    deploymentExamples: [
+      {
+        title: "Corporate Campus",
+        description: "Complete food and beverage solution for large offices",
+        image: { url: "https://images.unsplash.com/photo-1497366754035-f200968a6e72", alt: "Corporate campus deployment" }
+      },
+      {
+        title: "Healthcare Facility",
+        description: "24/7 food and essential items for healthcare workers and visitors",
+        image: { url: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d", alt: "Healthcare facility deployment" }
+      },
+      {
+        title: "Transportation Hub",
+        description: "Diverse refreshment options for travelers",
+        image: { url: "https://images.unsplash.com/photo-1597492892964-4391c5a76204", alt: "Transportation hub deployment" }
+      }
+    ]
+  },
+  {
+    id: '10',
+    slug: '21-cell-temperature-controlled',
+    title: "21-cell temperature controlled locker",
+    type: "locker",
+    temperature: "controlled",
+    description: "Large capacity temperature-controlled locker system with 21 compartments.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1534723328310-e82dad3ee43f", alt: "21-cell Temperature Controlled Locker" }
+    ],
+    specs: {
+      dimensions: "78\"H x 72\"W x 36\"D",
+      weight: "950 lbs (empty)",
+      capacity: "21 compartments with adjustable temperatures",
+      powerRequirements: "220V, 18 amps",
+      temperature: "Adjustable per cell (33°F - 150°F)",
+      connectivity: "WiFi, Ethernet, Cellular backup",
+      paymentOptions: "Mobile app integration, QR code, PIN access, RFID",
+      screen: "15\" HD Touchscreen Display",
+      manufacturer: "VendTech Solutions",
+      priceRange: "$18,000 - $25,000 (purchase) or leasing options available"
+    },
+    features: [
+      "Independent temperature control per cell",
+      "Variable cell sizes configuration",
+      "Advanced access control system",
+      "Real-time temperature monitoring",
+      "Automated alerts and notifications",
+      "Multi-user management platform",
+      "Delivery service integration",
+      "Touchless operation option",
+      "Emergency power backup system"
+    ],
+    deploymentExamples: [
+      {
+        title: "Large Restaurant Chain",
+        description: "High-volume food pickup system for takeout orders",
+        image: { url: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5", alt: "Restaurant chain deployment" }
+      },
+      {
+        title: "University Campus",
+        description: "Centralized food delivery system for students",
+        image: { url: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a", alt: "University campus deployment" }
+      },
+      {
+        title: "Grocery Store",
+        description: "Click-and-collect service with temperature-controlled storage",
+        image: { url: "https://images.unsplash.com/photo-1534723452862-4c874018d66d", alt: "Grocery store deployment" }
       }
     ]
   }
