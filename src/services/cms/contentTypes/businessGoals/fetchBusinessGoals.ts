@@ -1,127 +1,83 @@
-
-import { supabase } from '@/integrations/supabase/client';
 import { CMSBusinessGoal } from '@/types/cms';
-import { normalizeSlug } from '../../utils/slugMatching';
+import { supabase } from '@/config/supabase';
 
 /**
- * Fetch business goals from the database
+ * Fetches all business goals from the database.
+ * @returns A promise that resolves to an array of CMSBusinessGoal objects.
  */
-export async function fetchBusinessGoals<T>(): Promise<T[]> {
-  console.log('[fetchBusinessGoals] Fetching business goals from database');
-  
+export const fetchBusinessGoals = async (): Promise<CMSBusinessGoal[]> => {
   try {
-    // Fetch business goals
-    const { data: goals, error: goalsError } = await supabase
+    const { data, error } = await supabase
       .from('business_goals')
-      .select('*')
-      .order('title');
-      
-    if (goalsError) {
-      console.error('[fetchBusinessGoals] Error fetching business goals:', goalsError);
-      throw goalsError;
+      .select(`
+        id,
+        slug,
+        title,
+        description,
+        image_url,
+        image_alt,
+        visible,
+        created_at,
+        updated_at,
+        icon,
+        features (
+          id,
+          title,
+          description,
+          icon,
+          display_order,
+          screenshot_url,
+          screenshot_alt
+        )
+      `);
+
+    if (error) {
+      console.error("Error fetching business goals:", error);
+      throw new Error(`Failed to fetch business goals: ${error.message}`);
     }
-    
-    if (!goals || goals.length === 0) {
-      console.log('[fetchBusinessGoals] No business goals found');
-      return [] as T[];
+
+    if (!data) {
+      console.warn("No business goals found.");
+      return [];
     }
-    
-    const enhancedGoals: CMSBusinessGoal[] = [];
-    
-    // For each business goal, fetch associated data
-    for (const goal of goals) {
-      try {
-        // Fetch benefits
-        const { data: benefitsData, error: benefitsError } = await supabase
-          .from('business_goal_benefits')
-          .select('benefit')
-          .eq('business_goal_id', goal.id)
-          .order('display_order');
-          
-        if (benefitsError) {
-          console.error(`[fetchBusinessGoals] Error fetching benefits for goal ${goal.id}:`, benefitsError);
-          // Continue with the next goal
-          continue;
-        }
-        
-        // Extract benefits or default to empty array
-        const benefits = benefitsData ? benefitsData.map(b => b.benefit) : [];
-        
-        // Fetch features
-        const { data: features, error: featuresError } = await supabase
-          .from('business_goal_features')
-          .select(`
-            id, title, description, icon, display_order
-          `)
-          .eq('business_goal_id', goal.id)
-          .order('display_order');
-          
-        if (featuresError) {
-          console.error(`[fetchBusinessGoals] Error fetching features for goal ${goal.id}:`, featuresError);
-          // Continue with the next goal
-          continue;
-        }
-        
-        // Enhance features with their screenshots
-        const enhancedFeatures = await Promise.all(
-          (features || []).map(async (feature) => {
-            try {
-              // Fetch feature image
-              const { data: screenshot, error: screenshotError } = await supabase
-                .from('business_goal_feature_images')
-                .select('url, alt')
-                .eq('feature_id', feature.id)
-                .maybeSingle();
-                
-              if (screenshotError) {
-                console.error(`[fetchBusinessGoals] Error fetching screenshot for feature ${feature.id}:`, screenshotError);
-                return {
-                  ...feature,
-                  screenshot: undefined
-                };
-              }
-              
-              return {
-                ...feature,
-                screenshot: screenshot ? {
-                  url: screenshot.url,
-                  alt: screenshot.alt
-                } : undefined
-              };
-            } catch (error) {
-              console.error(`[fetchBusinessGoals] Error processing feature ${feature.id}:`, error);
-              return feature;
-            }
-          })
-        );
-        
-        // Create the enhanced business goal object
-        const enhancedGoal: CMSBusinessGoal = {
-          id: goal.id,
-          slug: goal.slug,
-          title: goal.title,
-          description: goal.description,
-          icon: goal.icon,
-          image: {
-            url: goal.image_url || '',
-            alt: goal.image_alt || goal.title
-          },
-          benefits: benefits,
-          features: enhancedFeatures,
-          caseStudies: [] // We'll need to implement this if case studies become a requirement
-        };
-        
-        enhancedGoals.push(enhancedGoal);
-      } catch (error) {
-        console.error(`[fetchBusinessGoals] Error processing goal ${goal.id}:`, error);
-        // Continue with the next goal
-      }
-    }
-    
-    console.log(`[fetchBusinessGoals] Returning ${enhancedGoals.length} business goals`);
-    return enhancedGoals as unknown as T[];
-  } catch (error) {
-    console.error('[fetchBusinessGoals] Error in fetchBusinessGoals:', error);
-    throw error;
+
+    // Map the data to the CMSBusinessGoal interface
+    const businessGoals: CMSBusinessGoal[] = data.map((item: any) => ({
+      id: item.id,
+      slug: item.slug,
+      title: item.title,
+      description: item.description,
+      visible: item.visible,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
+      icon: item.icon,
+      image: {
+        id: `img-${Math.random().toString(36).substr(2, 9)}`,
+        url: item.image_url || '',
+        alt: item.image_alt || item.title
+      },
+      benefits: [], // Assuming benefits are not directly fetched here
+      features: item.features?.map(f => ({
+        id: f.id || `feature-${Math.random().toString(36).substr(2, 9)}`,
+        title: f.title,
+        description: f.description,
+        icon: f.icon,
+        display_order: f.display_order,
+        ...(f.screenshot_url && {
+          screenshot: {
+            id: `screenshot-${Math.random().toString(36).substr(2, 9)}`,
+            url: f.screenshot_url,
+            alt: f.screenshot_alt || f.title
+          }
+        })
+      })) || [],
+      caseStudies: [] // Assuming caseStudies are not directly fetched here
+    }));
+
+    console.log("Successfully fetched business goals:", businessGoals);
+    return businessGoals;
+  } catch (error: any) {
+    console.error("Error in fetchBusinessGoals:", error);
+    throw new Error(`Failed to fetch business goals: ${error.message}`);
   }
-}
+};

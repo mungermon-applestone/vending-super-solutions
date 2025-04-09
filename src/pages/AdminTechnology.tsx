@@ -31,7 +31,7 @@ const AdminTechnology = () => {
     isError,
     error,
     refetch
-  } = useQuery({
+  } = useQuery<CMSTechnology[]>({
     queryKey: ['technologies'],
     queryFn: getTechnologies,
   });

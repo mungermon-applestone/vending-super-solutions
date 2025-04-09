@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { CMSProductType, MockImage } from '@/types/cms';
 import { ShoppingBag, ShieldCheck, Utensils, Tags, Truck, Clock, Sparkles, ThumbsUp, Pill } from 'lucide-react';
 
 // Helper function to ensure all images have IDs
 const createImage = (url: string, alt: string): MockImage => ({
-  id: `fallback-${Math.random().toString(36).substr(2, 9)}`,
+  id: `fallback-${Math.random().toString(36).substr(2, 9)}`, // Ensure ID is always generated
   url,
   alt
 });

@@ -1,3 +1,4 @@
+
 import { CMSMachine, CMSProductType, MockImage } from '@/types/cms';
 
 /**
@@ -7,7 +8,7 @@ import { CMSMachine, CMSProductType, MockImage } from '@/types/cms';
 
 // Helper function to ensure all images have IDs
 const createImage = (url: string, alt: string): MockImage => ({
-  id: `mock-${Math.random().toString(36).substr(2, 9)}`,
+  id: `mock-${Math.random().toString(36).substr(2, 9)}`, // Ensure ID is always generated
   url,
   alt
 });

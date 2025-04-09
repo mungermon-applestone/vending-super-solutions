@@ -1,4 +1,3 @@
-
 export interface CMSImage {
   id: string;
   url: string;
@@ -15,7 +14,6 @@ export interface CMSProductType {
   image?: CMSImage;
   created_at?: string;
   updated_at?: string;
-  // Add missing properties being used in the codebase
   benefits?: string[];
   features?: CMSFeature[];
   examples?: CMSExample[];
@@ -39,7 +37,6 @@ export interface CMSMachine {
   product_types?: CMSProductType[];
   created_at?: string;
   updated_at?: string;
-  // Add missing properties being used in the codebase
   temperature?: string;
   specs?: Record<string, string>;
   deploymentExamples?: CMSDeploymentExample[];
@@ -68,7 +65,6 @@ export interface CMSBusinessGoal {
   visible: boolean;
   created_at?: string;
   updated_at?: string;
-  // Add missing properties being used in the codebase
   icon?: string;
   image?: CMSImage;
   benefits?: string[];
@@ -76,7 +72,6 @@ export interface CMSBusinessGoal {
   caseStudies?: CMSExample[];
 }
 
-// Technology types
 export interface CMSTechnology {
   id: string;
   slug: string;
@@ -129,7 +124,6 @@ export interface CMSTechnologyImage {
   display_order: number;
 }
 
-// Add missing interfaces referenced in the codebase
 export interface CMSFeature {
   id?: string;
   title: string;
@@ -159,9 +153,10 @@ export interface CMSDeploymentExample {
   display_order?: number;
 }
 
-// Helper type for mock data
 export interface MockImage {
+  id: string;
   url: string;
   alt: string;
-  id?: string;
+  width?: number;
+  height?: number;
 }

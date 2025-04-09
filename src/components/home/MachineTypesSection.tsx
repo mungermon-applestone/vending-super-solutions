@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
@@ -13,7 +12,7 @@ interface MachineCardProps {
 }
 
 const MachineCard = ({ title, image, categories, path }: MachineCardProps) => {
-  // Handle both string and CMSImage types for backward compatibility
+  // Handle both string and CMSImage types
   const imageUrl = typeof image === 'string' ? image : image.url;
   const imageAlt = typeof image === 'string' ? title : (image.alt || title);
 
@@ -81,9 +80,12 @@ const MachineTypesSection = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {machines.map((machine, index) => {
-              // Fix: Use machine.images instead of machine.image for TypeScript compatibility
-              const machineImage = machine.images?.[0]?.url || 
-                                  (machine.images && machine.images[0] ? machine.images[0].url : "https://placehold.co/600x400?text=No+Image");
+              // Make sure image is properly handled with the required id property
+              const machineImage = machine.images?.[0] || {
+                id: `machine-${index}`,
+                url: "https://placehold.co/600x400?text=No+Image",
+                alt: "No Image"
+              };
               
               // Create machine categories
               const machineCategories = [
@@ -95,7 +97,7 @@ const MachineTypesSection = () => {
                 <MachineCard 
                   key={index}
                   title={machine.title}
-                  image={machine.images?.[0] || machineImage || "https://placehold.co/600x400?text=No+Image"}
+                  image={machineImage}
                   categories={machineCategories}
                   path={`/machines/${machine.type}/${machine.slug}`}
                 />

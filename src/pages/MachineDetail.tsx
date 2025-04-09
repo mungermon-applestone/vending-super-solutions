@@ -30,9 +30,9 @@ const MachineDetail = () => {
     temperature: "ambient",
     description: "Advanced touchscreen vending solution for ambient products with real-time inventory tracking and multiple payment options.",
     images: [
-      { url: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2", alt: "Smart Vending Machine - Front View" },
-      { url: "https://images.unsplash.com/photo-1623039405147-547794f92e9e", alt: "Smart Vending Machine - Side View" },
-      { url: "https://images.unsplash.com/photo-1627843240167-b1f9440fc173", alt: "Smart Vending Machine - Interior" }
+      { id: "default-img-1", url: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2", alt: "Smart Vending Machine - Front View" },
+      { id: "default-img-2", url: "https://images.unsplash.com/photo-1623039405147-547794f92e9e", alt: "Smart Vending Machine - Side View" },
+      { id: "default-img-3", url: "https://images.unsplash.com/photo-1627843240167-b1f9440fc173", alt: "Smart Vending Machine - Interior" }
     ],
     specs: {
       dimensions: "72\"H x 39\"W x 36\"D",
@@ -60,17 +60,17 @@ const MachineDetail = () => {
       {
         title: "Corporate Office",
         description: "Deployed in Fortune 500 headquarters providing snacks and essentials to employees",
-        image: { url: "https://images.unsplash.com/photo-1577412647305-991150c7d163", alt: "Corporate office deployment" }
+        image: { id: "deploy-1", url: "https://images.unsplash.com/photo-1577412647305-991150c7d163", alt: "Corporate office deployment" }
       },
       {
         title: "University Campus",
         description: "Network of machines across campus providing 24/7 access to convenience items for students",
-        image: { url: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a", alt: "University campus deployment" }
+        image: { id: "deploy-2", url: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a", alt: "University campus deployment" }
       },
       {
         title: "Transit Hub",
         description: "High-traffic location offering on-the-go refreshments and necessities to travelers",
-        image: { url: "https://images.unsplash.com/photo-1568438350562-2cae6d394ad0", alt: "Transit hub deployment" }
+        image: { id: "deploy-3", url: "https://images.unsplash.com/photo-1568438350562-2cae6d394ad0", alt: "Transit hub deployment" }
       }
     ]
   };
