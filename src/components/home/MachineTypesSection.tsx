@@ -80,12 +80,29 @@ const MachineTypesSection = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {machines.map((machine, index) => {
-              // Make sure image is properly handled with the required id property
-              const machineImage = machine.images?.[0] || {
-                id: `machine-${index}`,
-                url: "https://placehold.co/600x400?text=No+Image",
-                alt: "No Image"
-              };
+              // Make sure image is properly converted to CMSImage with required id property
+              let machineImage: CMSImage;
+              
+              if (machine.images && machine.images.length > 0) {
+                // If the machine image already has an id, use it directly
+                if ('id' in machine.images[0]) {
+                  machineImage = machine.images[0] as CMSImage;
+                } else {
+                  // Otherwise create a proper CMSImage with an id
+                  machineImage = {
+                    id: `machine-image-${machine.id}-${index}`,
+                    url: machine.images[0].url || "https://placehold.co/600x400?text=No+Image",
+                    alt: machine.images[0].alt || "Machine image"
+                  };
+                }
+              } else {
+                // Fallback if no images
+                machineImage = {
+                  id: `machine-fallback-${machine.id}-${index}`,
+                  url: "https://placehold.co/600x400?text=No+Image",
+                  alt: "No Image"
+                };
+              }
               
               // Create machine categories
               const machineCategories = [

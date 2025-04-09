@@ -25,15 +25,15 @@ export async function fetchFromCMS<T>(contentType: string, params: Record<string
     // Otherwise delegate to the appropriate handler based on content type
     switch (contentType) {
       case 'machines':
-        return await fetchMachines<T>(params);
+        return await fetchMachines(params) as unknown as T[];
       case 'product-types':
-        return await fetchProductTypes<T>(params);
+        return await fetchProductTypes(params) as unknown as T[];
       case 'testimonials':
-        return await fetchTestimonials<T>();
+        return await fetchTestimonials() as unknown as T[];
       case 'business-goals':
-        return await fetchBusinessGoals<T>();
+        return await fetchBusinessGoals() as unknown as T[];
       case 'technologies':
-        return await fetchTechnologies<T>();
+        return await fetchTechnologies() as unknown as T[];
       default:
         console.warn(`[fetchFromCMS] Unknown content type: ${contentType}`);
         return [] as T[];

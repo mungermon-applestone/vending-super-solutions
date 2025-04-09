@@ -1,5 +1,6 @@
+
 import { CMSBusinessGoal } from '@/types/cms';
-import { supabase } from '@/config/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Fetches all business goals from the database.
