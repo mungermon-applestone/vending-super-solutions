@@ -16,6 +16,7 @@ import MachineDetail from "./pages/MachineDetail";
 import MachineEditor from "./pages/MachineEditor";
 import MigrateMachinesData from "./pages/MigrateMachinesData";
 import AdminMachines from "./pages/AdminMachines";
+import AdminDashboard from "./pages/AdminDashboard"; // Add the import here
 import TechnologyLanding from "./pages/TechnologyLanding";
 import AboutUs from "./pages/AboutUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -77,6 +78,7 @@ const App = () => (
             <Route path="/products" element={<ProductsLanding />} />
             
             {/* Admin routes */}
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/products/new" element={<ProductEditor />} />
             <Route path="/admin/products/edit/:productSlug" element={<ProductEditor />} />

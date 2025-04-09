@@ -20,15 +20,14 @@ const Layout = ({
 }: LayoutProps) => {
   const location = useLocation();
 
-  // Don't show admin controls on admin pages
-  const showAdminControls = !location.pathname.startsWith('/admin/');
-
+  // We don't need to show AdminControls here since the component itself now handles this logic
+  
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className={`flex-grow ${className}`}>{children}</main>
       {!noFooter && <Footer />}
-      {showAdminControls && <AdminControls />}
+      <AdminControls />
     </div>
   );
 };
