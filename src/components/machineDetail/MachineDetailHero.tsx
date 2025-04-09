@@ -42,7 +42,13 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({
                 )}
               </div>
               <span className="text-vending-blue font-medium">
-                {machine.type.charAt(0).toUpperCase()}{machine.type.slice(1)} | {machine.temperature.charAt(0).toUpperCase()}{machine.temperature.slice(1)}
+                {machine.type.charAt(0).toUpperCase()}{machine.type.slice(1)} 
+                {machine.temperature && (
+                  <>
+                    {' | '}
+                    {machine.temperature.charAt(0).toUpperCase()}{machine.temperature.slice(1)}
+                  </>
+                )}
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-vending-blue-dark">
@@ -59,8 +65,8 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({
           <div className="relative">
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
               <img 
-                src={machine.images[0]?.url} 
-                alt={machine.images[0]?.alt || machine.title} 
+                src={machine.images?.[0]?.url} 
+                alt={machine.images?.[0]?.alt || machine.title} 
                 className="w-full h-auto object-cover"
               />
             </div>

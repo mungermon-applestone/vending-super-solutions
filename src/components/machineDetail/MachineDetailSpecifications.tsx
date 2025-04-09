@@ -9,6 +9,9 @@ interface MachineDetailSpecificationsProps {
 }
 
 const MachineDetailSpecifications: React.FC<MachineDetailSpecificationsProps> = ({ specs }) => {
+  // Guard clause for when specs is undefined
+  if (!specs) return null;
+  
   // Helper function to format spec names for display
   const formatSpecName = (key: string): string => {
     return key
@@ -52,7 +55,7 @@ const MachineDetailSpecifications: React.FC<MachineDetailSpecificationsProps> = 
                     {getSpecIcon(key)}
                     {formatSpecName(key)}
                   </h3>
-                  <p className="text-gray-700">{value}</p>
+                  <p className="text-gray-700">{String(value)}</p>
                 </div>
               ))}
             </div>
@@ -63,7 +66,7 @@ const MachineDetailSpecifications: React.FC<MachineDetailSpecificationsProps> = 
                     {getSpecIcon(key)}
                     {formatSpecName(key)}
                   </h3>
-                  <p className="text-gray-700">{value}</p>
+                  <p className="text-gray-700">{String(value)}</p>
                 </div>
               ))}
             </div>

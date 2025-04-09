@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as cmsService from '@/services/cms';
 import { toast } from '@/components/ui/use-toast';
 import { MachineData, MachineFormValues } from '@/utils/machineMigration/types';
+import { CMSMachine } from '@/types/cms';
 
 /**
  * Hook to fetch all machines with optional filters
@@ -13,7 +14,8 @@ export function useMachines(filters: Record<string, any> = {}) {
     queryFn: async () => {
       console.log("[useMachines] Fetching machines with filters:", filters);
       try {
-        const machines = await cmsService.getMachines(filters) as MachineData[];
+        // Add type casting to resolve type mismatch
+        const machines = await cmsService.getMachines(filters) as unknown as MachineData[];
         console.log("[useMachines] Fetched machines:", machines);
         console.log(`[useMachines] Total machines fetched: ${machines.length}`);
         return machines;
@@ -36,7 +38,8 @@ export function useMachineById(id: string | undefined) {
     queryFn: async () => {
       console.log("[useMachineById] Fetching machine with ID:", id);
       try {
-        const machine = await cmsService.getMachineById(id || '') as MachineData | null;
+        // Add type casting to resolve type mismatch
+        const machine = await cmsService.getMachineById(id || '') as unknown as MachineData | null;
         console.log("[useMachineById] Fetched machine:", machine);
         return machine;
       } catch (error) {
@@ -57,7 +60,8 @@ export function useMachineBySlug(type: string | undefined, slug: string | undefi
     queryFn: async () => {
       console.log("[useMachineBySlug] Fetching machine with type/slug:", type, slug);
       try {
-        const machine = await cmsService.getMachineBySlug(type || '', slug || '') as MachineData | null;
+        // Add type casting to resolve type mismatch
+        const machine = await cmsService.getMachineBySlug(type || '', slug || '') as unknown as MachineData | null;
         
         if (machine) {
           console.log("[useMachineBySlug] Fetched machine from database:", machine);
