@@ -1,3 +1,4 @@
+
 import { 
   CMSMachine, 
   CMSProductType, 
@@ -8,7 +9,6 @@ import {
 import { fetchFromCMS } from '@/services/cms/fetchFromCMS';
 import { fetchProductTypeBySlug, fetchProductTypeByUUID } from '@/services/cms/contentTypes/productTypes';
 import { fetchBusinessGoalBySlug } from '@/services/cms/contentTypes/businessGoals';
-import { fetchTechnologyBySlug } from '@/services/cms/contentTypes/technologies';
 import { 
   normalizeSlug, 
   mapUrlSlugToDatabaseSlug, 
@@ -16,6 +16,7 @@ import {
 } from '@/services/cms/utils/slugMatching';
 import { fetchMachineById, createMachine, updateMachine, deleteMachine } from '@/services/cms/contentTypes/machines';
 
+// Import everything from technologies through one import
 import {
   fetchTechnologies,
   fetchTechnologyBySlug
@@ -165,5 +166,6 @@ export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGo
   }
 }
 
+// Export technology functions
 export const getTechnologies = fetchTechnologies;
 export const getTechnologyBySlug = fetchTechnologyBySlug;
