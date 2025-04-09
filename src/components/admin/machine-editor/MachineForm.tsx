@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -85,6 +86,7 @@ const MachineForm = ({ machine, isCreating, onSubmit }: MachineFormProps) => {
 
   useEffect(() => {
     if (machine && !isCreating) {
+      console.log("Loading machine data into form:", machine);
       const images = machine.images?.map(img => ({
         url: img.url,
         alt: img.alt,
@@ -92,10 +94,13 @@ const MachineForm = ({ machine, isCreating, onSubmit }: MachineFormProps) => {
         height: img.height || undefined,
       })) || [{ url: '', alt: '' }];
       
+      // Convert the specs object to an array of key-value pairs
       const specs = Object.entries(machine.specs || {}).map(([key, value]) => ({
         key,
-        value,
+        value: typeof value === 'string' ? value : JSON.stringify(value),
       })) || [{ key: '', value: '' }];
+      
+      console.log("Transformed specs:", specs);
       
       const features = machine.features?.map(feature => ({
         text: feature,
@@ -118,6 +123,7 @@ const MachineForm = ({ machine, isCreating, onSubmit }: MachineFormProps) => {
     setIsSubmitting(true);
     
     try {
+      console.log("Submitting form data:", data);
       await onSubmit(data);
     } catch (error) {
       console.error('Error saving machine:', error);

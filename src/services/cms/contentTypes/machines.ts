@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { transformMachineData } from '../utils/transformers';
 import { CMSMachine } from '@/types/cms';
+import { MachineFormValues } from '@/utils/machineMigration/types';
 
 /**
  * Fetch machines from the CMS
@@ -199,7 +200,7 @@ export async function fetchMachineById<T>(id: string): Promise<T | null> {
 /**
  * Create a new machine in the CMS
  */
-export async function createMachine(machineData: any): Promise<string> {
+export async function createMachine(machineData: MachineFormValues): Promise<string> {
   try {
     console.log('[createMachine] Creating new machine with data:', machineData);
     
@@ -243,7 +244,7 @@ export async function createMachine(machineData: any): Promise<string> {
 /**
  * Update an existing machine in the CMS
  */
-export async function updateMachine(id: string, machineData: any): Promise<boolean> {
+export async function updateMachine(id: string, machineData: MachineFormValues): Promise<boolean> {
   try {
     console.log(`[updateMachine] Updating machine with ID: ${id}`, machineData);
     
@@ -339,13 +340,22 @@ async function addMachineImages(machineId: string, machineData: any) {
 /**
  * Helper function to add machine specs
  */
-async function addMachineSpecs(machineId: string, machineData: any) {
-  if (machineData.specs && Object.keys(machineData.specs).length > 0) {
-    const specInserts = Object.entries(machineData.specs).map(([key, value]: [string, any]) => ({
-      machine_id: machineId,
-      key,
-      value
-    }));
+async function addMachineSpecs(machineId: string, machineData: MachineFormValues) {
+  if (machineData.specs && machineData.specs.length > 0) {
+    console.log(`[addMachineSpecs] Adding ${machineData.specs.length} specs for machine ${machineId}`);
+    
+    const specInserts = machineData.specs
+      .filter(spec => spec.key && spec.value) // Only process specs with both key and value
+      .map(spec => ({
+        machine_id: machineId,
+        key: spec.key,
+        value: spec.value
+      }));
+    
+    if (specInserts.length === 0) {
+      console.log(`[addMachineSpecs] No valid specs to insert for machine ${machineId}`);
+      return;
+    }
     
     const { error: specError } = await supabase
       .from('machine_specs')
@@ -354,6 +364,8 @@ async function addMachineSpecs(machineId: string, machineData: any) {
     if (specError) {
       console.error(`[addMachineSpecs] Error adding specs for machine ${machineId}:`, specError);
       // Continue despite spec error
+    } else {
+      console.log(`[addMachineSpecs] Successfully added ${specInserts.length} specs for machine ${machineId}`);
     }
   }
 }
@@ -361,13 +373,22 @@ async function addMachineSpecs(machineId: string, machineData: any) {
 /**
  * Helper function to add machine features
  */
-async function addMachineFeatures(machineId: string, machineData: any) {
+async function addMachineFeatures(machineId: string, machineData: MachineFormValues) {
   if (machineData.features && machineData.features.length > 0) {
-    const featureInserts = machineData.features.map((feature: any, index: number) => ({
-      machine_id: machineId,
-      feature: typeof feature === 'string' ? feature : feature.text,
-      display_order: index
-    }));
+    console.log(`[addMachineFeatures] Adding ${machineData.features.length} features for machine ${machineId}`);
+    
+    const featureInserts = machineData.features
+      .filter(feature => feature.text) // Only process features with text
+      .map((feature, index) => ({
+        machine_id: machineId,
+        feature: feature.text,
+        display_order: index
+      }));
+    
+    if (featureInserts.length === 0) {
+      console.log(`[addMachineFeatures] No valid features to insert for machine ${machineId}`);
+      return;
+    }
     
     const { error: featureError } = await supabase
       .from('machine_features')
@@ -376,6 +397,8 @@ async function addMachineFeatures(machineId: string, machineData: any) {
     if (featureError) {
       console.error(`[addMachineFeatures] Error adding features for machine ${machineId}:`, featureError);
       // Continue despite feature error
+    } else {
+      console.log(`[addMachineFeatures] Successfully added ${featureInserts.length} features for machine ${machineId}`);
     }
   }
 }
@@ -396,7 +419,7 @@ async function updateMachineImages(machineId: string, machineData: any) {
   }
   
   // Add new images
-  if (machineData.images.length > 0) {
+  if (machineData.images && machineData.images.length > 0) {
     await addMachineImages(machineId, machineData);
   }
 }
@@ -404,8 +427,9 @@ async function updateMachineImages(machineId: string, machineData: any) {
 /**
  * Helper function to update machine specs
  */
-async function updateMachineSpecs(machineId: string, machineData: any) {
+async function updateMachineSpecs(machineId: string, machineData: MachineFormValues) {
   // Delete existing specs
+  console.log(`[updateMachineSpecs] Deleting existing specs for machine ${machineId}`);
   const { error: deleteError } = await supabase
     .from('machine_specs')
     .delete()
@@ -417,7 +441,7 @@ async function updateMachineSpecs(machineId: string, machineData: any) {
   }
   
   // Add new specs
-  if (Object.keys(machineData.specs).length > 0) {
+  if (machineData.specs && machineData.specs.length > 0) {
     await addMachineSpecs(machineId, machineData);
   }
 }
@@ -427,6 +451,7 @@ async function updateMachineSpecs(machineId: string, machineData: any) {
  */
 async function updateMachineFeatures(machineId: string, machineData: any) {
   // Delete existing features
+  console.log(`[updateMachineFeatures] Deleting existing features for machine ${machineId}`);
   const { error: deleteError } = await supabase
     .from('machine_features')
     .delete()
@@ -438,7 +463,7 @@ async function updateMachineFeatures(machineId: string, machineData: any) {
   }
   
   // Add new features
-  if (machineData.features.length > 0) {
+  if (machineData.features && machineData.features.length > 0) {
     await addMachineFeatures(machineId, machineData);
   }
 }

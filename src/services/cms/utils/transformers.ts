@@ -1,107 +1,79 @@
 
-/**
- * Utility functions for transforming raw CMS data into our application format
- */
+import { MachineData, MachineImage, MachineDeploymentExample } from '@/utils/machineMigration/types';
 
 /**
- * Transform raw product type data from Supabase into our CMS format
+ * Transform raw machine data from database to structured format
  */
-export function transformProductTypeData<T>(data: any[]): T[] {
-  if (!data || data.length === 0) {
-    return [] as T[];
+export function transformMachineData<T>(data: any[]): T[] {
+  if (!data || !Array.isArray(data)) {
+    console.warn('[transformMachineData] Invalid data provided:', data);
+    return [];
   }
+
+  console.log(`[transformMachineData] Transforming ${data.length} machines`);
   
-  return data.map(productType => {
-    const sortedBenefits = productType.product_type_benefits ? 
-      [...productType.product_type_benefits].sort((a, b) => a.display_order - b.display_order) : 
-      [];
+  return data.map(item => {
+    try {
+      // Process images
+      const images = Array.isArray(item.machine_images) 
+        ? item.machine_images.map((img: any) => ({
+            url: img.url,
+            alt: img.alt || '',
+            width: img.width || undefined,
+            height: img.height || undefined,
+          }))
+        : [];
 
-    // Get unique benefits by creating a Set of them
-    const uniqueBenefits = [...new Set(sortedBenefits.map((b: any) => b.benefit))];
+      // Process specs as a key-value object
+      const specs: Record<string, string> = {};
+      if (Array.isArray(item.machine_specs)) {
+        item.machine_specs.forEach((spec: any) => {
+          if (spec.key && spec.value !== undefined) {
+            specs[spec.key] = spec.value;
+          }
+        });
+      }
+      
+      // Log the specs format for debugging
+      console.log(`[transformMachineData] Transformed specs for ${item.title}:`, specs);
 
-    const image = productType.product_type_images && productType.product_type_images.length > 0 
-      ? productType.product_type_images[0] 
-      : null;
-    
-    const features = productType.product_type_features ? 
-      [...productType.product_type_features]
-        .sort((a: any, b: any) => a.display_order - b.display_order)
-        .map((feature: any) => {
-          const screenshot = feature.product_type_feature_images && 
-            feature.product_type_feature_images.length > 0 ? 
-            feature.product_type_feature_images[0] : 
-            null;
-          
-          return {
-            title: feature.title,
-            description: feature.description,
-            icon: feature.icon || undefined,
-            screenshot: screenshot ? {
-              url: screenshot.url,
-              alt: screenshot.alt,
-              width: screenshot.width,
-              height: screenshot.height
-            } : undefined
-          };
-        }) : 
-      [];
-    
-    return {
-      id: productType.id,
-      slug: productType.slug,
-      title: productType.title,
-      description: productType.description,
-      image: image ? {
-        url: image.url,
-        alt: image.alt,
-        width: image.width,
-        height: image.height
-      } : { url: "https://via.placeholder.com/800x600", alt: "Placeholder image" },
-      benefits: uniqueBenefits,
-      features: features,
-      examples: []
-    } as unknown as T;
-  });
-}
+      // Process features
+      const features = Array.isArray(item.machine_features)
+        ? item.machine_features.sort((a: any, b: any) => a.display_order - b.display_order)
+            .map((feature: any) => feature.feature)
+        : [];
 
-/**
- * Transform machine data from Supabase into our application format
- */
-export function transformMachineData<T>(machineData: any[]): T[] {
-  return machineData.map(machine => {
-    const sortedImages = machine.machine_images ? 
-      [...machine.machine_images].sort((a, b) => a.display_order - b.display_order) : [];
-    const sortedFeatures = machine.machine_features ? 
-      [...machine.machine_features].sort((a, b) => a.display_order - b.display_order) : [];
-    const sortedExamples = machine.deployment_examples ? 
-      [...machine.deployment_examples].sort((a, b) => a.display_order - b.display_order) : [];
-    
-    return {
-      id: machine.id,
-      slug: machine.slug,
-      title: machine.title,
-      type: machine.type as "vending" | "locker",
-      temperature: machine.temperature,
-      description: machine.description,
-      images: sortedImages.map(img => ({
-        url: img.url,
-        alt: img.alt,
-        width: img.width,
-        height: img.height
-      })),
-      specs: machine.machine_specs?.reduce((acc: Record<string, string>, spec) => {
-        acc[spec.key] = spec.value;
-        return acc;
-      }, {} as Record<string, string>) || {},
-      features: sortedFeatures.map(f => f.feature),
-      deploymentExamples: sortedExamples.map(ex => ({
-        title: ex.title,
-        description: ex.description,
-        image: {
-          url: ex.image_url,
-          alt: ex.image_alt
-        }
-      }))
-    } as unknown as T;
-  });
+      // Process deployment examples
+      const deploymentExamples = Array.isArray(item.deployment_examples)
+        ? item.deployment_examples.sort((a: any, b: any) => a.display_order - b.display_order)
+            .map((example: any) => ({
+              title: example.title,
+              description: example.description,
+              image: {
+                url: example.image_url,
+                alt: example.image_alt || example.title,
+              }
+            }))
+        : [];
+
+      // Build the final machine object
+      const machine = {
+        id: item.id,
+        slug: item.slug,
+        title: item.title,
+        type: item.type,
+        temperature: item.temperature,
+        description: item.description,
+        images,
+        specs,
+        features,
+        deploymentExamples,
+      };
+
+      return machine as unknown as T;
+    } catch (error) {
+      console.error(`[transformMachineData] Error processing machine ${item.id}:`, error);
+      return null;
+    }
+  }).filter(Boolean) as T[];
 }
