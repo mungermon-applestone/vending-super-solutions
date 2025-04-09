@@ -4,7 +4,8 @@ import {
   CMSMachine, 
   CMSProductType,
   CMSBusinessGoal,
-  CMSTestimonial 
+  CMSTestimonial,
+  CMSTechnology
 } from '@/types/cms';
 
 interface CMSContextType {
@@ -14,6 +15,7 @@ interface CMSContextType {
   productTypes: CMSProductType[];
   businessGoals: CMSBusinessGoal[];
   testimonials: CMSTestimonial[];
+  technologies: CMSTechnology[];
   refreshData: () => Promise<void>;
 }
 
@@ -34,6 +36,7 @@ interface CMSProviderProps {
     productTypes?: CMSProductType[];
     businessGoals?: CMSBusinessGoal[];
     testimonials?: CMSTestimonial[];
+    technologies?: CMSTechnology[];
   };
 }
 
@@ -44,6 +47,7 @@ export function CMSProvider({ children, initialData = {} }: CMSProviderProps) {
   const [productTypes, setProductTypes] = useState<CMSProductType[]>(initialData.productTypes || []);
   const [businessGoals, setBusinessGoals] = useState<CMSBusinessGoal[]>(initialData.businessGoals || []);
   const [testimonials, setTestimonials] = useState<CMSTestimonial[]>(initialData.testimonials || []);
+  const [technologies, setTechnologies] = useState<CMSTechnology[]>(initialData.technologies || []);
 
   async function refreshData() {
     setIsLoading(true);
@@ -51,17 +55,19 @@ export function CMSProvider({ children, initialData = {} }: CMSProviderProps) {
     try {
       // In a real implementation, we would fetch data from the CMS here
       // For now this is a placeholder for future implementation
-      // const [machinesData, productTypesData, businessGoalsData, testimonialsData] = await Promise.all([
+      // const [machinesData, productTypesData, businessGoalsData, testimonialsData, technologiesData] = await Promise.all([
       //   cmsService.getMachines(),
       //   cmsService.getProductTypes(),
       //   cmsService.getBusinessGoals(),
-      //   cmsService.getTestimonials()
+      //   cmsService.getTestimonials(),
+      //   cmsService.getTechnologies()
       // ]);
       
       // setMachines(machinesData);
       // setProductTypes(productTypesData);
       // setBusinessGoals(businessGoalsData);
       // setTestimonials(testimonialsData);
+      // setTechnologies(technologiesData);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('An unknown error occurred'));
       console.error('Error fetching CMS data:', err);
@@ -77,6 +83,7 @@ export function CMSProvider({ children, initialData = {} }: CMSProviderProps) {
     productTypes,
     businessGoals,
     testimonials,
+    technologies,
     refreshData
   };
 

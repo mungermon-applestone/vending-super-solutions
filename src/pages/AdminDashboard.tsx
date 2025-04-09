@@ -5,7 +5,7 @@ import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
-import { Package, Goal, Database, Plus, Server, Layers } from 'lucide-react';
+import { Package, Goal, Database, Plus, Server, Layers, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +33,14 @@ const contentTypes = [
     path: "/admin/machines",
     createPath: "/admin/machines/new",
     color: "bg-emerald-50 border-emerald-200"
+  },
+  {
+    title: "Technology",
+    description: "Manage technology platform features",
+    icon: <Monitor className="h-8 w-8 text-indigo-500" />,
+    path: "/admin/technology",
+    createPath: "/admin/technology/new",
+    color: "bg-indigo-50 border-indigo-200"
   },
 ];
 

@@ -1,8 +1,10 @@
+
 import { IS_DEVELOPMENT } from '@/config/cms';
 import { fetchMachines } from './contentTypes/machines';
 import { fetchProductTypes } from './contentTypes/productTypes';
 import { fetchTestimonials } from './contentTypes/testimonials';
 import { fetchBusinessGoals } from './contentTypes/businessGoals';
+import { fetchTechnologies } from './contentTypes/technologies';
 import { useMockData, getMockData } from './mockDataHandler';
 
 /**
@@ -30,6 +32,8 @@ export async function fetchFromCMS<T>(contentType: string, params: Record<string
         return await fetchTestimonials<T>();
       case 'business-goals':
         return await fetchBusinessGoals<T>();
+      case 'technologies':
+        return await fetchTechnologies<T>();
       default:
         console.warn(`[fetchFromCMS] Unknown content type: ${contentType}`);
         return [] as T[];

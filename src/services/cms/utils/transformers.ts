@@ -1,4 +1,3 @@
-
 import { MachineData, MachineImage, MachineDeploymentExample } from '@/utils/machineMigration/types';
 
 /**
@@ -183,4 +182,72 @@ export function transformProductTypeData<T>(data: any[]): T[] {
       return null;
     }
   }).filter(Boolean) as T[];
+}
+
+// Add transformTechnologyData function
+export async function transformTechnologyData(technology: any): Promise<any> {
+  if (!technology) return null;
+  
+  // Transform section data if available
+  let sections = [];
+  if (technology.technology_sections) {
+    sections = technology.technology_sections.map((section: any) => {
+      // Transform features
+      const features = section.technology_features ? section.technology_features.map((feature: any) => {
+        // Transform feature items (bullet points)
+        const items = feature.technology_feature_items ? 
+          feature.technology_feature_items.map((item: any) => item.text) : 
+          [];
+          
+        return {
+          title: feature.title,
+          description: feature.description,
+          icon: feature.icon,
+          items
+        };
+      }) : [];
+      
+      // Transform section images
+      const sectionImages = section.technology_images ? 
+        section.technology_images.map((image: any) => ({
+          url: image.url,
+          alt: image.alt,
+          width: image.width,
+          height: image.height
+        })) : 
+        [];
+        
+      return {
+        type: section.section_type,
+        title: section.title,
+        description: section.description,
+        features,
+        images: sectionImages
+      };
+    });
+  }
+  
+  // Transform technology images
+  const images = technology.technology_images ? 
+    technology.technology_images.filter((image: any) => image.section_id === null).map((image: any) => ({
+      url: image.url,
+      alt: image.alt,
+      width: image.width,
+      height: image.height
+    })) : 
+    [];
+  
+  // Build the technology object in our CMS format
+  return {
+    id: technology.id,
+    slug: technology.slug,
+    title: technology.title,
+    description: technology.description,
+    image: technology.image_url ? {
+      url: technology.image_url,
+      alt: technology.image_alt || technology.title
+    } : null,
+    sections,
+    images
+  };
 }

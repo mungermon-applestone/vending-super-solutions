@@ -87,3 +87,29 @@ export interface CMSBusinessGoal {
   features: CMSFeature[];
   caseStudies: CMSExample[];
 }
+
+// New Technology interfaces
+export interface CMSTechnologySection {
+  type: string;
+  title: string;
+  description?: string;
+  features: CMSTechnologyFeature[];
+  images: CMSImage[];
+}
+
+export interface CMSTechnologyFeature {
+  title?: string;
+  description?: string;
+  icon?: string;
+  items?: string[];
+}
+
+export interface CMSTechnology {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  image?: CMSImage;
+  sections: CMSTechnologySection[];
+  images: CMSImage[];
+}

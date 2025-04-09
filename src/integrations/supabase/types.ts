@@ -547,6 +547,213 @@ export type Database = {
         }
         Relationships: []
       }
+      technologies: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          image_alt: string | null
+          image_url: string | null
+          slug: string
+          title: string
+          updated_at: string
+          visible: boolean
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          slug: string
+          title: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
+      technology_feature_items: {
+        Row: {
+          created_at: string
+          display_order: number
+          feature_id: string
+          id: string
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          feature_id: string
+          id?: string
+          text: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          feature_id?: string
+          id?: string
+          text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technology_feature_items_feature_id_fkey"
+            columns: ["feature_id"]
+            isOneToOne: false
+            referencedRelation: "technology_features"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technology_features: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          section_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          section_id: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          section_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technology_features_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "technology_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technology_images: {
+        Row: {
+          alt: string
+          created_at: string
+          display_order: number
+          height: number | null
+          id: string
+          section_id: string | null
+          technology_id: string
+          updated_at: string
+          url: string
+          width: number | null
+        }
+        Insert: {
+          alt: string
+          created_at?: string
+          display_order?: number
+          height?: number | null
+          id?: string
+          section_id?: string | null
+          technology_id: string
+          updated_at?: string
+          url: string
+          width?: number | null
+        }
+        Update: {
+          alt?: string
+          created_at?: string
+          display_order?: number
+          height?: number | null
+          id?: string
+          section_id?: string | null
+          technology_id?: string
+          updated_at?: string
+          url?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technology_images_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "technology_sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technology_images_technology_id_fkey"
+            columns: ["technology_id"]
+            isOneToOne: false
+            referencedRelation: "technologies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technology_sections: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          section_type: string
+          technology_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          section_type: string
+          technology_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          section_type?: string
+          technology_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technology_sections_technology_id_fkey"
+            columns: ["technology_id"]
+            isOneToOne: false
+            referencedRelation: "technologies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       testimonials: {
         Row: {
           author: string
