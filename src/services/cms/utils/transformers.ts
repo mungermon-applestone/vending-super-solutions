@@ -77,3 +77,85 @@ export function transformMachineData<T>(data: any[]): T[] {
     }
   }).filter(Boolean) as T[];
 }
+
+/**
+ * Transform raw product type data from database to structured format
+ */
+export function transformProductTypeData<T>(data: any[]): T[] {
+  if (!data || !Array.isArray(data)) {
+    console.warn('[transformProductTypeData] Invalid data provided:', data);
+    return [];
+  }
+
+  console.log(`[transformProductTypeData] Transforming ${data.length} product types`);
+  
+  return data.map(item => {
+    try {
+      // Process images
+      const images = Array.isArray(item.product_type_images) 
+        ? item.product_type_images.map((img: any) => ({
+            url: img.url,
+            alt: img.alt || '',
+            width: img.width || undefined,
+            height: img.height || undefined,
+          }))
+        : [];
+
+      // Use the first image as the primary image or provide a default
+      const primaryImage = images.length > 0 ? images[0] : { url: '', alt: '' };
+      
+      // Process benefits with sort by display_order
+      const benefits = Array.isArray(item.product_type_benefits)
+        ? item.product_type_benefits
+            .sort((a: any, b: any) => a.display_order - b.display_order)
+            .map((benefit: any) => benefit.benefit)
+        : [];
+
+      // Process features with sort by display_order
+      const features = Array.isArray(item.product_type_features)
+        ? item.product_type_features
+            .sort((a: any, b: any) => a.display_order - b.display_order)
+            .map((feature: any) => {
+              // Process feature images
+              const featureImages = Array.isArray(feature.product_type_feature_images)
+                ? feature.product_type_feature_images.map((img: any) => ({
+                    url: img.url,
+                    alt: img.alt || '',
+                    width: img.width || undefined,
+                    height: img.height || undefined,
+                  }))
+                : [];
+
+              // Use the first feature image as the screenshot or provide a default
+              const screenshot = featureImages.length > 0
+                ? featureImages[0]
+                : { url: '', alt: '' };
+
+              return {
+                title: feature.title,
+                description: feature.description,
+                icon: feature.icon || 'check',
+                screenshot
+              };
+            })
+        : [];
+
+      // Build the final product type object
+      const productType = {
+        id: item.id,
+        slug: item.slug,
+        title: item.title,
+        description: item.description,
+        image: primaryImage,
+        benefits,
+        features,
+      };
+
+      console.log(`[transformProductTypeData] Transformed product type: ${item.title}`);
+      return productType as unknown as T;
+    } catch (error) {
+      console.error(`[transformProductTypeData] Error processing product type ${item.id}:`, error);
+      return null;
+    }
+  }).filter(Boolean) as T[];
+}
