@@ -29,21 +29,26 @@ export function transformMachineData<T>(data: any[]): T[] {
       if (Array.isArray(item.machine_specs)) {
         item.machine_specs.forEach((spec: any) => {
           if (spec.key && spec.value !== undefined) {
-            // First try to see if the value itself is a JSON object with key/value pairs
-            // This handles cases where the data might have been stored in a structured format
+            // Always use the actual spec.key from the database rather than 
+            // looking for a key property inside a potentially parsed value
+            let specValue = spec.value;
+            
+            // Try to parse the value if it's a JSON string, but only to extract
+            // the actual value (not to determine which key to use)
             try {
               const parsedValue = JSON.parse(spec.value);
-              if (typeof parsedValue === 'object' && parsedValue !== null && 'key' in parsedValue && 'value' in parsedValue) {
-                // Use the key from the parsed object and its value
-                specs[spec.key] = parsedValue.value;
-              } else {
-                // If it's valid JSON but not our expected format, use original values
-                specs[spec.key] = spec.value;
+              if (typeof parsedValue === 'object' && parsedValue !== null && 'value' in parsedValue) {
+                // Extract just the value from the parsed object
+                specValue = parsedValue.value;
               }
             } catch (e) {
-              // If not JSON or parsing fails, use the values as-is
-              specs[spec.key] = spec.value;
+              // If not JSON or parsing fails, use the value as-is
+              // No change needed here
             }
+            
+            // Always use the spec.key from the database record to maintain the
+            // user's ability to rename keys
+            specs[spec.key] = specValue;
           }
         });
       }
