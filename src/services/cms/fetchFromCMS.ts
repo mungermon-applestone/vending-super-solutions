@@ -31,9 +31,11 @@ export async function fetchFromCMS<T>(contentType: string, params: Record<string
       case 'testimonials':
         return await fetchTestimonials() as unknown as T[];
       case 'business-goals':
+        // Pass params to fetchBusinessGoals if it accepts them
         return await fetchBusinessGoals(params) as unknown as T[];
       case 'technologies':
-        return await fetchTechnologies() as unknown as T[];
+        // Pass params to fetchTechnologies if it accepts them
+        return await fetchTechnologies(params) as unknown as T[];
       default:
         console.warn(`[fetchFromCMS] Unknown content type: ${contentType}`);
         return [] as T[];
