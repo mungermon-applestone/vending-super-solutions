@@ -6,9 +6,28 @@ import { CMSMachine } from '@/types/cms';
 
 interface MachineDetailHeroProps {
   machine: CMSMachine;
+  primaryAction?: React.ReactNode;
+  secondaryAction?: React.ReactNode;
 }
 
-const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
+const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ 
+  machine,
+  primaryAction,
+  secondaryAction
+}) => {
+  // Default actions if none are provided
+  const defaultPrimaryAction = (
+    <Button className="btn-primary">
+      Request Pricing
+    </Button>
+  );
+  
+  const defaultSecondaryAction = (
+    <Button variant="outline">
+      Download Spec Sheet
+    </Button>
+  );
+
   return (
     <section className="py-12 md:py-16 bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
       <div className="container-wide">
@@ -33,12 +52,8 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
               {machine.description}
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button className="btn-primary">
-                Request Pricing
-              </Button>
-              <Button variant="outline">
-                Download Spec Sheet
-              </Button>
+              {primaryAction || defaultPrimaryAction}
+              {secondaryAction || defaultSecondaryAction}
             </div>
           </div>
           <div className="relative">

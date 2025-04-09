@@ -7,16 +7,33 @@ interface ProductHeroSectionProps {
   description: string;
   image: string;
   benefits: string[];
+  primaryAction?: React.ReactNode;
+  secondaryAction?: React.ReactNode;
 }
 
 const ProductHeroSection = ({
   productType,
   description,
   image,
-  benefits
+  benefits,
+  primaryAction,
+  secondaryAction
 }: ProductHeroSectionProps) => {
   // Filter out duplicate benefits
   const uniqueBenefits = [...new Set(benefits)];
+  
+  // Default actions if none are provided
+  const defaultPrimaryAction = (
+    <Button asChild className="btn-primary">
+      <Link to="/contact">Request a Demo</Link>
+    </Button>
+  );
+  
+  const defaultSecondaryAction = (
+    <Button asChild variant="outline">
+      <Link to="/products">View Other Product Types</Link>
+    </Button>
+  );
   
   return (
     <section className="py-12 md:py-16 bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
@@ -40,12 +57,8 @@ const ProductHeroSection = ({
               ))}
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button asChild className="btn-primary">
-                <Link to="/contact">Request a Demo</Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link to="/products">View Other Product Types</Link>
-              </Button>
+              {primaryAction || defaultPrimaryAction}
+              {secondaryAction || defaultSecondaryAction}
             </div>
           </div>
           <div className="relative">

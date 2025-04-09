@@ -9,9 +9,35 @@ interface BusinessGoalHeroProps {
   description: string;
   icon: ReactNode;
   image: string;
+  primaryAction?: React.ReactNode;
+  secondaryAction?: React.ReactNode;
 }
 
-const BusinessGoalHero = ({ title, description, icon, image }: BusinessGoalHeroProps) => {
+const BusinessGoalHero = ({ 
+  title, 
+  description, 
+  icon, 
+  image,
+  primaryAction,
+  secondaryAction
+}: BusinessGoalHeroProps) => {
+  // Default actions if none are provided
+  const defaultPrimaryAction = (
+    <Button asChild>
+      <Link to="/contact">
+        Request a Demo <ArrowRight className="ml-2 h-4 w-4" />
+      </Link>
+    </Button>
+  );
+  
+  const defaultSecondaryAction = (
+    <Button variant="outline" asChild>
+      <Link to="/products">
+        View Compatible Products
+      </Link>
+    </Button>
+  );
+
   return (
     <section className="py-16 md:py-24 bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
       <div className="container-wide">
@@ -29,16 +55,8 @@ const BusinessGoalHero = ({ title, description, icon, image }: BusinessGoalHeroP
               {description}
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button asChild>
-                <Link to="/contact">
-                  Request a Demo <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/products">
-                  View Compatible Products
-                </Link>
-              </Button>
+              {primaryAction || defaultPrimaryAction}
+              {secondaryAction || defaultSecondaryAction}
             </div>
           </div>
           <div className="relative">
