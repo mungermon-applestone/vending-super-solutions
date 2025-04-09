@@ -1,10 +1,13 @@
 
 import React from 'react';
 import Layout from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
 import CTASection from '@/components/common/CTASection';
-import { Server, HardDrive, Ruler, Weight, Plug, ThermometerSnowflake, DollarSign, Monitor, Building, CreditCard } from 'lucide-react';
-import Wifi from '@/components/ui/Wifi';
+import MachineHero from './hero/MachineHero';
+import SpecificationsSection from './specs/SpecificationsSection';
+import FeaturesList from './features/FeaturesList';
+import DeploymentExamplesSection from './examples/DeploymentExamplesSection';
+import AdditionalViews from './gallery/AdditionalViews';
+import InquiryForm from './contact/InquiryForm';
 
 export interface MachineTemplateProps {
   machine: {
@@ -19,16 +22,6 @@ export interface MachineTemplateProps {
       alt: string;
     }>;
     specs: {
-      dimensions?: string;
-      weight?: string;
-      capacity?: string;
-      powerRequirements?: string;
-      temperature?: string;
-      connectivity?: string;
-      paymentOptions?: string;
-      screen?: string;
-      manufacturer?: string;
-      priceRange?: string;
       [key: string]: string | undefined;
     };
     features: string[];
@@ -43,91 +36,11 @@ export interface MachineTemplateProps {
   };
 }
 
-// Helper function to get an appropriate icon for a specification based on its key
-const getSpecIcon = (key: string) => {
-  const lowerKey = key.toLowerCase();
-  
-  if (lowerKey.includes('dimension')) return <Ruler className="mr-2 h-5 w-5 text-vending-blue" />;
-  if (lowerKey.includes('weight')) return <Weight className="mr-2 h-5 w-5 text-vending-blue" />;
-  if (lowerKey.includes('power')) return <Plug className="mr-2 h-5 w-5 text-vending-blue" />;
-  if (lowerKey.includes('temp')) return <ThermometerSnowflake className="mr-2 h-5 w-5 text-vending-blue" />;
-  if (lowerKey.includes('capacity')) return <Server className="mr-2 h-5 w-5 text-vending-blue" />;
-  if (lowerKey.includes('connect')) return <Wifi className="mr-2 h-5 w-5 text-vending-blue" />;
-  if (lowerKey.includes('price') || lowerKey.includes('cost')) return <DollarSign className="mr-2 h-5 w-5 text-vending-blue" />;
-  if (lowerKey.includes('payment')) return <CreditCard className="mr-2 h-5 w-5 text-vending-blue" />;
-  if (lowerKey.includes('screen')) return <Monitor className="mr-2 h-5 w-5 text-vending-blue" />;
-  if (lowerKey.includes('manufacturer')) return <Building className="mr-2 h-5 w-5 text-vending-blue" />;
-  
-  // Default icon for other specs
-  return <Server className="mr-2 h-5 w-5 text-vending-blue" />;
-};
-
-// Helper function to make a spec label more readable
-const formatSpecLabel = (key: string): string => {
-  // Replace underscores and hyphens with spaces
-  let formatted = key.replace(/[_-]/g, ' ');
-  
-  // Capitalize first letter of each word
-  formatted = formatted.replace(/\w\S*/g, (txt) => {
-    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-  });
-  
-  return formatted;
-};
-
 const MachinePageTemplate: React.FC<MachineTemplateProps> = ({ machine }) => {
-  // Get all specification keys for rendering
-  const specKeys = Object.keys(machine.specs);
-  
-  // Split specs into two columns for better visual layout
-  const leftColSpecs = specKeys.slice(0, Math.ceil(specKeys.length / 2));
-  const rightColSpecs = specKeys.slice(Math.ceil(specKeys.length / 2));
-
   return (
     <Layout>
-      <section className="py-12 md:py-16 bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
-        <div className="container-wide">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="flex items-center mb-6">
-                <div className="bg-vending-blue p-2 rounded-full mr-3">
-                  {machine.type === 'vending' ? (
-                    <Server className="h-5 w-5 text-white" />
-                  ) : (
-                    <HardDrive className="h-5 w-5 text-white" />
-                  )}
-                </div>
-                <span className="text-vending-blue font-medium">
-                  {machine.type.charAt(0).toUpperCase() + machine.type.slice(1)} | {machine.temperature.charAt(0).toUpperCase() + machine.temperature.slice(1)}
-                </span>
-              </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-vending-blue-dark">
-                {machine.title}
-              </h1>
-              <p className="text-lg text-gray-700 mb-8">
-                {machine.description}
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button className="btn-primary">
-                  Request Pricing
-                </Button>
-                <Button variant="outline">
-                  Download Spec Sheet
-                </Button>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-                <img 
-                  src={machine.images[0]?.url} 
-                  alt={machine.images[0]?.alt || machine.title} 
-                  className="w-full h-auto object-cover"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section */}
+      <MachineHero machine={machine} />
       
       {/* Specifications Section */}
       <section className="py-12 bg-white" id="specifications">
@@ -136,37 +49,7 @@ const MachinePageTemplate: React.FC<MachineTemplateProps> = ({ machine }) => {
             Specifications
           </h2>
           <div className="bg-vending-gray rounded-lg shadow-md p-8">
-            {specKeys.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Left column */}
-                <div className="space-y-6">
-                  {leftColSpecs.map(key => (
-                    <div key={key}>
-                      <h3 className="text-lg font-medium mb-3 flex items-center">
-                        {getSpecIcon(key)}
-                        {formatSpecLabel(key)}
-                      </h3>
-                      <p className="text-gray-700">{machine.specs[key]}</p>
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Right column */}
-                <div className="space-y-6">
-                  {rightColSpecs.map(key => (
-                    <div key={key}>
-                      <h3 className="text-lg font-medium mb-3 flex items-center">
-                        {getSpecIcon(key)}
-                        {formatSpecLabel(key)}
-                      </h3>
-                      <p className="text-gray-700">{machine.specs[key]}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <p className="text-center text-gray-500">No specifications available for this machine.</p>
-            )}
+            <SpecificationsSection specs={machine.specs} />
           </div>
         </div>
       </section>
@@ -178,166 +61,22 @@ const MachinePageTemplate: React.FC<MachineTemplateProps> = ({ machine }) => {
             Features
           </h2>
           <div className="bg-white rounded-lg shadow-md p-8">
-            <div>
-              <ul className="space-y-4">
-                {machine.features.map((feature, index) => (
-                  <li key={index} className="flex items-start">
-                    <svg className="h-5 w-5 text-vending-teal mt-1 flex-shrink-0 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-gray-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-vending-gray p-6 rounded-lg">
-                  <h3 className="text-lg font-medium mb-3">Ideal For</h3>
-                  <p className="text-gray-700">
-                    {machine.type === 'vending' 
-                      ? "Retail environments, offices, schools, and public spaces requiring automated sales of various products." 
-                      : "Secure storage and distribution of items in retail, office, and transit environments."}
-                  </p>
-                </div>
-                <div className="bg-vending-gray p-6 rounded-lg">
-                  <h3 className="text-lg font-medium mb-3">Software Compatibility</h3>
-                  <p className="text-gray-700">
-                    Fully compatible with our management software, providing real-time inventory tracking, sales analytics, and remote management.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <FeaturesList features={machine.features} />
           </div>
         </div>
       </section>
       
       {/* Deployment Examples Section */}
-      {machine.deploymentExamples.length > 0 && (
-        <section className="py-12 bg-white" id="deployment-examples">
-          <div className="container-wide">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center text-vending-blue-dark">
-              Deployment Examples
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {machine.deploymentExamples.map((example, index) => (
-                <div key={index} className="bg-white rounded-lg overflow-hidden shadow-md">
-                  <img 
-                    src={example.image.url} 
-                    alt={example.image.alt || example.title}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="p-6">
-                    <h3 className="text-lg font-semibold mb-2">{example.title}</h3>
-                    <p className="text-gray-600">{example.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      <DeploymentExamplesSection examples={machine.deploymentExamples} />
       
       {/* Additional Views Section */}
-      {machine.images.length > 1 && (
-        <section className="py-12 bg-vending-gray">
-          <div className="container-wide">
-            <h2 className="text-2xl font-bold mb-8 text-center text-vending-blue-dark">Additional Views</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {machine.images.slice(0, 3).map((image, index) => (
-                <img 
-                  key={index}
-                  src={image.url}
-                  alt={image.alt || `${machine.title} - View ${index + 1}`}
-                  className="w-full h-64 object-cover rounded-lg shadow-md"
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      <AdditionalViews 
+        title={machine.title} 
+        images={machine.images} 
+      />
       
       {/* Contact Section */}
-      <section className="py-12 bg-white">
-        <div className="container-wide max-w-4xl">
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-8">
-              <h2 className="text-2xl font-bold mb-2 text-vending-blue-dark">
-                Interested in {machine.title}?
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Complete the form below and one of our specialists will contact you with pricing and availability.
-              </p>
-              <form className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      id="firstName"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      id="lastName"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
-                    Company
-                  </label>
-                  <input
-                    type="text"
-                    id="company"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                    Message
-                  </label>
-                  <textarea
-                    id="message"
-                    rows={4}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
-                    placeholder="Tell us about your needs, deployment location, and any questions you have."
-                  ></textarea>
-                </div>
-                <div>
-                  <Button className="w-full">Submit Inquiry</Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
+      <InquiryForm title={machine.title} />
 
       <CTASection />
     </Layout>
