@@ -3,7 +3,7 @@ import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import CTASection from '@/components/common/CTASection';
-import { Server, HardDrive, Ruler, Weight, Plug, ThermometerSnowflake, DollarSign } from 'lucide-react';
+import { Server, HardDrive, Ruler, Weight, Plug, ThermometerSnowflake, DollarSign, Monitor, Building, CreditCard } from 'lucide-react';
 import Wifi from '@/components/ui/Wifi';
 
 export interface MachineTemplateProps {
@@ -43,7 +43,46 @@ export interface MachineTemplateProps {
   };
 }
 
+// Helper function to get an appropriate icon for a specification based on its key
+const getSpecIcon = (key: string) => {
+  const lowerKey = key.toLowerCase();
+  
+  if (lowerKey.includes('dimension')) return <Ruler className="mr-2 h-5 w-5 text-vending-blue" />;
+  if (lowerKey.includes('weight')) return <Weight className="mr-2 h-5 w-5 text-vending-blue" />;
+  if (lowerKey.includes('power')) return <Plug className="mr-2 h-5 w-5 text-vending-blue" />;
+  if (lowerKey.includes('temp')) return <ThermometerSnowflake className="mr-2 h-5 w-5 text-vending-blue" />;
+  if (lowerKey.includes('capacity')) return <Server className="mr-2 h-5 w-5 text-vending-blue" />;
+  if (lowerKey.includes('connect')) return <Wifi className="mr-2 h-5 w-5 text-vending-blue" />;
+  if (lowerKey.includes('price') || lowerKey.includes('cost')) return <DollarSign className="mr-2 h-5 w-5 text-vending-blue" />;
+  if (lowerKey.includes('payment')) return <CreditCard className="mr-2 h-5 w-5 text-vending-blue" />;
+  if (lowerKey.includes('screen')) return <Monitor className="mr-2 h-5 w-5 text-vending-blue" />;
+  if (lowerKey.includes('manufacturer')) return <Building className="mr-2 h-5 w-5 text-vending-blue" />;
+  
+  // Default icon for other specs
+  return <Server className="mr-2 h-5 w-5 text-vending-blue" />;
+};
+
+// Helper function to make a spec label more readable
+const formatSpecLabel = (key: string): string => {
+  // Replace underscores and hyphens with spaces
+  let formatted = key.replace(/[_-]/g, ' ');
+  
+  // Capitalize first letter of each word
+  formatted = formatted.replace(/\w\S*/g, (txt) => {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
+  
+  return formatted;
+};
+
 const MachinePageTemplate: React.FC<MachineTemplateProps> = ({ machine }) => {
+  // Get all specification keys for rendering
+  const specKeys = Object.keys(machine.specs);
+  
+  // Split specs into two columns for better visual layout
+  const leftColSpecs = specKeys.slice(0, Math.ceil(specKeys.length / 2));
+  const rightColSpecs = specKeys.slice(Math.ceil(specKeys.length / 2));
+
   return (
     <Layout>
       <section className="py-12 md:py-16 bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
@@ -97,84 +136,37 @@ const MachinePageTemplate: React.FC<MachineTemplateProps> = ({ machine }) => {
             Specifications
           </h2>
           <div className="bg-vending-gray rounded-lg shadow-md p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-6">
-                {machine.specs.dimensions && (
-                  <div>
-                    <h3 className="text-lg font-medium mb-3 flex items-center">
-                      <Ruler className="mr-2 h-5 w-5 text-vending-blue" />
-                      Dimensions
-                    </h3>
-                    <p className="text-gray-700">{machine.specs.dimensions}</p>
-                  </div>
-                )}
-                {machine.specs.weight && (
-                  <div>
-                    <h3 className="text-lg font-medium mb-3 flex items-center">
-                      <Weight className="mr-2 h-5 w-5 text-vending-blue" />
-                      Weight
-                    </h3>
-                    <p className="text-gray-700">{machine.specs.weight}</p>
-                  </div>
-                )}
-                {machine.specs.powerRequirements && (
-                  <div>
-                    <h3 className="text-lg font-medium mb-3 flex items-center">
-                      <Plug className="mr-2 h-5 w-5 text-vending-blue" />
-                      Power Requirements
-                    </h3>
-                    <p className="text-gray-700">{machine.specs.powerRequirements}</p>
-                  </div>
-                )}
-                {machine.specs.temperature && (
-                  <div>
-                    <h3 className="text-lg font-medium mb-3 flex items-center">
-                      <ThermometerSnowflake className="mr-2 h-5 w-5 text-vending-blue" />
-                      Temperature
-                    </h3>
-                    <p className="text-gray-700">{machine.specs.temperature}</p>
-                  </div>
-                )}
+            {specKeys.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Left column */}
+                <div className="space-y-6">
+                  {leftColSpecs.map(key => (
+                    <div key={key}>
+                      <h3 className="text-lg font-medium mb-3 flex items-center">
+                        {getSpecIcon(key)}
+                        {formatSpecLabel(key)}
+                      </h3>
+                      <p className="text-gray-700">{machine.specs[key]}</p>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Right column */}
+                <div className="space-y-6">
+                  {rightColSpecs.map(key => (
+                    <div key={key}>
+                      <h3 className="text-lg font-medium mb-3 flex items-center">
+                        {getSpecIcon(key)}
+                        {formatSpecLabel(key)}
+                      </h3>
+                      <p className="text-gray-700">{machine.specs[key]}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="space-y-6">
-                {machine.specs.capacity && (
-                  <div>
-                    <h3 className="text-lg font-medium mb-3 flex items-center">
-                      <Server className="mr-2 h-5 w-5 text-vending-blue" />
-                      Capacity
-                    </h3>
-                    <p className="text-gray-700">{machine.specs.capacity}</p>
-                  </div>
-                )}
-                {machine.specs.connectivity && (
-                  <div>
-                    <h3 className="text-lg font-medium mb-3 flex items-center">
-                      <Wifi className="mr-2 h-5 w-5 text-vending-blue" />
-                      Connectivity
-                    </h3>
-                    <p className="text-gray-700">{machine.specs.connectivity}</p>
-                  </div>
-                )}
-                {machine.specs.priceRange && (
-                  <div>
-                    <h3 className="text-lg font-medium mb-3 flex items-center">
-                      <DollarSign className="mr-2 h-5 w-5 text-vending-blue" />
-                      Cost
-                    </h3>
-                    <p className="text-gray-700">{machine.specs.priceRange}</p>
-                  </div>
-                )}
-                {machine.specs.paymentOptions && (
-                  <div>
-                    <h3 className="text-lg font-medium mb-3 flex items-center">
-                      <Server className="mr-2 h-5 w-5 text-vending-blue" />
-                      Payment Options
-                    </h3>
-                    <p className="text-gray-700">{machine.specs.paymentOptions}</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            ) : (
+              <p className="text-center text-gray-500">No specifications available for this machine.</p>
+            )}
           </div>
         </div>
       </section>

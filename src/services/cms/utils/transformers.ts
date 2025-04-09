@@ -24,37 +24,43 @@ export function transformMachineData<T>(data: any[]): T[] {
           }))
         : [];
 
-      // Process specs as a key-value object
+      // Process specs as a key-value object - IMPROVED to preserve keys exactly as they appear in the database
       const specs: Record<string, string> = {};
       if (Array.isArray(item.machine_specs)) {
+        // First log all specs as received from the database for debugging
+        console.log(`[transformMachineData] Raw specs for ${item.title}:`, 
+          item.machine_specs.map((spec: any) => ({ key: spec.key, value: spec.value }))
+        );
+        
         item.machine_specs.forEach((spec: any) => {
+          // Only process specs that have both key and value defined
           if (spec.key && spec.value !== undefined) {
-            // Always use the actual spec.key from the database rather than 
-            // looking for a key property inside a potentially parsed value
             let specValue = spec.value;
             
-            // Try to parse the value if it's a JSON string, but only to extract
-            // the actual value (not to determine which key to use)
+            // Try to extract a cleaner value if the value is stored as JSON
             try {
               const parsedValue = JSON.parse(spec.value);
               if (typeof parsedValue === 'object' && parsedValue !== null && 'value' in parsedValue) {
-                // Extract just the value from the parsed object
                 specValue = parsedValue.value;
               }
             } catch (e) {
-              // If not JSON or parsing fails, use the value as-is
-              // No change needed here
+              // If it's not valid JSON, use the original value - no need to do anything
             }
             
-            // Always use the spec.key from the database record to maintain the
-            // user's ability to rename keys
+            // CRITICAL: Use exactly the key from the database as the property name
+            // This ensures we always display whatever key name the user has chosen
             specs[spec.key] = specValue;
+            
+            // Add extra debugging to confirm the spec was processed correctly
+            console.log(`[transformMachineData] Processed spec "${spec.key}" = "${specs[spec.key]}"`);
+          } else {
+            console.warn(`[transformMachineData] Skipping invalid spec:`, spec);
           }
         });
       }
       
       // Log the specs format for debugging
-      console.log(`[transformMachineData] Transformed specs for ${item.title}:`, specs);
+      console.log(`[transformMachineData] Final transformed specs for ${item.title}:`, specs);
 
       // Process features
       const features = Array.isArray(item.machine_features)
