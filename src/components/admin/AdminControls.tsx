@@ -9,25 +9,18 @@ const AdminControls = () => {
   const location = useLocation();
   const productInfo = useProductTypeFromUrl();
   
-  // Determine if we're on a product detail page
+  // Determine page context
   const isProductDetailPage = 
     (location.pathname.includes('/products/') && 
     productInfo.slug && 
     productInfo.slug !== 'products') ||
     location.pathname.includes('/admin/products/edit/');
   
-  // Determine if we're already on the admin pages
-  const isAdminProductsPage = location.pathname === '/admin/products';
+  // Determine admin page context
   const isAdminPage = location.pathname.startsWith('/admin');
+  const isAdminProductsPage = location.pathname === '/admin/products';
+  const isProductEditPage = location.pathname.includes('/admin/products/edit/');
   
-  console.log("AdminControls rendering with:", {
-    location: location.pathname,
-    productType: productInfo,
-    isProductDetailPage,
-    isAdminProductsPage,
-    isAdminPage
-  });
-
   // Don't show admin controls on admin pages
   if (isAdminPage) {
     return null;
@@ -42,22 +35,21 @@ const AdminControls = () => {
         </Link>
       </Button>
       
-      {/* Show Admin Products link unless we're already on that page */}
-      {!isAdminProductsPage && isProductDetailPage && (
-        <Button asChild className="bg-purple-600 hover:bg-purple-700 shadow-lg">
-          <Link to="/admin/products" className="flex items-center gap-2">
-            <List size={16} /> Manage Products
-          </Link>
-        </Button>
-      )}
-      
-      {/* Show Edit Product button on product detail pages */}
-      {isProductDetailPage && !location.pathname.includes('/admin/products/edit/') && (
-        <Button asChild className="bg-blue-600 hover:bg-blue-700 shadow-lg">
-          <Link to={`/admin/products/edit/${productInfo.slug}`} className="flex items-center gap-2">
-            <Edit size={16} /> Edit Product
-          </Link>
-        </Button>
+      {/* Show context-specific admin actions */}
+      {isProductDetailPage && !isProductEditPage && productInfo.slug && (
+        <>
+          <Button asChild className="bg-purple-600 hover:bg-purple-700 shadow-lg">
+            <Link to="/admin/products" className="flex items-center gap-2">
+              <List size={16} /> Manage Products
+            </Link>
+          </Button>
+          
+          <Button asChild className="bg-blue-600 hover:bg-blue-700 shadow-lg">
+            <Link to={`/admin/products/edit/${productInfo.slug}`} className="flex items-center gap-2">
+              <Edit size={16} /> Edit Product
+            </Link>
+          </Button>
+        </>
       )}
       
       {/* Show New Product button only on the admin products page */}
