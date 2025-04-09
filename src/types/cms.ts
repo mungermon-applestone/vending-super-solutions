@@ -1,118 +1,107 @@
-
-// Content types that will be stored in the CMS
-
-import { ReactNode } from 'react';
-
 export interface CMSImage {
+  id: string;
   url: string;
   alt: string;
   width?: number;
   height?: number;
 }
 
-export interface CMSFeature {
+export interface CMSProductType {
+  id: string;
   title: string;
+  slug: string;
   description: string;
-  icon?: ReactNode | string;
-  screenshot?: CMSImage;
-}
-
-export interface CMSExample {
-  title: string;
-  description: string;
-  image: CMSImage;
-}
-
-export interface CMSSpecs {
-  dimensions?: string;
-  weight?: string;
-  capacity?: string;
-  powerRequirements?: string;
-  temperature?: string;
-  connectivity?: string;
-  paymentOptions?: string;
-  screen?: string;
-  manufacturer?: string;
-  priceRange?: string;
-  [key: string]: string | undefined;
+  image?: CMSImage;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CMSMachine {
   id: string;
-  slug: string;
   title: string;
-  type: "vending" | "locker";
-  temperature: string;
-  description: string;
-  images: CMSImage[];
-  specs: CMSSpecs;
-  features: string[];
-  deploymentExamples: CMSExample[];
-}
-
-export interface CMSProductType {
-  id: string;
   slug: string;
-  title: string;
+  type: string;
   description: string;
-  image: CMSImage;
-  benefits: string[];
-  features: CMSFeature[];
-  examples: CMSExample[];
-  video?: {
-    title: string;
-    description: string;
-    thumbnailImage: CMSImage;
-    videoUrl?: string;
-  };
+  features?: string[];
+  images?: CMSImage[];
+  product_types?: CMSProductType[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CMSTestimonial {
   id: string;
-  quote: string;
-  author: string;
-  position: string;
+  name: string;
+  title: string;
   company: string;
-  image?: CMSImage;
+  testimonial: string;
+  image_url?: string;
+  rating: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CMSBusinessGoal {
   id: string;
+  title: string;
   slug: string;
-  title: string;
   description: string;
-  icon?: string;
-  image: CMSImage;
-  benefits: string[];
-  features: CMSFeature[];
-  caseStudies: CMSExample[];
+  image_url?: string;
+  image_alt?: string;
+  visible: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
-// New Technology interfaces
-export interface CMSTechnologySection {
-  id: string;
-  type: string;
-  title: string;
-  description?: string;
-  features: CMSTechnologyFeature[];
-  images: CMSImage[];
-}
-
-export interface CMSTechnologyFeature {
-  id?: string;
-  title?: string;
-  description?: string;
-  icon?: string;
-  items?: string[];
-}
-
+// Technology types
 export interface CMSTechnology {
   id: string;
   slug: string;
   title: string;
   description: string;
-  image?: CMSImage;
-  sections: CMSTechnologySection[];
-  images: CMSImage[];
-  visible: boolean; // Added visible property
+  image_url?: string;
+  image_alt?: string;
+  visible: boolean;
+  created_at?: string;
+  updated_at?: string;
+  sections?: CMSTechnologySection[];
+}
+
+export interface CMSTechnologySection {
+  id: string;
+  technology_id: string;
+  section_type: string;
+  title: string;
+  description?: string;
+  display_order: number;
+  features?: CMSTechnologyFeature[];
+  images?: CMSTechnologyImage[];
+}
+
+export interface CMSTechnologyFeature {
+  id: string;
+  section_id: string;
+  title: string;
+  description?: string;
+  icon?: string;
+  display_order: number;
+  items?: CMSTechnologyFeatureItem[];
+}
+
+export interface CMSTechnologyFeatureItem {
+  id: string;
+  feature_id: string;
+  text: string;
+  display_order: number;
+}
+
+export interface CMSTechnologyImage {
+  id: string;
+  technology_id: string;
+  section_id?: string;
+  url: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  display_order: number;
 }

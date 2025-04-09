@@ -16,6 +16,11 @@ import {
 } from '@/services/cms/utils/slugMatching';
 import { fetchMachineById, createMachine, updateMachine, deleteMachine } from '@/services/cms/contentTypes/machines';
 
+import {
+  fetchTechnologies,
+  fetchTechnologyBySlug
+} from './cms/contentTypes/technologies';
+
 export async function getMachines(filters: Record<string, any> = {}): Promise<CMSMachine[]> {
   return await fetchFromCMS<CMSMachine>('machines', filters);
 }
@@ -160,33 +165,5 @@ export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGo
   }
 }
 
-export async function getTechnologies(): Promise<CMSTechnology[]> {
-  return await fetchFromCMS<CMSTechnology>('technologies');
-}
-
-export async function getTechnologyBySlug(slug: string): Promise<CMSTechnology | null> {
-  console.log(`[cms.ts] Attempting to fetch technology with slug: "${slug}"`);
-  
-  if (!slug || slug.trim() === '') {
-    console.warn("[cms.ts] Empty slug passed to getTechnologyBySlug");
-    return null;
-  }
-  
-  try {
-    // Use the direct method to get a technology by slug
-    const technology = await fetchTechnologyBySlug<CMSTechnology>(slug);
-    
-    if (technology) {
-      console.log(`[cms.ts] Successfully retrieved technology: ${technology.title}`);
-      return technology;
-    }
-    
-    // Fallback to using fetchFromCMS if direct method fails
-    console.log(`[cms.ts] Direct lookup failed, trying fallback method`);
-    const technologies = await fetchFromCMS<CMSTechnology>('technologies', { slug });
-    return technologies.length > 0 ? technologies[0] : null;
-  } catch (error) {
-    console.error(`[cms.ts] Error fetching technology by slug "${slug}":`, error);
-    return null;
-  }
-}
+export const getTechnologies = fetchTechnologies;
+export const getTechnologyBySlug = fetchTechnologyBySlug;
