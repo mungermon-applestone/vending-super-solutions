@@ -2,8 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { getMachines } from '@/services/cms';
+import { useMachines } from '@/hooks/useMachinesData';
 import { CMSMachine, CMSImage } from '@/types/cms';
 
 interface MachineCardProps {
@@ -52,11 +51,8 @@ const MachineCard = ({ title, image, categories, path }: MachineCardProps) => {
 };
 
 const MachineTypesSection = () => {
-  // Fetch featured machines from CMS
-  const { data: cmsMachines = [], isLoading } = useQuery({
-    queryKey: ['machines', { featured: true, limit: 3 }],
-    queryFn: () => getMachines({ featured: true, limit: 3 }),
-  });
+  // Fetch featured machines from CMS using the useMachines hook
+  const { data: cmsMachines = [], isLoading } = useMachines({ featured: true, limit: 3 });
 
   // Fallback data if CMS data is not yet available
   const staticMachines = [

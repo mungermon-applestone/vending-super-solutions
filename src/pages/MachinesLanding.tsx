@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -6,7 +5,7 @@ import CTASection from '@/components/common/CTASection';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Server, HardDrive } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { useMachines } from '@/hooks/useCMSData';
+import { useMachines } from '@/hooks/useMachinesData';
 import { Wifi } from '@/components/ui/Wifi';
 
 const MachinesLanding = () => {
@@ -24,111 +23,9 @@ const MachinesLanding = () => {
 
   const { data: machines = [], isLoading } = useMachines();
   
-  // Predefined machine types that match our created pages
-  const vendingMachines = [
-    {
-      id: '1',
-      title: "Option-4 - Refrigerated",
-      description: "Full-size refrigerated vending machine with multiple temperature zones",
-      image: "https://images.unsplash.com/photo-1597393353415-b3730f3719fe",
-      type: "vending",
-      temperature: "refrigerated",
-      slug: "option-4-refrigerated"
-    },
-    {
-      id: '2',
-      title: "Option-2, Wall Mount XL",
-      description: "Extra large wall-mounted vending solution for high capacity needs",
-      image: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2",
-      type: "vending",
-      temperature: "ambient",
-      slug: "option-2-wall-mount-xl"
-    },
-    {
-      id: '3',
-      title: "Option-2, Wall Mount",
-      description: "Space-efficient wall-mounted vending machine for standard applications",
-      image: "https://images.unsplash.com/photo-1572635148818-ef6fd45eb394",
-      type: "vending",
-      temperature: "ambient",
-      slug: "option-2-wall-mount"
-    },
-    {
-      id: '4',
-      title: "DIVI-SS",
-      description: "Stainless steel vending solution with advanced touchscreen interface",
-      image: "https://images.unsplash.com/photo-1627998792088-f8016b438988",
-      type: "vending",
-      temperature: "ambient",
-      slug: "divi-ss"
-    },
-    {
-      id: '5',
-      title: "DIVI-WP",
-      description: "Weather-protected vending system for outdoor installations",
-      image: "https://images.unsplash.com/photo-1557034362-4ec717153f8f",
-      type: "vending",
-      temperature: "ambient",
-      slug: "divi-wp"
-    },
-    {
-      id: '6',
-      title: "DIVI-WS",
-      description: "Wall-mounted slim profile vending machine for tight spaces",
-      image: "https://images.unsplash.com/photo-1627395637580-988089c61818",
-      type: "vending",
-      temperature: "ambient",
-      slug: "divi-ws"
-    },
-    {
-      id: '7',
-      title: "DIVI-SP",
-      description: "Space-saving profile vending machine with flexible configuration options",
-      image: "https://images.unsplash.com/photo-1621964275191-ccc01ef2134c",
-      type: "vending",
-      temperature: "ambient",
-      slug: "divi-sp"
-    },
-    {
-      id: '8',
-      title: "Combi 3000",
-      description: "Combination vending system with multiple product categories and payment options",
-      image: "https://images.unsplash.com/photo-1527256351016-8ad33ff833fc",
-      type: "vending",
-      temperature: "multi",
-      slug: "combi-3000"
-    },
-  ];
-  
-  const smartLockers = [
-    {
-      id: '9',
-      title: "10-cell temperature controlled locker",
-      description: "Compact temperature-controlled locker system with 10 individual compartments",
-      image: "https://images.unsplash.com/photo-1604754742629-3e5728249d73",
-      type: "locker",
-      temperature: "controlled",
-      slug: "10-cell-temperature-controlled"
-    },
-    {
-      id: '10',
-      title: "21-cell temperature controlled locker",
-      description: "Large capacity temperature-controlled locker system with 21 individual compartments",
-      image: "https://images.unsplash.com/photo-1534723328310-e82dad3ee43f",
-      type: "locker",
-      temperature: "controlled",
-      slug: "21-cell-temperature-controlled"
-    },
-  ];
-
-  // Use CMS data when available, otherwise use predefined data
-  const displayVendingMachines = machines.length > 0 
-    ? machines.filter(machine => machine.type === 'vending')
-    : vendingMachines;
-    
-  const displayLockers = machines.length > 0 
-    ? machines.filter(machine => machine.type === 'locker')
-    : smartLockers;
+  // Filter machines by type
+  const vendingMachines = machines.filter(machine => machine.type === 'vending');
+  const smartLockers = machines.filter(machine => machine.type === 'locker');
 
   const renderMachineCard = (machine) => {
     const machineImage = machine.images?.[0]?.url || machine.image;

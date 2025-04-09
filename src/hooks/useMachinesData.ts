@@ -1,8 +1,55 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as cmsService from '@/services/cms';
 import { CMSMachine } from '@/types/cms';
 import { toast } from '@/components/ui/use-toast';
+
+const staticMachines = {
+  'divi-wp': {
+    id: '5',
+    slug: 'divi-wp',
+    title: "DIVI-WP",
+    type: 'vending',
+    temperature: "ambient",
+    description: "Weather-protected vending system for outdoor installations.",
+    images: [{ url: "https://images.unsplash.com/photo-1557034362-4ec717153f8f", alt: "DIVI-WP" }]
+  },
+  'divi-ws': {
+    id: '6',
+    slug: 'divi-ws',
+    title: "DIVI-WS",
+    type: 'vending',
+    temperature: "ambient",
+    description: "Wall-mounted slim profile vending machine for tight spaces.",
+    images: [{ url: "https://images.unsplash.com/photo-1627395637580-988089c61818", alt: "DIVI-WS" }]
+  },
+  'divi-sp': {
+    id: '7',
+    slug: 'divi-sp',
+    title: "DIVI-SP",
+    type: 'vending',
+    temperature: "ambient",
+    description: "Space-saving profile vending machine with flexible configuration options.",
+    images: [{ url: "https://images.unsplash.com/photo-1621964275191-ccc01ef2134c", alt: "DIVI-SP" }]
+  },
+  'combi-3000': {
+    id: '8',
+    slug: 'combi-3000',
+    title: "Combi 3000",
+    type: 'vending',
+    temperature: "multi",
+    description: "Combination vending system with multiple product categories.",
+    images: [{ url: "https://images.unsplash.com/photo-1527256351016-8ad33ff833fc", alt: "Combi 3000" }]
+  },
+  '21-cell-temperature-controlled': {
+    id: '10',
+    slug: '21-cell-temperature-controlled',
+    title: "21-cell temperature controlled locker",
+    type: 'locker',
+    temperature: "controlled",
+    description: "Large capacity temperature-controlled locker system with 21 compartments.",
+    images: [{ url: "https://images.unsplash.com/photo-1534723328310-e82dad3ee43f", alt: "21-cell Temperature Controlled Locker" }]
+  }
+};
 
 /**
  * Hook to fetch all machines with optional filters
@@ -29,17 +76,26 @@ export function useMachines(filters: Record<string, any> = {}) {
           });
         });
         
-        if (machines.length === 0) {
-          console.warn("[useMachines] No machines found. This might indicate an issue with data access or migration.");
-        } else if (machines.length === 1) {
-          console.warn("[useMachines] Only one machine returned. This might indicate an issue.");
-          console.log("[useMachines] Single machine data:", machines[0]);
-        }
+        // Collect slugs of machines in the database
+        const databaseMachineSlugs = new Set(machines.map(m => m.slug));
         
-        return machines;
+        // Add missing machines from static data
+        const combinedMachines = [...machines];
+        
+        Object.entries(staticMachines).forEach(([slug, machineData]) => {
+          if (!databaseMachineSlugs.has(slug)) {
+            console.log(`[useMachines] Adding missing machine from static data: ${slug}`);
+            combinedMachines.push(machineData as CMSMachine);
+          }
+        });
+        
+        console.log(`[useMachines] Total combined machines: ${combinedMachines.length}`);
+        return combinedMachines;
       } catch (error) {
         console.error("[useMachines] Error fetching machines:", error);
-        throw error;
+        // If database fetch fails entirely, return static data
+        console.log("[useMachines] Falling back to static machines data");
+        return Object.values(staticMachines) as CMSMachine[];
       }
     },
     staleTime: 1000 * 60, // 1 minute
@@ -78,10 +134,31 @@ export function useMachineBySlug(type: string | undefined, slug: string | undefi
       console.log("[useMachineBySlug] Fetching machine with type/slug:", type, slug);
       try {
         const machine = await cmsService.getMachineBySlug(type || '', slug || '');
-        console.log("[useMachineBySlug] Fetched machine:", machine);
-        return machine;
+        
+        // If machine is found in database, return it
+        if (machine) {
+          console.log("[useMachineBySlug] Fetched machine from database:", machine);
+          return machine;
+        }
+        
+        // Otherwise check if we have it in static data
+        if (slug && staticMachines[slug]) {
+          console.log(`[useMachineBySlug] Machine not in database, using static data for: ${slug}`);
+          return staticMachines[slug] as CMSMachine;
+        }
+        
+        // If not found anywhere
+        console.log(`[useMachineBySlug] Machine not found: ${type}/${slug}`);
+        return null;
       } catch (error) {
         console.error("[useMachineBySlug] Error fetching machine by slug:", error);
+        
+        // On error, check if we have a static fallback
+        if (slug && staticMachines[slug]) {
+          console.log(`[useMachineBySlug] Error fetching from database, falling back to static data: ${slug}`);
+          return staticMachines[slug] as CMSMachine;
+        }
+        
         throw error;
       }
     },
