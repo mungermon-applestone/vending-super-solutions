@@ -90,6 +90,7 @@ export interface CMSBusinessGoal {
 
 // New Technology interfaces
 export interface CMSTechnologySection {
+  id: string;
   type: string;
   title: string;
   description?: string;
@@ -98,6 +99,7 @@ export interface CMSTechnologySection {
 }
 
 export interface CMSTechnologyFeature {
+  id?: string;
   title?: string;
   description?: string;
   icon?: string;
@@ -112,4 +114,5 @@ export interface CMSTechnology {
   image?: CMSImage;
   sections: CMSTechnologySection[];
   images: CMSImage[];
+  visible: boolean; // Added visible property
 }

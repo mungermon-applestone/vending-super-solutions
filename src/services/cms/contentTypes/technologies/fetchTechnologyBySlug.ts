@@ -16,15 +16,15 @@ export async function fetchTechnologyBySlug<T>(slug: string): Promise<T | null> 
       .from('technologies')
       .select(`
         *,
-        technology_sections!technology_sections_technology_id_fkey (
+        technology_sections (
           *,
-          technology_features!technology_features_section_id_fkey (
+          technology_features (
             *,
-            technology_feature_items!technology_feature_items_feature_id_fkey (*)
+            technology_feature_items (*)
           ),
-          technology_images!technology_images_section_id_fkey (*)
+          technology_images (*)
         ),
-        technology_images!technology_images_technology_id_fkey (*)
+        technology_images (*)
       `)
       .eq('slug', slug)
       .maybeSingle();

@@ -1,9 +1,13 @@
-import { MachineData, MachineImage, MachineDeploymentExample } from '@/utils/machineMigration/types';
+import { CMSMachine, CMSProductType, CMSBusinessGoal, CMSTestimonial, CMSTechnology } from '@/types/cms';
 
-/**
- * Transform raw machine data from database to structured format
- */
-export function transformMachineData<T>(data: any[]): T[] {
+// Error handling utility
+export function handleError(functionName: string, error: unknown): never {
+  console.error(`[${functionName}] Error:`, error);
+  throw error;
+}
+
+// Transform database machine data to CMS format
+export async function transformMachineData(data: any): Promise<any> {
   if (!data || !Array.isArray(data)) {
     console.warn('[transformMachineData] Invalid data provided:', data);
     return [];
@@ -102,10 +106,8 @@ export function transformMachineData<T>(data: any[]): T[] {
   }).filter(Boolean) as T[];
 }
 
-/**
- * Transform raw product type data from database to structured format
- */
-export function transformProductTypeData<T>(data: any[]): T[] {
+// Transform database product type data to CMS format
+export async function transformProductTypeData(data: any): Promise<any> {
   if (!data || !Array.isArray(data)) {
     console.warn('[transformProductTypeData] Invalid data provided:', data);
     return [];
@@ -184,70 +186,169 @@ export function transformProductTypeData<T>(data: any[]): T[] {
   }).filter(Boolean) as T[];
 }
 
-// Add transformTechnologyData function
-export async function transformTechnologyData(technology: any): Promise<any> {
-  if (!technology) return null;
-  
-  // Transform section data if available
-  let sections = [];
-  if (technology.technology_sections) {
-    sections = technology.technology_sections.map((section: any) => {
-      // Transform features
-      const features = section.technology_features ? section.technology_features.map((feature: any) => {
-        // Transform feature items (bullet points)
-        const items = feature.technology_feature_items ? 
-          feature.technology_feature_items.map((item: any) => item.text) : 
-          [];
-          
-        return {
-          title: feature.title,
-          description: feature.description,
-          icon: feature.icon,
-          items
-        };
-      }) : [];
-      
-      // Transform section images
-      const sectionImages = section.technology_images ? 
-        section.technology_images.map((image: any) => ({
-          url: image.url,
-          alt: image.alt,
-          width: image.width,
-          height: image.height
-        })) : 
-        [];
-        
-      return {
-        type: section.section_type,
-        title: section.title,
-        description: section.description,
-        features,
-        images: sectionImages
-      };
-    });
+// Transform database business goal data to CMS format
+export async function transformBusinessGoalData(data: any): Promise<any> {
+  if (!data || !Array.isArray(data)) {
+    console.warn('[transformBusinessGoalData] Invalid data provided:', data);
+    return [];
   }
+
+  console.log(`[transformBusinessGoalData] Transforming ${data.length} business goals`);
   
-  // Transform technology images
-  const images = technology.technology_images ? 
-    technology.technology_images.filter((image: any) => image.section_id === null).map((image: any) => ({
-      url: image.url,
-      alt: image.alt,
-      width: image.width,
-      height: image.height
-    })) : 
-    [];
+  return data.map(item => {
+    try {
+      // Process images
+      const images = Array.isArray(item.business_goal_images) 
+        ? item.business_goal_images.map((img: any) => ({
+            url: img.url,
+            alt: img.alt || '',
+            width: img.width || undefined,
+            height: img.height || undefined,
+          }))
+        : [];
+
+      // Use the first image as the primary image or provide a default
+      const primaryImage = images.length > 0 ? images[0] : { url: '', alt: '' };
+      
+      // Build the final business goal object
+      const businessGoal = {
+        id: item.id,
+        slug: item.slug,
+        title: item.title,
+        description: item.description,
+        image: primaryImage,
+      };
+
+      console.log(`[transformBusinessGoalData] Transformed business goal: ${item.title}`);
+      return businessGoal as unknown as T;
+    } catch (error) {
+      console.error(`[transformBusinessGoalData] Error processing business goal ${item.id}:`, error);
+      return null;
+    }
+  }).filter(Boolean) as T[];
+}
+
+// Transform database testimonial data to CMS format
+export async function transformTestimonialData(data: any): Promise<any> {
+  if (!data || !Array.isArray(data)) {
+    console.warn('[transformTestimonialData] Invalid data provided:', data);
+    return [];
+  }
+
+  console.log(`[transformTestimonialData] Transforming ${data.length} testimonials`);
   
-  // Build the technology object in our CMS format
-  return {
-    id: technology.id,
-    slug: technology.slug,
-    title: technology.title,
-    description: technology.description,
-    image: technology.image_url ? {
-      url: technology.image_url,
-      alt: technology.image_alt || technology.title
-    } : null,
-    sections,
-    images
-  };
+  return data.map(item => {
+    try {
+      // Process images
+      const images = Array.isArray(item.testimonial_images) 
+        ? item.testimonial_images.map((img: any) => ({
+            url: img.url,
+            alt: img.alt || '',
+            width: img.width || undefined,
+            height: img.height || undefined,
+          }))
+        : [];
+
+      // Use the first image as the primary image or provide a default
+      const primaryImage = images.length > 0 ? images[0] : { url: '', alt: '' };
+      
+      // Build the final testimonial object
+      const testimonial = {
+        id: item.id,
+        slug: item.slug,
+        title: item.title,
+        description: item.description,
+        image: primaryImage,
+      };
+
+      console.log(`[transformTestimonialData] Transformed testimonial: ${item.title}`);
+      return testimonial as unknown as T;
+    } catch (error) {
+      console.error(`[transformTestimonialData] Error processing testimonial ${item.id}:`, error);
+      return null;
+    }
+  }).filter(Boolean) as T[];
+}
+
+// Transform database technology data to CMS format
+export async function transformTechnologyData(data: any): Promise<CMSTechnology> {
+  try {
+    // Extract sections and organize their features
+    const sections = data.technology_sections ? 
+      data.technology_sections.map((section: any) => {
+        // Extract features for this section
+        const features = section.technology_features ? 
+          section.technology_features.map((feature: any) => {
+            // Extract feature items if available
+            const items = feature.technology_feature_items ? 
+              feature.technology_feature_items
+                .sort((a: any, b: any) => a.display_order - b.display_order)
+                .map((item: any) => item.text) : 
+              [];
+            
+            return {
+              id: feature.id,
+              title: feature.title,
+              description: feature.description,
+              icon: feature.icon,
+              items
+            };
+          }) :
+          [];
+
+        // Extract images specific to this section
+        const sectionImages = section.technology_images ? 
+          section.technology_images
+            .sort((a: any, b: any) => a.display_order - b.display_order)
+            .map((img: any) => ({
+              url: img.url,
+              alt: img.alt,
+              width: img.width,
+              height: img.height
+            })) : 
+          [];
+
+        return {
+          id: section.id,
+          type: section.section_type,
+          title: section.title,
+          description: section.description,
+          features: features.sort((a: any, b: any) => a.display_order - b.display_order),
+          images: sectionImages
+        };
+      }) :
+      [];
+
+    // Extract technology-level images
+    const images = data.technology_images ?
+      data.technology_images
+        .filter((img: any) => !img.section_id)
+        .sort((a: any, b: any) => a.display_order - b.display_order)
+        .map((img: any) => ({
+          url: img.url,
+          alt: img.alt,
+          width: img.width,
+          height: img.height
+        })) :
+      [];
+        
+    // Prepare main image if available
+    const mainImage = images.length ? images[0] : undefined;
+
+    // Return transformed data in CMS format
+    return {
+      id: data.id,
+      slug: data.slug,
+      title: data.title,
+      description: data.description,
+      image: mainImage,
+      sections: sections.sort((a: any, b: any) => a.display_order - b.display_order),
+      images,
+      visible: data.visible || false
+    };
+  } catch (error) {
+    console.error('[transformTechnologyData] Error:', error);
+    console.error('[transformTechnologyData] Input data:', data);
+    throw new Error(`Failed to transform technology data: ${error}`);
+  }
 }

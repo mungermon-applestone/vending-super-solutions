@@ -9,9 +9,7 @@ export async function fetchTechnologies<T>(): Promise<T[]> {
     // Fetch core technology data
     const { data: technologies, error } = await supabase
       .from('technologies')
-      .select(`
-        *
-      `)
+      .select(`*`)
       .order('title', { ascending: true });
 
     if (error) {

@@ -16,7 +16,8 @@ export async function migrateTechnologyData() {
         title: 'Enterprise-Grade Technology',
         description: 'Our platform is built with security, scalability, and flexibility in mind. Connect any machine to our cloud infrastructure and unlock powerful retail automation capabilities.',
         image_url: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31',
-        image_alt: 'Technology platform'
+        image_alt: 'Technology platform',
+        visible: true
       })
       .select('id')
       .single();
@@ -103,12 +104,15 @@ export async function migrateTechnologyData() {
       }
     ];
     
-    const { error: featError } = await supabase
-      .from('technology_features')
-      .insert(architectureFeatures);
-    
-    if (featError) {
-      throw new Error(`Failed to create architecture features: ${featError.message}`);
+    // Need to handle feature insertion separately for each feature
+    for (const feature of architectureFeatures) {
+      const { error: featError } = await supabase
+        .from('technology_features')
+        .insert(feature);
+      
+      if (featError) {
+        throw new Error(`Failed to create architecture feature: ${featError.message}`);
+      }
     }
     
     // Add security features
@@ -129,12 +133,15 @@ export async function migrateTechnologyData() {
       }
     ];
     
-    const { error: secFeatError } = await supabase
-      .from('technology_features')
-      .insert(securityFeatures);
-    
-    if (secFeatError) {
-      throw new Error(`Failed to create security features: ${secFeatError.message}`);
+    // Insert security features one by one
+    for (const feature of securityFeatures) {
+      const { error: secFeatError } = await supabase
+        .from('technology_features')
+        .insert(feature);
+      
+      if (secFeatError) {
+        throw new Error(`Failed to create security feature: ${secFeatError.message}`);
+      }
     }
     
     // Add integration features
@@ -162,12 +169,15 @@ export async function migrateTechnologyData() {
       }
     ];
     
-    const { error: intFeatError } = await supabase
-      .from('technology_features')
-      .insert(integrationFeatures);
-    
-    if (intFeatError) {
-      throw new Error(`Failed to create integration features: ${intFeatError.message}`);
+    // Insert integration features one by one
+    for (const feature of integrationFeatures) {
+      const { error: intFeatError } = await supabase
+        .from('technology_features')
+        .insert(feature);
+      
+      if (intFeatError) {
+        throw new Error(`Failed to create integration feature: ${intFeatError.message}`);
+      }
     }
     
     console.log('Technology data migration completed successfully');
