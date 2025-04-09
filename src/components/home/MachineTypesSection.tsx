@@ -81,9 +81,9 @@ const MachineTypesSection = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {machines.map((machine, index) => {
-              // Ensure we have machine images data in the correct format
+              // Fix: Use machine.images instead of machine.image for TypeScript compatibility
               const machineImage = machine.images?.[0]?.url || 
-                                  (typeof machine.image === 'string' ? machine.image : machine.image?.url);
+                                  (machine.images && machine.images[0] ? machine.images[0].url : "https://placehold.co/600x400?text=No+Image");
               
               // Create machine categories
               const machineCategories = [
