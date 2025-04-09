@@ -16,7 +16,8 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
       return null;
     }
 
-    const { data, error } = await supabase
+    // First query the main business goal
+    const { data: goalData, error: goalError } = await supabase
       .from('business_goals')
       .select(`
         id,
@@ -28,64 +29,71 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
         visible,
         created_at,
         updated_at,
-        icon,
-        features (
-          id,
-          title,
-          description,
-          icon,
-          display_order,
-          screenshot_id,
-          screenshot:screenshot_id (
-            url,
-            alt
-          )
-        )
+        icon
       `)
       .eq('slug', slug)
       .single();
 
-    if (error) {
-      console.error("[fetchBusinessGoalBySlug] Error fetching business goal:", error);
+    if (goalError) {
+      console.error("[fetchBusinessGoalBySlug] Error fetching business goal:", goalError);
       return null;
     }
 
-    if (!data) {
+    if (!goalData) {
       console.log("[fetchBusinessGoalBySlug] Business goal not found.");
       return null;
     }
 
+    // Then query the features separately to avoid relation errors
+    const { data: featuresData, error: featuresError } = await supabase
+      .from('business_goal_features')
+      .select(`
+        id,
+        title,
+        description,
+        icon,
+        display_order,
+        screenshot_url,
+        screenshot_alt
+      `)
+      .eq('business_goal_id', goalData.id);
+
+    if (featuresError) {
+      console.error("[fetchBusinessGoalBySlug] Error fetching features:", featuresError);
+      // Continue without features
+    }
+
     // Map the data to the CMSBusinessGoal interface
     const businessGoal: CMSBusinessGoal = {
-      id: data.id,
-      slug: data.slug,
-      title: data.title,
-      description: data.description,
+      id: goalData.id,
+      slug: goalData.slug,
+      title: goalData.title,
+      description: goalData.description,
       image: {
         id: `img-${Math.random().toString(36).substr(2, 9)}`,
-        url: data.image_url || '',
-        alt: data.image_alt || data.title
+        url: goalData.image_url || '',
+        alt: goalData.image_alt || goalData.title
       },
-      visible: data.visible,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
-      icon: data.icon,
+      visible: goalData.visible,
+      created_at: goalData.created_at,
+      updated_at: goalData.updated_at,
+      icon: goalData.icon,
       benefits: [], // Assuming benefits are not directly fetched here
       caseStudies: [], // Assuming caseStudies are not directly fetched here
-      features: data.features?.map(f => ({
+      features: featuresData ? featuresData.map(f => ({
         id: f.id || `feature-${Math.random().toString(36).substr(2, 9)}`,
         title: f.title,
         description: f.description,
         icon: f.icon,
         display_order: f.display_order,
-        ...(f.screenshot && {
+        ...(f.screenshot_url && {
           screenshot: {
             id: `screenshot-${Math.random().toString(36).substr(2, 9)}`,
-            url: f.screenshot.url,
-            alt: f.screenshot.alt || f.title
+            url: f.screenshot_url,
+            alt: f.screenshot_alt || f.title
           }
         })
-      })) || [],
+      })) : [],
     };
 
     console.log(`[fetchBusinessGoalBySlug] Successfully fetched business goal: ${businessGoal.title}`);
