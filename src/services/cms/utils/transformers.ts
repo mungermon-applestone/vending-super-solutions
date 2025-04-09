@@ -1,4 +1,3 @@
-
 import { MachineData, MachineImage, MachineDeploymentExample } from '@/utils/machineMigration/types';
 
 /**
@@ -29,7 +28,20 @@ export function transformMachineData<T>(data: any[]): T[] {
       if (Array.isArray(item.machine_specs)) {
         item.machine_specs.forEach((spec: any) => {
           if (spec.key && spec.value !== undefined) {
-            specs[spec.key] = spec.value;
+            // Check if the value is a JSON string and try to parse it
+            try {
+              const parsedValue = JSON.parse(spec.value);
+              if (typeof parsedValue === 'object' && parsedValue !== null && 'key' in parsedValue && 'value' in parsedValue) {
+                // If it's a structured object with key/value pairs, use the value field
+                specs[parsedValue.key] = parsedValue.value;
+              } else {
+                // Otherwise use the original values
+                specs[spec.key] = spec.value;
+              }
+            } catch (e) {
+              // If not JSON or parsing fails, use as-is
+              specs[spec.key] = spec.value;
+            }
           }
         });
       }
