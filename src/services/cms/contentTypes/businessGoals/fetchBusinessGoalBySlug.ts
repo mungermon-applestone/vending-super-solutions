@@ -52,9 +52,7 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
         title,
         description,
         icon,
-        display_order,
-        screenshot_url,
-        screenshot_alt
+        display_order
       `)
       .eq('business_goal_id', goalData.id);
 
@@ -80,19 +78,12 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
       icon: goalData.icon,
       benefits: [], // Assuming benefits are not directly fetched here
       caseStudies: [], // Assuming caseStudies are not directly fetched here
-      features: featuresData ? featuresData.map(f => ({
-        id: f.id || `feature-${Math.random().toString(36).substr(2, 9)}`,
-        title: f.title,
-        description: f.description,
-        icon: f.icon,
-        display_order: f.display_order,
-        ...(f.screenshot_url && {
-          screenshot: {
-            id: `screenshot-${Math.random().toString(36).substr(2, 9)}`,
-            url: f.screenshot_url,
-            alt: f.screenshot_alt || f.title
-          }
-        })
+      features: featuresData ? featuresData.map(feature => ({
+        id: feature.id || `feature-${Math.random().toString(36).substr(2, 9)}`,
+        title: feature.title,
+        description: feature.description,
+        icon: feature.icon,
+        display_order: feature.display_order
       })) : [],
     };
 
