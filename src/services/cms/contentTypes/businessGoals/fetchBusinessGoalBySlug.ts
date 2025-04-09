@@ -1,0 +1,117 @@
+
+import { supabase } from '@/integrations/supabase/client';
+import { CMSBusinessGoal } from '@/types/cms';
+import { normalizeSlug } from '../../utils/slugMatching';
+
+/**
+ * Fetch a business goal by slug
+ */
+export async function fetchBusinessGoalBySlug<T>(slug: string): Promise<T | null> {
+  console.log(`[fetchBusinessGoalBySlug] Fetching business goal with slug "${slug}"`);
+  
+  const normalizedSlug = normalizeSlug(slug);
+  
+  try {
+    // Fetch the business goal
+    const { data: goal, error: goalError } = await supabase
+      .from('business_goals')
+      .select('*')
+      .eq('slug', normalizedSlug)
+      .maybeSingle();
+      
+    if (goalError) {
+      console.error(`[fetchBusinessGoalBySlug] Error fetching business goal with slug "${normalizedSlug}":`, goalError);
+      throw goalError;
+    }
+    
+    if (!goal) {
+      console.log(`[fetchBusinessGoalBySlug] No business goal found with slug "${normalizedSlug}"`);
+      return null;
+    }
+
+    try {
+      // Fetch benefits
+      const { data: benefitsData, error: benefitsError } = await supabase
+        .from('business_goal_benefits')
+        .select('benefit')
+        .eq('business_goal_id', goal.id)
+        .order('display_order');
+        
+      if (benefitsError) {
+        console.error(`[fetchBusinessGoalBySlug] Error fetching benefits for goal ${goal.id}:`, benefitsError);
+        // Continue anyway
+      }
+      
+      // Extract benefits or default to empty array
+      const benefits = benefitsData ? benefitsData.map(b => b.benefit) : [];
+      
+      // Fetch features
+      const { data: features, error: featuresError } = await supabase
+        .from('business_goal_features')
+        .select(`
+          id, title, description, icon, display_order
+        `)
+        .eq('business_goal_id', goal.id)
+        .order('display_order');
+        
+      if (featuresError) {
+        console.error(`[fetchBusinessGoalBySlug] Error fetching features for goal ${goal.id}:`, featuresError);
+        // Continue anyway
+      }
+      
+      // Enhance features with their screenshots
+      const enhancedFeatures = await Promise.all(
+        (features || []).map(async (feature) => {
+          try {
+            // Fetch feature image
+            const { data: screenshot, error: screenshotError } = await supabase
+              .from('business_goal_feature_images')
+              .select('url, alt')
+              .eq('feature_id', feature.id)
+              .maybeSingle();
+              
+            if (screenshotError) {
+              console.error(`[fetchBusinessGoalBySlug] Error fetching screenshot for feature ${feature.id}:`, screenshotError);
+            }
+            
+            return {
+              ...feature,
+              screenshot: screenshot ? {
+                url: screenshot.url,
+                alt: screenshot.alt
+              } : undefined
+            };
+          } catch (error) {
+            console.error(`[fetchBusinessGoalBySlug] Error processing feature ${feature.id}:`, error);
+            return feature;
+          }
+        })
+      );
+      
+      // Create the enhanced business goal object
+      const enhancedGoal: CMSBusinessGoal = {
+        id: goal.id,
+        slug: goal.slug,
+        title: goal.title,
+        description: goal.description,
+        icon: goal.icon,
+        image: {
+          url: goal.image_url || '',
+          alt: goal.image_alt || goal.title
+        },
+        benefits: benefits,
+        features: enhancedFeatures,
+        caseStudies: [] // We'll need to implement this if case studies become a requirement
+      };
+
+      console.log(`[fetchBusinessGoalBySlug] Returning business goal: ${goal.title}`);
+      return enhancedGoal as unknown as T;
+    } catch (error) {
+      console.error(`[fetchBusinessGoalBySlug] Error processing business goal data:`, error);
+      throw error;
+    }
+  } catch (error) {
+    console.error(`[fetchBusinessGoalBySlug] Error fetching business goal with slug "${slug}":`, error);
+    throw error;
+  }
+}
