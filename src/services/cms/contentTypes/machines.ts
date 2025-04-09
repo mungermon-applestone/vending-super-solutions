@@ -1,5 +1,7 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { transformMachineData } from '../utils/transformers';
+import { CMSMachine } from '@/types/cms';
 
 /**
  * Fetch machines from the CMS
@@ -46,21 +48,7 @@ export async function fetchMachines<T>(params: Record<string, any> = {}): Promis
       .eq('visible', true);
     
     // Apply filters if provided
-    if (params.type) {
-      query = query.eq('type', params.type);
-    }
-    
-    if (params.temperature) {
-      query = query.eq('temperature', params.temperature);
-    }
-    
-    if (params.slug) {
-      query = query.eq('slug', params.slug);
-    }
-    
-    if (params.id) {
-      query = query.eq('id', params.id);
-    }
+    query = applyFiltersToQuery(query, params);
     
     // Print the final query for debugging
     console.log('[fetchMachines] Running query with filters:', params);
@@ -72,33 +60,8 @@ export async function fetchMachines<T>(params: Record<string, any> = {}): Promis
       throw error;
     }
 
-    // Log raw data before transformation
-    console.log(`[fetchMachines] Raw data received: ${data?.length || 0} machines`);
-    if (data?.length > 0) {
-      console.log('[fetchMachines] First machine sample:', {
-        id: data[0].id,
-        title: data[0].title,
-        slug: data[0].slug
-      });
-    } else {
-      console.warn('[fetchMachines] No machines found in database');
-    }
-
-    // Check for possible RLS issues
-    if (!data || data.length === 0) {
-      console.warn('[fetchMachines] Empty result may indicate RLS policy issues - checking table access');
-      
-      // Try a simple count query to verify basic table access
-      const { count, error: countError } = await supabase
-        .from('machines')
-        .select('*', { count: 'exact', head: true });
-      
-      if (countError) {
-        console.error('[fetchMachines] Error accessing machines table:', countError);
-      } else {
-        console.log(`[fetchMachines] Total count in machines table (may be filtered by RLS): ${count}`);
-      }
-    }
+    // Log data received
+    logMachinesData(data);
 
     const transformed = transformMachineData<T>(data);
     console.log(`[fetchMachines] Transformed data: ${transformed.length} machines`);
@@ -107,6 +70,65 @@ export async function fetchMachines<T>(params: Record<string, any> = {}): Promis
   } catch (error) {
     console.error('[fetchMachines] Error fetching machines:', error);
     throw error;
+  }
+}
+
+/**
+ * Helper function to apply filters to the query
+ */
+function applyFiltersToQuery(query: any, params: Record<string, any>) {
+  if (params.type) {
+    query = query.eq('type', params.type);
+  }
+  
+  if (params.temperature) {
+    query = query.eq('temperature', params.temperature);
+  }
+  
+  if (params.slug) {
+    query = query.eq('slug', params.slug);
+  }
+  
+  if (params.id) {
+    query = query.eq('id', params.id);
+  }
+  
+  return query;
+}
+
+/**
+ * Helper function to log fetched machines data
+ */
+function logMachinesData(data: any[] | null) {
+  console.log(`[fetchMachines] Raw data received: ${data?.length || 0} machines`);
+  if (data?.length > 0) {
+    console.log('[fetchMachines] First machine sample:', {
+      id: data[0].id,
+      title: data[0].title,
+      slug: data[0].slug
+    });
+  } else {
+    console.warn('[fetchMachines] No machines found in database');
+    
+    // Check for possible RLS issues
+    console.warn('[fetchMachines] Empty result may indicate RLS policy issues - checking table access');
+    checkTableAccess();
+  }
+}
+
+/**
+ * Helper function to check database table access
+ */
+async function checkTableAccess() {
+  // Try a simple count query to verify basic table access
+  const { count, error: countError } = await supabase
+    .from('machines')
+    .select('*', { count: 'exact', head: true });
+  
+  if (countError) {
+    console.error('[fetchMachines] Error accessing machines table:', countError);
+  } else {
+    console.log(`[fetchMachines] Total count in machines table (may be filtered by RLS): ${count}`);
   }
 }
 
@@ -177,7 +199,7 @@ export async function fetchMachineById<T>(id: string): Promise<T | null> {
 /**
  * Create a new machine in the CMS
  */
-export async function createMachine(machineData: any) {
+export async function createMachine(machineData: any): Promise<string> {
   try {
     console.log('[createMachine] Creating new machine with data:', machineData);
     
@@ -203,61 +225,13 @@ export async function createMachine(machineData: any) {
     console.log(`[createMachine] Created machine with ID: ${machine.id}`);
     
     // Add machine images if provided
-    if (machineData.images && machineData.images.length > 0) {
-      const imageInserts = machineData.images.map((image: any, index: number) => ({
-        machine_id: machine.id,
-        url: image.url,
-        alt: image.alt || machineData.title,
-        width: image.width || 800,
-        height: image.height || 600,
-        display_order: index
-      }));
-      
-      const { error: imageError } = await supabase
-        .from('machine_images')
-        .insert(imageInserts);
-      
-      if (imageError) {
-        console.error('[createMachine] Error adding machine images:', imageError);
-        // Continue despite image error
-      }
-    }
+    await addMachineImages(machine.id, machineData);
     
     // Add machine specs if provided
-    if (machineData.specs && machineData.specs.length > 0) {
-      const specInserts = machineData.specs.map((spec: any) => ({
-        machine_id: machine.id,
-        key: spec.key,
-        value: spec.value
-      }));
-      
-      const { error: specError } = await supabase
-        .from('machine_specs')
-        .insert(specInserts);
-      
-      if (specError) {
-        console.error('[createMachine] Error adding machine specs:', specError);
-        // Continue despite spec error
-      }
-    }
+    await addMachineSpecs(machine.id, machineData);
     
     // Add machine features if provided
-    if (machineData.features && machineData.features.length > 0) {
-      const featureInserts = machineData.features.map((feature: any, index: number) => ({
-        machine_id: machine.id,
-        feature: feature.text,
-        display_order: index
-      }));
-      
-      const { error: featureError } = await supabase
-        .from('machine_features')
-        .insert(featureInserts);
-      
-      if (featureError) {
-        console.error('[createMachine] Error adding machine features:', featureError);
-        // Continue despite feature error
-      }
-    }
+    await addMachineFeatures(machine.id, machineData);
     
     return machine.id;
   } catch (error) {
@@ -269,7 +243,7 @@ export async function createMachine(machineData: any) {
 /**
  * Update an existing machine in the CMS
  */
-export async function updateMachine(id: string, machineData: any) {
+export async function updateMachine(id: string, machineData: any): Promise<boolean> {
   try {
     console.log(`[updateMachine] Updating machine with ID: ${id}`, machineData);
     
@@ -292,101 +266,17 @@ export async function updateMachine(id: string, machineData: any) {
     
     // Update images: first delete existing, then add new ones
     if (machineData.images) {
-      // Delete existing images
-      const { error: deleteError } = await supabase
-        .from('machine_images')
-        .delete()
-        .eq('machine_id', id);
-      
-      if (deleteError) {
-        console.error(`[updateMachine] Error deleting existing images for machine ${id}:`, deleteError);
-        // Continue despite error
-      }
-      
-      // Add new images
-      if (machineData.images.length > 0) {
-        const imageInserts = machineData.images.map((image: any, index: number) => ({
-          machine_id: id,
-          url: image.url,
-          alt: image.alt || machineData.title,
-          width: image.width || 800,
-          height: image.height || 600,
-          display_order: index
-        }));
-        
-        const { error: imageError } = await supabase
-          .from('machine_images')
-          .insert(imageInserts);
-        
-        if (imageError) {
-          console.error(`[updateMachine] Error adding new images for machine ${id}:`, imageError);
-          // Continue despite image error
-        }
-      }
+      await updateMachineImages(id, machineData);
     }
     
     // Update specs: first delete existing, then add new ones
     if (machineData.specs) {
-      // Delete existing specs
-      const { error: deleteError } = await supabase
-        .from('machine_specs')
-        .delete()
-        .eq('machine_id', id);
-      
-      if (deleteError) {
-        console.error(`[updateMachine] Error deleting existing specs for machine ${id}:`, deleteError);
-        // Continue despite error
-      }
-      
-      // Add new specs
-      if (machineData.specs.length > 0) {
-        const specInserts = machineData.specs.map((spec: any) => ({
-          machine_id: id,
-          key: spec.key,
-          value: spec.value
-        }));
-        
-        const { error: specError } = await supabase
-          .from('machine_specs')
-          .insert(specInserts);
-        
-        if (specError) {
-          console.error(`[updateMachine] Error adding new specs for machine ${id}:`, specError);
-          // Continue despite spec error
-        }
-      }
+      await updateMachineSpecs(id, machineData);
     }
     
     // Update features: first delete existing, then add new ones
     if (machineData.features) {
-      // Delete existing features
-      const { error: deleteError } = await supabase
-        .from('machine_features')
-        .delete()
-        .eq('machine_id', id);
-      
-      if (deleteError) {
-        console.error(`[updateMachine] Error deleting existing features for machine ${id}:`, deleteError);
-        // Continue despite error
-      }
-      
-      // Add new features
-      if (machineData.features.length > 0) {
-        const featureInserts = machineData.features.map((feature: any, index: number) => ({
-          machine_id: id,
-          feature: feature.text,
-          display_order: index
-        }));
-        
-        const { error: featureError } = await supabase
-          .from('machine_features')
-          .insert(featureInserts);
-        
-        if (featureError) {
-          console.error(`[updateMachine] Error adding new features for machine ${id}:`, featureError);
-          // Continue despite feature error
-        }
-      }
+      await updateMachineFeatures(id, machineData);
     }
     
     return true;
@@ -399,7 +289,7 @@ export async function updateMachine(id: string, machineData: any) {
 /**
  * Delete a machine from the CMS
  */
-export async function deleteMachine(id: string) {
+export async function deleteMachine(id: string): Promise<boolean> {
   try {
     console.log(`[deleteMachine] Deleting machine with ID: ${id}`);
     
@@ -418,5 +308,137 @@ export async function deleteMachine(id: string) {
   } catch (error) {
     console.error(`[deleteMachine] Error:`, error);
     throw error;
+  }
+}
+
+/**
+ * Helper function to add machine images
+ */
+async function addMachineImages(machineId: string, machineData: any) {
+  if (machineData.images && machineData.images.length > 0) {
+    const imageInserts = machineData.images.map((image: any, index: number) => ({
+      machine_id: machineId,
+      url: image.url,
+      alt: image.alt || machineData.title,
+      width: image.width || 800,
+      height: image.height || 600,
+      display_order: index
+    }));
+    
+    const { error: imageError } = await supabase
+      .from('machine_images')
+      .insert(imageInserts);
+    
+    if (imageError) {
+      console.error(`[addMachineImages] Error adding images for machine ${machineId}:`, imageError);
+      // Continue despite image error
+    }
+  }
+}
+
+/**
+ * Helper function to add machine specs
+ */
+async function addMachineSpecs(machineId: string, machineData: any) {
+  if (machineData.specs && Object.keys(machineData.specs).length > 0) {
+    const specInserts = Object.entries(machineData.specs).map(([key, value]: [string, any]) => ({
+      machine_id: machineId,
+      key,
+      value
+    }));
+    
+    const { error: specError } = await supabase
+      .from('machine_specs')
+      .insert(specInserts);
+    
+    if (specError) {
+      console.error(`[addMachineSpecs] Error adding specs for machine ${machineId}:`, specError);
+      // Continue despite spec error
+    }
+  }
+}
+
+/**
+ * Helper function to add machine features
+ */
+async function addMachineFeatures(machineId: string, machineData: any) {
+  if (machineData.features && machineData.features.length > 0) {
+    const featureInserts = machineData.features.map((feature: any, index: number) => ({
+      machine_id: machineId,
+      feature: typeof feature === 'string' ? feature : feature.text,
+      display_order: index
+    }));
+    
+    const { error: featureError } = await supabase
+      .from('machine_features')
+      .insert(featureInserts);
+    
+    if (featureError) {
+      console.error(`[addMachineFeatures] Error adding features for machine ${machineId}:`, featureError);
+      // Continue despite feature error
+    }
+  }
+}
+
+/**
+ * Helper function to update machine images
+ */
+async function updateMachineImages(machineId: string, machineData: any) {
+  // Delete existing images
+  const { error: deleteError } = await supabase
+    .from('machine_images')
+    .delete()
+    .eq('machine_id', machineId);
+  
+  if (deleteError) {
+    console.error(`[updateMachineImages] Error deleting existing images for machine ${machineId}:`, deleteError);
+    // Continue despite error
+  }
+  
+  // Add new images
+  if (machineData.images.length > 0) {
+    await addMachineImages(machineId, machineData);
+  }
+}
+
+/**
+ * Helper function to update machine specs
+ */
+async function updateMachineSpecs(machineId: string, machineData: any) {
+  // Delete existing specs
+  const { error: deleteError } = await supabase
+    .from('machine_specs')
+    .delete()
+    .eq('machine_id', machineId);
+  
+  if (deleteError) {
+    console.error(`[updateMachineSpecs] Error deleting existing specs for machine ${machineId}:`, deleteError);
+    // Continue despite error
+  }
+  
+  // Add new specs
+  if (Object.keys(machineData.specs).length > 0) {
+    await addMachineSpecs(machineId, machineData);
+  }
+}
+
+/**
+ * Helper function to update machine features
+ */
+async function updateMachineFeatures(machineId: string, machineData: any) {
+  // Delete existing features
+  const { error: deleteError } = await supabase
+    .from('machine_features')
+    .delete()
+    .eq('machine_id', machineId);
+  
+  if (deleteError) {
+    console.error(`[updateMachineFeatures] Error deleting existing features for machine ${machineId}:`, deleteError);
+    // Continue despite error
+  }
+  
+  // Add new features
+  if (machineData.features.length > 0) {
+    await addMachineFeatures(machineId, machineData);
   }
 }

@@ -1,15 +1,12 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as cmsService from '@/services/cms';
-import { CMSMachine } from '@/types/cms';
 import { toast } from '@/components/ui/use-toast';
 
 /**
  * Hook to fetch all machines with optional filters
  */
 export function useMachines(filters: Record<string, any> = {}) {
-  const queryClient = useQueryClient();
-  
   return useQuery({
     queryKey: ['machines', filters],
     queryFn: async () => {
@@ -18,32 +15,9 @@ export function useMachines(filters: Record<string, any> = {}) {
         const machines = await cmsService.getMachines(filters);
         console.log("[useMachines] Fetched machines:", machines);
         console.log(`[useMachines] Total machines fetched: ${machines.length}`);
-        
-        // Log each machine for debugging
-        machines.forEach((machine, index) => {
-          console.log(`[useMachines] Machine ${index + 1}:`, {
-            id: machine.id,
-            title: machine.title,
-            type: machine.type,
-            slug: machine.slug
-          });
-        });
-        
-        // Apply filters if specified
-        if (filters.featured === true) {
-          const featuredMachines = machines.slice(0, filters.limit || 3);
-          return featuredMachines;
-        }
-        
-        if (filters.type) {
-          return machines.filter(machine => machine.type === filters.type);
-        }
-        
         return machines;
       } catch (error) {
         console.error("[useMachines] Error fetching machines:", error);
-        // Return empty array on error
-        console.log("[useMachines] Returning empty array due to error");
         return [];
       }
     },
