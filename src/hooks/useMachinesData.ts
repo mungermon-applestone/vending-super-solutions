@@ -1,8 +1,10 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as cmsService from '@/services/cms';
 import { CMSMachine } from '@/types/cms';
 import { toast } from '@/components/ui/use-toast';
 
+// Static machine data as fallback
 const staticMachines = {
   'divi-wp': {
     id: '5',
@@ -76,7 +78,7 @@ export function useMachines(filters: Record<string, any> = {}) {
           });
         });
         
-        // Collect slugs of machines in the database
+        // Create a map of existing slugs for faster lookup
         const databaseMachineSlugs = new Set(machines.map(m => m.slug));
         
         // Add missing machines from static data
@@ -90,12 +92,35 @@ export function useMachines(filters: Record<string, any> = {}) {
         });
         
         console.log(`[useMachines] Total combined machines: ${combinedMachines.length}`);
+        
+        // Apply filters to combined machines if specified
+        if (filters.featured === true) {
+          const featuredMachines = combinedMachines.slice(0, filters.limit || 3);
+          return featuredMachines;
+        }
+        
+        if (filters.type) {
+          return combinedMachines.filter(machine => machine.type === filters.type);
+        }
+        
         return combinedMachines;
       } catch (error) {
         console.error("[useMachines] Error fetching machines:", error);
         // If database fetch fails entirely, return static data
         console.log("[useMachines] Falling back to static machines data");
-        return Object.values(staticMachines) as CMSMachine[];
+        
+        let staticMachinesList = Object.values(staticMachines) as CMSMachine[];
+        
+        // Apply filters to static machines if specified
+        if (filters.featured === true) {
+          staticMachinesList = staticMachinesList.slice(0, filters.limit || 3);
+        }
+        
+        if (filters.type) {
+          staticMachinesList = staticMachinesList.filter(machine => machine.type === filters.type);
+        }
+        
+        return staticMachinesList;
       }
     },
     staleTime: 1000 * 60, // 1 minute

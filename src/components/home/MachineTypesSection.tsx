@@ -52,40 +52,7 @@ const MachineCard = ({ title, image, categories, path }: MachineCardProps) => {
 
 const MachineTypesSection = () => {
   // Fetch featured machines from CMS using the useMachines hook
-  const { data: cmsMachines = [], isLoading } = useMachines({ featured: true, limit: 3 });
-
-  // Fallback data if CMS data is not yet available
-  const staticMachines = [
-    {
-      title: "Ambient Vending Machines",
-      image: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2",
-      categories: ["Vending Machines", "Ambient"],
-      path: "/machines/vending/ambient"
-    },
-    {
-      title: "Refrigerated Vending",
-      image: "https://images.unsplash.com/photo-1597393353415-b3730f3719fe",
-      categories: ["Vending Machines", "Refrigerated"],
-      path: "/machines/vending/refrigerated"
-    },
-    {
-      title: "Smart Lockers",
-      image: "https://images.unsplash.com/photo-1621964275191-ccc01ef2134c",
-      categories: ["Lockers", "Ambient"],
-      path: "/machines/lockers/ambient"
-    }
-  ];
-
-  // If we have CMS data, transform it to the format the component expects
-  const machines = cmsMachines.length > 0 
-    ? cmsMachines.map((machine: CMSMachine) => ({
-        title: machine.title,
-        image: machine.images[0],
-        categories: [machine.type.charAt(0).toUpperCase() + machine.type.slice(1), 
-                    machine.temperature.charAt(0).toUpperCase() + machine.temperature.slice(1)],
-        path: `/machines/${machine.type}/${machine.slug}`
-      }))
-    : staticMachines;
+  const { data: machines = [], isLoading } = useMachines({ featured: true, limit: 3 });
   
   return (
     <section className="bg-vending-gray py-16 md:py-24">
@@ -113,15 +80,27 @@ const MachineTypesSection = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {machines.map((machine, index) => (
-              <MachineCard 
-                key={index}
-                title={machine.title}
-                image={machine.image}
-                categories={machine.categories}
-                path={machine.path}
-              />
-            ))}
+            {machines.map((machine, index) => {
+              // Ensure we have machine images data in the correct format
+              const machineImage = machine.images?.[0]?.url || 
+                                  (typeof machine.image === 'string' ? machine.image : machine.image?.url);
+              
+              // Create machine categories
+              const machineCategories = [
+                machine.type.charAt(0).toUpperCase() + machine.type.slice(1),
+                machine.temperature.charAt(0).toUpperCase() + machine.temperature.slice(1)
+              ];
+              
+              return (
+                <MachineCard 
+                  key={index}
+                  title={machine.title}
+                  image={machine.images?.[0] || machineImage || "https://placehold.co/600x400?text=No+Image"}
+                  categories={machineCategories}
+                  path={`/machines/${machine.type}/${machine.slug}`}
+                />
+              );
+            })}
           </div>
         )}
         
