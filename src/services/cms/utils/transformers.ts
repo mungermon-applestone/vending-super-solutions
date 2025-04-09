@@ -1,3 +1,4 @@
+
 import { CMSMachine, CMSProductType, CMSBusinessGoal, CMSTestimonial, CMSTechnology } from '@/types/cms';
 
 // Error handling utility
@@ -7,7 +8,7 @@ export function handleError(functionName: string, error: unknown): never {
 }
 
 // Transform database machine data to CMS format
-export async function transformMachineData(data: any): Promise<any> {
+export function transformMachineData<T = CMSMachine>(data: any[]): T[] {
   if (!data || !Array.isArray(data)) {
     console.warn('[transformMachineData] Invalid data provided:', data);
     return [];
@@ -107,7 +108,7 @@ export async function transformMachineData(data: any): Promise<any> {
 }
 
 // Transform database product type data to CMS format
-export async function transformProductTypeData(data: any): Promise<any> {
+export function transformProductTypeData<T = CMSProductType>(data: any[]): T[] {
   if (!data || !Array.isArray(data)) {
     console.warn('[transformProductTypeData] Invalid data provided:', data);
     return [];
@@ -187,7 +188,7 @@ export async function transformProductTypeData(data: any): Promise<any> {
 }
 
 // Transform database business goal data to CMS format
-export async function transformBusinessGoalData(data: any): Promise<any> {
+export function transformBusinessGoalData<T = CMSBusinessGoal>(data: any[]): T[] {
   if (!data || !Array.isArray(data)) {
     console.warn('[transformBusinessGoalData] Invalid data provided:', data);
     return [];
@@ -229,7 +230,7 @@ export async function transformBusinessGoalData(data: any): Promise<any> {
 }
 
 // Transform database testimonial data to CMS format
-export async function transformTestimonialData(data: any): Promise<any> {
+export function transformTestimonialData<T = CMSTestimonial>(data: any[]): T[] {
   if (!data || !Array.isArray(data)) {
     console.warn('[transformTestimonialData] Invalid data provided:', data);
     return [];
@@ -271,7 +272,7 @@ export async function transformTestimonialData(data: any): Promise<any> {
 }
 
 // Transform database technology data to CMS format
-export async function transformTechnologyData(data: any): Promise<CMSTechnology> {
+export function transformTechnologyData<T = CMSTechnology>(data: any): T {
   try {
     // Extract sections and organize their features
     const sections = data.technology_sections ? 
@@ -345,7 +346,7 @@ export async function transformTechnologyData(data: any): Promise<CMSTechnology>
       sections: sections.sort((a: any, b: any) => a.display_order - b.display_order),
       images,
       visible: data.visible || false
-    };
+    } as unknown as T;
   } catch (error) {
     console.error('[transformTechnologyData] Error:', error);
     console.error('[transformTechnologyData] Input data:', data);

@@ -5,7 +5,7 @@ import { transformProductTypeData } from '../../utils/transformers';
 /**
  * Direct fetch a single product type by UUID - the most reliable identifier
  */
-export async function fetchProductTypeByUUID<T>(uuid: string): Promise<T | null> {
+export async function fetchProductTypeByUUID<T = any>(uuid: string): Promise<T | null> {
   try {
     console.log(`[fetchProductTypeByUUID] Directly fetching product type with UUID: "${uuid}"`);
     
@@ -66,8 +66,8 @@ export async function fetchProductTypeByUUID<T>(uuid: string): Promise<T | null>
     console.log(`[fetchProductTypeByUUID] Successfully found product type: "${data.title}"`);
     
     // Transform the single product type
-    const transformed = transformProductTypeData<T>([data]);
-    return transformed.length > 0 ? transformed[0] : null;
+    const transformed = transformProductTypeData([data]);
+    return transformed.length > 0 ? transformed[0] as T : null;
   } catch (error) {
     console.error(`[fetchProductTypeByUUID] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return null;

@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { handleError, transformTechnologyData } from '../../utils/transformers';
 
-export async function fetchTechnologies<T>(): Promise<T[]> {
+export async function fetchTechnologies<T = any>(): Promise<T[]> {
   console.log('[fetchTechnologies] Fetching all technologies from database');
 
   try {

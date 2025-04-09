@@ -11,7 +11,7 @@ import {
 /**
  * Search for product types by slug using progressively less strict matching
  */
-async function searchBySlug<T>(
+async function searchBySlug<T = any>(
   query: any, 
   slugParam: string, 
   exactMatchOnly: boolean = false
@@ -33,7 +33,7 @@ async function searchBySlug<T>(
   
   if (exactMatch && exactMatch.length > 0) {
     console.log(`[searchBySlug] Found exact match for slug '${normalizedSlug}'`, exactMatch);
-    return transformProductTypeData<T>(exactMatch);
+    return transformProductTypeData(exactMatch) as T[];
   }
   
   // 1b. Try with and without -vending suffix
@@ -53,7 +53,7 @@ async function searchBySlug<T>(
     // Continue to next strategy
   } else if (alternativeMatch && alternativeMatch.length > 0) {
     console.log(`[searchBySlug] Found match with alternative slug '${alternativeSlug}'`);
-    return transformProductTypeData<T>(alternativeMatch);
+    return transformProductTypeData(alternativeMatch) as T[];
   }
   
   if (exactMatchOnly) {
@@ -95,7 +95,7 @@ async function searchBySlug<T>(
   
   if (caseInsensitiveMatch && caseInsensitiveMatch.length > 0) {
     console.log(`[searchBySlug] Found case-insensitive match for: ${normalizedSlug}`);
-    return transformProductTypeData<T>(caseInsensitiveMatch);
+    return transformProductTypeData(caseInsensitiveMatch) as T[];
   }
   
   // 3. Try fuzzy match as last resort
@@ -113,7 +113,7 @@ async function searchBySlug<T>(
   
   if (fuzzyMatch && fuzzyMatch.length > 0) {
     console.log(`[searchBySlug] Found fuzzy match for: ${normalizedSlug}`);
-    return transformProductTypeData<T>(fuzzyMatch);
+    return transformProductTypeData(fuzzyMatch) as T[];
   }
   
   console.log(`[searchBySlug] No matches found for slug: ${normalizedSlug}`);
@@ -123,7 +123,7 @@ async function searchBySlug<T>(
 /**
  * Fetch product types from the CMS with improved slug matching
  */
-export async function fetchProductTypes<T>(params: Record<string, any> = {}): Promise<T[]> {  
+export async function fetchProductTypes<T = any>(params: Record<string, any> = {}): Promise<T[]> {  
   try {
     console.log('[fetchProductTypes] Fetching product types with params:', params);
     
@@ -198,7 +198,7 @@ export async function fetchProductTypes<T>(params: Record<string, any> = {}): Pr
       }
       
       console.log(`[fetchProductTypes] Found product by UUID: ${data[0].title}`);
-      return transformProductTypeData<T>(data);
+      return transformProductTypeData(data) as T[];
     } else if (hasSlug) {
       // If we have a slug, map it to its database counterpart if necessary
       const mappedSlug = mapUrlSlugToDatabaseSlug(params.slug);
@@ -218,7 +218,7 @@ export async function fetchProductTypes<T>(params: Record<string, any> = {}): Pr
       }
 
       console.log(`[fetchProductTypes] Found ${data.length} product types:`, data.map(item => item.title));
-      return transformProductTypeData<T>(data);
+      return transformProductTypeData(data) as T[];
     }
   } catch (error) {
     console.error('[fetchProductTypes] Error processing product types:', error);

@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { handleError, transformTechnologyData } from '../../utils/transformers';
 import { logSlugSearch } from '../../utils/slugMatching';
 
-export async function fetchTechnologyBySlug<T>(slug: string): Promise<T | null> {
+export async function fetchTechnologyBySlug<T = any>(slug: string): Promise<T | null> {
   logSlugSearch('technology', slug);
 
   try {

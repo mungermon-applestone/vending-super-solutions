@@ -5,7 +5,7 @@ import { transformMachineData } from '../../utils/transformers';
 /**
  * Fetch machines from the CMS
  */
-export async function fetchMachines<T>(params: Record<string, any> = {}): Promise<T[]> {
+export async function fetchMachines<T = any>(params: Record<string, any> = {}): Promise<T[]> {
   try {
     console.log('[fetchMachines] Starting fetch with params:', params);
     let query = supabase
@@ -62,10 +62,10 @@ export async function fetchMachines<T>(params: Record<string, any> = {}): Promis
     // Log data received
     logMachinesData(data);
 
-    const transformed = transformMachineData<T>(data);
+    const transformed = transformMachineData(data);
     console.log(`[fetchMachines] Transformed data: ${transformed.length} machines`);
     
-    return transformed;
+    return transformed as T[];
   } catch (error) {
     console.error('[fetchMachines] Error fetching machines:', error);
     throw error;
@@ -134,7 +134,7 @@ async function checkTableAccess() {
 /**
  * Fetch a single machine by its ID
  */
-export async function fetchMachineById<T>(id: string): Promise<T | null> {
+export async function fetchMachineById<T = any>(id: string): Promise<T | null> {
   try {
     console.log(`[fetchMachineById] Fetching machine with ID: ${id}`);
     
@@ -187,8 +187,8 @@ export async function fetchMachineById<T>(id: string): Promise<T | null> {
       return null;
     }
     
-    const transformed = transformMachineData<T>([data]);
-    return transformed.length > 0 ? transformed[0] : null;
+    const transformed = transformMachineData([data]);
+    return transformed.length > 0 ? transformed[0] as T : null;
   } catch (error) {
     console.error(`[fetchMachineById] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return null;

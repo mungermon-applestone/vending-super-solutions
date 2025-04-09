@@ -1,12 +1,12 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { transformProductTypeData } from '../../utils/transformers';
-import { getSlugVariations } from '../../utils/slugMatching';
+import { logSlugSearch } from '../../utils/slugMatching';
 
 /**
  * Direct fetch a single product type by slug - optimized for reliability
  */
-export async function fetchProductTypeBySlug<T>(slug: string): Promise<T | null> {
+export async function fetchProductTypeBySlug<T = any>(slug: string): Promise<T | null> {
   try {
     console.log(`[fetchProductTypeBySlug] Directly fetching product type with slug: "${slug}"`);
     
@@ -88,8 +88,8 @@ export async function fetchProductTypeBySlug<T>(slug: string): Promise<T | null>
         console.log(`[fetchProductTypeBySlug] Successfully found product type: "${data.title}" with slug variation "${variation}"`);
         
         // Transform the single product type
-        const transformed = transformProductTypeData<T>([data]);
-        return transformed.length > 0 ? transformed[0] : null;
+        const transformed = transformProductTypeData([data]);
+        return transformed.length > 0 ? transformed[0] as T : null;
       }
     }
     
@@ -99,4 +99,20 @@ export async function fetchProductTypeBySlug<T>(slug: string): Promise<T | null>
     console.error(`[fetchProductTypeBySlug] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return null;
   }
+}
+
+// Helper function for slug variations
+function getSlugVariations(slug: string): string[] {
+  if (!slug) return [];
+  
+  const variations = [slug];
+  
+  // Add or remove -vending suffix
+  if (slug.endsWith('-vending')) {
+    variations.push(slug.replace('-vending', ''));
+  } else {
+    variations.push(`${slug}-vending`);
+  }
+  
+  return variations;
 }
