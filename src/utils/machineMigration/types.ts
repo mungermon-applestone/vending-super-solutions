@@ -75,7 +75,7 @@ export interface MachineDeploymentExample {
 export interface MachineFormValues {
   title: string;
   slug: string;
-  type: "vending" | "locker";
+  type: "vending" | "locker";  // Explicitly typed as union type
   temperature: string;
   description: string;
   images: MachineImage[];
@@ -87,7 +87,7 @@ export interface MachineData {
   id: string;
   slug: string;
   title: string;
-  type: "vending" | "locker";
+  type: "vending" | "locker";  // Explicitly typed as union type
   temperature: string;
   description: string;
   images: MachineImage[];

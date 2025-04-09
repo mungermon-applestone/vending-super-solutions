@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -75,8 +74,8 @@ const MachineForm = ({ machine, isCreating, onSubmit }: MachineFormProps) => {
     defaultValues: {
       title: '',
       slug: '',
-      type: '',
-      temperature: '',
+      type: 'vending',
+      temperature: 'ambient',
       description: '',
       images: [{ url: '', alt: '' }],
       specs: [{ key: '', value: '' }],
@@ -86,7 +85,6 @@ const MachineForm = ({ machine, isCreating, onSubmit }: MachineFormProps) => {
 
   useEffect(() => {
     if (machine && !isCreating) {
-      // Extract the images from the machine's images array
       const images = machine.images?.map(img => ({
         url: img.url,
         alt: img.alt,
@@ -94,13 +92,11 @@ const MachineForm = ({ machine, isCreating, onSubmit }: MachineFormProps) => {
         height: img.height || undefined,
       })) || [{ url: '', alt: '' }];
       
-      // Convert the specs object to an array of key-value pairs
       const specs = Object.entries(machine.specs || {}).map(([key, value]) => ({
         key,
         value,
       })) || [{ key: '', value: '' }];
       
-      // Map the features array to the expected format
       const features = machine.features?.map(feature => ({
         text: feature,
       })) || [{ text: '' }];
