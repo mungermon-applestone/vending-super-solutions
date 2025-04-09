@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as cmsService from '@/services/cms';
 import { toast } from '@/components/ui/use-toast';
+import { MachineData, MachineFormValues } from '@/utils/machineMigration/types';
 
 /**
  * Hook to fetch all machines with optional filters
@@ -12,7 +13,7 @@ export function useMachines(filters: Record<string, any> = {}) {
     queryFn: async () => {
       console.log("[useMachines] Fetching machines with filters:", filters);
       try {
-        const machines = await cmsService.getMachines(filters);
+        const machines = await cmsService.getMachines(filters) as MachineData[];
         console.log("[useMachines] Fetched machines:", machines);
         console.log(`[useMachines] Total machines fetched: ${machines.length}`);
         return machines;
@@ -35,7 +36,7 @@ export function useMachineById(id: string | undefined) {
     queryFn: async () => {
       console.log("[useMachineById] Fetching machine with ID:", id);
       try {
-        const machine = await cmsService.getMachineById(id || '');
+        const machine = await cmsService.getMachineById(id || '') as MachineData | null;
         console.log("[useMachineById] Fetched machine:", machine);
         return machine;
       } catch (error) {
@@ -56,7 +57,7 @@ export function useMachineBySlug(type: string | undefined, slug: string | undefi
     queryFn: async () => {
       console.log("[useMachineBySlug] Fetching machine with type/slug:", type, slug);
       try {
-        const machine = await cmsService.getMachineBySlug(type || '', slug || '');
+        const machine = await cmsService.getMachineBySlug(type || '', slug || '') as MachineData | null;
         
         if (machine) {
           console.log("[useMachineBySlug] Fetched machine from database:", machine);
@@ -81,7 +82,7 @@ export function useCreateMachine() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (machineData: any) => cmsService.createNewMachine(machineData),
+    mutationFn: (machineData: MachineFormValues) => cmsService.createNewMachine(machineData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['machines'] });
       toast({
@@ -108,7 +109,7 @@ export function useUpdateMachine() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, machineData }: { id: string, machineData: any }) => 
+    mutationFn: ({ id, machineData }: { id: string, machineData: MachineFormValues }) => 
       cmsService.updateExistingMachine(id, machineData),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['machines'] });

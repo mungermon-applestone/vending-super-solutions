@@ -1,5 +1,5 @@
 
-// Type definitions for machine migration
+// Type definitions for machine migration and machine data
 export interface MachinePlaceholder {
   id: string;
   slug: string;
@@ -44,4 +44,54 @@ export interface MigrationResult {
   errors?: string[];
   machinesInDb?: any[];
   error?: string;
+}
+
+// Shared machine data types
+export interface MachineImage {
+  url: string;
+  alt: string;
+  width?: number;
+  height?: number;
+}
+
+export interface MachineSpec {
+  key: string;
+  value: string;
+}
+
+export interface MachineFeature {
+  text: string;
+}
+
+export interface MachineDeploymentExample {
+  title: string;
+  description: string;
+  image: {
+    url: string;
+    alt: string;
+  };
+}
+
+export interface MachineFormValues {
+  title: string;
+  slug: string;
+  type: "vending" | "locker";
+  temperature: string;
+  description: string;
+  images: MachineImage[];
+  specs: MachineSpec[];
+  features: MachineFeature[];
+}
+
+export interface MachineData {
+  id: string;
+  slug: string;
+  title: string;
+  type: "vending" | "locker";
+  temperature: string;
+  description: string;
+  images: MachineImage[];
+  specs: Record<string, string>;
+  features: string[];
+  deploymentExamples: MachineDeploymentExample[];
 }
