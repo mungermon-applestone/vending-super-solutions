@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { cn } from '@/lib/utils';
+import Image from '@/components/common/Image';
 import TechnologyFeatureItem from './TechnologyFeatureItem';
 import { TechFeature } from '@/types/technology';
 
-export interface TechnologySectionProps {
+interface TechnologySectionProps {
   id: string;
   title: string;
   description: string;
@@ -19,51 +19,39 @@ const TechnologySection: React.FC<TechnologySectionProps> = ({
   description,
   features,
   image,
-  index
+  index,
 }) => {
-  const isEven = index % 2 === 1;
-  
-  return (
-    <section 
-      id={id}
-      className={cn(
-        "py-16 md:py-24",
-        isEven ? "bg-slate-50" : "bg-white"
-      )}
-    >
-      <div className="container max-w-7xl mx-auto px-4">
-        <div className={cn(
-          "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
-        )}>
-          <div className={isEven ? "lg:order-2" : ""}>
-            <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-6">
-              {title}
-            </h2>
-            <p className="text-lg text-gray-700 mb-8">
-              {description}
-            </p>
+  const isEven = index % 2 === 0;
 
-            <div className="space-y-6 mb-8">
-              {features.map((feature, i) => (
+  return (
+    <section id={id} className={`py-16 ${isEven ? 'bg-gray-50' : 'bg-white'}`}>
+      <div className="container max-w-7xl mx-auto px-4">
+        <div className={`flex flex-col ${isEven ? 'md:flex-row-reverse' : 'md:flex-row'} gap-8 items-center`}>
+          <div className="w-full md:w-1/2">
+            <div className="relative rounded-lg overflow-hidden shadow-xl">
+              <Image 
+                src={image || 'https://images.unsplash.com/photo-1581091226033-c6e0b0cf8941'} 
+                alt={title}
+                className="w-full h-auto"
+              />
+            </div>
+          </div>
+          
+          <div className="w-full md:w-1/2">
+            <h2 className="text-3xl font-bold mb-4 tracking-tight">{title}</h2>
+            <p className="text-lg text-gray-600 mb-8">{description}</p>
+            
+            <div className="space-y-8">
+              {features.map((feature, idx) => (
                 <TechnologyFeatureItem
-                  key={i}
+                  key={idx}
                   icon={feature.icon}
                   title={feature.title}
                   description={feature.description}
+                  items={feature.items} // Pass items to the component
                 />
               ))}
             </div>
-          </div>
-
-          <div className={cn(
-            "relative rounded-lg overflow-hidden shadow-lg h-80 lg:h-96",
-            isEven ? "lg:order-1" : ""
-          )}>
-            <img
-              src={image}
-              alt={title}
-              className="w-full h-full object-cover"
-            />
           </div>
         </div>
       </div>

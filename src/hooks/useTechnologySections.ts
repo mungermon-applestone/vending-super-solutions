@@ -9,11 +9,24 @@ const transformCMSDataToSections = (cmsData: CMSTechnology[] = []): TechnologySe
   return cmsData.map(technology => {
     // Extract features from technology sections
     const features = technology.sections?.flatMap(section => 
-      section.features?.map(feature => ({
-        icon: feature.icon || 'HelpCircle', // Fallback icon
-        title: feature.title || '',
-        description: feature.description || ''
-      })) || []
+      section.features?.map(feature => {
+        // Create the feature with base properties
+        const transformedFeature = {
+          icon: feature.icon || 'HelpCircle', // Fallback icon
+          title: feature.title || '',
+          description: feature.description || '',
+          items: [] // Initialize items array
+        };
+        
+        // Add bullet point items if they exist
+        if (feature.items && feature.items.length > 0) {
+          transformedFeature.items = feature.items
+            .sort((a, b) => a.display_order - b.display_order)
+            .map(item => item.text);
+        }
+        
+        return transformedFeature;
+      }) || []
     ) || [];
     
     // Return in the format expected by our components
