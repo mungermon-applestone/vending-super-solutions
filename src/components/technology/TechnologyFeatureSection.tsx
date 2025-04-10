@@ -19,12 +19,17 @@ const TechnologyFeatureSection: React.FC<TechnologyFeatureSectionProps> = ({
     (a, b) => a.display_order - b.display_order
   );
 
+  // Format section type with capitalization (with null check)
+  const formattedSectionType = section.section_type 
+    ? section.section_type.charAt(0).toUpperCase() + section.section_type.slice(1) 
+    : 'Feature';
+
   return (
     <div className={`py-16 ${alternateLayout ? 'bg-slate-50' : 'bg-white'}`}>
       <div className="container max-w-7xl">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <Badge variant="outline" className="mb-3 px-3 py-1">
-            {section.section_type.charAt(0).toUpperCase() + section.section_type.slice(1)}
+            {formattedSectionType}
           </Badge>
           <h2 className="text-3xl font-bold mb-4">{section.title}</h2>
           {section.description && (
