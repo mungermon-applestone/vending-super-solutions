@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -22,7 +21,7 @@ import Partner from "./pages/Partner";
 import NotFound from "./pages/NotFound";
 
 // Admin components
-import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import ProductEditor from "./pages/ProductEditor";
 import AdminBusinessGoals from "./pages/admin/AdminBusinessGoals";
@@ -88,6 +87,7 @@ const App = () => (
             
             {/* Admin routes */}
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/products/new" element={<ProductEditor />} />
             <Route path="/admin/products/edit/:productSlug" element={<ProductEditor />} />
