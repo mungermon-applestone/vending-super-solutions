@@ -1,17 +1,23 @@
 
 import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useParams, useNavigate } from 'react-router-dom';
 import { useTechnologyData } from '@/hooks/useTechnologyData';
-import { Skeleton } from '@/components/ui/skeleton';
+import { CMSTechnology } from '@/types/cms';
+import { ArrowLeft } from 'lucide-react';
+import TechnologyEditorForm from '@/components/admin/technology-editor/TechnologyEditorForm';
+import { createTechnology, updateTechnology } from '@/services/cms/contentTypes/technologies';
 
 const TechnologyEditor: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { technologySlug } = useParams<{ technologySlug: string }>();
   const isNewTechnology = !technologySlug;
+  
+  const [isSaving, setIsSaving] = React.useState(false);
   
   // If editing an existing technology, fetch it
   const { technology, isLoading, error } = useTechnologyData(technologySlug || '');
@@ -37,10 +43,55 @@ const TechnologyEditor: React.FC = () => {
     });
   }, [toast, isNewTechnology]);
 
+  const handleSaveTechnology = async (formData: any) => {
+    try {
+      setIsSaving(true);
+      
+      if (isNewTechnology) {
+        // Create new technology
+        const newTechnology = await createTechnology(formData);
+        toast({
+          title: "Technology created",
+          description: "Technology has been created successfully."
+        });
+        navigate(`/admin/technology/edit/${newTechnology.slug}`);
+      } else if (technologySlug) {
+        // Update existing technology
+        await updateTechnology(technologySlug, formData);
+        toast({
+          title: "Technology updated",
+          description: "Technology has been updated successfully."
+        });
+        
+        // If the slug was changed, navigate to the new URL
+        if (formData.slug !== technologySlug) {
+          navigate(`/admin/technology/edit/${formData.slug}`);
+        }
+      }
+    } catch (error) {
+      console.error("Error saving technology:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to save technology",
+        description: error instanceof Error ? error.message : "An unknown error occurred"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <Layout>
       <div className="container mx-auto py-10">
-        <div className="mb-8">
+        <div className="mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/admin/technology')}
+            className="mb-4"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Technologies
+          </Button>
+          
           <h1 className="text-3xl font-bold">
             {isNewTechnology ? 'Create New Technology' : 'Edit Technology'}
           </h1>
@@ -51,29 +102,21 @@ const TechnologyEditor: React.FC = () => {
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Technology Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading && !isNewTechnology ? (
-              <div className="space-y-4">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-20 w-full" />
-                <Skeleton className="h-40 w-full" />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-center py-12 text-muted-foreground">
-                  Technology editor coming soon. This feature is currently under development.
-                </p>
-                <p className="text-center text-sm text-muted-foreground">
-                  In this editor, you will be able to create and edit technology details, sections, and features.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {isLoading && !isNewTechnology ? (
+          <Card className="p-6">
+            <div className="space-y-4 animate-pulse">
+              <div className="h-8 bg-gray-200 rounded-md w-1/3"></div>
+              <div className="h-20 bg-gray-200 rounded-md"></div>
+              <div className="h-40 bg-gray-200 rounded-md"></div>
+            </div>
+          </Card>
+        ) : (
+          <TechnologyEditorForm
+            initialData={isNewTechnology ? null : technology}
+            onSave={handleSaveTechnology}
+            isLoading={isSaving}
+          />
+        )}
       </div>
     </Layout>
   );
