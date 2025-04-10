@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Network,
@@ -14,7 +13,7 @@ import {
 } from 'lucide-react';
 import { TechnologySection } from '@/types/technology';
 
-export const useTechnologySections = () => {
+export const useTechnologySections = (): TechnologySection[] => {
   const technologies: TechnologySection[] = [
     {
       id: 'architecture',
@@ -22,17 +21,17 @@ export const useTechnologySections = () => {
       description: 'Our platform is built on a modern, scalable architecture that ensures reliability and performance for all your vending operations.',
       features: [
         {
-          icon: <Network className="h-5 w-5 text-blue-500" />,
+          icon: 'Network',
           title: 'Cloud-native design',
           description: 'Built for scalability and resilience'
         },
         {
-          icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+          icon: 'BarChart3',
           title: 'Real-time monitoring',
           description: 'Live tracking of machine status and performance'
         },
         {
-          icon: <Layers className="h-5 w-5 text-blue-500" />,
+          icon: 'Layers',
           title: 'Microservices approach',
           description: 'Modular components for maximum flexibility'
         }
@@ -45,17 +44,17 @@ export const useTechnologySections = () => {
       description: 'We embrace open standards to ensure interoperability and future-proof your investment in vending technology.',
       features: [
         {
-          icon: <Shuffle className="h-5 w-5 text-blue-500" />,
+          icon: 'Shuffle',
           title: 'Industry-standard protocols',
           description: 'Compatible with MDB, DEX, and other vending standards'
         },
         {
-          icon: <Plug className="h-5 w-5 text-blue-500" />,
+          icon: 'Plug',
           title: 'Open APIs',
           description: 'Well-documented interfaces for custom integrations'
         },
         {
-          icon: <Layers className="h-5 w-5 text-blue-500" />,
+          icon: 'Layers',
           title: 'Standardized data formats',
           description: 'Consistent data structures for easy integration'
         }
@@ -68,17 +67,17 @@ export const useTechnologySections = () => {
       description: 'Our platform works with virtually any vending hardware, allowing you to leverage existing investments or choose the best equipment for your needs.',
       features: [
         {
-          icon: <Layers className="h-5 w-5 text-blue-500" />,
+          icon: 'Layers',
           title: 'Universal compatibility',
           description: 'Works with machines from all major manufacturers'
         },
         {
-          icon: <Shuffle className="h-5 w-5 text-blue-500" />,
+          icon: 'Shuffle',
           title: 'Mixed fleet management',
           description: 'Manage different machine types from a single dashboard'
         },
         {
-          icon: <Network className="h-5 w-5 text-blue-500" />,
+          icon: 'Network',
           title: 'Flexible telemetry options',
           description: 'Multiple connectivity choices to suit any environment'
         }
@@ -91,17 +90,17 @@ export const useTechnologySections = () => {
       description: 'We take security seriously with multiple layers of protection for your data and operations.',
       features: [
         {
-          icon: <Shield className="h-5 w-5 text-blue-500" />,
+          icon: 'Shield',
           title: 'SOC 2 Type II certified',
           description: 'Enterprise-grade security compliance'
         },
         {
-          icon: <Lock className="h-5 w-5 text-blue-500" />,
+          icon: 'Lock',
           title: 'End-to-end encryption',
           description: 'Secure data transmission and storage'
         },
         {
-          icon: <Shield className="h-5 w-5 text-blue-500" />,
+          icon: 'Shield',
           title: 'Regular security audits',
           description: 'Ongoing penetration testing and vulnerability assessment'
         }
@@ -114,17 +113,17 @@ export const useTechnologySections = () => {
       description: 'Our platform is designed with privacy-first principles, ensuring compliance with global regulations and protecting customer data.',
       features: [
         {
-          icon: <Lock className="h-5 w-5 text-blue-500" />,
+          icon: 'Lock',
           title: 'GDPR compliant',
           description: 'Meeting European data protection standards'
         },
         {
-          icon: <Shield className="h-5 w-5 text-blue-500" />,
+          icon: 'Shield',
           title: 'Data minimization',
           description: 'Only collecting what\'s necessary for operation'
         },
         {
-          icon: <Shield className="h-5 w-5 text-blue-500" />,
+          icon: 'Shield',
           title: 'Customer consent management',
           description: 'Tools to manage privacy preferences and consent'
         }
@@ -137,17 +136,17 @@ export const useTechnologySections = () => {
       description: 'Connect your vending operations with your existing business systems and third-party services for seamless data flow.',
       features: [
         {
-          icon: <Layers className="h-5 w-5 text-blue-500" />,
+          icon: 'Layers',
           title: 'ERP integrations',
           description: 'Connect with SAP, Oracle, Microsoft Dynamics and more'
         },
         {
-          icon: <Shuffle className="h-5 w-5 text-blue-500" />,
+          icon: 'Shuffle',
           title: 'CRM connections',
           description: 'Salesforce, HubSpot and other CRM platforms'
         },
         {
-          icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+          icon: 'BarChart3',
           title: 'Analytics platforms',
           description: 'Export data to PowerBI, Tableau and other BI tools'
         }
@@ -160,17 +159,17 @@ export const useTechnologySections = () => {
       description: 'Our payment processing system supports all major payment methods and providers, maximizing convenience for your customers.',
       features: [
         {
-          icon: <CreditCard className="h-5 w-5 text-blue-500" />,
+          icon: 'CreditCard',
           title: 'Multiple payment options',
           description: 'Credit cards, debit cards, and digital wallets'
         },
         {
-          icon: <CreditCard className="h-5 w-5 text-blue-500" />,
+          icon: 'CreditCard',
           title: 'PCI DSS compliance',
           description: 'Highest standards for payment security'
         },
         {
-          icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+          icon: 'BarChart3',
           title: 'Detailed transaction reporting',
           description: 'Comprehensive analytics for all transactions'
         }
@@ -183,17 +182,17 @@ export const useTechnologySections = () => {
       description: 'Enable frictionless purchases with our comprehensive cashless payment solutions for modern consumers.',
       features: [
         {
-          icon: <Wallet className="h-5 w-5 text-blue-500" />,
+          icon: 'Wallet',
           title: 'Mobile payments',
           description: 'Apple Pay, Google Pay, and other mobile wallets'
         },
         {
-          icon: <Layers className="h-5 w-5 text-blue-500" />,
+          icon: 'Layers',
           title: 'Contactless cards',
           description: 'Support for NFC and tap-to-pay technologies'
         },
         {
-          icon: <CreditCard className="h-5 w-5 text-blue-500" />,
+          icon: 'CreditCard',
           title: 'Customer accounts',
           description: 'Stored value and subscription options'
         }
@@ -206,17 +205,17 @@ export const useTechnologySections = () => {
       description: 'Real-time inventory management ensures optimal stock levels and minimizes out-of-stock situations.',
       features: [
         {
-          icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+          icon: 'BarChart3',
           title: 'Real-time monitoring',
           description: 'Live tracking of product levels across all machines'
         },
         {
-          icon: <Network className="h-5 w-5 text-blue-500" />,
+          icon: 'Network',
           title: 'Automated alerts',
           description: 'Instant notifications for low stock and anomalies'
         },
         {
-          icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+          icon: 'BarChart3',
           title: 'Demand forecasting',
           description: 'AI-powered prediction of inventory needs'
         }
@@ -229,17 +228,17 @@ export const useTechnologySections = () => {
       description: 'Artificial intelligence and machine learning capabilities drive insights, automation, and optimization across your vending operations.',
       features: [
         {
-          icon: <Brain className="h-5 w-5 text-blue-500" />,
+          icon: 'Brain',
           title: 'Predictive analytics',
           description: 'Forecast sales, maintenance needs, and inventory requirements'
         },
         {
-          icon: <Brain className="h-5 w-5 text-blue-500" />,
+          icon: 'Brain',
           title: 'Personalization engine',
           description: 'Tailor customer experiences based on preferences and history'
         },
         {
-          icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+          icon: 'BarChart3',
           title: 'Anomaly detection',
           description: 'Identify unusual patterns that may indicate issues'
         }
