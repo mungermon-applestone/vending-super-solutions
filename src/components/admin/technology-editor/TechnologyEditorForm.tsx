@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import BasicInformation from './sections/BasicInformation';
 import TechnologySections from './sections/TechnologySections';
 import { CMSTechnology } from '@/types/cms';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 // Define the schema for technology form data
 const technologyFormSchema = z.object({
@@ -62,6 +63,8 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
 }) => {
   const { toast } = useToast();
   const isNew = !initialData;
+  const [formState, setFormState] = React.useState<'idle' | 'submitting' | 'error'>('idle');
+  const [formError, setFormError] = React.useState<string | null>(null);
   
   // Set up form with default values or existing technology data
   const form = useForm<TechnologyFormValues>({
@@ -88,7 +91,13 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
   // Handle form submission
   const handleSubmit = async (data: TechnologyFormValues) => {
     try {
+      setFormState('submitting');
+      setFormError(null);
+      
+      console.log('Submitting form data:', data);
       await onSave(data);
+      
+      setFormState('idle');
       toast({
         title: isNew ? "Technology created" : "Technology updated",
         description: isNew 
@@ -97,6 +106,9 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
       });
     } catch (error) {
       console.error('Form submission error:', error);
+      setFormState('error');
+      setFormError(error instanceof Error ? error.message : "Failed to save technology");
+      
       toast({
         variant: "destructive",
         title: "Submission failed",
@@ -108,6 +120,16 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
+        {formError && (
+          <div className="bg-destructive/15 p-3 rounded-md mb-4 flex items-start gap-2">
+            <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
+            <div>
+              <h4 className="font-medium text-destructive">Error saving technology</h4>
+              <p className="text-sm text-destructive/90">{formError}</p>
+            </div>
+          </div>
+        )}
+        
         <Tabs defaultValue="basics" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="basics">Basic Information</TabsTrigger>
@@ -130,10 +152,17 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
         <div className="flex justify-end gap-2 mt-6">
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || formState === 'submitting'}
             className="px-6"
           >
-            {isLoading ? 'Saving...' : (isNew ? 'Create Technology' : 'Update Technology')}
+            {formState === 'submitting' ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {isNew ? 'Creating...' : 'Updating...'}
+              </>
+            ) : (
+              isNew ? 'Create Technology' : 'Update Technology'
+            )}
           </Button>
         </div>
       </form>

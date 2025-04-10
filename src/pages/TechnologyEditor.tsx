@@ -44,12 +44,16 @@ const TechnologyEditor: React.FC = () => {
   }, [toast, isNewTechnology]);
 
   const handleSaveTechnology = async (formData: any) => {
+    console.log('Technology Editor: handleSaveTechnology called with data:', formData);
     try {
       setIsSaving(true);
       
       if (isNewTechnology) {
         // Create new technology
+        console.log('Creating new technology...');
         const newTechnology = await createTechnology(formData);
+        console.log('Technology created:', newTechnology);
+        
         toast({
           title: "Technology created",
           description: "Technology has been created successfully."
@@ -57,7 +61,10 @@ const TechnologyEditor: React.FC = () => {
         navigate(`/admin/technology/edit/${newTechnology.slug}`);
       } else if (technologySlug) {
         // Update existing technology
+        console.log('Updating existing technology...');
         await updateTechnology(technologySlug, formData);
+        console.log('Technology updated successfully');
+        
         toast({
           title: "Technology updated",
           description: "Technology has been updated successfully."
@@ -75,6 +82,7 @@ const TechnologyEditor: React.FC = () => {
         title: "Failed to save technology",
         description: error instanceof Error ? error.message : "An unknown error occurred"
       });
+      throw error; // Re-throw to let the form component handle it
     } finally {
       setIsSaving(false);
     }
