@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const SimpleTechnologyPage = () => {
   const technologies = useTechnologySections();
-  const isFetching = useIsFetching(['technologies']) > 0;
+  const isFetching = useIsFetching({ queryKey: ['technologies'] }) > 0;
 
   return (
     <Layout>
