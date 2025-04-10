@@ -11,13 +11,15 @@ export const useProductEditorForm = (
   productSlug: string | undefined,
   setIsLoading: (isLoading: boolean) => void,
   toast: UseToastReturn,
-  navigate: NavigateFunction
+  navigate: NavigateFunction,
+  isEditMode?: boolean
 ) => {
-  // We're in create mode if productSlug is falsy (undefined, null, or empty string)
-  const isCreatingState = !productSlug || productSlug === 'new';
+  // We're in create mode if explicitly set NOT in edit mode, or if productSlug is falsy ('new' or undefined)
+  const isCreatingState = isEditMode === false || !productSlug || productSlug === 'new';
   const [isCreating, setIsCreating] = useState(isCreatingState);
   
   console.log('[useProductEditorForm] Initialized with productSlug:', productSlug);
+  console.log('[useProductEditorForm] isEditMode flag:', isEditMode);
   console.log('[useProductEditorForm] isCreating mode:', isCreating);
   
   // Only fetch product data if we're in edit mode

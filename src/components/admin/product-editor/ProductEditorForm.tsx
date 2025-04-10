@@ -15,15 +15,17 @@ import ProductFeatures from './sections/ProductFeatures';
 
 interface ProductEditorFormProps {
   productSlug?: string;
+  isEditMode?: boolean;
 }
 
-const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
+const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) => {
   const navigate = useNavigate();
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   
   // Log that we're trying to edit a specific product
   console.log('[ProductEditorForm] Rendering with product slug:', productSlug);
+  console.log('[ProductEditorForm] isEditMode flag:', isEditMode);
   
   // Use our custom hook for form handling
   const { 
@@ -31,7 +33,7 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
     isLoadingProduct, 
     form, 
     onSubmit 
-  } = useProductEditorForm(productSlug, setIsLoading, toast, navigate);
+  } = useProductEditorForm(productSlug, setIsLoading, toast, navigate, isEditMode);
 
   // Display loading state while fetching product data
   if (isLoadingProduct && !isCreating) {
