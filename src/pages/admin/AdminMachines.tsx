@@ -2,6 +2,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
+import { Loader2, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useMachines, useDeleteMachine } from '@/hooks/useMachinesData';
+import { useToast } from '@/hooks/use-toast';
 import {
   Table,
   TableBody,
@@ -10,21 +14,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from '@/components/ui/button';
-import { useMachines, useDeleteMachine } from '@/hooks/useMachinesData';
-import { Loader2, Plus, Pencil, Eye, Trash2, Server, Package, Download, RefreshCcw } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/ui/badge';
+import MachineHeader from '@/components/admin/machines/MachineHeader';
+import MachineTableRow from '@/components/admin/machines/MachineTableRow';
+import DeleteMachineDialog from '@/components/admin/machines/DeleteMachineDialog';
 
 const AdminMachines = () => {
   const navigate = useNavigate();
@@ -68,55 +60,10 @@ const AdminMachines = () => {
     });
   };
 
-  const getMachineTypeIcon = (type: string) => {
-    switch (type?.toLowerCase()) {
-      case 'vending':
-        return <Server className="h-4 w-4" />;
-      case 'locker':
-        return <Package className="h-4 w-4" />;
-      default:
-        return <Server className="h-4 w-4" />;
-    }
-  };
-  
-  const getTemperatureBadge = (temperature: string) => {
-    switch (temperature?.toLowerCase()) {
-      case 'refrigerated':
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Refrigerated</Badge>;
-      case 'ambient':
-        return <Badge variant="secondary" className="bg-gray-100 text-gray-800">Ambient</Badge>;
-      case 'frozen':
-        return <Badge variant="secondary" className="bg-indigo-100 text-indigo-800">Frozen</Badge>;
-      case 'multi':
-        return <Badge variant="secondary" className="bg-purple-100 text-purple-800">Multi-temp</Badge>;
-      case 'controlled':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800">Controlled</Badge>;
-      default:
-        return <Badge variant="secondary" className="bg-gray-100 text-gray-800">{temperature || 'Unknown'}</Badge>;
-    }
-  };
-
   return (
     <Layout>
       <div className="container mx-auto py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Machines Management</h1>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleRefresh} title="Refresh data">
-              <RefreshCcw className="h-4 w-4 mr-2" /> Refresh
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/admin/machines/migrate">
-                <Download className="h-4 w-4 mr-2" /> Import Sample Data
-              </Link>
-            </Button>
-            <Button asChild>
-              <Link to="/admin/machines/new">
-                <Plus className="h-4 w-4 mr-2" /> Add New Machine
-              </Link>
-            </Button>
-          </div>
-        </div>
+        <MachineHeader onRefresh={handleRefresh} />
 
         {isLoading ? (
           <div className="flex justify-center py-8">
@@ -141,49 +88,11 @@ const AdminMachines = () => {
               </TableHeader>
               <TableBody>
                 {machines.map((machine) => (
-                  <TableRow key={machine.id}>
-                    <TableCell className="font-medium">{machine.title}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        {getMachineTypeIcon(machine.type)}
-                        <span className="ml-2 capitalize">{machine.type}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {getTemperatureBadge(machine.temperature)}
-                    </TableCell>
-                    <TableCell className="font-mono text-sm text-gray-500">
-                      {machine.slug}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => navigate(`/machines/${machine.type}/${machine.slug}`)}
-                          title="View machine"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => navigate(`/admin/machines/edit/${machine.id}`)}
-                          title="Edit machine"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => handleDeleteClick(machine)}
-                          title="Delete machine"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                  <MachineTableRow 
+                    key={machine.id} 
+                    machine={machine} 
+                    onDeleteClick={handleDeleteClick} 
+                  />
                 ))}
               </TableBody>
             </Table>
@@ -194,7 +103,7 @@ const AdminMachines = () => {
             <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 justify-center">
               <Button variant="outline" asChild>
                 <Link to="/admin/machines/migrate">
-                  <Download className="h-4 w-4 mr-2" /> Import Sample Data
+                  <Plus className="h-4 w-4 mr-2" /> Import Sample Data
                 </Link>
               </Button>
               <Button asChild>
@@ -207,32 +116,13 @@ const AdminMachines = () => {
         )}
       </div>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the machine "{machineToDelete?.title}". This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmDelete} 
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {deleteMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                'Delete'
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteMachineDialog
+        isOpen={deleteDialogOpen}
+        setIsOpen={setDeleteDialogOpen}
+        machineToDelete={machineToDelete}
+        onConfirmDelete={confirmDelete}
+        isDeleting={deleteMutation.isPending}
+      />
     </Layout>
   );
 };

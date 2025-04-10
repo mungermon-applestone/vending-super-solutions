@@ -1,13 +1,13 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
-import { Package, Goal, Database, Plus, Server, Layers, Monitor } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Card } from '@/components/ui/card';
+import { Package, Goal, Database, Server, Monitor } from 'lucide-react';
+import ContentTypeCard from '@/components/admin/dashboard/ContentTypeCard';
+import QuickNavigation from '@/components/admin/dashboard/QuickNavigation';
+import ContentManagementList from '@/components/admin/dashboard/ContentManagementList';
+import QuickActions from '@/components/admin/dashboard/QuickActions';
 
 const contentTypes = [
   {
@@ -16,7 +16,7 @@ const contentTypes = [
     icon: <Package className="h-8 w-8 text-blue-500" />,
     path: "/admin/products",
     createPath: "/admin/products/new",
-    color: "bg-blue-50 border-blue-200"
+    colorClass: "bg-blue-50 border-blue-200"
   },
   {
     title: "Business Goals",
@@ -24,7 +24,7 @@ const contentTypes = [
     icon: <Goal className="h-8 w-8 text-purple-500" />,
     path: "/admin/business-goals",
     createPath: "/admin/business-goals/new",
-    color: "bg-purple-50 border-purple-200"
+    colorClass: "bg-purple-50 border-purple-200"
   },
   {
     title: "Machines",
@@ -32,7 +32,7 @@ const contentTypes = [
     icon: <Server className="h-8 w-8 text-emerald-500" />,
     path: "/admin/machines",
     createPath: "/admin/machines/new",
-    color: "bg-emerald-50 border-emerald-200"
+    colorClass: "bg-emerald-50 border-emerald-200"
   },
   {
     title: "Technology",
@@ -40,40 +40,20 @@ const contentTypes = [
     icon: <Monitor className="h-8 w-8 text-indigo-500" />,
     path: "/admin/technology",
     createPath: "/admin/technology/new",
-    color: "bg-indigo-50 border-indigo-200"
+    colorClass: "bg-indigo-50 border-indigo-200"
   },
 ];
 
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <a
-          ref={ref}
-          className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className
-          )}
-          {...props}
-        >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
-        </a>
-      </NavigationMenuLink>
-    </li>
-  );
-});
-ListItem.displayName = "ListItem";
+const navItems = contentTypes.map(type => ({
+  title: type.title,
+  description: type.description,
+  href: type.path
+}));
 
 const AdminDashboard = () => {
   const { toast } = useToast();
 
-  React.useEffect(() => {
+  useEffect(() => {
     toast({
       title: "Admin Dashboard",
       description: "Welcome to the CMS admin dashboard",
@@ -91,58 +71,20 @@ const AdminDashboard = () => {
         </div>
 
         <div className="mb-8">
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent">Quick Navigation</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                    {contentTypes.map((type) => (
-                      <ListItem key={type.title} title={type.title} href={type.path}>
-                        {type.description}
-                      </ListItem>
-                    ))}
-                    <ListItem
-                      title="Database Overview"
-                      href="#database-section"
-                    >
-                      View and manage all database-driven content
-                    </ListItem>
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+          <QuickNavigation items={navItems} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           {contentTypes.map((type) => (
-            <Card key={type.title} className={`shadow-sm border ${type.color}`}>
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="p-2 rounded-lg bg-white shadow-sm border">
-                    {type.icon}
-                  </div>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to={type.createPath} className="flex items-center gap-1">
-                      <Plus className="h-4 w-4" /> New
-                    </Link>
-                  </Button>
-                </div>
-                <CardTitle className="mt-4">{type.title}</CardTitle>
-                <CardDescription>{type.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Create, edit, and manage {type.title.toLowerCase()} content types.
-                </p>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to={type.path}>Manage {type.title}</Link>
-                </Button>
-              </CardFooter>
-            </Card>
+            <ContentTypeCard
+              key={type.title}
+              title={type.title}
+              description={type.description}
+              icon={type.icon}
+              path={type.path}
+              createPath={type.createPath}
+              colorClass={type.colorClass}
+            />
           ))}
         </div>
 
@@ -153,74 +95,8 @@ const AdminDashboard = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Layers className="h-5 w-5 text-blue-500" />
-                  Content Management
-                </CardTitle>
-                <CardDescription>
-                  Access all content type management interfaces
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {contentTypes.map((type) => (
-                    <li key={type.title} className="flex justify-between items-center border-b pb-2">
-                      <div className="flex items-center gap-2">
-                        {type.icon}
-                        <span>{type.title}</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={type.path}>Manage</Link>
-                        </Button>
-                        <Button size="sm" asChild>
-                          <Link to={type.createPath}>Create</Link>
-                        </Button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>
-                  Commonly used admin actions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <Button variant="outline" asChild className="h-auto py-4 flex flex-col">
-                    <Link to="/admin/products/new">
-                      <Package className="h-6 w-6 mb-1" />
-                      <span>New Product</span>
-                    </Link>
-                  </Button>
-                  <Button variant="outline" asChild className="h-auto py-4 flex flex-col">
-                    <Link to="/admin/business-goals/new">
-                      <Goal className="h-6 w-6 mb-1" />
-                      <span>New Goal</span>
-                    </Link>
-                  </Button>
-                  <Button variant="outline" asChild className="h-auto py-4 flex flex-col">
-                    <Link to="/admin/machines/new">
-                      <Server className="h-6 w-6 mb-1" />
-                      <span>New Machine</span>
-                    </Link>
-                  </Button>
-                  <Button variant="outline" asChild className="h-auto py-4 flex flex-col">
-                    <Link to="/admin/machines/migrate">
-                      <Database className="h-6 w-6 mb-1" />
-                      <span>Import Data</span>
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <ContentManagementList contentTypes={contentTypes} />
+            <QuickActions />
           </div>
         </div>
       </div>
