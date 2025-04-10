@@ -318,11 +318,11 @@ const SimpleTechnologyPage = () => {
 
                 <div className="space-y-6 mb-8">
                   {tech.features.map((feature, i) => (
-                    <div key={i} className="flex gap-4">
-                      <div className="flex-shrink-0 mt-1 rounded-full bg-blue-50 p-2">
+                    <div key={i} className="flex items-start gap-4">
+                      <div className="flex-shrink-0 mt-1 bg-blue-50 p-2 rounded-full">
                         {feature.icon}
                       </div>
-                      <div>
+                      <div className="text-left">
                         <h3 className="font-medium text-lg">{feature.title}</h3>
                         <p className="text-gray-600">{feature.description}</p>
                       </div>
