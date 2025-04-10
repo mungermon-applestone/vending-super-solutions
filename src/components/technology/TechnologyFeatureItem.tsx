@@ -7,7 +7,7 @@ interface TechnologyFeatureItemProps {
   icon: string;
   title: string;
   description: string;
-  items?: string[]; // Add items prop
+  items?: string[]; // Items prop for bullet points
 }
 
 const TechnologyFeatureItem: React.FC<TechnologyFeatureItemProps> = ({ 
@@ -18,6 +18,14 @@ const TechnologyFeatureItem: React.FC<TechnologyFeatureItemProps> = ({
 }) => {
   // Dynamically get the icon component from lucide-react
   const IconComponent = (LucideIcons as any)[icon] || LucideIcons.HelpCircle;
+  
+  // Log props to help debug
+  console.log(`TechnologyFeatureItem rendering: ${title}`, {
+    icon,
+    description,
+    itemsCount: items?.length || 0,
+    items
+  });
   
   return (
     <div className="flex items-start gap-4">

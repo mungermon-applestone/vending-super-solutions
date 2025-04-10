@@ -7,9 +7,15 @@ import { CMSTechnology } from '@/types/cms';
 // Transform CMS data to the format our components expect
 const transformCMSDataToSections = (cmsData: CMSTechnology[] = []): TechnologySection[] => {
   return cmsData.map(technology => {
+    console.log('Processing technology:', technology.title, technology);
+    
     // Extract features from technology sections
-    const features = technology.sections?.flatMap(section => 
-      section.features?.map(feature => {
+    const features = technology.sections?.flatMap(section => {
+      console.log('Processing section:', section.title, 'with features:', section.features?.length || 0);
+      
+      return section.features?.map(feature => {
+        console.log('Processing feature:', feature.title, 'with items:', feature.items?.length || 0);
+        
         // Create the feature with base properties
         const transformedFeature = {
           icon: feature.icon || 'HelpCircle', // Fallback icon
@@ -20,14 +26,23 @@ const transformCMSDataToSections = (cmsData: CMSTechnology[] = []): TechnologySe
         
         // Add bullet point items if they exist
         if (feature.items && Array.isArray(feature.items) && feature.items.length > 0) {
+          console.log('Feature has items:', feature.items);
+          
           transformedFeature.items = feature.items
             .sort((a, b) => a.display_order - b.display_order)
-            .map(item => item.text);
+            .map(item => {
+              console.log('Item text:', item.text);
+              return item.text;
+            });
+            
+          console.log('Transformed items:', transformedFeature.items);
         }
         
         return transformedFeature;
-      }) || []
-    ) || [];
+      }) || [];
+    }) || [];
+    
+    console.log('Final features for', technology.title, ':', features);
     
     // Return in the format expected by our components
     return {
@@ -129,12 +144,17 @@ export const useTechnologySections = (): TechnologySection[] => {
     queryFn: fetchTechnologies,
   });
   
+  console.log('Technology CMS data received:', cmsData);
+  
   // Transform CMS data if available, otherwise use fallback data
   if (cmsData && Array.isArray(cmsData) && cmsData.length > 0 && !isError) {
     // Explicitly cast the data to CMSTechnology[] since we know its structure
-    return transformCMSDataToSections(cmsData as CMSTechnology[]);
+    const transformedData = transformCMSDataToSections(cmsData as CMSTechnology[]);
+    console.log('Transformed technology data:', transformedData);
+    return transformedData;
   }
   
+  console.log('Using fallback technology data');
   // Return fallback data if database fetch fails or returns no results
   return getFallbackTechnologyData();
 };

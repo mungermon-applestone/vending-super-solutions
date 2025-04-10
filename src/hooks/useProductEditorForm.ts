@@ -49,7 +49,7 @@ export const useProductEditorForm = (
 
   // Populate form with existing product data when available
   useEffect(() => {
-    if (existingProduct && !isCreating) {
+    if (existingProduct && productSlug) {
       console.log('[useProductEditorForm] Populating form with product data:', existingProduct);
       
       // Create a new object from the existing product data to avoid reference issues
@@ -85,6 +85,7 @@ export const useProductEditorForm = (
       
       // Reset the form with clean data
       form.reset(productData);
+      setIsCreating(false);
       
       console.log('[useProductEditorForm] Form reset with values:', form.getValues());
     } else if (productSlug && !existingProduct && !isLoadingProduct) {
@@ -96,7 +97,7 @@ export const useProductEditorForm = (
       });
       setIsCreating(true);
     }
-  }, [existingProduct, isCreating, isLoadingProduct, form, productSlug, toast]);
+  }, [existingProduct, isLoadingProduct, form, productSlug, toast]);
 
   // Form submission handler
   const onSubmit = async (data: ProductFormData) => {
