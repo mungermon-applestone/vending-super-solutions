@@ -37,7 +37,7 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
-            <span className="text-xl font-semibold">Vending Platform</span>
+            <span className="text-xl font-semibold">Applestone Solutions</span>
           </Link>
         </div>
 
@@ -143,6 +143,41 @@ const Header = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
+              {/* Business Goals Navigation Item - Moved from More dropdown to main navigation */}
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className={cn(isActive('/goals') && 'bg-accent text-accent-foreground')}>
+                  Business Goals
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[400px] gap-3 p-4">
+                    <li>
+                      <Link to="/goals" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">All Business Goals</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Explore how our solutions help achieve your business objectives
+                        </p>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/goals/expand-footprint" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">Expand Footprint</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Grow your business with scalable solutions
+                        </p>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/goals/bopis" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">Buy Online, Pickup In Store</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Enable convenient pickup options for customers
+                        </p>
+                      </Link>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
               {/* Technology dropdown */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className={cn(isActive('/technology') && 'bg-accent text-accent-foreground')}>
@@ -191,9 +226,9 @@ const Header = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* More items */}
+              {/* More items - Business Goals removed from here */}
               <NavigationMenuItem>
-                <NavigationMenuTrigger className={cn((isActive('/about') || isActive('/goals') || isActive('/contact')) && 'bg-accent text-accent-foreground')}>
+                <NavigationMenuTrigger className={cn((isActive('/about') || isActive('/contact')) && 'bg-accent text-accent-foreground')}>
                   More
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -203,14 +238,6 @@ const Header = () => {
                         <div className="text-sm font-medium leading-none">About Us</div>
                         <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                           Learn about our company and mission
-                        </p>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/goals" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                        <div className="text-sm font-medium leading-none">Business Goals</div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          How our solutions help achieve your business objectives
                         </p>
                       </Link>
                     </li>
@@ -252,9 +279,9 @@ const Header = () => {
         <div className="md:hidden py-2 px-2 space-y-1">
           <MobileNavItem title="Products" path="/products" />
           <MobileNavItem title="Machines" path="/machines" />
+          <MobileNavItem title="Business Goals" path="/goals" />
           <MobileNavItem title="Technology" path="/technology" />
           <MobileNavItem title="About Us" path="/about" />
-          <MobileNavItem title="Business Goals" path="/goals" />
           <MobileNavItem title="Contact" path="/contact" />
           <div className="pt-2">
             <Button asChild variant="default" size="sm" className="w-full">
