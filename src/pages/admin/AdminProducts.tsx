@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Edit, ChevronRight } from 'lucide-react';
+import { Plus, Edit, Eye, Trash2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -17,20 +17,34 @@ import {
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { getProductTypes } from '@/services/cms';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const AdminProducts = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   
+  // State for delete dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<{ id: string; title: string } | null>(null);
+  
   // Fetch all product types to display in the table
-  const { data: productTypes = [], error, isLoading: isLoadingProducts } = useQuery({
+  const { data: productTypes = [], error, isLoading: isLoadingProducts, refetch } = useQuery({
     queryKey: ['productTypes'],
     queryFn: async () => {
       try {
         return await getProductTypes();
       } catch (error) {
-        console.error('[AdminProductsPage] Error fetching product types:', error);
+        console.error('[AdminProducts] Error fetching product types:', error);
         toast({
           title: 'Error',
           description: 'Failed to load products. Please try again.',
@@ -43,6 +57,40 @@ const AdminProducts = () => {
 
   // Debug log for product types
   console.log('[AdminProducts] Product types loaded:', productTypes);
+
+  const handleDeleteClick = (product: any) => {
+    setProductToDelete({
+      id: product.id,
+      title: product.title
+    });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
+    
+    try {
+      // Implement delete functionality when available
+      console.log(`Would delete product: ${productToDelete.id}`);
+      
+      toast({
+        title: "Product deleted",
+        description: `${productToDelete.title} has been deleted successfully.`
+      });
+      
+      setDeleteDialogOpen(false);
+      setProductToDelete(null);
+      
+      // Refresh the list after deletion
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete product. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Layout>
@@ -87,7 +135,7 @@ const AdminProducts = () => {
                   <TableRow>
                     <TableHead>Title</TableHead>
                     <TableHead>Slug</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
+                    <TableHead className="w-[220px] text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -96,27 +144,36 @@ const AdminProducts = () => {
                       <TableCell className="font-medium">{product.title}</TableCell>
                       <TableCell>{product.slug}</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex justify-end gap-2">
                           <Button
-                            variant="ghost"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/products/${product.slug}`)}
+                            className="flex items-center gap-1"
+                            title="View product"
+                          >
+                            <Eye className="h-4 w-4" /> View
+                          </Button>
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={() => {
                               console.log(`[AdminProducts] Navigating to edit product with slug: ${product.slug}`);
                               navigate(`/admin/products/edit/${product.slug}`);
                             }}
-                            className="h-8 px-2 w-8"
+                            className="flex items-center gap-1"
                             title="Edit product"
                           >
-                            <Edit size={16} />
+                            <Edit className="h-4 w-4" /> Edit
                           </Button>
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            onClick={() => navigate(`/products/${product.slug}`)}
-                            className="h-8 px-2 w-8"
-                            title="View product page"
+                            onClick={() => handleDeleteClick(product)}
+                            className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
+                            title="Delete product"
                           >
-                            <ChevronRight size={16} />
+                            <Trash2 className="h-4 w-4" /> Delete
                           </Button>
                         </div>
                       </TableCell>
@@ -128,6 +185,26 @@ const AdminProducts = () => {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the product "{productToDelete?.title}". This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };

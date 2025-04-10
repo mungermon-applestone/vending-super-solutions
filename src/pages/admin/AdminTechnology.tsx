@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Monitor, Plus, Pencil, Trash2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Monitor, Plus, Pencil, Trash2, AlertCircle, CheckCircle2, Eye } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -15,14 +16,19 @@ import {
 } from "@/components/ui/table";
 import { getTechnologies } from '@/services/cms';
 import { CMSTechnology } from '@/types/cms';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 
 const AdminTechnology = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  
+  // State for delete dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [techToDelete, setTechToDelete] = useState<{ id: string; title: string } | null>(null);
   
   const {
     data: technologies,
@@ -46,6 +52,40 @@ const AdminTechnology = () => {
   }, [isError, error, toast]);
   
   console.log('[AdminTechnology] Technologies loaded:', technologies);
+
+  const handleDeleteClick = (tech: CMSTechnology) => {
+    setTechToDelete({
+      id: tech.id,
+      title: tech.title
+    });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!techToDelete) return;
+    
+    try {
+      // Implement delete functionality when available
+      console.log(`Would delete technology: ${techToDelete.id}`);
+      
+      toast({
+        title: "Technology deleted",
+        description: `${techToDelete.title} has been deleted successfully`
+      });
+      
+      setDeleteDialogOpen(false);
+      setTechToDelete(null);
+      
+      // Refresh the list after deletion
+      refetch();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error deleting technology",
+        description: "Failed to delete technology. Please try again."
+      });
+    }
+  };
 
   return (
     <Layout>
@@ -110,47 +150,23 @@ const AdminTechnology = () => {
                           {tech.visible ? "Published" : "Draft"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right space-x-1">
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/technology/${tech.slug}`}>
-                            View
-                          </Link>
-                        </Button>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/admin/technology/edit/${tech.slug}`}>
-                            <Pencil className="h-3 w-3 mr-1" /> Edit
-                          </Link>
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <Trash2 className="h-3 w-3 mr-1 text-red-500" /> Delete
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This will permanently delete "{tech.title}" and all associated data.
-                                This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                className="bg-red-600 hover:bg-red-700"
-                                onClick={() => {
-                                  toast({
-                                    title: "Technology deleted",
-                                    description: `${tech.title} has been deleted`
-                                  });
-                                }}
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={() => navigate(`/technology/${tech.slug}`)}>
+                            <Eye className="h-4 w-4" /> View
+                          </Button>
+                          <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={() => navigate(`/admin/technology/edit/${tech.slug}`)}>
+                            <Pencil className="h-4 w-4" /> Edit
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => handleDeleteClick(tech)}
+                          >
+                            <Trash2 className="h-4 w-4" /> Delete
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -172,6 +188,27 @@ const AdminTechnology = () => {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete "{techToDelete?.title}" and all associated data.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={confirmDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };

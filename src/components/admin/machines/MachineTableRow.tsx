@@ -41,31 +41,34 @@ const MachineTableRow: React.FC<MachineTableRowProps> = ({ machine, onDeleteClic
       <TableCell className="text-right">
         <div className="flex justify-end gap-2">
           <Button
-            size="icon"
-            variant="ghost"
+            variant="outline"
+            size="sm"
             onClick={() => navigate(`/machines/${machine.type}/${machine.slug}`)}
             title="View machine"
+            className="flex items-center gap-1"
           >
-            <Eye className="h-4 w-4" />
+            <Eye className="h-4 w-4" /> View
           </Button>
           <Button
-            size="icon"
-            variant="ghost"
+            variant="outline"
+            size="sm"
             onClick={() => {
               console.log(`[MachineTableRow] Navigating to edit machine with ID: ${machine.id}`);
               navigate(`/admin/machines/edit/${machine.id}`);
             }}
             title="Edit machine"
+            className="flex items-center gap-1"
           >
-            <Pencil className="h-4 w-4" />
+            <Pencil className="h-4 w-4" /> Edit
           </Button>
           <Button
-            size="icon"
-            variant="ghost"
+            variant="outline"
+            size="sm"
             onClick={() => onDeleteClick(machine)}
             title="Delete machine"
+            className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
           >
-            <Trash2 className="h-4 w-4 text-red-500" />
+            <Trash2 className="h-4 w-4" /> Delete
           </Button>
         </div>
       </TableCell>

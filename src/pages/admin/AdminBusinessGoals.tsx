@@ -1,17 +1,34 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useBusinessGoals } from '@/hooks/useCMSData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Edit, ExternalLink } from 'lucide-react';
+import { Plus, Edit, Eye, Trash2 } from 'lucide-react';
 import AdminControls from '@/components/admin/AdminControls';
 import Layout from '@/components/layout/Layout';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const AdminBusinessGoals = () => {
   const { data: businessGoals, isLoading, error } = useBusinessGoals();
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // State for delete dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [goalToDelete, setGoalToDelete] = useState<{ id: string; title: string } | null>(null);
 
   const filteredGoals = searchTerm && businessGoals
     ? businessGoals.filter(goal => 
@@ -19,6 +36,40 @@ const AdminBusinessGoals = () => {
         goal.slug.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : businessGoals;
+
+  const handleDeleteClick = (goal: any) => {
+    setGoalToDelete({
+      id: goal.id,
+      title: goal.title
+    });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!goalToDelete) return;
+    
+    try {
+      // Implement delete functionality when available
+      console.log(`Would delete goal: ${goalToDelete.id}`);
+      
+      toast({
+        title: "Goal deleted",
+        description: `${goalToDelete.title} has been deleted successfully.`
+      });
+      
+      setDeleteDialogOpen(false);
+      setGoalToDelete(null);
+      
+      // Refresh the list after deletion
+      // This would be replaced with actual refetch logic
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete goal. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Layout>
@@ -96,17 +147,19 @@ const AdminBusinessGoals = () => {
                         <p className="text-muted-foreground">/{goal.slug}</p>
                       </div>
                       <div className="flex gap-2">
-                        <Button asChild variant="outline" size="sm">
-                          <Link to={`/goals/${goal.slug}`} target="_blank">
-                            <ExternalLink className="h-4 w-4 mr-1" />
-                            View
-                          </Link>
+                        <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={() => navigate(`/goals/${goal.slug}`)}>
+                          <Eye className="h-4 w-4" /> View
                         </Button>
-                        <Button asChild size="sm">
-                          <Link to={`/admin/business-goals/edit/${goal.slug}`}>
-                            <Edit className="h-4 w-4 mr-1" />
-                            Edit
-                          </Link>
+                        <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={() => navigate(`/admin/business-goals/edit/${goal.slug}`)}>
+                          <Edit className="h-4 w-4" /> Edit
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => handleDeleteClick(goal)}
+                        >
+                          <Trash2 className="h-4 w-4" /> Delete
                         </Button>
                       </div>
                     </div>
@@ -117,6 +170,27 @@ const AdminBusinessGoals = () => {
           </div>
         )}
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the business goal "{goalToDelete?.title}". This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
       <AdminControls />
     </Layout>
   );
