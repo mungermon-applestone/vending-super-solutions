@@ -108,8 +108,9 @@ export const useTechnologySections = (): TechnologySection[] => {
   });
   
   // Transform CMS data if available, otherwise use fallback data
-  if (cmsData && cmsData.length > 0 && !isError) {
-    return transformCMSDataToSections(cmsData);
+  if (cmsData && Array.isArray(cmsData) && cmsData.length > 0 && !isError) {
+    // Explicitly cast the data to CMSTechnology[] since we know its structure
+    return transformCMSDataToSections(cmsData as CMSTechnology[]);
   }
   
   // Return fallback data if database fetch fails or returns no results
