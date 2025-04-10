@@ -8,7 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export const fetchBusinessGoals = async (): Promise<CMSBusinessGoal[]> => {
   try {
-    const { data, error } = await supabase
+    // First, fetch all business goals
+    const { data: goalsData, error: goalsError } = await supabase
       .from('business_goals')
       .select(`
         id,
@@ -20,60 +21,134 @@ export const fetchBusinessGoals = async (): Promise<CMSBusinessGoal[]> => {
         visible,
         created_at,
         updated_at,
-        icon,
-        features (
-          id,
-          title,
-          description,
-          icon,
-          display_order,
-          screenshot_url,
-          screenshot_alt
-        )
+        icon
       `);
 
-    if (error) {
-      console.error("Error fetching business goals:", error);
-      throw new Error(`Failed to fetch business goals: ${error.message}`);
+    if (goalsError) {
+      console.error("Error fetching business goals:", goalsError);
+      throw new Error(`Failed to fetch business goals: ${goalsError.message}`);
     }
 
-    if (!data) {
+    if (!goalsData || goalsData.length === 0) {
       console.warn("No business goals found.");
       return [];
     }
 
-    // Map the data to the CMSBusinessGoal interface
-    const businessGoals: CMSBusinessGoal[] = data.map((item: any) => ({
-      id: item.id,
-      slug: item.slug,
-      title: item.title,
-      description: item.description,
-      visible: item.visible,
-      created_at: item.created_at,
-      updated_at: item.updated_at,
-      icon: item.icon,
-      image: {
+    // Create a map of business goals for easier lookup when adding features
+    const businessGoals = goalsData.map((goal: any) => ({
+      id: goal.id,
+      slug: goal.slug,
+      title: goal.title,
+      description: goal.description,
+      visible: goal.visible,
+      created_at: goal.created_at,
+      updated_at: goal.updated_at,
+      icon: goal.icon,
+      image: goal.image_url ? {
         id: `img-${Math.random().toString(36).substr(2, 9)}`,
-        url: item.image_url || '',
-        alt: item.image_alt || item.title
-      },
-      benefits: [], // Assuming benefits are not directly fetched here
-      features: item.features?.map(f => ({
-        id: f.id || `feature-${Math.random().toString(36).substr(2, 9)}`,
-        title: f.title,
-        description: f.description,
-        icon: f.icon,
-        display_order: f.display_order,
-        ...(f.screenshot_url && {
-          screenshot: {
-            id: `screenshot-${Math.random().toString(36).substr(2, 9)}`,
-            url: f.screenshot_url,
-            alt: f.screenshot_alt || f.title
-          }
-        })
-      })) || [],
-      caseStudies: [] // Assuming caseStudies are not directly fetched here
+        url: goal.image_url,
+        alt: goal.image_alt || goal.title
+      } : undefined,
+      benefits: [],
+      features: [],
+      caseStudies: []
     }));
+
+    // Fetch features for all business goals
+    const { data: featuresData, error: featuresError } = await supabase
+      .from('business_goal_features')
+      .select(`
+        id,
+        business_goal_id,
+        title,
+        description,
+        icon,
+        display_order
+      `);
+
+    if (featuresError) {
+      console.error("Error fetching business goal features:", featuresError);
+      // We'll continue without features rather than failing completely
+    }
+
+    // If we have features, fetch their screenshots
+    if (featuresData && featuresData.length > 0) {
+      // Fetch screenshots for features
+      const { data: screenshotsData, error: screenshotsError } = await supabase
+        .from('business_goal_feature_images')
+        .select(`
+          id,
+          feature_id,
+          url,
+          alt,
+          width,
+          height
+        `);
+
+      if (screenshotsError) {
+        console.error("Error fetching feature screenshots:", screenshotsError);
+        // Continue without screenshots
+      }
+
+      // Create a map of screenshots by feature_id for easier lookup
+      const screenshotsByFeatureId = screenshotsData ? 
+        screenshotsData.reduce((acc: Record<string, any>, screenshot: any) => {
+          acc[screenshot.feature_id] = {
+            id: screenshot.id,
+            url: screenshot.url,
+            alt: screenshot.alt,
+            width: screenshot.width,
+            height: screenshot.height
+          };
+          return acc;
+        }, {}) : {};
+
+      // Add features to their respective business goals
+      for (const feature of featuresData) {
+        const businessGoal = businessGoals.find(goal => goal.id === feature.business_goal_id);
+        if (businessGoal) {
+          const screenshot = screenshotsByFeatureId[feature.id];
+          businessGoal.features.push({
+            id: feature.id,
+            title: feature.title,
+            description: feature.description,
+            icon: feature.icon,
+            display_order: feature.display_order,
+            ...(screenshot && {
+              screenshot: {
+                id: screenshot.id,
+                url: screenshot.url,
+                alt: screenshot.alt,
+                width: screenshot.width,
+                height: screenshot.height
+              }
+            })
+          });
+        }
+      }
+    }
+
+    // Fetch benefits for all business goals
+    const { data: benefitsData, error: benefitsError } = await supabase
+      .from('business_goal_benefits')
+      .select(`
+        business_goal_id,
+        benefit,
+        display_order
+      `);
+
+    if (benefitsError) {
+      console.error("Error fetching business goal benefits:", benefitsError);
+      // Continue without benefits
+    } else if (benefitsData) {
+      // Add benefits to their respective business goals
+      for (const benefit of benefitsData) {
+        const businessGoal = businessGoals.find(goal => goal.id === benefit.business_goal_id);
+        if (businessGoal) {
+          businessGoal.benefits.push(benefit.benefit);
+        }
+      }
+    }
 
     console.log("Successfully fetched business goals:", businessGoals);
     return businessGoals;
