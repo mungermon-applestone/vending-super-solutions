@@ -8,6 +8,21 @@ export interface UpdateTechnologyData extends CreateTechnologyData {
   id: string;
 }
 
+// Extend the section type to include optional id for TypeScript
+interface Section extends CreateTechnologyData['sections'][0] {
+  id?: string;
+}
+
+// Extend the feature type to include optional id for TypeScript
+interface Feature extends CreateTechnologyData['sections'][0]['features'][0] {
+  id?: string;
+}
+
+// Extend the item type to include optional id for TypeScript
+interface Item extends CreateTechnologyData['sections'][0]['features'][0]['items'][0] {
+  id?: string;
+}
+
 /**
  * Updates an existing technology entry in the database
  * @param data Technology data to update
@@ -65,7 +80,7 @@ export const updateTechnology = async (
     if (data.sections && data.sections.length > 0) {
       // Process each section
       for (let i = 0; i < data.sections.length; i++) {
-        const section = data.sections[i];
+        const section = data.sections[i] as Section; // Cast to our extended type
         
         // If section has an ID, update it, otherwise create new
         if (section.id) {
@@ -107,7 +122,7 @@ export const updateTechnology = async (
         }
         
         // Process features for this section
-        await processFeatures(section);
+        await processFeatures(section as Section);
       }
     }
     
@@ -130,7 +145,7 @@ export const updateTechnology = async (
 /**
  * Helper function to process section features
  */
-async function processFeatures(section: any) {
+async function processFeatures(section: Section) {
   if (!section.id || !section.features || section.features.length === 0) {
     return;
   }
@@ -145,7 +160,7 @@ async function processFeatures(section: any) {
   
   // Process each feature
   for (let i = 0; i < section.features.length; i++) {
-    const feature = section.features[i];
+    const feature = section.features[i] as Feature; // Cast to our extended type
     
     if (feature.id) {
       // Update existing feature
@@ -186,7 +201,7 @@ async function processFeatures(section: any) {
     }
     
     // Process feature items
-    await processFeatureItems(feature);
+    await processFeatureItems(feature as Feature);
   }
   
   // Delete features that weren't updated
@@ -201,7 +216,7 @@ async function processFeatures(section: any) {
 /**
  * Helper function to process feature items
  */
-async function processFeatureItems(feature: any) {
+async function processFeatureItems(feature: Feature) {
   if (!feature.id || !feature.items || feature.items.length === 0) {
     return;
   }
@@ -216,7 +231,7 @@ async function processFeatureItems(feature: any) {
   
   // Process each item
   for (let i = 0; i < feature.items.length; i++) {
-    const item = feature.items[i];
+    const item = feature.items[i] as Item; // Cast to our extended type
     
     if (item.id) {
       // Update existing item
