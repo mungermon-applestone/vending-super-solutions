@@ -42,7 +42,12 @@ const TechnologyEditor: React.FC = () => {
         : 'You are editing an existing technology. Changes will be visible on the site after saving.',
       duration: 5000,
     });
-  }, [toast, isNewTechnology]);
+    
+    console.log('TechnologyEditor mounted:', {
+      isNewTechnology,
+      technologySlug
+    });
+  }, [toast, isNewTechnology, technologySlug]);
 
   const handleSaveTechnology = async (formData: any) => {
     console.log('Technology Editor: handleSaveTechnology called with data:', formData);
@@ -77,6 +82,7 @@ const TechnologyEditor: React.FC = () => {
           navigate(`/admin/technology/edit/${formData.slug}`);
         }
       }
+      return Promise.resolve();
     } catch (error) {
       console.error("Error saving technology:", error);
       setSaveError(error instanceof Error ? error.message : "An unknown error occurred");
@@ -85,7 +91,7 @@ const TechnologyEditor: React.FC = () => {
         title: "Failed to save technology",
         description: error instanceof Error ? error.message : "An unknown error occurred"
       });
-      throw error; // Re-throw to let the form component handle it
+      return Promise.reject(error);
     } finally {
       setIsSaving(false);
     }

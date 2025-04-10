@@ -65,6 +65,7 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
   const isNew = !initialData;
   const [formState, setFormState] = React.useState<'idle' | 'submitting' | 'error'>('idle');
   const [formError, setFormError] = React.useState<string | null>(null);
+  const formRef = React.useRef<HTMLFormElement>(null);
   
   console.log('Form initialization - isLoading:', isLoading);
   console.log('Form initialization - formState:', formState);
@@ -89,67 +90,102 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
       visible: false,
       sections: [],
     },
-    mode: "onChange",
+    mode: "all",
   });
 
   // Monitor form validity state
   const formIsValid = form.formState.isValid;
   const formIsDirty = form.formState.isDirty;
+  const formErrors = form.formState.errors;
   
   React.useEffect(() => {
     console.log('Form state updated:', { 
       isValid: formIsValid, 
       isDirty: formIsDirty, 
-      errors: form.formState.errors 
+      errors: form.formState.errors,
+      formValues: form.getValues()
     });
   }, [formIsValid, formIsDirty, form.formState.errors]);
 
-  // Handle form submission
-  const handleSubmit = async (data: TechnologyFormValues) => {
-    console.log('Form submission initiated, button clicked');
-    try {
+  // Fix for the onClick event not being triggered
+  const handleManualSubmit = React.useCallback(() => {
+    console.log('Manual submit clicked');
+    
+    // Log current form state
+    const currentValues = form.getValues();
+    console.log('Current form values:', currentValues);
+    console.log('Form is valid:', formIsValid);
+    console.log('Form errors:', formErrors);
+
+    if (formIsValid) {
+      const data = form.getValues();
       setFormState('submitting');
       setFormError(null);
       
-      console.log('Submitting form data:', data);
-      await onSave(data);
+      onSave(data)
+        .then(() => {
+          setFormState('idle');
+          toast({
+            title: isNew ? "Technology created" : "Technology updated",
+            description: isNew 
+              ? "Your new technology has been created successfully." 
+              : "Your technology has been updated successfully.",
+          });
+        })
+        .catch((error) => {
+          console.error('Form submission error:', error);
+          setFormState('error');
+          setFormError(error instanceof Error ? error.message : "Failed to save technology");
+          
+          toast({
+            variant: "destructive",
+            title: "Submission failed",
+            description: error instanceof Error ? error.message : "Failed to save technology",
+          });
+        });
+    } else {
+      console.log('Form is invalid, cannot submit');
       
-      setFormState('idle');
-      toast({
-        title: isNew ? "Technology created" : "Technology updated",
-        description: isNew 
-          ? "Your new technology has been created successfully." 
-          : "Your technology has been updated successfully.",
-      });
-    } catch (error) {
-      console.error('Form submission error:', error);
-      setFormState('error');
-      setFormError(error instanceof Error ? error.message : "Failed to save technology");
-      
+      // Show toast for invalid form
       toast({
         variant: "destructive",
-        title: "Submission failed",
-        description: error instanceof Error ? error.message : "Failed to save technology",
+        title: "Form validation failed",
+        description: "Please fix the errors in the form before submitting.",
+      });
+      
+      // Touch all fields to show errors
+      Object.keys(form.getValues()).forEach(key => {
+        form.trigger(key as any);
       });
     }
-  };
+  }, [form, formIsValid, formErrors, onSave, isNew, toast]);
 
-  // Create a direct click handler for debugging
-  const handleButtonClick = () => {
-    console.log('Button clicked directly!');
+  // Create a direct debug function
+  const handleDebugClick = React.useCallback(() => {
+    console.log('Debug button clicked directly!');
     console.log('Form is valid:', formIsValid);
     console.log('Form errors:', form.formState.errors);
     console.log('Current form values:', form.getValues());
     
-    // This doesn't submit the form, just logs info
-  };
+    toast({
+      title: "Debug information",
+      description: `Form valid: ${formIsValid}, Dirty: ${formIsDirty}`,
+    });
+  }, [form, formIsValid, formIsDirty, toast]);
 
   return (
     <Form {...form}>
-      <form onSubmit={(e) => {
-        console.log('Form onSubmit triggered');
-        form.handleSubmit(handleSubmit)(e);
-      }}>
+      <form 
+        ref={formRef}
+        onSubmit={(e) => {
+          e.preventDefault();
+          console.log('Form onSubmit event triggered');
+          form.handleSubmit((data) => {
+            console.log('Form submission handler called with data:', data);
+            handleManualSubmit();
+          })(e);
+        }}
+      >
         {formError && (
           <div className="bg-destructive/15 p-3 rounded-md mb-4 flex items-start gap-2">
             <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
@@ -194,15 +230,16 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
           <Button
             type="button"
             variant="outline"
-            onClick={handleButtonClick}
+            onClick={handleDebugClick}
             className="px-6"
           >
             Debug Form
           </Button>
           
           <Button
-            type="submit"
-            disabled={isLoading || formState === 'submitting'}
+            type="button"
+            onClick={handleManualSubmit}
+            disabled={isLoading || formState === 'submitting' || (!formIsValid && formIsDirty)}
             className="px-6"
           >
             {formState === 'submitting' ? (
