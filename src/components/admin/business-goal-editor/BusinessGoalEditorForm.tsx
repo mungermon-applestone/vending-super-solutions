@@ -18,18 +18,20 @@ import GoalFeatures from './sections/GoalFeatures';
 
 interface BusinessGoalEditorFormProps {
   goalSlug?: string;
+  isEditMode?: boolean;
 }
 
-const BusinessGoalEditorForm = ({ goalSlug }: BusinessGoalEditorFormProps) => {
+const BusinessGoalEditorForm = ({ goalSlug, isEditMode = false }: BusinessGoalEditorFormProps) => {
   const navigate = useNavigate();
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const isCreating = !goalSlug;
+  const isCreating = !isEditMode;
   
   // Fetch business goal data if editing
   const { data: existingGoal, isLoading: isLoadingGoal } = useBusinessGoal(goalSlug);
   
   console.log('[BusinessGoalEditorForm] Rendering with goal slug:', goalSlug);
+  console.log('[BusinessGoalEditorForm] Is edit mode:', isEditMode);
   console.log('[BusinessGoalEditorForm] Is creating new goal:', isCreating);
   
   // Initialize form with default values
@@ -47,7 +49,7 @@ const BusinessGoalEditorForm = ({ goalSlug }: BusinessGoalEditorFormProps) => {
   
   // Populate form with existing business goal data when available
   useEffect(() => {
-    if (existingGoal && !isCreating) {
+    if (existingGoal && isEditMode) {
       console.log('[BusinessGoalEditorForm] Populating form with goal data:', existingGoal);
       
       // Create a clean object from the existing business goal data
@@ -79,7 +81,7 @@ const BusinessGoalEditorForm = ({ goalSlug }: BusinessGoalEditorFormProps) => {
       
       console.log('[BusinessGoalEditorForm] Form reset with values:', form.getValues());
     }
-  }, [existingGoal, isCreating, form]);
+  }, [existingGoal, isEditMode, form]);
 
   // Handle form submission
   const handleSubmit = form.handleSubmit(async (data) => {
@@ -105,7 +107,7 @@ const BusinessGoalEditorForm = ({ goalSlug }: BusinessGoalEditorFormProps) => {
   });
 
   // Display loading state while fetching business goal data
-  if (isLoadingGoal && !isCreating) {
+  if (isLoadingGoal && isEditMode) {
     return (
       <div className="container py-10">
         <h1 className="text-3xl font-bold mb-6">Loading Business Goal Data...</h1>
