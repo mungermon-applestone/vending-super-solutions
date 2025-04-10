@@ -7,6 +7,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi
 } from '@/components/ui/carousel';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -33,6 +34,25 @@ const CaseStudyCarousel = ({
   caseStudies 
 }: CaseStudyCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [api, setApi] = useState<CarouselApi>();
+
+  // Set up effect to handle carousel changes
+  // Update the currentIndex when the carousel changes
+  const handleApiChange = (api: CarouselApi | undefined) => {
+    if (!api) return;
+    
+    const handleSelect = () => {
+      setCurrentIndex(api.selectedScrollSnap());
+    };
+
+    api.on("select", handleSelect);
+    // Initial call to set the first slide
+    handleSelect();
+
+    return () => {
+      api.off("select", handleSelect);
+    };
+  };
 
   return (
     <section className="py-16 bg-slate-50">
@@ -49,12 +69,8 @@ const CaseStudyCarousel = ({
               loop: true,
             }}
             className="relative"
-            onSelect={(api) => {
-              if (api) {
-                const selectedIndex = api.selectedScrollSnap();
-                setCurrentIndex(selectedIndex);
-              }
-            }}
+            setApi={setApi}
+            onCreated={handleApiChange}
           >
             <CarouselContent>
               {caseStudies.map((study, index) => (
