@@ -1,14 +1,16 @@
 
-import { fetchMachines, fetchMachineById } from './api';
+import { getMachines, getMachineBySlug, getMachineById } from './api';
 import { createMachine } from './create';
 import { updateMachine } from './update';
 import { deleteMachine } from './delete';
+import { machineHelpers } from './helpers';
 
-// Export all functions from this central file
 export {
-  fetchMachines,
-  fetchMachineById,
+  getMachines,
+  getMachineBySlug,
+  getMachineById,
   createMachine,
   updateMachine,
-  deleteMachine
+  deleteMachine,
+  machineHelpers
 };

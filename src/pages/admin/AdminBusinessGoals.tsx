@@ -1,14 +1,14 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useBusinessGoals } from '@/hooks/useCMSData';
+import { useQueryClient, useBusinessGoals } from '@/hooks/useCMSData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Edit, Eye, Trash2 } from 'lucide-react';
+import { Plus, Edit, Eye, Trash2, Loader2 } from 'lucide-react';
 import AdminControls from '@/components/admin/AdminControls';
 import Layout from '@/components/layout/Layout';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { deleteBusinessGoal } from '@/services/businessGoal';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,10 +25,12 @@ const AdminBusinessGoals = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   // State for delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [goalToDelete, setGoalToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [goalToDelete, setGoalToDelete] = useState<{ id: string; title: string; slug: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const filteredGoals = searchTerm && businessGoals
     ? businessGoals.filter(goal => 
@@ -40,7 +42,8 @@ const AdminBusinessGoals = () => {
   const handleDeleteClick = (goal: any) => {
     setGoalToDelete({
       id: goal.id,
-      title: goal.title
+      title: goal.title,
+      slug: goal.slug
     });
     setDeleteDialogOpen(true);
   };
@@ -49,25 +52,26 @@ const AdminBusinessGoals = () => {
     if (!goalToDelete) return;
     
     try {
-      // Implement delete functionality when available
-      console.log(`Would delete goal: ${goalToDelete.id}`);
+      setIsDeleting(true);
+      await deleteBusinessGoal(goalToDelete.slug);
       
       toast({
         title: "Goal deleted",
         description: `${goalToDelete.title} has been deleted successfully.`
       });
       
+      queryClient.invalidateQueries({ queryKey: ['businessGoals'] });
+      
       setDeleteDialogOpen(false);
       setGoalToDelete(null);
-      
-      // Refresh the list after deletion
-      // This would be replaced with actual refetch logic
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to delete goal. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to delete goal. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -184,8 +188,15 @@ const AdminBusinessGoals = () => {
             <AlertDialogAction 
               onClick={confirmDelete} 
               className="bg-red-600 hover:bg-red-700"
+              disabled={isDeleting}
             >
-              Delete
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

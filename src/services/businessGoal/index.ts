@@ -1,29 +1,12 @@
 
 import { createBusinessGoal } from './createBusinessGoal';
 import { updateBusinessGoal } from './updateBusinessGoal';
-import { 
-  processBenefits,
-  addBusinessGoalImage, 
-  addBusinessGoalBenefits, 
-  addBusinessGoalFeatures,
-  updateBusinessGoalImage, 
-  updateBusinessGoalBenefits, 
-  updateBusinessGoalFeatures,
-  checkBusinessGoalSlugExists
-} from './businessGoalHelpers';
+import { deleteBusinessGoal } from './deleteBusinessGoal';
+import { businessGoalHelpers } from './businessGoalHelpers';
 
-export { 
-  // Main operations
+export {
   createBusinessGoal,
   updateBusinessGoal,
-  
-  // Helper functions
-  processBenefits,
-  addBusinessGoalImage,
-  addBusinessGoalBenefits,
-  addBusinessGoalFeatures,
-  updateBusinessGoalImage,
-  updateBusinessGoalBenefits,
-  updateBusinessGoalFeatures,
-  checkBusinessGoalSlugExists
+  deleteBusinessGoal,
+  businessGoalHelpers
 };

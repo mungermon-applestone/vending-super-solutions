@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -14,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getTechnologies } from '@/services/cms';
+import { getTechnologies, deleteTechnology } from '@/services/cms';
 import { CMSTechnology } from '@/types/cms';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
@@ -28,7 +27,8 @@ const AdminTechnology = () => {
   
   // State for delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [techToDelete, setTechToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [techToDelete, setTechToDelete] = useState<{ id: string; title: string, slug: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const {
     data: technologies,
@@ -56,7 +56,8 @@ const AdminTechnology = () => {
   const handleDeleteClick = (tech: CMSTechnology) => {
     setTechToDelete({
       id: tech.id,
-      title: tech.title
+      title: tech.title,
+      slug: tech.slug
     });
     setDeleteDialogOpen(true);
   };
@@ -65,25 +66,29 @@ const AdminTechnology = () => {
     if (!techToDelete) return;
     
     try {
-      // Implement delete functionality when available
-      console.log(`Would delete technology: ${techToDelete.id}`);
+      setIsDeleting(true);
+      // Call the delete function with the slug
+      await deleteTechnology(techToDelete.slug);
       
       toast({
         title: "Technology deleted",
         description: `${techToDelete.title} has been deleted successfully`
       });
       
+      // Invalidate and refetch queries to update the UI
+      queryClient.invalidateQueries({ queryKey: ['technologies'] });
+      
       setDeleteDialogOpen(false);
       setTechToDelete(null);
-      
-      // Refresh the list after deletion
-      refetch();
     } catch (error) {
+      console.error("Error deleting technology:", error);
       toast({
         variant: "destructive",
         title: "Error deleting technology",
-        description: "Failed to delete technology. Please try again."
+        description: error instanceof Error ? error.message : "Failed to delete technology. Please try again."
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -203,8 +208,9 @@ const AdminTechnology = () => {
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700"
               onClick={confirmDelete}
+              disabled={isDeleting}
             >
-              Delete
+              {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

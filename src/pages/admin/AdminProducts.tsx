@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit, Eye, Trash2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { getProductTypes } from '@/services/cms';
+import { getProductTypes, deleteProductType } from '@/services/cms';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,14 +30,15 @@ import {
 const AdminProducts = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // State for delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [productToDelete, setProductToDelete] = useState<{ id: string; title: string; slug: string } | null>(null);
   
   // Fetch all product types to display in the table
-  const { data: productTypes = [], error, isLoading: isLoadingProducts, refetch } = useQuery({
+  const { data: productTypes = [], isLoading: isLoadingProducts, refetch } = useQuery({
     queryKey: ['productTypes'],
     queryFn: async () => {
       try {
@@ -61,7 +61,8 @@ const AdminProducts = () => {
   const handleDeleteClick = (product: any) => {
     setProductToDelete({
       id: product.id,
-      title: product.title
+      title: product.title,
+      slug: product.slug
     });
     setDeleteDialogOpen(true);
   };
@@ -70,25 +71,29 @@ const AdminProducts = () => {
     if (!productToDelete) return;
     
     try {
-      // Implement delete functionality when available
-      console.log(`Would delete product: ${productToDelete.id}`);
+      setIsDeleting(true);
+      // Call the delete function with the slug
+      await deleteProductType(productToDelete.slug);
       
       toast({
         title: "Product deleted",
         description: `${productToDelete.title} has been deleted successfully.`
       });
       
+      // Invalidate and refetch queries to update the UI
+      queryClient.invalidateQueries({ queryKey: ['productTypes'] });
+      
       setDeleteDialogOpen(false);
       setProductToDelete(null);
-      
-      // Refresh the list after deletion
-      refetch();
     } catch (error) {
+      console.error("Error deleting product:", error);
       toast({
         title: "Error",
-        description: "Failed to delete product. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to delete product. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -199,8 +204,9 @@ const AdminProducts = () => {
             <AlertDialogAction 
               onClick={confirmDelete} 
               className="bg-red-600 hover:bg-red-700"
+              disabled={isDeleting}
             >
-              Delete
+              {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
