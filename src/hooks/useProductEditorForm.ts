@@ -13,11 +13,20 @@ export const useProductEditorForm = (
   toast: UseToastReturn,
   navigate: NavigateFunction
 ) => {
-  const [isCreating, setIsCreating] = useState(!productSlug);
-  const { data: existingProduct, isLoading: isLoadingProduct, error } = useProductType(productSlug);
+  // We're in create mode if productSlug is falsy (undefined, null, or empty string)
+  const isCreatingState = !productSlug || productSlug === 'new';
+  const [isCreating, setIsCreating] = useState(isCreatingState);
   
   console.log('[useProductEditorForm] Initialized with productSlug:', productSlug);
   console.log('[useProductEditorForm] isCreating mode:', isCreating);
+  
+  // Only fetch product data if we're in edit mode
+  const { 
+    data: existingProduct, 
+    isLoading: isLoadingProduct, 
+    error 
+  } = useProductType(isCreating ? undefined : productSlug);
+  
   console.log('[useProductEditorForm] Existing product data:', existingProduct);
   
   if (error) {
@@ -49,7 +58,7 @@ export const useProductEditorForm = (
 
   // Populate form with existing product data when available
   useEffect(() => {
-    if (existingProduct && productSlug) {
+    if (existingProduct && !isCreating) {
       console.log('[useProductEditorForm] Populating form with product data:', existingProduct);
       
       // Create a new object from the existing product data to avoid reference issues
@@ -85,10 +94,9 @@ export const useProductEditorForm = (
       
       // Reset the form with clean data
       form.reset(productData);
-      setIsCreating(false);
       
       console.log('[useProductEditorForm] Form reset with values:', form.getValues());
-    } else if (productSlug && !existingProduct && !isLoadingProduct) {
+    } else if (productSlug && productSlug !== 'new' && !existingProduct && !isLoadingProduct) {
       console.log('[useProductEditorForm] No existing product found for slug:', productSlug);
       toast.toast({
         title: "Product not found",
@@ -97,7 +105,7 @@ export const useProductEditorForm = (
       });
       setIsCreating(true);
     }
-  }, [existingProduct, isLoadingProduct, form, productSlug, toast]);
+  }, [existingProduct, isLoadingProduct, form, productSlug, toast, isCreating]);
 
   // Form submission handler
   const onSubmit = async (data: ProductFormData) => {
@@ -109,7 +117,7 @@ export const useProductEditorForm = (
         console.log('[useProductEditorForm] Creating new product');
         await createProduct(data, toast);
         navigate(`/admin/products`);
-      } else if (productSlug) {
+      } else if (productSlug && productSlug !== 'new') {
         console.log(`[useProductEditorForm] Updating product: ${productSlug}`);
         console.log('[useProductEditorForm] Form data for update:', data);
         

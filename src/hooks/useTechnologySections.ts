@@ -6,6 +6,8 @@ import { CMSTechnology } from '@/types/cms';
 
 // Transform CMS data to the format our components expect
 const transformCMSDataToSections = (cmsData: CMSTechnology[] = []): TechnologySection[] => {
+  console.log('Starting transformation of technology CMS data:', cmsData);
+  
   return cmsData.map(technology => {
     console.log('Processing technology:', technology.title, technology);
     
@@ -49,11 +51,33 @@ const transformCMSDataToSections = (cmsData: CMSTechnology[] = []): TechnologySe
       id: technology.slug,
       title: technology.title,
       description: technology.description,
-      features: features.slice(0, 3), // Limit to 3 features per section for consistency
+      features: features.length > 0 ? features.slice(0, 3) : getDummyFeatures(), // Limit to 3 features or use fallback
       image: technology.image_url || ''
     };
   });
 };
+
+// Fallback features in case no features are available
+const getDummyFeatures = () => [
+  {
+    icon: 'Network',
+    title: 'Cloud-native design',
+    description: 'Built for scalability and resilience',
+    items: ['Auto-scaling infrastructure', 'Load balancing across regions', 'High availability design']
+  },
+  {
+    icon: 'BarChart3',
+    title: 'Real-time monitoring',
+    description: 'Live tracking of machine status and performance',
+    items: ['Instant alerts', 'Performance metrics', 'Detailed analytics']
+  },
+  {
+    icon: 'Layers',
+    title: 'Microservices approach',
+    description: 'Modular components for maximum flexibility',
+    items: ['Independent scaling', 'Isolated failure domains', 'Technology diversity']
+  }
+];
 
 // Fallback data in case database fetch fails or returns no results
 const getFallbackTechnologyData = (): TechnologySection[] => [

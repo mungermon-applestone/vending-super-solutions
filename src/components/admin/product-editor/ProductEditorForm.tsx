@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ const ProductEditorForm = ({ productSlug }: ProductEditorFormProps) => {
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   
+  // Log that we're trying to edit a specific product
   console.log('[ProductEditorForm] Rendering with product slug:', productSlug);
   
   // Use our custom hook for form handling

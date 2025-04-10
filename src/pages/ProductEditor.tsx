@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import ProductEditorForm from '@/components/admin/product-editor/ProductEditorForm';
@@ -13,9 +13,15 @@ const ProductEditorPage = () => {
   
   console.log(`[ProductEditorPage] Rendering editor for product: ${productSlug || 'new product'}`);
   
+  // Log when the component mounts or the productSlug changes
+  useEffect(() => {
+    console.log(`[ProductEditorPage] Product slug from URL params: ${productSlug}`);
+    console.log(`[ProductEditorPage] Is this a create or edit operation: ${!productSlug || productSlug === 'new' ? 'create' : 'edit'}`);
+  }, [productSlug]);
+  
   return (
     <Layout>
-      <ProductEditorForm key={`editor-${productSlug || 'new'}`} productSlug={productSlug} />
+      <ProductEditorForm key={`editor-${productSlug || 'new'}`} productSlug={productSlug === 'new' ? undefined : productSlug} />
     </Layout>
   );
 };
