@@ -3,7 +3,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTechnology } from '@/hooks/useTechnologyData';
+import { useTechnologyData } from '@/hooks/useTechnologyData';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import TechnologyHero from '@/components/technology/TechnologyHero';
@@ -14,10 +14,11 @@ const TechnologyLanding = () => {
   const techSlug = slug || 'enterprise-platform'; // Default to main technology page if no slug provided
   
   const { 
-    data: technology, 
+    technology, 
     isLoading, 
+    isError,
     error 
-  } = useTechnology(techSlug);
+  } = useTechnologyData(techSlug);
 
   return (
     <Layout>
@@ -32,7 +33,7 @@ const TechnologyLanding = () => {
             <Skeleton className="h-64" />
           </div>
         </div>
-      ) : error ? (
+      ) : isError ? (
         <div className="container max-w-7xl py-12">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
