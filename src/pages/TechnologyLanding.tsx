@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTechnologyData } from '@/hooks/useTechnologyData';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, LayoutTemplate } from 'lucide-react';
 import TechnologyHero from '@/components/technology/TechnologyHero';
 import TechnologySections from '@/components/technology/TechnologySections';
 import { Button } from '@/components/ui/button';
@@ -116,6 +115,11 @@ const TechnologyLanding = () => {
                 </Button>
                 <Button asChild variant="outline">
                   <Link to="/partner">Partner With Us</Link>
+                </Button>
+                <Button asChild variant="outline" className="flex items-center gap-2">
+                  <Link to="/technology/simple">
+                    <LayoutTemplate size={16} /> View Simplified Layout
+                  </Link>
                 </Button>
               </div>
             </div>

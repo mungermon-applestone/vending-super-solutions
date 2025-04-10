@@ -18,6 +18,7 @@ import ProductEditor from "./pages/ProductEditor";
 import BusinessGoalsLanding from "./pages/BusinessGoalsLanding";
 import BusinessGoalDetail from "./pages/BusinessGoalDetail";
 import TechnologyLanding from "./pages/TechnologyLanding";
+import SimpleTechnologyPage from "./pages/SimpleTechnologyPage";
 import TechnologyEditor from "./pages/TechnologyEditor";
 import CaseStudies from "./pages/CaseStudies";
 import CaseStudyDetail from "./pages/CaseStudyDetail";
@@ -83,6 +84,7 @@ function App() {
       
       {/* Technology routes */}
       <Route path="/technology" element={<TechnologyLanding />} />
+      <Route path="/technology/simple" element={<SimpleTechnologyPage />} />
       <Route path="/technology/:slug" element={<TechnologyLanding />} />
       
       {/* Case Studies routes */}
