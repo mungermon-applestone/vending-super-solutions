@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Save } from 'lucide-react';
 import { Form } from '@/components/ui/form';
 import { useProductEditorForm } from '@/hooks/useProductEditorForm';
-import { ProductFormData } from '@/types/forms';
 
 // Import form sections
 import BasicInformation from './sections/BasicInformation';
