@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,14 +19,12 @@ import { CMSTechnology } from '@/types/cms';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useQueryClient, useQuery } from '@tanstack/react-query';
 
 const AdminTechnology = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   
-  // State for delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [techToDelete, setTechToDelete] = useState<{ id: string; title: string, slug: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -67,7 +66,6 @@ const AdminTechnology = () => {
     
     try {
       setIsDeleting(true);
-      // Call the delete function with the slug
       await deleteTechnology(techToDelete.slug);
       
       toast({
@@ -75,7 +73,6 @@ const AdminTechnology = () => {
         description: `${techToDelete.title} has been deleted successfully`
       });
       
-      // Invalidate and refetch queries to update the UI
       queryClient.invalidateQueries({ queryKey: ['technologies'] });
       
       setDeleteDialogOpen(false);

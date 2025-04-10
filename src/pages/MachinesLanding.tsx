@@ -7,6 +7,7 @@ import { ChevronRight, Server, HardDrive } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useMachines } from '@/hooks/useMachinesData';
 import { Wifi } from '@/components/ui/Wifi';
+import { CMSMachine } from '@/types/cms';
 
 const MachinesLanding = () => {
   const location = useLocation();
@@ -22,10 +23,11 @@ const MachinesLanding = () => {
   }, [location.hash]);
 
   const { data: machines = [], isLoading } = useMachines();
+  const typedMachines = machines as CMSMachine[];
   
   // Filter machines by type
-  const vendingMachines = machines.filter(machine => machine.type === 'vending');
-  const smartLockers = machines.filter(machine => machine.type === 'locker');
+  const vendingMachines = typedMachines.filter(machine => machine.type === 'vending');
+  const smartLockers = typedMachines.filter(machine => machine.type === 'locker');
 
   const renderMachineCard = (machine) => {
     const machineImage = machine.images?.[0]?.url || machine.image;

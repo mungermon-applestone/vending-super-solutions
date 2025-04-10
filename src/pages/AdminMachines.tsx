@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { CMSMachine } from '@/types/cms';
 
 const AdminMachines = () => {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ const AdminMachines = () => {
   const [machineToDelete, setMachineToDelete] = useState<{id: string, title: string} | null>(null);
 
   const { data: machines = [], isLoading, refetch } = useMachines();
+  const typedMachines = machines as CMSMachine[];
   const deleteMutation = useDeleteMachine();
 
   const handleDeleteClick = (machine: any) => {
@@ -121,11 +123,11 @@ const AdminMachines = () => {
           <div className="flex justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
           </div>
-        ) : machines && machines.length > 0 ? (
+        ) : typedMachines && typedMachines.length > 0 ? (
           <div className="bg-white rounded-md shadow overflow-x-auto">
             <div className="p-4 border-b">
               <p className="text-sm text-gray-500">
-                Showing {machines.length} machine{machines.length !== 1 && 's'}
+                Showing {typedMachines.length} machine{typedMachines.length !== 1 && 's'}
               </p>
             </div>
             <Table>
@@ -139,7 +141,7 @@ const AdminMachines = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {machines.map((machine) => (
+                {typedMachines.map((machine) => (
                   <TableRow key={machine.id}>
                     <TableCell className="font-medium">{machine.title}</TableCell>
                     <TableCell>

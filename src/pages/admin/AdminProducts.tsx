@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, Eye, Trash2 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Plus, Edit, ChevronRight, Trash2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -33,11 +33,9 @@ const AdminProducts = () => {
   const queryClient = useQueryClient();
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // State for delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<{ id: string; title: string; slug: string } | null>(null);
   
-  // Fetch all product types to display in the table
   const { data: productTypes = [], isLoading: isLoadingProducts, refetch } = useQuery({
     queryKey: ['productTypes'],
     queryFn: async () => {
@@ -55,7 +53,6 @@ const AdminProducts = () => {
     },
   });
 
-  // Debug log for product types
   console.log('[AdminProducts] Product types loaded:', productTypes);
 
   const handleDeleteClick = (product: any) => {
@@ -72,7 +69,6 @@ const AdminProducts = () => {
     
     try {
       setIsDeleting(true);
-      // Call the delete function with the slug
       await deleteProductType(productToDelete.slug);
       
       toast({
@@ -80,7 +76,6 @@ const AdminProducts = () => {
         description: `${productToDelete.title} has been deleted successfully.`
       });
       
-      // Invalidate and refetch queries to update the UI
       queryClient.invalidateQueries({ queryKey: ['productTypes'] });
       
       setDeleteDialogOpen(false);

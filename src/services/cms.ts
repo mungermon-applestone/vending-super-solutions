@@ -1,4 +1,3 @@
-
 import { 
   CMSMachine, 
   CMSProductType, 
@@ -7,7 +6,7 @@ import {
   CMSTechnology
 } from '@/types/cms';
 import { fetchFromCMS } from '@/services/cms/fetchFromCMS';
-import { fetchProductTypeBySlug, fetchProductTypeByUUID } from '@/services/cms/contentTypes/productTypes';
+import { fetchProductTypeBySlug, fetchProductTypeByUUID, deleteProductType } from '@/services/cms/contentTypes/productTypes';
 import { fetchBusinessGoalBySlug } from '@/services/cms/contentTypes/businessGoals';
 import { 
   normalizeSlug, 
@@ -19,7 +18,8 @@ import { fetchMachineById, createMachine, updateMachine, deleteMachine } from '@
 // Import everything from technologies through one import
 import {
   fetchTechnologies,
-  fetchTechnologyBySlug
+  fetchTechnologyBySlug,
+  deleteTechnology
 } from './cms/contentTypes/technologies';
 
 export async function getMachines(filters: Record<string, any> = {}): Promise<CMSMachine[]> {
@@ -36,7 +36,7 @@ export async function getMachineBySlug(type: string, id: string): Promise<CMSMac
 }
 
 export async function getMachineById(id: string): Promise<CMSMachine | null> {
-  return await fetchMachineById<CMSMachine>(id);
+  return await fetchMachineById(id);
 }
 
 export async function createNewMachine(machineData: any): Promise<string> {
@@ -54,6 +54,11 @@ export async function removeExistingMachine(id: string): Promise<boolean> {
 export async function getProductTypes(): Promise<CMSProductType[]> {
   console.log("[cms.ts] Fetching all product types");
   return await fetchFromCMS<CMSProductType>('product-types');
+}
+
+export async function deleteProductType(id: string): Promise<boolean> {
+  console.log(`[cms.ts] Deleting product type with ID: ${id}`);
+  return await deleteProductType(id);
 }
 
 export async function getProductTypeBySlug(slug: string): Promise<CMSProductType | null> {
@@ -169,3 +174,4 @@ export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGo
 // Export technology functions
 export const getTechnologies = fetchTechnologies;
 export const getTechnologyBySlug = fetchTechnologyBySlug;
+export const deleteTechnology = deleteTechnology;

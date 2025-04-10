@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useQueryClient, useBusinessGoals } from '@/hooks/useCMSData';
+import { useQueryClient } from '@tanstack/react-query';
+import { useBusinessGoals } from '@/hooks/useCMSData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Edit, Eye, Trash2, Loader2 } from 'lucide-react';

@@ -51,7 +51,8 @@ const MachineCard = ({ title, image, categories, path }: MachineCardProps) => {
 
 const MachineTypesSection = () => {
   // Fetch featured machines from CMS using the useMachines hook
-  const { data: machines = [], isLoading } = useMachines({ featured: true, limit: 3 });
+  const { data: machines = [], isLoading } = useMachines();
+  const typedMachines = machines as CMSMachine[];
   
   return (
     <section className="bg-vending-gray py-16 md:py-24">
@@ -79,7 +80,7 @@ const MachineTypesSection = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {machines.map((machine, index) => {
+            {typedMachines.map((machine, index) => {
               // Make sure image is properly converted to CMSImage with required id property
               let machineImage: CMSImage;
               

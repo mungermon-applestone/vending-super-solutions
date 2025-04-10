@@ -2,11 +2,10 @@
 import { createBusinessGoal } from './createBusinessGoal';
 import { updateBusinessGoal } from './updateBusinessGoal';
 import { deleteBusinessGoal } from './deleteBusinessGoal';
-import { businessGoalHelpers } from './businessGoalHelpers';
+// Remove the businessGoalHelpers export if it doesn't exist
 
 export {
   createBusinessGoal,
   updateBusinessGoal,
-  deleteBusinessGoal,
-  businessGoalHelpers
+  deleteBusinessGoal
 };
