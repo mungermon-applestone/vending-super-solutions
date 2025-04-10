@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -5,6 +6,40 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { CMSProvider } from "@/context/CMSContext";
+
+// Import all page components
+import Index from "./pages/Index";
+import ProductsLanding from "./pages/ProductsLanding";
+import ProductDetail from "./pages/ProductDetail";
+import MachinesLanding from "./pages/MachinesLanding";
+import MachineDetail from "./pages/MachineDetail";
+import TechnologyLanding from "./pages/TechnologyLanding";
+import TechnologyEditor from "./pages/TechnologyEditor";
+import MigrateTechnologyData from "./pages/MigrateTechnologyData";
+import MigrateMachinesData from "./pages/MigrateMachinesData";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Partner from "./pages/Partner";
+import NotFound from "./pages/NotFound";
+
+// Admin components
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProducts from "./pages/admin/AdminProducts";
+import ProductEditor from "./pages/ProductEditor";
+import AdminBusinessGoals from "./pages/admin/AdminBusinessGoals";
+import BusinessGoalEditor from "./pages/admin/BusinessGoalEditor";
+import AdminMachines from "./pages/admin/AdminMachines";
+import MachineEditor from "./pages/MachineEditor";
+import AdminTechnology from "./pages/admin/AdminTechnology";
+import BusinessGoalsLanding from "./pages/BusinessGoalsLanding";
+import BusinessGoalDetail from "./pages/BusinessGoalDetail";
+
+// Additional pages
+import AboutUs from "./pages/AboutUs";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import CaseStudies from "./pages/CaseStudies";
+import CaseStudyDetail from "./pages/CaseStudyDetail";
+import Contact from "./pages/Contact";
 
 // Import individual machine pages
 import Option4Refrigerated from "./pages/machines/Option4Refrigerated";
