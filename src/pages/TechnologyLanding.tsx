@@ -88,16 +88,48 @@ const TechnologyLanding = () => {
   // If no specific technology is requested, show a list of all technologies
   return (
     <Layout>
+      {/* Hero Section with similar styling to machines page */}
       <div className="bg-gradient-to-r from-slate-50 to-slate-100 py-16">
-        <div className="container max-w-7xl">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Our Technology Platform</h1>
-          <p className="text-lg text-muted-foreground mb-8 max-w-3xl">
-            Explore our suite of enterprise-grade technologies designed to streamline operations and enhance your business.
-          </p>
+        <div className="container-wide">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold text-vending-blue-dark mb-6">Our Technology Platform</h1>
+              <p className="text-lg text-gray-700 mb-8 max-w-2xl">
+                Explore our suite of enterprise-grade technologies designed to streamline operations and enhance your business.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Button asChild className="bg-vending-blue text-white hover:bg-vending-blue-dark">
+                  <Link to="/contact">Request a Demo</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/partner">Partner With Us</Link>
+                </Button>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+                <img 
+                  src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789" 
+                  alt="Vending Technology" 
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+              <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
+                <p className="font-bold">Hardware agnostic platform</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
       <div className="container max-w-7xl py-12">
+        <div className="max-w-4xl mx-auto mb-12 text-center">
+          <h2 className="text-3xl font-bold text-vending-blue-dark mb-6">Advanced Solutions</h2>
+          <p className="text-lg text-muted-foreground mb-8">
+            Discover how our technology can transform your vending operations
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {allTechnologies && allTechnologies.length > 0 ? (
             allTechnologies.map(tech => (
