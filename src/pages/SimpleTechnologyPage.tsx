@@ -5,24 +5,17 @@ import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import { Button } from '@/components/ui/button';
 import { 
-  Cloud, 
-  Wifi, 
-  Settings, 
-  Shield, 
-  BarChart, 
-  CreditCard,
-  Smartphone,
+  LayoutGrid,
+  Network,
+  Shuffle,
+  Layers,
+  Shield,
   Lock,
-  Database,
-  Bell,
-  Battery,
-  ClipboardCheck,
-  UserCheck,
-  RefreshCcw,
-  TrendingUp,
-  PieChart,
-  Map,
-  LayoutGrid
+  Plug,
+  CreditCard,
+  Wallet,
+  BarChart3,
+  Brain
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -38,148 +31,239 @@ interface TechnologySection {
   description: string;
   features: TechFeature[];
   image: string;
-  cta?: {
-    label: string;
-    link: string;
-  };
 }
 
 const SimpleTechnologyPage = () => {
   const technologies: TechnologySection[] = [
     {
-      id: 'cloud-management',
-      title: 'Cloud-Based Management',
-      description: 'Our cloud-based management system allows you to monitor and manage your vending machines from anywhere in the world.',
+      id: 'architecture',
+      title: 'Architecture',
+      description: 'Our platform is built on a modern, scalable architecture that ensures reliability and performance for all your vending operations.',
       features: [
         {
-          icon: <BarChart className="h-5 w-5 text-blue-500" />,
-          title: 'Real-time Monitoring',
-          description: 'Track sales, inventory, and machine status in real-time'
+          icon: <Network className="h-5 w-5 text-blue-500" />,
+          title: 'Cloud-native design',
+          description: 'Built for scalability and resilience'
         },
         {
-          icon: <Settings className="h-5 w-5 text-blue-500" />,
-          title: 'Remote Management',
-          description: 'Update prices, products, and settings remotely'
+          icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+          title: 'Real-time monitoring',
+          description: 'Live tracking of machine status and performance'
         },
         {
-          icon: <Bell className="h-5 w-5 text-blue-500" />,
-          title: 'Automated Alerts',
-          description: 'Receive notifications for low inventory, maintenance needs, or unusual activity'
+          icon: <Layers className="h-5 w-5 text-blue-500" />,
+          title: 'Microservices approach',
+          description: 'Modular components for maximum flexibility'
         }
       ],
-      image: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81',
-      cta: {
-        label: 'Learn more about cloud management',
-        link: '/contact'
-      }
+      image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31'
     },
     {
-      id: 'iot-connectivity',
-      title: 'IoT Connectivity',
-      description: 'Our machines use advanced IoT technology to stay connected and provide real-time data and control.',
+      id: 'open-standards',
+      title: 'Open Standards',
+      description: 'We embrace open standards to ensure interoperability and future-proof your investment in vending technology.',
       features: [
         {
-          icon: <Wifi className="h-5 w-5 text-blue-500" />,
-          title: 'Multiple connectivity options',
-          description: 'Cellular, Wi-Fi, and Ethernet'
+          icon: <Shuffle className="h-5 w-5 text-blue-500" />,
+          title: 'Industry-standard protocols',
+          description: 'Compatible with MDB, DEX, and other vending standards'
         },
         {
-          icon: <Battery className="h-5 w-5 text-blue-500" />,
-          title: 'Low-power operation',
-          description: 'Extended battery life'
+          icon: <Plug className="h-5 w-5 text-blue-500" />,
+          title: 'Open APIs',
+          description: 'Well-documented interfaces for custom integrations'
         },
         {
-          icon: <Lock className="h-5 w-5 text-blue-500" />,
-          title: 'Secure communication',
-          description: 'End-to-end encryption'
+          icon: <LayoutGrid className="h-5 w-5 text-blue-500" />,
+          title: 'Standardized data formats',
+          description: 'Consistent data structures for easy integration'
         }
       ],
-      image: 'https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b',
-      cta: {
-        label: 'Explore IoT capabilities',
-        link: '/contact'
-      }
+      image: 'https://images.unsplash.com/photo-1617042375876-a13e36732a04'
+    },
+    {
+      id: 'hardware-agnostic',
+      title: 'Hardware Agnostic',
+      description: 'Our platform works with virtually any vending hardware, allowing you to leverage existing investments or choose the best equipment for your needs.',
+      features: [
+        {
+          icon: <Layers className="h-5 w-5 text-blue-500" />,
+          title: 'Universal compatibility',
+          description: 'Works with machines from all major manufacturers'
+        },
+        {
+          icon: <Shuffle className="h-5 w-5 text-blue-500" />,
+          title: 'Mixed fleet management',
+          description: 'Manage different machine types from a single dashboard'
+        },
+        {
+          icon: <Network className="h-5 w-5 text-blue-500" />,
+          title: 'Flexible telemetry options',
+          description: 'Multiple connectivity choices to suit any environment'
+        }
+      ],
+      image: 'https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b'
     },
     {
       id: 'security',
-      title: 'Enterprise-Grade Security',
+      title: 'Security',
       description: 'We take security seriously with multiple layers of protection for your data and operations.',
       features: [
         {
           icon: <Shield className="h-5 w-5 text-blue-500" />,
           title: 'SOC 2 Type II certified',
-          description: 'Enterprise-grade security'
+          description: 'Enterprise-grade security compliance'
         },
         {
-          icon: <UserCheck className="h-5 w-5 text-blue-500" />,
-          title: 'Role-based access control',
-          description: 'With multi-factor authentication'
+          icon: <Lock className="h-5 w-5 text-blue-500" />,
+          title: 'End-to-end encryption',
+          description: 'Secure data transmission and storage'
         },
         {
-          icon: <ClipboardCheck className="h-5 w-5 text-blue-500" />,
+          icon: <Shield className="h-5 w-5 text-blue-500" />,
           title: 'Regular security audits',
-          description: 'Penetration testing and compliance checks'
+          description: 'Ongoing penetration testing and vulnerability assessment'
         }
       ],
-      image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3',
-      cta: {
-        label: 'Learn about our security',
-        link: '/contact'
-      }
+      image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3'
     },
     {
-      id: 'payment-processing',
-      title: 'Flexible Payment Processing',
-      description: 'Accept all popular payment methods to maximize sales and customer satisfaction.',
+      id: 'privacy',
+      title: 'Privacy',
+      description: 'Our platform is designed with privacy-first principles, ensuring compliance with global regulations and protecting customer data.',
+      features: [
+        {
+          icon: <Lock className="h-5 w-5 text-blue-500" />,
+          title: 'GDPR compliant',
+          description: 'Meeting European data protection standards'
+        },
+        {
+          icon: <Shield className="h-5 w-5 text-blue-500" />,
+          title: 'Data minimization',
+          description: 'Only collecting what\'s necessary for operation'
+        },
+        {
+          icon: <Shield className="h-5 w-5 text-blue-500" />,
+          title: 'Customer consent management',
+          description: 'Tools to manage privacy preferences and consent'
+        }
+      ],
+      image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3'
+    },
+    {
+      id: 'third-party-integrations',
+      title: 'Third-Party Integrations',
+      description: 'Connect your vending operations with your existing business systems and third-party services for seamless data flow.',
+      features: [
+        {
+          icon: <Layers className="h-5 w-5 text-blue-500" />,
+          title: 'ERP integrations',
+          description: 'Connect with SAP, Oracle, Microsoft Dynamics and more'
+        },
+        {
+          icon: <Shuffle className="h-5 w-5 text-blue-500" />,
+          title: 'CRM connections',
+          description: 'Salesforce, HubSpot and other CRM platforms'
+        },
+        {
+          icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+          title: 'Analytics platforms',
+          description: 'Export data to PowerBI, Tableau and other BI tools'
+        }
+      ],
+      image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4'
+    },
+    {
+      id: 'payments',
+      title: 'Payments',
+      description: 'Our payment processing system supports all major payment methods and providers, maximizing convenience for your customers.',
       features: [
         {
           icon: <CreditCard className="h-5 w-5 text-blue-500" />,
           title: 'Multiple payment options',
-          description: 'Credit cards, mobile payments, and contactless'
+          description: 'Credit cards, debit cards, and digital wallets'
         },
         {
-          icon: <Smartphone className="h-5 w-5 text-blue-500" />,
-          title: 'Mobile app integration',
-          description: 'Custom branded payment applications'
+          icon: <CreditCard className="h-5 w-5 text-blue-500" />,
+          title: 'PCI DSS compliance',
+          description: 'Highest standards for payment security'
         },
         {
-          icon: <RefreshCcw className="h-5 w-5 text-blue-500" />,
-          title: 'Automatic reconciliation',
-          description: 'Seamless transaction reporting and accounting'
+          icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+          title: 'Detailed transaction reporting',
+          description: 'Comprehensive analytics for all transactions'
         }
       ],
-      image: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df',
-      cta: {
-        label: 'Explore payment options',
-        link: '/contact'
-      }
+      image: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df'
     },
     {
-      id: 'analytics',
-      title: 'Advanced Analytics',
-      description: 'Powerful insights to optimize your vending operations and increase revenue.',
+      id: 'cashless',
+      title: 'Cashless',
+      description: 'Enable frictionless purchases with our comprehensive cashless payment solutions for modern consumers.',
       features: [
         {
-          icon: <TrendingUp className="h-5 w-5 text-blue-500" />,
-          title: 'Sales performance tracking',
-          description: 'Monitor trends across locations and product types'
+          icon: <Wallet className="h-5 w-5 text-blue-500" />,
+          title: 'Mobile payments',
+          description: 'Apple Pay, Google Pay, and other mobile wallets'
         },
         {
-          icon: <PieChart className="h-5 w-5 text-blue-500" />,
-          title: 'Inventory optimization',
-          description: 'Data-driven restocking recommendations'
+          icon: <Layers className="h-5 w-5 text-blue-500" />,
+          title: 'Contactless cards',
+          description: 'Support for NFC and tap-to-pay technologies'
         },
         {
-          icon: <Map className="h-5 w-5 text-blue-500" />,
-          title: 'Location analysis',
-          description: 'Identify optimal placement for maximum returns'
+          icon: <CreditCard className="h-5 w-5 text-blue-500" />,
+          title: 'Customer accounts',
+          description: 'Stored value and subscription options'
         }
       ],
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71',
-      cta: {
-        label: 'Discover our analytics',
-        link: '/contact'
-      }
+      image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3'
+    },
+    {
+      id: 'live-inventory',
+      title: 'Live Inventory',
+      description: 'Real-time inventory management ensures optimal stock levels and minimizes out-of-stock situations.',
+      features: [
+        {
+          icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+          title: 'Real-time monitoring',
+          description: 'Live tracking of product levels across all machines'
+        },
+        {
+          icon: <Network className="h-5 w-5 text-blue-500" />,
+          title: 'Automated alerts',
+          description: 'Instant notifications for low stock and anomalies'
+        },
+        {
+          icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+          title: 'Demand forecasting',
+          description: 'AI-powered prediction of inventory needs'
+        }
+      ],
+      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71'
+    },
+    {
+      id: 'ai',
+      title: 'AI',
+      description: 'Artificial intelligence and machine learning capabilities drive insights, automation, and optimization across your vending operations.',
+      features: [
+        {
+          icon: <Brain className="h-5 w-5 text-blue-500" />,
+          title: 'Predictive analytics',
+          description: 'Forecast sales, maintenance needs, and inventory requirements'
+        },
+        {
+          icon: <Brain className="h-5 w-5 text-blue-500" />,
+          title: 'Personalization engine',
+          description: 'Tailor customer experiences based on preferences and history'
+        },
+        {
+          icon: <BarChart3 className="h-5 w-5 text-blue-500" />,
+          title: 'Anomaly detection',
+          description: 'Identify unusual patterns that may indicate issues'
+        }
+      ],
+      image: 'https://images.unsplash.com/photo-1677442135136-760c813dce1b'
     }
   ];
 
@@ -245,14 +329,6 @@ const SimpleTechnologyPage = () => {
                     </div>
                   ))}
                 </div>
-
-                {tech.cta && (
-                  <Button asChild variant="outline" className="mt-2">
-                    <Link to={tech.cta.link}>
-                      {tech.cta.label}
-                    </Link>
-                  </Button>
-                )}
               </div>
 
               <div className={cn(
