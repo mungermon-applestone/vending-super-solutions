@@ -17,10 +17,10 @@ const MachineDetail: React.FC<MachineDetailProps> = ({ machine }) => {
   return (
     <>
       <MachineDetailHero machine={machine} />
-      <MachineDetailSpecifications specs={machine.specs} />
-      <MachineDetailFeatures features={machine.features} />
-      <MachineDetailDeployments deploymentExamples={machine.deploymentExamples} />
-      <MachineDetailGallery title={machine.title} images={machine.images} />
+      <MachineDetailSpecifications specs={machine.specs || []} />
+      <MachineDetailFeatures features={machine.features || []} />
+      <MachineDetailDeployments deploymentExamples={machine.deploymentExamples || []} />
+      <MachineDetailGallery title={machine.title} images={machine.images || []} />
       <MachineDetailInquiry machineTitle={machine.title} />
       <CTASection />
     </>

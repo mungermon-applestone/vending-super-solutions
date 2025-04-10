@@ -56,10 +56,10 @@ export async function getProductTypes(): Promise<CMSProductType[]> {
   return await fetchFromCMS<CMSProductType>('product-types');
 }
 
-export async function removeProductType(id: string): Promise<boolean> {
+export async function deleteProductType(id: string): Promise<boolean> {
   console.log(`[cms.ts] Deleting product type with ID: ${id}`);
-  const { deleteProductType } = await import('@/services/cms/contentTypes/productTypes');
-  return await deleteProductType(id);
+  const { deleteProductType: removeProductType } = await import('@/services/cms/contentTypes/productTypes');
+  return await removeProductType(id);
 }
 
 export async function getProductTypeBySlug(slug: string): Promise<CMSProductType | null> {

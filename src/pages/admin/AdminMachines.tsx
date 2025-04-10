@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -89,11 +88,17 @@ const AdminMachines = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {typedMachines.map((machine) => (
-                  <MachineTableRow 
-                    key={machine.id} 
-                    machine={machine} 
-                    onDeleteClick={handleDeleteClick}
+                {machines.map((machine) => (
+                  <MachineTableRow
+                    key={machine.id}
+                    machine={{
+                      id: machine.id,
+                      title: machine.title,
+                      type: machine.type || '',
+                      temperature: machine.temperature || '',
+                      slug: machine.slug || ''
+                    }}
+                    onDelete={handleDeleteClick}
                   />
                 ))}
               </TableBody>

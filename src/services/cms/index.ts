@@ -6,12 +6,8 @@ import {
 } from './contentTypes/businessGoals';
 
 import {
-  getMachines,
-  getMachineBySlug,
-  getMachineById,
-  createMachine,
-  updateMachine,
-  deleteMachine
+  fetchMachines as getMachines,
+  fetchMachineById as getMachineById
 } from './contentTypes/machines';
 
 import {
@@ -31,6 +27,12 @@ import {
 
 import { fetchTestimonials } from './contentTypes/testimonials';
 
+// Define getMachineBySlug locally since it doesn't exist in the imports
+const getMachineBySlug = async (type: string, id: string) => {
+  const machines = await getMachines({ type, slug: id });
+  return machines.length > 0 ? machines[0] : null;
+};
+
 export {
   // Business Goals
   fetchBusinessGoalBySlug,
@@ -40,9 +42,6 @@ export {
   getMachines,
   getMachineBySlug,
   getMachineById,
-  createMachine,
-  updateMachine,
-  deleteMachine,
   
   // Product Types
   fetchProductTypeBySlug,

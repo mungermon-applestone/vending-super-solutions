@@ -1,137 +1,130 @@
+
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
-import { useMachines } from '@/hooks/useMachinesData';
-import { CMSMachine, CMSImage } from '@/types/cms';
+import { ArrowRight } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { getProductTypes } from '@/services/cms';
+import { CMSProductType } from '@/types/cms';
+import { normalizeSlug } from '@/services/cms/utils/slugMatching';
 
-interface MachineCardProps {
+interface ProductCardProps {
   title: string;
-  image: string | CMSImage;
-  categories: string[];
+  description: string;
+  image?: string;
   path: string;
 }
 
-const MachineCard = ({ title, image, categories, path }: MachineCardProps) => {
-  // Handle both string and CMSImage types
-  const imageUrl = typeof image === 'string' ? image : image.url;
-  const imageAlt = typeof image === 'string' ? title : (image.alt || title);
-
+const ProductCard = ({ title, description, image, path }: ProductCardProps) => {
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-md">
-      <div className="relative">
-        <img 
-          src={imageUrl} 
-          alt={imageAlt} 
-          className="w-full h-64 object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-          <div className="p-6">
-            <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {categories.map((category, index) => (
-                <span 
-                  key={index} 
-                  className="text-xs bg-vending-teal/90 text-white px-2 py-1 rounded-full"
-                >
-                  {category}
-                </span>
-              ))}
-            </div>
-            <Button asChild variant="outline" className="bg-white/80 hover:bg-white">
-              <Link to={path} className="flex items-center">
-                View Details <ChevronRight className="ml-1 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
+    <div className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow">
+      <img 
+        src={image || "https://images.unsplash.com/photo-1604719312566-8912e9227c6a"} 
+        alt={title} 
+        className="w-full h-48 object-cover"
+      />
+      <div className="p-5">
+        <h3 className="text-xl font-semibold mb-2">{title}</h3>
+        <p className="text-gray-600 mb-4 line-clamp-2">{description}</p>
+        <Button asChild variant="outline" className="w-full">
+          <Link to={path} className="flex items-center justify-center">
+            Learn more <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
       </div>
     </div>
   );
 };
 
-const MachineTypesSection = () => {
-  // Fetch featured machines from CMS using the useMachines hook
-  const { data: machines = [], isLoading } = useMachines();
-  const typedMachines = machines as CMSMachine[];
+const ProductTypesSection = () => {
+  const { data: productTypes = [], isLoading } = useQuery({
+    queryKey: ['productTypes'],
+    queryFn: () => getProductTypes(),
+  });
+
+  const staticProductTypes = [
+    {
+      title: "Grocery",
+      description: "Automate grocery sales with temperature-controlled vending for snacks, drinks, and everyday essentials.",
+      image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a",
+      path: "/products/grocery"
+    },
+    {
+      title: "Vape & Cannabis",
+      description: "Secure solutions for age-restricted products with ID verification and compliance features.",
+      image: "https://images.unsplash.com/photo-1560913210-91e811632701",
+      path: "/products/vape"
+    },
+    {
+      title: "Fresh Food",
+      description: "Temperature-monitored vending for fresh meals, salads, and sandwiches with extended shelf life tracking.",
+      image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+      path: "/products/fresh-food"
+    },
+    {
+      title: "Cosmetics",
+      description: "Premium display options for beauty products with detailed product information access.",
+      image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348",
+      path: "/products/cosmetics"
+    }
+  ];
+
+  const displayProductTypes = productTypes && productTypes.length > 0 
+    ? productTypes.map((product: CMSProductType) => ({
+        title: product.title,
+        description: product.description,
+        image: product.image?.url || "",
+        path: `/products/${normalizeSlug(product.slug)}`
+      }))
+    : staticProductTypes;
+  
+  const featuredProductTypes = displayProductTypes.slice(0, 4);
   
   return (
-    <section className="bg-vending-gray py-16 md:py-24">
+    <section className="py-16 md:py-24">
       <div className="container-wide">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-            Compatible Machine Types
-          </h2>
-          <p className="subtitle mx-auto">
-            Our software integrates with a wide variety of vending machines and smart lockers to meet your specific requirements.
-          </p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
+              Sell Any Product Type
+            </h2>
+            <p className="subtitle max-w-2xl">
+              Our versatile vending software adapts to various product categories, providing specialized features for each.
+            </p>
+          </div>
+          <Button asChild className="mt-4 md:mt-0">
+            <Link to="/products">View All Product Types</Link>
+          </Button>
         </div>
         
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-lg overflow-hidden shadow-md p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-lg overflow-hidden shadow-md bg-white p-4">
                 <div className="animate-pulse">
-                  <div className="bg-gray-300 h-64 w-full mb-4"></div>
+                  <div className="bg-gray-300 h-48 w-full mb-4"></div>
                   <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-300 rounded w-full mb-4"></div>
+                  <div className="h-10 bg-gray-300 rounded w-full"></div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {typedMachines.map((machine, index) => {
-              // Make sure image is properly converted to CMSImage with required id property
-              let machineImage: CMSImage;
-              
-              if (machine.images && machine.images.length > 0) {
-                // If the machine image already has an id, use it directly
-                if ('id' in machine.images[0]) {
-                  machineImage = machine.images[0] as CMSImage;
-                } else {
-                  // Otherwise create a proper CMSImage with an id
-                  machineImage = {
-                    id: `machine-image-${machine.id}-${index}`,
-                    url: machine.images[0].url || "https://placehold.co/600x400?text=No+Image",
-                    alt: machine.images[0].alt || "Machine image"
-                  };
-                }
-              } else {
-                // Fallback if no images
-                machineImage = {
-                  id: `machine-fallback-${machine.id}-${index}`,
-                  url: "https://placehold.co/600x400?text=No+Image",
-                  alt: "No Image"
-                };
-              }
-              
-              // Create machine categories
-              const machineCategories = [
-                machine.type.charAt(0).toUpperCase() + machine.type.slice(1),
-                machine.temperature.charAt(0).toUpperCase() + machine.temperature.slice(1)
-              ];
-              
-              return (
-                <MachineCard 
-                  key={index}
-                  title={machine.title}
-                  image={machineImage}
-                  categories={machineCategories}
-                  path={`/machines/${machine.type}/${machine.slug}`}
-                />
-              );
-            })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredProductTypes.map((product, index) => (
+              <ProductCard 
+                key={index}
+                title={product.title}
+                description={product.description}
+                image={product.image}
+                path={product.path}
+              />
+            ))}
           </div>
         )}
-        
-        <div className="text-center mt-12">
-          <Button asChild className="btn-primary">
-            <Link to="/machines">Browse All Machine Types</Link>
-          </Button>
-        </div>
       </div>
     </section>
   );
 };
 
-export default MachineTypesSection;
+export default ProductTypesSection;
