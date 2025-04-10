@@ -50,8 +50,10 @@ const CaseStudyCarousel = ({
             }}
             className="relative"
             onSelect={(api) => {
-              const selectedIndex = api.selectedScrollSnap();
-              setCurrentIndex(selectedIndex);
+              if (api) {
+                const selectedIndex = api.selectedScrollSnap();
+                setCurrentIndex(selectedIndex);
+              }
             }}
           >
             <CarouselContent>
