@@ -19,10 +19,11 @@ export async function fetchTechnologies<T = CMSTechnology>(): Promise<T[]> {
 
     console.log(`[fetchTechnologies] Found ${technologies.length} technologies`);
     
-    // Transform the database data into our CMS format - this will be enhanced later
+    // Transform the database data into our CMS format
+    // Initialize sections as an empty array since it's not in the database record
     const transformedData = technologies.map(technology => ({
       ...technology,
-      sections: technology.sections || []
+      sections: [] // Ensure sections always exists as an empty array at minimum
     })) as T[];
 
     return transformedData;
