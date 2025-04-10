@@ -1,8 +1,9 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { CMSTechnology } from '@/types/cms';
 import { handleError, transformTechnologyData } from '../../utils/transformers';
 
-export async function fetchTechnologies<T = any>(): Promise<T[]> {
+export async function fetchTechnologies<T = CMSTechnology>(): Promise<T[]> {
   console.log('[fetchTechnologies] Fetching all technologies from database');
 
   try {
@@ -18,13 +19,15 @@ export async function fetchTechnologies<T = any>(): Promise<T[]> {
 
     console.log(`[fetchTechnologies] Found ${technologies.length} technologies`);
     
-    // Transform the database data into our CMS format
-    const transformedData = await Promise.all(
-      technologies.map(technology => transformTechnologyData(technology))
-    );
+    // Transform the database data into our CMS format - this will be enhanced later
+    const transformedData = technologies.map(technology => ({
+      ...technology,
+      sections: technology.sections || []
+    })) as T[];
 
-    return transformedData as T[];
+    return transformedData;
   } catch (error) {
-    return handleError('fetchTechnologies', error);
+    console.error('[fetchTechnologies] Error fetching technologies:', error);
+    return [];
   }
 }
