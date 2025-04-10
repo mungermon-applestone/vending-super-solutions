@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Carousel,
@@ -37,8 +37,7 @@ const CaseStudyCarousel = ({
   const [api, setApi] = useState<CarouselApi>();
 
   // Set up effect to handle carousel changes
-  // Update the currentIndex when the carousel changes
-  const handleApiChange = (api: CarouselApi | undefined) => {
+  useEffect(() => {
     if (!api) return;
     
     const handleSelect = () => {
@@ -46,13 +45,14 @@ const CaseStudyCarousel = ({
     };
 
     api.on("select", handleSelect);
+    
     // Initial call to set the first slide
     handleSelect();
 
     return () => {
       api.off("select", handleSelect);
     };
-  };
+  }, [api]);
 
   return (
     <section className="py-16 bg-slate-50">
@@ -70,7 +70,6 @@ const CaseStudyCarousel = ({
             }}
             className="relative"
             setApi={setApi}
-            onCreated={handleApiChange}
           >
             <CarouselContent>
               {caseStudies.map((study, index) => (
