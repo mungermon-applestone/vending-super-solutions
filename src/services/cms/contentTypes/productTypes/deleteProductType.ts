@@ -2,42 +2,34 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Deletes a product type from the database
- * @param slug Slug of the product type to delete
- * @returns True if successful, throws error otherwise
+ * Delete a product type from the database
+ * @param id The UUID of the product type to delete
+ * @returns A boolean indicating whether the deletion was successful
  */
-export const deleteProductType = async (slug: string): Promise<boolean> => {
-  console.log(`[deleteProductType] Deleting product type with slug: ${slug}`);
+export async function deleteProductType(id: string): Promise<boolean> {
+  console.log(`[deleteProductType] Attempting to delete product type with ID: ${id}`);
+  
+  if (!id) {
+    console.error('[deleteProductType] No ID provided');
+    return false;
+  }
   
   try {
-    // First, fetch the product to get its ID
-    const { data: productType, error: fetchError } = await supabase
-      .from('product_types')
-      .select('id')
-      .eq('slug', slug)
-      .single();
-      
-    if (fetchError) {
-      console.error('[deleteProductType] Error fetching product type:', fetchError);
-      throw new Error(`Product type with slug '${slug}' not found`);
-    }
-    
-    const productTypeId = productType.id;
-    
     // Delete the product type
-    const { error: deleteError } = await supabase
+    const { error } = await supabase
       .from('product_types')
       .delete()
-      .eq('id', productTypeId);
+      .eq('id', id);
       
-    if (deleteError) {
-      console.error('[deleteProductType] Error deleting product type:', deleteError);
-      throw new Error(`Failed to delete product type: ${deleteError.message}`);
+    if (error) {
+      console.error('[deleteProductType] Error deleting product type:', error);
+      return false;
     }
     
+    console.log(`[deleteProductType] Successfully deleted product type with ID: ${id}`);
     return true;
   } catch (error) {
-    console.error('[deleteProductType] Error:', error);
-    throw error;
+    console.error('[deleteProductType] Error deleting product type:', error);
+    return false;
   }
-};
+}

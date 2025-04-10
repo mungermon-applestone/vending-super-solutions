@@ -17,7 +17,7 @@ const MachineDetail: React.FC<MachineDetailProps> = ({ machine }) => {
   return (
     <>
       <MachineDetailHero machine={machine} />
-      <MachineDetailSpecifications specs={machine.specs || []} />
+      <MachineDetailSpecifications specs={machine.specs || {}} />
       <MachineDetailFeatures features={machine.features || []} />
       <MachineDetailDeployments deploymentExamples={machine.deploymentExamples || []} />
       <MachineDetailGallery title={machine.title} images={machine.images || []} />

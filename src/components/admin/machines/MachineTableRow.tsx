@@ -6,6 +6,7 @@ import { TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import MachineTypeIcon from './MachineTypeIcon';
 import TemperatureBadge from './TemperatureBadge';
+import { CMSMachine } from '@/types/cms';
 
 interface MachineTableRowProps {
   machine: {
@@ -15,7 +16,7 @@ interface MachineTableRowProps {
     temperature: string;
     slug: string;
   };
-  onDeleteClick: (machine: any) => void;
+  onDeleteClick: (machine: CMSMachine) => void;
 }
 
 const MachineTableRow: React.FC<MachineTableRowProps> = ({ machine, onDeleteClick }) => {
@@ -64,7 +65,7 @@ const MachineTableRow: React.FC<MachineTableRowProps> = ({ machine, onDeleteClic
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onDeleteClick(machine)}
+            onClick={() => onDeleteClick(machine as CMSMachine)}
             title="Delete machine"
             className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
           >

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -28,7 +29,7 @@ const AdminMachines = () => {
   const typedMachines = machines as CMSMachine[];
   const deleteMutation = useDeleteMachine();
 
-  const handleDeleteClick = (machine: any) => {
+  const handleDeleteClick = (machine: CMSMachine) => {
     setMachineToDelete({
       id: machine.id,
       title: machine.title
@@ -88,7 +89,7 @@ const AdminMachines = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {machines.map((machine) => (
+                {typedMachines.map((machine) => (
                   <MachineTableRow
                     key={machine.id}
                     machine={{
@@ -98,7 +99,7 @@ const AdminMachines = () => {
                       temperature: machine.temperature || '',
                       slug: machine.slug || ''
                     }}
-                    onDelete={handleDeleteClick}
+                    onDeleteClick={handleDeleteClick}
                   />
                 ))}
               </TableBody>

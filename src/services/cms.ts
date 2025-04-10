@@ -1,3 +1,4 @@
+
 import { 
   CMSMachine, 
   CMSProductType, 
@@ -6,7 +7,11 @@ import {
   CMSTechnology
 } from '@/types/cms';
 import { fetchFromCMS } from '@/services/cms/fetchFromCMS';
-import { fetchProductTypeBySlug, fetchProductTypeByUUID } from '@/services/cms/contentTypes/productTypes';
+import { 
+  fetchProductTypeBySlug,
+  fetchProductTypeByUUID,
+  deleteProductType as removeProductType
+} from '@/services/cms/contentTypes/productTypes';
 import { fetchBusinessGoalBySlug } from '@/services/cms/contentTypes/businessGoals';
 import { 
   normalizeSlug, 
@@ -58,7 +63,6 @@ export async function getProductTypes(): Promise<CMSProductType[]> {
 
 export async function deleteProductType(id: string): Promise<boolean> {
   console.log(`[cms.ts] Deleting product type with ID: ${id}`);
-  const { deleteProductType: removeProductType } = await import('@/services/cms/contentTypes/productTypes');
   return await removeProductType(id);
 }
 
