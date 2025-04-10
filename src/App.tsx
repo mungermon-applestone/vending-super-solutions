@@ -5,34 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { CMSProvider } from "@/context/CMSContext";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import ProductsLanding from "./pages/ProductsLanding";
-import ProductDetail from "./pages/ProductDetail";
-import ProductEditor from "./pages/ProductEditor";
-import MachinesLanding from "./pages/MachinesLanding";
-import MachineDetail from "./pages/MachineDetail";
-import MachineEditor from "./pages/MachineEditor";
-import MigrateMachinesData from "./pages/MigrateMachinesData";
-import MigrateTechnologyData from "./pages/MigrateTechnologyData";
-import AdminMachines from "./pages/AdminMachines";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminTechnology from "./pages/AdminTechnology";
-import TechnologyLanding from "./pages/TechnologyLanding";
-import TechnologyEditor from "./pages/TechnologyEditor";
-import AboutUs from "./pages/AboutUs";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import CaseStudies from "./pages/CaseStudies";
-import CaseStudyDetail from "./pages/CaseStudyDetail";
-import Contact from "./pages/Contact";
-import Partner from "./pages/Partner";
-import BusinessGoalsLanding from "./pages/BusinessGoalsLanding";
-import BusinessGoalDetail from "./pages/BusinessGoalDetail";
-import AdminProducts from "./pages/AdminProducts";
-import AdminBusinessGoals from "./pages/AdminBusinessGoals";
-import BusinessGoalEditor from "./pages/BusinessGoalEditor";
 
 // Import individual machine pages
 import Option4Refrigerated from "./pages/machines/Option4Refrigerated";
@@ -127,6 +99,7 @@ const App = () => (
             <Route path="/machines/locker/21-cell-temperature-controlled" element={<Locker21Cell />} />
             
             <Route path="/technology" element={<TechnologyLanding />} />
+            <Route path="/technology/:slug" element={<TechnologyLanding />} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/blog" element={<Blog />} />

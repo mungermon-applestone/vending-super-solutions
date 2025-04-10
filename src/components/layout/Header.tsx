@@ -1,300 +1,289 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown, ChevronRight, CircleUser } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { Menu, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { getTechnologies } from '@/services/cms';
+import { CMSTechnology } from '@/types/cms';
 
-// Dropdown menu types
-interface MenuItem {
-  title: string;
-  path: string;
-}
+const Header = () => {
+  const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-interface DropdownProps {
-  title: string;
-  items: MenuItem[];
-}
+  // Fetch technologies for the dropdown
+  const { data: technologies } = useQuery<CMSTechnology[]>({
+    queryKey: ['technologies'],
+    queryFn: getTechnologies,
+  });
 
-const Dropdown: React.FC<DropdownProps> = ({ title, items }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+
+  const isActive = (path: string): boolean => {
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
 
   return (
-    <div className="relative group" onMouseEnter={() => setIsOpen(true)} onMouseLeave={() => setIsOpen(false)}>
-      <button 
-        className="flex items-center gap-1 nav-link"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {title} <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-      
-      {isOpen && (
-        <div className="absolute left-0 mt-1 w-64 bg-white shadow-lg rounded-md py-1 z-50 animate-fade-in">
-          {items.map((item, index) => (
-            <Link
-              key={index}
-              to={item.path}
-              className="block px-4 py-2 text-sm text-vending-gray-dark hover:bg-vending-blue-light hover:text-vending-blue"
-              onClick={() => setIsOpen(false)}
-            >
-              <div className="flex items-center gap-2">
-                <ChevronRight className="h-3 w-3" />
-                {item.title}
-              </div>
-            </Link>
-          ))}
+    <header className="sticky top-0 z-30 w-full border-b bg-background">
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center">
+          <Link to="/" className="flex items-center">
+            <span className="text-xl font-semibold">Vending Platform</span>
+          </Link>
+        </div>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-1">
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className={cn(isActive('/products') && 'bg-accent text-accent-foreground')}>
+                  Products
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                    <li className="row-span-3">
+                      <NavigationMenuLink asChild>
+                        <Link
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          to="/products"
+                        >
+                          <div className="mb-2 mt-4 text-lg font-medium">
+                            Product Types
+                          </div>
+                          <p className="text-sm leading-tight text-muted-foreground">
+                            Explore all product categories that work with our vending platform
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                    <li>
+                      <Link to="/products/grocery" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">Grocery</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Automated retail solutions for grocery items
+                        </p>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/products/fresh-food" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">Fresh Food</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Temperature-controlled solutions for fresh food
+                        </p>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/products/cannabis" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">Cannabis</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Compliant dispensing solutions for cannabis products
+                        </p>
+                      </Link>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className={cn(isActive('/machines') && 'bg-accent text-accent-foreground')}>
+                  Machines
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                    <li className="row-span-3">
+                      <NavigationMenuLink asChild>
+                        <Link
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          to="/machines"
+                        >
+                          <div className="mb-2 mt-4 text-lg font-medium">
+                            Machine Types
+                          </div>
+                          <p className="text-sm leading-tight text-muted-foreground">
+                            Explore our range of vending machines and automated retail solutions
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                    <li>
+                      <Link to="/machines/vending/option-4-refrigerated" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">Option 4 Refrigerated</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Temperature-controlled vending with large capacity
+                        </p>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/machines/vending/option-2-wall-mount" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">Option 2 Wall Mount</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Space-saving wall-mounted vending solution
+                        </p>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/machines/locker/10-cell-temperature-controlled" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">10-Cell Locker</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Secure, temperature-controlled pickup lockers
+                        </p>
+                      </Link>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              {/* Technology dropdown */}
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className={cn(isActive('/technology') && 'bg-accent text-accent-foreground')}>
+                  Technology
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                    <li className="row-span-3">
+                      <NavigationMenuLink asChild>
+                        <Link
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          to="/technology"
+                        >
+                          <div className="mb-2 mt-4 text-lg font-medium">
+                            Our Technology
+                          </div>
+                          <p className="text-sm leading-tight text-muted-foreground">
+                            Explore the technology that powers our vending solutions
+                          </p>
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                    
+                    {technologies?.map((tech) => (
+                      <li key={tech.id}>
+                        <Link 
+                          to={`/technology/${tech.slug}`} 
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                        >
+                          <div className="text-sm font-medium leading-none">{tech.title}</div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            {tech.description}
+                          </p>
+                        </Link>
+                      </li>
+                    ))}
+                    
+                    {(!technologies || technologies.length === 0) && (
+                      <li>
+                        <div className="block select-none space-y-1 rounded-md p-3 leading-none">
+                          <div className="text-sm font-medium leading-none">No technologies available</div>
+                        </div>
+                      </li>
+                    )}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              {/* More items */}
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className={cn((isActive('/about') || isActive('/goals') || isActive('/contact')) && 'bg-accent text-accent-foreground')}>
+                  More
+                </NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid w-[400px] gap-3 p-4">
+                    <li>
+                      <Link to="/about" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">About Us</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Learn about our company and mission
+                        </p>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/goals" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">Business Goals</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          How our solutions help achieve your business objectives
+                        </p>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/contact" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">Contact Us</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Get in touch with our team
+                        </p>
+                      </Link>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+
+          <Button asChild variant="default" size="sm" className="ml-4">
+            <Link to="/partner">Become a Partner</Link>
+          </Button>
+        </nav>
+
+        {/* Mobile menu toggle */}
+        <button
+          className="md:hidden p-2 rounded-md hover:bg-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+          onClick={toggleMobileMenu}
+        >
+          {mobileMenuOpen ? (
+            <X className="h-6 w-6" aria-hidden="true" />
+          ) : (
+            <Menu className="h-6 w-6" aria-hidden="true" />
+          )}
+          <span className="sr-only">Toggle menu</span>
+        </button>
+      </div>
+
+      {/* Mobile Navigation */}
+      {mobileMenuOpen && (
+        <div className="md:hidden py-2 px-2 space-y-1">
+          <MobileNavItem title="Products" path="/products" />
+          <MobileNavItem title="Machines" path="/machines" />
+          <MobileNavItem title="Technology" path="/technology" />
+          <MobileNavItem title="About Us" path="/about" />
+          <MobileNavItem title="Business Goals" path="/goals" />
+          <MobileNavItem title="Contact" path="/contact" />
+          <div className="pt-2">
+            <Button asChild variant="default" size="sm" className="w-full">
+              <Link to="/partner">Become a Partner</Link>
+            </Button>
+          </div>
         </div>
       )}
-    </div>
+    </header>
   );
 };
 
-const Header = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Define navigation items with dropdowns
-  const productTypes = [
-    { title: "Grocery", path: "/products/grocery" },
-    { title: "Vape", path: "/products/vape" },
-    { title: "Cannabis", path: "/products/cannabis" },
-    { title: "Fresh Food", path: "/products/fresh-food" },
-    { title: "Cosmetics", path: "/products/cosmetics" },
-    { title: "Toys/Cards/Collectibles", path: "/products/collectibles" },
-    { title: "OTC", path: "/products/otc" },
-    { title: "Swag and Samples", path: "/products/swag" },
-  ];
-
-  const businessGoals = [
-    { title: "Expand Footprint", path: "/goals/expand-footprint" },
-    { title: "BOPIS", path: "/goals/bopis" },
-    { title: "Loss Prevention", path: "/goals/loss-prevention" },
-    { title: "DOOH Advertising", path: "/goals/dooh-advertising" },
-    { title: "Line Busting", path: "/goals/line-busting" },
-    { title: "Amusement", path: "/goals/amusement" },
-    { title: "Food Desert / Corp. Res.", path: "/goals/food-desert" },
-    { title: "Marketing and Promotions", path: "/goals/marketing" },
-    { title: "Third Party Integrations", path: "/goals/integrations" },
-    { title: "Data", path: "/goals/data" },
-    { title: "Fleet Management", path: "/goals/fleet-management" },
-    { title: "Inventory Management", path: "/goals/inventory-management" },
-    { title: "Customer Satisfaction", path: "/goals/customer-satisfaction" },
-  ];
-
-  const vendingMachines = [
-    { title: "Option-4 - Refrigerated", path: "/machines/vending/option-4-refrigerated" },
-    { title: "Option-2, Wall Mount XL", path: "/machines/vending/option-2-wall-mount-xl" },
-    { title: "Option-2, Wall Mount", path: "/machines/vending/option-2-wall-mount" },
-    { title: "DIVI-SS", path: "/machines/vending/divi-ss" },
-    { title: "DIVI-WP", path: "/machines/vending/divi-wp" },
-    { title: "DIVI-WS", path: "/machines/vending/divi-ws" },
-    { title: "DIVI-SP", path: "/machines/vending/divi-sp" },
-    { title: "Combi 3000", path: "/machines/vending/combi-3000" },
-  ];
-
-  const smartLockers = [
-    { title: "10-cell temperature controlled", path: "/machines/locker/10-cell-temperature-controlled" },
-    { title: "21-cell temperature controlled", path: "/machines/locker/21-cell-temperature-controlled" },
-  ];
-
-  const machineTypes = [
-    { title: "All Machines", path: "/machines" },
-    { title: "Vending Machines", path: "/machines#vending-machines" },
-    { title: "Smart Lockers", path: "/machines#smart-lockers" },
-  ];
-
-  const technologyItems = [
-    { title: "Architecture", path: "/technology#architecture" },
-    { title: "Security", path: "/technology#security" },
-    { title: "Third-party integrations", path: "/technology#integrations" },
-    { title: "Payments", path: "/technology#payments" },
-    { title: "Live Inventory", path: "/technology#inventory" },
-  ];
-
-  const aboutItems = [
-    { title: "About Us", path: "/about" },
-    { title: "Contact Us", path: "/contact" },
-    { title: "Privacy Policy", path: "/privacy" },
-  ];
-
+// Mobile Navigation Item Component
+const MobileNavItem = ({ title, path }: { title: string; path: string }) => {
+  const location = useLocation();
+  const isActive = location.pathname === path || location.pathname.startsWith(`${path}/`);
+  
   return (
-    <header className="sticky top-0 bg-white border-b border-gray-200 shadow-sm z-50">
-      <div className="container-wide">
-        {/* Top Secondary Navigation */}
-        <div className="flex justify-end py-1 text-sm border-b border-gray-100">
-          <div className="flex gap-4">
-            <Link to="/partner-signin" className="text-vending-gray-dark hover:text-vending-blue flex items-center gap-1">
-              <CircleUser className="h-3 w-3" /> Partner Sign-In
-            </Link>
-            <Link to="/customer-signin" className="text-vending-gray-dark hover:text-vending-blue flex items-center gap-1">
-              <CircleUser className="h-3 w-3" /> Customer Sign-In
-            </Link>
-          </div>
-        </div>
-        
-        {/* Main Navigation */}
-        <div className="flex items-center justify-between py-4">
-          <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold text-vending-blue mr-8">
-              VendingSoft
-            </Link>
-            
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex space-x-1">
-              <Dropdown title="Products" items={productTypes} />
-              <Dropdown title="Business Goals" items={businessGoals} />
-              <Dropdown title="Machine Types" items={machineTypes} />
-              <Dropdown title="Vending Machines" items={vendingMachines} />
-              <Dropdown title="Smart Lockers" items={smartLockers} />
-              <Dropdown title="Technology" items={technologyItems} />
-              <Dropdown title="About" items={aboutItems} />
-              <Link to="/blog" className="nav-link">
-                Blog
-              </Link>
-              <Link to="/case-studies" className="nav-link">
-                Case Studies
-              </Link>
-              <Link to="/partner" className="nav-link">
-                Partner With Us
-              </Link>
-            </nav>
-          </div>
-          
-          {/* CTA Button & Mobile Menu Toggle */}
-          <div className="flex items-center gap-4">
-            <Button asChild className="hidden sm:inline-flex btn-primary">
-              <Link to="/contact">Request Demo</Link>
-            </Button>
-            
-            <button 
-              className="lg:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
-        
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <nav className="lg:hidden py-4 px-4 bg-white border-t border-gray-100">
-            <div className="flex flex-col space-y-2">
-              <div className="border-b border-gray-200 pb-2">
-                <p className="font-medium mb-2">Types of Products</p>
-                {productTypes.map((item, i) => (
-                  <Link 
-                    key={i} 
-                    to={item.path} 
-                    className="block py-1.5 pl-3 text-sm text-vending-gray-dark hover:text-vending-blue"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.title}
-                  </Link>
-                ))}
-              </div>
-              
-              <div className="border-b border-gray-200 pb-2">
-                <p className="font-medium mb-2">Business Goals</p>
-                {businessGoals.map((item, i) => (
-                  <Link 
-                    key={i} 
-                    to={item.path} 
-                    className="block py-1.5 pl-3 text-sm text-vending-gray-dark hover:text-vending-blue"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.title}
-                  </Link>
-                ))}
-              </div>
-              
-              <div className="border-b border-gray-200 pb-2">
-                <p className="font-medium mb-2">Machine Types</p>
-                {machineTypes.map((item, i) => (
-                  <Link 
-                    key={i} 
-                    to={item.path} 
-                    className="block py-1.5 pl-3 text-sm text-vending-gray-dark hover:text-vending-blue"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.title}
-                  </Link>
-                ))}
-              </div>
-              
-              <div className="border-b border-gray-200 pb-2">
-                <p className="font-medium mb-2">Vending Machines</p>
-                {vendingMachines.map((item, i) => (
-                  <Link 
-                    key={i} 
-                    to={item.path} 
-                    className="block py-1.5 pl-3 text-sm text-vending-gray-dark hover:text-vending-blue"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.title}
-                  </Link>
-                ))}
-              </div>
-              
-              <div className="border-b border-gray-200 pb-2">
-                <p className="font-medium mb-2">Smart Lockers</p>
-                {smartLockers.map((item, i) => (
-                  <Link 
-                    key={i} 
-                    to={item.path} 
-                    className="block py-1.5 pl-3 text-sm text-vending-gray-dark hover:text-vending-blue"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.title}
-                  </Link>
-                ))}
-              </div>
-              
-              <div className="border-b border-gray-200 pb-2">
-                <p className="font-medium mb-2">Technology</p>
-                {technologyItems.map((item, i) => (
-                  <Link 
-                    key={i} 
-                    to={item.path} 
-                    className="block py-1.5 pl-3 text-sm text-vending-gray-dark hover:text-vending-blue"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.title}
-                  </Link>
-                ))}
-              </div>
-              
-              <div className="border-b border-gray-200 pb-2">
-                <p className="font-medium mb-2">About</p>
-                {aboutItems.map((item, i) => (
-                  <Link 
-                    key={i} 
-                    to={item.path} 
-                    className="block py-1.5 pl-3 text-sm text-vending-gray-dark hover:text-vending-blue"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {item.title}
-                  </Link>
-                ))}
-              </div>
-              
-              <Link to="/blog" className="block py-2 font-medium hover:text-vending-blue" onClick={() => setMobileMenuOpen(false)}>
-                Blog
-              </Link>
-              
-              <Link to="/case-studies" className="block py-2 font-medium hover:text-vending-blue" onClick={() => setMobileMenuOpen(false)}>
-                Case Studies
-              </Link>
-              
-              <Link to="/partner" className="block py-2 font-medium hover:text-vending-blue" onClick={() => setMobileMenuOpen(false)}>
-                Partner With Us
-              </Link>
-              
-              <Button asChild className="w-full mt-4">
-                <Link to="/contact" onClick={() => setMobileMenuOpen(false)}>Request Demo</Link>
-              </Button>
-            </div>
-          </nav>
-        )}
-      </div>
-    </header>
+    <Link
+      to={path}
+      className={cn(
+        "block px-3 py-2 rounded-md text-base font-medium",
+        isActive
+          ? "bg-accent text-accent-foreground"
+          : "text-foreground hover:bg-accent hover:text-accent-foreground"
+      )}
+    >
+      {title}
+    </Link>
   );
 };
 
