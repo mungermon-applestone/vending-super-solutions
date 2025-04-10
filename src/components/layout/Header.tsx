@@ -9,6 +9,7 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
     <header className="sticky top-0 z-30 w-full border-b bg-background">
@@ -37,7 +38,7 @@ const Header = () => {
       </div>
 
       {/* Mobile Navigation */}
-      <MobileNavigation isOpen={mobileMenuOpen} />
+      <MobileNavigation isOpen={mobileMenuOpen} onClose={closeMobileMenu} />
     </header>
   );
 };
