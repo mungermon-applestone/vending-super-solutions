@@ -13,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { getTechnologies } from '@/services/cms';
 import { CMSTechnology } from '@/types/cms';
+import InquiryForm from '@/components/machines/contact/InquiryForm';
 
 const TechnologyLanding = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -78,6 +79,8 @@ const TechnologyLanding = () => {
       <Layout>
         <TechnologyHero technology={technology} />
         <TechnologySections technology={technology} />
+        {/* Inquiry Form */}
+        <InquiryForm title={`${technology.title} Technology`} />
       </Layout>
     );
   }
@@ -129,6 +132,9 @@ const TechnologyLanding = () => {
           )}
         </div>
       </div>
+
+      {/* Inquiry Form */}
+      <InquiryForm title="Technology Solutions" />
     </Layout>
   );
 };

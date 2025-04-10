@@ -6,6 +6,7 @@ import { useBusinessGoal } from '@/hooks/useCMSData';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check, ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import InquiryForm from '@/components/machines/contact/InquiryForm';
 
 // Import the business goal components
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
@@ -127,6 +128,9 @@ const BusinessGoalDetail = () => {
           </div>
         </div>
       </section>
+
+      {/* Inquiry Form */}
+      <InquiryForm title={`${goal.title} Solutions`} />
     </Layout>
   );
 };

@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
+import InquiryForm from '@/components/machines/contact/InquiryForm';
 
 const BusinessGoalsLanding = () => {
   const { data: businessGoals, isLoading, error } = useBusinessGoals();
@@ -86,6 +87,9 @@ const BusinessGoalsLanding = () => {
           </div>
         )}
       </div>
+
+      {/* Inquiry Form */}
+      <InquiryForm title="Business Goal Solutions" />
     </Layout>
   );
 };
