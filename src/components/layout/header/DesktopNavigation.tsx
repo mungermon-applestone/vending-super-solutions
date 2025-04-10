@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
+  NavigationMenuContent,
 } from "@/components/ui/navigation-menu";
 import NavigationDropdownContent from './NavigationDropdownContent';
 import TechnologyDropdown from './TechnologyDropdown';
@@ -76,16 +76,7 @@ const DesktopNavigation = () => {
   ];
 
   const moreItems = [
-    {
-      title: "About Us",
-      path: "/about",
-      description: "Learn about our company and mission"
-    },
-    {
-      title: "Contact Us",
-      path: "/contact",
-      description: "Get in touch with our team"
-    }
+    // About Us and Contact Us have been moved to the main navigation
   ];
 
   return (
@@ -142,17 +133,39 @@ const DesktopNavigation = () => {
           {/* Technology dropdown */}
           <TechnologyDropdown isActive={isActive('/technology')} />
 
-          {/* More items */}
+          {/* About Us link - moved from More */}
           <NavigationMenuItem>
-            <NavigationMenuTrigger className={cn((isActive('/about') || isActive('/contact')) && 'bg-accent text-accent-foreground')}>
-              More
-            </NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <NavigationDropdownContent 
-                items={moreItems}
-              />
-            </NavigationMenuContent>
+            <Link to="/about" className={cn(
+              "inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none",
+              isActive('/about') && 'bg-accent text-accent-foreground'
+            )}>
+              About Us
+            </Link>
           </NavigationMenuItem>
+          
+          {/* Contact Us link - moved from More */}
+          <NavigationMenuItem>
+            <Link to="/contact" className={cn(
+              "inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none",
+              isActive('/contact') && 'bg-accent text-accent-foreground'
+            )}>
+              Contact Us
+            </Link>
+          </NavigationMenuItem>
+
+          {/* More items - if we still need this dropdown */}
+          {moreItems.length > 0 && (
+            <NavigationMenuItem>
+              <NavigationMenuTrigger>
+                More
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <NavigationDropdownContent 
+                  items={moreItems}
+                />
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          )}
         </NavigationMenuList>
       </NavigationMenu>
 

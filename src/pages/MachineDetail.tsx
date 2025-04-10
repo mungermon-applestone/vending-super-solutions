@@ -104,7 +104,6 @@ const MachineDetail = () => {
       <MachineDetailFeatures features={machineData.features} />
       <MachineDetailDeployments deploymentExamples={machineData.deploymentExamples} />
       <MachineDetailGallery title={machineData.title} images={machineData.images} />
-      <MachineDetailInquiry machineTitle={machineData.title} />
       <CTASection />
     </Layout>
   );

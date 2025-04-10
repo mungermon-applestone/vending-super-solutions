@@ -15,11 +15,11 @@ const transformCMSDataToSections = (cmsData: CMSTechnology[] = []): TechnologySe
           icon: feature.icon || 'HelpCircle', // Fallback icon
           title: feature.title || '',
           description: feature.description || '',
-          items: [] // Initialize items array
+          items: [] as string[] // Initialize items array with proper type
         };
         
         // Add bullet point items if they exist
-        if (feature.items && feature.items.length > 0) {
+        if (feature.items && Array.isArray(feature.items) && feature.items.length > 0) {
           transformedFeature.items = feature.items
             .sort((a, b) => a.display_order - b.display_order)
             .map(item => item.text);
@@ -50,17 +50,20 @@ const getFallbackTechnologyData = (): TechnologySection[] => [
       {
         icon: 'Network',
         title: 'Cloud-native design',
-        description: 'Built for scalability and resilience'
+        description: 'Built for scalability and resilience',
+        items: ['Auto-scaling infrastructure', 'Load balancing across regions', 'High availability design']
       },
       {
         icon: 'BarChart3',
         title: 'Real-time monitoring',
-        description: 'Live tracking of machine status and performance'
+        description: 'Live tracking of machine status and performance',
+        items: ['Instant alerts', 'Performance metrics', 'Detailed analytics']
       },
       {
         icon: 'Layers',
         title: 'Microservices approach',
-        description: 'Modular components for maximum flexibility'
+        description: 'Modular components for maximum flexibility',
+        items: ['Independent scaling', 'Isolated failure domains', 'Technology diversity']
       }
     ],
     image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31'
@@ -73,17 +76,20 @@ const getFallbackTechnologyData = (): TechnologySection[] => [
       {
         icon: 'Shield',
         title: 'SOC 2 Type II certified',
-        description: 'Enterprise-grade security compliance'
+        description: 'Enterprise-grade security compliance',
+        items: ['Annual audits', 'Continuous monitoring', 'Strict access controls']
       },
       {
         icon: 'Lock',
         title: 'End-to-end encryption',
-        description: 'Secure data transmission and storage'
+        description: 'Secure data transmission and storage',
+        items: ['AES-256 encryption', 'TLS 1.3 transport security', 'Zero-knowledge protocols']
       },
       {
         icon: 'Shield',
         title: 'Regular security audits',
-        description: 'Ongoing penetration testing and vulnerability assessment'
+        description: 'Ongoing penetration testing and vulnerability assessment',
+        items: ['External security partners', 'Vulnerability bounty program', 'Continuous threat modeling']
       }
     ],
     image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3'
@@ -96,17 +102,20 @@ const getFallbackTechnologyData = (): TechnologySection[] => [
       {
         icon: 'Layers',
         title: 'ERP integrations',
-        description: 'Connect with SAP, Oracle, Microsoft Dynamics and more'
+        description: 'Connect with SAP, Oracle, Microsoft Dynamics and more',
+        items: ['Bidirectional data sync', 'Custom field mapping', 'Automated workflows']
       },
       {
         icon: 'Shuffle',
         title: 'CRM connections',
-        description: 'Salesforce, HubSpot and other CRM platforms'
+        description: 'Salesforce, HubSpot and other CRM platforms',
+        items: ['Customer data integration', 'Sales funnel tracking', 'Unified customer view']
       },
       {
         icon: 'BarChart3',
         title: 'Analytics platforms',
-        description: 'Export data to PowerBI, Tableau and other BI tools'
+        description: 'Export data to PowerBI, Tableau and other BI tools',
+        items: ['Customized dashboards', 'Scheduled exports', 'Real-time data feeds']
       }
     ],
     image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4'
