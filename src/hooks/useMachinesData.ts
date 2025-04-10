@@ -1,8 +1,20 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchMachines, fetchMachineById, deleteMachine, createMachine, updateMachine } from '@/services/cms/contentTypes/machines';
+import { fetchMachines, fetchMachineById } from '@/services/cms/contentTypes/machines';
 import { useToast } from '@/hooks/use-toast';
-import { CMSMachine, MachineFormValues } from '@/types/cms';
+import { CMSMachine } from '@/types/cms';
+
+// Define the MachineFormValues interface if it doesn't exist in types
+interface MachineFormValues {
+  title: string;
+  slug: string;
+  type: string;
+  temperature: string;
+  description?: string;
+  images?: Array<{ url: string; alt?: string; width?: number; height?: number }>;
+  specs?: Array<{ key: string; value: string }>;
+  features?: Array<{ text: string }>;
+}
 
 /**
  * Hook to fetch machines data
@@ -48,7 +60,10 @@ export const useCreateMachine = () => {
   const { toast } = useToast();
   
   return useMutation({
-    mutationFn: (machineData: MachineFormValues) => createMachine(machineData),
+    mutationFn: (machineData: MachineFormValues) => {
+      const { createMachine } = require('@/services/cms/contentTypes/machines');
+      return createMachine(machineData);
+    },
     onSuccess: () => {
       toast({
         title: "Machine created",
@@ -74,8 +89,10 @@ export const useUpdateMachine = () => {
   const { toast } = useToast();
   
   return useMutation({
-    mutationFn: ({ id, machineData }: { id: string, machineData: MachineFormValues }) => 
-      updateMachine(id, machineData),
+    mutationFn: ({ id, machineData }: { id: string, machineData: MachineFormValues }) => {
+      const { updateMachine } = require('@/services/cms/contentTypes/machines');
+      return updateMachine(id, machineData);
+    },
     onSuccess: () => {
       toast({
         title: "Machine updated",
@@ -101,7 +118,10 @@ export const useDeleteMachine = () => {
   const { toast } = useToast();
   
   return useMutation({
-    mutationFn: deleteMachine,
+    mutationFn: (id: string) => {
+      const { deleteMachine } = require('@/services/cms/contentTypes/machines');
+      return deleteMachine(id);
+    },
     onSuccess: () => {
       toast({
         title: "Machine deleted",

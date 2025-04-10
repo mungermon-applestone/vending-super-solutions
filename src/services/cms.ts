@@ -6,7 +6,7 @@ import {
   CMSTechnology
 } from '@/types/cms';
 import { fetchFromCMS } from '@/services/cms/fetchFromCMS';
-import { fetchProductTypeBySlug, fetchProductTypeByUUID, deleteProductType } from '@/services/cms/contentTypes/productTypes';
+import { fetchProductTypeBySlug, fetchProductTypeByUUID } from '@/services/cms/contentTypes/productTypes';
 import { fetchBusinessGoalBySlug } from '@/services/cms/contentTypes/businessGoals';
 import { 
   normalizeSlug, 
@@ -19,7 +19,7 @@ import { fetchMachineById, createMachine, updateMachine, deleteMachine } from '@
 import {
   fetchTechnologies,
   fetchTechnologyBySlug,
-  deleteTechnology
+  deleteTechnology as removeTechnology
 } from './cms/contentTypes/technologies';
 
 export async function getMachines(filters: Record<string, any> = {}): Promise<CMSMachine[]> {
@@ -56,8 +56,9 @@ export async function getProductTypes(): Promise<CMSProductType[]> {
   return await fetchFromCMS<CMSProductType>('product-types');
 }
 
-export async function deleteProductType(id: string): Promise<boolean> {
+export async function removeProductType(id: string): Promise<boolean> {
   console.log(`[cms.ts] Deleting product type with ID: ${id}`);
+  const { deleteProductType } = await import('@/services/cms/contentTypes/productTypes');
   return await deleteProductType(id);
 }
 
@@ -174,4 +175,4 @@ export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGo
 // Export technology functions
 export const getTechnologies = fetchTechnologies;
 export const getTechnologyBySlug = fetchTechnologyBySlug;
-export const deleteTechnology = deleteTechnology;
+export const deleteTechnology = removeTechnology;
