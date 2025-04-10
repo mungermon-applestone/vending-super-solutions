@@ -10,7 +10,13 @@ import { MachineFormValues } from '@/utils/machineMigration/types';
 const MachineEditor = () => {
   const { machineId } = useParams<{ machineId: string }>();
   const navigate = useNavigate();
-  const isCreating = !machineId;
+  
+  // A machine is in edit mode if machineId exists and is not 'new'
+  const isEditMode = !!machineId && machineId !== 'new';
+  const isCreating = !isEditMode;
+  
+  console.log('[MachineEditor] Machine ID from URL:', machineId);
+  console.log('[MachineEditor] Is edit mode:', isEditMode);
 
   const { data: machine, isLoading } = useMachineById(machineId);
   const createMachineMutation = useCreateMachine();

@@ -6,7 +6,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useTechnologyData } from '@/hooks/useTechnologyData';
-import { CMSTechnology } from '@/types/cms';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 import TechnologyEditorForm from '@/components/admin/technology-editor/TechnologyEditorForm';
 import { createTechnology, updateTechnology } from '@/services/cms/contentTypes/technologies';
@@ -15,13 +14,21 @@ const TechnologyEditor: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { technologySlug } = useParams<{ technologySlug: string }>();
-  const isNewTechnology = !technologySlug;
+  
+  // A technology is in edit mode if technologySlug exists and is not 'new'
+  const isEditMode = !!technologySlug && technologySlug !== 'new';
+  const isNewTechnology = !isEditMode;
+  
+  console.log('[TechnologyEditor] Technology slug from URL:', technologySlug);
+  console.log('[TechnologyEditor] Is edit mode:', isEditMode);
   
   const [isSaving, setIsSaving] = React.useState(false);
   const [saveError, setSaveError] = React.useState<string | null>(null);
   
   // If editing an existing technology, fetch it
-  const { technology, isLoading, error } = useTechnologyData(technologySlug || '');
+  const { technology, isLoading, error } = useTechnologyData(
+    isEditMode ? technologySlug || '' : ''
+  );
 
   React.useEffect(() => {
     if (error) {

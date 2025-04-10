@@ -91,7 +91,7 @@ const AdminMachines = () => {
                   <MachineTableRow 
                     key={machine.id} 
                     machine={machine} 
-                    onDeleteClick={handleDeleteClick} 
+                    onDeleteClick={handleDeleteClick}
                   />
                 ))}
               </TableBody>

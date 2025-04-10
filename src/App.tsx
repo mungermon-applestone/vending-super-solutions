@@ -96,13 +96,13 @@ function App() {
       <Route path="/admin/products/edit/:productSlug" element={<ProductEditor />} />
       <Route path="/admin/business-goals" element={<AdminBusinessGoals />} />
       <Route path="/admin/business-goals/new" element={<BusinessGoalEditor />} />
-      <Route path="/admin/business-goals/edit/:slug" element={<BusinessGoalEditor />} />
+      <Route path="/admin/business-goals/edit/:goalSlug" element={<BusinessGoalEditor />} />
       <Route path="/admin/machines" element={<AdminMachines />} />
       <Route path="/admin/machines/new" element={<MachineEditor />} />
-      <Route path="/admin/machines/edit/:id" element={<MachineEditor />} />
+      <Route path="/admin/machines/edit/:machineId" element={<MachineEditor />} />
       <Route path="/admin/technology" element={<AdminTechnology />} />
       <Route path="/admin/technology/new" element={<TechnologyEditor />} />
-      <Route path="/admin/technology/edit/:slug" element={<TechnologyEditor />} />
+      <Route path="/admin/technology/edit/:technologySlug" element={<TechnologyEditor />} />
       
       {/* Migration utilities */}
       <Route path="/utils/migrate-machines" element={<MigrateMachinesData />} />

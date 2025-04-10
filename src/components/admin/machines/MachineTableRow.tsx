@@ -20,6 +20,8 @@ interface MachineTableRowProps {
 
 const MachineTableRow: React.FC<MachineTableRowProps> = ({ machine, onDeleteClick }) => {
   const navigate = useNavigate();
+  
+  console.log(`[MachineTableRow] Machine ID: ${machine.id}, Title: ${machine.title}`);
 
   return (
     <TableRow>
@@ -49,7 +51,10 @@ const MachineTableRow: React.FC<MachineTableRowProps> = ({ machine, onDeleteClic
           <Button
             size="icon"
             variant="ghost"
-            onClick={() => navigate(`/admin/machines/edit/${machine.id}`)}
+            onClick={() => {
+              console.log(`[MachineTableRow] Navigating to edit machine with ID: ${machine.id}`);
+              navigate(`/admin/machines/edit/${machine.id}`);
+            }}
             title="Edit machine"
           >
             <Pencil className="h-4 w-4" />
