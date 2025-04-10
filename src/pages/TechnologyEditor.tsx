@@ -55,6 +55,9 @@ const TechnologyEditor: React.FC = () => {
     try {
       setIsSaving(true);
       
+      // Log that we're about to create/update the technology
+      console.log(`About to ${isNewTechnology ? 'create' : 'update'} technology with data:`, formData);
+      
       if (isNewTechnology) {
         // Create new technology
         console.log('Creating new technology...');

@@ -13,7 +13,7 @@ import TechnologySections from './sections/TechnologySections';
 import { CMSTechnology } from '@/types/cms';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
-// Define the schema for technology form data
+// Define the schema for technology form data - make title and description optional for draft state
 const technologyFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   slug: z.string().min(1, 'Slug is required'),
@@ -90,35 +90,47 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
       visible: false,
       sections: [],
     },
-    mode: "all",
+    mode: "onChange", // Change to onChange to validate as user types
   });
 
-  // Monitor form validity state
-  const formIsValid = form.formState.isValid;
-  const formIsDirty = form.formState.isDirty;
-  const formErrors = form.formState.errors;
-  
+  // Log form validation state changes
   React.useEffect(() => {
-    console.log('Form state updated:', { 
-      isValid: formIsValid, 
-      isDirty: formIsDirty, 
-      errors: form.formState.errors,
-      formValues: form.getValues()
+    console.log('Form validation state:', { 
+      isValid: form.formState.isValid, 
+      isDirty: form.formState.isDirty,
+      dirtyFields: Object.keys(form.formState.dirtyFields),
+      errors: form.formState.errors 
     });
-  }, [formIsValid, formIsDirty, form.formState.errors]);
+  }, [form.formState.isValid, form.formState.isDirty, form.formState.errors]);
 
-  // Fix for the onClick event not being triggered
-  const handleManualSubmit = React.useCallback(() => {
+  // Explicitly check form validity
+  const checkFormValidity = () => {
+    const values = form.getValues();
+    console.log('Checking form validity with values:', values);
+    
+    // Check required fields
+    const hasTitle = !!values.title && values.title.trim().length > 0;
+    const hasSlug = !!values.slug && values.slug.trim().length > 0;
+    const hasDescription = !!values.description && values.description.trim().length > 0;
+    
+    const isValid = hasTitle && hasSlug && hasDescription;
+    console.log('Manual validity check:', { hasTitle, hasSlug, hasDescription, isValid });
+    
+    return isValid;
+  };
+
+  const handleManualSubmit = () => {
     console.log('Manual submit clicked');
     
-    // Log current form state
-    const currentValues = form.getValues();
-    console.log('Current form values:', currentValues);
-    console.log('Form is valid:', formIsValid);
-    console.log('Form errors:', formErrors);
+    // Get current form values
+    const data = form.getValues();
+    console.log('Current form values:', data);
+    
+    // Manually check form validity
+    const isManuallyValid = checkFormValidity();
+    console.log('Form is manually valid:', isManuallyValid);
 
-    if (formIsValid) {
-      const data = form.getValues();
+    if (isManuallyValid) {
       setFormState('submitting');
       setFormError(null);
       
@@ -146,44 +158,46 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
     } else {
       console.log('Form is invalid, cannot submit');
       
-      // Show toast for invalid form
+      // Show toast with specific validation errors
+      const errors = form.formState.errors;
+      const errorFields = Object.keys(errors).join(', ');
+      
       toast({
         variant: "destructive",
         title: "Form validation failed",
-        description: "Please fix the errors in the form before submitting.",
+        description: `Please fix errors in: ${errorFields || 'required fields'}`,
       });
       
       // Touch all fields to show errors
-      Object.keys(form.getValues()).forEach(key => {
-        form.trigger(key as any);
-      });
+      form.trigger();
     }
-  }, [form, formIsValid, formErrors, onSave, isNew, toast]);
+  };
 
-  // Create a direct debug function
-  const handleDebugClick = React.useCallback(() => {
-    console.log('Debug button clicked directly!');
-    console.log('Form is valid:', formIsValid);
+  const handleDebugClick = () => {
+    console.log('Debug button clicked!');
+    
+    // Check each required field
+    const values = form.getValues();
+    const manualCheckResult = checkFormValidity();
+    
+    console.log('Form values:', values);
     console.log('Form errors:', form.formState.errors);
-    console.log('Current form values:', form.getValues());
+    console.log('Manual check result:', manualCheckResult);
     
     toast({
       title: "Debug information",
-      description: `Form valid: ${formIsValid}, Dirty: ${formIsDirty}`,
+      description: `Form valid (manual): ${manualCheckResult}, Form valid (React Hook Form): ${form.formState.isValid}, Dirty: ${form.formState.isDirty}`,
     });
-  }, [form, formIsValid, formIsDirty, toast]);
+  };
 
   return (
     <Form {...form}>
-      <form 
+      <form
         ref={formRef}
         onSubmit={(e) => {
           e.preventDefault();
-          console.log('Form onSubmit event triggered');
-          form.handleSubmit((data) => {
-            console.log('Form submission handler called with data:', data);
-            handleManualSubmit();
-          })(e);
+          console.log('Form submit event triggered');
+          handleManualSubmit();
         }}
       >
         {formError && (
@@ -239,7 +253,7 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
           <Button
             type="button"
             onClick={handleManualSubmit}
-            disabled={isLoading || formState === 'submitting' || (!formIsValid && formIsDirty)}
+            disabled={isLoading || formState === 'submitting'}
             className="px-6"
           >
             {formState === 'submitting' ? (
