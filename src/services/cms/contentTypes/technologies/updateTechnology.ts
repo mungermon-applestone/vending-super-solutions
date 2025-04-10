@@ -8,19 +8,31 @@ export interface UpdateTechnologyData extends CreateTechnologyData {
   id: string;
 }
 
-// Extend the section type to include optional id for TypeScript
-interface Section extends CreateTechnologyData['sections'][0] {
+// Define proper section type that matches the array elements
+interface Section {
   id?: string;
+  title: string;
+  description?: string;
+  section_type?: string;
+  display_order: number;
+  features?: Feature[];
 }
 
-// Extend the feature type to include optional id for TypeScript
-interface Feature extends CreateTechnologyData['sections'][0]['features'][0] {
+// Define feature type
+interface Feature {
   id?: string;
+  title: string;
+  description?: string;
+  icon?: string;
+  display_order: number;
+  items?: Item[];
 }
 
-// Extend the item type to include optional id for TypeScript
-interface Item extends CreateTechnologyData['sections'][0]['features'][0]['items'][0] {
+// Define item type
+interface Item {
   id?: string;
+  text: string;
+  display_order: number;
 }
 
 /**
@@ -122,7 +134,7 @@ export const updateTechnology = async (
         }
         
         // Process features for this section
-        await processFeatures(section as Section);
+        await processFeatures(section);
       }
     }
     
@@ -160,7 +172,7 @@ async function processFeatures(section: Section) {
   
   // Process each feature
   for (let i = 0; i < section.features.length; i++) {
-    const feature = section.features[i] as Feature; // Cast to our extended type
+    const feature = section.features[i];
     
     if (feature.id) {
       // Update existing feature
@@ -201,7 +213,7 @@ async function processFeatures(section: Section) {
     }
     
     // Process feature items
-    await processFeatureItems(feature as Feature);
+    await processFeatureItems(feature);
   }
   
   // Delete features that weren't updated
@@ -231,7 +243,7 @@ async function processFeatureItems(feature: Feature) {
   
   // Process each item
   for (let i = 0; i < feature.items.length; i++) {
-    const item = feature.items[i] as Item; // Cast to our extended type
+    const item = feature.items[i];
     
     if (item.id) {
       // Update existing item
