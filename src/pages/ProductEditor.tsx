@@ -7,6 +7,7 @@ import useAdminAlert from '@/hooks/useAdminAlert';
 
 const ProductEditorPage = () => {
   const { productSlug } = useParams<{ productSlug: string }>();
+  // A product is in edit mode if the slug exists and is not 'new'
   const isEditMode = !!productSlug && productSlug !== 'new';
   
   // Show admin alert when accessing this page

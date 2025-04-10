@@ -93,7 +93,7 @@ function App() {
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin/products" element={<AdminProducts />} />
       <Route path="/admin/products/new" element={<ProductEditor />} />
-      <Route path="/admin/products/edit/:slug" element={<ProductEditor />} />
+      <Route path="/admin/products/edit/:productSlug" element={<ProductEditor />} />
       <Route path="/admin/business-goals" element={<AdminBusinessGoals />} />
       <Route path="/admin/business-goals/new" element={<BusinessGoalEditor />} />
       <Route path="/admin/business-goals/edit/:slug" element={<BusinessGoalEditor />} />

@@ -41,6 +41,9 @@ const AdminProducts = () => {
     },
   });
 
+  // Debug log for product types
+  console.log('[AdminProducts] Product types loaded:', productTypes);
+
   return (
     <Layout>
       <div className="container py-10">
@@ -97,7 +100,10 @@ const AdminProducts = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => navigate(`/admin/products/edit/${product.slug}`)}
+                            onClick={() => {
+                              console.log(`[AdminProducts] Navigating to edit product with slug: ${product.slug}`);
+                              navigate(`/admin/products/edit/${product.slug}`);
+                            }}
                             className="h-8 px-2 w-8"
                             title="Edit product"
                           >
