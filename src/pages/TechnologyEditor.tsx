@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useTechnologyData } from '@/hooks/useTechnologyData';
 import { CMSTechnology } from '@/types/cms';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
 import TechnologyEditorForm from '@/components/admin/technology-editor/TechnologyEditorForm';
 import { createTechnology, updateTechnology } from '@/services/cms/contentTypes/technologies';
 
@@ -18,6 +18,7 @@ const TechnologyEditor: React.FC = () => {
   const isNewTechnology = !technologySlug;
   
   const [isSaving, setIsSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
   
   // If editing an existing technology, fetch it
   const { technology, isLoading, error } = useTechnologyData(technologySlug || '');
@@ -45,6 +46,7 @@ const TechnologyEditor: React.FC = () => {
 
   const handleSaveTechnology = async (formData: any) => {
     console.log('Technology Editor: handleSaveTechnology called with data:', formData);
+    setSaveError(null);
     try {
       setIsSaving(true);
       
@@ -77,6 +79,7 @@ const TechnologyEditor: React.FC = () => {
       }
     } catch (error) {
       console.error("Error saving technology:", error);
+      setSaveError(error instanceof Error ? error.message : "An unknown error occurred");
       toast({
         variant: "destructive",
         title: "Failed to save technology",
@@ -109,6 +112,16 @@ const TechnologyEditor: React.FC = () => {
               : `Editing: ${isLoading ? '...' : technology?.title}`}
           </p>
         </div>
+
+        {saveError && (
+          <div className="bg-destructive/15 p-4 rounded-md mb-4 flex items-start gap-2">
+            <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
+            <div>
+              <h4 className="font-medium text-destructive">Error</h4>
+              <p className="text-sm text-destructive/90">{saveError}</p>
+            </div>
+          </div>
+        )}
 
         {isLoading && !isNewTechnology ? (
           <Card className="p-6">

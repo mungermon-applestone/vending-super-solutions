@@ -66,6 +66,9 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
   const [formState, setFormState] = React.useState<'idle' | 'submitting' | 'error'>('idle');
   const [formError, setFormError] = React.useState<string | null>(null);
   
+  console.log('Form initialization - isLoading:', isLoading);
+  console.log('Form initialization - formState:', formState);
+  
   // Set up form with default values or existing technology data
   const form = useForm<TechnologyFormValues>({
     resolver: zodResolver(technologyFormSchema),
@@ -86,10 +89,24 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
       visible: false,
       sections: [],
     },
+    mode: "onChange",
   });
+
+  // Monitor form validity state
+  const formIsValid = form.formState.isValid;
+  const formIsDirty = form.formState.isDirty;
+  
+  React.useEffect(() => {
+    console.log('Form state updated:', { 
+      isValid: formIsValid, 
+      isDirty: formIsDirty, 
+      errors: form.formState.errors 
+    });
+  }, [formIsValid, formIsDirty, form.formState.errors]);
 
   // Handle form submission
   const handleSubmit = async (data: TechnologyFormValues) => {
+    console.log('Form submission initiated, button clicked');
     try {
       setFormState('submitting');
       setFormError(null);
@@ -117,9 +134,22 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
     }
   };
 
+  // Create a direct click handler for debugging
+  const handleButtonClick = () => {
+    console.log('Button clicked directly!');
+    console.log('Form is valid:', formIsValid);
+    console.log('Form errors:', form.formState.errors);
+    console.log('Current form values:', form.getValues());
+    
+    // This doesn't submit the form, just logs info
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
+      <form onSubmit={(e) => {
+        console.log('Form onSubmit triggered');
+        form.handleSubmit(handleSubmit)(e);
+      }}>
         {formError && (
           <div className="bg-destructive/15 p-3 rounded-md mb-4 flex items-start gap-2">
             <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
@@ -127,6 +157,17 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
               <h4 className="font-medium text-destructive">Error saving technology</h4>
               <p className="text-sm text-destructive/90">{formError}</p>
             </div>
+          </div>
+        )}
+        
+        {Object.keys(form.formState.errors).length > 0 && (
+          <div className="bg-amber-50 p-3 rounded-md mb-4 border border-amber-200">
+            <h4 className="font-medium text-amber-800">Form has validation errors</h4>
+            <ul className="list-disc pl-5 mt-2 text-sm text-amber-700">
+              {Object.entries(form.formState.errors).map(([key, value]) => (
+                <li key={key}>{key}: {value?.message?.toString()}</li>
+              ))}
+            </ul>
           </div>
         )}
         
@@ -150,6 +191,15 @@ const TechnologyEditorForm: React.FC<TechnologyEditorFormProps> = ({
         </Tabs>
         
         <div className="flex justify-end gap-2 mt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleButtonClick}
+            className="px-6"
+          >
+            Debug Form
+          </Button>
+          
           <Button
             type="submit"
             disabled={isLoading || formState === 'submitting'}
