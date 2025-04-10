@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -8,10 +7,15 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
+import CaseStudyCarousel from '@/components/case-studies/CaseStudyCarousel';
+import { getBusinessGoalCaseStudies } from '@/data/caseStudiesData';
 
 const BusinessGoalsLanding = () => {
   const { data: businessGoals, isLoading, error } = useBusinessGoals();
   const navigate = useNavigate();
+  
+  // Get business goals case studies
+  const businessGoalCaseStudies = getBusinessGoalCaseStudies();
 
   return (
     <Layout>
@@ -123,6 +127,13 @@ const BusinessGoalsLanding = () => {
           </div>
         )}
       </div>
+
+      {/* Case Studies Section */}
+      <CaseStudyCarousel 
+        title="Business Goal Success Stories" 
+        subtitle="Real-world examples of how our solutions help achieve business objectives"
+        caseStudies={businessGoalCaseStudies}
+      />
 
       {/* Inquiry Form */}
       <InquiryForm title="Business Goal Solutions" />

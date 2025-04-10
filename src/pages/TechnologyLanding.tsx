@@ -14,9 +14,14 @@ import { useQuery } from '@tanstack/react-query';
 import { getTechnologies } from '@/services/cms';
 import { CMSTechnology } from '@/types/cms';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
+import CaseStudyCarousel from '@/components/case-studies/CaseStudyCarousel';
+import { getTechnologyCaseStudies } from '@/data/caseStudiesData';
 
 const TechnologyLanding = () => {
   const { slug } = useParams<{ slug: string }>();
+  
+  // Get technology case studies
+  const technologyCaseStudies = getTechnologyCaseStudies();
   
   // If slug is provided, fetch the specific technology
   const { 
@@ -79,6 +84,14 @@ const TechnologyLanding = () => {
       <Layout>
         <TechnologyHero technology={technology} />
         <TechnologySections technology={technology} />
+        
+        {/* Case Studies Section */}
+        <CaseStudyCarousel 
+          title="Technology Success Stories" 
+          subtitle="See how our technology solutions create real business impact"
+          caseStudies={technologyCaseStudies}
+        />
+        
         {/* Inquiry Form */}
         <InquiryForm title={`${technology.title} Technology`} />
       </Layout>
@@ -164,6 +177,13 @@ const TechnologyLanding = () => {
           )}
         </div>
       </div>
+
+      {/* Case Studies Section */}
+      <CaseStudyCarousel 
+        title="Technology Success Stories" 
+        subtitle="See how our technology solutions create real business impact"
+        caseStudies={technologyCaseStudies}
+      />
 
       {/* Inquiry Form */}
       <InquiryForm title="Technology Solutions" />

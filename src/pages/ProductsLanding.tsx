@@ -1,9 +1,10 @@
-
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import CTASection from '@/components/common/CTASection';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import CaseStudyCarousel from '@/components/case-studies/CaseStudyCarousel';
+import { getProductCaseStudies } from '@/data/caseStudiesData';
 
 const ProductsLanding = () => {
   // Product types data
@@ -65,6 +66,9 @@ const ProductsLanding = () => {
       features: ["Custom branding", "Data collection", "Engagement tracking"]
     }
   ];
+
+  // Get product case studies
+  const productCaseStudies = getProductCaseStudies();
 
   return (
     <Layout>
@@ -141,6 +145,13 @@ const ProductsLanding = () => {
         </div>
       </section>
 
+      {/* Case Studies Section */}
+      <CaseStudyCarousel 
+        title="Product Success Stories" 
+        subtitle="See how our product solutions have helped businesses achieve their goals"
+        caseStudies={productCaseStudies}
+      />
+
       {/* Special Features Section */}
       <section className="py-16 bg-vending-gray">
         <div className="container-wide">
@@ -170,7 +181,7 @@ const ProductsLanding = () => {
             <div className="bg-white p-8 rounded-lg shadow-md">
               <div className="bg-vending-blue-light p-3 rounded-full w-14 h-14 flex items-center justify-center text-vending-blue mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" />
                   <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
                 </svg>
               </div>

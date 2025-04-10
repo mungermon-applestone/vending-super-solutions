@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -7,18 +6,18 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check, ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
-
-// Import the business goal components
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
 import BusinessGoalFeatures from '@/components/businessGoals/BusinessGoalFeatures';
+import CaseStudyCarousel from '@/components/case-studies/CaseStudyCarousel';
+import { getBusinessGoalCaseStudies } from '@/data/caseStudiesData';
 
 const BusinessGoalDetail = () => {
   const { goalSlug } = useParams<{ goalSlug: string }>();
   const { data: goal, isLoading, error } = useBusinessGoal(goalSlug);
+  
+  const businessGoalCaseStudies = getBusinessGoalCaseStudies();
 
-  // Function to render icon for features
   const renderFeatureIcon = (iconName: string | undefined) => {
-    // Default to Check icon if no icon is provided
     return <Check className="h-6 w-6" />;
   };
 
@@ -55,8 +54,6 @@ const BusinessGoalDetail = () => {
     );
   }
 
-  // Prepare features with icons for the BusinessGoalFeatures component - this is where the error occurs
-  // We need to convert the icon property to a React node before passing it to the component
   const featuresWithIcons = goal.features?.map(feature => ({
     ...feature,
     icon: renderFeatureIcon(feature.icon?.toString())
@@ -64,7 +61,6 @@ const BusinessGoalDetail = () => {
 
   return (
     <Layout>
-      {/* Breadcrumb */}
       <div className="bg-gray-50 border-b border-gray-200">
         <div className="container mx-auto py-3">
           <nav className="flex items-center text-sm">
@@ -77,7 +73,6 @@ const BusinessGoalDetail = () => {
         </div>
       </div>
 
-      {/* Hero Section */}
       <BusinessGoalHero
         title={goal.title}
         description={goal.description}
@@ -85,12 +80,16 @@ const BusinessGoalDetail = () => {
         image={goal.image?.url || 'https://placehold.co/600x400?text=Business+Goal'}
       />
 
-      {/* Features Section */}
       {featuresWithIcons.length > 0 && (
         <BusinessGoalFeatures features={featuresWithIcons} />
       )}
 
-      {/* Benefits Section (if available) */}
+      <CaseStudyCarousel 
+        title={`${goal.title} Success Stories`}
+        subtitle="See how our solutions have helped organizations achieve their goals"
+        caseStudies={businessGoalCaseStudies}
+      />
+
       {goal.benefits && goal.benefits.length > 0 && (
         <section className="py-16 bg-vending-gray">
           <div className="container-wide">
@@ -111,7 +110,6 @@ const BusinessGoalDetail = () => {
         </section>
       )}
 
-      {/* Call to Action */}
       <section className="py-16 bg-vending-blue text-white">
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">Ready to achieve your {goal.title} goals?</h2>
@@ -129,7 +127,6 @@ const BusinessGoalDetail = () => {
         </div>
       </section>
 
-      {/* Inquiry Form */}
       <InquiryForm title={`${goal.title} Solutions`} />
     </Layout>
   );
