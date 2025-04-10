@@ -54,10 +54,11 @@ const BusinessGoalDetail = () => {
     );
   }
 
-  // Prepare features with icons for the BusinessGoalFeatures component
+  // Prepare features with icons for the BusinessGoalFeatures component - this is where the error occurs
+  // We need to convert the icon property to a React node before passing it to the component
   const featuresWithIcons = goal.features?.map(feature => ({
     ...feature,
-    icon: renderFeatureIcon(feature.icon)
+    icon: renderFeatureIcon(feature.icon?.toString())
   })) || [];
 
   return (
@@ -79,7 +80,7 @@ const BusinessGoalDetail = () => {
       <BusinessGoalHero
         title={goal.title}
         description={goal.description}
-        icon={renderFeatureIcon(goal.icon)}
+        icon={renderFeatureIcon(goal.icon?.toString())}
         image={goal.image?.url || 'https://placehold.co/600x400?text=Business+Goal'}
       />
 
