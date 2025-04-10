@@ -133,3 +133,24 @@ export function useBusinessGoal(slug: string | undefined) {
     enabled: !!slug,
   });
 }
+
+/**
+ * Hook to fetch all technologies
+ */
+export function useTechnologies() {
+  return useQuery({
+    queryKey: ['technologies'],
+    queryFn: cmsService.getTechnologies,
+  });
+}
+
+/**
+ * Hook to fetch a specific technology by slug
+ */
+export function useTechnology(slug: string | undefined) {
+  return useQuery({
+    queryKey: ['technology', slug],
+    queryFn: () => cmsService.getTechnologyBySlug(slug || ''),
+    enabled: !!slug,
+  });
+}

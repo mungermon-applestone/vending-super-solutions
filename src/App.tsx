@@ -17,7 +17,6 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import ProductEditor from "./pages/ProductEditor";
 import BusinessGoalsLanding from "./pages/BusinessGoalsLanding";
 import BusinessGoalDetail from "./pages/BusinessGoalDetail";
-import TechnologyLanding from "./pages/TechnologyLanding";
 import SimpleTechnologyPage from "./pages/SimpleTechnologyPage";
 import TechnologyEditor from "./pages/TechnologyEditor";
 import CaseStudies from "./pages/CaseStudies";
@@ -82,10 +81,9 @@ function App() {
       <Route path="/goals" element={<BusinessGoalsLanding />} />
       <Route path="/goals/:goalSlug" element={<BusinessGoalDetail />} />
       
-      {/* Technology routes */}
-      <Route path="/technology" element={<TechnologyLanding />} />
+      {/* Technology routes - making simple the default route */}
+      <Route path="/technology" element={<SimpleTechnologyPage />} />
       <Route path="/technology/simple" element={<SimpleTechnologyPage />} />
-      <Route path="/technology/:slug" element={<TechnologyLanding />} />
       
       {/* Case Studies routes */}
       <Route path="/case-studies" element={<CaseStudies />} />
