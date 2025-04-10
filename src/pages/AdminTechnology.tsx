@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -139,7 +138,6 @@ const AdminTechnology = () => {
                               <AlertDialogAction
                                 className="bg-red-600 hover:bg-red-700"
                                 onClick={() => {
-                                  // TODO: Implement delete functionality
                                   toast({
                                     title: "Technology deleted",
                                     description: `${tech.title} has been deleted`

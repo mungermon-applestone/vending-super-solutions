@@ -19,6 +19,7 @@ import AdminMachines from "./pages/AdminMachines";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminTechnology from "./pages/AdminTechnology";
 import TechnologyLanding from "./pages/TechnologyLanding";
+import TechnologyEditor from "./pages/TechnologyEditor";
 import AboutUs from "./pages/AboutUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Blog from "./pages/Blog";
@@ -91,6 +92,8 @@ const App = () => (
             <Route path="/admin/machines/edit/:machineId" element={<MachineEditor />} />
             <Route path="/admin/machines/migrate" element={<MigrateMachinesData />} />
             <Route path="/admin/technology" element={<AdminTechnology />} />
+            <Route path="/admin/technology/new" element={<TechnologyEditor />} />
+            <Route path="/admin/technology/edit/:technologySlug" element={<TechnologyEditor />} />
             <Route path="/admin/technology/migrate" element={<MigrateTechnologyData />} />
             
             {/* Specific product type routes */}

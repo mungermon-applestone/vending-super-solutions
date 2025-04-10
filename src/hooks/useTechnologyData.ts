@@ -1,25 +1,25 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { fetchTechnologyBySlug, fetchTechnologies } from '@/services/cms/contentTypes/technologies';
+import { useState, useEffect } from 'react';
+import { fetchTechnologyBySlug } from '@/services/cms/contentTypes/technologies';
 import { CMSTechnology } from '@/types/cms';
+import { useQuery } from '@tanstack/react-query';
 
-/**
- * Hook to fetch all technologies
- */
-export function useTechnologies() {
-  return useQuery({
-    queryKey: ['technologies'],
-    queryFn: fetchTechnologies,
-  });
-}
-
-/**
- * Hook to fetch a specific technology by slug
- */
-export function useTechnology(slug: string | undefined) {
-  return useQuery({
+export const useTechnologyData = (slug: string) => {
+  const {
+    data: technology,
+    isLoading,
+    isError,
+    error
+  } = useQuery<CMSTechnology | null, Error>({
     queryKey: ['technology', slug],
-    queryFn: () => fetchTechnologyBySlug(slug || 'enterprise-platform'),
-    enabled: !!slug || true, // Always fetch the default technology if no slug provided
+    queryFn: () => fetchTechnologyBySlug(slug),
+    enabled: !!slug,
   });
-}
+
+  return {
+    technology,
+    isLoading: isLoading && !!slug,
+    isError,
+    error,
+  };
+};

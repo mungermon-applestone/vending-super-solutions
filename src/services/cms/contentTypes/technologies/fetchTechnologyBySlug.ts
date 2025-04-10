@@ -1,48 +1,42 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { handleError, transformTechnologyData } from '../../utils/transformers';
-import { logSlugSearch } from '../../utils/slugMatching';
+import { CMSTechnology } from '@/types/cms';
+import { IS_DEVELOPMENT } from '@/config/cms';
+import { useMockData, getMockData } from '../../mockDataHandler';
 
-export async function fetchTechnologyBySlug<T = any>(slug: string): Promise<T | null> {
-  logSlugSearch('technology', slug);
-
+/**
+ * Fetches a single technology by slug
+ * @param slug The slug of the technology to fetch
+ * @returns Promise resolving to the technology or null if not found
+ */
+export const fetchTechnologyBySlug = async (slug: string): Promise<CMSTechnology | null> => {
+  console.log(`[fetchTechnologyBySlug] Fetching technology for slug: "${slug}"`);
+  
   try {
-    if (!slug || slug.trim() === '') {
-      console.error('[fetchTechnologyBySlug] Empty slug provided');
-      return null;
+    // If mock data is enabled, use it instead of actual API calls
+    if (useMockData) {
+      const mockData = await getMockData<CMSTechnology>('technologies', { slug });
+      return mockData[0] || null;
     }
     
-    const { data: technology, error } = await supabase
+    const { data, error } = await supabase
       .from('technologies')
-      .select(`
-        *,
-        technology_sections (
-          *,
-          technology_features (
-            *,
-            technology_feature_items (*)
-          ),
-          technology_images (*)
-        ),
-        technology_images (*)
-      `)
+      .select('*')
       .eq('slug', slug)
-      .maybeSingle();
-
+      .single();
+    
     if (error) {
       throw error;
     }
-
-    if (!technology) {
-      console.log(`[fetchTechnologyBySlug] No technology found with slug "${slug}"`);
+    
+    if (!data) {
       return null;
     }
     
-    console.log(`[fetchTechnologyBySlug] Found technology: "${technology.title}"`);
-    const transformedData = await transformTechnologyData(technology);
-    
-    return transformedData as T;
+    console.log(`[fetchTechnologyBySlug] Found technology: "${data.title}"`);
+    return data as CMSTechnology;
   } catch (error) {
-    return handleError('fetchTechnologyBySlug', error);
+    console.error(`[fetchTechnologyBySlug] Error fetching technology with slug "${slug}":`, error);
+    throw error;
   }
-}
+};
