@@ -323,7 +323,7 @@ const SimpleTechnologyPage = () => {
                         {feature.icon}
                       </div>
                       <div className="text-left">
-                        <h3 className="font-medium text-lg">{feature.title}</h3>
+                        <h3 className="font-medium text-lg leading-tight mb-0.5">{feature.title}</h3>
                         <p className="text-gray-600">{feature.description}</p>
                       </div>
                     </div>
