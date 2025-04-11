@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { transformProductTypeData } from '../../utils/transformers';
 import { 
@@ -135,7 +134,12 @@ export async function fetchProductTypes<T = any>(params: Record<string, any> = {
     
     // DEBUG: Log the Supabase connection status to verify connectivity
     try {
-      const { data: healthCheck, error: healthError } = await supabase.from('product_types').select('count(*)');
+      // Fix the health check query by using a simpler approach that doesn't use count(*)
+      const { data: healthCheck, error: healthError } = await supabase
+        .from('product_types')
+        .select('id')
+        .limit(1);
+        
       if (healthError) {
         console.error('[fetchProductTypes] DEBUG: Supabase connection issue:', healthError);
       } else {
