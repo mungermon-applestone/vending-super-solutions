@@ -2,20 +2,10 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import './App.css';
+import NotFound from './pages/NotFound';
 
-// We need to import the admin pages from the correct locations
-import AdminDashboard from './pages/AdminDashboard';
-import AdminProducts from './pages/admin/AdminProducts';
-import AdminMachines from './pages/admin/AdminMachines';
-import AdminBusinessGoals from './pages/admin/AdminBusinessGoals';
-import AdminTechnology from './pages/admin/AdminTechnology';
-import AdminBlog from './pages/admin/AdminBlog';
-import AdminMedia from './pages/admin/AdminMedia';
-
-// Import the MachineEditor instead of MachineForm
-import MachineEditor from './pages/MachineEditor';
-import ProductEditor from './pages/ProductEditor';
-import TechnologyEditor from './pages/TechnologyEditor';
+// Import the homepage component
+import Homepage from './pages/Homepage';
 
 // We'll need a placeholder component for routes we don't have yet
 const PlaceholderPage = () => (
@@ -25,12 +15,24 @@ const PlaceholderPage = () => (
   </div>
 );
 
+// Admin pages
+import AdminDashboard from './pages/AdminDashboard';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminMachines from './pages/admin/AdminMachines';
+import AdminBusinessGoals from './pages/admin/AdminBusinessGoals';
+import AdminTechnology from './pages/admin/AdminTechnology';
+import AdminBlog from './pages/admin/AdminBlog';
+import AdminMedia from './pages/admin/AdminMedia';
+import ProductEditor from './pages/ProductEditor';
+import MachineEditor from './pages/MachineEditor';
+import TechnologyEditor from './pages/TechnologyEditor';
+
 function App() {
   return (
     <div className="App">
       <Routes>
-        {/* Public routes - using placeholder for now */}
-        <Route path="/" element={<PlaceholderPage />} />
+        {/* Public routes */}
+        <Route path="/" element={<Homepage />} />
         <Route path="/products" element={<PlaceholderPage />} />
         <Route path="/machines" element={<PlaceholderPage />} />
         <Route path="/business-goals" element={<PlaceholderPage />} />
@@ -59,7 +61,7 @@ function App() {
         <Route path="/admin/media" element={<AdminMedia />} />
         
         {/* 404 fallback */}
-        <Route path="*" element={<div>404 Not Found</div>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );
