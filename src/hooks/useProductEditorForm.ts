@@ -59,38 +59,6 @@ export const useProductEditorForm = (
     mode: 'onBlur',
   });
 
-  // Ensure the form is never set to readonly
-  useEffect(() => {
-    // Make sure form is editable
-    console.log('[useProductEditorForm] Ensuring form is not readonly or disabled');
-    
-    const makeFormEditable = () => {
-      // Directly manipulate the DOM to ensure form elements are editable
-      document.querySelectorAll('input, textarea, select').forEach(el => {
-        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-          // Force properties
-          el.readOnly = false;
-          el.disabled = false;
-          
-          // Remove attributes
-          el.removeAttribute('readonly');
-          el.removeAttribute('disabled');
-        } else if (el instanceof HTMLSelectElement) {
-          el.disabled = false;
-          el.removeAttribute('disabled');
-        }
-      });
-    };
-    
-    // Run immediately
-    makeFormEditable();
-    
-    // Then set up interval
-    const interval = setInterval(makeFormEditable, 500);
-    
-    return () => clearInterval(interval);
-  }, [form]);
-
   // Populate form with existing product data when available
   useEffect(() => {
     if (existingProduct && !isCreating) {
@@ -129,23 +97,7 @@ export const useProductEditorForm = (
       
       // Reset the form with clean data
       form.reset(productData);
-      
       console.log('[useProductEditorForm] Form reset with values:', form.getValues());
-      
-      // Force update to ensure form is editable
-      setTimeout(() => {
-        console.log('[useProductEditorForm] Force making form editable after population');
-        document.querySelectorAll('input, textarea, select').forEach(el => {
-          if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-            el.readOnly = false;
-            el.disabled = false;
-          } else if (el instanceof HTMLSelectElement) {
-            el.disabled = false;
-          }
-          el.removeAttribute('readonly');
-          el.removeAttribute('disabled');
-        });
-      }, 100);
     } else if (productSlug && productSlug !== 'new' && !existingProduct && !isLoadingProduct) {
       console.log('[useProductEditorForm] No existing product found for slug:', productSlug);
       toast.toast({
