@@ -111,37 +111,179 @@ If content deletion doesn't work properly, check the following:
    }
    ```
 
-## Implementation Examples
+## Standardized Deletion Pattern
 
-See the following files for examples of proper form field handling:
+For consistent deletion functionality across the application, follow this pattern:
 
-- `src/components/admin/product-editor/sections/BasicInformation.tsx`
-- `src/components/admin/product-editor/sections/ProductImage.tsx`
-- `src/hooks/useProductEditorForm.ts`
-- `src/components/admin/product-editor/FormFieldWrapper.tsx`
-
-## When to Use FormFieldWrapper
-
-The `FormFieldWrapper` component standardizes form field handling. Use it when:
-
-1. Creating new form fields that need consistent handling
-2. Refactoring existing form fields for better maintainability
-3. Working with forms that may be affected by operations like cloning
-
-Example usage:
+### 1. Create a Delete Dialog Component
 
 ```tsx
-<FormFieldWrapper
-  form={form}
-  name="title"
-  label="Title"
-  placeholder="Enter title"
-  renderInput={(field) => (
-    <Input
-      {...field}
-      placeholder="Product Title"
-      value={field.value || ''}
-    />
-  )}
+// DeleteEntityDialog.tsx
+import React from 'react';
+import { Loader2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+interface DeleteEntityDialogProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  entityToDelete: { id: string; title: string; slug: string } | null;
+  onConfirmDelete: () => Promise<void>;
+  isDeleting: boolean;
+  entityType?: string; // Optional - entity type name for customized messages
+}
+
+const DeleteEntityDialog: React.FC<DeleteEntityDialogProps> = ({
+  isOpen,
+  setIsOpen,
+  entityToDelete,
+  onConfirmDelete,
+  isDeleting,
+  entityType = 'item'
+}) => {
+  return (
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete the {entityType} "{entityToDelete?.title}". 
+            This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={onConfirmDelete} 
+            className="bg-red-600 hover:bg-red-700"
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              'Delete'
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
+```
+
+### 2. Create a Delete Function in the Service Layer
+
+```tsx
+// deleteEntity.ts
+export const deleteEntity = async (slug: string): Promise<boolean> => {
+  try {
+    // 1. Fetch entity ID first
+    const { data: entity, error: fetchError } = await supabase
+      .from('entities')
+      .select('id')
+      .eq('slug', slug)
+      .single();
+      
+    if (fetchError || !entity) {
+      throw new Error(`Entity with slug '${slug}' not found`);
+    }
+    
+    // 2. Delete related records first
+    await Promise.all([
+      supabase.from('entity_related_items').delete().eq('entity_id', entity.id),
+      supabase.from('entity_images').delete().eq('entity_id', entity.id)
+    ]);
+    
+    // 3. Delete the main entity
+    const { error } = await supabase
+      .from('entities')
+      .delete()
+      .eq('id', entity.id);
+      
+    if (error) throw error;
+    
+    return true;
+  } catch (error) {
+    console.error('Deletion error:', error);
+    throw error; // Re-throw for proper handling in the component
+  }
+};
+```
+
+### 3. Implement in Admin Page
+
+```tsx
+// AdminEntitiesPage.tsx
+const [isDeleting, setIsDeleting] = useState(false);
+const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+const [entityToDelete, setEntityToDelete] = useState<{ id: string; title: string; slug: string } | null>(null);
+
+const handleDeleteClick = (entity) => {
+  setEntityToDelete({
+    id: entity.id,
+    title: entity.title,
+    slug: entity.slug
+  });
+  setDeleteDialogOpen(true);
+};
+
+const confirmDelete = async () => {
+  if (!entityToDelete) return;
+  
+  try {
+    setIsDeleting(true);
+    
+    await deleteEntity(entityToDelete.slug);
+    
+    toast({
+      title: "Entity deleted",
+      description: `${entityToDelete.title} has been deleted successfully.`
+    });
+    
+    queryClient.invalidateQueries({ queryKey: ['entities'] });
+    
+    setDeleteDialogOpen(false);
+    setEntityToDelete(null);
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: error instanceof Error ? error.message : "Failed to delete entity",
+      variant: "destructive",
+    });
+  } finally {
+    setIsDeleting(false);
+  }
+};
+
+// In the render function:
+<DeleteEntityDialog
+  isOpen={deleteDialogOpen}
+  setIsOpen={setDeleteDialogOpen}
+  entityToDelete={entityToDelete}
+  onConfirmDelete={confirmDelete}
+  isDeleting={isDeleting}
+  entityType="entity"
 />
 ```
+
+## Implementation Examples
+
+See the following files for examples of proper deletion handling:
+
+- `src/components/admin/product-editor/DeleteProductDialog.tsx`
+- `src/components/admin/technology/DeleteTechnologyDialog.tsx`
+- `src/services/cms/contentTypes/productTypes/deleteProductType.ts`
+- `src/services/cms/contentTypes/technologies/deleteTechnology.ts`
+- `src/pages/admin/AdminProducts.tsx`
+- `src/pages/admin/AdminTechnology.tsx`

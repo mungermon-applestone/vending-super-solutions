@@ -1,16 +1,6 @@
 
 import React from 'react';
-import { Loader2 } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import DeleteEntityDialog, { EntityToDelete } from '../common/DeleteEntityDialog';
 
 interface DeleteMachineDialogProps {
   isOpen: boolean;
@@ -27,33 +17,24 @@ const DeleteMachineDialog: React.FC<DeleteMachineDialogProps> = ({
   onConfirmDelete,
   isDeleting
 }) => {
+  // Convert machineToDelete to the format expected by DeleteEntityDialog
+  const entityToDelete: EntityToDelete | null = machineToDelete 
+    ? { 
+        id: machineToDelete.id, 
+        title: machineToDelete.title, 
+        slug: ''  // Machine might not have slug in this component
+      } 
+    : null;
+
   return (
-    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This will permanently delete the machine "{machineToDelete?.title}". This action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction 
-            onClick={onConfirmDelete} 
-            className="bg-red-600 hover:bg-red-700"
-          >
-            {isDeleting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Deleting...
-              </>
-            ) : (
-              'Delete'
-            )}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <DeleteEntityDialog
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      entityToDelete={entityToDelete}
+      onConfirmDelete={onConfirmDelete}
+      isDeleting={isDeleting}
+      entityType="machine"
+    />
   );
 };
 
