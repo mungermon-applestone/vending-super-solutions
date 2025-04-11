@@ -1,11 +1,19 @@
 
 // This file is now just a re-export of the modularized business goals files
+import { businessGoalOperations } from './businessGoals/index';
 import {
   fetchBusinessGoals,
-  fetchBusinessGoalBySlug
+  fetchBusinessGoalBySlug,
+  createBusinessGoal,
+  updateBusinessGoal,
+  deleteBusinessGoal
 } from './businessGoals/index';
 
 export {
+  businessGoalOperations,
   fetchBusinessGoals,
-  fetchBusinessGoalBySlug
+  fetchBusinessGoalBySlug,
+  createBusinessGoal,
+  updateBusinessGoal,
+  deleteBusinessGoal
 };

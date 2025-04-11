@@ -7,25 +7,37 @@ import {
 } from '@/types/cms';
 import { fetchFromCMS } from '@/services/cms/fetchFromCMS';
 import { 
+  productTypeOperations,
   fetchProductTypeBySlug,
   fetchProductTypeByUUID,
   fetchProductTypes,
   deleteProductType as removeProductType
 } from '@/services/cms/contentTypes/productTypes';
-import { fetchBusinessGoalBySlug } from '@/services/cms/contentTypes/businessGoals';
+import { businessGoalOperations, fetchBusinessGoalBySlug } from '@/services/cms/contentTypes/businessGoals';
 import { 
   normalizeSlug, 
   mapUrlSlugToDatabaseSlug, 
   getSlugVariations 
 } from '@/services/cms/utils/slugMatching';
-import { fetchMachineById, createMachine, updateMachine, deleteMachine } from '@/services/cms/contentTypes/machines';
+import { 
+  fetchMachineById, 
+  createMachine, 
+  updateMachine, 
+  deleteMachine 
+} from '@/services/cms/contentTypes/machines';
 
 // Import everything from technologies through one import
 import {
+  technologyOperations,
   fetchTechnologies,
   fetchTechnologyBySlug,
   deleteTechnology as removeTechnology
 } from './cms/contentTypes/technologies';
+
+// Export standardized content type operations
+export const productTypes = productTypeOperations;
+export const businessGoals = businessGoalOperations;
+export const technologies = technologyOperations;
 
 export async function getMachines(filters: Record<string, any> = {}): Promise<CMSMachine[]> {
   return await fetchFromCMS<CMSMachine>('machines', filters);
@@ -58,12 +70,12 @@ export async function removeExistingMachine(id: string): Promise<boolean> {
 
 export async function getProductTypes(): Promise<CMSProductType[]> {
   console.log("[cms.ts] Fetching all product types");
-  return await fetchFromCMS<CMSProductType>('product-types');
+  return await productTypes.fetchAll();
 }
 
 export async function deleteProductType(id: string): Promise<boolean> {
   console.log(`[cms.ts] Deleting product type with ID: ${id}`);
-  return await removeProductType(id);
+  return await productTypes.delete(id);
 }
 
 export async function getProductTypeBySlug(slug: string): Promise<CMSProductType | null> {
@@ -77,7 +89,7 @@ export async function getProductTypeBySlug(slug: string): Promise<CMSProductType
   try {
     // Direct lookup with improved slug handling
     console.log(`[cms.ts] Using enhanced slug lookup for: "${slug}"`);
-    const productType = await fetchProductTypeBySlug<CMSProductType>(slug);
+    const productType = await productTypes.fetchBySlug(slug);
     
     if (productType) {
       console.log(`[cms.ts] Successfully retrieved product type: ${productType.title}`);
@@ -88,14 +100,14 @@ export async function getProductTypeBySlug(slug: string): Promise<CMSProductType
     
     // As a last resort, try a fuzzy search
     console.log(`[cms.ts] All direct lookups failed, trying fallback method with fuzzy search`);
-    const productTypes = await fetchFromCMS<CMSProductType>('product-types', { 
+    const productTypesList = await fetchFromCMS<CMSProductType>('product-types', { 
       slug: slug,
       exactMatch: false // Allow fuzzy matching as last resort
     });
     
-    if (productTypes.length > 0) {
-      console.log(`[cms.ts] Fallback found product type via fuzzy search: ${productTypes[0].title}`);
-      return productTypes[0];
+    if (productTypesList.length > 0) {
+      console.log(`[cms.ts] Fallback found product type via fuzzy search: ${productTypesList[0].title}`);
+      return productTypesList[0];
     }
     
     // DEBUG: Let's try to get all product types to see what's available
@@ -126,7 +138,7 @@ export async function getProductTypeByUUID(uuid: string): Promise<CMSProductType
   
   try {
     // Use our direct method specifically for UUID lookups
-    const productType = await fetchProductTypeByUUID<CMSProductType>(uuid);
+    const productType = await productTypes.fetchById(uuid);
     
     if (productType) {
       console.log(`[cms.ts] Successfully retrieved product type by UUID: ${productType.title}`);
@@ -146,7 +158,7 @@ export async function getTestimonials(): Promise<CMSTestimonial[]> {
 }
 
 export async function getBusinessGoals(): Promise<CMSBusinessGoal[]> {
-  return await fetchFromCMS<CMSBusinessGoal>('business-goals');
+  return await businessGoals.fetchAll();
 }
 
 export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGoal | null> {
@@ -159,7 +171,7 @@ export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGo
   
   try {
     // Use the direct method to get a business goal by slug
-    const businessGoal = await fetchBusinessGoalBySlug<CMSBusinessGoal>(slug);
+    const businessGoal = await businessGoals.fetchBySlug(slug);
     
     if (businessGoal) {
       console.log(`[cms.ts] Successfully retrieved business goal: ${businessGoal.title}`);
@@ -176,7 +188,7 @@ export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGo
   }
 }
 
-// Export technology functions
-export const getTechnologies = fetchTechnologies;
-export const getTechnologyBySlug = fetchTechnologyBySlug;
-export const deleteTechnology = removeTechnology;
+// Export technology functions with standardized naming
+export const getTechnologies = technologies.fetchAll;
+export const getTechnologyBySlug = technologies.fetchBySlug;
+export const deleteTechnology = technologies.delete;

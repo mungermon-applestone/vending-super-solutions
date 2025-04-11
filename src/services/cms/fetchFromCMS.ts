@@ -1,10 +1,5 @@
-
 import { IS_DEVELOPMENT } from '@/config/cms';
-import { fetchMachines } from './contentTypes/machines';
-import { fetchProductTypes } from './contentTypes/productTypes';
-import { fetchTestimonials } from './contentTypes/testimonials';
-import { fetchBusinessGoals } from './contentTypes/businessGoals';
-import { fetchTechnologies } from './contentTypes/technologies';
+import { CMSContentTypeFactory } from './contentTypeFactory';
 import { useMockData, getMockData } from './mockDataHandler';
 
 /**
@@ -22,23 +17,36 @@ export async function fetchFromCMS<T>(contentType: string, params: Record<string
       return await getMockData<T>(contentType, params);
     }
     
-    // Otherwise delegate to the appropriate handler based on content type
-    switch (contentType) {
-      case 'machines':
-        return await fetchMachines(params) as unknown as T[];
-      case 'product-types':
-        return await fetchProductTypes(params) as unknown as T[];
-      case 'testimonials':
-        return await fetchTestimonials() as unknown as T[];
-      case 'business-goals':
-        // We need to call fetchBusinessGoals without parameters since it doesn't accept any
-        return await fetchBusinessGoals() as unknown as T[];
-      case 'technologies':
-        // We need to call fetchTechnologies without parameters since it doesn't accept any
-        return await fetchTechnologies() as unknown as T[];
-      default:
-        console.warn(`[fetchFromCMS] Unknown content type: ${contentType}`);
-        return [] as T[];
+    // Use our factory to get the right operations for this content type
+    try {
+      const contentTypeOps = CMSContentTypeFactory.getOperations<T>(contentType);
+      return await contentTypeOps.fetchAll({ filters: params });
+    } catch (error) {
+      // If the content type isn't registered in our factory yet,
+      // fall back to the direct import approach
+      console.log(`[fetchFromCMS] Content type "${contentType}" not registered in factory, using direct imports.`);
+      
+      // Otherwise delegate to the appropriate handler based on content type
+      switch (contentType) {
+        case 'machines':
+          const { fetchMachines } = await import('./contentTypes/machines');
+          return await fetchMachines(params) as unknown as T[];
+        case 'product-types':
+          const { fetchProductTypes } = await import('./contentTypes/productTypes');
+          return await fetchProductTypes(params) as unknown as T[];
+        case 'testimonials':
+          const { fetchTestimonials } = await import('./contentTypes/testimonials');
+          return await fetchTestimonials() as unknown as T[];
+        case 'business-goals':
+          const { fetchBusinessGoals } = await import('./contentTypes/businessGoals');
+          return await fetchBusinessGoals() as unknown as T[];
+        case 'technologies':
+          const { fetchTechnologies } = await import('./contentTypes/technologies');
+          return await fetchTechnologies() as unknown as T[];
+        default:
+          console.warn(`[fetchFromCMS] Unknown content type: ${contentType}`);
+          return [] as T[];
+      }
     }
   } catch (error) {
     console.error(`[fetchFromCMS] Error fetching ${contentType}:`, error);

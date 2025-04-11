@@ -160,3 +160,16 @@ export interface MockImage {
   width?: number;
   height?: number;
 }
+
+/**
+ * Standard query options interface for CMS operations
+ */
+export interface QueryOptions {
+  filters?: Record<string, any>;
+  limit?: number;
+  offset?: number;
+  orderBy?: string;
+  orderDirection?: 'asc' | 'desc';
+  search?: string;
+  exactMatch?: boolean;
+}
