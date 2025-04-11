@@ -1,3 +1,5 @@
+
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import CTASection from '@/components/common/CTASection';
@@ -5,67 +7,26 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import CaseStudyCarousel from '@/components/case-studies/CaseStudyCarousel';
 import { getProductCaseStudies } from '@/data/caseStudiesData';
+import { useProductTypes } from '@/hooks/cms/useProductTypes';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ProductsLanding = () => {
-  // Product types data
-  const productTypes = [
-    {
-      title: "Grocery",
-      description: "Vending solutions for packaged food, snacks, beverages, and everyday essentials.",
-      image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a",
-      path: "/products/grocery",
-      features: ["Temperature control", "Expiration tracking", "Versatile sizing options"]
-    },
-    {
-      title: "Vape",
-      description: "Secure, age-verified vending solutions for vape products with compliance features.",
-      image: "https://images.unsplash.com/photo-1560913210-91e811632701",
-      path: "/products/vape",
-      features: ["Age verification", "Secure dispensing", "Compliance reporting"]
-    },
-    {
-      title: "Cannabis",
-      description: "Compliant solutions for cannabis product sales with robust security and verification.",
-      image: "https://images.unsplash.com/photo-1635246304789-e90e1fc1013a",
-      path: "/products/cannabis",
-      features: ["Legal compliance", "Secure storage", "Track and trace"]
-    },
-    {
-      title: "Fresh Food",
-      description: "Temperature-monitored vending for prepared meals, salads, and perishable items.",
-      image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-      path: "/products/fresh-food",
-      features: ["Temperature monitoring", "Shelf life tracking", "Smart rotation"]
-    },
-    {
-      title: "Cosmetics",
-      description: "Premium display and dispensing solutions for beauty and personal care products.",
-      image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348",
-      path: "/products/cosmetics",
-      features: ["Premium displays", "Product information", "Sample options"]
-    },
-    {
-      title: "Toys/Cards/Collectibles",
-      description: "Specialized vending for hobby products with showcasing and protection features.",
-      image: "https://images.unsplash.com/photo-1559181567-c3190ca9959b",
-      path: "/products/collectibles",
-      features: ["Display cases", "Limited edition tracking", "Anti-theft measures"]
-    },
-    {
-      title: "OTC Products",
-      description: "Secure vending solutions for over-the-counter medications and health products.",
-      image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae",
-      path: "/products/otc",
-      features: ["Compliance features", "Temperature control", "Secure dispensing"]
-    },
-    {
-      title: "Swag and Samples",
-      description: "Promotional product dispensing solutions for marketing and brand awareness.",
-      image: "https://images.unsplash.com/photo-1581075734134-187d255cc9f5",
-      path: "/products/swag",
-      features: ["Custom branding", "Data collection", "Engagement tracking"]
-    }
-  ];
+  // Fetch actual product types from CMS
+  const { data: productTypes = [], isLoading } = useProductTypes();
+  
+  // For debugging
+  useEffect(() => {
+    console.log('Product types loaded on landing page:', productTypes);
+  }, [productTypes]);
+
+  // Map CMS products to display format with default features if none available
+  const mappedProducts = productTypes.map(product => ({
+    title: product.title,
+    description: product.description || "No description available",
+    image: product.image?.url || "https://images.unsplash.com/photo-1604719312566-8912e9227c6a",
+    path: `/products/${product.slug}`,
+    features: product.benefits?.slice(0, 3).map(benefit => benefit) || ["Smart vending solution"]
+  }));
 
   // Get product case studies
   const productCaseStudies = getProductCaseStudies();
@@ -83,9 +44,16 @@ const ProductsLanding = () => {
               <p className="text-xl text-gray-700 mb-8 max-w-2xl">
                 Our versatile vending software enables you to sell virtually any product type. Whether you're a vending operator, enterprise, SMB, or brand, our solutions adapt to your specific needs.
               </p>
-              <Button asChild className="btn-primary">
-                <Link to="/contact">Request a Demo</Link>
-              </Button>
+              <div className="flex gap-4">
+                <Button asChild className="btn-primary">
+                  <Link to="/contact">Request a Demo</Link>
+                </Button>
+                {productTypes.length > 0 && (
+                  <Button asChild variant="outline">
+                    <Link to="/admin/products">Manage Products</Link>
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="relative">
               <img 
@@ -104,44 +72,88 @@ const ProductsLanding = () => {
       {/* Featured Product Types Grid */}
       <section className="py-16 bg-white">
         <div className="container-wide">
-          <h2 className="text-3xl font-bold text-center mb-16">Featured Product Types</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {productTypes.map((product, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                <div className="relative h-48">
-                  <img 
-                    src={product.image} 
-                    alt={product.title} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2">{product.title}</h3>
-                  <p className="text-gray-600 mb-4 line-clamp-2">{product.description}</p>
-                  
-                  <div className="mb-4">
-                    <div className="flex flex-wrap gap-2">
-                      {product.features.map((feature, i) => (
-                        <span 
-                          key={i}
-                          className="text-xs bg-vending-blue-light text-vending-blue px-2 py-1 rounded-full"
-                        >
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <Button asChild variant="outline" className="w-full">
-                    <Link to={product.path}>
-                      Learn More <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            ))}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
+            <div>
+              <h2 className="text-3xl font-bold mb-2">Featured Product Types</h2>
+              <p className="text-gray-600 max-w-2xl">
+                {isLoading 
+                  ? "Loading product types..." 
+                  : productTypes.length > 0 
+                    ? `Showing ${productTypes.length} product types` 
+                    : "No product types found. Add some in the admin section!"
+                }
+              </p>
+            </div>
+            <Button asChild className="mt-4 md:mt-0">
+              <Link to="/admin/products">Manage Products</Link>
+            </Button>
           </div>
+          
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <Skeleton className="h-48 w-full" />
+                  <div className="p-6">
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-full mb-4" />
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-10 w-full mt-4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : productTypes.length === 0 ? (
+            <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 className="text-xl font-semibold mb-2">No Products Found</h3>
+              <p className="text-gray-600 mb-6">Start by creating your first product type in the admin section.</p>
+              <Button asChild>
+                <Link to="/admin/products/new">Create First Product</Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {mappedProducts.map((product, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                  <div className="relative h-48">
+                    <img 
+                      src={product.image} 
+                      alt={product.title} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x200?text=No+Image";
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold mb-2">{product.title}</h3>
+                    <p className="text-gray-600 mb-4 line-clamp-2">{product.description}</p>
+                    
+                    {product.features && product.features.length > 0 && (
+                      <div className="mb-4">
+                        <div className="flex flex-wrap gap-2">
+                          {product.features.slice(0, 3).map((feature, i) => (
+                            <span 
+                              key={i}
+                              className="text-xs bg-vending-blue-light text-vending-blue px-2 py-1 rounded-full"
+                            >
+                              {feature}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <Button asChild variant="outline" className="w-full">
+                      <Link to={product.path}>
+                        Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
