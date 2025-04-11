@@ -29,6 +29,19 @@ export function getSlugVariations(slug: string): string[] {
     variations.push(`${slug}s`); // Add trailing 's'
   }
   
+  // Handle common adjective forms with -y and -ies
+  if (slug.endsWith('y')) {
+    variations.push(`${slug.slice(0, -1)}ies`); // e.g., candy -> candies
+  } else if (slug.endsWith('ies')) {
+    variations.push(`${slug.slice(0, -3)}y`); // e.g., candies -> candy
+  }
+  
+  // Handle common word permutations (swap order in two-word slugs)
+  if (slug.includes('-') && slug.split('-').length === 2) {
+    const [first, second] = slug.split('-');
+    variations.push(`${second}-${first}`);
+  }
+  
   return [...new Set(variations)]; // Remove duplicates
 }
 

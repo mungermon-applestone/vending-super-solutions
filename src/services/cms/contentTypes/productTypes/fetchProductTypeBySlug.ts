@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { transformProductTypeData } from '../../utils/transformers';
-import { logSlugSearch } from '../../utils/slugMatching';
+import { logSlugSearch, getSlugVariations } from '../../utils/slugMatching';
 
 /**
  * Direct fetch a single product type by slug - optimized for reliability
@@ -15,7 +15,7 @@ export async function fetchProductTypeBySlug<T = any>(slug: string): Promise<T |
       return null;
     }
     
-    // Try all slug variations (original, mapped, with/without -vending suffix)
+    // Try all slug variations using our central utility
     const slugVariations = getSlugVariations(slug);
     
     // DEBUG: For debugging purposes, let's get all products to see what's available
@@ -99,20 +99,4 @@ export async function fetchProductTypeBySlug<T = any>(slug: string): Promise<T |
     console.error(`[fetchProductTypeBySlug] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return null;
   }
-}
-
-// Helper function for slug variations
-function getSlugVariations(slug: string): string[] {
-  if (!slug) return [];
-  
-  const variations = [slug];
-  
-  // Add or remove -vending suffix
-  if (slug.endsWith('-vending')) {
-    variations.push(slug.replace('-vending', ''));
-  } else {
-    variations.push(`${slug}-vending`);
-  }
-  
-  return variations;
 }

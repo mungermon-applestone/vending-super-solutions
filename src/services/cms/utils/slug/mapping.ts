@@ -50,6 +50,15 @@ export function mapUrlSlugToDatabaseSlug(urlSlug: string): string {
     }
   }
   
+  // Check for fuzzy matches if no exact match was found
+  for (const mappedUrlSlug in urlToDbSlugMap) {
+    if (slugsMatch(normalizedSlug, mappedUrlSlug)) {
+      // Register this fuzzy match for future use
+      registerSlugChange(normalizedSlug, urlToDbSlugMap[mappedUrlSlug]);
+      return urlToDbSlugMap[mappedUrlSlug];
+    }
+  }
+  
   // No mapping found, return the original (normalized)
   return normalizedSlug;
 }
@@ -74,6 +83,15 @@ export function mapDatabaseSlugToUrlSlug(dbSlug: string): string {
       // Add this mapping for future use
       registerSlugChange(dbToUrlSlugMap[variation], normalizedSlug);
       return dbToUrlSlugMap[variation];
+    }
+  }
+  
+  // Check for fuzzy matches if no exact match was found
+  for (const mappedDbSlug in dbToUrlSlugMap) {
+    if (slugsMatch(normalizedSlug, mappedDbSlug)) {
+      // Register this fuzzy match for future use
+      registerSlugChange(dbToUrlSlugMap[mappedDbSlug], normalizedSlug);
+      return dbToUrlSlugMap[mappedDbSlug];
     }
   }
   
