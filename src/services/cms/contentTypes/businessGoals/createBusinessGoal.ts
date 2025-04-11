@@ -7,7 +7,13 @@ export async function createBusinessGoal(data: any): Promise<string> {
   // Create a mock toast object to satisfy the parameter requirement
   // This is needed since the external service expects a toast parameter
   const mockToast = {
-    toast: () => {},
+    toast: () => {
+      return {
+        id: "mock-id",
+        dismiss: () => {},
+        update: () => {}
+      };
+    },
     dismiss: () => {},
     toasts: []
   };

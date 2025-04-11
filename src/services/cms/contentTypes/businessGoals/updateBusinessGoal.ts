@@ -6,7 +6,13 @@ export async function updateBusinessGoal(id: string, data: any): Promise<boolean
   
   // Create a mock toast object to satisfy the parameter requirement
   const mockToast = {
-    toast: () => {},
+    toast: () => {
+      return {
+        id: "mock-id",
+        dismiss: () => {},
+        update: () => {}
+      };
+    },
     dismiss: () => {},
     toasts: []
   };
