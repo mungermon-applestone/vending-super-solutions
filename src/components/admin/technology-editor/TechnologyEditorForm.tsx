@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { generateSlug } from '@/lib/utils';
-import { UseToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import TechnologyImage from './sections/TechnologyImage';
 
 interface TechnologyFormProps {
@@ -27,8 +28,10 @@ const formSchema = z.object({
   content: z.string().optional(),
 });
 
+export type TechnologyFormValues = z.infer<typeof formSchema>;
+
 const TechnologyEditorForm: React.FC<TechnologyFormProps> = ({ initialData, onSave, isLoading }) => {
-  const { toast } = UseToast()
+  const { toast } = useToast()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
