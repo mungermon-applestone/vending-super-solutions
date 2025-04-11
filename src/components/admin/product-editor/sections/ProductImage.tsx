@@ -1,99 +1,49 @@
 
 import React from 'react';
-import { UseFormReturn } from 'react-hook-form';
-import { 
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { FormField } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ProductFormData } from '@/types/forms';
+import MediaSelector from '@/components/admin/media/MediaSelector';
 
-/**
- * ProductImage component for handling product image URL and alt text
- * 
- * @important This component must always use controlled form fields with explicit
- * value handling to prevent fields becoming uneditable after cloning
- */
-interface ProductImageProps {
-  form: UseFormReturn<ProductFormData>;
-}
-
-const ProductImage = ({ form }: ProductImageProps) => {
-  // Add debugging to track field value changes
-  console.log('[ProductImage] Rendering with image URL:', form.watch('image.url'));
-  
+const ProductImage = ({ form }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Image</CardTitle>
+        <CardTitle>Product Image</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* 
-          IMPORTANT: When working with form fields after cloning operations,
-          always provide explicit value handling (value={field.value || ''})
-          and proper onChange handlers
-        */}
-        <FormField
-          control={form.control}
-          name="image.url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Image URL</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="https://..." 
-                  {...field}
-                  onChange={(e) => {
-                    console.log('[ProductImage] URL field changed to:', e.target.value);
-                    field.onChange(e);
-                  }}
-                  value={field.value || ''}
+      <CardContent>
+        <div className="space-y-4">
+          <div>
+            <FormField
+              control={form.control}
+              name="image.url"
+              render={({ field }) => (
+                <MediaSelector
+                  value={field.value}
+                  onChange={field.onChange}
+                  buttonLabel="Select Product Image"
                 />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="image.alt"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Image Alt Text</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="Description of image" 
-                  {...field}
-                  onChange={(e) => {
-                    console.log('[ProductImage] Alt field changed to:', e.target.value);
-                    field.onChange(e);
-                  }}
-                  value={field.value || ''}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {form.watch('image.url') && (
-          <div className="mt-4">
-            <p className="text-sm mb-2">Preview:</p>
-            <img 
-              src={form.watch('image.url')} 
-              alt={form.watch('image.alt')} 
-              className="max-w-[300px] border rounded"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "/placeholder.svg";
-              }}
+              )}
             />
           </div>
-        )}
+          
+          <FormField
+            control={form.control}
+            name="image.alt"
+            render={({ field }) => (
+              <div className="space-y-1">
+                <label className="text-sm font-medium">
+                  Alt Text
+                </label>
+                <input
+                  type="text"
+                  className="w-full border rounded-md px-3 py-2"
+                  placeholder="Description for accessibility"
+                  {...field}
+                />
+              </div>
+            )}
+          />
+        </div>
       </CardContent>
     </Card>
   );

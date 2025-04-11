@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -13,9 +13,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { MediaFile } from '@/types/media';
-import { useUpdateMediaMetadata, useMediaUrl } from '@/hooks/useMediaData';
+import { useUpdateMediaMetadata } from '@/hooks/useMediaData';
+import { useToast } from '@/hooks/use-toast';
 
 interface MediaEditDialogProps {
   isOpen: boolean;
@@ -34,16 +34,6 @@ const MediaEditDialog: React.FC<MediaEditDialogProps> = ({
   
   const { toast } = useToast();
   const updateMediaMutation = useUpdateMediaMetadata();
-  const { getUrl } = useMediaUrl();
-  
-  // Update form values when media changes
-  useEffect(() => {
-    if (isOpen) {
-      setTitle(media.title || '');
-      setAltText(media.alt_text || '');
-      setDescription(media.description || '');
-    }
-  }, [isOpen, media]);
   
   const handleSave = async () => {
     try {
@@ -55,24 +45,21 @@ const MediaEditDialog: React.FC<MediaEditDialogProps> = ({
       });
       
       toast({
-        title: 'Media updated successfully',
-        description: 'The media details have been updated.',
+        title: "Media updated",
+        description: "Media details have been updated successfully."
       });
       
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating media:', error);
       toast({
-        title: 'Update failed',
-        description: 'There was an error updating the media. Please try again.',
-        variant: 'destructive',
+        title: "Update failed",
+        description: "Failed to update media details. Please try again.",
+        variant: "destructive",
       });
     }
   };
   
-  const isImage = media.file_type.startsWith('image/');
-  const publicUrl = getUrl(media.storage_path);
-
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -80,30 +67,22 @@ const MediaEditDialog: React.FC<MediaEditDialogProps> = ({
           <DialogTitle>Edit Media</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
-          {/* Media Preview */}
-          {isImage && (
-            <div className="flex justify-center border rounded-md p-2">
-              <img
-                src={publicUrl}
+        <div className="space-y-4 py-2">
+          <div className="flex justify-center mb-4">
+            {media.file_type.startsWith('image/') ? (
+              <img 
+                src={`https://eyxlqcavscrthjkonght.supabase.co/storage/v1/object/public/cms_media/${media.storage_path}`} 
                 alt={media.alt_text || media.filename}
-                className="max-h-40 max-w-full object-contain"
+                className="max-h-40 max-w-full object-contain rounded border"
               />
-            </div>
-          )}
-
-          {/* Filename (readonly) */}
-          <div className="grid w-full items-center gap-1.5">
-            <Label htmlFor="filename">Filename</Label>
-            <Input
-              id="filename"
-              value={media.filename}
-              readOnly
-              disabled
-            />
+            ) : (
+              <div className="text-center p-6 bg-gray-100 rounded">
+                <p>{media.filename}</p>
+                <p className="text-sm text-gray-500 mt-1">{media.file_type}</p>
+              </div>
+            )}
           </div>
           
-          {/* Title */}
           <div className="grid w-full items-center gap-1.5">
             <Label htmlFor="title">Title</Label>
             <Input
@@ -113,7 +92,6 @@ const MediaEditDialog: React.FC<MediaEditDialogProps> = ({
             />
           </div>
           
-          {/* Alt Text */}
           <div className="grid w-full items-center gap-1.5">
             <Label htmlFor="alt-text">Alt Text</Label>
             <Input
@@ -124,7 +102,6 @@ const MediaEditDialog: React.FC<MediaEditDialogProps> = ({
             />
           </div>
           
-          {/* Description */}
           <div className="grid w-full items-center gap-1.5">
             <Label htmlFor="description">Description</Label>
             <Textarea
