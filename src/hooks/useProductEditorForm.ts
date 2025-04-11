@@ -65,17 +65,17 @@ export const useProductEditorForm = (
     console.log('[useProductEditorForm] Ensuring form is not readonly or disabled');
     if (form) {
       // This is a workaround to ensure form is not readonly
-      const formState = form.formState;
-      if (formState.isReadOnly) {
-        console.log('[useProductEditorForm] Form was readonly, attempting to make editable');
-        // Force the form to be editable by directly manipulating the DOM
-        setTimeout(() => {
-          document.querySelectorAll('input, textarea, select').forEach(el => {
-            el.removeAttribute('readonly');
-            el.removeAttribute('disabled');
-          });
-        }, 100);
-      }
+      // Instead of checking formState.isReadOnly (which doesn't exist),
+      // directly enforce editability
+      console.log('[useProductEditorForm] Form state:', form.formState);
+      
+      // Force the form to be editable by directly manipulating the DOM
+      setTimeout(() => {
+        document.querySelectorAll('input, textarea, select').forEach(el => {
+          el.removeAttribute('readonly');
+          el.removeAttribute('disabled');
+        });
+      }, 100);
     }
   }, [form]);
 

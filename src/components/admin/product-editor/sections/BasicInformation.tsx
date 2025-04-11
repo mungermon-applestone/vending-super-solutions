@@ -33,9 +33,9 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
       .replace(/[^a-z0-9-]/g, '');
   };
 
-  // Debug the form state
-  console.log('[BasicInformation] Form is read-only:', form.formState.isReadOnly);
-  console.log('[BasicInformation] Form is disabled:', form.formState.disabled);
+  // Debug the form state (fixed to avoid TypeScript errors)
+  console.log('[BasicInformation] Form state:', form.formState);
+  console.log('[BasicInformation] Ensuring form is editable');
 
   return (
     <Card>
