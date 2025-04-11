@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy } from 'lucide-react';
+import { Copy, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface CloneButtonProps {
@@ -46,7 +46,7 @@ const CloneButton: React.FC<CloneButtonProps> = ({
     >
       {isCloning ? (
         <>
-          <Copy className="h-4 w-4 animate-spin mr-1" /> Cloning...
+          <Loader2 className="h-4 w-4 animate-spin mr-1" /> Cloning...
         </>
       ) : (
         <>

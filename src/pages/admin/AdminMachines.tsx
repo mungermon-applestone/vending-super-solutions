@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,6 @@ import { CMSMachine } from '@/types/cms';
 import { useCloneMachine } from '@/hooks/cms/useCloneCMS';
 
 const AdminMachines = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [machineToDelete, setMachineToDelete] = useState<{id: string, title: string} | null>(null);
@@ -65,7 +64,7 @@ const AdminMachines = () => {
     }
   };
   
-  const handleCloneMachine = async (machine: CMSMachine): Promise<void> => {
+  const handleCloneMachine = async (machine: CMSMachine) => {
     try {
       setCloningMachineId(machine.id);
       const clonedMachine = await cloneMachineMutation.mutateAsync(machine.id);

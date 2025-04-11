@@ -17,8 +17,8 @@ interface MachineTableRowProps {
     temperature: string;
     slug: string;
   };
-  onDeleteClick: (machine: CMSMachine) => void;
-  onCloneClick: (machine: CMSMachine) => Promise<void>;
+  onDeleteClick: () => void;
+  onCloneClick: () => Promise<void>;
   isCloningId: string | null;
 }
 
@@ -67,14 +67,14 @@ const MachineTableRow: React.FC<MachineTableRowProps> = ({
             <Pencil className="h-4 w-4" /> Edit
           </Button>
           <CloneButton
-            onClone={() => onCloneClick(machine as CMSMachine)}
+            onClone={onCloneClick}
             itemName={machine.title}
             isCloning={isCloning}
           />
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onDeleteClick(machine as CMSMachine)}
+            onClick={onDeleteClick}
             title="Delete machine"
             className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
           >
