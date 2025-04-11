@@ -13,6 +13,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProductFormData } from '@/types/forms';
 
+/**
+ * BasicInformation component for handling product title, slug, and description
+ * 
+ * @important This component must always use controlled form fields with explicit
+ * value handling to prevent fields becoming uneditable after cloning
+ */
 interface BasicInformationProps {
   form: UseFormReturn<ProductFormData>;
 }
@@ -36,6 +42,11 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-4">
+          {/* 
+            IMPORTANT: When working with form fields after cloning operations,
+            always provide explicit value handling (value={field.value || ''})
+            and proper onChange handlers
+          */}
           <FormField
             control={form.control}
             name="title"

@@ -7,6 +7,20 @@ import { useProductType } from '@/hooks/useCMSData';
 import { ProductFormData } from '@/types/forms';
 import { createProduct, updateProduct } from '@/services/product';
 
+/**
+ * Custom hook for handling product editor form state and operations
+ * 
+ * @important When cloning products, special care must be taken to:
+ * 1. Correctly reset the form with new values
+ * 2. Use explicit value handling in form fields (value={field.value || ''})
+ * 3. Ensure form initialization happens only once per product
+ * 
+ * @param productSlug - The slug of the product to edit (undefined for new product)
+ * @param setIsLoading - Function to set loading state
+ * @param toast - Toast notification utility
+ * @param navigate - Navigation function
+ * @param isEditMode - Whether editing an existing product
+ */
 export const useProductEditorForm = (
   productSlug: string | undefined,
   setIsLoading: (isLoading: boolean) => void,
@@ -73,7 +87,13 @@ export const useProductEditorForm = (
     }
   }, [productSlug, form]);
 
-  // Populate form with existing product data when available
+  /**
+   * Populate form with existing product data when available
+   * 
+   * IMPORTANT: This is where form initialization happens after cloning.
+   * The form must be properly reset with all fields to prevent fields 
+   * from becoming uneditable.
+   */
   useEffect(() => {
     if (existingProduct && !isCreating && !formInitialized) {
       console.log('[useProductEditorForm] Populating form with product data:', existingProduct);

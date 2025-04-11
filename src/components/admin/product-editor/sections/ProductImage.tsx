@@ -12,6 +12,12 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProductFormData } from '@/types/forms';
 
+/**
+ * ProductImage component for handling product image URL and alt text
+ * 
+ * @important This component must always use controlled form fields with explicit
+ * value handling to prevent fields becoming uneditable after cloning
+ */
 interface ProductImageProps {
   form: UseFormReturn<ProductFormData>;
 }
@@ -26,6 +32,11 @@ const ProductImage = ({ form }: ProductImageProps) => {
         <CardTitle>Image</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* 
+          IMPORTANT: When working with form fields after cloning operations,
+          always provide explicit value handling (value={field.value || ''})
+          and proper onChange handlers
+        */}
         <FormField
           control={form.control}
           name="image.url"
