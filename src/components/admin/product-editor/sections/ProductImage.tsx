@@ -17,6 +17,9 @@ interface ProductImageProps {
 }
 
 const ProductImage = ({ form }: ProductImageProps) => {
+  // Add debugging to track field value changes
+  console.log('[ProductImage] Rendering with image URL:', form.watch('image.url'));
+  
   return (
     <Card>
       <CardHeader>
@@ -33,6 +36,11 @@ const ProductImage = ({ form }: ProductImageProps) => {
                 <Input 
                   placeholder="https://..." 
                   {...field}
+                  onChange={(e) => {
+                    console.log('[ProductImage] URL field changed to:', e.target.value);
+                    field.onChange(e);
+                  }}
+                  value={field.value || ''}
                 />
               </FormControl>
               <FormMessage />
@@ -50,6 +58,11 @@ const ProductImage = ({ form }: ProductImageProps) => {
                 <Input 
                   placeholder="Description of image" 
                   {...field}
+                  onChange={(e) => {
+                    console.log('[ProductImage] Alt field changed to:', e.target.value);
+                    field.onChange(e);
+                  }}
+                  value={field.value || ''}
                 />
               </FormControl>
               <FormMessage />

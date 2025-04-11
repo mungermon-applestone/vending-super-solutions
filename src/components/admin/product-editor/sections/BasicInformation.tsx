@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { 
   FormField,
@@ -27,9 +27,7 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
   };
 
   // Log form values for debugging
-  useEffect(() => {
-    console.log('[BasicInformation] Form values:', form.getValues());
-  }, [form]);
+  console.log('[BasicInformation] Form values:', form.getValues());
 
   return (
     <Card id="basic-info-section">
@@ -51,6 +49,11 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                       id="title"
                       placeholder="Product Title"
                       {...field}
+                      onChange={(e) => {
+                        console.log('[BasicInformation] Title changed to:', e.target.value);
+                        field.onChange(e);
+                      }}
+                      value={field.value || ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -71,9 +74,11 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                     placeholder="product-slug"
                     {...field}
                     onChange={(e) => {
-                      // Apply slug formatting and update the field
-                      field.onChange(formatSlug(e.target.value));
+                      const formattedValue = formatSlug(e.target.value);
+                      console.log('[BasicInformation] Slug changed to:', formattedValue);
+                      field.onChange(formattedValue);
                     }}
+                    value={field.value || ''}
                   />
                 </FormControl>
                 <FormMessage />
@@ -93,6 +98,11 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                     placeholder="Describe the product..."
                     className="min-h-[100px]"
                     {...field}
+                    onChange={(e) => {
+                      console.log('[BasicInformation] Description changed to:', e.target.value);
+                      field.onChange(e);
+                    }}
+                    value={field.value || ''}
                   />
                 </FormControl>
                 <FormMessage />

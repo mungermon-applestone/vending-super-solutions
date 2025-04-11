@@ -17,10 +17,32 @@ export const useProductEditorForm = (
   // We're in create mode if explicitly set NOT in edit mode, or if productSlug is falsy ('new' or undefined)
   const isCreatingState = isEditMode === false || !productSlug || productSlug === 'new';
   const [isCreating, setIsCreating] = useState(isCreatingState);
+  const [formInitialized, setFormInitialized] = useState(false);
   
   console.log('[useProductEditorForm] Initialized with productSlug:', productSlug);
   console.log('[useProductEditorForm] isEditMode flag:', isEditMode);
   console.log('[useProductEditorForm] isCreating mode:', isCreating);
+  
+  // Default form values
+  const defaultValues: ProductFormData = {
+    title: '',
+    slug: '',
+    description: '',
+    image: {
+      url: '',
+      alt: ''
+    },
+    benefits: [''],
+    features: [
+      {
+        title: '',
+        description: '',
+        icon: 'check',
+        screenshotUrl: '',
+        screenshotAlt: ''
+      }
+    ]
+  };
   
   // Only fetch product data if we're in edit mode
   const { 
@@ -37,31 +59,23 @@ export const useProductEditorForm = (
 
   // Set up form with default values
   const form = useForm<ProductFormData>({
-    defaultValues: {
-      title: '',
-      slug: '',
-      description: '',
-      image: {
-        url: '',
-        alt: ''
-      },
-      benefits: [''],
-      features: [
-        {
-          title: '',
-          description: '',
-          icon: 'check',
-          screenshotUrl: '',
-          screenshotAlt: ''
-        }
-      ]
-    },
+    defaultValues,
     mode: 'onChange', // This makes the form more responsive to changes
   });
 
+  // Force reset form completely when product changes
+  useEffect(() => {
+    if (productSlug) {
+      console.log('[useProductEditorForm] Product slug changed to:', productSlug);
+      // Reset form to clean state
+      form.reset(defaultValues);
+      setFormInitialized(false);
+    }
+  }, [productSlug, form]);
+
   // Populate form with existing product data when available
   useEffect(() => {
-    if (existingProduct && !isCreating) {
+    if (existingProduct && !isCreating && !formInitialized) {
       console.log('[useProductEditorForm] Populating form with product data:', existingProduct);
       
       try {
@@ -96,14 +110,11 @@ export const useProductEditorForm = (
               ]
         };
         
-        // Reset the form with clean data - using resetField for each field to ensure proper updating
-        Object.keys(productData).forEach(key => {
-          form.setValue(key as any, (productData as any)[key], { 
-            shouldDirty: false,
-            shouldTouch: false,
-            shouldValidate: false
-          });
-        });
+        // Complete reset of the form with new values - more reliable than field-by-field setting
+        form.reset(productData);
+        
+        // Mark form as initialized to prevent overwrites
+        setFormInitialized(true);
 
         console.log('[useProductEditorForm] Form reset with values:', form.getValues());
       } catch (err) {
@@ -123,7 +134,7 @@ export const useProductEditorForm = (
       });
       setIsCreating(true);
     }
-  }, [existingProduct, isLoadingProduct, form, productSlug, toast, isCreating]);
+  }, [existingProduct, isLoadingProduct, form, productSlug, toast, isCreating, formInitialized]);
 
   // Form submission handler
   const onSubmit = async (data: ProductFormData) => {

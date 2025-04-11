@@ -25,6 +25,7 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
   const [isLoading, setIsLoading] = useState(false);
   const [isCloning, setIsCloning] = useState(false);
   const cloneProductMutation = useCloneProductType();
+  const [forceUpdate, setForceUpdate] = useState(0); // Use this to force re-renders
   
   console.log('[ProductEditorForm] Rendering with product slug:', productSlug);
   console.log('[ProductEditorForm] isEditMode flag:', isEditMode);
@@ -39,12 +40,18 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
   } = useProductEditorForm(productSlug, setIsLoading, toast, navigate, isEditMode);
 
   useEffect(() => {
-    // Add additional debugging to check form state
+    // Add debugging to track form value changes
     const subscription = form.watch((value) => {
       console.log('[ProductEditorForm] Form values changed:', value);
     });
     return () => subscription.unsubscribe();
   }, [form]);
+
+  // Add useEffect to detect product slug changes
+  useEffect(() => {
+    console.log(`[ProductEditorForm] Product slug changed to: ${productSlug || 'new'}`);
+    setForceUpdate(prev => prev + 1); // Force a re-render when product changes
+  }, [productSlug]);
 
   const handleFormSubmit = form.handleSubmit((data) => {
     console.log('[ProductEditorForm] Form submitted with data:', data);
@@ -95,6 +102,8 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
 
   // Debug form values
   console.log('[ProductEditorForm] Current form values:', form.getValues());
+  console.log('[ProductEditorForm] Form is dirty:', form.formState.isDirty);
+  console.log('[ProductEditorForm] Form is valid:', form.formState.isValid);
 
   return (
     <div className="container py-10">
@@ -106,7 +115,7 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
         <form 
           onSubmit={handleFormSubmit} 
           className="space-y-8"
-          key={productSlug || 'new-product'} // Force re-render when product changes
+          key={`${productSlug || 'new'}-${forceUpdate}`} // Force re-render when product or forceUpdate changes
         >
           <BasicInformation form={form} />
           <ProductImage form={form} />
