@@ -16,8 +16,8 @@ export function generateSuffix(length: number): string {
   return result;
 }
 
-// Define specific table types to ensure type safety
-type TableName = 
+// Define specific table types to ensure type safety using literal string union
+type TableName = string & (
   | 'product_types'
   | 'product_type_benefits'
   | 'product_type_features'
@@ -36,7 +36,8 @@ type TableName =
   | 'machine_features'
   | 'machine_images'
   | 'machine_specs'
-  | 'deployment_examples';
+  | 'deployment_examples'
+);
 
 /**
  * Generic function to clone a content item from any content type
@@ -122,7 +123,7 @@ export async function cloneRelatedItems(
   try {
     // Fetch all related items for the original content
     const { data: relatedItems, error: fetchError } = await supabase
-      .from(table)
+      .from(table as any)
       .select('*')
       .eq(foreignKeyField, originalId);
 
@@ -146,7 +147,7 @@ export async function cloneRelatedItems(
 
     // Insert all cloned related items
     const { error: insertError } = await supabase
-      .from(table)
+      .from(table as any)
       .insert(clonedItems);
 
     if (insertError) {
