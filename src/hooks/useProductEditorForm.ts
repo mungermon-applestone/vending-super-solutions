@@ -56,7 +56,7 @@ export const useProductEditorForm = (
         }
       ]
     },
-    mode: 'all', // Changed from 'onBlur' to 'all' for better reactivity
+    mode: 'onChange', // This makes the form more responsive to changes
   });
 
   // Populate form with existing product data when available
@@ -64,40 +64,56 @@ export const useProductEditorForm = (
     if (existingProduct && !isCreating) {
       console.log('[useProductEditorForm] Populating form with product data:', existingProduct);
       
-      // Create a new object from the existing product data to avoid reference issues
-      const productData: ProductFormData = {
-        title: existingProduct.title || '',
-        slug: existingProduct.slug || '',
-        description: existingProduct.description || '',
-        image: {
-          url: existingProduct.image?.url || '',
-          alt: existingProduct.image?.alt || ''
-        },
-        benefits: existingProduct.benefits && existingProduct.benefits.length > 0 
-          ? [...existingProduct.benefits] 
-          : [''],
-        features: existingProduct.features && existingProduct.features.length > 0 
-          ? existingProduct.features.map(feature => ({
-              title: feature.title || '',
-              description: feature.description || '',
-              icon: typeof feature.icon === 'string' ? feature.icon : 'check',
-              screenshotUrl: feature.screenshot?.url || '',
-              screenshotAlt: feature.screenshot?.alt || ''
-            })) 
-          : [
-              {
-                title: '',
-                description: '',
-                icon: 'check',
-                screenshotUrl: '',
-                screenshotAlt: ''
-              }
-            ]
-      };
-      
-      // Reset the form with clean data
-      form.reset(productData);
-      console.log('[useProductEditorForm] Form reset with values:', form.getValues());
+      try {
+        // Create a new object from the existing product data to avoid reference issues
+        const productData: ProductFormData = {
+          title: existingProduct.title || '',
+          slug: existingProduct.slug || '',
+          description: existingProduct.description || '',
+          image: {
+            url: existingProduct.image?.url || '',
+            alt: existingProduct.image?.alt || ''
+          },
+          benefits: existingProduct.benefits && existingProduct.benefits.length > 0 
+            ? [...existingProduct.benefits] 
+            : [''],
+          features: existingProduct.features && existingProduct.features.length > 0 
+            ? existingProduct.features.map(feature => ({
+                title: feature.title || '',
+                description: feature.description || '',
+                icon: typeof feature.icon === 'string' ? feature.icon : 'check',
+                screenshotUrl: feature.screenshot?.url || '',
+                screenshotAlt: feature.screenshot?.alt || ''
+              })) 
+            : [
+                {
+                  title: '',
+                  description: '',
+                  icon: 'check',
+                  screenshotUrl: '',
+                  screenshotAlt: ''
+                }
+              ]
+        };
+        
+        // Reset the form with clean data - using resetField for each field to ensure proper updating
+        Object.keys(productData).forEach(key => {
+          form.setValue(key as any, (productData as any)[key], { 
+            shouldDirty: false,
+            shouldTouch: false,
+            shouldValidate: false
+          });
+        });
+
+        console.log('[useProductEditorForm] Form reset with values:', form.getValues());
+      } catch (err) {
+        console.error('[useProductEditorForm] Error when setting form values:', err);
+        toast.toast({
+          title: "Form Error",
+          description: "There was a problem loading the product data into the form.",
+          variant: "destructive"
+        });
+      }
     } else if (productSlug && productSlug !== 'new' && !existingProduct && !isLoadingProduct) {
       console.log('[useProductEditorForm] No existing product found for slug:', productSlug);
       toast.toast({

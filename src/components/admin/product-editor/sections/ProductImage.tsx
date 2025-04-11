@@ -32,11 +32,7 @@ const ProductImage = ({ form }: ProductImageProps) => {
               <FormControl>
                 <Input 
                   placeholder="https://..." 
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  name={field.name}
-                  ref={field.ref}
+                  {...field}
                 />
               </FormControl>
               <FormMessage />
@@ -53,11 +49,7 @@ const ProductImage = ({ form }: ProductImageProps) => {
               <FormControl>
                 <Input 
                   placeholder="Description of image" 
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  name={field.name}
-                  ref={field.ref}
+                  {...field}
                 />
               </FormControl>
               <FormMessage />

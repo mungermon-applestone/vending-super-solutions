@@ -50,20 +50,7 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                     <Input
                       id="title"
                       placeholder="Product Title"
-                      value={field.value || ''}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        
-                        // Auto-generate slug if slug is empty
-                        const currentSlug = form.getValues('slug');
-                        if (!currentSlug) {
-                          form.setValue('slug', formatSlug(e.target.value), {
-                            shouldDirty: true
-                          });
-                        }
-                      }}
-                      onBlur={field.onBlur}
-                      name={field.name}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -82,13 +69,11 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                   <Input
                     id="slug"
                     placeholder="product-slug"
-                    value={field.value || ''}
+                    {...field}
                     onChange={(e) => {
                       // Apply slug formatting and update the field
                       field.onChange(formatSlug(e.target.value));
                     }}
-                    onBlur={field.onBlur}
-                    name={field.name}
                   />
                 </FormControl>
                 <FormMessage />
@@ -107,10 +92,7 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                     id="description"
                     placeholder="Describe the product..."
                     className="min-h-[100px]"
-                    value={field.value || ''}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    name={field.name}
+                    {...field}
                   />
                 </FormControl>
                 <FormMessage />

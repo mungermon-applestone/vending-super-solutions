@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -37,6 +37,14 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
     onSubmit,
     productId
   } = useProductEditorForm(productSlug, setIsLoading, toast, navigate, isEditMode);
+
+  useEffect(() => {
+    // Add additional debugging to check form state
+    const subscription = form.watch((value) => {
+      console.log('[ProductEditorForm] Form values changed:', value);
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const handleFormSubmit = form.handleSubmit((data) => {
     console.log('[ProductEditorForm] Form submitted with data:', data);
@@ -98,6 +106,7 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
         <form 
           onSubmit={handleFormSubmit} 
           className="space-y-8"
+          key={productSlug || 'new-product'} // Force re-render when product changes
         >
           <BasicInformation form={form} />
           <ProductImage form={form} />
