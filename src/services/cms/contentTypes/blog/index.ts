@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { BlogPost, BlogPostFormData } from "@/types/blog";
 
@@ -73,6 +74,8 @@ export const createBlogPost = async (postData: BlogPostFormData): Promise<BlogPo
     published_at: postData.status === 'published' ? new Date().toISOString() : null
   };
   
+  console.log("[createBlogPost] Sending to Supabase:", newPost);
+  
   const { data, error } = await supabase
     .from('blog_posts')
     .insert(newPost)
@@ -123,6 +126,8 @@ export const updateBlogPost = async (id: string, postData: BlogPostFormData): Pr
     // If changing to draft, set published_at to null
     updatedPost.published_at = null;
   }
+  
+  console.log("[updateBlogPost] Sending to Supabase:", updatedPost);
   
   const { data, error } = await supabase
     .from('blog_posts')

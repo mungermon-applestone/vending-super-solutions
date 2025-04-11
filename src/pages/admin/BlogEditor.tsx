@@ -26,7 +26,10 @@ const BlogEditor = () => {
   
   const handleFormSubmit = async (data: BlogPostFormData) => {
     try {
+      console.log('[BlogEditor] Form submitted with data:', data);
+      
       if (isCreating) {
+        console.log('[BlogEditor] Creating new post');
         await createPostMutation.mutateAsync(data);
         toast({
           title: data.status === 'published' ? "Post published" : "Draft saved",
@@ -35,6 +38,7 @@ const BlogEditor = () => {
             : "Your blog post draft has been saved.",
         });
       } else if (postId && post?.id) {
+        console.log('[BlogEditor] Updating post:', post.id);
         await updatePostMutation.mutateAsync({ id: post.id, postData: data });
         toast({
           title: data.status === 'published' ? "Post updated and published" : "Draft updated",

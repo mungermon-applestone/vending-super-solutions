@@ -79,42 +79,70 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({
     }
   };
   
-  const handleSaveDraft = () => {
-    form.setValue('status', 'draft');
-    setIsDraft(true);
-    form.handleSubmit(async (data) => {
-      try {
-        await onSubmit({
-          ...data,
-          status: 'draft',
-        });
-        toast({
-          title: "Draft saved",
-          description: "Your blog post has been saved as a draft.",
-        });
-      } catch (error) {
-        console.error("Error saving draft:", error);
-      }
-    })();
-  };
-  
-  const handlePublish = () => {
-    form.setValue('status', 'published');
-    setIsDraft(false);
-    form.handleSubmit(async (data) => {
-      try {
-        await onSubmit({
-          ...data,
-          status: 'published',
-        });
-        toast({
-          title: "Post published",
-          description: "Your blog post has been published.",
-        });
-      } catch (error) {
-        console.error("Error publishing post:", error);
-      }
-    })();
+  const handleSave = async (status: 'draft' | 'published') => {
+    // Check for required fields manually
+    const title = form.getValues('title');
+    const slug = form.getValues('slug');
+    const content = form.getValues('content');
+    
+    if (!title) {
+      form.setError('title', { message: 'Title is required' });
+      toast({
+        title: "Missing required fields",
+        description: "Please provide a title for your post.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!slug) {
+      form.setError('slug', { message: 'Slug is required' });
+      toast({
+        title: "Missing required fields",
+        description: "Please provide a slug for your post.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!content) {
+      form.setError('content', { message: 'Content is required' });
+      toast({
+        title: "Missing required fields",
+        description: "Please provide content for your post.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      // Get all form values
+      const data = form.getValues();
+      
+      // Update status to match the button clicked
+      data.status = status;
+      setIsDraft(status === 'draft');
+      
+      console.log("Submitting form data:", data);
+      await onSubmit(data);
+      
+      toast({
+        title: status === 'published' ? "Post published" : "Draft saved",
+        description: status === 'published' 
+          ? "Your blog post has been published successfully." 
+          : "Your blog post draft has been saved.",
+      });
+      
+      // Navigate back to blog list
+      navigate('/admin/blog');
+    } catch (error) {
+      console.error("Error saving post:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save blog post. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   return (
@@ -225,7 +253,7 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({
             <Button
               type="button"
               variant="secondary"
-              onClick={handleSaveDraft}
+              onClick={() => handleSave('draft')}
               disabled={isSaving}
             >
               {isSaving && isDraft ? (
@@ -239,7 +267,7 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({
             <Button
               type="button"
               variant="default"
-              onClick={handlePublish}
+              onClick={() => handleSave('published')}
               disabled={isSaving}
             >
               {isSaving && !isDraft ? (
