@@ -1,122 +1,134 @@
 
-import { Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import AboutUs from "./pages/AboutUs";
-import Contact from "./pages/Contact";
-import Partner from "./pages/Partner";
-import Blog from "./pages/BlogList";
-import BlogPost from "./pages/BlogPostDetail";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import ProductsLanding from "./pages/ProductsLanding";
-import ProductDetail from "./pages/ProductDetail";
-import MachinesLanding from "./pages/MachinesLanding";
-import MachineDetail from "./pages/MachineDetail";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminProducts from "./pages/admin/AdminProducts";
-import ProductEditor from "./pages/ProductEditor";
-import BusinessGoalsLanding from "./pages/BusinessGoalsLanding";
-import BusinessGoalDetail from "./pages/BusinessGoalDetail";
-import SimpleTechnologyPage from "./pages/SimpleTechnologyPage";
-import TechnologyEditor from "./pages/TechnologyEditor";
-import CaseStudies from "./pages/CaseStudies";
-import CaseStudyDetail from "./pages/CaseStudyDetail";
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { ThemeProvider } from '@/components/providers/theme-provider';
+import Index from './pages/Index';
+import AboutUs from './pages/AboutUs';
+import ProductsLanding from './pages/ProductsLanding';
+import ProductDetail from './pages/ProductDetail';
+import MachinesLanding from './pages/MachinesLanding';
+import MachineDetail from './pages/MachineDetail';
+import BusinessGoalsLanding from './pages/BusinessGoalsLanding';
+import BusinessGoalDetail from './pages/BusinessGoalDetail';
+import CaseStudies from './pages/CaseStudies';
+import CaseStudyDetail from './pages/CaseStudyDetail';
+import Contact from './pages/Contact';
+import NotFound from './pages/NotFound';
+import BlogList from './pages/BlogList';
+import BlogPost from './pages/BlogPost';
+import TechnologyLanding from './pages/TechnologyLanding';
+import SimpleTechnologyPage from './pages/SimpleTechnologyPage';
+import Partner from './pages/Partner';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
-// Import specific machine pages
-import DiviWP from "./pages/machines/DiviWP";
-import DiviSP from "./pages/machines/DiviSP";
-import DiviWS from "./pages/machines/DiviWS";
-import DiviSS from "./pages/machines/DiviSS";
-import Combi3000 from "./pages/machines/Combi3000";
-import Option2WallMount from "./pages/machines/Option2WallMount";
-import Option2WallMountXL from "./pages/machines/Option2WallMountXL";
-import Option4Refrigerated from "./pages/machines/Option4Refrigerated";
-import Locker10Cell from "./pages/machines/Locker10Cell";
-import Locker21Cell from "./pages/machines/Locker21Cell";
+// Admin Routes
+import AdminDashboard from './pages/AdminDashboard';
+import AdminProducts from './pages/admin/AdminProducts';
+import ProductEditor from './pages/ProductEditor';
+import AdminMachines from './pages/admin/AdminMachines';
+import MachineEditor from './pages/MachineEditor';
+import AdminBusinessGoals from './pages/admin/AdminBusinessGoals';
+import BusinessGoalEditor from './pages/admin/BusinessGoalEditor';
+import AdminTechnology from './pages/admin/AdminTechnology';
+import TechnologyEditor from './pages/TechnologyEditor';
+import AdminBlog from './pages/admin/AdminBlog';
+import BlogEditor from './pages/admin/BlogEditor';
+import AdminMedia from './pages/admin/AdminMedia';
 
-// Admin routes
-import AdminBusinessGoals from "./pages/admin/AdminBusinessGoals";
-import BusinessGoalEditor from "./pages/admin/BusinessGoalEditor";
-import MigrateMachinesData from "./pages/MigrateMachinesData";
-import MigrateBusinessGoalData from "./pages/MigrateBusinessGoalData";
-import MigrateTechnologyData from "./pages/MigrateTechnologyData";
-import AdminMachines from "./pages/admin/AdminMachines";
-import MachineEditor from "./pages/MachineEditor";
-import AdminTechnology from "./pages/admin/AdminTechnology";
-import AdminBlog from "./pages/admin/AdminBlog";
-import BlogEditor from "./pages/admin/BlogEditor";
+// Migration routes
+import MigrateTechnologyData from './pages/MigrateTechnologyData';
+import MigrateMachinesData from './pages/MigrateMachinesData';
+import MigrateBusinessGoalData from './pages/MigrateBusinessGoalData';
 
-import "./App.css";
+// Machine pages
+import Option2WallMount from './pages/machines/Option2WallMount';
+import Option2WallMountXL from './pages/machines/Option2WallMountXL';
+import Locker10Cell from './pages/machines/Locker10Cell';
+import Locker21Cell from './pages/machines/Locker21Cell';
+import Option4Refrigerated from './pages/machines/Option4Refrigerated';
+import DiviSS from './pages/machines/DiviSS';
+import DiviSP from './pages/machines/DiviSP';
+import DiviWS from './pages/machines/DiviWS';
+import DiviWP from './pages/machines/DiviWP';
+import Combi3000 from './pages/machines/Combi3000';
+
+// Query Client
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 60 * 1000,
+    }
+  }
+});
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/about" element={<AboutUs />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/partner" element={<Partner />} />
-      <Route path="/blog" element={<Blog />} />
-      <Route path="/blog/:slug" element={<BlogPost />} />
-      <Route path="/privacy" element={<PrivacyPolicy />} />
-      
-      {/* Product routes */}
-      <Route path="/products" element={<ProductsLanding />} />
-      <Route path="/products/:productSlug" element={<ProductDetail />} />
-      
-      {/* Machine routes */}
-      <Route path="/machines" element={<MachinesLanding />} />
-      <Route path="/machines/:machineType/:machineId" element={<MachineDetail />} />
-      
-      {/* Specific machine routes */}
-      <Route path="/machines/divi-wp" element={<DiviWP />} />
-      <Route path="/machines/divi-sp" element={<DiviSP />} />
-      <Route path="/machines/divi-ws" element={<DiviWS />} />
-      <Route path="/machines/divi-ss" element={<DiviSS />} />
-      <Route path="/machines/combi-3000" element={<Combi3000 />} />
-      <Route path="/machines/option-2-wall-mount" element={<Option2WallMount />} />
-      <Route path="/machines/option-2-wall-mount-xl" element={<Option2WallMountXL />} />
-      <Route path="/machines/option-4-refrigerated" element={<Option4Refrigerated />} />
-      <Route path="/machines/locker-10-cell" element={<Locker10Cell />} />
-      <Route path="/machines/locker-21-cell" element={<Locker21Cell />} />
-      
-      {/* Business Goals routes */}
-      <Route path="/goals" element={<BusinessGoalsLanding />} />
-      <Route path="/goals/:goalSlug" element={<BusinessGoalDetail />} />
-      
-      {/* Technology routes - making simple the default route */}
-      <Route path="/technology" element={<SimpleTechnologyPage />} />
-      <Route path="/technology/simple" element={<SimpleTechnologyPage />} />
-      
-      {/* Case Studies routes */}
-      <Route path="/case-studies" element={<CaseStudies />} />
-      <Route path="/case-studies/:slug" element={<CaseStudyDetail />} />
-      
-      {/* Admin routes */}
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin/products" element={<AdminProducts />} />
-      <Route path="/admin/products/new" element={<ProductEditor />} />
-      <Route path="/admin/products/edit/:productSlug" element={<ProductEditor />} />
-      <Route path="/admin/business-goals" element={<AdminBusinessGoals />} />
-      <Route path="/admin/business-goals/new" element={<BusinessGoalEditor />} />
-      <Route path="/admin/business-goals/edit/:goalSlug" element={<BusinessGoalEditor />} />
-      <Route path="/admin/machines" element={<AdminMachines />} />
-      <Route path="/admin/machines/new" element={<MachineEditor />} />
-      <Route path="/admin/machines/edit/:machineId" element={<MachineEditor />} />
-      <Route path="/admin/technology" element={<AdminTechnology />} />
-      <Route path="/admin/technology/new" element={<TechnologyEditor />} />
-      <Route path="/admin/technology/edit/:technologySlug" element={<TechnologyEditor />} />
-      <Route path="/admin/blog" element={<AdminBlog />} />
-      <Route path="/admin/blog/new" element={<BlogEditor />} />
-      <Route path="/admin/blog/edit/:postId" element={<BlogEditor />} />
-      
-      {/* Migration utilities */}
-      <Route path="/utils/migrate-machines" element={<MigrateMachinesData />} />
-      <Route path="/utils/migrate-business-goals" element={<MigrateBusinessGoalData />} />
-      <Route path="/utils/migrate-technologies" element={<MigrateTechnologyData />} />
-      
-      {/* 404 route */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme="light">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/about-us" element={<AboutUs />} />
+            <Route path="/products" element={<ProductsLanding />} />
+            <Route path="/products/:productSlug" element={<ProductDetail />} />
+            <Route path="/machines" element={<MachinesLanding />} />
+            <Route path="/machines/:machineSlug" element={<MachineDetail />} />
+            <Route path="/business-goals" element={<BusinessGoalsLanding />} />
+            <Route path="/business-goals/:businessGoalSlug" element={<BusinessGoalDetail />} />
+            <Route path="/case-studies" element={<CaseStudies />} />
+            <Route path="/case-studies/:caseStudySlug" element={<CaseStudyDetail />} />
+            <Route path="/blog" element={<BlogList />} />
+            <Route path="/blog/:postSlug" element={<BlogPost />} />
+            <Route path="/technology" element={<TechnologyLanding />} />
+            <Route path="/technology/:technologySlug" element={<SimpleTechnologyPage />} />
+            <Route path="/partner" element={<Partner />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/products" element={<AdminProducts />} />
+            <Route path="/admin/products/:productSlug" element={<ProductEditor />} />
+            <Route path="/admin/machines" element={<AdminMachines />} />
+            <Route path="/admin/machines/:machineId" element={<MachineEditor />} />
+            <Route path="/admin/business-goals" element={<AdminBusinessGoals />} />
+            <Route path="/admin/business-goals/:goalSlug" element={<BusinessGoalEditor />} />
+            <Route path="/admin/technology" element={<AdminTechnology />} />
+            <Route path="/admin/technology/:technologySlug" element={<TechnologyEditor />} />
+            <Route path="/admin/blog" element={<AdminBlog />} />
+            <Route path="/admin/blog/:postId" element={<BlogEditor />} />
+            <Route path="/admin/media" element={<AdminMedia />} />
+            
+            {/* Migration Routes */}
+            <Route path="/admin/migrate/technologies" element={<MigrateTechnologyData />} />
+            <Route path="/admin/migrate/machines" element={<MigrateMachinesData />} />
+            <Route path="/admin/migrate/business-goals" element={<MigrateBusinessGoalData />} />
+
+            {/* Static Machine Pages */}
+            <Route path="/machines/option-2-wall-mount" element={<Option2WallMount />} />
+            <Route path="/machines/option-2-wall-mount-xl" element={<Option2WallMountXL />} />
+            <Route path="/machines/locker-10-cell" element={<Locker10Cell />} />
+            <Route path="/machines/locker-21-cell" element={<Locker21Cell />} />
+            <Route path="/machines/option-4-refrigerated" element={<Option4Refrigerated />} />
+            <Route path="/machines/divi-ss" element={<DiviSS />} />
+            <Route path="/machines/divi-sp" element={<DiviSP />} />
+            <Route path="/machines/divi-ws" element={<DiviWS />} />
+            <Route path="/machines/divi-wp" element={<DiviWP />} />
+            <Route path="/machines/combi-3000" element={<Combi3000 />} />
+            
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster position="top-center" richColors />
+          <ShadcnToaster />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   );
 }
 

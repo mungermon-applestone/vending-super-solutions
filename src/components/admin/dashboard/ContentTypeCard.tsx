@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { LucideIcon, Plus } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Plus, List } from 'lucide-react';
 
 interface ContentTypeCardProps {
   title: string;
@@ -11,7 +11,7 @@ interface ContentTypeCardProps {
   icon: React.ReactNode;
   path: string;
   createPath: string;
-  colorClass: string;
+  colorClass?: string;
 }
 
 const ContentTypeCard: React.FC<ContentTypeCardProps> = ({
@@ -20,32 +20,33 @@ const ContentTypeCard: React.FC<ContentTypeCardProps> = ({
   icon,
   path,
   createPath,
-  colorClass,
+  colorClass = "bg-gray-50 border-gray-200"
 }) => {
   return (
-    <Card className={`shadow-sm border ${colorClass}`}>
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <div className="p-2 rounded-lg bg-white shadow-sm border">
-            {icon}
+    <Card className={`border ${colorClass} hover:shadow-md transition-shadow overflow-hidden`}>
+      <div className="p-6">
+        <div className="flex items-start space-x-4">
+          <div>{icon}</div>
+          <div>
+            <h3 className="text-lg font-semibold">{title}</h3>
+            <p className="text-sm text-muted-foreground">{description}</p>
           </div>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to={createPath} className="flex items-center gap-1">
-              <Plus className="h-4 w-4" /> New
-            </Link>
-          </Button>
         </div>
-        <CardTitle className="mt-4">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">
-          Create, edit, and manage {title.toLowerCase()} content types.
-        </p>
-      </CardContent>
-      <CardFooter>
-        <Button variant="outline" className="w-full" asChild>
-          <Link to={path}>Manage {title}</Link>
+      </div>
+      
+      <CardFooter className="bg-card border-t p-2 flex justify-between">
+        <Button asChild variant="ghost" size="sm">
+          <Link to={path}>
+            <List className="h-4 w-4 mr-2" />
+            Manage
+          </Link>
+        </Button>
+        
+        <Button asChild variant="ghost" size="sm">
+          <Link to={createPath}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create
+          </Link>
         </Button>
       </CardFooter>
     </Card>

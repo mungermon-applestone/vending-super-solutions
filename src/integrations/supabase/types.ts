@@ -201,6 +201,51 @@ export type Database = {
         }
         Relationships: []
       }
+      cms_media: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          description: string | null
+          file_size: number
+          file_type: string
+          filename: string
+          height: number | null
+          id: string
+          storage_path: string
+          title: string | null
+          updated_at: string
+          width: number | null
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          description?: string | null
+          file_size: number
+          file_type: string
+          filename: string
+          height?: number | null
+          id?: string
+          storage_path: string
+          title?: string | null
+          updated_at?: string
+          width?: number | null
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          description?: string | null
+          file_size?: number
+          file_type?: string
+          filename?: string
+          height?: number | null
+          id?: string
+          storage_path?: string
+          title?: string | null
+          updated_at?: string
+          width?: number | null
+        }
+        Relationships: []
+      }
       deployment_examples: {
         Row: {
           created_at: string
