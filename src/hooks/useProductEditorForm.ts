@@ -65,7 +65,7 @@ export const useProductEditorForm = (
       console.log('[useProductEditorForm] Populating form with product data:', existingProduct);
       
       // Create a new object from the existing product data to avoid reference issues
-      const productData = {
+      const productData: ProductFormData = {
         title: existingProduct.title || '',
         slug: existingProduct.slug || '',
         description: existingProduct.description || '',
@@ -138,6 +138,7 @@ export const useProductEditorForm = (
     isCreating,
     isLoadingProduct,
     form,
-    onSubmit
+    onSubmit,
+    productId: existingProduct?.id || null
   };
 };

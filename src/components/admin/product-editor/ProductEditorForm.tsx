@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Save } from 'lucide-react';
+import { Save, Copy } from 'lucide-react';
 import { Form } from '@/components/ui/form';
 import { useProductEditorForm } from '@/hooks/useProductEditorForm';
+import { useCloneProductType } from '@/hooks/cms/useCloneCMS';
 
 // Import form sections
 import BasicInformation from './sections/BasicInformation';
@@ -22,6 +23,8 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
   const navigate = useNavigate();
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isCloning, setIsCloning] = useState(false);
+  const cloneProductMutation = useCloneProductType();
   
   console.log('[ProductEditorForm] Rendering with product slug:', productSlug);
   console.log('[ProductEditorForm] isEditMode flag:', isEditMode);
@@ -31,13 +34,42 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
     isCreating, 
     isLoadingProduct, 
     form, 
-    onSubmit 
+    onSubmit,
+    productId
   } = useProductEditorForm(productSlug, setIsLoading, toast, navigate, isEditMode);
 
   const handleFormSubmit = form.handleSubmit((data) => {
     console.log('[ProductEditorForm] Form submitted with data:', data);
     onSubmit(data);
   });
+
+  const handleCloneProduct = async () => {
+    if (!productId) return;
+    
+    try {
+      setIsCloning(true);
+      const clonedProduct = await cloneProductMutation.mutateAsync(productId);
+      
+      if (clonedProduct) {
+        toast.toast({
+          title: "Product cloned",
+          description: `Product has been cloned successfully.`
+        });
+        
+        // Navigate to the newly cloned product
+        navigate(`/admin/products/edit/${clonedProduct.slug}`);
+      }
+    } catch (error) {
+      console.error("Error cloning product:", error);
+      toast.toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to clone product. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCloning(false);
+    }
+  };
 
   // Display loading state while fetching product data
   if (isLoadingProduct && !isCreating) {
@@ -73,6 +105,17 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
           <ProductFeatures form={form} />
 
           <div className="flex justify-end gap-4">
+            {!isCreating && productId && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCloneProduct}
+                disabled={isLoading || isCloning}
+                className="gap-2 mr-auto"
+              >
+                {isCloning ? 'Cloning...' : <><Copy className="h-4 w-4" /> Clone Product</>}
+              </Button>
+            )}
             <Button 
               type="button" 
               variant="outline" 
