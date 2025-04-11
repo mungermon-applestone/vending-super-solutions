@@ -53,6 +53,9 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
     );
   }
 
+  // Debug form values
+  console.log('[ProductEditorForm] Current form values:', form.getValues());
+
   return (
     <div className="container py-10">
       <h1 className="text-3xl font-bold mb-6">

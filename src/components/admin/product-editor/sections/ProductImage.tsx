@@ -30,7 +30,14 @@ const ProductImage = ({ form }: ProductImageProps) => {
             <FormItem>
               <FormLabel>Image URL</FormLabel>
               <FormControl>
-                <Input placeholder="https://..." {...field} />
+                <Input 
+                  placeholder="https://..." 
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -44,7 +51,14 @@ const ProductImage = ({ form }: ProductImageProps) => {
             <FormItem>
               <FormLabel>Image Alt Text</FormLabel>
               <FormControl>
-                <Input placeholder="Description of image" {...field} />
+                <Input 
+                  placeholder="Description of image" 
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  ref={field.ref}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

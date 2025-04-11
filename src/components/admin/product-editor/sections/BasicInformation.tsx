@@ -43,7 +43,7 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                   <Input
                     id="title"
                     placeholder="Product Title"
-                    {...field}
+                    value={field.value}
                     onChange={(e) => {
                       field.onChange(e);
                       
@@ -55,6 +55,9 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                         });
                       }
                     }}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
                   />
                 </FormControl>
                 <FormMessage />
@@ -72,11 +75,14 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                   <Input
                     id="slug"
                     placeholder="product-slug"
-                    {...field}
+                    value={field.value}
                     onChange={(e) => {
                       // Apply slug formatting and update the field
                       field.onChange(formatSlug(e.target.value));
                     }}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
                   />
                 </FormControl>
                 <FormMessage />
@@ -95,7 +101,11 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                     id="description"
                     placeholder="Describe the product..."
                     className="min-h-[100px]"
-                    {...field}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
                   />
                 </FormControl>
                 <FormMessage />
