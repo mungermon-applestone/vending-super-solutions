@@ -15,8 +15,14 @@ export const productTypeOperations: ContentTypeOperations<CMSProductType> = {
   fetchAll: (options?: QueryOptions) => fetchProductTypes(options?.filters),
   fetchBySlug: fetchProductTypeBySlug,
   fetchById: fetchProductTypeByUUID,
-  create: createProductType,
-  update: updateProductType,
+  create: async (data: any) => {
+    // Create returns the full product type
+    return await createProductType(data);
+  },
+  update: async (idOrSlug: string, data: any) => {
+    // Update returns the updated product type
+    return await updateProductType(idOrSlug, data);
+  },
   delete: deleteProductType
 };
 

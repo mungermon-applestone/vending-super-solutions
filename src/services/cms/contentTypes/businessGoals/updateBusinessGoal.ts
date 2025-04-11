@@ -4,6 +4,6 @@ export async function updateBusinessGoal(id: string, data: any): Promise<boolean
   console.log('[updateBusinessGoal] Using external service');
   const { updateBusinessGoal: externalUpdate } = await import('@/services/businessGoal');
   
-  // Remove toast parameter to fix type issues
+  // Call external update with correct parameters
   return await externalUpdate(id, data);
 }

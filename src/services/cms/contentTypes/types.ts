@@ -46,3 +46,23 @@ export interface ContentTypeOperations<T> {
    */
   delete: (idOrSlug: string) => Promise<boolean>;
 }
+
+/**
+ * Utility function to log CMS operations for debugging
+ * @param operation Name of the operation
+ * @param contentType Type of content being operated on
+ * @param message Log message
+ */
+export function logCMSOperation(operation: string, contentType: string, message: string): void {
+  console.log(`[${contentType}:${operation}] ${message}`);
+}
+
+/**
+ * Utility function to handle CMS errors consistently
+ * @param operation Name of the operation
+ * @param contentType Type of content being operated on
+ * @param error Error that occurred
+ */
+export function handleCMSError(operation: string, contentType: string, error: any): void {
+  console.error(`[${contentType}:${operation}] Error:`, error);
+}
