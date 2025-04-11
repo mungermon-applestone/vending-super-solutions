@@ -3,11 +3,13 @@
 import {
   fetchProductTypes,
   fetchProductTypeBySlug,
-  fetchProductTypeByUUID
+  fetchProductTypeByUUID,
+  deleteProductType
 } from './productTypes/index';
 
 export {
   fetchProductTypes,
   fetchProductTypeBySlug,
-  fetchProductTypeByUUID
+  fetchProductTypeByUUID,
+  deleteProductType
 };
