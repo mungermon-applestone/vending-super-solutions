@@ -23,10 +23,8 @@ const CloneButton: React.FC<CloneButtonProps> = ({
   const handleClick = async () => {
     try {
       await onClone();
-      toast({
-        title: "Success",
-        description: `${itemName} was successfully cloned.`,
-      });
+      // Note: We don't need to show a toast here as the parent component will handle that
+      // This avoids duplicate toast messages
     } catch (error) {
       console.error('Error cloning item:', error);
       toast({
