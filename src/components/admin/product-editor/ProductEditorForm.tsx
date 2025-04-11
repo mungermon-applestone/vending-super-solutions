@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -6,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Save } from 'lucide-react';
 import { Form } from '@/components/ui/form';
 import { useProductEditorForm } from '@/hooks/useProductEditorForm';
+import useKeepFormsEditable from '@/hooks/useKeepFormsEditable';
 
 // Import form sections
 import BasicInformation from './sections/BasicInformation';
@@ -22,6 +22,9 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
   const navigate = useNavigate();
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Apply the hook that keeps form fields editable
+  useKeepFormsEditable();
   
   // Log that we're trying to edit a specific product
   console.log('[ProductEditorForm] Rendering with product slug:', productSlug);
