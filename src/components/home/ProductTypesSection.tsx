@@ -36,16 +36,17 @@ const ProductCard = ({ title, description, image, path }: ProductCardProps) => {
 };
 
 const ProductTypesSection = () => {
-  // Add error handling to prevent blank screens
+  // Fix the useQuery configuration by using the meta object for error handling
   const { data: productTypes = [], isLoading, error } = useQuery({
     queryKey: ['productTypes'],
     queryFn: () => getProductTypes(),
-    // Add retry configuration and error handling
+    // Remove the onError property and use a more compatible approach
     retry: 2,
     retryDelay: 1000,
-    // Use static fallback data when API fails
-    onError: (err) => {
-      console.error('Error fetching product types:', err);
+    meta: {
+      onError: (err: any) => {
+        console.error('Error fetching product types:', err);
+      }
     }
   });
 
