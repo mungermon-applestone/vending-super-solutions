@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { transformProductTypeData } from '../../utils/transformers';
-import { logSlugSearch, getSlugVariations } from '../../utils/slugMatching';
+import { getSlugVariations } from '../../utils/slugMatching';
 
 /**
  * Direct fetch a single product type by slug - optimized for reliability
