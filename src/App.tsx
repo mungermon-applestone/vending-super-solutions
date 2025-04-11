@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import Index from './pages/Index';
@@ -52,83 +52,69 @@ import DiviWS from './pages/machines/DiviWS';
 import DiviWP from './pages/machines/DiviWP';
 import Combi3000 from './pages/machines/Combi3000';
 
-// Query Client
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+// UI Components
 import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      staleTime: 60 * 1000,
-    }
-  }
-});
 
 function App() {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme="light">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/about-us" element={<AboutUs />} />
-            <Route path="/products" element={<ProductsLanding />} />
-            <Route path="/products/:productSlug" element={<ProductDetail />} />
-            <Route path="/machines" element={<MachinesLanding />} />
-            <Route path="/machines/:machineSlug" element={<MachineDetail />} />
-            <Route path="/business-goals" element={<BusinessGoalsLanding />} />
-            <Route path="/business-goals/:businessGoalSlug" element={<BusinessGoalDetail />} />
-            <Route path="/case-studies" element={<CaseStudies />} />
-            <Route path="/case-studies/:caseStudySlug" element={<CaseStudyDetail />} />
-            <Route path="/blog" element={<BlogList />} />
-            <Route path="/blog/:postSlug" element={<BlogPost />} />
-            <Route path="/technology" element={<TechnologyLanding />} />
-            <Route path="/technology/:technologySlug" element={<SimpleTechnologyPage />} />
-            <Route path="/partner" element={<Partner />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/products" element={<AdminProducts />} />
-            <Route path="/admin/products/:productSlug" element={<ProductEditor />} />
-            <Route path="/admin/machines" element={<AdminMachines />} />
-            <Route path="/admin/machines/:machineId" element={<MachineEditor />} />
-            <Route path="/admin/business-goals" element={<AdminBusinessGoals />} />
-            <Route path="/admin/business-goals/:goalSlug" element={<BusinessGoalEditor />} />
-            <Route path="/admin/technology" element={<AdminTechnology />} />
-            <Route path="/admin/technology/:technologySlug" element={<TechnologyEditor />} />
-            <Route path="/admin/blog" element={<AdminBlog />} />
-            <Route path="/admin/blog/:postId" element={<BlogEditor />} />
-            <Route path="/admin/media" element={<AdminMedia />} />
-            
-            {/* Migration Routes */}
-            <Route path="/admin/migrate/technologies" element={<MigrateTechnologyData />} />
-            <Route path="/admin/migrate/machines" element={<MigrateMachinesData />} />
-            <Route path="/admin/migrate/business-goals" element={<MigrateBusinessGoalData />} />
+    <ThemeProvider defaultTheme="light">
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Index />} />
+        <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/products" element={<ProductsLanding />} />
+        <Route path="/products/:productSlug" element={<ProductDetail />} />
+        <Route path="/machines" element={<MachinesLanding />} />
+        <Route path="/machines/:machineSlug" element={<MachineDetail />} />
+        <Route path="/business-goals" element={<BusinessGoalsLanding />} />
+        <Route path="/business-goals/:businessGoalSlug" element={<BusinessGoalDetail />} />
+        <Route path="/case-studies" element={<CaseStudies />} />
+        <Route path="/case-studies/:caseStudySlug" element={<CaseStudyDetail />} />
+        <Route path="/blog" element={<BlogList />} />
+        <Route path="/blog/:postSlug" element={<BlogPost />} />
+        <Route path="/technology" element={<TechnologyLanding />} />
+        <Route path="/technology/:technologySlug" element={<SimpleTechnologyPage />} />
+        <Route path="/partner" element={<Partner />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/products" element={<AdminProducts />} />
+        <Route path="/admin/products/:productSlug" element={<ProductEditor />} />
+        <Route path="/admin/machines" element={<AdminMachines />} />
+        <Route path="/admin/machines/:machineId" element={<MachineEditor />} />
+        <Route path="/admin/business-goals" element={<AdminBusinessGoals />} />
+        <Route path="/admin/business-goals/:goalSlug" element={<BusinessGoalEditor />} />
+        <Route path="/admin/technology" element={<AdminTechnology />} />
+        <Route path="/admin/technology/:technologySlug" element={<TechnologyEditor />} />
+        <Route path="/admin/blog" element={<AdminBlog />} />
+        <Route path="/admin/blog/:postId" element={<BlogEditor />} />
+        <Route path="/admin/media" element={<AdminMedia />} />
+        
+        {/* Migration Routes */}
+        <Route path="/admin/migrate/technologies" element={<MigrateTechnologyData />} />
+        <Route path="/admin/migrate/machines" element={<MigrateMachinesData />} />
+        <Route path="/admin/migrate/business-goals" element={<MigrateBusinessGoalData />} />
 
-            {/* Static Machine Pages */}
-            <Route path="/machines/option-2-wall-mount" element={<Option2WallMount />} />
-            <Route path="/machines/option-2-wall-mount-xl" element={<Option2WallMountXL />} />
-            <Route path="/machines/locker-10-cell" element={<Locker10Cell />} />
-            <Route path="/machines/locker-21-cell" element={<Locker21Cell />} />
-            <Route path="/machines/option-4-refrigerated" element={<Option4Refrigerated />} />
-            <Route path="/machines/divi-ss" element={<DiviSS />} />
-            <Route path="/machines/divi-sp" element={<DiviSP />} />
-            <Route path="/machines/divi-ws" element={<DiviWS />} />
-            <Route path="/machines/divi-wp" element={<DiviWP />} />
-            <Route path="/machines/combi-3000" element={<Combi3000 />} />
-            
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster position="top-center" richColors />
-          <ShadcnToaster />
-        </ThemeProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+        {/* Static Machine Pages */}
+        <Route path="/machines/option-2-wall-mount" element={<Option2WallMount />} />
+        <Route path="/machines/option-2-wall-mount-xl" element={<Option2WallMountXL />} />
+        <Route path="/machines/locker-10-cell" element={<Locker10Cell />} />
+        <Route path="/machines/locker-21-cell" element={<Locker21Cell />} />
+        <Route path="/machines/option-4-refrigerated" element={<Option4Refrigerated />} />
+        <Route path="/machines/divi-ss" element={<DiviSS />} />
+        <Route path="/machines/divi-sp" element={<DiviSP />} />
+        <Route path="/machines/divi-ws" element={<DiviWS />} />
+        <Route path="/machines/divi-wp" element={<DiviWP />} />
+        <Route path="/machines/combi-3000" element={<Combi3000 />} />
+        
+        {/* 404 */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Toaster position="top-center" richColors />
+      <ShadcnToaster />
+    </ThemeProvider>
   );
 }
 
