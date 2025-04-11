@@ -34,6 +34,11 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
     onSubmit 
   } = useProductEditorForm(productSlug, setIsLoading, toast, navigate, isEditMode);
 
+  const handleFormSubmit = form.handleSubmit((data) => {
+    console.log('[ProductEditorForm] Form submitted with data:', data);
+    onSubmit(data);
+  });
+
   // Display loading state while fetching product data
   if (isLoadingProduct && !isCreating) {
     return (
@@ -56,7 +61,7 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
 
       <Form {...form}>
         <form 
-          onSubmit={form.handleSubmit(onSubmit)} 
+          onSubmit={handleFormSubmit} 
           className="space-y-8"
         >
           <BasicInformation form={form} />

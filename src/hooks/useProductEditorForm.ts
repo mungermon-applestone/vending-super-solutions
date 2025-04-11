@@ -56,7 +56,7 @@ export const useProductEditorForm = (
         }
       ]
     },
-    mode: 'onBlur',
+    mode: 'all', // Changed from 'onBlur' to 'all' for better reactivity
   });
 
   // Populate form with existing product data when available
@@ -118,13 +118,13 @@ export const useProductEditorForm = (
       if (isCreating) {
         console.log('[useProductEditorForm] Creating new product');
         await createProduct(data, toast);
-        navigate(`/admin/products`);
+        navigate('/admin/products');
       } else if (productSlug && productSlug !== 'new') {
         console.log(`[useProductEditorForm] Updating product: ${productSlug}`);
         console.log('[useProductEditorForm] Form data for update:', data);
         
         await updateProduct(data, productSlug, toast);
-        navigate(`/admin/products`);
+        navigate('/admin/products');
       }
     } catch (error) {
       console.error('[useProductEditorForm] Error saving product:', error);
