@@ -56,10 +56,7 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
 
       <Form {...form}>
         <form 
-          onSubmit={(e) => {
-            console.log('[ProductEditorForm] Form submitted');
-            form.handleSubmit(onSubmit)(e);
-          }} 
+          onSubmit={form.handleSubmit(onSubmit)} 
           className="space-y-8"
         >
           <BasicInformation form={form} />
