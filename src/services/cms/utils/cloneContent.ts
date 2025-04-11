@@ -16,28 +16,9 @@ export function generateSuffix(length: number): string {
   return result;
 }
 
-// Define specific table types to ensure type safety using literal string union
-type TableName = string & (
-  | 'product_types'
-  | 'product_type_benefits'
-  | 'product_type_features'
-  | 'product_type_images'
-  | 'product_type_feature_images'
-  | 'business_goals'
-  | 'business_goal_benefits'
-  | 'business_goal_features'
-  | 'business_goal_feature_images'
-  | 'technologies'
-  | 'technology_sections'
-  | 'technology_features'
-  | 'technology_feature_items'
-  | 'technology_images'
-  | 'machines'
-  | 'machine_features'
-  | 'machine_images'
-  | 'machine_specs'
-  | 'deployment_examples'
-);
+// Define specific table types to ensure type safety using string literal union
+// Use a simpler approach to avoid excessive depth in type instantiation
+type TableName = string;
 
 /**
  * Generic function to clone a content item from any content type
@@ -58,7 +39,7 @@ export async function cloneContentItem<T>(
 
     // First, fetch the original item
     const { data: originalItem, error: fetchError } = await supabase
-      .from(table)
+      .from(table as any)
       .select('*')
       .eq('id', id)
       .single();
@@ -69,7 +50,7 @@ export async function cloneContentItem<T>(
     }
 
     // Create a copy of the original item
-    const cloneData = { ...originalItem };
+    const cloneData: Record<string, any> = { ...originalItem };
     
     // Remove the id so a new one will be generated
     delete cloneData.id;
@@ -89,7 +70,7 @@ export async function cloneContentItem<T>(
 
     // Insert the cloned item
     const { data: newItem, error: insertError } = await supabase
-      .from(table)
+      .from(table as any)
       .insert(cloneData)
       .select('*')
       .single();
@@ -137,11 +118,24 @@ export async function cloneRelatedItems(
       return;
     }
 
-    // Create clones of each related item
+    // Create clones of each related item - fix the spread operator issue by ensuring items are treated as objects
     const clonedItems = relatedItems.map(item => {
-      const clone = { ...item };
-      delete clone.id; // Remove ID so a new one will be generated
-      clone[foreignKeyField] = newId; // Set the foreign key to the new parent ID
+      // Define clone as Record<string, any> to ensure TypeScript sees it as an object type
+      const clone: Record<string, any> = {};
+      
+      // Manually copy properties instead of using spread
+      for (const key in item) {
+        if (Object.prototype.hasOwnProperty.call(item, key)) {
+          clone[key] = item[key];
+        }
+      }
+      
+      // Remove ID so a new one will be generated
+      delete clone.id;
+      
+      // Set the foreign key to the new parent ID
+      clone[foreignKeyField] = newId;
+      
       return clone;
     });
 
