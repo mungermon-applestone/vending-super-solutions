@@ -1,97 +1,82 @@
-/**
- * Slug mapping utilities - handles mapping between URL and database slugs
- */
-
-// Map of URL slugs to database slugs
-// This is a one-way mapping from URL slug to database slug
-const slugMappings: Record<string, string> = {
-  'grocery': 'grocery-vending',
-  'cannabis': 'cannabis-vending',
-  'vape': 'vape-vending',
-  'cosmetics': 'cosmetics-vending',
-  'otc': 'over-the-counter-pharma-vending',
-  'collectibles': 'toys-cards-collectibles'  // Updated to match the database slug
-};
-
-// Map for the reverse lookup (database slug to URL slug)
-// This helps avoid circular references
-const reverseMappings: Record<string, string> = {
-  'grocery-vending': 'grocery',
-  'cannabis-vending': 'cannabis',
-  'vape-vending': 'vape',
-  'cosmetics-vending': 'cosmetics',
-  'over-the-counter-pharma-vending': 'otc',
-  'toys-cards-collectibles': 'collectibles' // Updated to match the URL slug
-};
-
-// Track historical slugs that may have changed - maps old slugs to current slugs
-// This allows products to be found even if their slug has changed
-const historicalSlugs: Record<string, string> = {
-  // Example: 'old-product-slug': 'new-product-slug'
-};
 
 import { normalizeSlug } from './normalize';
+import { getSlugVariations, slugsMatch } from './variations';
 
 /**
- * Map a URL slug to its corresponding database slug if a mapping exists
- * @param slug The URL slug to map
- * @returns The database slug or the original slug if no mapping exists
+ * Maps from URL-friendly slugs to database slugs
  */
-export function mapUrlSlugToDatabaseSlug(slug: string): string {
-  const normalizedSlug = normalizeSlug(slug);
-  console.log(`[slugMatching] Mapping URL slug: "${normalizedSlug}" to database slug`);
+const urlToDbSlugMap: Record<string, string> = {};
+
+/**
+ * Maps from database slugs to URL-friendly slugs
+ */
+const dbToUrlSlugMap: Record<string, string> = {};
+
+/**
+ * Register a slug change mapping between URL and database
+ * @param urlSlug The slug used in URLs
+ * @param dbSlug The slug used in database
+ */
+export function registerSlugChange(urlSlug: string, dbSlug: string): void {
+  const normalizedUrlSlug = normalizeSlug(urlSlug);
+  const normalizedDbSlug = normalizeSlug(dbSlug);
   
-  // Check for direct mapping
-  if (slugMappings[normalizedSlug]) {
-    console.log(`[slugMatching] Found mapping: "${normalizedSlug}" -> "${slugMappings[normalizedSlug]}"`);
-    return slugMappings[normalizedSlug];
+  urlToDbSlugMap[normalizedUrlSlug] = normalizedDbSlug;
+  dbToUrlSlugMap[normalizedDbSlug] = normalizedUrlSlug;
+  
+  console.log(`[slugMapping] Registered mapping: URL '${normalizedUrlSlug}' -> DB '${normalizedDbSlug}'`);
+}
+
+/**
+ * Maps a URL-friendly slug to a database slug
+ * @param urlSlug The slug from the URL
+ * @returns The corresponding database slug
+ */
+export function mapUrlSlugToDatabaseSlug(urlSlug: string): string {
+  const normalizedSlug = normalizeSlug(urlSlug);
+  
+  // If we have an exact mapping, use it
+  if (urlToDbSlugMap[normalizedSlug]) {
+    return urlToDbSlugMap[normalizedSlug];
   }
   
-  // Check historical slugs if no direct mapping found
-  if (historicalSlugs[normalizedSlug]) {
-    const currentSlug = historicalSlugs[normalizedSlug];
-    console.log(`[slugMatching] Found historical mapping: "${normalizedSlug}" -> "${currentSlug}"`);
-    
-    // If the current slug has a database mapping, use that
-    if (slugMappings[currentSlug]) {
-      return slugMappings[currentSlug];
+  // Try variations
+  const variations = getSlugVariations(normalizedSlug);
+  for (const variation of variations) {
+    if (urlToDbSlugMap[variation]) {
+      // Add this mapping for future use
+      registerSlugChange(normalizedSlug, urlToDbSlugMap[variation]);
+      return urlToDbSlugMap[variation];
     }
-    
-    // Otherwise return the current slug
-    return currentSlug;
   }
   
-  console.log(`[slugMatching] No mapping found for slug: "${normalizedSlug}", using as-is`);
+  // No mapping found, return the original (normalized)
   return normalizedSlug;
 }
 
 /**
- * Map a database slug to its corresponding URL slug
- * @param slug The database slug to map
- * @returns The URL slug or the original slug if no mapping exists
+ * Maps a database slug to a URL-friendly slug
+ * @param dbSlug The slug from the database
+ * @returns The corresponding URL-friendly slug
  */
-export function mapDatabaseSlugToUrlSlug(slug: string): string {
-  const normalizedSlug = normalizeSlug(slug);
+export function mapDatabaseSlugToUrlSlug(dbSlug: string): string {
+  const normalizedSlug = normalizeSlug(dbSlug);
   
-  if (reverseMappings[normalizedSlug]) {
-    console.log(`[slugMatching] Reverse mapping: "${normalizedSlug}" -> "${reverseMappings[normalizedSlug]}"`);
-    return reverseMappings[normalizedSlug];
+  // If we have an exact mapping, use it
+  if (dbToUrlSlugMap[normalizedSlug]) {
+    return dbToUrlSlugMap[normalizedSlug];
   }
   
+  // Try variations
+  const variations = getSlugVariations(normalizedSlug);
+  for (const variation of variations) {
+    if (dbToUrlSlugMap[variation]) {
+      // Add this mapping for future use
+      registerSlugChange(dbToUrlSlugMap[variation], normalizedSlug);
+      return dbToUrlSlugMap[variation];
+    }
+  }
+  
+  // No mapping found, return the original (normalized)
   return normalizedSlug;
-}
-
-/**
- * Register a slug change to help with lookups
- * @param oldSlug The previous slug
- * @param newSlug The new slug
- */
-export function registerSlugChange(oldSlug: string, newSlug: string): void {
-  if (!oldSlug || !newSlug || oldSlug === newSlug) return;
-  
-  const normalizedOld = normalizeSlug(oldSlug);
-  const normalizedNew = normalizeSlug(newSlug);
-  
-  console.log(`[slugMatching] Registering slug change: "${normalizedOld}" -> "${normalizedNew}"`);
-  historicalSlugs[normalizedOld] = normalizedNew;
 }

@@ -1,7 +1,18 @@
 
 import { useQuery } from '@tanstack/react-query';
 import * as cmsService from '@/services/cms';
-import { normalizeSlug, getSlugVariations } from '@/services/cms/utils/slugMatching';
+import { normalizeSlug, getSlugVariations, slugsMatch } from '@/services/cms/utils/slugMatching';
+
+/**
+ * Common options for all CMS data queries
+ */
+const defaultQueryOptions = {
+  retry: 2,
+  refetchOnMount: true,
+  refetchOnWindowFocus: false,
+  staleTime: 1000 * 60 * 5, // 5 minutes
+  gcTime: 1000 * 60 * 10, // 10 minutes
+};
 
 /**
  * Hook to fetch machines with optional filters
@@ -10,6 +21,7 @@ export function useMachines(filters: Record<string, any> = {}) {
   return useQuery({
     queryKey: ['machines', filters],
     queryFn: () => cmsService.getMachines(filters),
+    ...defaultQueryOptions,
   });
 }
 
@@ -21,6 +33,7 @@ export function useMachine(type: string | undefined, id: string | undefined) {
     queryKey: ['machine', type, id],
     queryFn: () => cmsService.getMachineBySlug(type || '', id || ''),
     enabled: !!type && !!id,
+    ...defaultQueryOptions,
   });
 }
 
@@ -31,6 +44,12 @@ export function useProductTypes() {
   return useQuery({
     queryKey: ['productTypes'],
     queryFn: cmsService.getProductTypes,
+    ...defaultQueryOptions,
+    meta: {
+      onError: (err: any) => {
+        console.error('[useCMSData] Error fetching product types:', err);
+      }
+    }
   });
 }
 
@@ -80,12 +99,18 @@ export function useProductType(slug: string | undefined, uuid: string | null = n
         } else {
           console.warn(`[useCMSData] No product found for slug "${normalizedSlug}"`);
           
-          // DEBUG: Let's try to get all product types to see what's available
-          console.log('[useCMSData] DEBUG: Fetching all product types to check available options');
-          const allTypes = await cmsService.getProductTypes();
-          console.log('[useCMSData] DEBUG: Available product types:', 
-            allTypes.map(pt => ({ title: pt.title, slug: pt.slug, id: pt.id }))
-          );
+          // Try slug variations as a last resort
+          const variations = getSlugVariations(normalizedSlug);
+          for (const variation of variations) {
+            if (variation === normalizedSlug) continue; // Skip the one we already tried
+            
+            console.log(`[useCMSData] Trying slug variation: "${variation}"`);
+            const resultFromVariation = await cmsService.getProductTypeBySlug(variation);
+            if (resultFromVariation) {
+              console.log(`[useCMSData] Found product with slug variation: "${variation}"`);
+              return resultFromVariation;
+            }
+          }
         }
         
         return result;
@@ -95,11 +120,7 @@ export function useProductType(slug: string | undefined, uuid: string | null = n
       }
     },
     enabled: (!!slug && slug.trim() !== '') || !!uuid, // Run if either slug or UUID is provided
-    retry: 2,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes
+    ...defaultQueryOptions,
   });
 }
 
@@ -110,6 +131,7 @@ export function useTestimonials() {
   return useQuery({
     queryKey: ['testimonials'],
     queryFn: cmsService.getTestimonials,
+    ...defaultQueryOptions,
   });
 }
 
@@ -120,6 +142,7 @@ export function useBusinessGoals() {
   return useQuery({
     queryKey: ['businessGoals'],
     queryFn: cmsService.getBusinessGoals,
+    ...defaultQueryOptions,
   });
 }
 
@@ -129,8 +152,48 @@ export function useBusinessGoals() {
 export function useBusinessGoal(slug: string | undefined) {
   return useQuery({
     queryKey: ['businessGoal', slug],
-    queryFn: () => cmsService.getBusinessGoalBySlug(slug || ''),
-    enabled: !!slug,
+    queryFn: async () => {
+      if (!slug) {
+        console.warn('[useCMSData] useBusinessGoal called with empty slug');
+        return null;
+      }
+      
+      const normalizedSlug = normalizeSlug(slug);
+      console.log(`[useCMSData] Looking up business goal with slug: "${normalizedSlug}"`);
+      
+      try {
+        // Try direct lookup first
+        const result = await cmsService.getBusinessGoalBySlug(normalizedSlug);
+        
+        if (result) {
+          return result;
+        }
+        
+        // If direct lookup fails, try slug variations
+        console.log(`[useCMSData] Direct lookup failed, trying slug variations for: "${normalizedSlug}"`);
+        const variations = getSlugVariations(normalizedSlug);
+        
+        for (const variation of variations) {
+          if (variation === normalizedSlug) continue; // Skip the one we already tried
+          
+          console.log(`[useCMSData] Trying variation: "${variation}"`);
+          const resultFromVariation = await cmsService.getBusinessGoalBySlug(variation);
+          
+          if (resultFromVariation) {
+            console.log(`[useCMSData] Found business goal with variation: "${variation}"`);
+            return resultFromVariation;
+          }
+        }
+        
+        console.warn(`[useCMSData] No business goal found for slug "${normalizedSlug}" or variations`);
+        return null;
+      } catch (error) {
+        console.error(`[useCMSData] Error fetching business goal "${normalizedSlug}":`, error);
+        return null;
+      }
+    },
+    enabled: !!slug && slug.trim() !== '',
+    ...defaultQueryOptions,
   });
 }
 
@@ -141,6 +204,7 @@ export function useTechnologies() {
   return useQuery({
     queryKey: ['technologies'],
     queryFn: () => cmsService.getTechnologies(),
+    ...defaultQueryOptions,
   });
 }
 
@@ -150,7 +214,47 @@ export function useTechnologies() {
 export function useTechnology(slug: string | undefined) {
   return useQuery({
     queryKey: ['technology', slug],
-    queryFn: () => cmsService.getTechnologyBySlug(slug || ''),
-    enabled: !!slug,
+    queryFn: async () => {
+      if (!slug) {
+        console.warn('[useCMSData] useTechnology called with empty slug');
+        return null;
+      }
+      
+      const normalizedSlug = normalizeSlug(slug);
+      console.log(`[useCMSData] Looking up technology with slug: "${normalizedSlug}"`);
+      
+      try {
+        // Try direct lookup first
+        const result = await cmsService.getTechnologyBySlug(normalizedSlug);
+        
+        if (result) {
+          return result;
+        }
+        
+        // If direct lookup fails, try slug variations
+        console.log(`[useCMSData] Direct lookup failed, trying slug variations for: "${normalizedSlug}"`);
+        const variations = getSlugVariations(normalizedSlug);
+        
+        for (const variation of variations) {
+          if (variation === normalizedSlug) continue; // Skip the one we already tried
+          
+          console.log(`[useCMSData] Trying variation: "${variation}"`);
+          const resultFromVariation = await cmsService.getTechnologyBySlug(variation);
+          
+          if (resultFromVariation) {
+            console.log(`[useCMSData] Found technology with variation: "${variation}"`);
+            return resultFromVariation;
+          }
+        }
+        
+        console.warn(`[useCMSData] No technology found for slug "${normalizedSlug}" or variations`);
+        return null;
+      } catch (error) {
+        console.error(`[useCMSData] Error fetching technology "${normalizedSlug}":`, error);
+        return null;
+      }
+    },
+    enabled: !!slug && slug.trim() !== '',
+    ...defaultQueryOptions,
   });
 }
