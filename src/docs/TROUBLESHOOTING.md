@@ -67,6 +67,50 @@ If form fields become uneditable after cloning an item, check the following:
 
 5. **Reset Form Completely**: Use `form.reset(newValues)` rather than setting field values individually.
 
+## Content Deletion Issues
+
+If content deletion doesn't work properly, check the following:
+
+### Root Causes
+
+1. **Orphaned Related Records**: If related records aren't deleted first, database constraints may prevent deletion.
+
+2. **Incorrect ID/Slug Usage**: Using slug in place of ID or vice versa in deletion queries.
+
+3. **Missing Error Handling**: Deletion errors that are silently caught without propagation.
+
+### Solutions
+
+1. **Delete Related Records First**:
+   ```tsx
+   // Delete related records first
+   await supabase.from('related_table').delete().eq('parent_id', id);
+   
+   // Then delete the main record
+   await supabase.from('main_table').delete().eq('id', id);
+   ```
+
+2. **Verify ID Resolution**:
+   ```tsx
+   // First fetch the entity to ensure we have the correct ID
+   const { data, error } = await supabase
+     .from('table')
+     .select('id')
+     .eq('slug', slug)
+     .single();
+     
+   // Then use the ID for deletion
+   await supabase.from('table').delete().eq('id', data.id);
+   ```
+
+3. **Proper Error Propagation**:
+   ```tsx
+   if (error) {
+     console.error('Deletion error:', error);
+     throw error; // Don't silently catch errors
+   }
+   ```
+
 ## Implementation Examples
 
 See the following files for examples of proper form field handling:
