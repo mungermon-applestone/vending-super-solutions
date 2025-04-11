@@ -1,4 +1,3 @@
-
 import { 
   CMSMachine, 
   CMSProductType, 
@@ -10,6 +9,7 @@ import { fetchFromCMS } from '@/services/cms/fetchFromCMS';
 import { 
   fetchProductTypeBySlug,
   fetchProductTypeByUUID,
+  fetchProductTypes,
   deleteProductType as removeProductType
 } from '@/services/cms/contentTypes/productTypes';
 import { fetchBusinessGoalBySlug } from '@/services/cms/contentTypes/businessGoals';
