@@ -33,6 +33,10 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
       .replace(/[^a-z0-9-]/g, '');
   };
 
+  // Debug the form state
+  console.log('[BasicInformation] Form is read-only:', form.formState.isReadOnly);
+  console.log('[BasicInformation] Form is disabled:', form.formState.disabled);
+
   return (
     <Card>
       <CardHeader>
@@ -51,8 +55,12 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                     id="title"
                     placeholder="Product Title"
                     {...field}
+                    readOnly={false}
+                    disabled={false}
+                    data-force-editable="true"
                     onChange={(e) => {
                       field.onChange(e.target.value);
+                      console.log('[BasicInformation] Title changed to:', e.target.value);
                       
                       // Auto-generate slug if slug is empty
                       const currentSlug = form.getValues('slug');
@@ -80,9 +88,13 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                     id="slug"
                     placeholder="product-slug"
                     {...field}
+                    readOnly={false}
+                    disabled={false}
+                    data-force-editable="true"
                     onChange={(e) => {
                       const formattedValue = formatSlug(e.target.value);
                       field.onChange(formattedValue);
+                      console.log('[BasicInformation] Slug changed to:', formattedValue);
                     }}
                   />
                 </FormControl>
@@ -103,6 +115,13 @@ const BasicInformation = ({ form }: BasicInformationProps) => {
                     placeholder="Describe the product..."
                     className="min-h-[100px]"
                     {...field}
+                    readOnly={false}
+                    disabled={false}
+                    data-force-editable="true"
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      console.log('[BasicInformation] Description changed to:', e.target.value);
+                    }}
                   />
                 </FormControl>
                 <FormMessage />

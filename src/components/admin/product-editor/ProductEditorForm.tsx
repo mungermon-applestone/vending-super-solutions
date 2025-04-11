@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -38,6 +39,27 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
     onSubmit 
   } = useProductEditorForm(productSlug, setIsLoading, toast, navigate, isEditMode);
 
+  // Ensure the form is always editable after loading
+  useEffect(() => {
+    if (!isLoadingProduct) {
+      // Force all form inputs to be editable after form is initialized
+      setTimeout(() => {
+        console.log('[ProductEditorForm] Ensuring form is editable');
+        const formElements = document.querySelectorAll('input, textarea, select');
+        formElements.forEach(element => {
+          if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+            element.readOnly = false;
+            element.disabled = false;
+            element.setAttribute('data-force-editable', 'true');
+          } else if (element instanceof HTMLSelectElement) {
+            element.disabled = false;
+            element.setAttribute('data-force-editable', 'true');
+          }
+        });
+      }, 500);
+    }
+  }, [isLoadingProduct, form]);
+
   // Display loading state while fetching product data
   if (isLoadingProduct && !isCreating) {
     return (
@@ -59,7 +81,13 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
       </h1>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form 
+          onSubmit={(e) => {
+            console.log('[ProductEditorForm] Form submitted');
+            form.handleSubmit(onSubmit)(e);
+          }} 
+          className="space-y-8"
+        >
           <BasicInformation form={form} />
           <ProductImage form={form} />
           <ProductBenefits form={form} />

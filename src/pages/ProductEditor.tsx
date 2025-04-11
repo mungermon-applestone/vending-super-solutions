@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -23,6 +24,19 @@ const ProductEditorPage = () => {
   useEffect(() => {
     console.log(`[ProductEditorPage] Product slug from URL params: ${productSlug}`);
     console.log(`[ProductEditorPage] Is this a create or edit operation: ${!isEditMode ? 'create' : 'edit'}`);
+    
+    // Additional step to ensure form remains editable
+    setTimeout(() => {
+      console.log('[ProductEditorPage] Ensuring form is editable after mount');
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+          el.readOnly = false;
+          el.disabled = false;
+        } else if (el instanceof HTMLSelectElement) {
+          el.disabled = false;
+        }
+      });
+    }, 1000);
   }, [productSlug, isEditMode]);
   
   return (

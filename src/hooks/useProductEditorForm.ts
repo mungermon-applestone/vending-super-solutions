@@ -56,7 +56,28 @@ export const useProductEditorForm = (
         }
       ]
     },
+    mode: 'onBlur',
   });
+
+  // Ensure the form is never set to readonly
+  useEffect(() => {
+    // Make sure form is editable
+    console.log('[useProductEditorForm] Ensuring form is not readonly or disabled');
+    if (form) {
+      // This is a workaround to ensure form is not readonly
+      const formState = form.formState;
+      if (formState.isReadOnly) {
+        console.log('[useProductEditorForm] Form was readonly, attempting to make editable');
+        // Force the form to be editable by directly manipulating the DOM
+        setTimeout(() => {
+          document.querySelectorAll('input, textarea, select').forEach(el => {
+            el.removeAttribute('readonly');
+            el.removeAttribute('disabled');
+          });
+        }, 100);
+      }
+    }
+  }, [form]);
 
   // Populate form with existing product data when available
   useEffect(() => {
@@ -98,6 +119,15 @@ export const useProductEditorForm = (
       form.reset(productData);
       
       console.log('[useProductEditorForm] Form reset with values:', form.getValues());
+      
+      // Force update to ensure form is editable
+      setTimeout(() => {
+        console.log('[useProductEditorForm] Force making form editable after population');
+        document.querySelectorAll('input, textarea, select').forEach(el => {
+          el.removeAttribute('readonly');
+          el.removeAttribute('disabled');
+        });
+      }, 100);
     } else if (productSlug && productSlug !== 'new' && !existingProduct && !isLoadingProduct) {
       console.log('[useProductEditorForm] No existing product found for slug:', productSlug);
       toast.toast({
