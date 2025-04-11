@@ -59,7 +59,7 @@ const AdminMachines = () => {
     }
   };
   
-  const handleCloneMachine = async (machine: CMSMachine) => {
+  const handleCloneMachine = async (machine: CMSMachine): Promise<void> => {
     try {
       setCloningMachineId(machine.id);
       const clonedMachine = await cloneMachineMutation.mutateAsync(machine.id);

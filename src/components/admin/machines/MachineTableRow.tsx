@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, Pencil, Trash2, Copy } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import MachineTypeIcon from './MachineTypeIcon';
@@ -18,7 +18,7 @@ interface MachineTableRowProps {
     slug: string;
   };
   onDeleteClick: (machine: CMSMachine) => void;
-  onCloneClick: (machine: CMSMachine) => void;
+  onCloneClick: (machine: CMSMachine) => Promise<void>;
   isCloningId: string | null;
 }
 

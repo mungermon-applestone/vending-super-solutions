@@ -93,7 +93,7 @@ const AdminTechnology = () => {
     }
   };
 
-  const handleCloneTechnology = async (technology: CMSTechnology) => {
+  const handleCloneTechnology = async (technology: CMSTechnology): Promise<void> => {
     try {
       setCloningTechnologyId(technology.id);
       const clonedTechnology = await cloneTechnologyMutation.mutateAsync(technology.id);

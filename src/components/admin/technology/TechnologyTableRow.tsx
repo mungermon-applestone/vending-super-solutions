@@ -10,7 +10,7 @@ import CloneButton from '../common/CloneButton';
 interface TechnologyTableRowProps {
   technology: CMSTechnology;
   onDeleteClick: (technology: CMSTechnology) => void;
-  onCloneClick: (technology: CMSTechnology) => void;
+  onCloneClick: (technology: CMSTechnology) => Promise<void>;
   isCloningId: string | null;
 }
 
