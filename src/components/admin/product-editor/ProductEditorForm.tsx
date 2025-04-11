@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -38,6 +37,54 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
     form, 
     onSubmit 
   } = useProductEditorForm(productSlug, setIsLoading, toast, navigate, isEditMode);
+
+  // Override React Hook Form's default handling to ensure inputs are always editable
+  useEffect(() => {
+    // Immediately make form editable when mounted
+    const forceFormEditable = () => {
+      console.log('[ProductEditorForm] Forcing form to be editable');
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+          // Force properties
+          Object.defineProperty(el, 'readOnly', { 
+            writable: true, 
+            value: false 
+          });
+          Object.defineProperty(el, 'disabled', { 
+            writable: true, 
+            value: false 
+          });
+          
+          // Remove attributes 
+          el.removeAttribute('readonly');
+          el.removeAttribute('disabled');
+          
+          // Add our own data attribute
+          el.setAttribute('data-lovable-editable', 'true');
+        } else if (el instanceof HTMLSelectElement) {
+          // Force property
+          Object.defineProperty(el, 'disabled', { 
+            writable: true, 
+            value: false 
+          });
+          
+          // Remove attribute
+          el.removeAttribute('disabled');
+          
+          // Add our own data attribute
+          el.setAttribute('data-lovable-editable', 'true');
+        }
+      });
+    };
+    
+    // Run immediately
+    forceFormEditable();
+    
+    // Then set up interval to keep checking
+    const interval = setInterval(forceFormEditable, 500);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   // Ensure the form is always editable after loading
   useEffect(() => {

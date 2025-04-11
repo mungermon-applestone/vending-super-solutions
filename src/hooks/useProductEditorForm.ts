@@ -63,20 +63,32 @@ export const useProductEditorForm = (
   useEffect(() => {
     // Make sure form is editable
     console.log('[useProductEditorForm] Ensuring form is not readonly or disabled');
-    if (form) {
-      // This is a workaround to ensure form is not readonly
-      // Instead of checking formState.isReadOnly (which doesn't exist),
-      // directly enforce editability
-      console.log('[useProductEditorForm] Form state:', form.formState);
-      
-      // Force the form to be editable by directly manipulating the DOM
-      setTimeout(() => {
-        document.querySelectorAll('input, textarea, select').forEach(el => {
+    
+    const makeFormEditable = () => {
+      // Directly manipulate the DOM to ensure form elements are editable
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+          // Force properties
+          el.readOnly = false;
+          el.disabled = false;
+          
+          // Remove attributes
           el.removeAttribute('readonly');
           el.removeAttribute('disabled');
-        });
-      }, 100);
-    }
+        } else if (el instanceof HTMLSelectElement) {
+          el.disabled = false;
+          el.removeAttribute('disabled');
+        }
+      });
+    };
+    
+    // Run immediately
+    makeFormEditable();
+    
+    // Then set up interval
+    const interval = setInterval(makeFormEditable, 500);
+    
+    return () => clearInterval(interval);
   }, [form]);
 
   // Populate form with existing product data when available
@@ -124,6 +136,12 @@ export const useProductEditorForm = (
       setTimeout(() => {
         console.log('[useProductEditorForm] Force making form editable after population');
         document.querySelectorAll('input, textarea, select').forEach(el => {
+          if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+            el.readOnly = false;
+            el.disabled = false;
+          } else if (el instanceof HTMLSelectElement) {
+            el.disabled = false;
+          }
           el.removeAttribute('readonly');
           el.removeAttribute('disabled');
         });
