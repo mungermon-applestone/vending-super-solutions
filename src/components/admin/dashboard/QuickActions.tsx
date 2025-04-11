@@ -3,7 +3,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, Goal, Server, Database } from 'lucide-react';
+import { Package, Goal, Server, Database, TestTube } from 'lucide-react';
+import RegressionTestButton from '../testing/RegressionTestButton';
 
 const QuickActions: React.FC = () => {
   return (
@@ -15,7 +16,7 @@ const QuickActions: React.FC = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <Button variant="outline" asChild className="h-auto py-4 flex flex-col">
             <Link to="/admin/products/new">
               <Package className="h-6 w-6 mb-1" />
@@ -40,6 +41,11 @@ const QuickActions: React.FC = () => {
               <span>Import Data</span>
             </Link>
           </Button>
+        </div>
+        
+        {/* Add the regression test button */}
+        <div className="mt-4 flex justify-center">
+          <RegressionTestButton />
         </div>
       </CardContent>
     </Card>
