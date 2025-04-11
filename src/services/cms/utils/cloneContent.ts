@@ -1,7 +1,29 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logCMSOperation, handleCMSError } from '../contentTypes/types';
-import { generateSuffix } from './slugMatching';
+import { generateSuffix } from './slug/variations';
+
+// Define specific table types to ensure type safety
+type TableName = 
+  | 'product_types'
+  | 'product_type_benefits'
+  | 'product_type_features'
+  | 'product_type_images'
+  | 'product_type_feature_images'
+  | 'business_goals'
+  | 'business_goal_benefits'
+  | 'business_goal_features'
+  | 'business_goal_feature_images'
+  | 'technologies'
+  | 'technology_sections'
+  | 'technology_features'
+  | 'technology_feature_items'
+  | 'technology_images'
+  | 'machines'
+  | 'machine_features'
+  | 'machine_images'
+  | 'machine_specs'
+  | 'deployment_examples';
 
 /**
  * Generic function to clone a content item from any content type
@@ -12,7 +34,7 @@ import { generateSuffix } from './slugMatching';
  * @returns The cloned item or null if failed
  */
 export async function cloneContentItem<T>(
-  table: string,
+  table: TableName,
   id: string,
   contentType: string,
   additionalFields: Record<string, any> = {}
@@ -38,14 +60,14 @@ export async function cloneContentItem<T>(
     // Remove the id so a new one will be generated
     delete cloneData.id;
     
-    // Update the title and slug to indicate it's a copy
-    if (cloneData.title) {
+    // Update the title and slug to indicate it's a copy, if those properties exist
+    if ('title' in cloneData) {
       cloneData.title = `${cloneData.title} (copy)`;
     }
     
-    if (cloneData.slug) {
+    if ('slug' in cloneData) {
       // Generate a new slug based on the original one
-      cloneData.slug = `${cloneData.slug}-copy${generateSuffix(3)}`;
+      cloneData.slug = `${cloneData.slug}-copy-${generateSuffix(3)}`;
     }
     
     // Apply any additional field overrides
@@ -72,20 +94,6 @@ export async function cloneContentItem<T>(
 }
 
 /**
- * Function to generate a random suffix for creating unique slugs
- * @param length Length of the random suffix
- * @returns Random string of specified length
- */
-function generateRandomSuffix(length: number = 5): string {
-  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
-
-/**
  * Clone related items that have a foreign key relationship to the main content
  * @param table Related table name
  * @param foreignKeyField Name of the foreign key field that references the parent
@@ -93,7 +101,7 @@ function generateRandomSuffix(length: number = 5): string {
  * @param newId New parent ID to associate with the cloned items
  */
 export async function cloneRelatedItems(
-  table: string,
+  table: TableName,
   foreignKeyField: string,
   originalId: string,
   newId: string

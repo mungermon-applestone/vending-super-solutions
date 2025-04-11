@@ -73,3 +73,17 @@ export function slugsMatch(targetSlug: string, candidateSlug: string): boolean {
   
   return targetVariations.includes(candidateNormalized);
 }
+
+/**
+ * Generates a random suffix for creating unique slug variations
+ * @param length Length of the random suffix
+ * @returns Random alphanumeric string
+ */
+export function generateSuffix(length: number = 3): string {
+  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}

@@ -42,18 +42,18 @@ export async function cloneBusinessGoal(id: string): Promise<CMSBusinessGoal | n
       
     if (features && features.length > 0) {
       // For each new feature, check if there were images in the original
-      const originalFeatures = await supabase
+      const { data: originalFeatures } = await supabase
         .from('business_goal_features')
         .select('id')
         .eq('business_goal_id', id);
         
-      if (originalFeatures.data) {
+      if (originalFeatures) {
         // Clone feature images for each feature
-        for (let i = 0; i < Math.min(features.length, originalFeatures.data.length); i++) {
+        for (let i = 0; i < Math.min(features.length, originalFeatures.length); i++) {
           await cloneRelatedItems(
             'business_goal_feature_images',
             'feature_id',
-            originalFeatures.data[i].id,
+            originalFeatures[i].id,
             features[i].id
           );
         }

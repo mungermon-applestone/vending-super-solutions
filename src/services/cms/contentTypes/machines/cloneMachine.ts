@@ -2,6 +2,7 @@
 import { CMSMachine } from '@/types/cms';
 import { handleCMSError, logCMSOperation } from '../types';
 import { cloneContentItem, cloneRelatedItems } from '../../utils/cloneContent';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Clone a machine

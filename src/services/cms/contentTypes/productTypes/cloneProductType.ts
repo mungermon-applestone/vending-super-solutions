@@ -2,6 +2,7 @@
 import { CMSProductType } from '@/types/cms';
 import { handleCMSError, logCMSOperation } from '../types';
 import { cloneContentItem, cloneRelatedItems } from '../../utils/cloneContent';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Clone a product type
@@ -44,18 +45,18 @@ export async function cloneProductType(id: string): Promise<CMSProductType | nul
       
     if (features && features.length > 0) {
       // For each new feature, check if there were images in the original
-      const originalFeatures = await supabase
+      const { data: originalFeatures } = await supabase
         .from('product_type_features')
         .select('id')
         .eq('product_type_id', id);
         
-      if (originalFeatures.data) {
+      if (originalFeatures) {
         // Clone feature images for each feature
-        for (let i = 0; i < Math.min(features.length, originalFeatures.data.length); i++) {
+        for (let i = 0; i < Math.min(features.length, originalFeatures.length); i++) {
           await cloneRelatedItems(
             'product_type_feature_images',
             'feature_id',
-            originalFeatures.data[i].id,
+            originalFeatures[i].id,
             features[i].id
           );
         }
