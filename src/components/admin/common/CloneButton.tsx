@@ -48,7 +48,7 @@ const CloneButton: React.FC<CloneButtonProps> = ({
     >
       {isCloning ? (
         <>
-          <span className="animate-spin mr-1">⟳</span> Cloning...
+          <Copy className="h-4 w-4 animate-spin mr-1" /> Cloning...
         </>
       ) : (
         <>

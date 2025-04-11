@@ -18,12 +18,17 @@ import MachineHeader from '@/components/admin/machines/MachineHeader';
 import MachineTableRow from '@/components/admin/machines/MachineTableRow';
 import DeleteMachineDialog from '@/components/admin/machines/DeleteMachineDialog';
 import { CMSMachine } from '@/types/cms';
+import { useCloneMachine } from '@/hooks/cms/useCloneCMS';
 
 const AdminMachines = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [machineToDelete, setMachineToDelete] = useState<{id: string, title: string} | null>(null);
+
+  // For cloning functionality
+  const cloneMachineMutation = useCloneMachine();
+  const [cloningMachineId, setCloningMachineId] = useState<string | null>(null);
 
   const { data: machines = [], isLoading, refetch } = useMachines();
   const typedMachines = machines as CMSMachine[];
@@ -51,6 +56,29 @@ const AdminMachines = () => {
         description: "Failed to delete machine. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+  
+  const handleCloneMachine = async (machine: CMSMachine) => {
+    try {
+      setCloningMachineId(machine.id);
+      const clonedMachine = await cloneMachineMutation.mutateAsync(machine.id);
+      
+      if (clonedMachine) {
+        toast({
+          title: "Machine cloned",
+          description: `${machine.title} has been cloned successfully.`
+        });
+      }
+    } catch (error) {
+      console.error('Error cloning machine:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to clone machine. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCloningMachineId(null);
     }
   };
 
@@ -100,6 +128,8 @@ const AdminMachines = () => {
                       slug: machine.slug || ''
                     }}
                     onDeleteClick={handleDeleteClick}
+                    onCloneClick={handleCloneMachine}
+                    isCloningId={cloningMachineId}
                   />
                 ))}
               </TableBody>

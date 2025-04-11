@@ -1,38 +1,43 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, Pencil, Trash2, Copy } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { CMSTechnology } from '@/types/cms';
-import CloneButton from '@/components/admin/common/CloneButton';
+import CloneButton from '../common/CloneButton';
 
 interface TechnologyTableRowProps {
   technology: CMSTechnology;
   onDeleteClick: (technology: CMSTechnology) => void;
-  onCloneClick?: (technology: CMSTechnology) => Promise<void>;
-  isCloningId?: string | null;
+  onCloneClick: (technology: CMSTechnology) => void;
+  isCloningId: string | null;
 }
 
 const TechnologyTableRow: React.FC<TechnologyTableRowProps> = ({ 
   technology, 
-  onDeleteClick,
+  onDeleteClick, 
   onCloneClick,
   isCloningId
 }) => {
   const navigate = useNavigate();
+  const isCloning = isCloningId === technology.id;
   
   return (
     <TableRow>
-      <TableCell className="font-medium">{technology.title}</TableCell>
-      <TableCell>{technology.slug}</TableCell>
+      <TableCell className="font-medium">
+        {technology.title}
+      </TableCell>
+      <TableCell className="font-mono text-sm text-gray-500">
+        {technology.slug}
+      </TableCell>
       <TableCell className="text-right">
         <div className="flex justify-end gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigate(`/technology/${technology.slug}`)}
-            title="View technology page"
+            title="View technology"
             className="flex items-center gap-1"
           >
             <Eye className="h-4 w-4" /> View
@@ -46,17 +51,13 @@ const TechnologyTableRow: React.FC<TechnologyTableRowProps> = ({
           >
             <Pencil className="h-4 w-4" /> Edit
           </Button>
-          
-          {onCloneClick && (
-            <CloneButton
-              onClone={() => onCloneClick(technology)}
-              itemName={technology.title}
-              isCloning={isCloningId === technology.id}
-            />
-          )}
-          
+          <CloneButton
+            onClone={() => onCloneClick(technology)}
+            itemName={technology.title}
+            isCloning={isCloning}
+          />
           <Button
-            variant="outline"
+            variant="outline" 
             size="sm"
             onClick={() => onDeleteClick(technology)}
             title="Delete technology"

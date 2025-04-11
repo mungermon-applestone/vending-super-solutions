@@ -1,12 +1,13 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2, Copy } from 'lucide-react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import MachineTypeIcon from './MachineTypeIcon';
 import TemperatureBadge from './TemperatureBadge';
 import { CMSMachine } from '@/types/cms';
+import CloneButton from '../common/CloneButton';
 
 interface MachineTableRowProps {
   machine: {
@@ -17,13 +18,19 @@ interface MachineTableRowProps {
     slug: string;
   };
   onDeleteClick: (machine: CMSMachine) => void;
+  onCloneClick: (machine: CMSMachine) => void;
+  isCloningId: string | null;
 }
 
-const MachineTableRow: React.FC<MachineTableRowProps> = ({ machine, onDeleteClick }) => {
+const MachineTableRow: React.FC<MachineTableRowProps> = ({ 
+  machine, 
+  onDeleteClick, 
+  onCloneClick,
+  isCloningId
+}) => {
   const navigate = useNavigate();
+  const isCloning = isCloningId === machine.id;
   
-  console.log(`[MachineTableRow] Machine ID: ${machine.id}, Title: ${machine.title}`);
-
   return (
     <TableRow>
       <TableCell className="font-medium">{machine.title}</TableCell>
@@ -53,15 +60,17 @@ const MachineTableRow: React.FC<MachineTableRowProps> = ({ machine, onDeleteClic
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {
-              console.log(`[MachineTableRow] Navigating to edit machine with ID: ${machine.id}`);
-              navigate(`/admin/machines/edit/${machine.id}`);
-            }}
+            onClick={() => navigate(`/admin/machines/edit/${machine.id}`)}
             title="Edit machine"
             className="flex items-center gap-1"
           >
             <Pencil className="h-4 w-4" /> Edit
           </Button>
+          <CloneButton
+            onClone={() => onCloneClick(machine as CMSMachine)}
+            itemName={machine.title}
+            isCloning={isCloning}
+          />
           <Button
             variant="outline"
             size="sm"
