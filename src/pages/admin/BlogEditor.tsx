@@ -30,25 +30,27 @@ const BlogEditor = () => {
       
       if (isCreating) {
         console.log('[BlogEditor] Creating new post');
-        await createPostMutation.mutateAsync(data);
+        const createdPost = await createPostMutation.mutateAsync(data);
+        console.log('[BlogEditor] Post created:', createdPost);
         toast({
           title: data.status === 'published' ? "Post published" : "Draft saved",
           description: data.status === 'published' 
             ? "Your blog post has been published successfully." 
             : "Your blog post draft has been saved.",
         });
+        navigate('/admin/blog');
       } else if (postId && post?.id) {
         console.log('[BlogEditor] Updating post:', post.id);
-        await updatePostMutation.mutateAsync({ id: post.id, postData: data });
+        const updatedPost = await updatePostMutation.mutateAsync({ id: post.id, postData: data });
+        console.log('[BlogEditor] Post updated:', updatedPost);
         toast({
           title: data.status === 'published' ? "Post updated and published" : "Draft updated",
           description: data.status === 'published' 
             ? "Your blog post has been updated and published." 
             : "Your blog post draft has been updated.",
         });
+        navigate('/admin/blog');
       }
-      
-      navigate('/admin/blog');
     } catch (error) {
       console.error('[BlogEditor] Error saving post:', error);
       toast({

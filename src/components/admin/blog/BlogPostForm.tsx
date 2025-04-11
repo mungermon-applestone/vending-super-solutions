@@ -80,42 +80,42 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({
   };
   
   const handleSave = async (status: 'draft' | 'published') => {
-    // Check for required fields manually
-    const title = form.getValues('title');
-    const slug = form.getValues('slug');
-    const content = form.getValues('content');
-    
-    if (!title) {
-      form.setError('title', { message: 'Title is required' });
-      toast({
-        title: "Missing required fields",
-        description: "Please provide a title for your post.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!slug) {
-      form.setError('slug', { message: 'Slug is required' });
-      toast({
-        title: "Missing required fields",
-        description: "Please provide a slug for your post.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!content) {
-      form.setError('content', { message: 'Content is required' });
-      toast({
-        title: "Missing required fields",
-        description: "Please provide content for your post.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     try {
+      // Check for required fields manually
+      const title = form.getValues('title');
+      const slug = form.getValues('slug');
+      const content = form.getValues('content');
+      
+      if (!title) {
+        form.setError('title', { message: 'Title is required' });
+        toast({
+          title: "Missing required fields",
+          description: "Please provide a title for your post.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (!slug) {
+        form.setError('slug', { message: 'Slug is required' });
+        toast({
+          title: "Missing required fields",
+          description: "Please provide a slug for your post.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (!content) {
+        form.setError('content', { message: 'Content is required' });
+        toast({
+          title: "Missing required fields",
+          description: "Please provide content for your post.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Get all form values
       const data = form.getValues();
       
@@ -125,16 +125,6 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({
       
       console.log("Submitting form data:", data);
       await onSubmit(data);
-      
-      toast({
-        title: status === 'published' ? "Post published" : "Draft saved",
-        description: status === 'published' 
-          ? "Your blog post has been published successfully." 
-          : "Your blog post draft has been saved.",
-      });
-      
-      // Navigate back to blog list
-      navigate('/admin/blog');
     } catch (error) {
       console.error("Error saving post:", error);
       toast({
@@ -147,7 +137,7 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({
   
   return (
     <Form {...form}>
-      <form>
+      <form onSubmit={(e) => e.preventDefault()}>
         <div className="grid gap-8">
           <Card>
             <CardContent className="pt-6">
