@@ -18,7 +18,14 @@ describe('MachineTableRow component', () => {
   };
 
   it('renders machine details correctly', () => {
-    render(<MachineTableRow machine={mockMachine} onDeleteClick={mockHandlers.onDeleteClick} onCloneClick={mockHandlers.onCloneClick} />);
+    render(
+      <MachineTableRow 
+        machine={mockMachine} 
+        onDeleteClick={mockHandlers.onDeleteClick} 
+        onCloneClick={mockHandlers.onCloneClick}
+        isCloningId={null}
+      />
+    );
     
     expect(screen.getByText('Test Machine')).toBeInTheDocument();
     expect(screen.getByText('vending')).toBeInTheDocument();
@@ -27,7 +34,14 @@ describe('MachineTableRow component', () => {
   });
 
   it('calls onDeleteClick when delete button is clicked', () => {
-    render(<MachineTableRow machine={mockMachine} onDeleteClick={mockHandlers.onDeleteClick} onCloneClick={mockHandlers.onCloneClick} />);
+    render(
+      <MachineTableRow 
+        machine={mockMachine} 
+        onDeleteClick={mockHandlers.onDeleteClick} 
+        onCloneClick={mockHandlers.onCloneClick}
+        isCloningId={null}
+      />
+    );
     
     const deleteButton = screen.getByLabelText(/delete/i);
     fireEvent.click(deleteButton);
