@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
@@ -35,11 +36,20 @@ const ProductCard = ({ title, description, image, path }: ProductCardProps) => {
 };
 
 const ProductTypesSection = () => {
-  const { data: productTypes = [], isLoading } = useQuery({
+  // Add error handling to prevent blank screens
+  const { data: productTypes = [], isLoading, error } = useQuery({
     queryKey: ['productTypes'],
     queryFn: () => getProductTypes(),
+    // Add retry configuration and error handling
+    retry: 2,
+    retryDelay: 1000,
+    // Use static fallback data when API fails
+    onError: (err) => {
+      console.error('Error fetching product types:', err);
+    }
   });
 
+  // Improved static fallback data - will be used if API fails
   const staticProductTypes = [
     {
       title: "Grocery",
@@ -67,16 +77,20 @@ const ProductTypesSection = () => {
     }
   ];
 
-  const displayProductTypes = productTypes.length > 0 
+  // Always default to static data if API fails or returns empty
+  const displayProductTypes = (productTypes && productTypes.length > 0) 
     ? productTypes.map((product: CMSProductType) => ({
         title: product.title,
         description: product.description,
-        image: product.image.url,
+        image: product.image?.url || "https://images.unsplash.com/photo-1606787366850-de6330128bfc",
         path: `/products/${normalizeSlug(product.slug)}`
       }))
     : staticProductTypes;
   
   const featuredProductTypes = displayProductTypes.slice(0, 4);
+  
+  // If we're in an error state but have fallback data, don't show loading state
+  const shouldShowLoading = isLoading && !error;
   
   return (
     <section className="py-16 md:py-24">
@@ -95,7 +109,7 @@ const ProductTypesSection = () => {
           </Button>
         </div>
         
-        {isLoading ? (
+        {shouldShowLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="rounded-lg overflow-hidden shadow-md bg-white p-4">

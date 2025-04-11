@@ -26,30 +26,39 @@ export async function fetchFromCMS<T>(contentType: string, params: Record<string
       // fall back to the direct import approach
       console.log(`[fetchFromCMS] Content type "${contentType}" not registered in factory, using direct imports.`);
       
-      // Otherwise delegate to the appropriate handler based on content type
-      switch (contentType) {
-        case 'machines':
-          const { fetchMachines } = await import('./contentTypes/machines');
-          return await fetchMachines(params) as unknown as T[];
-        case 'product-types':
-          const { fetchProductTypes } = await import('./contentTypes/productTypes');
-          return await fetchProductTypes(params) as unknown as T[];
-        case 'testimonials':
-          const { fetchTestimonials } = await import('./contentTypes/testimonials');
-          return await fetchTestimonials() as unknown as T[];
-        case 'business-goals':
-          const { fetchBusinessGoals } = await import('./contentTypes/businessGoals');
-          return await fetchBusinessGoals() as unknown as T[];
-        case 'technologies':
-          const { fetchTechnologies } = await import('./contentTypes/technologies');
-          return await fetchTechnologies() as unknown as T[];
-        default:
-          console.warn(`[fetchFromCMS] Unknown content type: ${contentType}`);
-          return [] as T[];
+      try {
+        // Otherwise delegate to the appropriate handler based on content type
+        switch (contentType) {
+          case 'machines':
+            const { fetchMachines } = await import('./contentTypes/machines');
+            return await fetchMachines(params) as unknown as T[];
+          case 'product-types':
+            const { fetchProductTypes } = await import('./contentTypes/productTypes');
+            const result = await fetchProductTypes(params) as unknown as T[];
+            console.log(`[fetchFromCMS] Fetched ${result.length} product types`);
+            return result;
+          case 'testimonials':
+            const { fetchTestimonials } = await import('./contentTypes/testimonials');
+            return await fetchTestimonials() as unknown as T[];
+          case 'business-goals':
+            const { fetchBusinessGoals } = await import('./contentTypes/businessGoals');
+            return await fetchBusinessGoals() as unknown as T[];
+          case 'technologies':
+            const { fetchTechnologies } = await import('./contentTypes/technologies');
+            return await fetchTechnologies() as unknown as T[];
+          default:
+            console.warn(`[fetchFromCMS] Unknown content type: ${contentType}`);
+            return [] as T[];
+        }
+      } catch (innerError) {
+        console.error(`[fetchFromCMS] Error importing module for content type ${contentType}:`, innerError);
+        // Return empty array instead of throwing to prevent blank screens
+        return [] as T[];
       }
     }
   } catch (error) {
     console.error(`[fetchFromCMS] Error fetching ${contentType}:`, error);
-    throw error;
+    // Return empty array instead of throwing to prevent blank screens
+    return [] as T[];
   }
 }

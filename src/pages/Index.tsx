@@ -1,4 +1,5 @@
 
+import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import HeroSection from '@/components/home/HeroSection';
 import FeaturesSection from '@/components/home/FeaturesSection';
@@ -9,6 +10,14 @@ import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CTASection from '@/components/common/CTASection';
 
 const Index = () => {
+  // Add diagnostic logging to help troubleshoot rendering issues
+  useEffect(() => {
+    console.log('Index page mounted');
+    return () => {
+      console.log('Index page unmounted');
+    };
+  }, []);
+
   return (
     <Layout>
       <HeroSection />
