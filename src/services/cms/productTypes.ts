@@ -14,9 +14,9 @@ export async function getProductTypes(): Promise<CMSProductType[]> {
 /**
  * Delete a product type
  */
-export async function deleteProductType(id: string): Promise<boolean> {
-  console.log(`[productTypes.ts] Deleting product type with ID: ${id}`);
-  return await productTypeOperations.delete(id);
+export async function deleteProductType(slug: string): Promise<boolean> {
+  console.log(`[productTypes.ts] Deleting product type with slug: ${slug}`);
+  return await import('./contentTypes/productTypes/deleteProductType').then(module => module.deleteProductType(slug));
 }
 
 /**

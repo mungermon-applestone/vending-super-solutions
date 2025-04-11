@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, ChevronRight, Trash2, Eye, Copy } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -10,7 +10,6 @@ import {
   Table,
   TableBody,
   TableCaption,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -18,17 +17,9 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { getProductTypes, deleteProductType } from '@/services/cms';
 import { useCloneProductType } from '@/hooks/cms/useCloneCMS';
-import CloneButton from '@/components/admin/common/CloneButton';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import ProductTableRow from '@/components/admin/product-editor/ProductTableRow';
+import DeleteProductDialog from '@/components/admin/product-editor/DeleteProductDialog';
+import { CMSProductType } from '@/types/cms';
 
 const AdminProducts = () => {
   const navigate = useNavigate();
@@ -39,11 +30,18 @@ const AdminProducts = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<{ id: string; title: string; slug: string } | null>(null);
   
-  const { data: productTypes = [], isLoading: isLoadingProducts, refetch } = useQuery({
+  // For cloning functionality
+  const cloneProductMutation = useCloneProductType();
+  const [cloningProductId, setCloningProductId] = useState<string | null>(null);
+  
+  const { data: productTypes = [], isLoading: isLoadingProducts } = useQuery({
     queryKey: ['productTypes'],
     queryFn: async () => {
       try {
-        return await getProductTypes();
+        console.log('[AdminProducts] Fetching product types...');
+        const products = await getProductTypes();
+        console.log('[AdminProducts] Products loaded:', products);
+        return products;
       } catch (error) {
         console.error('[AdminProducts] Error fetching product types:', error);
         toast({
@@ -56,13 +54,7 @@ const AdminProducts = () => {
     },
   });
 
-  // Add cloning functionality
-  const cloneProductMutation = useCloneProductType();
-  const [cloningProductId, setCloningProductId] = useState<string | null>(null);
-
-  console.log('[AdminProducts] Product types loaded:', productTypes);
-
-  const handleDeleteClick = (product: any) => {
+  const handleDeleteClick = (product: CMSProductType) => {
     setProductToDelete({
       id: product.id,
       title: product.title,
@@ -76,6 +68,8 @@ const AdminProducts = () => {
     
     try {
       setIsDeleting(true);
+      console.log(`[AdminProducts] Deleting product with slug: ${productToDelete.slug}`);
+      
       await deleteProductType(productToDelete.slug);
       
       toast({
@@ -88,7 +82,7 @@ const AdminProducts = () => {
       setDeleteDialogOpen(false);
       setProductToDelete(null);
     } catch (error) {
-      console.error("Error deleting product:", error);
+      console.error("[AdminProducts] Error deleting product:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to delete product. Please try again.",
@@ -99,7 +93,7 @@ const AdminProducts = () => {
     }
   };
 
-  const handleCloneProduct = async (product: any) => {
+  const handleCloneProduct = async (product: CMSProductType) => {
     try {
       setCloningProductId(product.id);
       const clonedProduct = await cloneProductMutation.mutateAsync(product.id);
@@ -111,7 +105,7 @@ const AdminProducts = () => {
         });
       }
     } catch (error) {
-      console.error("Error cloning product:", error);
+      console.error("[AdminProducts] Error cloning product:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to clone product. Please try again.",
@@ -165,54 +159,18 @@ const AdminProducts = () => {
                   <TableRow>
                     <TableHead>Title</TableHead>
                     <TableHead>Slug</TableHead>
-                    <TableHead className="w-[250px] text-right">Actions</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {productTypes.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell className="font-medium">{product.title}</TableCell>
-                      <TableCell>{product.slug}</TableCell>
-                      <TableCell>
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => navigate(`/products/${product.slug}`)}
-                            className="flex items-center gap-1"
-                            title="View product"
-                          >
-                            <Eye className="h-4 w-4" /> View
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              console.log(`[AdminProducts] Navigating to edit product with slug: ${product.slug}`);
-                              navigate(`/admin/products/edit/${product.slug}`);
-                            }}
-                            className="flex items-center gap-1"
-                            title="Edit product"
-                          >
-                            <Edit className="h-4 w-4" /> Edit
-                          </Button>
-                          <CloneButton
-                            onClone={() => handleCloneProduct(product)}
-                            itemName={product.title}
-                            isCloning={cloningProductId === product.id}
-                          />
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteClick(product)}
-                            className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
-                            title="Delete product"
-                          >
-                            <Trash2 className="h-4 w-4" /> Delete
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    <ProductTableRow 
+                      key={product.id} 
+                      product={product}
+                      onDeleteClick={handleDeleteClick}
+                      onCloneClick={handleCloneProduct}
+                      isCloningId={cloningProductId}
+                    />
                   ))}
                 </TableBody>
               </Table>
@@ -220,27 +178,14 @@ const AdminProducts = () => {
           </CardContent>
         </Card>
       </div>
-
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the product "{productToDelete?.title}". This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmDelete} 
-              className="bg-red-600 hover:bg-red-700"
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      
+      <DeleteProductDialog
+        isOpen={deleteDialogOpen}
+        setIsOpen={setDeleteDialogOpen}
+        productToDelete={productToDelete}
+        onConfirmDelete={confirmDelete}
+        isDeleting={isDeleting}
+      />
     </Layout>
   );
 };
