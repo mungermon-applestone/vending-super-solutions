@@ -4,13 +4,13 @@ import {
   fetchBusinessGoalBySlug,
   fetchBusinessGoals,
   cloneBusinessGoal
-} from './contentTypes/businessGoals';
+} from './contentTypes/businessGoals/index';
 
 import {
   fetchMachines as getMachines,
   fetchMachineById as getMachineById,
   cloneMachine
-} from './contentTypes/machines';
+} from './contentTypes/machines/index';
 
 import {
   fetchProductTypeBySlug,
@@ -18,7 +18,7 @@ import {
   fetchProductTypes,
   deleteProductType,
   cloneProductType
-} from './contentTypes/productTypes';
+} from './contentTypes/productTypes/index';
 
 import {
   fetchTechnologyBySlug,
@@ -27,7 +27,7 @@ import {
   updateTechnology,
   deleteTechnology,
   cloneTechnology
-} from './contentTypes/technologies';
+} from './contentTypes/technologies/index';
 
 import { fetchTestimonials } from './contentTypes/testimonials';
 

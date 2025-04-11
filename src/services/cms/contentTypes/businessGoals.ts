@@ -6,7 +6,8 @@ import {
   fetchBusinessGoalBySlug,
   createBusinessGoal,
   updateBusinessGoal,
-  deleteBusinessGoal
+  deleteBusinessGoal,
+  cloneBusinessGoal
 } from './businessGoals/index';
 
 export {
@@ -15,5 +16,6 @@ export {
   fetchBusinessGoalBySlug,
   createBusinessGoal,
   updateBusinessGoal,
-  deleteBusinessGoal
+  deleteBusinessGoal,
+  cloneBusinessGoal
 };
