@@ -11,15 +11,15 @@ import { deleteTechnology } from './deleteTechnology';
  * Standardized API for technology operations
  */
 export const technologyOperations: ContentTypeOperations<CMSTechnology> = {
-  fetchAll: (options?: QueryOptions) => fetchTechnologies(),
+  fetchAll: async (options?: QueryOptions) => fetchTechnologies(),
   fetchBySlug: fetchTechnologyBySlug,
   fetchById: async (id: string) => {
     // For technologies, we'll implement a simple ID lookup based on slug lookup
     const technologies = await fetchTechnologies();
     return technologies.find(tech => tech.id === id) || null;
   },
-  create: createTechnology,
-  update: updateTechnology,
+  create: async (data: any) => createTechnology(data),
+  update: async (slug: string, data: any) => updateTechnology(slug, data),
   delete: deleteTechnology
 };
 

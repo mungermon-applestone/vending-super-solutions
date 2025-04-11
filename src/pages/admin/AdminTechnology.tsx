@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -30,14 +31,14 @@ const AdminTechnology = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   
   const {
-    data: technologies,
+    data: technologies = [],
     isLoading,
     isError,
     error,
     refetch
   } = useQuery<CMSTechnology[]>({
     queryKey: ['technologies'],
-    queryFn: getTechnologies,
+    queryFn: () => getTechnologies(),
   });
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+
 import { 
   CMSMachine, 
   CMSProductType, 
@@ -188,7 +189,15 @@ export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGo
   }
 }
 
-// Export technology functions with standardized naming
-export const getTechnologies = technologies.fetchAll;
-export const getTechnologyBySlug = technologies.fetchBySlug;
-export const deleteTechnology = technologies.delete;
+// Export technology functions with standardized naming and proper function signatures
+export async function getTechnologies(): Promise<CMSTechnology[]> {
+  return await technologies.fetchAll();
+}
+
+export async function getTechnologyBySlug(slug: string): Promise<CMSTechnology | null> {
+  return await technologies.fetchBySlug(slug);
+}
+
+export async function deleteTechnology(slug: string): Promise<boolean> {
+  return await technologies.delete(slug);
+}

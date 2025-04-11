@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -32,13 +33,13 @@ const TechnologyLanding = () => {
 
   // If no slug is provided, fetch all technologies
   const {
-    data: allTechnologies,
+    data: allTechnologies = [],
     isLoading: isAllLoading,
     isError: isAllError,
     error: allError
   } = useQuery<CMSTechnology[]>({
     queryKey: ['technologies'],
-    queryFn: getTechnologies,
+    queryFn: () => getTechnologies(),
     enabled: !slug // Only run this query when no slug is provided
   });
 

@@ -140,7 +140,7 @@ export function useBusinessGoal(slug: string | undefined) {
 export function useTechnologies() {
   return useQuery({
     queryKey: ['technologies'],
-    queryFn: cmsService.getTechnologies,
+    queryFn: () => cmsService.getTechnologies(),
   });
 }
 

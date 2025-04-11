@@ -3,6 +3,7 @@
 export async function createBusinessGoal(data: any): Promise<string> {
   console.log('[createBusinessGoal] Using external service');
   const { createBusinessGoal: externalCreate } = await import('@/services/businessGoal');
-  const toast = { toast: () => {} }; // Mock toast object
-  return await externalCreate(data, toast);
+  
+  // Remove the toast parameter that's causing type issues
+  return await externalCreate(data);
 }
