@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { BlogPost, BlogPostFormData } from "@/types/blog";
 
@@ -34,7 +33,7 @@ export const fetchBlogPosts = async (filters: {
   }
   
   // Sort by published_at for published posts, created_at for drafts
-  query = query.order('published_at', { ascending: false, nullsLast: true })
+  query = query.order('published_at', { ascending: false, nullsFirst: false })
                .order('created_at', { ascending: false });
   
   const { data, error } = await query;
@@ -92,22 +91,37 @@ export const createBlogPost = async (postData: BlogPostFormData): Promise<BlogPo
 export const updateBlogPost = async (id: string, postData: BlogPostFormData): Promise<BlogPost> => {
   console.log("[updateBlogPost] Updating blog post:", id, postData);
   
-  const updatedPost = {
+  // First, get the existing post to check its status
+  const { data: existingPost } = await supabase
+    .from('blog_posts')
+    .select('status, published_at')
+    .eq('id', id)
+    .single();
+  
+  const updatedPost: {
+    title: string;
+    slug: string;
+    content: string;
+    excerpt?: string;
+    status: 'draft' | 'published';
+    published_at?: string | null;
+    updated_at: string;
+  } = {
     ...postData,
     updated_at: new Date().toISOString()
   };
   
   // If status changed to published and wasn't previously published, set published_at date
   if (postData.status === 'published') {
-    const { data: existingPost } = await supabase
-      .from('blog_posts')
-      .select('status, published_at')
-      .eq('id', id)
-      .single();
-    
     if (existingPost && existingPost.status !== 'published') {
       updatedPost.published_at = new Date().toISOString();
+    } else if (existingPost && existingPost.published_at) {
+      // Keep the original published date
+      updatedPost.published_at = existingPost.published_at;
     }
+  } else {
+    // If changing to draft, set published_at to null
+    updatedPost.published_at = null;
   }
   
   const { data, error } = await supabase

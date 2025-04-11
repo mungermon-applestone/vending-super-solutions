@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { BlogPost } from '@/types/blog';
-import { Badge } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface BlogPostCardProps {
   post: BlogPost;
@@ -25,9 +25,9 @@ const BlogPostCard: React.FC<BlogPostCardProps> = ({ post }) => {
           </CardTitle>
           
           {!isPublished && (
-            <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">
+            <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
               Draft
-            </span>
+            </Badge>
           )}
         </div>
       </CardHeader>
