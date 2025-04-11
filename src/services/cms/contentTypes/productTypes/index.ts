@@ -7,6 +7,7 @@ import { fetchProductTypeByUUID } from './fetchProductTypeByUUID';
 import { createProductType } from './createProductType';
 import { updateProductType } from './updateProductType';
 import { deleteProductType } from './deleteProductType';
+import { cloneProductType } from './cloneProductType';
 
 /**
  * Standardized API for product type operations
@@ -23,7 +24,8 @@ export const productTypeOperations: ContentTypeOperations<CMSProductType> = {
     // Update returns the updated product type
     return await updateProductType(idOrSlug, data);
   },
-  delete: deleteProductType
+  delete: deleteProductType,
+  clone: cloneProductType
 };
 
 // Export individual operations for backward compatibility
@@ -33,5 +35,6 @@ export {
   fetchProductTypeByUUID,
   createProductType,
   updateProductType,
-  deleteProductType
+  deleteProductType,
+  cloneProductType
 };

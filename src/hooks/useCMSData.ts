@@ -12,6 +12,10 @@ import {
   useTechnologies,
   useTechnology,
   useTestimonials,
+  useCloneProductType,
+  useCloneBusinessGoal,
+  useCloneTechnology,
+  useCloneMachine
 } from './cms';
 
 // Re-export all hooks
@@ -25,4 +29,8 @@ export {
   useTechnologies,
   useTechnology,
   useTestimonials,
+  useCloneProductType,
+  useCloneBusinessGoal,
+  useCloneTechnology,
+  useCloneMachine
 };

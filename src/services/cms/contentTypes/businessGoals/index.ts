@@ -6,6 +6,7 @@ import { fetchBusinessGoalBySlug } from './fetchBusinessGoalBySlug';
 import { createBusinessGoal } from './createBusinessGoal';
 import { updateBusinessGoal } from './updateBusinessGoal';
 import { deleteBusinessGoal } from './deleteBusinessGoal';
+import { cloneBusinessGoal } from './cloneBusinessGoal';
 
 export const businessGoalOperations: ContentTypeOperations<CMSBusinessGoal> = {
   fetchAll: async () => {
@@ -44,7 +45,8 @@ export const businessGoalOperations: ContentTypeOperations<CMSBusinessGoal> = {
   },
   delete: async (id) => {
     return await deleteBusinessGoal(id);
-  }
+  },
+  clone: cloneBusinessGoal
 };
 
 // Export individual operations for direct imports
@@ -53,5 +55,6 @@ export {
   fetchBusinessGoalBySlug,
   createBusinessGoal,
   updateBusinessGoal,
-  deleteBusinessGoal
+  deleteBusinessGoal,
+  cloneBusinessGoal
 };

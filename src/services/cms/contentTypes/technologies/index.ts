@@ -6,6 +6,7 @@ import { fetchTechnologies } from './fetchTechnologies';
 import { createTechnology } from './createTechnology';
 import { updateTechnology } from './updateTechnology';
 import { deleteTechnology } from './deleteTechnology';
+import { cloneTechnology } from './cloneTechnology';
 
 /**
  * Standardized API for technology operations
@@ -20,7 +21,8 @@ export const technologyOperations: ContentTypeOperations<CMSTechnology> = {
   },
   create: async (data: any) => createTechnology(data),
   update: async (slug: string, data: any) => updateTechnology(slug, data),
-  delete: deleteTechnology
+  delete: deleteTechnology,
+  clone: cloneTechnology
 };
 
 // Export individual operations for backward compatibility
@@ -29,5 +31,6 @@ export {
   fetchTechnologies,
   createTechnology,
   updateTechnology,
-  deleteTechnology
+  deleteTechnology,
+  cloneTechnology
 };

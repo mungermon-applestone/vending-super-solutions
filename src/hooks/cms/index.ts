@@ -6,3 +6,4 @@ export * from './useMachines';
 export * from './useTechnologies';
 export * from './useTestimonials';
 export * from './useQueryDefaults';
+export * from './useCloneCMS';
