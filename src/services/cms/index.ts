@@ -31,6 +31,16 @@ import {
 
 import { fetchTestimonials } from './contentTypes/testimonials';
 
+import {
+  fetchBlogPosts,
+  fetchBlogPostBySlug,
+  createBlogPost,
+  updateBlogPost,
+  deleteBlogPost,
+  cloneBlogPost,
+  getAdjacentPosts
+} from './contentTypes/blog/index';
+
 // Define getMachineBySlug locally since it doesn't exist in the imports
 const getMachineBySlug = async (type: string, id: string) => {
   const machines = await getMachines({ type, slug: id });
@@ -66,4 +76,13 @@ export {
   
   // Testimonials
   fetchTestimonials,
+
+  // Blog Posts
+  fetchBlogPosts,
+  fetchBlogPostBySlug,
+  createBlogPost,
+  updateBlogPost,
+  deleteBlogPost,
+  cloneBlogPost,
+  getAdjacentPosts,
 };

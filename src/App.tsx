@@ -5,8 +5,8 @@ import NotFound from "./pages/NotFound";
 import AboutUs from "./pages/AboutUs";
 import Contact from "./pages/Contact";
 import Partner from "./pages/Partner";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
+import Blog from "./pages/BlogList";
+import BlogPost from "./pages/BlogPostDetail";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ProductsLanding from "./pages/ProductsLanding";
 import ProductDetail from "./pages/ProductDetail";
@@ -43,6 +43,8 @@ import MigrateTechnologyData from "./pages/MigrateTechnologyData";
 import AdminMachines from "./pages/admin/AdminMachines";
 import MachineEditor from "./pages/MachineEditor";
 import AdminTechnology from "./pages/admin/AdminTechnology";
+import AdminBlog from "./pages/admin/AdminBlog";
+import BlogEditor from "./pages/admin/BlogEditor";
 
 import "./App.css";
 
@@ -103,6 +105,9 @@ function App() {
       <Route path="/admin/technology" element={<AdminTechnology />} />
       <Route path="/admin/technology/new" element={<TechnologyEditor />} />
       <Route path="/admin/technology/edit/:technologySlug" element={<TechnologyEditor />} />
+      <Route path="/admin/blog" element={<AdminBlog />} />
+      <Route path="/admin/blog/new" element={<BlogEditor />} />
+      <Route path="/admin/blog/edit/:postId" element={<BlogEditor />} />
       
       {/* Migration utilities */}
       <Route path="/utils/migrate-machines" element={<MigrateMachinesData />} />

@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
-import { Package, Goal, Database, Server, Monitor } from 'lucide-react';
+import { Package, Goal, Database, Server, Monitor, FileText } from 'lucide-react';
 import ContentTypeCard from '@/components/admin/dashboard/ContentTypeCard';
 import QuickNavigation from '@/components/admin/dashboard/QuickNavigation';
 import ContentManagementList from '@/components/admin/dashboard/ContentManagementList';
@@ -42,6 +42,14 @@ const contentTypes = [
     createPath: "/admin/technology/new",
     colorClass: "bg-indigo-50 border-indigo-200"
   },
+  {
+    title: "Blog",
+    description: "Manage blog posts and updates",
+    icon: <FileText className="h-8 w-8 text-amber-500" />,
+    path: "/admin/blog",
+    createPath: "/admin/blog/new",
+    colorClass: "bg-amber-50 border-amber-200"
+  }
 ];
 
 const navItems = contentTypes.map(type => ({
