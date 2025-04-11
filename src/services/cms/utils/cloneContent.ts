@@ -1,7 +1,20 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { logCMSOperation, handleCMSError } from '../contentTypes/types';
-import { generateSuffix } from './slug/variations';
+
+/**
+ * Generate a random alphanumeric suffix of the specified length
+ * @param length Length of the suffix to generate
+ * @returns Random alphanumeric string
+ */
+export function generateSuffix(length: number): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
 
 // Define specific table types to ensure type safety
 type TableName = 
