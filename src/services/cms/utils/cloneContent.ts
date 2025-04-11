@@ -50,7 +50,15 @@ export async function cloneContentItem<T>(
     }
 
     // Create a copy of the original item
-    const cloneData: Record<string, any> = { ...originalItem };
+    // Fix: Create an explicit Record<string, any> and copy properties manually instead of using spread
+    const cloneData: Record<string, any> = {};
+    
+    // Copy all properties from originalItem to cloneData
+    for (const key in originalItem) {
+      if (Object.prototype.hasOwnProperty.call(originalItem, key)) {
+        cloneData[key] = originalItem[key];
+      }
+    }
     
     // Remove the id so a new one will be generated
     delete cloneData.id;
@@ -80,7 +88,13 @@ export async function cloneContentItem<T>(
       return null;
     }
 
-    logCMSOperation('cloneContentItem', contentType, `Successfully cloned ${contentType}, new ID: ${newItem.id}`);
+    // Fix: Type safety for newItem.id - ensure newItem exists and has an id property
+    if (newItem && 'id' in newItem) {
+      logCMSOperation('cloneContentItem', contentType, `Successfully cloned ${contentType}, new ID: ${newItem.id}`);
+    } else {
+      logCMSOperation('cloneContentItem', contentType, `Successfully cloned ${contentType}, but couldn't retrieve new ID`);
+    }
+    
     return newItem as T;
   } catch (error) {
     handleCMSError('cloneContentItem', contentType, error);
