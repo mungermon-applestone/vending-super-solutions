@@ -119,8 +119,11 @@ export const useDeleteMachine = () => {
   
   return useMutation({
     mutationFn: async (id: string) => {
-      const { deleteMachine } = require('@/services/cms/contentTypes/machines/delete');
-      return await deleteMachine(id);
+      // Import directly from the delete file
+      const { deleteMachine } = await import('@/services/cms/contentTypes/machines/delete');
+      const result = await deleteMachine(id);
+      console.log('[useDeleteMachine] Delete result:', result);
+      return result;
     },
     onSuccess: () => {
       toast({
@@ -130,6 +133,7 @@ export const useDeleteMachine = () => {
       queryClient.invalidateQueries({ queryKey: ['machines'] });
     },
     onError: (error) => {
+      console.error('[useDeleteMachine] Error:', error);
       toast({
         variant: "destructive",
         title: "Error",

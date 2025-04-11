@@ -19,6 +19,7 @@ export async function deleteMachine(id: string): Promise<boolean> {
       throw error;
     }
     
+    console.log(`[deleteMachine] Successfully deleted machine with ID: ${id}`);
     return true;
   } catch (error) {
     console.error(`[deleteMachine] Error:`, error);

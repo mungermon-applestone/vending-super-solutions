@@ -35,6 +35,7 @@ const AdminMachines = () => {
   const deleteMutation = useDeleteMachine();
 
   const handleDeleteClick = (machine: CMSMachine) => {
+    console.log("[AdminMachines] Delete clicked for machine:", machine);
     setMachineToDelete({
       id: machine.id,
       title: machine.title
@@ -46,6 +47,7 @@ const AdminMachines = () => {
     if (!machineToDelete) return;
     
     try {
+      console.log("[AdminMachines] Confirming delete for machine:", machineToDelete);
       await deleteMutation.mutateAsync(machineToDelete.id);
       setDeleteDialogOpen(false);
       setMachineToDelete(null);
@@ -54,7 +56,7 @@ const AdminMachines = () => {
         description: `${machineToDelete.title} has been deleted successfully.`
       });
     } catch (error) {
-      console.error('Error deleting machine:', error);
+      console.error('[AdminMachines] Error deleting machine:', error);
       toast({
         title: "Error",
         description: "Failed to delete machine. Please try again.",
@@ -75,7 +77,7 @@ const AdminMachines = () => {
         });
       }
     } catch (error) {
-      console.error('Error cloning machine:', error);
+      console.error('[AdminMachines] Error cloning machine:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to clone machine. Please try again.",
@@ -131,8 +133,8 @@ const AdminMachines = () => {
                       temperature: machine.temperature || '',
                       slug: machine.slug || ''
                     }}
-                    onDeleteClick={handleDeleteClick}
-                    onCloneClick={handleCloneMachine}
+                    onDeleteClick={() => handleDeleteClick(machine)}
+                    onCloneClick={() => handleCloneMachine(machine)}
                     isCloningId={cloningMachineId}
                   />
                 ))}
