@@ -10,7 +10,7 @@ const HeroSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-vending-blue-dark">
-              Smart Vending Software for Modern Business
+              Vend Anything You Sell
             </h1>
             <p className="text-xl text-gray-700 max-w-2xl">
               Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.
