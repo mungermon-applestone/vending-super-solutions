@@ -118,9 +118,9 @@ export const useDeleteMachine = () => {
   const { toast } = useToast();
   
   return useMutation({
-    mutationFn: (id: string) => {
-      const { deleteMachine } = require('@/services/cms/contentTypes/machines');
-      return deleteMachine(id);
+    mutationFn: async (id: string) => {
+      const { deleteMachine } = require('@/services/cms/contentTypes/machines/delete');
+      return await deleteMachine(id);
     },
     onSuccess: () => {
       toast({

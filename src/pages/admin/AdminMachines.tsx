@@ -49,6 +49,10 @@ const AdminMachines = () => {
       await deleteMutation.mutateAsync(machineToDelete.id);
       setDeleteDialogOpen(false);
       setMachineToDelete(null);
+      toast({
+        title: "Machine deleted",
+        description: `${machineToDelete.title} has been deleted successfully.`
+      });
     } catch (error) {
       console.error('Error deleting machine:', error);
       toast({
