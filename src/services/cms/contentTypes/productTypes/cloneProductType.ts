@@ -11,29 +11,26 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export async function cloneProductType(id: string): Promise<CMSProductType | null> {
   try {
-    logCMSOperation('cloneProductType', 'Product Type', `Starting clone operation for product with ID: ${id}`);
+    logCMSOperation('cloneProductType', 'Product Type', `Starting clone operation for product type with ID: ${id}`);
     
     // Clone the main product type
-    const newProduct = await cloneContentItem<CMSProductType>(
+    const newProductType = await cloneContentItem<CMSProductType>(
       'product_types',
       id,
       'Product Type'
     );
     
-    if (!newProduct) {
+    if (!newProductType) {
       throw new Error('Failed to clone product type');
     }
     
     // Clone related items
     await Promise.all([
       // Clone benefits
-      cloneRelatedItems('product_type_benefits', 'product_type_id', id, newProduct.id),
+      cloneRelatedItems('product_type_benefits', 'product_type_id', id, newProductType.id),
       
       // Clone features
-      cloneRelatedItems('product_type_features', 'product_type_id', id, newProduct.id),
-      
-      // Clone images
-      cloneRelatedItems('product_type_images', 'product_type_id', id, newProduct.id)
+      cloneRelatedItems('product_type_features', 'product_type_id', id, newProductType.id)
     ]);
     
     // For feature images, we need a two-step process
@@ -41,7 +38,7 @@ export async function cloneProductType(id: string): Promise<CMSProductType | nul
     const { data: features } = await supabase
       .from('product_type_features')
       .select('id')
-      .eq('product_type_id', newProduct.id);
+      .eq('product_type_id', newProductType.id);
       
     if (features && features.length > 0) {
       // For each new feature, check if there were images in the original
@@ -63,7 +60,10 @@ export async function cloneProductType(id: string): Promise<CMSProductType | nul
       }
     }
     
-    return newProduct;
+    // Clone the main product image if available
+    await cloneRelatedItems('product_type_images', 'product_type_id', id, newProductType.id);
+    
+    return newProductType;
   } catch (error) {
     handleCMSError('cloneProductType', 'Product Type', error);
     return null;

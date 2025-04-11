@@ -3,18 +3,21 @@
 import {
   fetchBusinessGoalBySlug,
   fetchBusinessGoals,
+  cloneBusinessGoal
 } from './contentTypes/businessGoals';
 
 import {
   fetchMachines as getMachines,
-  fetchMachineById as getMachineById
+  fetchMachineById as getMachineById,
+  cloneMachine
 } from './contentTypes/machines';
 
 import {
   fetchProductTypeBySlug,
   fetchProductTypeByUUID,
   fetchProductTypes,
-  deleteProductType
+  deleteProductType,
+  cloneProductType
 } from './contentTypes/productTypes';
 
 import {
@@ -22,7 +25,8 @@ import {
   fetchTechnologies,
   createTechnology,
   updateTechnology,
-  deleteTechnology
+  deleteTechnology,
+  cloneTechnology
 } from './contentTypes/technologies';
 
 import { fetchTestimonials } from './contentTypes/testimonials';
@@ -37,17 +41,20 @@ export {
   // Business Goals
   fetchBusinessGoalBySlug,
   fetchBusinessGoals,
+  cloneBusinessGoal,
   
   // Machines
   getMachines,
   getMachineBySlug,
   getMachineById,
+  cloneMachine,
   
   // Product Types
   fetchProductTypeBySlug,
   fetchProductTypeByUUID,
   fetchProductTypes,
   deleteProductType,
+  cloneProductType,
   
   // Technologies
   fetchTechnologyBySlug,
@@ -55,6 +62,7 @@ export {
   createTechnology,
   updateTechnology,
   deleteTechnology,
+  cloneTechnology,
   
   // Testimonials
   fetchTestimonials,

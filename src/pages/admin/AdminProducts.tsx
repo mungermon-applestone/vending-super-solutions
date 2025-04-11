@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, ChevronRight, Trash2, Eye } from 'lucide-react';
+import { Plus, Edit, ChevronRight, Trash2, Eye, Copy } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { getProductTypes, deleteProductType } from '@/services/cms';
+import { useCloneProductType } from '@/hooks/cms/useCloneCMS';
+import CloneButton from '@/components/admin/common/CloneButton';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,6 +56,10 @@ const AdminProducts = () => {
     },
   });
 
+  // Add cloning functionality
+  const cloneProductMutation = useCloneProductType();
+  const [cloningProductId, setCloningProductId] = useState<string | null>(null);
+
   console.log('[AdminProducts] Product types loaded:', productTypes);
 
   const handleDeleteClick = (product: any) => {
@@ -90,6 +96,29 @@ const AdminProducts = () => {
       });
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleCloneProduct = async (product: any) => {
+    try {
+      setCloningProductId(product.id);
+      const clonedProduct = await cloneProductMutation.mutateAsync(product.id);
+      
+      if (clonedProduct) {
+        toast({
+          title: "Product cloned",
+          description: `${product.title} has been cloned successfully.`
+        });
+      }
+    } catch (error) {
+      console.error("Error cloning product:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to clone product. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCloningProductId(null);
     }
   };
 
@@ -136,7 +165,7 @@ const AdminProducts = () => {
                   <TableRow>
                     <TableHead>Title</TableHead>
                     <TableHead>Slug</TableHead>
-                    <TableHead className="w-[220px] text-right">Actions</TableHead>
+                    <TableHead className="w-[250px] text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -167,6 +196,11 @@ const AdminProducts = () => {
                           >
                             <Edit className="h-4 w-4" /> Edit
                           </Button>
+                          <CloneButton
+                            onClone={() => handleCloneProduct(product)}
+                            itemName={product.title}
+                            isCloning={cloningProductId === product.id}
+                          />
                           <Button
                             variant="outline"
                             size="sm"
