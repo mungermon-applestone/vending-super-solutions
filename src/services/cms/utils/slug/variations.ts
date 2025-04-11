@@ -42,6 +42,20 @@ export function getSlugVariations(slug: string): string[] {
     variations.push(`${second}-${first}`);
   }
   
+  // Handle copy suffix pattern (for our upcoming clone feature)
+  if (slug.endsWith('-copy')) {
+    variations.push(slug.replace(/-copy$/, '')); // Without copy
+  } else {
+    variations.push(`${slug}-copy`); // With copy
+  }
+  
+  // Handle numbered copy patterns (copy-2, copy-3, etc.)
+  const copyNumberMatch = slug.match(/-copy-(\d+)$/);
+  if (copyNumberMatch) {
+    variations.push(slug.replace(/-copy-\d+$/, '')); // Base without number
+    variations.push(slug.replace(/-copy-\d+$/, '-copy')); // Just copy without number
+  }
+  
   return [...new Set(variations)]; // Remove duplicates
 }
 
