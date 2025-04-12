@@ -8,11 +8,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { LockIcon, MailIcon } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const SignIn: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('munger@applestonesolutions.com'); // Set default admin email
+  const [password, setPassword] = useState('Password123!'); // Set default admin password
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { signIn, user, isAdmin } = useAuth();
@@ -108,7 +107,7 @@ const SignIn: React.FC = () => {
           </CardContent>
           <CardFooter className="text-center text-sm text-muted-foreground">
             <p className="w-full">
-              Admin accounts can only be created by existing administrators
+              Default admin: munger@applestonesolutions.com / Password123!
             </p>
           </CardFooter>
         </Card>
