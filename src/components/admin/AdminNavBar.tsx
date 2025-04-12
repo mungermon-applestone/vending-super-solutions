@@ -1,108 +1,46 @@
 
-import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
+import { NavLink } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
-const AdminNavBar = () => {
-  const { user, isAdmin, signOut } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  
-  // Only show admin controls for admin users and on admin routes
-  const isAdminRoute = location.pathname.startsWith('/admin');
-  
-  if (!isAdmin && !isAdminRoute) {
-    return null;
-  }
+interface AdminNavBarProps {
+  activeItem?: string;
+}
 
-  // If we're on an admin route but the user is not an admin, they should be redirected
-  if (isAdminRoute && !user) {
-    return (
-      <div className="bg-gray-800 text-white p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <span className="font-bold">Admin Panel</span>
-          </div>
-          <Button variant="outline" onClick={() => navigate('/admin/sign-in')}>
-            Sign In
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  
-  if (!isAdminRoute || !isAdmin) {
-    return null;
-  }
-  
-  const adminRoutes = [
-    { name: 'Dashboard', path: '/admin' },
-    { name: 'Products', path: '/admin/products' },
-    { name: 'Machines', path: '/admin/machines' },
-    { name: 'Business Goals', path: '/admin/business-goals' },
-    { name: 'Technology', path: '/admin/technology' },
-    { name: 'Blog', path: '/admin/blog' },
-    { name: 'Media', path: '/admin/media' },
-    { name: 'Users', path: '/admin/users' },
+const AdminNavBar: React.FC<AdminNavBarProps> = ({ activeItem }) => {
+  const items = [
+    { name: 'Dashboard', path: '/admin', key: 'dashboard' },
+    { name: 'Products', path: '/admin/products', key: 'products' },
+    { name: 'Machines', path: '/admin/machines', key: 'machines' },
+    { name: 'Business Goals', path: '/admin/business-goals', key: 'business-goals' },
+    { name: 'Technology', path: '/admin/technology', key: 'technology' },
+    { name: 'Blog', path: '/admin/blog', key: 'blog' },
+    { name: 'Case Studies', path: '/admin/case-studies', key: 'case-studies' },
+    { name: 'Landing Pages', path: '/admin/landing-pages', key: 'landing-pages' },
+    { name: 'Media', path: '/admin/media', key: 'media' },
+    { name: 'Users', path: '/admin/users', key: 'users' },
   ];
-  
-  const isActive = (path: string): boolean => {
-    return location.pathname === path || location.pathname.startsWith(`${path}/`);
-  };
-  
+
   return (
-    <div className="bg-gray-800 text-white">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-wrap justify-between items-center py-3">
-          <div className="flex items-center">
-            <Link to="/admin" className="font-bold text-xl mr-8">Admin Panel</Link>
-            <div className="hidden md:flex space-x-1">
-              {adminRoutes.map((route) => (
-                <Button
-                  key={route.path}
-                  variant={isActive(route.path) ? "secondary" : "ghost"}
-                  className={`${isActive(route.path) ? 'bg-gray-700' : 'text-gray-300 hover:text-white hover:bg-gray-700'}`}
-                  asChild
-                >
-                  <Link to={route.path}>{route.name}</Link>
-                </Button>
-              ))}
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            {user && (
-              <>
-                <span className="text-sm hidden md:inline">{user.email}</span>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={async () => {
-                    await signOut();
-                    navigate('/');
-                  }}
-                >
-                  Sign Out
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="md:hidden overflow-x-auto">
-        <div className="flex space-x-2 p-2 bg-gray-900">
-          {adminRoutes.map((route) => (
-            <Button
-              key={route.path}
-              variant={isActive(route.path) ? "secondary" : "ghost"}
-              className={`${isActive(route.path) ? 'bg-gray-700' : 'text-gray-300 hover:text-white hover:bg-gray-700'} whitespace-nowrap`}
-              size="sm"
-              asChild
+    <div className="bg-white border-b">
+      <div className="container mx-auto overflow-auto">
+        <nav className="flex space-x-1 py-2">
+          {items.map((item) => (
+            <NavLink
+              key={item.key}
+              to={item.path}
+              className={({ isActive }) =>
+                cn(
+                  'px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap',
+                  activeItem === item.key || isActive
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                )
+              }
             >
-              <Link to={route.path}>{route.name}</Link>
-            </Button>
+              {item.name}
+            </NavLink>
           ))}
-        </div>
+        </nav>
       </div>
     </div>
   );

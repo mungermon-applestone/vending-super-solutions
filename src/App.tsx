@@ -30,10 +30,12 @@ import AdminTechnology from './pages/admin/AdminTechnology';
 import AdminBlog from './pages/admin/AdminBlog';
 import AdminMedia from './pages/admin/AdminMedia';
 import AdminCaseStudies from './pages/admin/AdminCaseStudies';
+import AdminLandingPages from './pages/admin/AdminLandingPages';
 import ProductEditor from './pages/ProductEditor';
 import MachineEditor from './pages/MachineEditor';
 import TechnologyEditor from './pages/TechnologyEditor';
 import CaseStudyEditor from './pages/admin/CaseStudyEditor';
+import LandingPageEditor from './pages/admin/LandingPageEditor';
 
 // Public pages
 import CaseStudies from './pages/CaseStudies';
@@ -83,6 +85,9 @@ function App() {
           <Route path="/admin/case-studies" element={<AdminCaseStudies />} />
           <Route path="/admin/case-studies/new" element={<CaseStudyEditor />} />
           <Route path="/admin/case-studies/edit/:caseStudySlug" element={<CaseStudyEditor />} />
+          <Route path="/admin/landing-pages" element={<AdminLandingPages />} />
+          <Route path="/admin/landing-pages/new" element={<LandingPageEditor />} />
+          <Route path="/admin/landing-pages/edit/:id" element={<LandingPageEditor />} />
           
           {/* 404 fallback */}
           <Route path="*" element={<NotFound />} />

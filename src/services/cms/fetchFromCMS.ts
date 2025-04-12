@@ -1,3 +1,4 @@
+
 import { IS_DEVELOPMENT } from '@/config/cms';
 import { CMSContentTypeFactory } from './contentTypeFactory';
 import { useMockData, getMockData } from './mockDataHandler';
@@ -46,6 +47,12 @@ export async function fetchFromCMS<T>(contentType: string, params: Record<string
           case 'technologies':
             const { fetchTechnologies } = await import('./contentTypes/technologies');
             return await fetchTechnologies() as unknown as T[];
+          case 'case-studies':
+            const { fetchCaseStudies } = await import('./contentTypes/caseStudies');
+            return await fetchCaseStudies() as unknown as T[];
+          case 'landing-pages':
+            const { fetchLandingPages } = await import('./contentTypes/landingPages');
+            return await fetchLandingPages() as unknown as T[];
           default:
             console.warn(`[fetchFromCMS] Unknown content type: ${contentType}`);
             return [] as T[];

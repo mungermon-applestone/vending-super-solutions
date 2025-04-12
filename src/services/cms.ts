@@ -41,11 +41,21 @@ import {
   deleteCaseStudy
 } from './cms/contentTypes/caseStudies';
 
+// Import landing pages service
+import {
+  fetchLandingPages,
+  fetchLandingPageByKey,
+  createLandingPage,
+  updateLandingPage,
+  deleteLandingPage
+} from './cms/contentTypes/landingPages';
+
 // Import operations for direct access
 import { productTypeOperations } from './cms/contentTypes/productTypes';
 import { businessGoalOperations } from './cms/contentTypes/businessGoals';
 import { technologyOperations } from './cms/contentTypes/technologies';
 import { caseStudyOperations } from './cms/contentTypes/caseStudies/operations';
+import { landingPageOperations } from './cms/contentTypes/landingPages/operations';
 import { cloneProductType } from './cms/contentTypes/productTypes/cloneProductType';
 import { cloneBusinessGoal } from './cms/contentTypes/businessGoals/cloneBusinessGoal';
 import { cloneTechnology } from './cms/contentTypes/technologies/cloneTechnology';
@@ -56,6 +66,7 @@ export const productTypes = productTypeOperations;
 export const businessGoals = businessGoalOperations;
 export const technologies = technologyOperations;
 export const caseStudies = caseStudyOperations;
+export const landingPages = landingPageOperations;
 
 // Export individual service functions for backward compatibility
 export {
@@ -94,5 +105,12 @@ export {
   fetchCaseStudyBySlug,
   createCaseStudy,
   updateCaseStudy,
-  deleteCaseStudy
+  deleteCaseStudy,
+
+  // Landing Pages
+  fetchLandingPages,
+  fetchLandingPageByKey,
+  createLandingPage,
+  updateLandingPage,
+  deleteLandingPage
 };

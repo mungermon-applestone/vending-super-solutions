@@ -41,6 +41,14 @@ import {
   getAdjacentPosts
 } from './contentTypes/blog/index';
 
+import {
+  fetchLandingPages,
+  fetchLandingPageByKey,
+  createLandingPage,
+  updateLandingPage,
+  deleteLandingPage
+} from './contentTypes/landingPages/index';
+
 // Define getMachineBySlug locally since it doesn't exist in the imports
 const getMachineBySlug = async (type: string, id: string) => {
   const machines = await getMachines({ type, slug: id });
@@ -85,4 +93,11 @@ export {
   deleteBlogPost,
   cloneBlogPost,
   getAdjacentPosts,
+
+  // Landing Pages
+  fetchLandingPages,
+  fetchLandingPageByKey,
+  createLandingPage,
+  updateLandingPage,
+  deleteLandingPage,
 };

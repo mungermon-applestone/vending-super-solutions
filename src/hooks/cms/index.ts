@@ -7,3 +7,4 @@ export * from './useTechnologies';
 export * from './useTestimonials';
 export * from './useQueryDefaults';
 export * from './useCloneCMS';
+export * from './useLandingPages';

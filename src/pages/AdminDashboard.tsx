@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
-import { Package, Goal, Database, Server, Monitor, FileText, Image, BookOpen } from 'lucide-react';
+import { Package, Goal, Database, Server, Monitor, FileText, Image, BookOpen, Layout as LayoutIcon } from 'lucide-react';
 import ContentTypeCard from '@/components/admin/dashboard/ContentTypeCard';
 import QuickNavigation from '@/components/admin/dashboard/QuickNavigation';
 import ContentManagementList from '@/components/admin/dashboard/ContentManagementList';
@@ -59,6 +59,14 @@ const contentTypes = [
     path: "/admin/case-studies",
     createPath: "/admin/case-studies/new",
     colorClass: "bg-teal-50 border-teal-200"
+  },
+  {
+    title: "Landing Pages",
+    description: "Manage hero content on landing pages",
+    icon: <LayoutIcon className="h-8 w-8 text-pink-500" />,
+    path: "/admin/landing-pages",
+    createPath: "/admin/landing-pages/new",
+    colorClass: "bg-pink-50 border-pink-200"
   },
   {
     title: "Media",

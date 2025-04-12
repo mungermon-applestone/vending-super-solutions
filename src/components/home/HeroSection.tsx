@@ -1,31 +1,123 @@
 
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
+import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const HeroSection = () => {
+  const { data: landingPage, isLoading, error } = useLandingPageByKey('home');
+  
+  // If we're loading or have an error, show the default hero
+  if (isLoading || error || !landingPage) {
+    // Default content if CMS data isn't available yet
+    return (
+      <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
+        <div className="container-wide py-16 md:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              {isLoading ? (
+                <>
+                  <Skeleton className="h-12 w-3/4" />
+                  <Skeleton className="h-24 w-full" />
+                  <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                    <Skeleton className="h-10 w-36" />
+                    <Skeleton className="h-10 w-36" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-vending-blue-dark">
+                    Vend Anything You Sell
+                  </h1>
+                  <p className="text-xl text-gray-700 max-w-2xl">
+                    Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                    <Button asChild className="btn-primary" size="lg">
+                      <Link to="/contact">
+                        Request a Demo <ArrowRight className="ml-2 h-5 w-5" />
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="lg">
+                      <Link to="/products">
+                        Explore Solutions
+                      </Link>
+                    </Button>
+                  </div>
+                </>
+              )}
+              <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="text-vending-teal h-5 w-5" />
+                  <span className="text-gray-700">Hardware Agnostic</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="text-vending-teal h-5 w-5" />
+                  <span className="text-gray-700">Real-time Inventory</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="text-vending-teal h-5 w-5" />
+                  <span className="text-gray-700">Multiple Payment Options</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="text-vending-teal h-5 w-5" />
+                  <span className="text-gray-700">Advanced Analytics</span>
+                </div>
+              </div>
+            </div>
+            <div className="relative flex justify-center">
+              {isLoading ? (
+                <Skeleton className="w-full h-80 rounded-lg" />
+              ) : (
+                <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+                  <img 
+                    src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81" 
+                    alt="Vending Machine Software Interface" 
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+              )}
+              <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
+                <p className="font-bold">Works with 150+ machine models</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Render the hero from CMS data
+  const { hero_content: hero } = landingPage;
+  
   return (
-    <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
+    <div className={hero.background_class || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"}>
       <div className="container-wide py-16 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-vending-blue-dark">
-              Vend Anything You Sell
+              {hero.title}
             </h1>
             <p className="text-xl text-gray-700 max-w-2xl">
-              Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.
+              {hero.subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              <Button asChild className="btn-primary" size="lg">
-                <Link to="/contact">
-                  Request a Demo <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/products">
-                  Explore Solutions
-                </Link>
-              </Button>
+              {hero.cta_primary_text && (
+                <Button asChild className="btn-primary" size="lg">
+                  <Link to={hero.cta_primary_url || "#"}>
+                    {hero.cta_primary_text} <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              )}
+              {hero.cta_secondary_text && (
+                <Button asChild variant="outline" size="lg">
+                  <Link to={hero.cta_secondary_url || "#"}>
+                    {hero.cta_secondary_text}
+                  </Link>
+                </Button>
+              )}
             </div>
             <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex items-center gap-2">
@@ -49,9 +141,12 @@ const HeroSection = () => {
           <div className="relative flex justify-center">
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
               <img 
-                src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81" 
-                alt="Vending Machine Software Interface" 
+                src={hero.image_url}
+                alt={hero.image_alt}
                 className="w-full h-auto object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1605810230434-7631ac76ec81";
+                }}
               />
             </div>
             <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
