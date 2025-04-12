@@ -7,7 +7,7 @@ import { createQueryOptions } from './useQueryDefaults';
 export function useLandingPages() {
   return useQuery({
     queryKey: ['landing-pages'],
-    queryFn: () => fetchLandingPages(),
+    queryFn: fetchLandingPages,
     ...createQueryOptions()
   });
 }

@@ -1,4 +1,3 @@
-
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 import { useMockData } from '../../mockDataHandler';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,18 +7,19 @@ import { supabase } from '@/integrations/supabase/client';
 export async function fetchLandingPages(): Promise<LandingPage[]> {
   if (useMockData) {
     try {
+      console.log("Starting to fetch landing pages with mock data");
       // Check if we have any landing pages in mock storage
       let landingPages = await getLandingPagesFromMock();
       
       // If no landing pages exist, seed the database with default data
-      if (landingPages.length === 0) {
+      if (!landingPages || landingPages.length === 0) {
         console.log("No landing pages found, seeding default data");
         await seedDefaultLandingPages();
         // Fetch the newly created landing pages
         landingPages = await getLandingPagesFromMock();
       }
       
-      console.log(`Fetched ${landingPages.length} landing pages`);
+      console.log(`Fetched ${landingPages.length} landing pages:`, landingPages);
       return landingPages;
     } catch (error) {
       console.error("Error fetching landing pages:", error);
@@ -35,7 +35,10 @@ export async function fetchLandingPages(): Promise<LandingPage[]> {
 async function getLandingPagesFromMock(): Promise<LandingPage[]> {
   // This simulates a database with mock data stored in memory
   // In a real app, this would be fetched from Supabase
-  const mockPages = [
+  console.log("Getting landing pages from mock storage");
+  
+  // Force return the mock data directly for now
+  return [
     {
       id: '1',
       page_key: 'home',
@@ -125,8 +128,6 @@ async function getLandingPagesFromMock(): Promise<LandingPage[]> {
       updated_at: new Date().toISOString(),
     }
   ];
-  
-  return mockPages;
 }
 
 // Function to seed default landing page data

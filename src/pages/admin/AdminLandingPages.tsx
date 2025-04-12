@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import AdminControls from '@/components/admin/AdminControls';
@@ -21,6 +21,13 @@ const AdminLandingPages = () => {
 
   // Type assertion to ensure landingPages is treated as an array of LandingPage
   const typedLandingPages = landingPages as LandingPage[] | undefined;
+  
+  // Debug logging to see what data we're getting
+  useEffect(() => {
+    console.log("Landing Pages Data:", landingPages);
+    console.log("Is Loading:", isLoading);
+    console.log("Error:", error);
+  }, [landingPages, isLoading, error]);
 
   const handleDeletePage = async (id: string) => {
     try {
@@ -105,7 +112,7 @@ const AdminLandingPages = () => {
           </div>
         )}
         
-        {!isLoading && !error && typedLandingPages && typedLandingPages.length === 0 && (
+        {!isLoading && !error && (!typedLandingPages || typedLandingPages.length === 0) && (
           <div className="text-center py-12 border border-dashed rounded-lg">
             <h3 className="font-medium text-lg mb-2">No Landing Pages Found</h3>
             <p className="text-gray-500 mb-6">Start by adding your first landing page</p>
