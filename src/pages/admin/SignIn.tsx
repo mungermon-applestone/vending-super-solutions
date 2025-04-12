@@ -13,6 +13,7 @@ const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { signIn, user, isAdmin } = useAuth();
   const navigate = useNavigate();
   
@@ -26,11 +27,15 @@ const SignIn: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage(null);
     
     try {
       await signIn(email, password);
+      // If we reach here, sign-in was successful (no error thrown)
+      console.log("Sign-in successful");
     } catch (error) {
       console.error('Authentication error:', error);
+      setErrorMessage('Invalid email or password. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -49,6 +54,11 @@ const SignIn: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {errorMessage && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded">
+                {errorMessage}
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -87,7 +97,7 @@ const SignIn: React.FC = () => {
                 disabled={isSubmitting}
               >
                 {isSubmitting
-                  ? 'Please wait...'
+                  ? 'Signing in...'
                   : 'Sign in'
                 }
               </Button>

@@ -3,6 +3,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import './App.css';
 import NotFound from './pages/NotFound';
+import { Toaster } from "@/components/ui/toaster";
 
 // Import the homepage component
 import Homepage from './pages/Homepage';
@@ -73,6 +74,7 @@ function App() {
           {/* 404 fallback */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Toaster />
       </div>
     </AuthProvider>
   );
