@@ -20,6 +20,9 @@ const AdminLandingPages = () => {
   const { data: landingPages, isLoading, error } = useLandingPages();
   const deleteMutation = useDeleteLandingPage();
 
+  // Type assertion to ensure landingPages is treated as an array of LandingPage
+  const typedLandingPages = landingPages as LandingPage[] | undefined;
+
   const handleDeletePage = async (id: string) => {
     try {
       await deleteMutation.mutateAsync(id);
@@ -103,7 +106,7 @@ const AdminLandingPages = () => {
           </div>
         )}
         
-        {!isLoading && !error && landingPages && landingPages.length === 0 && (
+        {!isLoading && !error && typedLandingPages && typedLandingPages.length === 0 && (
           <div className="text-center py-12 border border-dashed rounded-lg">
             <h3 className="font-medium text-lg mb-2">No Landing Pages Found</h3>
             <p className="text-gray-500 mb-6">Start by adding your first landing page</p>
@@ -113,7 +116,7 @@ const AdminLandingPages = () => {
           </div>
         )}
         
-        {!isLoading && landingPages && landingPages.length > 0 && (
+        {!isLoading && typedLandingPages && typedLandingPages.length > 0 && (
           <div className="bg-white rounded-md shadow overflow-hidden">
             <div className="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-600">
               <div className="col-span-3">Page Name</div>
@@ -123,7 +126,7 @@ const AdminLandingPages = () => {
             </div>
             
             <div className="divide-y divide-gray-200">
-              {(landingPages as LandingPage[]).map((page) => (
+              {typedLandingPages.map((page) => (
                 <LandingPageTableRow 
                   key={page.id} 
                   page={page} 
