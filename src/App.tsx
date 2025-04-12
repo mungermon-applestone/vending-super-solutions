@@ -47,6 +47,12 @@ import Blog from './pages/Blog';
 import BusinessGoalEditor from './pages/admin/BusinessGoalEditor';
 import BlogEditor from './pages/admin/BlogEditor';
 import TechnologyDetail from './pages/TechnologyDetail';
+import TechnologyLanding from './pages/TechnologyLanding';
+import SimpleTechnologyPage from './pages/SimpleTechnologyPage';
+import Contact from './pages/Contact';
+import AboutUs from './pages/AboutUs';
+import BusinessGoalsLanding from './pages/BusinessGoalsLanding';
+import BusinessGoalDetail from './pages/BusinessGoalDetail';
 
 function App() {
   return (
@@ -58,10 +64,14 @@ function App() {
           <Route path="/products/:productSlug" element={<PlaceholderPage />} />
           <Route path="/machines" element={<MachinesLanding />} />
           <Route path="/machines/:machineType/:machineId" element={<MachineDetail />} />
-          <Route path="/business-goals" element={<PlaceholderPage />} />
-          <Route path="/technology" element={<PlaceholderPage />} />
+          <Route path="/business-goals" element={<BusinessGoalsLanding />} />
+          <Route path="/goals" element={<BusinessGoalsLanding />} />
+          <Route path="/goals/:goalSlug" element={<BusinessGoalDetail />} />
+          <Route path="/technology" element={<TechnologyLanding />} />
+          <Route path="/technology/simple" element={<SimpleTechnologyPage />} />
           <Route path="/technology/:slug" element={<TechnologyDetail />} />
-          <Route path="/contact" element={<PlaceholderPage />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<AboutUs />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPostDetail />} />
           

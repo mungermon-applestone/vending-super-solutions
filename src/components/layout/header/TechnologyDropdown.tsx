@@ -21,7 +21,7 @@ const TechnologyDropdown: React.FC<TechnologyDropdownProps> = ({ isActive }) => 
           isActive && "bg-accent text-accent-foreground"
         )}
       >
-        <Link to="/technology/simple">Technology</Link>
+        <Link to="/technology">Technology</Link>
       </NavigationMenuLink>
     </NavigationMenuItem>
   );
