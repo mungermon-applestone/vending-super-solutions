@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { LandingPageFormData } from '@/types/landingPage';
 import BackgroundPreview from '@/components/admin/landing-pages/BackgroundPreview';
+import MediaSelector from '@/components/admin/media/MediaSelector';
 
 const formSchema = z.object({
   page_key: z.string().min(1, "Page key is required"),
@@ -199,15 +200,21 @@ const LandingPageForm: React.FC<LandingPageFormProps> = ({
                   )}
                 />
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <FormField
                     control={form.control}
                     name="hero.image_url"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Hero Image URL</FormLabel>
+                        <FormLabel>Hero Image</FormLabel>
                         <FormControl>
-                          <Input placeholder="URL of the hero image" {...field} />
+                          <MediaSelector
+                            value={field.value}
+                            onChange={(url) => {
+                              form.setValue("hero.image_url", url);
+                            }}
+                            buttonLabel="Select Hero Image"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
