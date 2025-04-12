@@ -1,28 +1,21 @@
+
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
-import { useMockData } from '../../mockDataHandler';
+import { useMockData, getMockData, _getMockLandingPages } from '../../mockDataHandler';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
 
 // In a real app, this would be a Supabase query
 export async function fetchLandingPages(): Promise<LandingPage[]> {
+  console.log("[fetchLandingPages] Starting to fetch landing pages");
+  
   if (useMockData) {
     try {
-      console.log("Starting to fetch landing pages with mock data");
-      // Check if we have any landing pages in mock storage
-      let landingPages = await getLandingPagesFromMock();
-      
-      // If no landing pages exist, seed the database with default data
-      if (!landingPages || landingPages.length === 0) {
-        console.log("No landing pages found, seeding default data");
-        await seedDefaultLandingPages();
-        // Fetch the newly created landing pages
-        landingPages = await getLandingPagesFromMock();
-      }
-      
-      console.log(`Fetched ${landingPages.length} landing pages:`, landingPages);
+      console.log("[fetchLandingPages] Using mock data");
+      const landingPages = await getMockData<LandingPage>('landing-pages');
+      console.log(`[fetchLandingPages] Fetched ${landingPages.length} landing pages:`, landingPages);
       return landingPages;
     } catch (error) {
-      console.error("Error fetching landing pages:", error);
+      console.error("[fetchLandingPages] Error fetching mock landing pages:", error);
       return [];
     }
   }
@@ -31,187 +24,15 @@ export async function fetchLandingPages(): Promise<LandingPage[]> {
   return [];
 }
 
-// Function to retrieve landing pages from mock storage
-async function getLandingPagesFromMock(): Promise<LandingPage[]> {
-  // This simulates a database with mock data stored in memory
-  // In a real app, this would be fetched from Supabase
-  console.log("Getting landing pages from mock storage");
-  
-  // Force return the mock data directly for now
-  return [
-    {
-      id: '1',
-      page_key: 'home',
-      page_name: 'Homepage',
-      hero_content_id: '1',
-      hero_content: {
-        id: '1',
-        title: 'Vend Anything You Sell',
-        subtitle: 'Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.',
-        image_url: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81',
-        image_alt: 'Vending Machine Software Interface',
-        cta_primary_text: 'Request a Demo',
-        cta_primary_url: '/contact',
-        cta_secondary_text: 'Explore Solutions',
-        cta_secondary_url: '/products',
-        background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      page_key: 'products',
-      page_name: 'Products Page',
-      hero_content_id: '2',
-      hero_content: {
-        id: '2',
-        title: 'Types of Products You Can Sell',
-        subtitle: 'Our versatile vending software enables you to sell virtually any product type. Whether you\'re a vending operator, enterprise, SMB, or brand, our solutions adapt to your specific needs.',
-        image_url: 'https://images.unsplash.com/photo-1481495278953-0a688f58e194',
-        image_alt: 'Various vending products',
-        cta_primary_text: 'Request a Demo',
-        cta_primary_url: '/contact',
-        cta_secondary_text: 'Manage Products',
-        cta_secondary_url: '/admin/products',
-        background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '3',
-      page_key: 'business-goals',
-      page_name: 'Business Goals Page',
-      hero_content_id: '3',
-      hero_content: {
-        id: '3',
-        title: 'Business Goals',
-        subtitle: 'Our comprehensive vending solutions help you achieve your business goals with powerful technology and customizable options.',
-        image_url: 'https://images.unsplash.com/photo-1553877522-43269d4ea984',
-        image_alt: 'Business Goals',
-        cta_primary_text: 'Request a Demo',
-        cta_primary_url: '/contact',
-        cta_secondary_text: 'Explore Solutions',
-        cta_secondary_url: '/products',
-        background_class: 'bg-gradient-to-r from-slate-50 to-slate-100',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: '4',
-      page_key: 'machines',
-      page_name: 'Machines Page',
-      hero_content_id: '4',
-      hero_content: {
-        id: '4',
-        title: 'Our Machines',
-        subtitle: 'Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs.',
-        image_url: 'https://images.unsplash.com/photo-1493723843671-1d655e66ac1c',
-        image_alt: 'Various vending machines',
-        cta_primary_text: 'Vending Machines',
-        cta_primary_url: '#vending-machines',
-        cta_secondary_text: 'Smart Lockers',
-        cta_secondary_url: '#smart-lockers',
-        background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-  ];
-}
-
-// Function to seed default landing page data
-async function seedDefaultLandingPages(): Promise<void> {
-  const defaultPages = [
-    {
-      page_key: 'home',
-      page_name: 'Homepage',
-      hero: {
-        title: 'Vend Anything You Sell',
-        subtitle: 'Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.',
-        image_url: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81',
-        image_alt: 'Vending Machine Software Interface',
-        cta_primary_text: 'Request a Demo',
-        cta_primary_url: '/contact',
-        cta_secondary_text: 'Explore Solutions',
-        cta_secondary_url: '/products',
-        background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
-      }
-    },
-    {
-      page_key: 'products',
-      page_name: 'Products Page',
-      hero: {
-        title: 'Types of Products You Can Sell',
-        subtitle: 'Our versatile vending software enables you to sell virtually any product type. Whether you\'re a vending operator, enterprise, SMB, or brand, our solutions adapt to your specific needs.',
-        image_url: 'https://images.unsplash.com/photo-1481495278953-0a688f58e194',
-        image_alt: 'Various vending products',
-        cta_primary_text: 'Request a Demo',
-        cta_primary_url: '/contact',
-        cta_secondary_text: 'Manage Products',
-        cta_secondary_url: '/admin/products',
-        background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
-      }
-    },
-    {
-      page_key: 'business-goals',
-      page_name: 'Business Goals Page',
-      hero: {
-        title: 'Business Goals',
-        subtitle: 'Our comprehensive vending solutions help you achieve your business goals with powerful technology and customizable options.',
-        image_url: 'https://images.unsplash.com/photo-1553877522-43269d4ea984',
-        image_alt: 'Business Goals',
-        cta_primary_text: 'Request a Demo',
-        cta_primary_url: '/contact',
-        cta_secondary_text: 'Explore Solutions',
-        cta_secondary_url: '/products',
-        background_class: 'bg-gradient-to-r from-slate-50 to-slate-100',
-      }
-    },
-    {
-      page_key: 'machines',
-      page_name: 'Machines Page',
-      hero: {
-        title: 'Our Machines',
-        subtitle: 'Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs.',
-        image_url: 'https://images.unsplash.com/photo-1493723843671-1d655e66ac1c',
-        image_alt: 'Various vending machines',
-        cta_primary_text: 'Vending Machines',
-        cta_primary_url: '#vending-machines',
-        cta_secondary_text: 'Smart Lockers',
-        cta_secondary_url: '#smart-lockers',
-        background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
-      }
-    }
-  ];
-  
-  console.log("Creating default landing pages:", defaultPages.length);
-  
-  // Create each landing page
-  for (const pageData of defaultPages) {
-    await createLandingPage(pageData);
-  }
-}
-
 export async function fetchLandingPageByKey(key: string): Promise<LandingPage | null> {
   try {
-    console.log(`Fetching landing page with key: ${key}`);
+    console.log(`[fetchLandingPageByKey] Fetching landing page with key: ${key}`);
     const pages = await fetchLandingPages();
     const page = pages.find(page => page.page_key === key);
-    console.log(`Found page for key ${key}:`, page ? "Yes" : "No");
+    console.log(`[fetchLandingPageByKey] Found page for key ${key}:`, page ? "Yes" : "No");
     return page || null;
   } catch (error) {
-    console.error(`Error fetching landing page with key ${key}:`, error);
+    console.error(`[fetchLandingPageByKey] Error fetching landing page with key ${key}:`, error);
     return null;
   }
 }
@@ -244,7 +65,7 @@ export async function createLandingPage(data: LandingPageFormData): Promise<Land
     updated_at: timestamp,
   };
   
-  console.log("Created new landing page:", newPage.page_key);
+  console.log("[createLandingPage] Created new landing page:", newPage.page_key);
   
   // With Supabase, this would insert the new page and hero content
   return newPage;
@@ -282,6 +103,6 @@ export async function updateLandingPage(id: string, data: Partial<LandingPageFor
 }
 
 export async function deleteLandingPage(id: string): Promise<void> {
-  console.log(`Deleting landing page with ID: ${id}`);
+  console.log(`[deleteLandingPage] Deleting landing page with ID: ${id}`);
   // Implementation would delete both the page and associated hero content
 }
