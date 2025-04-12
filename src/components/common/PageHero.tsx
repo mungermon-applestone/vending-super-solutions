@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
 import { Button } from '@/components/ui/button';
 import { LandingPage } from '@/types/landingPage';
+import { Link } from 'react-router-dom';
 
 interface PageHeroProps {
   pageKey: string;
@@ -35,6 +36,7 @@ const PageHero: React.FC<PageHeroProps> = ({
       landingPage,
       isLoading,
       hasCmsData: !!landingPage,
+      heroContent: landingPage ? (landingPage as LandingPage).hero_content : null,
     });
   }, [pageKey, landingPage, isLoading]);
   
@@ -67,18 +69,18 @@ const PageHero: React.FC<PageHeroProps> = ({
             </p>
             <div className="flex flex-wrap gap-4">
               {primaryButtonText && primaryButtonUrl && (
-                <a href={primaryButtonUrl}>
+                <Link to={primaryButtonUrl}>
                   <Button size="lg">
                     {primaryButtonText}
                   </Button>
-                </a>
+                </Link>
               )}
               {secondaryButtonText && secondaryButtonUrl && (
-                <a href={secondaryButtonUrl}>
+                <Link to={secondaryButtonUrl}>
                   <Button size="lg" variant="outline">
                     {secondaryButtonText}
                   </Button>
-                </a>
+                </Link>
               )}
             </div>
           </div>
@@ -90,6 +92,7 @@ const PageHero: React.FC<PageHeroProps> = ({
               style={{ maxHeight: '500px' }}
               onError={(e) => {
                 e.currentTarget.src = "https://via.placeholder.com/800x500?text=Image+Not+Found";
+                console.log("Image failed to load:", imageUrl);
               }}
             />
           </div>

@@ -23,9 +23,9 @@ const Index = () => {
   const { data: landingPage, isLoading, error } = useLandingPageByKey('home');
 
   useEffect(() => {
-    console.log('Landing page data:', landingPage);
-    console.log('Landing page loading:', isLoading);
-    console.log('Landing page error:', error);
+    console.log('Index page - Landing page data:', landingPage);
+    console.log('Index page - Landing page loading:', isLoading);
+    console.log('Index page - Landing page error:', error);
   }, [landingPage, isLoading, error]);
 
   return (
