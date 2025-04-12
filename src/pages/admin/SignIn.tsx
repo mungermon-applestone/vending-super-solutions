@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { LockIcon, MailIcon } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -30,12 +31,13 @@ const SignIn: React.FC = () => {
     setErrorMessage(null);
     
     try {
+      console.log("Submitting sign-in form with email:", email);
       await signIn(email, password);
       // If we reach here, sign-in was successful (no error thrown)
       console.log("Sign-in successful");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Authentication error:', error);
-      setErrorMessage('Invalid email or password. Please try again.');
+      setErrorMessage(error?.message || 'Invalid email or password. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

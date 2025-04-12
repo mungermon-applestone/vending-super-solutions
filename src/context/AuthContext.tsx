@@ -65,6 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkAdminStatus = async (userId: string) => {
     try {
+      console.log('Checking admin status for user:', userId);
       const { data, error } = await supabase.rpc('is_admin', { uid: userId });
       
       if (error) {
@@ -73,6 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
+      console.log('Admin status result:', data);
       setIsAdmin(data === true);
     } catch (error) {
       console.error('Error checking admin status:', error);
@@ -83,6 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);
     try {
+      console.log('Attempting to sign in with email:', email);
       const { error, data } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         console.error('Sign-in error:', error.message);

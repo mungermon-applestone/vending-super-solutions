@@ -1,35 +1,50 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { 
-  LayoutDashboard, 
-  PackageSearch, 
-  Box, 
-  BarChart, 
-  Zap, 
-  BookOpen, 
-  ImageIcon,
-  UserCog,
-  LogOut
-} from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
-const AdminNavBar: React.FC = () => {
-  const { signOut, isAdmin } = useAuth();
+const AdminNavBar = () => {
+  const { user, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
   
-  if (!isAdmin) return null;
+  // Only show admin controls for admin users and on admin routes
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  
+  if (!isAdmin && !isAdminRoute) {
+    return null;
+  }
+
+  // If we're on an admin route but the user is not an admin, they should be redirected
+  if (isAdminRoute && !user) {
+    return (
+      <div className="bg-gray-800 text-white p-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <span className="font-bold">Admin Panel</span>
+          </div>
+          <Button variant="outline" onClick={() => navigate('/admin/sign-in')}>
+            Sign In
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!isAdminRoute || !isAdmin) {
+    return null;
+  }
   
   const adminRoutes = [
-    { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard className="h-4 w-4" /> },
-    { name: 'Products', path: '/admin/products', icon: <PackageSearch className="h-4 w-4" /> },
-    { name: 'Machines', path: '/admin/machines', icon: <Box className="h-4 w-4" /> },
-    { name: 'Business Goals', path: '/admin/business-goals', icon: <BarChart className="h-4 w-4" /> },
-    { name: 'Technology', path: '/admin/technology', icon: <Zap className="h-4 w-4" /> },
-    { name: 'Blog', path: '/admin/blog', icon: <BookOpen className="h-4 w-4" /> },
-    { name: 'Media', path: '/admin/media', icon: <ImageIcon className="h-4 w-4" /> },
-    { name: 'Admin Users', path: '/admin/users', icon: <UserCog className="h-4 w-4" /> },
+    { name: 'Dashboard', path: '/admin' },
+    { name: 'Products', path: '/admin/products' },
+    { name: 'Machines', path: '/admin/machines' },
+    { name: 'Business Goals', path: '/admin/business-goals' },
+    { name: 'Technology', path: '/admin/technology' },
+    { name: 'Blog', path: '/admin/blog' },
+    { name: 'Media', path: '/admin/media' },
+    { name: 'Users', path: '/admin/users' },
   ];
   
   const isActive = (path: string): boolean => {
@@ -37,34 +52,57 @@ const AdminNavBar: React.FC = () => {
   };
   
   return (
-    <div className="bg-gray-900 text-white px-4 py-2 w-full sticky top-0 z-40">
-      <div className="container mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-1 overflow-x-auto">
+    <div className="bg-gray-800 text-white">
+      <div className="container mx-auto px-4">
+        <div className="flex flex-wrap justify-between items-center py-3">
+          <div className="flex items-center">
+            <Link to="/admin" className="font-bold text-xl mr-8">Admin Panel</Link>
+            <div className="hidden md:flex space-x-1">
+              {adminRoutes.map((route) => (
+                <Button
+                  key={route.path}
+                  variant={isActive(route.path) ? "secondary" : "ghost"}
+                  className={`${isActive(route.path) ? 'bg-gray-700' : 'text-gray-300 hover:text-white hover:bg-gray-700'}`}
+                  asChild
+                >
+                  <Link to={route.path}>{route.name}</Link>
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            {user && (
+              <>
+                <span className="text-sm hidden md:inline">{user.email}</span>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={async () => {
+                    await signOut();
+                    navigate('/');
+                  }}
+                >
+                  Sign Out
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="md:hidden overflow-x-auto">
+        <div className="flex space-x-2 p-2 bg-gray-900">
           {adminRoutes.map((route) => (
             <Button
               key={route.path}
-              asChild
-              variant={isActive(route.path) ? "default" : "ghost"}
+              variant={isActive(route.path) ? "secondary" : "ghost"}
+              className={`${isActive(route.path) ? 'bg-gray-700' : 'text-gray-300 hover:text-white hover:bg-gray-700'} whitespace-nowrap`}
               size="sm"
-              className={isActive(route.path) ? "" : "hover:bg-gray-700 text-white"}
+              asChild
             >
-              <Link to={route.path} className="flex items-center">
-                <span className="mr-1">{route.icon}</span>
-                <span className="hidden sm:inline">{route.name}</span>
-              </Link>
+              <Link to={route.path}>{route.name}</Link>
             </Button>
           ))}
         </div>
-        
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => signOut()}
-          className="hover:bg-gray-700 text-white"
-        >
-          <LogOut className="h-4 w-4 mr-1" />
-          <span className="hidden sm:inline">Sign Out</span>
-        </Button>
       </div>
     </div>
   );
