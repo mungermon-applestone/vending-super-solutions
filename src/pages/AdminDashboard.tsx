@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
-import { Package, Goal, Database, Server, Monitor, FileText } from 'lucide-react';
+import { Package, Goal, Database, Server, Monitor, FileText, Image, BookOpen } from 'lucide-react';
 import ContentTypeCard from '@/components/admin/dashboard/ContentTypeCard';
 import QuickNavigation from '@/components/admin/dashboard/QuickNavigation';
 import ContentManagementList from '@/components/admin/dashboard/ContentManagementList';
@@ -47,10 +47,26 @@ const contentTypes = [
   {
     title: "Blog",
     description: "Manage blog posts and updates",
-    icon: <FileText className="h-8 w-8 text-amber-500" />,
+    icon: <BookOpen className="h-8 w-8 text-amber-500" />,
     path: "/admin/blog",
     createPath: "/admin/blog/new",
     colorClass: "bg-amber-50 border-amber-200"
+  },
+  {
+    title: "Case Studies",
+    description: "Manage success stories and case studies",
+    icon: <FileText className="h-8 w-8 text-teal-500" />,
+    path: "/admin/case-studies",
+    createPath: "/admin/case-studies/new",
+    colorClass: "bg-teal-50 border-teal-200"
+  },
+  {
+    title: "Media",
+    description: "Manage images and media files",
+    icon: <Image className="h-8 w-8 text-rose-500" />,
+    path: "/admin/media",
+    createPath: "/admin/media", // Media doesn't have a separate create page
+    colorClass: "bg-rose-50 border-rose-200"
   }
 ];
 
@@ -111,7 +127,7 @@ const AdminDashboard = () => {
           <QuickNavigation items={navItems} />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
           {contentTypes.map((type) => (
             <ContentTypeCard
               key={type.title}

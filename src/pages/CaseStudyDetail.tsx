@@ -4,17 +4,17 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, CheckCircle2, ChevronRight, Building2, Calendar, BarChart, ArrowUpRight } from 'lucide-react';
-import { getCaseStudyBySlug, caseStudies } from '@/data/caseStudiesData';
+import { useCaseStudy } from '@/hooks/useCaseStudies';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 
 const CaseStudyDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   
-  const caseStudy = getCaseStudyBySlug(slug || '');
+  const { data: caseStudy, isLoading, error } = useCaseStudy(slug);
   
-  // If case study not found, provide a fallback
-  if (!caseStudy) {
+  // If case study not found or error, provide a fallback
+  if (error || (!isLoading && !caseStudy)) {
     return (
       <Layout>
         <div className="container py-12">
@@ -32,11 +32,42 @@ const CaseStudyDetail = () => {
     );
   }
 
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container py-12">
+          <div className="flex justify-center items-center h-64">
+            Loading case study...
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   // Function to get related case studies (excluding current one)
   const getRelatedCaseStudies = () => {
-    return caseStudies
-      .filter(study => study.id !== caseStudy.id)
-      .slice(0, 3);
+    // This would typically come from a backend API call
+    // For now, we'll just return some sample data
+    return [
+      {
+        id: '1',
+        title: 'Financial Services Refreshment Solution',
+        slug: 'financial-services-refreshment',
+        industry: 'Financial Services',
+      },
+      {
+        id: '2',
+        title: 'University Campus Refreshment Solution',
+        slug: 'university-campus-refreshment',
+        industry: 'Education',
+      },
+      {
+        id: '3',
+        title: 'Manufacturing Facility Vending Solution',
+        slug: 'manufacturing-facility-vending',
+        industry: 'Manufacturing',
+      },
+    ];
   };
 
   // Get related case studies
@@ -76,8 +107,8 @@ const CaseStudyDetail = () => {
             {/* Main image */}
             <div className="rounded-lg overflow-hidden mb-8">
               <img 
-                src={caseStudy.imageUrl}
-                alt={caseStudy.title}
+                src={caseStudy.image_url || "https://images.unsplash.com/photo-1504439904031-93ded9f93e4e"}
+                alt={caseStudy.image_alt || caseStudy.title}
                 className="w-full h-auto"
               />
             </div>
@@ -86,13 +117,13 @@ const CaseStudyDetail = () => {
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-vending-blue-dark mb-4">The Challenge</h2>
               <p className="text-gray-700 mb-4">
-                {caseStudy.description}
+                {caseStudy.summary}
               </p>
-              <p className="text-gray-700">
-                The client needed a solution that could scale with their business while maintaining 
-                consistent quality and customer experience across all locations. Traditional approaches 
-                were proving too costly and inefficient to manage at scale.
-              </p>
+              <div className="whitespace-pre-line text-gray-700">
+                {caseStudy.content.split('\n\n').map((paragraph, index) => (
+                  <p key={index} className="mb-4">{paragraph}</p>
+                ))}
+              </div>
             </div>
             
             {/* Solution */}
@@ -130,12 +161,12 @@ const CaseStudyDetail = () => {
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                {caseStudy.results.map((result, index) => (
+                {caseStudy.results && caseStudy.results.map((result, index) => (
                   <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 text-center">
                     <div className="text-vending-teal mb-2">
                       <BarChart className="h-8 w-8 mx-auto" />
                     </div>
-                    <p className="font-medium">{result}</p>
+                    <p className="font-medium">{result.text}</p>
                   </div>
                 ))}
               </div>
@@ -148,14 +179,18 @@ const CaseStudyDetail = () => {
             </div>
             
             {/* Testimonial */}
-            <div className="bg-vending-blue-light bg-opacity-10 rounded-lg p-8 mb-8">
-              <blockquote className="text-xl font-medium text-vending-blue-dark italic mb-4">
-                "The solution transformed how we approach our retail strategy. We're now able to expand
-                into locations that weren't previously viable, while providing a consistent experience
-                for our customers."
-              </blockquote>
-              <div className="font-medium">— Director of Operations, {caseStudy.industry} Company</div>
-            </div>
+            {caseStudy.testimonial && (
+              <div className="bg-vending-blue-light bg-opacity-10 rounded-lg p-8 mb-8">
+                <blockquote className="text-xl font-medium text-vending-blue-dark italic mb-4">
+                  "{caseStudy.testimonial.quote}"
+                </blockquote>
+                <div className="font-medium">
+                  — {caseStudy.testimonial.author}
+                  {caseStudy.testimonial.position && `, ${caseStudy.testimonial.position}`}
+                  {caseStudy.testimonial.company && `, ${caseStudy.testimonial.company}`}
+                </div>
+              </div>
+            )}
             
             {/* CTA */}
             <div className="bg-vending-gray rounded-lg p-8 text-center">

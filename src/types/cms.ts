@@ -1,3 +1,4 @@
+
 export interface CMSImage {
   id: string;
   url: string;
@@ -151,6 +152,38 @@ export interface CMSDeploymentExample {
   description: string;
   image: CMSImage;
   display_order?: number;
+}
+
+export interface CMSCaseStudy {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string;
+  content: string;
+  industry?: string;
+  image_url?: string;
+  image_alt?: string;
+  visible: boolean;
+  created_at?: string;
+  updated_at?: string;
+  results?: CMSCaseStudyResult[];
+  testimonial?: CMSCaseStudyTestimonial;
+}
+
+export interface CMSCaseStudyResult {
+  id: string;
+  case_study_id: string;
+  text: string;
+  display_order: number;
+}
+
+export interface CMSCaseStudyTestimonial {
+  id: string;
+  case_study_id: string;
+  quote: string;
+  author: string;
+  company?: string;
+  position?: string;
 }
 
 export interface MockImage {

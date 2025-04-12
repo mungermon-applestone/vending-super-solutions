@@ -222,6 +222,124 @@ export type Database = {
         }
         Relationships: []
       }
+      case_studies: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          image_alt: string | null
+          image_url: string | null
+          industry: string | null
+          slug: string
+          summary: string
+          title: string
+          updated_at: string
+          visible: boolean
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          industry?: string | null
+          slug: string
+          summary: string
+          title: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          industry?: string | null
+          slug?: string
+          summary?: string
+          title?: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
+      case_study_results: {
+        Row: {
+          case_study_id: string
+          created_at: string
+          display_order: number
+          id: string
+          text: string
+          updated_at: string
+        }
+        Insert: {
+          case_study_id: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          text: string
+          updated_at?: string
+        }
+        Update: {
+          case_study_id?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_study_results_case_study_id_fkey"
+            columns: ["case_study_id"]
+            isOneToOne: false
+            referencedRelation: "case_studies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      case_study_testimonials: {
+        Row: {
+          author: string
+          case_study_id: string
+          company: string | null
+          created_at: string
+          id: string
+          position: string | null
+          quote: string
+          updated_at: string
+        }
+        Insert: {
+          author: string
+          case_study_id: string
+          company?: string | null
+          created_at?: string
+          id?: string
+          position?: string | null
+          quote: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string
+          case_study_id?: string
+          company?: string | null
+          created_at?: string
+          id?: string
+          position?: string | null
+          quote?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_study_testimonials_case_study_id_fkey"
+            columns: ["case_study_id"]
+            isOneToOne: false
+            referencedRelation: "case_studies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cms_media: {
         Row: {
           alt_text: string | null

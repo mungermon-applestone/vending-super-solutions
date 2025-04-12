@@ -29,9 +29,14 @@ import AdminBusinessGoals from './pages/admin/AdminBusinessGoals';
 import AdminTechnology from './pages/admin/AdminTechnology';
 import AdminBlog from './pages/admin/AdminBlog';
 import AdminMedia from './pages/admin/AdminMedia';
+import AdminCaseStudies from './pages/admin/AdminCaseStudies';
 import ProductEditor from './pages/ProductEditor';
 import MachineEditor from './pages/MachineEditor';
 import TechnologyEditor from './pages/TechnologyEditor';
+
+// Public pages
+import CaseStudies from './pages/CaseStudies';
+import CaseStudyDetail from './pages/CaseStudyDetail';
 
 function App() {
   return (
@@ -47,6 +52,10 @@ function App() {
           <Route path="/contact" element={<PlaceholderPage />} />
           <Route path="/blog" element={<PlaceholderPage />} />
           <Route path="/blog/:postSlug" element={<PlaceholderPage />} />
+          
+          {/* Case Studies routes */}
+          <Route path="/case-studies" element={<CaseStudies />} />
+          <Route path="/case-studies/:slug" element={<CaseStudyDetail />} />
           
           {/* Auth routes */}
           <Route path="/admin/sign-in" element={<SignIn />} />
@@ -70,6 +79,9 @@ function App() {
           <Route path="/admin/blog/new" element={<PlaceholderPage />} />
           <Route path="/admin/blog/edit/:postSlug" element={<PlaceholderPage />} />
           <Route path="/admin/media" element={<AdminMedia />} />
+          <Route path="/admin/case-studies" element={<AdminCaseStudies />} />
+          <Route path="/admin/case-studies/new" element={<PlaceholderPage />} />
+          <Route path="/admin/case-studies/edit/:caseStudySlug" element={<PlaceholderPage />} />
           
           {/* 404 fallback */}
           <Route path="*" element={<NotFound />} />
