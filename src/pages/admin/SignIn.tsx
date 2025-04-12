@@ -14,7 +14,7 @@ const SignIn: React.FC = () => {
   const [password, setPassword] = useState('Password123!'); // Set default admin password
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { signIn, user, isAdmin } = useAuth();
+  const { signIn, signUp, user, isAdmin } = useAuth();
   const navigate = useNavigate();
   
   // If user is already logged in and is an admin, redirect to admin dashboard
@@ -36,7 +36,6 @@ const SignIn: React.FC = () => {
     
     try {
       console.log("Creating default admin account");
-      const { signUp } = useAuth();
       await signUp(email, password);
       
       // After sign-up, attempt to sign in
