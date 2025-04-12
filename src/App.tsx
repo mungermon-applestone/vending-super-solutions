@@ -33,7 +33,7 @@ import AdminCaseStudies from './pages/admin/AdminCaseStudies';
 import ProductEditor from './pages/ProductEditor';
 import MachineEditor from './pages/MachineEditor';
 import TechnologyEditor from './pages/TechnologyEditor';
-import CaseStudyEditor from './pages/admin/CaseStudyEditor';
+import CaseStudyEditor from './pages/admin/CaseStudyEditor'; // Make sure this import is correct
 
 // Public pages
 import CaseStudies from './pages/CaseStudies';
