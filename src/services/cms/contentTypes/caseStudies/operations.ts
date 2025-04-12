@@ -4,18 +4,18 @@ import { CaseStudyWithRelations } from '@/types/caseStudy';
 import { fetchCaseStudies, fetchCaseStudyBySlug, createCaseStudy, updateCaseStudy, deleteCaseStudy } from './index';
 
 export const caseStudyOperations: ContentTypeOperations<CaseStudyWithRelations> = {
-  getAll: async () => {
+  fetchAll: async (options) => {
     const studies = await fetchCaseStudies();
     return studies;
   },
   
-  getBySlug: async (slug: string) => {
+  fetchBySlug: async (slug: string) => {
     return await fetchCaseStudyBySlug(slug);
   },
   
-  getById: async (id: string) => {
+  fetchById: async (id: string) => {
     const allStudies = await fetchCaseStudies();
-    return allStudies.find(study => study.id === id);
+    return allStudies.find(study => study.id === id) || null;
   },
   
   create: async (data) => {
@@ -26,7 +26,8 @@ export const caseStudyOperations: ContentTypeOperations<CaseStudyWithRelations> 
     return await updateCaseStudy(id, data);
   },
   
-  remove: async (id) => {
+  delete: async (id) => {
     await deleteCaseStudy(id);
+    return true;
   },
 };
