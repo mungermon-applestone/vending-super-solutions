@@ -1,5 +1,6 @@
 import { IS_DEVELOPMENT } from '@/config/cms';
 import { v4 as uuidv4 } from 'uuid';
+import { LandingPage } from '@/types/landingPage';
 
 export const useMockData = IS_DEVELOPMENT;
 
@@ -102,6 +103,30 @@ let mockData: { [key: string]: any[] } = {
       updated_at: new Date().toISOString(),
     },
   ],
+  'landing-pages': [
+    {
+      id: "landing-home-123",
+      page_key: "home",
+      page_name: "Home Page",
+      hero_content_id: "hero-home-123",
+      hero_content: {
+        id: "hero-home-123",
+        title: "Vend Anything You Sell",
+        subtitle: "Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.",
+        image_url: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81",
+        image_alt: "Vending Machine Software Interface",
+        cta_primary_text: "Request a Demo",
+        cta_primary_url: "/contact",
+        cta_secondary_text: "Explore Solutions", 
+        cta_secondary_url: "/products",
+        background_class: "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light",
+        created_at: "2023-01-01T00:00:00Z",
+        updated_at: "2023-01-01T00:00:00Z"
+      },
+      created_at: "2023-01-01T00:00:00Z",
+      updated_at: "2023-01-01T00:00:00Z"
+    }
+  ]
 };
 
 // Function to seed initial mock data
@@ -210,7 +235,32 @@ export const seedMockData = () => {
         updated_at: new Date().toISOString(),
       },
     ],
+    'landing-pages': [
+      {
+        id: "landing-home-123",
+        page_key: "home",
+        page_name: "Home Page",
+        hero_content_id: "hero-home-123",
+        hero_content: {
+          id: "hero-home-123",
+          title: "Vend Anything You Sell",
+          subtitle: "Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.",
+          image_url: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81",
+          image_alt: "Vending Machine Software Interface",
+          cta_primary_text: "Request a Demo",
+          cta_primary_url: "/contact",
+          cta_secondary_text: "Explore Solutions", 
+          cta_secondary_url: "/products",
+          background_class: "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light",
+          created_at: "2023-01-01T00:00:00Z",
+          updated_at: "2023-01-01T00:00:00Z"
+        },
+        created_at: "2023-01-01T00:00:00Z",
+        updated_at: "2023-01-01T00:00:00Z"
+      }
+    ]
   };
+  
   console.log('Mock data seeded.');
 };
 
@@ -225,7 +275,39 @@ export async function getMockData<T>(contentType: string, params: Record<string,
 
   if (!mockData[contentType]) {
     console.warn(`[getMockData] No mock data found for content type: ${contentType}`);
-    return [];
+    // Initialize landing pages if this is the first time we're trying to access it
+    if (contentType === 'landing-pages' && useMockData) {
+      console.log('[getMockData] Initializing landing pages mock data');
+      mockData['landing-pages'] = [
+        {
+          id: "landing-home-123",
+          page_key: "home",
+          page_name: "Home Page",
+          hero_content_id: "hero-home-123",
+          hero_content: {
+            id: "hero-home-123",
+            title: "Vend Anything You Sell",
+            subtitle: "Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.",
+            image_url: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81",
+            image_alt: "Vending Machine Software Interface",
+            cta_primary_text: "Request a Demo",
+            cta_primary_url: "/contact",
+            cta_secondary_text: "Explore Solutions", 
+            cta_secondary_url: "/products",
+            background_class: "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light",
+            created_at: "2023-01-01T00:00:00Z",
+            updated_at: "2023-01-01T00:00:00Z"
+          },
+          created_at: "2023-01-01T00:00:00Z",
+          updated_at: "2023-01-01T00:00:00Z"
+        }
+      ];
+    }
+    
+    // If still no data, return empty array
+    if (!mockData[contentType]) {
+      return [];
+    }
   }
 
   let results = [...mockData[contentType]] as T[];
@@ -245,9 +327,7 @@ export async function getMockData<T>(contentType: string, params: Record<string,
   return results;
 }
 
-// Only add the new function to properly set up mock landing pages
-
-// Add this function to the file, don't replace the entire file
+// Export function to get mock landing pages (keep this for compatibility)
 export function _getMockLandingPages() {
   const homeHeroId = "hero-home-123";
   const homeId = "landing-home-123";

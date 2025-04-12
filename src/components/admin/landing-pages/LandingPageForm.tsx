@@ -141,7 +141,6 @@ const LandingPageForm: React.FC<LandingPageFormProps> = ({
           <Button 
             type="submit" 
             disabled={isSubmitting}
-            onClick={() => console.log("Save button clicked, current form state:", form.getValues())}
           >
             {isSubmitting ? "Saving..." : "Save Landing Page"}
           </Button>

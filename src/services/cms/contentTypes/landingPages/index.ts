@@ -1,6 +1,6 @@
 
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
-import { useMockData, getMockData, _getMockLandingPages } from '../../mockDataHandler';
+import { useMockData, getMockData } from '../../mockDataHandler';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -29,7 +29,7 @@ export async function fetchLandingPageByKey(key: string): Promise<LandingPage | 
     console.log(`[fetchLandingPageByKey] Fetching landing page with key: ${key}`);
     const pages = await fetchLandingPages();
     const page = pages.find(page => page.page_key === key);
-    console.log(`[fetchLandingPageByKey] Found page for key ${key}:`, page ? "Yes" : "No");
+    console.log(`[fetchLandingPageByKey] Found page for key ${key}:`, page ? "Yes" : "No", page);
     return page || null;
   } catch (error) {
     console.error(`[fetchLandingPageByKey] Error fetching landing page with key ${key}:`, error);
@@ -77,17 +77,27 @@ export async function createLandingPage(data: LandingPageFormData): Promise<Land
       
       // If another page with the same key already exists, update it instead
       const existingPageIndex = existingPages.findIndex(p => p.page_key === data.page_key);
+      
       if (existingPageIndex !== -1) {
         console.log(`[createLandingPage] Page with key ${data.page_key} already exists, updating instead`);
         existingPages[existingPageIndex] = newPage;
-        // In a real app this would use Supabase to update the database
       } else {
         // Add the new page
+        console.log(`[createLandingPage] Adding new page with key ${data.page_key}`);
         existingPages.push(newPage);
       }
       
       // In a real app, this would use Supabase to update the database
-      console.log(`[createLandingPage] Updated mock data with ${existingPages.length} landing pages`);
+      // Store updated pages back to mock data
+      if (!Array.isArray(window.__MOCK_DATA)) {
+        window.__MOCK_DATA = {};
+      }
+      if (!window.__MOCK_DATA['landing-pages']) {
+        window.__MOCK_DATA['landing-pages'] = [];
+      }
+      
+      window.__MOCK_DATA['landing-pages'] = existingPages;
+      console.log(`[createLandingPage] Updated mock data with ${existingPages.length} landing pages:`, existingPages);
     } catch (error) {
       console.error('[createLandingPage] Error updating mock landing pages:', error);
     }
@@ -141,7 +151,16 @@ export async function updateLandingPage(id: string, data: Partial<LandingPageFor
       if (pageIndex !== -1) {
         // Replace the old page with the updated one
         existingPages[pageIndex] = updatedPage;
-        // In a real app this would use Supabase to update the database
+        
+        // Store updated pages back to mock data
+        if (!Array.isArray(window.__MOCK_DATA)) {
+          window.__MOCK_DATA = {};
+        }
+        if (!window.__MOCK_DATA['landing-pages']) {
+          window.__MOCK_DATA['landing-pages'] = [];
+        }
+        
+        window.__MOCK_DATA['landing-pages'] = existingPages;
       }
       
       console.log(`[updateLandingPage] Updated mock data with ${existingPages.length} landing pages`);
@@ -165,7 +184,12 @@ export async function deleteLandingPage(id: string): Promise<void> {
       // Filter out the page to delete
       const filteredPages = existingPages.filter(p => p.id !== id);
       
-      // In a real app, this would use Supabase to update the database
+      // Store updated pages back to mock data
+      if (!Array.isArray(window.__MOCK_DATA)) {
+        window.__MOCK_DATA = {};
+      }
+      window.__MOCK_DATA['landing-pages'] = filteredPages;
+      
       console.log(`[deleteLandingPage] Removed page from mock data, now have ${filteredPages.length} landing pages`);
     } catch (error) {
       console.error('[deleteLandingPage] Error deleting mock landing page:', error);
@@ -173,4 +197,13 @@ export async function deleteLandingPage(id: string): Promise<void> {
   }
   
   // Implementation would delete both the page and associated hero content
+}
+
+// Define window.__MOCK_DATA type to avoid TypeScript errors
+declare global {
+  interface Window {
+    __MOCK_DATA: {
+      [key: string]: any[];
+    };
+  }
 }

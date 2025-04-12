@@ -21,6 +21,11 @@ const LandingPageEditor = () => {
   const createMutation = useCreateLandingPage();
   const updateMutation = useUpdateLandingPage();
   
+  // Debug the landing pages data
+  useEffect(() => {
+    console.log("LandingPageEditor - Landing pages data:", landingPages);
+  }, [landingPages]);
+  
   // Type assertion to ensure landingPages is treated as an array of LandingPage
   const currentPage = landingPages ? 
     (landingPages as LandingPage[]).find(page => page.id === id) : 

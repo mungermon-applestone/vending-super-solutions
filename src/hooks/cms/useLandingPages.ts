@@ -7,7 +7,11 @@ import { createQueryOptions } from './useQueryDefaults';
 export function useLandingPages() {
   return useQuery<LandingPage[]>({
     queryKey: ['landing-pages'],
-    queryFn: fetchLandingPages,
+    queryFn: async () => {
+      const pages = await fetchLandingPages();
+      console.log('useLandingPages hook fetched data:', pages);
+      return pages as LandingPage[];
+    },
     ...createQueryOptions()
   });
 }
@@ -15,7 +19,16 @@ export function useLandingPages() {
 export function useLandingPageByKey(key: string) {
   return useQuery<LandingPage | null>({
     queryKey: ['landing-pages', key],
-    queryFn: () => fetchLandingPageByKey(key),
+    queryFn: async () => {
+      try {
+        const page = await fetchLandingPageByKey(key);
+        console.log(`useLandingPageByKey hook (${key}) fetched data:`, page);
+        return page as LandingPage | null;
+      } catch (error) {
+        console.error(`Error fetching landing page by key (${key}):`, error);
+        return null;
+      }
+    },
     enabled: !!key,
     ...createQueryOptions()
   });
