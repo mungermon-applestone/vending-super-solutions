@@ -8,6 +8,7 @@ import BusinessGoalsSection from '@/components/home/BusinessGoalsSection';
 import MachineTypesSection from '@/components/home/MachineTypesSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CTASection from '@/components/common/CTASection';
+import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
 
 const Index = () => {
   // Add diagnostic logging to help troubleshoot rendering issues
@@ -17,6 +18,15 @@ const Index = () => {
       console.log('Index page unmounted');
     };
   }, []);
+
+  // Fetch hero content from CMS for the home page
+  const { data: landingPage, isLoading, error } = useLandingPageByKey('home');
+
+  useEffect(() => {
+    console.log('Landing page data:', landingPage);
+    console.log('Landing page loading:', isLoading);
+    console.log('Landing page error:', error);
+  }, [landingPage, isLoading, error]);
 
   return (
     <Layout>
