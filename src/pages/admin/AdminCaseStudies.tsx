@@ -32,7 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
 import { useCaseStudies, useDeleteCaseStudy } from '@/hooks/useCaseStudies';
-import DeleteDialog from '@/components/admin/common/DeleteEntityDialog';
+import DeleteEntityDialog from '@/components/admin/common/DeleteEntityDialog';
 
 const AdminCaseStudies = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -207,13 +207,13 @@ const AdminCaseStudies = () => {
         </Card>
       </div>
 
-      <DeleteDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        title="Delete Case Study"
-        description={`Are you sure you want to delete "${selectedCaseStudyTitle}"? This action cannot be undone.`}
-        onDelete={handleDeleteConfirm}
+      <DeleteEntityDialog
+        isOpen={deleteDialogOpen}
+        setIsOpen={setDeleteDialogOpen}
+        entityToDelete={selectedCaseStudyId ? { id: selectedCaseStudyId, title: selectedCaseStudyTitle, slug: '' } : null}
+        onConfirmDelete={handleDeleteConfirm}
         isDeleting={deleteCaseStudy.isPending}
+        entityType="case study"
       />
     </Layout>
   );

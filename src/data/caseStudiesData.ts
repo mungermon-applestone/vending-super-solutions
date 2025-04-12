@@ -59,3 +59,23 @@ export const caseStudies: CaseStudy[] = [
 export function getCaseStudyBySlug(slug: string): CaseStudy | undefined {
   return caseStudies.find(study => study.slug === slug);
 }
+
+// Function to get business goal related case studies
+export function getBusinessGoalCaseStudies(): CaseStudy[] {
+  // For now, return a subset of case studies that relate to business goals
+  // In a real app, this would filter based on a tag or category
+  return caseStudies.slice(0, 2);
+}
+
+// Function to get product related case studies
+export function getProductCaseStudies(): CaseStudy[] {
+  // Return case studies related to products
+  return caseStudies.filter(study => 
+    study.industry === 'Technology' || study.industry === 'Manufacturing');
+}
+
+// Function to get technology related case studies
+export function getTechnologyCaseStudies(): CaseStudy[] {
+  // Return case studies that showcase technology solutions
+  return caseStudies.filter(study => study.industry === 'Technology');
+}
