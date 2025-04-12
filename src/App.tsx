@@ -42,6 +42,11 @@ import CaseStudies from './pages/CaseStudies';
 import CaseStudyDetail from './pages/CaseStudyDetail';
 import MachinesLanding from './pages/MachinesLanding';
 import MachineDetail from './pages/MachineDetail';
+import BlogPostDetail from './pages/BlogPostDetail';
+import Blog from './pages/Blog';
+import BusinessGoalEditor from './pages/admin/BusinessGoalEditor';
+import BlogEditor from './pages/admin/BlogEditor';
+import TechnologyDetail from './pages/TechnologyDetail';
 
 function App() {
   return (
@@ -50,14 +55,15 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Homepage />} />
-          <Route path="/products" element={<PlaceholderPage />} />
+          <Route path="/products/:productSlug" element={<PlaceholderPage />} />
           <Route path="/machines" element={<MachinesLanding />} />
           <Route path="/machines/:machineType/:machineId" element={<MachineDetail />} />
           <Route path="/business-goals" element={<PlaceholderPage />} />
           <Route path="/technology" element={<PlaceholderPage />} />
+          <Route path="/technology/:slug" element={<TechnologyDetail />} />
           <Route path="/contact" element={<PlaceholderPage />} />
-          <Route path="/blog" element={<PlaceholderPage />} />
-          <Route path="/blog/:postSlug" element={<PlaceholderPage />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPostDetail />} />
           
           {/* Case Studies routes */}
           <Route path="/case-studies" element={<CaseStudies />} />
@@ -76,14 +82,14 @@ function App() {
           <Route path="/admin/machines/new" element={<MachineEditor />} />
           <Route path="/admin/machines/edit/:machineId" element={<MachineEditor />} />
           <Route path="/admin/business-goals" element={<AdminBusinessGoals />} />
-          <Route path="/admin/business-goals/new" element={<PlaceholderPage />} />
-          <Route path="/admin/business-goals/edit/:goalSlug" element={<PlaceholderPage />} />
+          <Route path="/admin/business-goals/new" element={<BusinessGoalEditor />} />
+          <Route path="/admin/business-goals/edit/:goalSlug" element={<BusinessGoalEditor />} />
           <Route path="/admin/technology" element={<AdminTechnology />} />
           <Route path="/admin/technology/new" element={<TechnologyEditor />} />
           <Route path="/admin/technology/edit/:technologySlug" element={<TechnologyEditor />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
-          <Route path="/admin/blog/new" element={<PlaceholderPage />} />
-          <Route path="/admin/blog/edit/:postSlug" element={<PlaceholderPage />} />
+          <Route path="/admin/blog/new" element={<BlogEditor />} />
+          <Route path="/admin/blog/edit/:postId" element={<BlogEditor />} />
           <Route path="/admin/media" element={<AdminMedia />} />
           <Route path="/admin/case-studies" element={<AdminCaseStudies />} />
           <Route path="/admin/case-studies/new" element={<CaseStudyEditor />} />
