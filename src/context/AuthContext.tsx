@@ -42,6 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initializeAuth = async () => {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
+        console.log('Current session:', currentSession);
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
@@ -101,6 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Signed in successfully",
         description: "Welcome back!",
       });
+      return data;
     } catch (error) {
       console.error('Sign-in error:', error);
       throw error;

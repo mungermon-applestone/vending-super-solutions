@@ -34,7 +34,8 @@ const SignIn: React.FC = () => {
       console.log("Submitting sign-in form with email:", email);
       await signIn(email, password);
       // If we reach here, sign-in was successful (no error thrown)
-      console.log("Sign-in successful");
+      console.log("Sign-in successful, navigating to admin dashboard");
+      navigate('/admin');
     } catch (error: any) {
       console.error('Authentication error:', error);
       setErrorMessage(error?.message || 'Invalid email or password. Please try again.');
