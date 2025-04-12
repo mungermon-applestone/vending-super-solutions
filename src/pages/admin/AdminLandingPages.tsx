@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -16,18 +15,30 @@ import { LandingPage } from '@/types/landingPage';
 const AdminLandingPages = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: landingPages = [], isLoading, error } = useLandingPages();
+  const { data: landingPages = [], isLoading, error, refetch } = useLandingPages();
   const deleteMutation = useDeleteLandingPage();
 
-  // Enhanced debugging to see what's going on
+  // Enhanced debugging to see what's going on - always runs in all environments
   useEffect(() => {
+    console.log("[AdminLandingPages] Mounting component");
     console.log("[AdminLandingPages] Landing Pages Data:", landingPages);
     console.log("[AdminLandingPages] Is Loading:", isLoading);
     console.log("[AdminLandingPages] Error:", error);
     console.log("[AdminLandingPages] Data type:", landingPages ? typeof landingPages : "undefined");
     console.log("[AdminLandingPages] Is Array:", landingPages ? Array.isArray(landingPages) : "n/a");
     console.log("[AdminLandingPages] Length:", landingPages && Array.isArray(landingPages) ? landingPages.length : "n/a");
+    
+    if (error) {
+      console.error("[AdminLandingPages] Error details:", error);
+    }
   }, [landingPages, isLoading, error]);
+
+  // Try to fetch data on initial load and when component mounts
+  useEffect(() => {
+    refetch().catch(err => {
+      console.error("[AdminLandingPages] Error refetching data:", err);
+    });
+  }, [refetch]);
 
   const handleDeletePage = async (id: string) => {
     try {
@@ -38,6 +49,7 @@ const AdminLandingPages = () => {
         variant: 'default',
       });
     } catch (error) {
+      console.error("[AdminLandingPages] Delete error:", error);
       toast({
         title: 'Error',
         description: 'Failed to delete landing page',
@@ -85,18 +97,19 @@ const AdminLandingPages = () => {
           </Button>
         </div>
 
-        {/* Debug info for development */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-300 rounded">
-            <div className="flex items-center mb-2">
-              <AlertTriangle size={20} className="text-yellow-600 mr-2" />
-              <h3 className="font-medium">Debug Information</h3>
-            </div>
-            <p className="text-sm">Landing Pages Count: {Array.isArray(landingPages) ? landingPages.length : 'Not an array'}</p>
-            <p className="text-sm">Loading: {isLoading ? 'Yes' : 'No'}</p>
-            <p className="text-sm">Error: {error ? 'Yes' : 'No'}</p>
+        {/* Debug info - show in all environments to help diagnose issues */}
+        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-300 rounded">
+          <div className="flex items-center mb-2">
+            <AlertTriangle size={20} className="text-yellow-600 mr-2" />
+            <h3 className="font-medium">Debug Information</h3>
           </div>
-        )}
+          <p className="text-sm">Landing Pages Count: {Array.isArray(landingPages) ? landingPages.length : 'Not an array'}</p>
+          <p className="text-sm">Loading: {isLoading ? 'Yes' : 'No'}</p>
+          <p className="text-sm">Error: {error ? 'Yes' : 'No'}</p>
+          {error && (
+            <p className="text-sm text-red-500">Error Message: {error instanceof Error ? error.message : 'Unknown error'}</p>
+          )}
+        </div>
         
         {isLoading && (
           <div className="space-y-4">

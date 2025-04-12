@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
 import { Button } from '@/components/ui/button';
-import { LandingPage } from '@/types/landingPage';
 import { Link } from 'react-router-dom';
 
 interface PageHeroProps {
@@ -28,10 +27,11 @@ const PageHero: React.FC<PageHeroProps> = ({
   fallbackSecondaryButtonText,
   fallbackSecondaryButtonUrl,
 }) => {
-  const { data: landingPage, isLoading, error } = useLandingPageByKey(pageKey);
+  const { data: landingPage, isLoading, error, refetch } = useLandingPageByKey(pageKey);
   
-  // Add enhanced debugging to track what's happening
+  // Add enhanced debugging to track what's happening - in all environments
   useEffect(() => {
+    console.log(`PageHero component for ${pageKey} - mounted`);
     console.log(`PageHero component for ${pageKey}:`, {
       landingPage,
       isLoading,
@@ -39,7 +39,16 @@ const PageHero: React.FC<PageHeroProps> = ({
       hasCmsData: !!landingPage,
       heroContent: landingPage ? landingPage.hero_content : null,
     });
-  }, [pageKey, landingPage, isLoading, error]);
+    
+    if (error) {
+      console.error(`PageHero component for ${pageKey} - Error:`, error);
+    }
+    
+    // Try to refetch on mount to ensure we have the latest data
+    refetch().catch(err => {
+      console.error(`PageHero component for ${pageKey} - Refetch error:`, err);
+    });
+  }, [pageKey, landingPage, isLoading, error, refetch]);
   
   // Use CMS data if available, otherwise fall back to props
   const heroContent = landingPage?.hero_content || null;
@@ -64,7 +73,7 @@ const PageHero: React.FC<PageHeroProps> = ({
   const backgroundClass = heroContent?.background_class || 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light';
   
   return (
-    <section className={`py-16 ${backgroundClass}`}>
+    <section className={`py-16 ${backgroundClass}`} data-testid={`page-hero-${pageKey}`}>
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="space-y-6">

@@ -1,4 +1,3 @@
-
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 import { useMockData, getMockData } from '../../mockDataHandler';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,12 +10,22 @@ export async function fetchLandingPages(): Promise<LandingPage[]> {
   if (useMockData) {
     try {
       console.log("[fetchLandingPages] Using mock data");
+      // Explicitly force window.__MOCK_DATA initialization if it doesn't exist
+      if (typeof window !== 'undefined' && (!window.__MOCK_DATA || !window.__MOCK_DATA['landing-pages'])) {
+        console.log("[fetchLandingPages] Initializing window.__MOCK_DATA['landing-pages']");
+        if (!window.__MOCK_DATA) window.__MOCK_DATA = {};
+        
+        // Import seed data directly to ensure it's available
+        const { _getMockLandingPages } = require('../../mockDataHandler');
+        window.__MOCK_DATA['landing-pages'] = _getMockLandingPages();
+      }
+      
       const landingPages = await getMockData<LandingPage>('landing-pages');
       console.log(`[fetchLandingPages] Fetched ${landingPages.length} landing pages:`, landingPages);
       return landingPages;
     } catch (error) {
       console.error("[fetchLandingPages] Error fetching mock landing pages:", error);
-      return [];
+      throw error; // Propagate the error to be handled by the caller
     }
   }
   
@@ -27,7 +36,7 @@ export async function fetchLandingPages(): Promise<LandingPage[]> {
     return [];
   } catch (error) {
     console.error("[fetchLandingPages] Error fetching from Supabase:", error);
-    return [];
+    throw error;
   }
 }
 

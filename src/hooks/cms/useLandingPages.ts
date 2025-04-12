@@ -8,18 +8,26 @@ export function useLandingPages() {
   return useQuery<LandingPage[]>({
     queryKey: ['landing-pages'],
     queryFn: async () => {
+      console.log('useLandingPages hook fetching data...');
       try {
         const pages = await fetchLandingPages();
         console.log('useLandingPages hook fetched data:', pages);
         
-        // Ensure we're returning an array even if pages is undefined
-        return Array.isArray(pages) ? pages : [];
+        // Force return of an empty array if pages is undefined or null
+        if (!pages || !Array.isArray(pages)) {
+          console.warn('useLandingPages: fetchLandingPages returned unexpected data type:', typeof pages);
+          return [];
+        }
+        
+        return pages;
       } catch (error) {
         console.error('Error in useLandingPages:', error);
-        return [];
+        throw error; // Let the error propagate to React Query's error handler
       }
     },
-    ...createQueryOptions()
+    ...createQueryOptions(),
+    retry: 2,
+    staleTime: 60000, // 1 minute
   });
 }
 
@@ -27,6 +35,7 @@ export function useLandingPageByKey(key: string) {
   return useQuery<LandingPage | null>({
     queryKey: ['landing-pages', key],
     queryFn: async () => {
+      console.log(`useLandingPageByKey hook fetching data for key: ${key}`);
       try {
         const page = await fetchLandingPageByKey(key);
         console.log(`useLandingPageByKey hook (${key}) fetched data:`, page);
