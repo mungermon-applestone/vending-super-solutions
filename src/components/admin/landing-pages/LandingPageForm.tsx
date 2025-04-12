@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -7,6 +7,7 @@ import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LandingPageFormData } from '@/types/landingPage';
+import { useToast } from '@/hooks/use-toast';
 
 // Import refactored tab components
 import BasicInformationTab from './tabs/BasicInformationTab';
@@ -64,6 +65,7 @@ const LandingPageForm: React.FC<LandingPageFormProps> = ({
   onSubmit,
   isSubmitting
 }) => {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
@@ -83,8 +85,28 @@ const LandingPageForm: React.FC<LandingPageFormProps> = ({
     }
   });
 
+  // Debug form state
+  useEffect(() => {
+    console.log("LandingPageForm - Form state:", {
+      values: form.getValues(),
+      errors: form.formState.errors,
+      isDirty: form.formState.isDirty,
+      isSubmitting: form.formState.isSubmitting,
+    });
+  }, [form.formState]);
+
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    onSubmit(data as LandingPageFormData);
+    console.log("LandingPageForm - Submitting form with data:", data);
+    try {
+      onSubmit(data as LandingPageFormData);
+    } catch (error) {
+      console.error("Error in form submission:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit form. Please check the console for details.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -116,7 +138,11 @@ const LandingPageForm: React.FC<LandingPageFormProps> = ({
         </Tabs>
         
         <div className="flex justify-end">
-          <Button type="submit" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            onClick={() => console.log("Save button clicked, current form state:", form.getValues())}
+          >
             {isSubmitting ? "Saving..." : "Save Landing Page"}
           </Button>
         </div>

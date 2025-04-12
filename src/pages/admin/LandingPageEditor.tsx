@@ -38,15 +38,19 @@ const LandingPageEditor = () => {
   }, [isEditing, landingPages, currentPage, navigate, toast]);
   
   const handleSubmit = async (data: LandingPageFormData) => {
+    console.log("LandingPageEditor - handleSubmit called with data:", data);
     try {
       if (isEditing && id) {
+        console.log(`Updating landing page ${id}`);
         await updateMutation.mutateAsync({ id, data });
         toast({
           title: "Success",
           description: "Landing page updated successfully",
         });
       } else {
-        await createMutation.mutateAsync(data);
+        console.log("Creating new landing page");
+        const result = await createMutation.mutateAsync(data);
+        console.log("Create mutation result:", result);
         toast({
           title: "Success",
           description: "Landing page created successfully",
@@ -54,6 +58,7 @@ const LandingPageEditor = () => {
       }
       navigate('/admin/landing-pages');
     } catch (error) {
+      console.error("Error in handleSubmit:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "An error occurred",

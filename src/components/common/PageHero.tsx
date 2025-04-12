@@ -28,23 +28,33 @@ const PageHero: React.FC<PageHeroProps> = ({
   fallbackSecondaryButtonText,
   fallbackSecondaryButtonUrl,
 }) => {
-  const { data: landingPage, isLoading } = useLandingPageByKey(pageKey);
+  const { data: landingPage, isLoading, error } = useLandingPageByKey(pageKey);
   
-  // Add debugging to track what's happening
+  // Add enhanced debugging to track what's happening
   useEffect(() => {
     console.log(`PageHero component for ${pageKey}:`, {
       landingPage,
       isLoading,
+      error,
       hasCmsData: !!landingPage,
       heroContent: landingPage ? (landingPage as LandingPage).hero_content : null,
     });
-  }, [pageKey, landingPage, isLoading]);
+  }, [pageKey, landingPage, isLoading, error]);
   
   // Type assertion to ensure landingPage is treated as LandingPage type
-  const typedLandingPage = landingPage as LandingPage | null | undefined;
+  const typedLandingPage = landingPage as LandingPage | null;
   
   // Use CMS data if available, otherwise fall back to props
   const heroContent = typedLandingPage?.hero_content || null;
+  
+  // Debug what content we're actually using
+  useEffect(() => {
+    console.log(`PageHero for ${pageKey} - Using content:`, {
+      usingCmsData: !!heroContent,
+      title: heroContent?.title || fallbackTitle,
+      subtitle: heroContent?.subtitle || fallbackSubtitle,
+    });
+  }, [heroContent, pageKey, fallbackTitle, fallbackSubtitle]);
   
   const title = heroContent?.title || fallbackTitle;
   const subtitle = heroContent?.subtitle || fallbackSubtitle;

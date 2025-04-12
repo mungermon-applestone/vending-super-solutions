@@ -25,10 +25,17 @@ export function useCreateLandingPage() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (data: LandingPageFormData) => createLandingPage(data),
-    onSuccess: () => {
+    mutationFn: (data: LandingPageFormData) => {
+      console.log('Creating landing page with data:', data);
+      return createLandingPage(data);
+    },
+    onSuccess: (data) => {
+      console.log('Landing page created successfully:', data);
       queryClient.invalidateQueries({ queryKey: ['landing-pages'] });
     },
+    onError: (error) => {
+      console.error('Error creating landing page:', error);
+    }
   });
 }
 
@@ -36,12 +43,18 @@ export function useUpdateLandingPage() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, data }: { id: string, data: Partial<LandingPageFormData> }) => 
-      updateLandingPage(id, data),
+    mutationFn: ({ id, data }: { id: string, data: Partial<LandingPageFormData> }) => {
+      console.log(`Updating landing page ${id} with data:`, data);
+      return updateLandingPage(id, data);
+    },
     onSuccess: (data: LandingPage) => {
+      console.log('Landing page updated successfully:', data);
       queryClient.invalidateQueries({ queryKey: ['landing-pages'] });
       queryClient.invalidateQueries({ queryKey: ['landing-pages', data.page_key] });
     },
+    onError: (error) => {
+      console.error('Error updating landing page:', error);
+    }
   });
 }
 

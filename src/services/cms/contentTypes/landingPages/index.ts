@@ -1,3 +1,4 @@
+
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 import { useMockData, getMockData, _getMockLandingPages } from '../../mockDataHandler';
 import { v4 as uuidv4 } from 'uuid';
@@ -37,6 +38,8 @@ export async function fetchLandingPageByKey(key: string): Promise<LandingPage | 
 }
 
 export async function createLandingPage(data: LandingPageFormData): Promise<LandingPage> {
+  console.log("[createLandingPage] Creating new landing page with data:", data);
+  
   const heroId = uuidv4();
   const pageId = uuidv4();
   const timestamp = new Date().toISOString();
@@ -64,17 +67,44 @@ export async function createLandingPage(data: LandingPageFormData): Promise<Land
     updated_at: timestamp,
   };
   
-  console.log("[createLandingPage] Created new landing page:", newPage.page_key);
+  console.log("[createLandingPage] Created new landing page:", newPage);
+  
+  // With mock data, we need to add the new page to our mock data store
+  if (useMockData) {
+    try {
+      // Get existing landing pages
+      const existingPages = await getMockData<LandingPage>('landing-pages');
+      
+      // If another page with the same key already exists, update it instead
+      const existingPageIndex = existingPages.findIndex(p => p.page_key === data.page_key);
+      if (existingPageIndex !== -1) {
+        console.log(`[createLandingPage] Page with key ${data.page_key} already exists, updating instead`);
+        existingPages[existingPageIndex] = newPage;
+        // In a real app this would use Supabase to update the database
+      } else {
+        // Add the new page
+        existingPages.push(newPage);
+      }
+      
+      // In a real app, this would use Supabase to update the database
+      console.log(`[createLandingPage] Updated mock data with ${existingPages.length} landing pages`);
+    } catch (error) {
+      console.error('[createLandingPage] Error updating mock landing pages:', error);
+    }
+  }
   
   // With Supabase, this would insert the new page and hero content
   return newPage;
 }
 
 export async function updateLandingPage(id: string, data: Partial<LandingPageFormData>): Promise<LandingPage> {
+  console.log(`[updateLandingPage] Updating landing page ${id} with data:`, data);
+  
   const pages = await fetchLandingPages();
   const pageToUpdate = pages.find(page => page.id === id);
   
   if (!pageToUpdate) {
+    console.error(`[updateLandingPage] Landing page with ID ${id} not found`);
     throw new Error(`Landing page with ID ${id} not found`);
   }
   
@@ -98,10 +128,49 @@ export async function updateLandingPage(id: string, data: Partial<LandingPageFor
     }
   };
   
+  console.log("[updateLandingPage] Updated landing page:", updatedPage);
+  
+  // With mock data, we need to update our mock data store
+  if (useMockData) {
+    try {
+      // Get existing landing pages
+      const existingPages = await getMockData<LandingPage>('landing-pages');
+      
+      // Find the page to update
+      const pageIndex = existingPages.findIndex(p => p.id === id);
+      if (pageIndex !== -1) {
+        // Replace the old page with the updated one
+        existingPages[pageIndex] = updatedPage;
+        // In a real app this would use Supabase to update the database
+      }
+      
+      console.log(`[updateLandingPage] Updated mock data with ${existingPages.length} landing pages`);
+    } catch (error) {
+      console.error('[updateLandingPage] Error updating mock landing pages:', error);
+    }
+  }
+  
   return updatedPage;
 }
 
 export async function deleteLandingPage(id: string): Promise<void> {
   console.log(`[deleteLandingPage] Deleting landing page with ID: ${id}`);
+  
+  // With mock data, we need to remove the page from our mock data store
+  if (useMockData) {
+    try {
+      // Get existing landing pages
+      const existingPages = await getMockData<LandingPage>('landing-pages');
+      
+      // Filter out the page to delete
+      const filteredPages = existingPages.filter(p => p.id !== id);
+      
+      // In a real app, this would use Supabase to update the database
+      console.log(`[deleteLandingPage] Removed page from mock data, now have ${filteredPages.length} landing pages`);
+    } catch (error) {
+      console.error('[deleteLandingPage] Error deleting mock landing page:', error);
+    }
+  }
+  
   // Implementation would delete both the page and associated hero content
 }

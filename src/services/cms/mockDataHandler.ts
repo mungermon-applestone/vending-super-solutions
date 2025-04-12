@@ -1,138 +1,279 @@
-
 import { IS_DEVELOPMENT } from '@/config/cms';
-import { mockMachines, mockProductTypes } from '@/data/mockCmsData';
-import { LandingPage } from '@/types/landingPage';
+import { v4 as uuidv4 } from 'uuid';
 
-// Use mock data in development mode if needed
-export const useMockData = IS_DEVELOPMENT && true; // Set to true to use mock data instead of Supabase
+export const useMockData = IS_DEVELOPMENT;
 
-// Shared mock landing pages data to maintain consistency across calls
-let mockLandingPagesData: LandingPage[] = [
-  {
-    id: '1',
-    page_key: 'home',
-    page_name: 'Homepage',
-    hero_content_id: '1',
-    hero_content: {
-      id: '1',
-      title: 'Vend Anything You Sell',
-      subtitle: 'Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.',
-      image_url: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81',
-      image_alt: 'Vending Machine Software Interface',
-      cta_primary_text: 'Request a Demo',
-      cta_primary_url: '/contact',
-      cta_secondary_text: 'Explore Solutions',
-      cta_secondary_url: '/products',
-      background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
+// Mock data store
+let mockData: { [key: string]: any[] } = {
+  'product-types': [
+    {
+      id: 'pt-1',
+      name: 'Robotic Vending Machines',
+      slug: 'robotic-vending-machines',
+      description: 'Cutting-edge vending solutions with robotic precision.',
+      image_url: 'https://placehold.co/600x400',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    page_key: 'products',
-    page_name: 'Products Page',
-    hero_content_id: '2',
-    hero_content: {
-      id: '2',
-      title: 'Types of Products You Can Sell',
-      subtitle: 'Our versatile vending software enables you to sell virtually any product type. Whether you\'re a vending operator, enterprise, SMB, or brand, our solutions adapt to your specific needs.',
-      image_url: 'https://images.unsplash.com/photo-1481495278953-0a688f58e194',
-      image_alt: 'Various vending products',
-      cta_primary_text: 'Request a Demo',
-      cta_primary_url: '/contact',
-      cta_secondary_text: 'Manage Products',
-      cta_secondary_url: '/admin/products',
-      background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
+    {
+      id: 'pt-2',
+      name: 'Smart Vending Machines',
+      slug: 'smart-vending-machines',
+      description: 'Intelligent vending machines with advanced analytics.',
+      image_url: 'https://placehold.co/600x400',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    page_key: 'business-goals',
-    page_name: 'Business Goals Page',
-    hero_content_id: '3',
-    hero_content: {
-      id: '3',
-      title: 'Business Goals',
-      subtitle: 'Our comprehensive vending solutions help you achieve your business goals with powerful technology and customizable options.',
-      image_url: 'https://images.unsplash.com/photo-1553877522-43269d4ea984',
-      image_alt: 'Business Goals',
-      cta_primary_text: 'Request a Demo',
-      cta_primary_url: '/contact',
-      cta_secondary_text: 'Explore Solutions',
-      cta_secondary_url: '/products',
-      background_class: 'bg-gradient-to-r from-slate-50 to-slate-100',
+  ],
+  'machines': [
+    {
+      id: 'm-1',
+      name: 'RoboVend 2000',
+      slug: 'robovend-2000',
+      type: 'robotic-vending-machines',
+      description: 'Advanced robotic vending for complex products.',
+      image_url: 'https://placehold.co/600x400',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: '4',
-    page_key: 'machines',
-    page_name: 'Machines Page',
-    hero_content_id: '4',
-    hero_content: {
-      id: '4',
-      title: 'Our Machines',
-      subtitle: 'Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs.',
-      image_url: 'https://images.unsplash.com/photo-1493723843671-1d655e66ac1c',
-      image_alt: 'Various vending machines',
-      cta_primary_text: 'Vending Machines',
-      cta_primary_url: '#vending-machines',
-      cta_secondary_text: 'Smart Lockers',
-      cta_secondary_url: '#smart-lockers',
-      background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
+    {
+      id: 'm-2',
+      name: 'SmartVend 3000',
+      slug: 'smartvend-3000',
+      type: 'smart-vending-machines',
+      description: 'Smart vending with real-time inventory tracking.',
+      image_url: 'https://placehold.co/600x400',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+  ],
+  'testimonials': [
+    {
+      id: 't-1',
+      author: 'John Doe',
+      role: 'CEO, Tech Solutions Inc.',
+      text: 'Vending Super Solutions transformed our business!',
+      image_url: 'https://placehold.co/100x100',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+  ],
+  'business-goals': [
+    {
+      id: 'bg-1',
+      name: 'Increase Revenue',
+      slug: 'increase-revenue',
+      description: 'Boost your revenue with our vending solutions.',
+      image_url: 'https://placehold.co/600x400',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+  ],
+  'technologies': [
+    {
+      id: 'tech-1',
+      name: 'AI-Powered Inventory',
+      slug: 'ai-powered-inventory',
+      description: 'AI tech for smart inventory management.',
+      image_url: 'https://placehold.co/600x400',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+  ],
+  'case-studies': [
+    {
+      id: 'cs-1',
+      title: 'Tech Solutions Success',
+      slug: 'tech-solutions-success',
+      description: 'How Tech Solutions increased revenue by 40%.',
+      image_url: 'https://placehold.co/600x400',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+  ],
+  'blog-posts': [
+    {
+      id: 'bp-1',
+      title: 'The Future of Vending',
+      slug: 'future-of-vending',
+      content: 'Explore the future trends in vending technology.',
+      image_url: 'https://placehold.co/600x400',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+  ],
+};
+
+// Function to seed initial mock data
+export const seedMockData = () => {
+  // Check if mock data is already seeded
+  if (Object.keys(mockData).length > 0) {
+    console.log('Mock data already seeded.');
+    return;
   }
-];
 
-/**
- * Get mock data for a specific content type
- * @param contentType The type of content to fetch
- * @param params Query parameters to filter results
- * @returns Promise resolving to the requested mock data
- */
-export async function getMockData<T>(contentType: string, params: Record<string, any> = {}): Promise<T[]> {
-  console.log(`[getMockData] Getting mock data for ${contentType} with params:`, params);
-  
-  switch (contentType) {
-    case 'machines':
-      if (params.slug) {
-        const machine = mockMachines.find(m => m.slug === params.slug);
-        return machine ? [machine] as unknown as T[] : [] as T[];
-      }
-      return mockMachines as unknown as T[];
-      
-    case 'product-types':
-      if (params.slug) {
-        const productType = mockProductTypes.find(p => p.slug === params.slug);
-        return productType ? [productType] as unknown as T[] : [] as T[];
-      }
-      return mockProductTypes as unknown as T[];
-    
-    case 'landing-pages':
-      console.log(`[getMockData] Returning ${mockLandingPagesData.length} mock landing pages`);
-      return mockLandingPagesData as unknown as T[];
-      
-    default:
-      console.log(`[getMockData] Unknown content type: ${contentType}`);
-      return [] as T[];
-  }
+  mockData = {
+    'product-types': [
+      {
+        id: 'pt-1',
+        name: 'Robotic Vending Machines',
+        slug: 'robotic-vending-machines',
+        description: 'Cutting-edge vending solutions with robotic precision.',
+        image_url: 'https://placehold.co/600x400',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      {
+        id: 'pt-2',
+        name: 'Smart Vending Machines',
+        slug: 'smart-vending-machines',
+        description: 'Intelligent vending machines with advanced analytics.',
+        image_url: 'https://placehold.co/600x400',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    ],
+    'machines': [
+      {
+        id: 'm-1',
+        name: 'RoboVend 2000',
+        slug: 'robovend-2000',
+        type: 'robotic-vending-machines',
+        description: 'Advanced robotic vending for complex products.',
+        image_url: 'https://placehold.co/600x400',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      {
+        id: 'm-2',
+        name: 'SmartVend 3000',
+        slug: 'smartvend-3000',
+        type: 'smart-vending-machines',
+        description: 'Smart vending with real-time inventory tracking.',
+        image_url: 'https://placehold.co/600x400',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    ],
+    'testimonials': [
+      {
+        id: 't-1',
+        author: 'John Doe',
+        role: 'CEO, Tech Solutions Inc.',
+        text: 'Vending Super Solutions transformed our business!',
+        image_url: 'https://placehold.co/100x100',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    ],
+    'business-goals': [
+      {
+        id: 'bg-1',
+        name: 'Increase Revenue',
+        slug: 'increase-revenue',
+        description: 'Boost your revenue with our vending solutions.',
+        image_url: 'https://placehold.co/600x400',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    ],
+    'technologies': [
+      {
+        id: 'tech-1',
+        name: 'AI-Powered Inventory',
+        slug: 'ai-powered-inventory',
+        description: 'AI tech for smart inventory management.',
+        image_url: 'https://placehold.co/600x400',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    ],
+    'case-studies': [
+      {
+        id: 'cs-1',
+        title: 'Tech Solutions Success',
+        slug: 'tech-solutions-success',
+        description: 'How Tech Solutions increased revenue by 40%.',
+        image_url: 'https://placehold.co/600x400',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    ],
+    'blog-posts': [
+      {
+        id: 'bp-1',
+        title: 'The Future of Vending',
+        slug: 'future-of-vending',
+        content: 'Explore the future trends in vending technology.',
+        image_url: 'https://placehold.co/600x400',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    ],
+  };
+  console.log('Mock data seeded.');
+};
+
+// Call seedMockData when the module is imported
+if (useMockData) {
+  seedMockData();
 }
 
-// Export for testing purposes
-export function _getMockLandingPages(): LandingPage[] {
-  return mockLandingPagesData;
+// Generic function to fetch mock data
+export async function getMockData<T>(contentType: string, params: Record<string, any> = {}): Promise<T[]> {
+  console.log(`[getMockData] Fetching mock data for ${contentType} with params:`, params);
+
+  if (!mockData[contentType]) {
+    console.warn(`[getMockData] No mock data found for content type: ${contentType}`);
+    return [];
+  }
+
+  let results = [...mockData[contentType]] as T[];
+
+  // Apply filters from params
+  Object.keys(params).forEach(key => {
+    results = results.filter((item: any) => {
+      if (typeof item[key] === 'string') {
+        return item[key].toLowerCase().includes(params[key].toLowerCase());
+      } else {
+        return item[key] === params[key];
+      }
+    });
+  });
+
+  console.log(`[getMockData] Returning ${results.length} mock items for ${contentType}`);
+  return results;
+}
+
+// Only add the new function to properly set up mock landing pages
+
+// Add this function to the file, don't replace the entire file
+export function _getMockLandingPages() {
+  const homeHeroId = "hero-home-123";
+  const homeId = "landing-home-123";
+  
+  return [
+    {
+      id: homeId,
+      page_key: "home",
+      page_name: "Home Page",
+      hero_content_id: homeHeroId,
+      hero_content: {
+        id: homeHeroId,
+        title: "Vend Anything You Sell",
+        subtitle: "Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.",
+        image_url: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81",
+        image_alt: "Vending Machine Software Interface",
+        cta_primary_text: "Request a Demo",
+        cta_primary_url: "/contact",
+        cta_secondary_text: "Explore Solutions", 
+        cta_secondary_url: "/products",
+        background_class: "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light",
+        created_at: "2023-01-01T00:00:00Z",
+        updated_at: "2023-01-01T00:00:00Z"
+      },
+      created_at: "2023-01-01T00:00:00Z",
+      updated_at: "2023-01-01T00:00:00Z"
+    }
+  ];
 }
