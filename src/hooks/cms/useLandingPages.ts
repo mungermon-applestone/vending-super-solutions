@@ -22,7 +22,7 @@ export function useLandingPages() {
         return pages;
       } catch (error) {
         console.error('Error in useLandingPages:', error);
-        throw error; // Let the error propagate to React Query's error handler
+        return []; // Return empty array on error to prevent UI from breaking
       }
     },
     ...createQueryOptions(),

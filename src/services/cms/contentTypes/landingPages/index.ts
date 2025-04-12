@@ -1,3 +1,4 @@
+
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 import { useMockData, getMockData } from '../../mockDataHandler';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,14 +11,23 @@ export async function fetchLandingPages(): Promise<LandingPage[]> {
   if (useMockData) {
     try {
       console.log("[fetchLandingPages] Using mock data");
-      // Explicitly force window.__MOCK_DATA initialization if it doesn't exist
+      
+      // Initialize mock data if it doesn't exist
       if (typeof window !== 'undefined' && (!window.__MOCK_DATA || !window.__MOCK_DATA['landing-pages'])) {
         console.log("[fetchLandingPages] Initializing window.__MOCK_DATA['landing-pages']");
         if (!window.__MOCK_DATA) window.__MOCK_DATA = {};
         
-        // Import seed data directly to ensure it's available
-        const { _getMockLandingPages } = require('../../mockDataHandler');
-        window.__MOCK_DATA['landing-pages'] = _getMockLandingPages();
+        // Use the mock data directly from mockDataHandler instead of using require()
+        import('../../mockDataHandler').then(module => {
+          window.__MOCK_DATA['landing-pages'] = module._getMockLandingPages();
+          console.log("[fetchLandingPages] Successfully initialized landing pages mock data");
+        }).catch(err => {
+          console.error("[fetchLandingPages] Failed to import mockDataHandler:", err);
+        });
+        
+        // While we're waiting for the import to complete, return an empty array
+        // This will be updated on subsequent calls after the import completes
+        return [];
       }
       
       const landingPages = await getMockData<LandingPage>('landing-pages');
