@@ -16,7 +16,12 @@ const SimpleTechnologyPage = () => {
   return (
     <Layout>
       {/* Hero Section */}
-      <TechnologyHeroSimple />
+      <TechnologyHeroSimple 
+        title="Our Technology Platform"
+        description="Powerful, reliable, and secure technology solutions designed specifically for the vending industry"
+        imageUrl="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789"
+        imageAlt="Vending Technology Platform"
+      />
 
       {/* Loading State */}
       {isFetching && (

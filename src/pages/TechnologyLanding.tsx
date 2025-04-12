@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -83,7 +82,9 @@ const TechnologyLanding = () => {
     return (
       <Layout>
         <TechnologyHero technology={technology} />
-        <TechnologySections technology={technology} />
+        {technology.sections && technology.sections.length > 0 && (
+          <TechnologySections sections={technology.sections} />
+        )}
         
         {/* Case Studies Section */}
         <CaseStudyCarousel 
