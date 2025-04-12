@@ -19,7 +19,10 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [selectedMediaIds, setSelectedMediaIds] = useState<string[]>([]);
   
+  console.log("[MediaSelector] Rendering with value:", value);
+  
   const handleOpenChange = (open: boolean) => {
+    console.log("[MediaSelector] Dialog open state changed to:", open);
     setIsOpen(open);
     if (!open) {
       // Reset selected items when closing without selecting
@@ -28,12 +31,14 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
   };
   
   const handleSelectMedia = (mediaId: string, url: string) => {
+    console.log("[MediaSelector] Selected media:", mediaId, url);
     setSelectedMediaIds([mediaId]);
     onChange(url);
     setIsOpen(false);
   };
   
   const handleRemove = () => {
+    console.log("[MediaSelector] Removing selected image");
     onChange('');
     setSelectedMediaIds([]);
   };
@@ -62,7 +67,10 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
         <Button
           type="button"
           variant={value ? "outline" : "default"}
-          onClick={() => setIsOpen(true)}
+          onClick={() => {
+            console.log("[MediaSelector] Opening media selection dialog");
+            setIsOpen(true);
+          }}
         >
           <Image className="mr-2 h-4 w-4" />
           {value ? "Change Image" : buttonLabel}

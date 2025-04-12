@@ -2,6 +2,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import MediaSelector from '@/components/admin/media/MediaSelector';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
 const ProductImage = ({ form }) => {
   return (
@@ -11,33 +13,43 @@ const ProductImage = ({ form }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div>
-            {form.control && (
-              <div className="space-y-1">
-                <label className="text-sm font-medium">Product Image</label>
-                <MediaSelector
-                  value={form.watch?.("image.url") || ""}
-                  onChange={(url) => form.setValue?.("image.url", url)}
-                  buttonLabel="Select Product Image"
-                />
-              </div>
+          <FormField
+            control={form.control}
+            name="image.url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Product Image</FormLabel>
+                <FormControl>
+                  <MediaSelector
+                    value={field.value || ""}
+                    onChange={(url) => {
+                      form.setValue("image.url", url);
+                      console.log("[ProductImage] Selected image URL:", url);
+                    }}
+                    buttonLabel="Select Product Image"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-          </div>
+          />
           
-          {form.control && (
-            <div className="space-y-1">
-              <label className="text-sm font-medium">
-                Alt Text
-              </label>
-              <input
-                type="text"
-                className="w-full border rounded-md px-3 py-2"
-                placeholder="Description for accessibility"
-                value={form.watch?.("image.alt") || ""}
-                onChange={(e) => form.setValue?.("image.alt", e.target.value)}
-              />
-            </div>
-          )}
+          <FormField
+            control={form.control}
+            name="image.alt"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Alt Text</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Description for accessibility" 
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       </CardContent>
     </Card>
