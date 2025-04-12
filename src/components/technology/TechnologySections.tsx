@@ -1,15 +1,15 @@
 
 import React from 'react';
-import { CMSTechnology } from '@/types/cms';
+import { CMSTechnology, CMSTechnologySection } from '@/types/cms';
 import TechnologyFeatureSection from './TechnologyFeatureSection';
 
 interface TechnologySectionsProps {
-  technology: CMSTechnology;
+  sections: CMSTechnologySection[];
 }
 
-const TechnologySections: React.FC<TechnologySectionsProps> = ({ technology }) => {
+const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => {
   // Sort sections by display order
-  const sortedSections = [...(technology.sections || [])].sort(
+  const sortedSections = [...sections].sort(
     (a, b) => a.display_order - b.display_order
   );
 
