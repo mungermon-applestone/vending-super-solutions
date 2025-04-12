@@ -26,7 +26,7 @@ const AdminLandingPages = () => {
     console.log("[AdminLandingPages] Error:", error);
     console.log("[AdminLandingPages] Data type:", landingPages ? typeof landingPages : "undefined");
     console.log("[AdminLandingPages] Is Array:", landingPages ? Array.isArray(landingPages) : "n/a");
-    console.log("[AdminLandingPages] Length:", landingPages ? landingPages.length : "n/a");
+    console.log("[AdminLandingPages] Length:", landingPages && Array.isArray(landingPages) ? (landingPages as LandingPage[]).length : "n/a");
   }, [landingPages, isLoading, error]);
 
   const handleDeletePage = async (id: string) => {
@@ -70,6 +70,9 @@ const AdminLandingPages = () => {
     window.open(path, '_blank');
   };
 
+  // Cast landingPages to the correct type to ensure TypeScript knows it's an array
+  const typedLandingPages = landingPages as LandingPage[] | undefined;
+
   return (
     <Layout>
       <AdminNavBar activeItem="landing-pages" />
@@ -112,7 +115,7 @@ const AdminLandingPages = () => {
           </div>
         )}
         
-        {!isLoading && !error && (!landingPages || landingPages.length === 0) && (
+        {!isLoading && !error && (!typedLandingPages || typedLandingPages.length === 0) && (
           <div className="text-center py-12 border border-dashed rounded-lg">
             <h3 className="font-medium text-lg mb-2">No Landing Pages Found</h3>
             <p className="text-gray-500 mb-6">Start by adding your first landing page</p>
@@ -122,7 +125,7 @@ const AdminLandingPages = () => {
           </div>
         )}
         
-        {!isLoading && !error && landingPages && landingPages.length > 0 && (
+        {!isLoading && !error && typedLandingPages && typedLandingPages.length > 0 && (
           <div className="bg-white rounded-md shadow overflow-hidden">
             <div className="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-600">
               <div className="col-span-3">Page Name</div>
@@ -132,7 +135,7 @@ const AdminLandingPages = () => {
             </div>
             
             <div className="divide-y divide-gray-200">
-              {landingPages.map((page: LandingPage) => (
+              {typedLandingPages.map((page: LandingPage) => (
                 <LandingPageTableRow 
                   key={page.id} 
                   page={page} 

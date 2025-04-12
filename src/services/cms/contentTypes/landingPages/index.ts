@@ -1,4 +1,3 @@
-
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 import { useMockData, getMockData, _getMockLandingPages } from '../../mockDataHandler';
 import { v4 as uuidv4 } from 'uuid';
