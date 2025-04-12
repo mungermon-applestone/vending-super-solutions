@@ -5,12 +5,11 @@ import Layout from '@/components/layout/Layout';
 import AdminControls from '@/components/admin/AdminControls';
 import AdminNavBar from '@/components/admin/AdminNavBar';
 import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2, Eye, ArrowRight } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useLandingPages } from '@/hooks/cms/useLandingPages';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useDeleteLandingPage } from '@/hooks/cms/useLandingPages';
-import { Badge } from '@/components/ui/badge';
 import LandingPageTableRow from '@/components/admin/landing-pages/LandingPageTableRow';
 import { LandingPage } from '@/types/landingPage';
 

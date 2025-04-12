@@ -7,25 +7,35 @@ import { supabase } from '@/integrations/supabase/client';
 // In a real app, this would be a Supabase query
 export async function fetchLandingPages(): Promise<LandingPage[]> {
   if (useMockData) {
-    // Check if we have any landing pages
-    const landingPages = await getLandingPagesFromMock();
-    
-    // If no landing pages exist, seed the database with default data
-    if (landingPages.length === 0) {
-      console.log("No landing pages found, seeding default data");
-      await seedDefaultLandingPages();
-      return getLandingPagesFromMock();
+    try {
+      // Check if we have any landing pages in mock storage
+      let landingPages = await getLandingPagesFromMock();
+      
+      // If no landing pages exist, seed the database with default data
+      if (landingPages.length === 0) {
+        console.log("No landing pages found, seeding default data");
+        await seedDefaultLandingPages();
+        // Fetch the newly created landing pages
+        landingPages = await getLandingPagesFromMock();
+      }
+      
+      console.log(`Fetched ${landingPages.length} landing pages`);
+      return landingPages;
+    } catch (error) {
+      console.error("Error fetching landing pages:", error);
+      return [];
     }
-    
-    return landingPages;
   }
   
   // In a real implementation, this would connect to Supabase
   return [];
 }
 
+// Function to retrieve landing pages from mock storage
 async function getLandingPagesFromMock(): Promise<LandingPage[]> {
-  return [
+  // This simulates a database with mock data stored in memory
+  // In a real app, this would be fetched from Supabase
+  const mockPages = [
     {
       id: '1',
       page_key: 'home',
@@ -115,6 +125,8 @@ async function getLandingPagesFromMock(): Promise<LandingPage[]> {
       updated_at: new Date().toISOString(),
     }
   ];
+  
+  return mockPages;
 }
 
 // Function to seed default landing page data
@@ -182,6 +194,8 @@ async function seedDefaultLandingPages(): Promise<void> {
     }
   ];
   
+  console.log("Creating default landing pages:", defaultPages.length);
+  
   // Create each landing page
   for (const pageData of defaultPages) {
     await createLandingPage(pageData);
@@ -189,8 +203,16 @@ async function seedDefaultLandingPages(): Promise<void> {
 }
 
 export async function fetchLandingPageByKey(key: string): Promise<LandingPage | null> {
-  const pages = await fetchLandingPages();
-  return pages.find(page => page.page_key === key) || null;
+  try {
+    console.log(`Fetching landing page with key: ${key}`);
+    const pages = await fetchLandingPages();
+    const page = pages.find(page => page.page_key === key);
+    console.log(`Found page for key ${key}:`, page ? "Yes" : "No");
+    return page || null;
+  } catch (error) {
+    console.error(`Error fetching landing page with key ${key}:`, error);
+    return null;
+  }
 }
 
 export async function createLandingPage(data: LandingPageFormData): Promise<LandingPage> {
@@ -220,6 +242,8 @@ export async function createLandingPage(data: LandingPageFormData): Promise<Land
     created_at: timestamp,
     updated_at: timestamp,
   };
+  
+  console.log("Created new landing page:", newPage.page_key);
   
   // With Supabase, this would insert the new page and hero content
   return newPage;
