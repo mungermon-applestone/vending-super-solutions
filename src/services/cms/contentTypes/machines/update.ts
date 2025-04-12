@@ -33,7 +33,7 @@ export async function updateMachine(id: string, machineData: MachineFormValues):
     
     // Update images: first delete existing, then add new ones
     if (machineData.images && machineData.images.length > 0) {
-      // Filter out empty image URLs
+      // Filter out empty image URLs before processing
       const validImages = machineData.images.filter(img => img.url && img.url.trim() !== '');
       
       if (validImages.length > 0) {
@@ -42,16 +42,27 @@ export async function updateMachine(id: string, machineData: MachineFormValues):
       } else {
         console.log(`[updateMachine] No valid images to update for machine ${id}`);
       }
+    } else {
+      // If no images are provided, we still need to delete existing ones
+      await updateMachineImages(id, { ...machineData, images: [] });
     }
     
     // Update specs: first delete existing, then add new ones
     if (machineData.specs && machineData.specs.length > 0) {
-      await updateMachineSpecs(id, machineData);
+      // Filter out invalid specs
+      const validSpecs = machineData.specs.filter(spec => spec.key && spec.value);
+      await updateMachineSpecs(id, { ...machineData, specs: validSpecs });
+    } else {
+      await updateMachineSpecs(id, { ...machineData, specs: [] });
     }
     
     // Update features: first delete existing, then add new ones
     if (machineData.features && machineData.features.length > 0) {
-      await updateMachineFeatures(id, machineData);
+      // Filter out invalid features
+      const validFeatures = machineData.features.filter(feature => feature.text);
+      await updateMachineFeatures(id, { ...machineData, features: validFeatures });
+    } else {
+      await updateMachineFeatures(id, { ...machineData, features: [] });
     }
     
     return true;

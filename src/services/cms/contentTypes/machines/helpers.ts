@@ -122,7 +122,8 @@ export async function updateMachineImages(machineId: string, machineData: any) {
     
     // Add new images
     if (machineData.images && machineData.images.length > 0) {
-      const validImages = machineData.images.filter((img: any) => img.url && img.url.trim() !== '');
+      // Ensure all images have valid URLs
+      const validImages = machineData.images.filter((img: any) => img && img.url && img.url.trim() !== '');
       
       if (validImages.length > 0) {
         console.log(`[updateMachineImages] Adding ${validImages.length} new images for machine ${machineId}`);
@@ -130,6 +131,8 @@ export async function updateMachineImages(machineId: string, machineData: any) {
       } else {
         console.log(`[updateMachineImages] No valid images to add for machine ${machineId}`);
       }
+    } else {
+      console.log(`[updateMachineImages] No images to add for machine ${machineId}`);
     }
   } catch (error) {
     console.error(`[updateMachineImages] Error updating images for machine ${machineId}:`, error);
