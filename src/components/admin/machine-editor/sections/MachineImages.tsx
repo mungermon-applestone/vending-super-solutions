@@ -13,6 +13,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 
 interface MachineImagesProps {
@@ -31,6 +32,13 @@ const MachineImages: React.FC<MachineImagesProps> = ({ form }) => {
       form.setValue('images', currentImages.filter((_, i) => i !== index));
     }
   };
+
+  // Ensure images array exists in the form
+  React.useEffect(() => {
+    if (!form.getValues('images')) {
+      form.setValue('images', [{ url: '', alt: '' }]);
+    }
+  }, [form]);
 
   return (
     <Card>
@@ -65,7 +73,7 @@ const MachineImages: React.FC<MachineImagesProps> = ({ form }) => {
                   <FormLabel>Image</FormLabel>
                   <FormControl>
                     <MediaSelector
-                      value={field.value}
+                      value={field.value || ''}
                       onChange={(url) => {
                         form.setValue(`images.${index}.url`, url);
                         console.log("[MachineImages] Selected image URL:", url);
@@ -73,6 +81,13 @@ const MachineImages: React.FC<MachineImagesProps> = ({ form }) => {
                       buttonLabel="Select Machine Image"
                     />
                   </FormControl>
+                  {field.value && (
+                    <FormDescription className="text-xs text-right">
+                      <a href={field.value} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                        View image
+                      </a>
+                    </FormDescription>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -85,7 +100,7 @@ const MachineImages: React.FC<MachineImagesProps> = ({ form }) => {
                 <FormItem className="mt-2">
                   <FormLabel>Alt Text</FormLabel>
                   <FormControl>
-                    <Input placeholder="Image description" {...field} />
+                    <Input placeholder="Image description" {...field} value={field.value || ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

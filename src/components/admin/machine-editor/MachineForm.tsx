@@ -27,7 +27,7 @@ const machineFormSchema = z.object({
   description: z.string().min(10, { message: "Description must be at least 10 characters." }),
   images: z.array(
     z.object({
-      url: z.string().url({ message: "Please enter a valid URL." }),
+      url: z.string().optional().or(z.string().url({ message: "Please enter a valid URL." })),
       alt: z.string().optional(),
       width: z.number().optional(),
       height: z.number().optional(),
@@ -73,23 +73,34 @@ const MachineForm = ({ machine, isCreating, onSubmit }: MachineFormProps) => {
 
   useEffect(() => {
     if (machine && !isCreating) {
-      console.log("Loading machine data into form:", machine);
-      const images = machine.images?.map(img => ({
-        url: img.url,
-        alt: img.alt,
-        width: img.width || undefined,
-        height: img.height || undefined,
-      })) || [{ url: '', alt: '' }];
+      console.log("[MachineForm] Loading machine data into form:", machine);
       
-      const specs = Object.entries(machine.specs || {}).map(([key, value]) => ({
-        key,
-        value: typeof value === 'string' ? value : JSON.stringify(value),
-      })) || [{ key: '', value: '' }];
+      // Handle images data
+      const images = machine.images && machine.images.length > 0 
+        ? machine.images.map(img => ({
+            url: img.url,
+            alt: img.alt || '',
+            width: img.width || undefined,
+            height: img.height || undefined,
+          }))
+        : [{ url: '', alt: '' }];
       
-      const features = machine.features?.map(feature => ({
-        text: feature,
-      })) || [{ text: '' }];
+      // Handle specs data  
+      const specs = machine.specs 
+        ? Object.entries(machine.specs).map(([key, value]) => ({
+            key,
+            value: typeof value === 'string' ? value : JSON.stringify(value),
+          }))
+        : [{ key: '', value: '' }];
       
+      // Handle features data
+      const features = machine.features && machine.features.length > 0
+        ? machine.features.map(feature => ({
+            text: feature,
+          }))
+        : [{ text: '' }];
+      
+      // Reset form with machine data
       form.reset({
         title: machine.title,
         slug: machine.slug,
@@ -100,33 +111,70 @@ const MachineForm = ({ machine, isCreating, onSubmit }: MachineFormProps) => {
         specs,
         features,
       });
+      
+      console.log("[MachineForm] Form reset with machine data:", {
+        title: machine.title,
+        images: images.length,
+        specs: specs.length,
+        features: features.length
+      });
     }
   }, [machine, form, isCreating]);
 
   const handleSubmit = async (data: MachineFormValues) => {
-    setIsSubmitting(true);
-    
     try {
-      console.log("Submitting form data:", data);
+      setIsSubmitting(true);
+      console.log("[MachineForm] Starting form submission with data:", data);
       
-      // Filter out empty image URLs
-      const filteredImages = data.images?.filter(img => img.url && img.url.trim() !== '') || [];
+      // Validate and filter image data
+      let formattedData = { ...data };
+      if (data.images) {
+        const filteredImages = data.images.filter(img => img && img.url && img.url.trim() !== '');
+        
+        console.log(`[MachineForm] Filtered images: ${filteredImages.length} of ${data.images.length}`);
+        
+        if (filteredImages.length === 0) {
+          // Ensure we have at least an empty array for images
+          formattedData.images = [];
+        } else {
+          // Format image data
+          formattedData.images = filteredImages.map(img => ({
+            ...img,
+            alt: img.alt || data.title || '',
+          }));
+        }
+      }
       
-      const sanitizedData = {
-        ...data,
-        images: filteredImages.map(img => ({
-          ...img,
-          alt: img.alt || data.title || '',
-        })),
-      };
+      // Validate specs
+      if (formattedData.specs) {
+        const filteredSpecs = formattedData.specs.filter(spec => spec && spec.key && spec.value);
+        console.log(`[MachineForm] Filtered specs: ${filteredSpecs.length} of ${formattedData.specs.length}`);
+        formattedData.specs = filteredSpecs;
+      }
       
-      console.log("Sanitized data for submission:", sanitizedData);
-      await onSubmit(sanitizedData);
+      // Validate features
+      if (formattedData.features) {
+        const filteredFeatures = formattedData.features.filter(feature => feature && feature.text);
+        console.log(`[MachineForm] Filtered features: ${filteredFeatures.length} of ${formattedData.features.length}`);
+        formattedData.features = filteredFeatures;
+      }
+      
+      console.log("[MachineForm] Submitting formatted data:", formattedData);
+      await onSubmit(formattedData);
+      
+      // Show success toast
+      toast({
+        title: isCreating ? "Machine created" : "Machine updated",
+        description: `Machine has been ${isCreating ? 'created' : 'updated'} successfully.`
+      });
+      
     } catch (error) {
-      console.error('Error saving machine:', error);
+      console.error('[MachineForm] Error saving machine:', error);
+      
+      // Show detailed error toast
       toast({
         title: "Error",
-        description: "Failed to save machine. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to save machine. Please try again.",
         variant: "destructive",
       });
     } finally {

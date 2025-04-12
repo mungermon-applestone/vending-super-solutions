@@ -6,10 +6,12 @@ import { Loader2 } from 'lucide-react';
 import { useMachineById, useCreateMachine, useUpdateMachine } from '@/hooks/useMachinesData';
 import MachineForm from '@/components/admin/machine-editor/MachineForm';
 import { MachineFormValues } from '@/utils/machineMigration/types';
+import { useToast } from '@/hooks/use-toast';
 
 const MachineEditor = () => {
   const { machineId } = useParams<{ machineId: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   // A machine is in edit mode if machineId exists and is not 'new'
   const isEditMode = !!machineId && machineId !== 'new';
@@ -18,19 +20,72 @@ const MachineEditor = () => {
   console.log('[MachineEditor] Machine ID from URL:', machineId);
   console.log('[MachineEditor] Is edit mode:', isEditMode);
 
-  const { data: machine, isLoading } = useMachineById(machineId);
+  const { data: machine, isLoading, error: machineError } = useMachineById(machineId);
   const createMachineMutation = useCreateMachine();
   const updateMachineMutation = useUpdateMachine();
   
   const handleFormSubmit = async (data: MachineFormValues) => {
-    if (isCreating) {
-      await createMachineMutation.mutateAsync(data);
-    } else if (machineId) {
-      await updateMachineMutation.mutateAsync({ id: machineId, machineData: data });
-    }
+    console.log('[MachineEditor] Form submission with data:', data);
     
-    navigate('/admin/machines');
+    try {
+      if (isCreating) {
+        console.log('[MachineEditor] Creating new machine');
+        await createMachineMutation.mutateAsync(data);
+        console.log('[MachineEditor] Machine created successfully');
+      } else if (machineId) {
+        console.log(`[MachineEditor] Updating machine with ID: ${machineId}`);
+        await updateMachineMutation.mutateAsync({ id: machineId, machineData: data });
+        console.log('[MachineEditor] Machine updated successfully');
+      }
+      
+      // Only navigate if the mutation was successful
+      navigate('/admin/machines');
+    } catch (error) {
+      console.error('[MachineEditor] Error during form submission:', error);
+      
+      // Show error toast
+      toast({
+        title: "Error",
+        description: error instanceof Error 
+          ? `Failed to ${isCreating ? 'create' : 'update'} machine: ${error.message}` 
+          : `Failed to ${isCreating ? 'create' : 'update'} machine. Please check console for details.`,
+        variant: "destructive",
+      });
+      
+      // Re-throw to allow the form component to handle the error as well
+      throw error;
+    }
   };
+
+  // Handle loading errors
+  if (machineError && !isCreating) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-8">
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+            <div className="flex">
+              <div>
+                <p className="text-red-700 font-medium">Error loading machine</p>
+                <p className="text-red-600">
+                  {machineError instanceof Error
+                    ? machineError.message
+                    : "Failed to load machine data. Please try again."}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              onClick={() => navigate('/admin/machines')}
+              variant="outline"
+            >
+              Back to Machines
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   if (isLoading && !isCreating) {
     return (

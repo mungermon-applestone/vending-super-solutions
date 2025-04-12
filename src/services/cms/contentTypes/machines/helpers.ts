@@ -6,9 +6,14 @@ import { MachineFormValues } from '@/utils/machineMigration/types';
  * Helper function to add machine images
  */
 export async function addMachineImages(machineId: string, machineData: any) {
-  if (machineData.images && machineData.images.length > 0) {
+  if (!machineId) {
+    console.error('[addMachineImages] No machine ID provided');
+    return;
+  }
+  
+  if (machineData.images && Array.isArray(machineData.images) && machineData.images.length > 0) {
     // Filter out invalid images
-    const validImages = machineData.images.filter((image: any) => image.url && image.url.trim() !== '');
+    const validImages = machineData.images.filter((image: any) => image && image.url && image.url.trim() !== '');
     
     if (validImages.length === 0) {
       console.log(`[addMachineImages] No valid images to add for machine ${machineId}`);
@@ -32,7 +37,9 @@ export async function addMachineImages(machineId: string, machineData: any) {
     
     if (imageError) {
       console.error(`[addMachineImages] Error adding images for machine ${machineId}:`, imageError);
-      // Continue despite image error
+      throw imageError;
+    } else {
+      console.log(`[addMachineImages] Successfully added ${imageInserts.length} images for machine ${machineId}`);
     }
   }
 }
@@ -41,11 +48,16 @@ export async function addMachineImages(machineId: string, machineData: any) {
  * Helper function to add machine specs
  */
 export async function addMachineSpecs(machineId: string, machineData: MachineFormValues) {
-  if (machineData.specs && machineData.specs.length > 0) {
-    console.log(`[addMachineSpecs] Adding ${machineData.specs.length} specs for machine ${machineId}`);
+  if (!machineId) {
+    console.error('[addMachineSpecs] No machine ID provided');
+    return;
+  }
+  
+  if (machineData.specs && Array.isArray(machineData.specs) && machineData.specs.length > 0) {
+    console.log(`[addMachineSpecs] Processing ${machineData.specs.length} specs for machine ${machineId}`);
     
     const specInserts = machineData.specs
-      .filter(spec => spec.key && spec.value) // Only process specs with both key and value
+      .filter(spec => spec && spec.key && spec.value) // Only process specs with both key and value
       .map(spec => ({
         machine_id: machineId,
         key: spec.key,
@@ -57,13 +69,14 @@ export async function addMachineSpecs(machineId: string, machineData: MachineFor
       return;
     }
     
+    console.log(`[addMachineSpecs] Inserting ${specInserts.length} specs for machine ${machineId}`);
     const { error: specError } = await supabase
       .from('machine_specs')
       .insert(specInserts);
     
     if (specError) {
       console.error(`[addMachineSpecs] Error adding specs for machine ${machineId}:`, specError);
-      // Continue despite spec error
+      throw specError;
     } else {
       console.log(`[addMachineSpecs] Successfully added ${specInserts.length} specs for machine ${machineId}`);
     }
@@ -74,11 +87,16 @@ export async function addMachineSpecs(machineId: string, machineData: MachineFor
  * Helper function to add machine features
  */
 export async function addMachineFeatures(machineId: string, machineData: MachineFormValues) {
-  if (machineData.features && machineData.features.length > 0) {
-    console.log(`[addMachineFeatures] Adding ${machineData.features.length} features for machine ${machineId}`);
+  if (!machineId) {
+    console.error('[addMachineFeatures] No machine ID provided');
+    return;
+  }
+  
+  if (machineData.features && Array.isArray(machineData.features) && machineData.features.length > 0) {
+    console.log(`[addMachineFeatures] Processing ${machineData.features.length} features for machine ${machineId}`);
     
     const featureInserts = machineData.features
-      .filter(feature => feature.text) // Only process features with text
+      .filter(feature => feature && feature.text) // Only process features with text
       .map((feature, index) => ({
         machine_id: machineId,
         feature: feature.text,
@@ -90,13 +108,14 @@ export async function addMachineFeatures(machineId: string, machineData: Machine
       return;
     }
     
+    console.log(`[addMachineFeatures] Inserting ${featureInserts.length} features for machine ${machineId}`);
     const { error: featureError } = await supabase
       .from('machine_features')
       .insert(featureInserts);
     
     if (featureError) {
       console.error(`[addMachineFeatures] Error adding features for machine ${machineId}:`, featureError);
-      // Continue despite feature error
+      throw featureError;
     } else {
       console.log(`[addMachineFeatures] Successfully added ${featureInserts.length} features for machine ${machineId}`);
     }
@@ -108,6 +127,11 @@ export async function addMachineFeatures(machineId: string, machineData: Machine
  */
 export async function updateMachineImages(machineId: string, machineData: any) {
   try {
+    if (!machineId) {
+      console.error('[updateMachineImages] No machine ID provided');
+      throw new Error('Invalid machine ID');
+    }
+    
     // Delete existing images
     console.log(`[updateMachineImages] Deleting existing images for machine ${machineId}`);
     const { error: deleteError } = await supabase
@@ -118,10 +142,12 @@ export async function updateMachineImages(machineId: string, machineData: any) {
     if (deleteError) {
       console.error(`[updateMachineImages] Error deleting existing images for machine ${machineId}:`, deleteError);
       throw deleteError;
+    } else {
+      console.log(`[updateMachineImages] Successfully deleted existing images for machine ${machineId}`);
     }
     
-    // Add new images
-    if (machineData.images && machineData.images.length > 0) {
+    // Add new images if available
+    if (machineData.images && Array.isArray(machineData.images) && machineData.images.length > 0) {
       // Ensure all images have valid URLs
       const validImages = machineData.images.filter((img: any) => img && img.url && img.url.trim() !== '');
       
@@ -145,6 +171,11 @@ export async function updateMachineImages(machineId: string, machineData: any) {
  */
 export async function updateMachineSpecs(machineId: string, machineData: MachineFormValues) {
   try {
+    if (!machineId) {
+      console.error('[updateMachineSpecs] No machine ID provided');
+      throw new Error('Invalid machine ID');
+    }
+    
     // Delete existing specs
     console.log(`[updateMachineSpecs] Deleting existing specs for machine ${machineId}`);
     const { error: deleteError } = await supabase
@@ -155,11 +186,21 @@ export async function updateMachineSpecs(machineId: string, machineData: Machine
     if (deleteError) {
       console.error(`[updateMachineSpecs] Error deleting existing specs for machine ${machineId}:`, deleteError);
       throw deleteError;
+    } else {
+      console.log(`[updateMachineSpecs] Successfully deleted existing specs for machine ${machineId}`);
     }
     
-    // Add new specs
-    if (machineData.specs && machineData.specs.length > 0) {
-      await addMachineSpecs(machineId, machineData);
+    // Add new specs if available
+    if (machineData.specs && Array.isArray(machineData.specs) && machineData.specs.length > 0) {
+      const validSpecs = machineData.specs.filter(spec => spec && spec.key && spec.value);
+      if (validSpecs.length > 0) {
+        console.log(`[updateMachineSpecs] Adding ${validSpecs.length} new specs for machine ${machineId}`);
+        await addMachineSpecs(machineId, { ...machineData, specs: validSpecs });
+      } else {
+        console.log(`[updateMachineSpecs] No valid specs to add for machine ${machineId}`);
+      }
+    } else {
+      console.log(`[updateMachineSpecs] No specs to add for machine ${machineId}`);
     }
   } catch (error) {
     console.error(`[updateMachineSpecs] Error updating specs for machine ${machineId}:`, error);
@@ -172,6 +213,11 @@ export async function updateMachineSpecs(machineId: string, machineData: Machine
  */
 export async function updateMachineFeatures(machineId: string, machineData: any) {
   try {
+    if (!machineId) {
+      console.error('[updateMachineFeatures] No machine ID provided');
+      throw new Error('Invalid machine ID');
+    }
+    
     // Delete existing features
     console.log(`[updateMachineFeatures] Deleting existing features for machine ${machineId}`);
     const { error: deleteError } = await supabase
@@ -182,11 +228,21 @@ export async function updateMachineFeatures(machineId: string, machineData: any)
     if (deleteError) {
       console.error(`[updateMachineFeatures] Error deleting existing features for machine ${machineId}:`, deleteError);
       throw deleteError;
+    } else {
+      console.log(`[updateMachineFeatures] Successfully deleted existing features for machine ${machineId}`);
     }
     
-    // Add new features
-    if (machineData.features && machineData.features.length > 0) {
-      await addMachineFeatures(machineId, machineData);
+    // Add new features if available
+    if (machineData.features && Array.isArray(machineData.features) && machineData.features.length > 0) {
+      const validFeatures = machineData.features.filter(feature => feature && feature.text);
+      if (validFeatures.length > 0) {
+        console.log(`[updateMachineFeatures] Adding ${validFeatures.length} new features for machine ${machineId}`);
+        await addMachineFeatures(machineId, { ...machineData, features: validFeatures });
+      } else {
+        console.log(`[updateMachineFeatures] No valid features to add for machine ${machineId}`);
+      }
+    } else {
+      console.log(`[updateMachineFeatures] No features to add for machine ${machineId}`);
     }
   } catch (error) {
     console.error(`[updateMachineFeatures] Error updating features for machine ${machineId}:`, error);
