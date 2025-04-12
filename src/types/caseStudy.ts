@@ -8,6 +8,7 @@ export interface CaseStudy {
   industry: string;
   image_url?: string;
   image_alt?: string;
+  solution?: string; // Added solution field
   visible: boolean;
   created_at: string;
   updated_at: string;
@@ -44,6 +45,7 @@ export interface CaseStudyFormData {
   summary: string;
   content: string;
   industry: string;
+  solution: string; // Added solution field
   image_url: string;
   image_alt: string;
   visible: boolean;

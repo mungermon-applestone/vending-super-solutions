@@ -1,4 +1,3 @@
-
 import { CaseStudyFormData, CaseStudyWithRelations } from "@/types/caseStudy";
 
 // Mock implementation for case studies API
@@ -11,6 +10,7 @@ const caseStudies: CaseStudyWithRelations[] = [
     slug: "regional-hospital-revenue",
     summary: "How a regional hospital increased vending revenue by 35% while improving patient satisfaction",
     content: "This case study explores how a major regional hospital implemented smart vending solutions to increase revenue and improve patient satisfaction...",
+    solution: "We implemented a customized vending solution that addressed the specific needs of the Healthcare sector with hardware optimization, cloud-based management systems, integrated payment processing, and automated restocking notifications.",
     industry: "Healthcare",
     image_url: "https://images.unsplash.com/photo-1504439904031-93ded9f93e4e",
     image_alt: "Hospital hallway with modern vending machines",
@@ -60,6 +60,7 @@ const caseStudies: CaseStudyWithRelations[] = [
     slug: "corporate-campus-refreshment",
     summary: "Streamlining refreshment services across a multi-building tech campus with 3,000+ employees",
     content: "This tech company needed a modern solution to provide refreshments across their sprawling campus...",
+    solution: "We installed a network of smart vending machines with centralized monitoring capabilities, cashless payment options, and inventory management that automatically triggered restocking when supplies ran low.",
     industry: "Technology",
     image_url: "https://images.unsplash.com/photo-1497366754035-f200968a6e72",
     image_alt: "Modern office space with refreshment area",
@@ -109,6 +110,7 @@ const caseStudies: CaseStudyWithRelations[] = [
     slug: "manufacturing-plant-productivity",
     summary: "How smart vending solutions improved worker productivity and reduced downtime",
     content: "This manufacturing plant implemented vending solutions to reduce downtime and improve worker efficiency...",
+    solution: "We developed a custom vending solution with strategic machine placement throughout the facility, specialized product selection based on department needs, and integration with employee ID badges for streamlined access.",
     industry: "Manufacturing",
     image_url: "https://images.unsplash.com/photo-1581091226033-c6e0b0cf8715",
     image_alt: "Manufacturing floor with vending solutions",
@@ -184,6 +186,7 @@ export const createCaseStudy = async (data: CaseStudyFormData): Promise<CaseStud
     slug: data.slug,
     summary: data.summary,
     content: data.content,
+    solution: data.solution,
     industry: data.industry || '',
     image_url: data.image_url,
     image_alt: data.image_alt,
@@ -249,6 +252,7 @@ export const updateCaseStudy = async (id: string, data: CaseStudyFormData): Prom
     slug: data.slug,
     summary: data.summary,
     content: data.content,
+    solution: data.solution,
     industry: data.industry || '',
     image_url: data.image_url,
     image_alt: data.image_alt,

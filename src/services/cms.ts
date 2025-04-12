@@ -32,10 +32,20 @@ import {
 
 import { getTestimonials } from './cms/testimonials';
 
+// Import case studies service
+import {
+  fetchCaseStudies,
+  fetchCaseStudyBySlug,
+  createCaseStudy,
+  updateCaseStudy,
+  deleteCaseStudy
+} from './cms/contentTypes/caseStudies';
+
 // Import operations for direct access
 import { productTypeOperations } from './cms/contentTypes/productTypes';
 import { businessGoalOperations } from './cms/contentTypes/businessGoals';
 import { technologyOperations } from './cms/contentTypes/technologies';
+import { caseStudyOperations } from './cms/contentTypes/caseStudies/operations';
 import { cloneProductType } from './cms/contentTypes/productTypes/cloneProductType';
 import { cloneBusinessGoal } from './cms/contentTypes/businessGoals/cloneBusinessGoal';
 import { cloneTechnology } from './cms/contentTypes/technologies/cloneTechnology';
@@ -45,6 +55,7 @@ import { cloneMachine } from './cms/contentTypes/machines/cloneMachine';
 export const productTypes = productTypeOperations;
 export const businessGoals = businessGoalOperations;
 export const technologies = technologyOperations;
+export const caseStudies = caseStudyOperations;
 
 // Export individual service functions for backward compatibility
 export {
@@ -76,5 +87,12 @@ export {
   cloneTechnology,
   
   // Testimonials
-  getTestimonials
+  getTestimonials,
+  
+  // Case Studies
+  fetchCaseStudies,
+  fetchCaseStudyBySlug,
+  createCaseStudy,
+  updateCaseStudy,
+  deleteCaseStudy
 };

@@ -3,6 +3,7 @@ import { ContentTypeOperations } from './contentTypes/types';
 import { productTypeOperations } from './contentTypes/productTypes';
 import { businessGoalOperations } from './contentTypes/businessGoals';
 import { technologyOperations } from './contentTypes/technologies';
+import { caseStudyOperations } from './contentTypes/caseStudies/operations';
 
 /**
  * A factory for accessing different content type operations
@@ -13,6 +14,7 @@ export class CMSContentTypeFactory {
     'product-types': productTypeOperations,
     'business-goals': businessGoalOperations,
     'technologies': technologyOperations,
+    'case-studies': caseStudyOperations,
   };
   
   /**

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -17,7 +16,6 @@ const CaseStudyEditor = () => {
   
   const [isRedirecting, setIsRedirecting] = useState(false);
   
-  // Fetch case study data if editing
   const { data: caseStudy, isLoading: isLoadingCaseStudy } = useCaseStudy(
     isEditing ? caseStudySlug : undefined
   );
@@ -52,13 +50,13 @@ const CaseStudyEditor = () => {
     );
   }
 
-  // Transform case study data to form data format if editing
   const initialData: CaseStudyFormData | undefined = isEditing && caseStudy
     ? {
         title: caseStudy.title,
         slug: caseStudy.slug,
         summary: caseStudy.summary,
         content: caseStudy.content,
+        solution: caseStudy.solution || '',
         industry: caseStudy.industry || '',
         image_url: caseStudy.image_url || '',
         image_alt: caseStudy.image_alt || '',

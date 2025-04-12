@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -13,7 +12,6 @@ const CaseStudyDetail = () => {
   
   const { data: caseStudy, isLoading, error } = useCaseStudy(slug);
   
-  // If case study not found or error, provide a fallback
   if (error || (!isLoading && !caseStudy)) {
     return (
       <Layout>
@@ -44,10 +42,7 @@ const CaseStudyDetail = () => {
     );
   }
 
-  // Function to get related case studies (excluding current one)
   const getRelatedCaseStudies = () => {
-    // This would typically come from a backend API call
-    // For now, we'll just return some sample data
     return [
       {
         id: '1',
@@ -70,12 +65,10 @@ const CaseStudyDetail = () => {
     ];
   };
 
-  // Get related case studies
   const relatedCaseStudies = getRelatedCaseStudies();
 
   return (
     <Layout>
-      {/* Breadcrumb */}
       <div className="bg-gray-50 border-b border-gray-200">
         <div className="container mx-auto py-3">
           <nav className="flex items-center text-sm">
@@ -88,7 +81,6 @@ const CaseStudyDetail = () => {
         </div>
       </div>
 
-      {/* Hero Section */}
       <div className="bg-gradient-to-r from-slate-50 to-slate-100 py-12">
         <div className="container">
           <div className="flex items-center text-vending-teal mb-4">
@@ -104,8 +96,7 @@ const CaseStudyDetail = () => {
       <div className="container py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            {/* Main image */}
-            <div className="rounded-lg overflow-hidden mb-8">
+            <div className="rounded-lg overflow-hidden mb-8 max-w-md mx-auto">
               <img 
                 src={caseStudy.image_url || "https://images.unsplash.com/photo-1504439904031-93ded9f93e4e"}
                 alt={caseStudy.image_alt || caseStudy.title}
@@ -113,7 +104,6 @@ const CaseStudyDetail = () => {
               />
             </div>
             
-            {/* Challenge */}
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-vending-blue-dark mb-4">The Challenge</h2>
               <p className="text-gray-700 mb-4">
@@ -126,12 +116,10 @@ const CaseStudyDetail = () => {
               </div>
             </div>
             
-            {/* Solution */}
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-vending-blue-dark mb-4">Our Solution</h2>
               <p className="text-gray-700 mb-4">
-                We implemented a customized vending solution that addressed the specific needs of the {caseStudy.industry} sector. 
-                The solution included:
+                {caseStudy.solution || `We implemented a customized vending solution that addressed the specific needs of the ${caseStudy.industry} sector.`}
               </p>
               <ul className="space-y-3 text-gray-700">
                 <li className="flex items-start">
@@ -153,7 +141,6 @@ const CaseStudyDetail = () => {
               </ul>
             </div>
             
-            {/* Results */}
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-vending-blue-dark mb-4">The Results</h2>
               <p className="text-gray-700 mb-6">
@@ -178,7 +165,6 @@ const CaseStudyDetail = () => {
               </p>
             </div>
             
-            {/* Testimonial */}
             {caseStudy.testimonial && (
               <div className="bg-vending-blue-light bg-opacity-10 rounded-lg p-8 mb-8">
                 <blockquote className="text-xl font-medium text-vending-blue-dark italic mb-4">
@@ -192,7 +178,6 @@ const CaseStudyDetail = () => {
               </div>
             )}
             
-            {/* CTA */}
             <div className="bg-vending-gray rounded-lg p-8 text-center">
               <h3 className="text-xl font-bold mb-4">Ready to achieve similar results?</h3>
               <p className="mb-6 text-gray-700">
@@ -209,7 +194,6 @@ const CaseStudyDetail = () => {
             </div>
           </div>
           
-          {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
               <h3 className="text-lg font-bold mb-4">Project Details</h3>
@@ -246,7 +230,6 @@ const CaseStudyDetail = () => {
               </div>
             </div>
             
-            {/* Related Case Studies */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h3 className="text-lg font-bold mb-4">Related Case Studies</h3>
               <div className="space-y-4">
@@ -266,7 +249,6 @@ const CaseStudyDetail = () => {
         </div>
       </div>
 
-      {/* Inquiry Form */}
       <InquiryForm title={`${caseStudy.industry} Solutions`} />
     </Layout>
   );

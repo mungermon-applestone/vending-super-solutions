@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -34,6 +33,7 @@ const formSchema = z.object({
   slug: z.string().min(1, 'Slug is required'),
   summary: z.string().min(1, 'Summary is required'),
   content: z.string().min(1, 'Content is required'),
+  solution: z.string().min(1, 'Solution is required'),
   industry: z.string().optional(),
   image_url: z.string().optional(),
   image_alt: z.string().optional(),
@@ -62,6 +62,7 @@ const CaseStudyForm: React.FC<CaseStudyFormProps> = ({
     slug: '',
     summary: '',
     content: '',
+    solution: '',
     industry: '',
     image_url: '',
     image_alt: '',
@@ -95,7 +96,6 @@ const CaseStudyForm: React.FC<CaseStudyFormProps> = ({
     );
   };
 
-  // Generate slug from title
   const handleTitleChange = (title: string) => {
     if (!isEditing && !form.getValues('slug')) {
       const slug = title
@@ -229,6 +229,29 @@ const CaseStudyForm: React.FC<CaseStudyFormProps> = ({
                         {...field} 
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="mt-6">
+              <FormField
+                control={form.control}
+                name="solution"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Solution</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Describe the solution implemented for this case" 
+                        className="min-h-[150px]" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Explain what solution was implemented to address the client's needs
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
