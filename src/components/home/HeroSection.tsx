@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
 import { Skeleton } from '@/components/ui/skeleton';
+import { LandingPage } from '@/types/landingPage';
 
 const HeroSection = () => {
   const { data: landingPage, isLoading, error } = useLandingPageByKey('home');
@@ -89,8 +90,9 @@ const HeroSection = () => {
     );
   }
   
-  // Render the hero from CMS data
-  const { hero_content: hero } = landingPage;
+  // Type assertion to ensure landingPage is treated correctly
+  const typedLandingPage = landingPage as LandingPage;
+  const hero = typedLandingPage.hero_content;
   
   return (
     <div className={hero.background_class || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"}>

@@ -9,7 +9,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import LandingPageForm from '@/components/admin/landing-pages/LandingPageForm';
 import { useLandingPages, useCreateLandingPage, useUpdateLandingPage } from '@/hooks/cms/useLandingPages';
-import { LandingPageFormData } from '@/types/landingPage';
+import { LandingPageFormData, LandingPage } from '@/types/landingPage';
 
 const LandingPageEditor = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,7 +21,10 @@ const LandingPageEditor = () => {
   const createMutation = useCreateLandingPage();
   const updateMutation = useUpdateLandingPage();
   
-  const currentPage = landingPages?.find(page => page.id === id);
+  // Type assertion to ensure landingPages is treated as an array of LandingPage
+  const currentPage = landingPages ? 
+    (landingPages as LandingPage[]).find(page => page.id === id) : 
+    undefined;
   
   useEffect(() => {
     if (isEditing && landingPages && !currentPage) {

@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDeleteLandingPage } from '@/hooks/cms/useLandingPages';
 import { Badge } from '@/components/ui/badge';
 import LandingPageTableRow from '@/components/admin/landing-pages/LandingPageTableRow';
+import { LandingPage } from '@/types/landingPage';
 
 const AdminLandingPages = () => {
   const navigate = useNavigate();
@@ -122,7 +123,7 @@ const AdminLandingPages = () => {
             </div>
             
             <div className="divide-y divide-gray-200">
-              {landingPages.map((page) => (
+              {(landingPages as LandingPage[]).map((page) => (
                 <LandingPageTableRow 
                   key={page.id} 
                   page={page} 
