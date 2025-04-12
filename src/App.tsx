@@ -53,6 +53,8 @@ import Contact from './pages/Contact';
 import AboutUs from './pages/AboutUs';
 import BusinessGoalsLanding from './pages/BusinessGoalsLanding';
 import BusinessGoalDetail from './pages/BusinessGoalDetail';
+import ProductDetail from './pages/ProductDetail'; // Import the ProductDetail component
+import ProductsLanding from './pages/ProductsLanding'; // Import the ProductsLanding component
 
 function App() {
   return (
@@ -61,7 +63,8 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Homepage />} />
-          <Route path="/products/:productSlug" element={<PlaceholderPage />} />
+          <Route path="/products" element={<ProductsLanding />} />
+          <Route path="/products/:productSlug" element={<ProductDetail />} />
           <Route path="/machines" element={<MachinesLanding />} />
           <Route path="/machines/:machineType/:machineId" element={<MachineDetail />} />
           <Route path="/business-goals" element={<BusinessGoalsLanding />} />

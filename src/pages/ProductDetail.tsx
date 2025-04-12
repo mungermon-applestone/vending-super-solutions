@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ProductFeaturesList from '@/components/products/ProductFeaturesList';
@@ -9,23 +9,19 @@ import ProductVideoSection from '@/components/products/ProductVideoSection';
 import CTASection from '@/components/common/CTASection';
 import { useProductType } from '@/hooks/useCMSData';
 import ProductDetailSkeleton from '@/components/products/ProductDetailSkeleton';
-import { useProductTypeFromUrl } from '@/hooks/useProductTypeFromUrl';
 import { productFallbacks } from '@/data/productFallbacks';
 
 const ProductDetail = () => {
   const navigate = useNavigate();
-  const productInfo = useProductTypeFromUrl();
-  
-  console.log("ProductDetail rendering for product type:", productInfo);
+  const { productSlug } = useParams<{ productSlug: string }>();
   
   // Use the hook from useCMSData with clearer enabled condition
   const { 
     data: productTypeData, 
     isLoading, 
     error, 
-    isError,
     refetch 
-  } = useProductType(productInfo.slug, productInfo.uuid);
+  } = useProductType(productSlug);
   
   // Log what we're receiving from the API to help debug
   useEffect(() => {
@@ -33,30 +29,24 @@ const ProductDetail = () => {
       productTypeData,
       isLoading,
       error,
-      slug: productInfo.slug,
-      uuid: productInfo.uuid
+      slug: productSlug
     });
     
     if (error) {
       console.error("Error loading product data:", error);
     }
-    
-    // If we have a product type but no data and we're not loading, log this issue
-    if (productInfo.slug && !productTypeData && !isLoading) {
-      console.warn(`ProductDetail: Product type "${productInfo.slug}" requested but no data returned`);
-    }
-  }, [productTypeData, isLoading, error, productInfo]);
+  }, [productTypeData, isLoading, error, productSlug]);
   
   // Force refetch when product info changes
   useEffect(() => {
-    if (productInfo.slug || productInfo.uuid) {
-      console.log(`ProductDetail: Product info changed, refetching data`);
+    if (productSlug) {
+      console.log(`ProductDetail: Product slug changed, refetching data for ${productSlug}`);
       refetch();
     }
-  }, [productInfo, refetch]);
+  }, [productSlug, refetch]);
   
   // Use CMS data if available, otherwise try fallbacks, default to grocery
-  const fallbackData = productFallbacks[productInfo.slug] || productFallbacks['grocery'];
+  const fallbackData = productFallbacks[productSlug || ''] || productFallbacks['grocery'];
   const currentProductData = productTypeData || fallbackData;
   
   console.log("ProductDetail using data:", {
