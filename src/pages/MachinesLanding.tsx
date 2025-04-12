@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -11,6 +12,12 @@ import { CMSMachine } from '@/types/cms';
 
 const MachinesLanding = () => {
   const location = useLocation();
+  const { data: machines = [], isLoading } = useMachines();
+  const typedMachines = machines as CMSMachine[];
+  
+  // Filter machines by type
+  const vendingMachines = typedMachines.filter(machine => machine.type === 'vending');
+  const smartLockers = typedMachines.filter(machine => machine.type === 'locker');
 
   // Scroll to section if hash is present in URL
   useEffect(() => {
@@ -22,15 +29,8 @@ const MachinesLanding = () => {
     }
   }, [location.hash]);
 
-  const { data: machines = [], isLoading } = useMachines();
-  const typedMachines = machines as CMSMachine[];
-  
-  // Filter machines by type
-  const vendingMachines = typedMachines.filter(machine => machine.type === 'vending');
-  const smartLockers = typedMachines.filter(machine => machine.type === 'locker');
-
   const renderMachineCard = (machine) => {
-    const machineImage = machine.images?.[0]?.url || machine.image;
+    const machineImage = machine.images?.[0]?.url || 'https://placehold.co/600x400?text=No+Image';
     const machineAlt = machine.images?.[0]?.alt || machine.title;
     
     return (
@@ -58,7 +58,7 @@ const MachinesLanding = () => {
             </div>
             <h3 className="text-xl font-semibold">{machine.title}</h3>
           </div>
-          <p className="text-gray-600 mb-4">{machine.description}</p>
+          <p className="text-gray-600 mb-4 line-clamp-2">{machine.description}</p>
           
           <Button asChild variant="outline" className="w-full">
             <Link to={`/machines/${machine.type}/${machine.slug}`} className="flex items-center justify-center">
@@ -74,20 +74,20 @@ const MachinesLanding = () => {
     <Layout>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light py-16">
-        <div className="container-wide">
+        <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl sm:text-5xl font-bold leading-tight text-vending-blue-dark mb-6">
                 Our Machines
               </h1>
-              <p className="text-xl text-gray-700 mb-8 max-w-2xl">
+              <p className="text-xl text-gray-700 mb-8">
                 Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Button asChild variant="default" className="btn-primary">
+                <Button asChild variant="default">
                   <a href="#vending-machines">Vending Machines</a>
                 </Button>
-                <Button asChild variant="outline" className="btn-outline">
+                <Button asChild variant="outline">
                   <a href="#smart-lockers">Smart Lockers</a>
                 </Button>
               </div>
@@ -98,20 +98,17 @@ const MachinesLanding = () => {
                 alt="Various vending machines" 
                 className="rounded-lg shadow-xl"
               />
-              <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
-                <p className="font-bold">Hardware agnostic platform</p>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Vending Machines Section */}
-      <section id="vending-machines" className="py-16 bg-vending-gray">
-        <div className="container-wide">
+      <section id="vending-machines" className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">Vending Machines</h2>
-            <p className="subtitle mx-auto">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               A comprehensive selection of vending machines to suit various environments and product requirements.
             </p>
           </div>
@@ -129,9 +126,13 @@ const MachinesLanding = () => {
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          ) : vendingMachines.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {vendingMachines.map(renderMachineCard)}
+            </div>
+          ) : (
+            <div className="text-center py-10">
+              <p>No vending machines found.</p>
             </div>
           )}
         </div>
@@ -139,10 +140,10 @@ const MachinesLanding = () => {
 
       {/* Smart Lockers Section */}
       <section id="smart-lockers" className="py-16 bg-white">
-        <div className="container-wide">
+        <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">Smart Lockers</h2>
-            <p className="subtitle mx-auto">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Secure, temperature-controlled locker solutions for automated pickup and delivery.
             </p>
           </div>
@@ -150,7 +151,7 @@ const MachinesLanding = () => {
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {[1, 2].map((i) => (
-                <div key={i} className="bg-vending-gray rounded-lg shadow-md p-6 h-80">
+                <div key={i} className="bg-gray-50 rounded-lg shadow-md p-6 h-80">
                   <div className="animate-pulse">
                     <div className="bg-gray-300 h-40 w-full mb-4"></div>
                     <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
@@ -160,60 +161,15 @@ const MachinesLanding = () => {
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          ) : smartLockers.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {smartLockers.map(renderMachineCard)}
             </div>
+          ) : (
+            <div className="text-center py-10">
+              <p>No smart lockers found.</p>
+            </div>
           )}
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16 bg-vending-blue-dark text-white">
-        <div className="container-wide">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-bold mb-6">Software Compatible with All Machine Types</h2>
-              <p className="text-lg opacity-90 mb-6">
-                Our platform integrates seamlessly with all our machine types, providing a unified management experience regardless of your hardware mix.
-              </p>
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-start">
-                  <svg className="h-6 w-6 text-vending-teal flex-shrink-0 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Single dashboard to manage all your machines</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="h-6 w-6 text-vending-teal flex-shrink-0 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Real-time inventory tracking across your entire fleet</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="h-6 w-6 text-vending-teal flex-shrink-0 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Unified payment processing and reporting</span>
-                </li>
-                <li className="flex items-start">
-                  <Wifi className="h-6 w-6 text-vending-teal flex-shrink-0 mr-2" />
-                  <span>Wireless connectivity for remote management</span>
-                </li>
-              </ul>
-              <Button asChild className="btn-secondary">
-                <Link to="/technology">Learn More About Our Technology</Link>
-              </Button>
-            </div>
-            
-            <div className="relative">
-              <img 
-                src="https://images.unsplash.com/photo-1581092921461-7d56631a4ab9" 
-                alt="Software dashboard" 
-                className="rounded-lg shadow-xl"
-              />
-            </div>
-          </div>
         </div>
       </section>
 

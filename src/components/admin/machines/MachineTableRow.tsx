@@ -6,7 +6,6 @@ import { TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import MachineTypeIcon from './MachineTypeIcon';
 import TemperatureBadge from './TemperatureBadge';
-import { CMSMachine } from '@/types/cms';
 import CloneButton from '../common/CloneButton';
 
 interface MachineTableRowProps {

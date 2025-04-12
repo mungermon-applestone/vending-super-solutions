@@ -40,6 +40,8 @@ import LandingPageEditor from './pages/admin/LandingPageEditor';
 // Public pages
 import CaseStudies from './pages/CaseStudies';
 import CaseStudyDetail from './pages/CaseStudyDetail';
+import MachinesLanding from './pages/MachinesLanding';
+import MachineDetail from './pages/MachineDetail';
 
 function App() {
   return (
@@ -49,7 +51,8 @@ function App() {
           {/* Public routes */}
           <Route path="/" element={<Homepage />} />
           <Route path="/products" element={<PlaceholderPage />} />
-          <Route path="/machines" element={<PlaceholderPage />} />
+          <Route path="/machines" element={<MachinesLanding />} />
+          <Route path="/machines/:machineType/:machineId" element={<MachineDetail />} />
           <Route path="/business-goals" element={<PlaceholderPage />} />
           <Route path="/technology" element={<PlaceholderPage />} />
           <Route path="/contact" element={<PlaceholderPage />} />
