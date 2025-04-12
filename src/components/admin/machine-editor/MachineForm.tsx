@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -27,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from '@/components/ui/card';
 import { MachineFormValues, MachineData } from '@/utils/machineMigration/types';
+import MediaSelector from '@/components/admin/media/MediaSelector';
 
 // Schema validation for the machine form
 const machineFormSchema = z.object({
@@ -94,13 +94,10 @@ const MachineForm = ({ machine, isCreating, onSubmit }: MachineFormProps) => {
         height: img.height || undefined,
       })) || [{ url: '', alt: '' }];
       
-      // Convert the specs object to an array of key-value pairs
       const specs = Object.entries(machine.specs || {}).map(([key, value]) => ({
         key,
         value: typeof value === 'string' ? value : JSON.stringify(value),
       })) || [{ key: '', value: '' }];
-      
-      console.log("Transformed specs:", specs);
       
       const features = machine.features?.map(feature => ({
         text: feature,
@@ -312,9 +309,16 @@ const MachineForm = ({ machine, isCreating, onSubmit }: MachineFormProps) => {
                       name={`images.${index}.url`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Image URL</FormLabel>
+                          <FormLabel>Image</FormLabel>
                           <FormControl>
-                            <Input placeholder="https://example.com/image.jpg" {...field} />
+                            <MediaSelector
+                              value={field.value}
+                              onChange={(url) => {
+                                form.setValue(`images.${index}.url`, url);
+                                console.log("[MachineForm] Selected image URL:", url);
+                              }}
+                              buttonLabel="Select Machine Image"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
