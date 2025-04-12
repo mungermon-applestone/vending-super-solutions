@@ -3,18 +3,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchMachines, fetchMachineById } from '@/services/cms/contentTypes/machines';
 import { useToast } from '@/hooks/use-toast';
 import { CMSMachine } from '@/types/cms';
-
-// Define the MachineFormValues interface if it doesn't exist in types
-interface MachineFormValues {
-  title: string;
-  slug: string;
-  type: string;
-  temperature: string;
-  description?: string;
-  images?: Array<{ url: string; alt?: string; width?: number; height?: number }>;
-  specs?: Array<{ key: string; value: string }>;
-  features?: Array<{ text: string }>;
-}
+import { createMachine } from '@/services/cms/contentTypes/machines/create';
+import { updateMachine } from '@/services/cms/contentTypes/machines/update';
+import { deleteMachine } from '@/services/cms/contentTypes/machines/delete';
+import { MachineFormValues } from '@/utils/machineMigration/types';
 
 /**
  * Hook to fetch machines data
@@ -61,7 +53,6 @@ export const useCreateMachine = () => {
   
   return useMutation({
     mutationFn: (machineData: MachineFormValues) => {
-      const { createMachine } = require('@/services/cms/contentTypes/machines');
       return createMachine(machineData);
     },
     onSuccess: () => {
@@ -90,7 +81,6 @@ export const useUpdateMachine = () => {
   
   return useMutation({
     mutationFn: ({ id, machineData }: { id: string, machineData: MachineFormValues }) => {
-      const { updateMachine } = require('@/services/cms/contentTypes/machines');
       return updateMachine(id, machineData);
     },
     onSuccess: () => {
@@ -119,11 +109,7 @@ export const useDeleteMachine = () => {
   
   return useMutation({
     mutationFn: async (id: string) => {
-      // Import directly from the delete file
-      const { deleteMachine } = await import('@/services/cms/contentTypes/machines/delete');
-      const result = await deleteMachine(id);
-      console.log('[useDeleteMachine] Delete result:', result);
-      return result;
+      return await deleteMachine(id);
     },
     onSuccess: () => {
       toast({
