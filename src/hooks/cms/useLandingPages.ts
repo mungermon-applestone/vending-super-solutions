@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 import { fetchLandingPages, fetchLandingPageByKey, createLandingPage, updateLandingPage, deleteLandingPage } from '@/services/cms/contentTypes/landingPages';
@@ -12,7 +13,7 @@ export function useLandingPages() {
 }
 
 export function useLandingPageByKey(key: string) {
-  return useQuery({
+  return useQuery<LandingPage | null>({
     queryKey: ['landing-pages', key],
     queryFn: () => fetchLandingPageByKey(key),
     enabled: !!key,

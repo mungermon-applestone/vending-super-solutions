@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
 import { Button } from '@/components/ui/button';
+import { LandingPage } from '@/types/landingPage';
 
 interface PageHeroProps {
   pageKey: string;
@@ -37,8 +38,11 @@ const PageHero: React.FC<PageHeroProps> = ({
     });
   }, [pageKey, landingPage, isLoading]);
   
+  // Type assertion to ensure landingPage is treated as LandingPage type
+  const typedLandingPage = landingPage as LandingPage | null | undefined;
+  
   // Use CMS data if available, otherwise fall back to props
-  const heroContent = landingPage?.hero_content || null;
+  const heroContent = typedLandingPage?.hero_content || null;
   
   const title = heroContent?.title || fallbackTitle;
   const subtitle = heroContent?.subtitle || fallbackSubtitle;
