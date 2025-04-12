@@ -27,7 +27,6 @@ const Layout = ({
       <Header />
       <main className={`flex-grow ${className}`}>{children}</main>
       {!noFooter && <Footer />}
-      <AdminControls />
     </div>
   );
 };

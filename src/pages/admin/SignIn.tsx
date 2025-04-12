@@ -12,9 +12,8 @@ import Layout from '@/components/layout/Layout';
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { signIn, signUp, user, isAdmin } = useAuth();
+  const { signIn, user, isAdmin } = useAuth();
   const navigate = useNavigate();
   
   // If user is already logged in and is an admin, redirect to admin dashboard
@@ -29,20 +28,12 @@ const SignIn: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      if (isSignUp) {
-        await signUp(email, password);
-      } else {
-        await signIn(email, password);
-      }
+      await signIn(email, password);
     } catch (error) {
       console.error('Authentication error:', error);
     } finally {
       setIsSubmitting(false);
     }
-  };
-  
-  const toggleAuthMode = () => {
-    setIsSignUp(!isSignUp);
   };
   
   return (
@@ -51,12 +42,10 @@ const SignIn: React.FC = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">
-              {isSignUp ? 'Create an account' : 'Sign in to your account'}
+              Sign in to access admin panel
             </CardTitle>
             <CardDescription className="text-center">
-              {isSignUp 
-                ? 'Enter your email and create a password to create your account' 
-                : 'Enter your email and password to access the admin panel'}
+              Enter your email and password to access the admin panel
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -99,19 +88,15 @@ const SignIn: React.FC = () => {
               >
                 {isSubmitting
                   ? 'Please wait...'
-                  : isSignUp
-                    ? 'Create account'
-                    : 'Sign in'
+                  : 'Sign in'
                 }
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="justify-center">
-            <Button variant="link" onClick={toggleAuthMode}>
-              {isSignUp 
-                ? 'Already have an account? Sign in' 
-                : 'Don\'t have an account? Create one'}
-            </Button>
+          <CardFooter className="text-center text-sm text-muted-foreground">
+            <p className="w-full">
+              Admin accounts can only be created by existing administrators
+            </p>
           </CardFooter>
         </Card>
       </div>

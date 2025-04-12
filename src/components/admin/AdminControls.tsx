@@ -30,7 +30,8 @@ const AdminControls = () => {
   };
   
   return (
-    <nav className="bg-gray-900 text-white min-h-screen w-64 pb-4 hidden md:block">
+    <nav className="hidden">
+      {/* The content is hidden but kept for reference */}
       <div className="p-4">
         <h2 className="text-2xl font-semibold">Admin Panel</h2>
       </div>
