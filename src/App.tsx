@@ -33,6 +33,7 @@ import AdminCaseStudies from './pages/admin/AdminCaseStudies';
 import ProductEditor from './pages/ProductEditor';
 import MachineEditor from './pages/MachineEditor';
 import TechnologyEditor from './pages/TechnologyEditor';
+import CaseStudyEditor from './pages/admin/CaseStudyEditor';
 
 // Public pages
 import CaseStudies from './pages/CaseStudies';
@@ -80,8 +81,8 @@ function App() {
           <Route path="/admin/blog/edit/:postSlug" element={<PlaceholderPage />} />
           <Route path="/admin/media" element={<AdminMedia />} />
           <Route path="/admin/case-studies" element={<AdminCaseStudies />} />
-          <Route path="/admin/case-studies/new" element={<PlaceholderPage />} />
-          <Route path="/admin/case-studies/edit/:caseStudySlug" element={<PlaceholderPage />} />
+          <Route path="/admin/case-studies/new" element={<CaseStudyEditor />} />
+          <Route path="/admin/case-studies/edit/:caseStudySlug" element={<CaseStudyEditor />} />
           
           {/* 404 fallback */}
           <Route path="*" element={<NotFound />} />

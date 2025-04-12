@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -52,7 +51,6 @@ const AdminCaseStudies = () => {
     }
   }, [isAdmin, isLoading, navigate]);
 
-  // Filter case studies based on search term
   const filteredCaseStudies = React.useMemo(() => {
     if (!caseStudies) return [];
     
