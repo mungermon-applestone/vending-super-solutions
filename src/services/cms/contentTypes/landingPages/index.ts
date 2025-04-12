@@ -251,7 +251,6 @@ export async function createLandingPage(data: LandingPageFormData): Promise<Land
 }
 
 export async function updateLandingPage(id: string, data: Partial<LandingPageFormData>): Promise<LandingPage> {
-  // In a real app with Supabase, this would update the record
   const pages = await fetchLandingPages();
   const pageToUpdate = pages.find(page => page.id === id);
   
@@ -283,7 +282,6 @@ export async function updateLandingPage(id: string, data: Partial<LandingPageFor
 }
 
 export async function deleteLandingPage(id: string): Promise<void> {
-  // In a real app with Supabase, this would delete the record
   console.log(`Deleting landing page with ID: ${id}`);
   // Implementation would delete both the page and associated hero content
 }

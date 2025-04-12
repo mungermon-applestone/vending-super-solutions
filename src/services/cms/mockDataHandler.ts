@@ -3,7 +3,7 @@ import { IS_DEVELOPMENT } from '@/config/cms';
 import { mockMachines, mockProductTypes } from '@/data/mockCmsData';
 
 // Use mock data in development mode if needed
-export const useMockData = IS_DEVELOPMENT && false; // Set to true to use mock data instead of Supabase
+export const useMockData = IS_DEVELOPMENT && true; // Set to true to use mock data instead of Supabase
 
 /**
  * Get mock data for a specific content type
