@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
+import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useMachineById, useCreateMachine, useUpdateMachine } from '@/hooks/useMachinesData';
 import MachineForm from '@/components/admin/machine-editor/MachineForm';
