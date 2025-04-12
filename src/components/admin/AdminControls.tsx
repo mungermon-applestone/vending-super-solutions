@@ -1,12 +1,19 @@
+
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Zap } from 'lucide-react';
-
 import { LayoutDashboard, PackageSearch, Box, BarChart, BookOpen, ImageIcon } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const AdminControls = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAdmin } = useAuth();
+  
+  // Only show admin controls for admin users and on admin routes
+  if (!isAdmin || !location.pathname.startsWith('/admin')) {
+    return null;
+  }
   
   const adminRoutes = [
     { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard className="h-5 w-5" /> },
@@ -18,8 +25,8 @@ const AdminControls = () => {
     { name: 'Media', path: '/admin/media', icon: <ImageIcon className="h-5 w-5" /> },
   ];
   
-  const isActive = (path: string) => {
-    return location.pathname.startsWith(path);
+  const isActive = (path: string): boolean => {
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
   
   return (

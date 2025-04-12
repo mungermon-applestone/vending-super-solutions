@@ -1,5 +1,6 @@
 
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import ContentTypeCard from '@/components/admin/dashboard/ContentTypeCard';
 import QuickNavigation from '@/components/admin/dashboard/QuickNavigation';
 import ContentManagementList from '@/components/admin/dashboard/ContentManagementList';
 import QuickActions from '@/components/admin/dashboard/QuickActions';
+import { useAuth } from '@/context/AuthContext';
 
 const contentTypes = [
   {
@@ -60,13 +62,40 @@ const navItems = contentTypes.map(type => ({
 
 const AdminDashboard = () => {
   const { toast } = useToast();
+  const { isAdmin, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect to sign-in if not an admin
+  useEffect(() => {
+    if (!isLoading && !isAdmin) {
+      navigate('/admin/sign-in');
+    }
+  }, [isAdmin, isLoading, navigate]);
 
   useEffect(() => {
-    toast({
-      title: "Admin Dashboard",
-      description: "Welcome to the CMS admin dashboard",
-    });
-  }, [toast]);
+    if (isAdmin) {
+      toast({
+        title: "Admin Dashboard",
+        description: "Welcome to the CMS admin dashboard",
+      });
+    }
+  }, [isAdmin, toast]);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-10">
+          <div className="flex items-center justify-center h-64">
+            <p>Loading...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!isAdmin) {
+    return null; // Will redirect via useEffect
+  }
 
   return (
     <Layout>

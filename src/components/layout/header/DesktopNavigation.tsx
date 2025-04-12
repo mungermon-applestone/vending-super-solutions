@@ -13,9 +13,12 @@ import {
 } from "@/components/ui/navigation-menu";
 import NavigationDropdownContent from './NavigationDropdownContent';
 import TechnologyDropdown from './TechnologyDropdown';
+import { useAuth } from '@/context/AuthContext';
+import { UserCog } from 'lucide-react';
 
 const DesktopNavigation = () => {
   const location = useLocation();
+  const { isAdmin } = useAuth();
   
   const isActive = (path: string): boolean => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
@@ -169,9 +172,27 @@ const DesktopNavigation = () => {
         </NavigationMenuList>
       </NavigationMenu>
 
-      <Button asChild variant="default" size="sm" className="ml-4">
-        <Link to="/partner">Become a Partner</Link>
-      </Button>
+      <div className="flex items-center gap-2 ml-4">
+        {isAdmin ? (
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin">
+              <UserCog className="h-4 w-4 mr-1" />
+              Admin Dashboard
+            </Link>
+          </Button>
+        ) : (
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin/sign-in">
+              <UserCog className="h-4 w-4 mr-1" />
+              Admin Sign In
+            </Link>
+          </Button>
+        )}
+        
+        <Button asChild variant="default" size="sm">
+          <Link to="/partner">Become a Partner</Link>
+        </Button>
+      </div>
     </nav>
   );
 };
