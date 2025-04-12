@@ -28,7 +28,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { MachineFormValues, MachineData } from '@/utils/machineMigration/types';
 import MediaSelector from '@/components/admin/media/MediaSelector';
 
-// Schema validation for the machine form
 const machineFormSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters." }),
   slug: z.string().min(3, { message: "Slug must be at least 3 characters." })
@@ -121,7 +120,16 @@ const MachineForm = ({ machine, isCreating, onSubmit }: MachineFormProps) => {
     
     try {
       console.log("Submitting form data:", data);
-      await onSubmit(data);
+      const sanitizedData = {
+        ...data,
+        images: data.images?.map(img => ({
+          ...img,
+          alt: img.alt || data.title || '',
+        })),
+      };
+      
+      console.log("Sanitized data for submission:", sanitizedData);
+      await onSubmit(sanitizedData);
     } catch (error) {
       console.error('Error saving machine:', error);
       toast({
