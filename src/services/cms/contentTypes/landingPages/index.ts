@@ -21,7 +21,14 @@ export async function fetchLandingPages(): Promise<LandingPage[]> {
   }
   
   // In a real implementation, this would connect to Supabase
-  return [];
+  try {
+    console.log("[fetchLandingPages] Attempting to fetch from Supabase");
+    // This would be replaced with actual Supabase query in a real implementation
+    return [];
+  } catch (error) {
+    console.error("[fetchLandingPages] Error fetching from Supabase:", error);
+    return [];
+  }
 }
 
 export async function fetchLandingPageByKey(key: string): Promise<LandingPage | null> {
@@ -87,16 +94,14 @@ export async function createLandingPage(data: LandingPageFormData): Promise<Land
         existingPages.push(newPage);
       }
       
-      // In a real app, this would use Supabase to update the database
       // Store updated pages back to mock data
-      if (!Array.isArray(window.__MOCK_DATA)) {
-        window.__MOCK_DATA = {};
-      }
-      if (!window.__MOCK_DATA['landing-pages']) {
-        window.__MOCK_DATA['landing-pages'] = [];
+      if (typeof window !== 'undefined') {
+        if (!window.__MOCK_DATA) {
+          window.__MOCK_DATA = {};
+        }
+        window.__MOCK_DATA['landing-pages'] = existingPages;
       }
       
-      window.__MOCK_DATA['landing-pages'] = existingPages;
       console.log(`[createLandingPage] Updated mock data with ${existingPages.length} landing pages:`, existingPages);
     } catch (error) {
       console.error('[createLandingPage] Error updating mock landing pages:', error);

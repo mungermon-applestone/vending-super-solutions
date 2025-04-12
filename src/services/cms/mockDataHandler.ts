@@ -4,6 +4,98 @@ import { LandingPage } from '@/types/landingPage';
 
 export const useMockData = IS_DEVELOPMENT;
 
+// Mock landing pages data with multiple predefined pages
+const mockLandingPages: LandingPage[] = [
+  {
+    id: "landing-home-123",
+    page_key: "home",
+    page_name: "Home Page",
+    hero_content_id: "hero-home-123",
+    hero_content: {
+      id: "hero-home-123",
+      title: "Vend Anything You Sell",
+      subtitle: "Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.",
+      image_url: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81",
+      image_alt: "Vending Machine Software Interface",
+      cta_primary_text: "Request a Demo",
+      cta_primary_url: "/contact",
+      cta_secondary_text: "Explore Solutions", 
+      cta_secondary_url: "/products",
+      background_class: "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light",
+      created_at: "2023-01-01T00:00:00Z",
+      updated_at: "2023-01-01T00:00:00Z"
+    },
+    created_at: "2023-01-01T00:00:00Z",
+    updated_at: "2023-01-01T00:00:00Z"
+  },
+  {
+    id: "landing-products-456",
+    page_key: "products",
+    page_name: "Products Page",
+    hero_content_id: "hero-products-456",
+    hero_content: {
+      id: "hero-products-456",
+      title: "Our Vending Solutions",
+      subtitle: "Explore our range of cutting-edge vending machines and software designed to maximize your revenue and customer satisfaction.",
+      image_url: "https://images.unsplash.com/photo-1525328437458-0c4d4db7cab4",
+      image_alt: "Vending Machine Products",
+      cta_primary_text: "View Machines",
+      cta_primary_url: "/machines",
+      cta_secondary_text: "Contact Sales",
+      cta_secondary_url: "/contact",
+      background_class: "bg-gradient-to-r from-slate-50 to-slate-100",
+      created_at: "2023-01-02T00:00:00Z",
+      updated_at: "2023-01-02T00:00:00Z"
+    },
+    created_at: "2023-01-02T00:00:00Z",
+    updated_at: "2023-01-02T00:00:00Z"
+  },
+  {
+    id: "landing-machines-789",
+    page_key: "machines",
+    page_name: "Machines Page",
+    hero_content_id: "hero-machines-789",
+    hero_content: {
+      id: "hero-machines-789",
+      title: "Advanced Vending Machines",
+      subtitle: "Our state-of-the-art machines are designed for reliability, security, and maximum customer engagement.",
+      image_url: "https://images.unsplash.com/photo-1525328437458-0c4d4db7cab4",
+      image_alt: "Vending Machine Hardware",
+      cta_primary_text: "Request Quote",
+      cta_primary_url: "/contact",
+      cta_secondary_text: "Learn More",
+      cta_secondary_url: "/about",
+      background_class: "bg-vending-blue-dark text-white",
+      created_at: "2023-01-03T00:00:00Z",
+      updated_at: "2023-01-03T00:00:00Z"
+    },
+    created_at: "2023-01-03T00:00:00Z",
+    updated_at: "2023-01-03T00:00:00Z"
+  },
+  {
+    id: "landing-business-goals-101112",
+    page_key: "business-goals",
+    page_name: "Business Goals Page",
+    hero_content_id: "hero-business-goals-101112",
+    hero_content: {
+      id: "hero-business-goals-101112",
+      title: "Achieve Your Business Goals",
+      subtitle: "Our vending solutions help you meet and exceed your business objectives through innovative technology and strategic placement.",
+      image_url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf",
+      image_alt: "Business Growth Chart",
+      cta_primary_text: "Explore Solutions",
+      cta_primary_url: "/products",
+      cta_secondary_text: "Schedule Consultation",
+      cta_secondary_url: "/contact",
+      background_class: "bg-vending-teal text-white",
+      created_at: "2023-01-04T00:00:00Z",
+      updated_at: "2023-01-04T00:00:00Z"
+    },
+    created_at: "2023-01-04T00:00:00Z",
+    updated_at: "2023-01-04T00:00:00Z"
+  }
+];
+
 // Mock data store
 let mockData: { [key: string]: any[] } = {
   'product-types': [
@@ -103,30 +195,7 @@ let mockData: { [key: string]: any[] } = {
       updated_at: new Date().toISOString(),
     },
   ],
-  'landing-pages': [
-    {
-      id: "landing-home-123",
-      page_key: "home",
-      page_name: "Home Page",
-      hero_content_id: "hero-home-123",
-      hero_content: {
-        id: "hero-home-123",
-        title: "Vend Anything You Sell",
-        subtitle: "Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.",
-        image_url: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81",
-        image_alt: "Vending Machine Software Interface",
-        cta_primary_text: "Request a Demo",
-        cta_primary_url: "/contact",
-        cta_secondary_text: "Explore Solutions", 
-        cta_secondary_url: "/products",
-        background_class: "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light",
-        created_at: "2023-01-01T00:00:00Z",
-        updated_at: "2023-01-01T00:00:00Z"
-      },
-      created_at: "2023-01-01T00:00:00Z",
-      updated_at: "2023-01-01T00:00:00Z"
-    }
-  ]
+  'landing-pages': mockLandingPages
 };
 
 // Function to seed initial mock data
@@ -235,30 +304,7 @@ export const seedMockData = () => {
         updated_at: new Date().toISOString(),
       },
     ],
-    'landing-pages': [
-      {
-        id: "landing-home-123",
-        page_key: "home",
-        page_name: "Home Page",
-        hero_content_id: "hero-home-123",
-        hero_content: {
-          id: "hero-home-123",
-          title: "Vend Anything You Sell",
-          subtitle: "Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.",
-          image_url: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81",
-          image_alt: "Vending Machine Software Interface",
-          cta_primary_text: "Request a Demo",
-          cta_primary_url: "/contact",
-          cta_secondary_text: "Explore Solutions", 
-          cta_secondary_url: "/products",
-          background_class: "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light",
-          created_at: "2023-01-01T00:00:00Z",
-          updated_at: "2023-01-01T00:00:00Z"
-        },
-        created_at: "2023-01-01T00:00:00Z",
-        updated_at: "2023-01-01T00:00:00Z"
-      }
-    ]
+    'landing-pages': mockLandingPages
   };
   
   console.log('Mock data seeded.');
@@ -275,33 +321,11 @@ export async function getMockData<T>(contentType: string, params: Record<string,
 
   if (!mockData[contentType]) {
     console.warn(`[getMockData] No mock data found for content type: ${contentType}`);
+    
     // Initialize landing pages if this is the first time we're trying to access it
     if (contentType === 'landing-pages' && useMockData) {
       console.log('[getMockData] Initializing landing pages mock data');
-      mockData['landing-pages'] = [
-        {
-          id: "landing-home-123",
-          page_key: "home",
-          page_name: "Home Page",
-          hero_content_id: "hero-home-123",
-          hero_content: {
-            id: "hero-home-123",
-            title: "Vend Anything You Sell",
-            subtitle: "Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.",
-            image_url: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81",
-            image_alt: "Vending Machine Software Interface",
-            cta_primary_text: "Request a Demo",
-            cta_primary_url: "/contact",
-            cta_secondary_text: "Explore Solutions", 
-            cta_secondary_url: "/products",
-            background_class: "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light",
-            created_at: "2023-01-01T00:00:00Z",
-            updated_at: "2023-01-01T00:00:00Z"
-          },
-          created_at: "2023-01-01T00:00:00Z",
-          updated_at: "2023-01-01T00:00:00Z"
-        }
-      ];
+      mockData['landing-pages'] = mockLandingPages;
     }
     
     // If still no data, return empty array
@@ -329,31 +353,14 @@ export async function getMockData<T>(contentType: string, params: Record<string,
 
 // Export function to get mock landing pages (keep this for compatibility)
 export function _getMockLandingPages() {
-  const homeHeroId = "hero-home-123";
-  const homeId = "landing-home-123";
-  
-  return [
-    {
-      id: homeId,
-      page_key: "home",
-      page_name: "Home Page",
-      hero_content_id: homeHeroId,
-      hero_content: {
-        id: homeHeroId,
-        title: "Vend Anything You Sell",
-        subtitle: "Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.",
-        image_url: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81",
-        image_alt: "Vending Machine Software Interface",
-        cta_primary_text: "Request a Demo",
-        cta_primary_url: "/contact",
-        cta_secondary_text: "Explore Solutions", 
-        cta_secondary_url: "/products",
-        background_class: "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light",
-        created_at: "2023-01-01T00:00:00Z",
-        updated_at: "2023-01-01T00:00:00Z"
-      },
-      created_at: "2023-01-01T00:00:00Z",
-      updated_at: "2023-01-01T00:00:00Z"
-    }
-  ];
+  return mockLandingPages;
+}
+
+// Define window.__MOCK_DATA type to avoid TypeScript errors
+declare global {
+  interface Window {
+    __MOCK_DATA: {
+      [key: string]: any[];
+    };
+  }
 }

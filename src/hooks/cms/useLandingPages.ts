@@ -8,9 +8,16 @@ export function useLandingPages() {
   return useQuery<LandingPage[]>({
     queryKey: ['landing-pages'],
     queryFn: async () => {
-      const pages = await fetchLandingPages();
-      console.log('useLandingPages hook fetched data:', pages);
-      return pages as LandingPage[];
+      try {
+        const pages = await fetchLandingPages();
+        console.log('useLandingPages hook fetched data:', pages);
+        
+        // Ensure we're returning an array even if pages is undefined
+        return Array.isArray(pages) ? pages : [];
+      } catch (error) {
+        console.error('Error in useLandingPages:', error);
+        return [];
+      }
     },
     ...createQueryOptions()
   });

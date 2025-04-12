@@ -66,23 +66,27 @@ const LandingPageForm: React.FC<LandingPageFormProps> = ({
   isSubmitting
 }) => {
   const { toast } = useToast();
+  
+  // Set up default values
+  const defaultValues = initialData || {
+    page_key: '',
+    page_name: '',
+    hero: {
+      title: '',
+      subtitle: '',
+      image_url: '',
+      image_alt: '',
+      cta_primary_text: 'Request a Demo',
+      cta_primary_url: '/contact',
+      cta_secondary_text: 'Explore Products',
+      cta_secondary_url: '/products',
+      background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
+    }
+  };
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData || {
-      page_key: '',
-      page_name: '',
-      hero: {
-        title: '',
-        subtitle: '',
-        image_url: '',
-        image_alt: '',
-        cta_primary_text: 'Request a Demo',
-        cta_primary_url: '/contact',
-        cta_secondary_text: 'Explore Products',
-        cta_secondary_url: '/products',
-        background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
-      }
-    }
+    defaultValues: defaultValues
   });
 
   // Debug form state
@@ -92,13 +96,14 @@ const LandingPageForm: React.FC<LandingPageFormProps> = ({
       errors: form.formState.errors,
       isDirty: form.formState.isDirty,
       isSubmitting: form.formState.isSubmitting,
+      defaultValues: form.formState.defaultValues
     });
   }, [form.formState]);
 
-  const handleSubmit = (data: z.infer<typeof formSchema>) => {
+  const handleFormSubmit = async (data: z.infer<typeof formSchema>) => {
     console.log("LandingPageForm - Submitting form with data:", data);
     try {
-      onSubmit(data as LandingPageFormData);
+      await onSubmit(data as LandingPageFormData);
     } catch (error) {
       console.error("Error in form submission:", error);
       toast({
@@ -111,7 +116,7 @@ const LandingPageForm: React.FC<LandingPageFormProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <Tabs defaultValue="basic" className="w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="basic">Basic Information</TabsTrigger>
@@ -141,6 +146,20 @@ const LandingPageForm: React.FC<LandingPageFormProps> = ({
           <Button 
             type="submit" 
             disabled={isSubmitting}
+            onClick={() => {
+              console.log("Save button clicked");
+              console.log("Form values:", form.getValues());
+              console.log("Form errors:", form.formState.errors);
+              
+              if (!form.formState.isValid) {
+                console.log("Form is invalid, not submitting");
+                toast({
+                  title: "Validation Error",
+                  description: "Please check the form for errors and try again.",
+                  variant: "destructive",
+                });
+              }
+            }}
           >
             {isSubmitting ? "Saving..." : "Save Landing Page"}
           </Button>

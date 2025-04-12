@@ -37,15 +37,12 @@ const PageHero: React.FC<PageHeroProps> = ({
       isLoading,
       error,
       hasCmsData: !!landingPage,
-      heroContent: landingPage ? (landingPage as LandingPage).hero_content : null,
+      heroContent: landingPage ? landingPage.hero_content : null,
     });
   }, [pageKey, landingPage, isLoading, error]);
   
-  // Type assertion to ensure landingPage is treated as LandingPage type
-  const typedLandingPage = landingPage as LandingPage | null;
-  
   // Use CMS data if available, otherwise fall back to props
-  const heroContent = typedLandingPage?.hero_content || null;
+  const heroContent = landingPage?.hero_content || null;
   
   // Debug what content we're actually using
   useEffect(() => {

@@ -17,22 +17,26 @@ const LandingPageEditor = () => {
   const { toast } = useToast();
   const isEditing = !!id;
   
-  const { data: landingPages, isLoading } = useLandingPages();
+  const { data: landingPages = [], isLoading } = useLandingPages();
   const createMutation = useCreateLandingPage();
   const updateMutation = useUpdateLandingPage();
   
   // Debug the landing pages data
   useEffect(() => {
     console.log("LandingPageEditor - Landing pages data:", landingPages);
-  }, [landingPages]);
+    console.log("LandingPageEditor - isEditing:", isEditing);
+    console.log("LandingPageEditor - id:", id);
+  }, [landingPages, isEditing, id]);
   
-  // Type assertion to ensure landingPages is treated as an array of LandingPage
-  const currentPage = landingPages ? 
-    (landingPages as LandingPage[]).find(page => page.id === id) : 
+  // Find the current page being edited
+  const currentPage = isEditing && Array.isArray(landingPages) ? 
+    landingPages.find(page => page.id === id) : 
     undefined;
   
   useEffect(() => {
-    if (isEditing && landingPages && !currentPage) {
+    console.log("LandingPageEditor - Current page:", currentPage);
+    
+    if (isEditing && !isLoading && Array.isArray(landingPages) && landingPages.length > 0 && !currentPage) {
       toast({
         title: "Error",
         description: "Landing page not found",
@@ -40,7 +44,7 @@ const LandingPageEditor = () => {
       });
       navigate('/admin/landing-pages');
     }
-  }, [isEditing, landingPages, currentPage, navigate, toast]);
+  }, [isEditing, landingPages, currentPage, navigate, toast, isLoading]);
   
   const handleSubmit = async (data: LandingPageFormData) => {
     console.log("LandingPageEditor - handleSubmit called with data:", data);
@@ -85,7 +89,7 @@ const LandingPageEditor = () => {
           cta_primary_url: currentPage.hero_content.cta_primary_url || '',
           cta_secondary_text: currentPage.hero_content.cta_secondary_text || '',
           cta_secondary_url: currentPage.hero_content.cta_secondary_url || '',
-          background_class: currentPage.hero_content.background_class,
+          background_class: currentPage.hero_content.background_class || 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
         }
       }
     : undefined;

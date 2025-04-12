@@ -5,7 +5,7 @@ import Layout from '@/components/layout/Layout';
 import AdminControls from '@/components/admin/AdminControls';
 import AdminNavBar from '@/components/admin/AdminNavBar';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, AlertTriangle } from 'lucide-react';
 import { useLandingPages } from '@/hooks/cms/useLandingPages';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
@@ -16,7 +16,7 @@ import { LandingPage } from '@/types/landingPage';
 const AdminLandingPages = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { data: landingPages, isLoading, error } = useLandingPages();
+  const { data: landingPages = [], isLoading, error } = useLandingPages();
   const deleteMutation = useDeleteLandingPage();
 
   // Enhanced debugging to see what's going on
@@ -26,7 +26,7 @@ const AdminLandingPages = () => {
     console.log("[AdminLandingPages] Error:", error);
     console.log("[AdminLandingPages] Data type:", landingPages ? typeof landingPages : "undefined");
     console.log("[AdminLandingPages] Is Array:", landingPages ? Array.isArray(landingPages) : "n/a");
-    console.log("[AdminLandingPages] Length:", landingPages && Array.isArray(landingPages) ? (landingPages as LandingPage[]).length : "n/a");
+    console.log("[AdminLandingPages] Length:", landingPages && Array.isArray(landingPages) ? landingPages.length : "n/a");
   }, [landingPages, isLoading, error]);
 
   const handleDeletePage = async (id: string) => {
@@ -70,9 +70,6 @@ const AdminLandingPages = () => {
     window.open(path, '_blank');
   };
 
-  // Cast landingPages to the correct type to ensure TypeScript knows it's an array
-  const typedLandingPages = landingPages as LandingPage[] | undefined;
-
   return (
     <Layout>
       <AdminNavBar activeItem="landing-pages" />
@@ -87,6 +84,19 @@ const AdminLandingPages = () => {
             <Plus size={16} className="mr-2" /> Add Landing Page
           </Button>
         </div>
+
+        {/* Debug info for development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-300 rounded">
+            <div className="flex items-center mb-2">
+              <AlertTriangle size={20} className="text-yellow-600 mr-2" />
+              <h3 className="font-medium">Debug Information</h3>
+            </div>
+            <p className="text-sm">Landing Pages Count: {Array.isArray(landingPages) ? landingPages.length : 'Not an array'}</p>
+            <p className="text-sm">Loading: {isLoading ? 'Yes' : 'No'}</p>
+            <p className="text-sm">Error: {error ? 'Yes' : 'No'}</p>
+          </div>
+        )}
         
         {isLoading && (
           <div className="space-y-4">
@@ -115,7 +125,7 @@ const AdminLandingPages = () => {
           </div>
         )}
         
-        {!isLoading && !error && (!typedLandingPages || typedLandingPages.length === 0) && (
+        {!isLoading && !error && (!landingPages || !Array.isArray(landingPages) || landingPages.length === 0) && (
           <div className="text-center py-12 border border-dashed rounded-lg">
             <h3 className="font-medium text-lg mb-2">No Landing Pages Found</h3>
             <p className="text-gray-500 mb-6">Start by adding your first landing page</p>
@@ -125,7 +135,7 @@ const AdminLandingPages = () => {
           </div>
         )}
         
-        {!isLoading && !error && typedLandingPages && typedLandingPages.length > 0 && (
+        {!isLoading && !error && Array.isArray(landingPages) && landingPages.length > 0 && (
           <div className="bg-white rounded-md shadow overflow-hidden">
             <div className="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-600">
               <div className="col-span-3">Page Name</div>
@@ -135,7 +145,7 @@ const AdminLandingPages = () => {
             </div>
             
             <div className="divide-y divide-gray-200">
-              {typedLandingPages.map((page: LandingPage) => (
+              {landingPages.map((page: LandingPage) => (
                 <LandingPageTableRow 
                   key={page.id} 
                   page={page} 
