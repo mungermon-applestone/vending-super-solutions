@@ -80,6 +80,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       console.log('Admin status result:', data);
       setIsAdmin(data === true);
+
+      // If this is the default admin email and not an admin yet, add them as admin
+      if (!data && user?.email === 'munger@applestonesolutions.com') {
+        const { error: insertError } = await supabase
+          .from('admin_users')
+          .insert({ user_id: userId });
+        
+        if (insertError) {
+          console.error('Error adding default admin:', insertError);
+        } else {
+          console.log('Default admin added successfully');
+          setIsAdmin(true);
+        }
+      }
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
@@ -101,6 +115,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
       console.log('Sign-in successful, data:', data);
+      
+      // If this is the default admin, ensure they're in the admin_users table
+      if (email === 'munger@applestonesolutions.com' && data.user) {
+        await checkAdminStatus(data.user.id);
+      }
+      
       toast({
         title: "Signed in successfully",
         description: "Welcome back!",
@@ -126,6 +146,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         throw error;
       }
+      
+      // If this is the default admin email, mark them as admin
+      if (email === 'munger@applestonesolutions.com') {
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData?.user) {
+          const { error: insertError } = await supabase
+            .from('admin_users')
+            .insert({ user_id: userData.user.id });
+          
+          if (insertError) {
+            console.error('Error adding admin status:', insertError);
+          }
+        }
+      }
+      
       toast({
         title: "Sign-up successful",
         description: "Your account has been created.",

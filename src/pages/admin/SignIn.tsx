@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { LockIcon, MailIcon } from 'lucide-react';
+import { LockIcon, MailIcon, AlertCircle } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 
 const SignIn: React.FC = () => {
@@ -24,6 +24,33 @@ const SignIn: React.FC = () => {
     }
   }, [user, isAdmin, navigate]);
   
+  // Handle signup for default admin if it doesn't exist
+  const handleSignUpDefaultAdmin = async () => {
+    if (email !== 'munger@applestonesolutions.com') {
+      setErrorMessage("You can only sign up with the default admin credentials");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    
+    try {
+      console.log("Creating default admin account");
+      const { signUp } = useAuth();
+      await signUp(email, password);
+      
+      // After sign-up, attempt to sign in
+      console.log("Signing in with newly created admin account");
+      await signIn(email, password);
+      navigate('/admin');
+    } catch (error: any) {
+      console.error('Admin creation error:', error);
+      setErrorMessage(error?.message || 'Failed to create admin account. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -37,7 +64,13 @@ const SignIn: React.FC = () => {
       navigate('/admin');
     } catch (error: any) {
       console.error('Authentication error:', error);
-      setErrorMessage(error?.message || 'Invalid email or password. Please try again.');
+      
+      // Special case for default admin - offer to create the account
+      if (email === 'munger@applestonesolutions.com' && error?.message?.includes('Invalid login')) {
+        setErrorMessage("Default admin account doesn't exist yet. Would you like to create it?");
+      } else {
+        setErrorMessage(error?.message || 'Invalid email or password. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -58,7 +91,20 @@ const SignIn: React.FC = () => {
           <CardContent>
             {errorMessage && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded">
-                {errorMessage}
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <div>{errorMessage}</div>
+                </div>
+                
+                {errorMessage.includes("create it") && (
+                  <Button 
+                    onClick={handleSignUpDefaultAdmin}
+                    className="mt-2 w-full"
+                    disabled={isSubmitting}
+                  >
+                    Create Default Admin Account
+                  </Button>
+                )}
               </div>
             )}
             <form onSubmit={handleSubmit} className="space-y-4">
