@@ -1,54 +1,99 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, Goal, Server, Database, TestTube } from 'lucide-react';
-import RegressionTestButton from '../testing/RegressionTestButton';
+import { Button } from '@/components/ui/button';
+import { Plus, Settings, Users, FileText, Image } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import CMSConfigInfo from './CMSConfigInfo';
 
-const QuickActions: React.FC = () => {
+const QuickActions = () => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Quick Actions</CardTitle>
-        <CardDescription>
-          Commonly used admin actions
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <Button variant="outline" asChild className="h-auto py-4 flex flex-col">
-            <Link to="/admin/products/new">
-              <Package className="h-6 w-6 mb-1" />
-              <span>New Product</span>
-            </Link>
-          </Button>
-          <Button variant="outline" asChild className="h-auto py-4 flex flex-col">
-            <Link to="/admin/business-goals/new">
-              <Goal className="h-6 w-6 mb-1" />
-              <span>New Goal</span>
-            </Link>
-          </Button>
-          <Button variant="outline" asChild className="h-auto py-4 flex flex-col">
-            <Link to="/admin/machines/new">
-              <Server className="h-6 w-6 mb-1" />
-              <span>New Machine</span>
-            </Link>
-          </Button>
-          <Button variant="outline" asChild className="h-auto py-4 flex flex-col">
-            <Link to="/admin/machines/migrate">
-              <Database className="h-6 w-6 mb-1" />
-              <span>Import Data</span>
-            </Link>
-          </Button>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Add Content</CardTitle>
+              <CardDescription>Create new content items</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-2">
+                <Button asChild variant="outline" className="justify-start">
+                  <Link to="/admin/products/new">
+                    <Plus className="mr-2 h-4 w-4" /> New Product Type
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="justify-start">
+                  <Link to="/admin/machines/new">
+                    <Plus className="mr-2 h-4 w-4" /> New Machine
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="justify-start">
+                  <Link to="/admin/technology/new">
+                    <Plus className="mr-2 h-4 w-4" /> New Technology
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Manage</CardTitle>
+              <CardDescription>Site administration</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-2">
+                <Button asChild variant="outline" className="justify-start">
+                  <Link to="/admin/users">
+                    <Users className="mr-2 h-4 w-4" /> Users
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="justify-start">
+                  <Link to="/admin/settings">
+                    <Settings className="mr-2 h-4 w-4" /> Settings
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="justify-start">
+                  <Link to="/admin/media">
+                    <Image className="mr-2 h-4 w-4" /> Media Library
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Content</CardTitle>
+              <CardDescription>Edit existing content</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-2">
+                <Button asChild variant="outline" className="justify-start">
+                  <Link to="/admin/landing-pages">
+                    <FileText className="mr-2 h-4 w-4" /> Landing Pages
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="justify-start">
+                  <Link to="/admin/blog">
+                    <FileText className="mr-2 h-4 w-4" /> Blog Posts
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="justify-start">
+                  <Link to="/admin/case-studies">
+                    <FileText className="mr-2 h-4 w-4" /> Case Studies
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <CMSConfigInfo />
         </div>
-        
-        {/* Add the regression test button */}
-        <div className="mt-4 flex justify-center">
-          <RegressionTestButton />
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
