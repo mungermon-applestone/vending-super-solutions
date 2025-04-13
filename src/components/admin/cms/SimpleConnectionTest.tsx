@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, CheckCircle, Loader2, RefreshCw } from 'lucide-react';
@@ -10,36 +9,48 @@ const testStrapiConnectionWithUrl = async (customUrl: string) => {
   try {
     console.log(`Testing connection to: ${customUrl}`);
     
+    // Process the URL to ensure it's correctly formatted
+    // Remove trailing slash if present
+    let baseUrl = customUrl.trim();
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.slice(0, -1);
+    }
+    
+    // Remove /api suffix for now, we'll try with and without it
+    const hasApiSuffix = baseUrl.endsWith('/api');
+    if (hasApiSuffix) {
+      baseUrl = baseUrl.slice(0, -4);
+    }
+    
+    console.log(`Processed base URL: ${baseUrl}`);
+    
     // Try multiple endpoints to find the right one
     const endpointsToTry = [
-      '/technology?populate=*', // Standard collection endpoint
-      '/api/technology?populate=*', // With /api prefix if not already included
-      '/technologies?populate=*', // Plural collection name
-      '/api/technologies?populate=*', // Plural with /api prefix
-      '' // Just test the base URL
+      `${baseUrl}/api/technology?populate=*`,  // Standard API path with singular
+      `${baseUrl}/api/technologies?populate=*`, // Standard API path with plural
+      `${baseUrl}/technology?populate=*`,      // Without /api prefix, singular
+      `${baseUrl}/technologies?populate=*`,    // Without /api prefix, plural
+      `${baseUrl}/api`,                        // Just the API base path
+      baseUrl                                  // The base URL itself
     ];
     
-    // Remove /api from the URL if it's already there to avoid double /api/api
-    const baseUrl = customUrl.endsWith('/api') 
-      ? customUrl 
-      : customUrl.endsWith('/') 
-        ? customUrl.slice(0, -1) 
-        : customUrl;
+    console.log('Endpoints to try:', endpointsToTry);
     
     let lastError = null;
     
     // Try each endpoint until one works
-    for (const endpoint of endpointsToTry) {
+    for (const url of endpointsToTry) {
       try {
-        const url = `${baseUrl}${endpoint}`;
         console.log(`Trying endpoint: ${url}`);
         
         const response = await fetch(url);
+        console.log(`Response from ${url}:`, response.status, response.statusText);
         
         if (response.ok) {
           // Try to parse the response as JSON
           try {
             const data = await response.json();
+            console.log('Received JSON data:', data);
             return {
               success: true,
               message: `Successfully connected to Strapi API at ${url}`,
@@ -51,6 +62,7 @@ const testStrapiConnectionWithUrl = async (customUrl: string) => {
             // If it's HTML, it might be the Strapi admin UI
             const text = await response.text();
             if (text.includes('<!DOCTYPE html>')) {
+              console.log('Received HTML response, likely admin UI');
               return {
                 success: true,
                 message: `Connected to Strapi at ${url} but received HTML (likely admin UI)`,
@@ -68,13 +80,12 @@ const testStrapiConnectionWithUrl = async (customUrl: string) => {
             statusText: response.statusText,
             url: url
           };
-          console.log(`Endpoint ${url} returned ${response.status} ${response.statusText}`);
         }
       } catch (error) {
-        console.log(`Error trying ${endpoint}:`, error);
+        console.error(`Error trying ${url}:`, error);
         lastError = {
           error: error instanceof Error ? error.message : String(error),
-          url: `${baseUrl}${endpoint}`
+          url: url
         };
       }
     }
@@ -85,7 +96,7 @@ const testStrapiConnectionWithUrl = async (customUrl: string) => {
       message: `Failed to connect: ${lastError?.status ? `Server returned ${lastError.status} ${lastError.statusText || ''}` : 'All connection attempts failed'}`,
       details: { 
         ...lastError,
-        attemptedEndpoints: endpointsToTry.map(e => `${baseUrl}${e}`)
+        attemptedEndpoints: endpointsToTry
       }
     };
   } catch (error) {
