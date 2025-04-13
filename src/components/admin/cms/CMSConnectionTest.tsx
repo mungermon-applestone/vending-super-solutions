@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
-import { getTechnologies } from '@/services/cms/technologies';
+import { testCMSConnection } from '@/services/cms/utils/connection';
 
 const CMSConnectionTest: React.FC = () => {
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
@@ -18,16 +18,19 @@ const CMSConnectionTest: React.FC = () => {
     setErrorMessage(null);
     
     try {
-      // Attempt to fetch technologies as a test
+      // Test connection to the current CMS provider
       console.log('[CMSConnectionTest] Testing connection to CMS...');
-      const technologies = await getTechnologies();
+      const result = await testCMSConnection();
       
-      console.log('[CMSConnectionTest] Test successful:', technologies);
-      setTestResults({
-        recordCount: technologies.length,
-        sampleData: technologies.slice(0, 3)
-      });
-      setTestStatus('success');
+      console.log('[CMSConnectionTest] Test result:', result);
+      
+      if (result.success) {
+        setTestResults(result);
+        setTestStatus('success');
+      } else {
+        setErrorMessage(result.message);
+        setTestStatus('error');
+      }
     } catch (error) {
       console.error('[CMSConnectionTest] Connection test failed:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Unknown error');
@@ -61,7 +64,7 @@ const CMSConnectionTest: React.FC = () => {
           <CheckCircle className="h-4 w-4 text-green-600" />
           <AlertTitle className="text-green-800">Connection successful</AlertTitle>
           <AlertDescription className="text-green-700">
-            Successfully connected to {cmsInfo.provider} CMS and retrieved {testResults?.recordCount || 0} technologies.
+            Successfully connected to {cmsInfo.provider} CMS.
           </AlertDescription>
         </Alert>
       )}
@@ -78,9 +81,9 @@ const CMSConnectionTest: React.FC = () => {
       
       {testStatus === 'success' && testResults && (
         <div className="border rounded-md p-4 bg-gray-50 mt-4">
-          <h4 className="font-medium mb-2">Sample data:</h4>
+          <h4 className="font-medium mb-2">Connection details:</h4>
           <pre className="text-xs overflow-auto max-h-40 p-2 bg-white border rounded">
-            {JSON.stringify(testResults.sampleData, null, 2)}
+            {JSON.stringify(testResults, null, 2)}
           </pre>
         </div>
       )}
