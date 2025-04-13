@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
 
@@ -30,7 +31,7 @@ export const checkProductSlugExists = async (slug: string, excludeProductId?: st
 };
 
 /**
- * Update a product's image
+ * Add or update a product's image
  */
 export const updateProductImage = async (data: ProductFormData, productId: string): Promise<void> => {
   console.log('[productHelpers] Updating product image for product ID:', productId);
@@ -90,6 +91,11 @@ export const updateProductImage = async (data: ProductFormData, productId: strin
 };
 
 /**
+ * Add a product image (alias for updateProductImage for consistency)
+ */
+export const addProductImage = updateProductImage;
+
+/**
  * Update a product's benefits
  */
 export const updateProductBenefits = async (data: ProductFormData, productId: string): Promise<void> => {
@@ -134,6 +140,11 @@ export const updateProductBenefits = async (data: ProductFormData, productId: st
     throw error;
   }
 };
+
+/**
+ * Add product benefits (alias for updateProductBenefits for consistency)
+ */
+export const addProductBenefits = updateProductBenefits;
 
 /**
  * Update a product's features
@@ -214,4 +225,27 @@ export const updateProductFeatures = async (data: ProductFormData, productId: st
     console.error('[productHelpers] Error in updateProductFeatures:', error);
     throw error;
   }
+};
+
+/**
+ * Add product features (alias for updateProductFeatures for consistency)
+ */
+export const addProductFeatures = updateProductFeatures;
+
+/**
+ * Process benefits to remove duplicates and empty entries
+ */
+export const processBenefits = (benefits: string[]): string[] => {
+  // Filter out empty benefits and remove duplicates
+  const uniqueBenefits = new Set<string>();
+  return benefits
+    .filter(benefit => benefit.trim() !== '')
+    .filter(benefit => {
+      const normalized = benefit.trim().toLowerCase();
+      if (uniqueBenefits.has(normalized)) {
+        return false;
+      }
+      uniqueBenefits.add(normalized);
+      return true;
+    });
 };
