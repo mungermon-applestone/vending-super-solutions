@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
-import { Database, Server, Key, AlertCircle } from 'lucide-react';
+import { Database, Server, Key, AlertCircle, CheckCircle } from 'lucide-react';
 
 const CMSConfigInfo: React.FC = () => {
   const cmsInfo = getCMSInfo();
@@ -53,7 +53,8 @@ const CMSConfigInfo: React.FC = () => {
                   <span className="font-medium">API Key:</span>
                 </span>
                 {cmsInfo.apiKeyConfigured ? (
-                  <Badge variant="outline" className="text-green-600 border-green-600">
+                  <Badge variant="outline" className="text-green-600 border-green-600 flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3" /> 
                     Configured
                   </Badge>
                 ) : (

@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle, CheckCircle2, RefreshCw, Settings } from 'lucide-react';
 import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
 import CMSConnectionTest from '@/components/admin/cms/CMSConnectionTest';
+import CMSConfigInfo from '@/components/admin/cms/CMSConfigInfo';
 
 const AdminSettings: React.FC = () => {
   const { toast } = useToast();
@@ -94,117 +95,125 @@ const AdminSettings: React.FC = () => {
           
           <TabsContent value="cms">
             <div className="grid gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" />
-                    CMS Provider Configuration
-                  </CardTitle>
-                  <CardDescription>
-                    Configure which CMS provider your application will use
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Alert className="mb-6">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>Important</AlertTitle>
-                    <AlertDescription>
-                      Changing your CMS provider will affect how content is retrieved and managed.
-                      Make sure you have set up the corresponding environment variables in your .env file.
-                    </AlertDescription>
-                  </Alert>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <Label>CMS Provider</Label>
-                      <div className="flex items-center gap-4 mt-2">
-                        <button
-                          type="button"
-                          onClick={() => setCmsProvider('supabase')}
-                          className={`p-4 border rounded-md flex flex-col items-center gap-2 w-40 ${
-                            cmsProvider === 'supabase' 
-                              ? 'border-primary bg-primary/5' 
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                        >
-                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            DB
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="md:col-span-2">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="h-5 w-5" />
+                        CMS Provider Configuration
+                      </CardTitle>
+                      <CardDescription>
+                        Configure which CMS provider your application will use
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Alert className="mb-6">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>Important</AlertTitle>
+                        <AlertDescription>
+                          Changing your CMS provider will affect how content is retrieved and managed.
+                          Make sure you have set up the corresponding environment variables in your .env file.
+                        </AlertDescription>
+                      </Alert>
+                      
+                      <div className="space-y-6">
+                        <div>
+                          <Label>CMS Provider</Label>
+                          <div className="flex items-center gap-4 mt-2">
+                            <button
+                              type="button"
+                              onClick={() => setCmsProvider('supabase')}
+                              className={`p-4 border rounded-md flex flex-col items-center gap-2 w-40 ${
+                                cmsProvider === 'supabase' 
+                                  ? 'border-primary bg-primary/5' 
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                DB
+                              </div>
+                              <span className="font-medium">Supabase</span>
+                              {cmsProvider === 'supabase' && (
+                                <CheckCircle2 className="h-4 w-4 text-primary" />
+                              )}
+                            </button>
+                            
+                            <button
+                              type="button"
+                              onClick={() => setCmsProvider('strapi')}
+                              className={`p-4 border rounded-md flex flex-col items-center gap-2 w-40 ${
+                                cmsProvider === 'strapi' 
+                                  ? 'border-primary bg-primary/5' 
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                ST
+                              </div>
+                              <span className="font-medium">Strapi</span>
+                              {cmsProvider === 'strapi' && (
+                                <CheckCircle2 className="h-4 w-4 text-primary" />
+                              )}
+                            </button>
                           </div>
-                          <span className="font-medium">Supabase</span>
-                          {cmsProvider === 'supabase' && (
-                            <CheckCircle2 className="h-4 w-4 text-primary" />
-                          )}
-                        </button>
-                        
-                        <button
-                          type="button"
-                          onClick={() => setCmsProvider('strapi')}
-                          className={`p-4 border rounded-md flex flex-col items-center gap-2 w-40 ${
-                            cmsProvider === 'strapi' 
-                              ? 'border-primary bg-primary/5' 
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                        >
-                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            ST
-                          </div>
-                          <span className="font-medium">Strapi</span>
-                          {cmsProvider === 'strapi' && (
-                            <CheckCircle2 className="h-4 w-4 text-primary" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {cmsProvider === 'strapi' && (
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="strapiUrl">Strapi API URL</Label>
-                          <Input 
-                            id="strapiUrl"
-                            placeholder="http://localhost:1337"
-                            value={strapiUrl}
-                            onChange={(e) => setStrapiUrl(e.target.value)}
-                          />
-                          <p className="text-sm text-muted-foreground">
-                            The base URL of your Strapi API
-                          </p>
                         </div>
                         
-                        <div className="space-y-2">
-                          <Label htmlFor="strapiApiKey">Strapi API Key (Optional)</Label>
-                          <Input 
-                            id="strapiApiKey"
-                            type="password"
-                            placeholder="Your Strapi API key"
-                            value={strapiApiKey}
-                            onChange={(e) => setStrapiApiKey(e.target.value)}
-                          />
-                          <p className="text-sm text-muted-foreground">
-                            The API key to authenticate with Strapi
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    
-                    <div className="pt-4">
-                      <Button 
-                        onClick={handleSaveCmsSettings} 
-                        disabled={isLoading || (cmsProvider === 'strapi' && !strapiUrl)}
-                      >
-                        {isLoading ? (
-                          <>
-                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> 
-                            Saving...
-                          </>
-                        ) : (
-                          'Save CMS Settings'
+                        {cmsProvider === 'strapi' && (
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="strapiUrl">Strapi API URL</Label>
+                              <Input 
+                                id="strapiUrl"
+                                placeholder="http://localhost:1337"
+                                value={strapiUrl}
+                                onChange={(e) => setStrapiUrl(e.target.value)}
+                              />
+                              <p className="text-sm text-muted-foreground">
+                                The base URL of your Strapi API
+                              </p>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor="strapiApiKey">Strapi API Key (Optional)</Label>
+                              <Input 
+                                id="strapiApiKey"
+                                type="password"
+                                placeholder="Your Strapi API key"
+                                value={strapiApiKey}
+                                onChange={(e) => setStrapiApiKey(e.target.value)}
+                              />
+                              <p className="text-sm text-muted-foreground">
+                                The API key to authenticate with Strapi
+                              </p>
+                            </div>
+                          </div>
                         )}
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                        
+                        <div className="pt-4">
+                          <Button 
+                            onClick={handleSaveCmsSettings} 
+                            disabled={isLoading || (cmsProvider === 'strapi' && !strapiUrl)}
+                          >
+                            {isLoading ? (
+                              <>
+                                <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> 
+                                Saving...
+                              </>
+                            ) : (
+                              'Save CMS Settings'
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <div>
+                  <CMSConfigInfo />
+                </div>
+              </div>
               
               <Card>
                 <CardHeader>

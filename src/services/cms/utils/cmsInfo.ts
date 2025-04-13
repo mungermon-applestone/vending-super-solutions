@@ -12,6 +12,7 @@ export function getCMSInfo(): {
   apiUrl: string | null;
   isConfigured: boolean;
   apiKeyConfigured: boolean;
+  status: 'configured' | 'partial' | 'unconfigured';
 } {
   const config = getCMSProviderConfig();
   
@@ -19,11 +20,22 @@ export function getCMSInfo(): {
     const baseUrl = getStrapiBaseUrl();
     const apiKey = getStrapiApiKey();
     
+    const isConfigured = !!baseUrl;
+    const apiKeyConfigured = !!apiKey;
+    
+    let status: 'configured' | 'partial' | 'unconfigured' = 'unconfigured';
+    if (isConfigured && apiKeyConfigured) {
+      status = 'configured';
+    } else if (isConfigured) {
+      status = 'partial';
+    }
+    
     return {
       provider: 'Strapi',
       apiUrl: baseUrl,
-      isConfigured: !!baseUrl,
-      apiKeyConfigured: !!apiKey
+      isConfigured,
+      apiKeyConfigured,
+      status
     };
   }
   
@@ -32,7 +44,8 @@ export function getCMSInfo(): {
     provider: 'Supabase',
     apiUrl: null,
     isConfigured: true,  // Supabase is always configured through the Lovable integration
-    apiKeyConfigured: true
+    apiKeyConfigured: true, // No separate API key needed for Supabase
+    status: 'configured'
   };
 }
 
@@ -49,6 +62,7 @@ export function getCMSConfigInfoString(): string {
   if (info.provider === 'Strapi') {
     lines.push(`API URL: ${info.apiUrl || 'Not configured'}`);
     lines.push(`API Key: ${info.apiKeyConfigured ? 'Configured' : 'Not configured'}`);
+    lines.push(`Status: ${info.status}`);
   }
   
   return lines.join('\n');
