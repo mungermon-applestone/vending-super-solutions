@@ -2,9 +2,48 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, CheckCircle, Loader2, RefreshCw } from 'lucide-react';
-import { testStrapiConnection } from '@/services/cms/technology';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+
+// Create a modified version of the test function that accepts a custom URL
+const testStrapiConnectionWithUrl = async (customUrl: string) => {
+  try {
+    console.log(`Testing connection to: ${customUrl}`);
+    
+    // Make a simple fetch request to check if the API is accessible
+    const response = await fetch(`${customUrl}/technology?populate=*`);
+    
+    if (!response.ok) {
+      return {
+        success: false,
+        message: `Failed to connect: Server returned ${response.status} ${response.statusText}`,
+        details: { status: response.status, statusText: response.statusText }
+      };
+    }
+    
+    // Try to parse the response as JSON
+    try {
+      const data = await response.json();
+      return {
+        success: true,
+        message: `Successfully connected to Strapi API at ${customUrl}`,
+        data: data
+      };
+    } catch (parseError) {
+      return {
+        success: false,
+        message: `Connected, but received invalid JSON response: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
+        details: { parseError: String(parseError) }
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: `Error testing connection: ${error instanceof Error ? error.message : String(error)}`,
+      details: { error: String(error) }
+    };
+  }
+};
 
 const SimpleConnectionTest: React.FC = () => {
   const [testResult, setTestResult] = useState<{
@@ -21,18 +60,8 @@ const SimpleConnectionTest: React.FC = () => {
     setTestResult({ status: 'loading' });
     
     try {
-      console.log(`Testing connection to: ${customUrl}`);
-      
-      // Temporarily update the API URL for this test
-      const originalApiUrl = import.meta.env.VITE_STRAPI_API_URL;
-      // @ts-ignore - We're setting this temporarily for the test
-      import.meta.env.VITE_STRAPI_API_URL = customUrl;
-      
-      const result = await testStrapiConnection();
-      
-      // Restore the original API URL
-      // @ts-ignore - Restoring the original value
-      import.meta.env.VITE_STRAPI_API_URL = originalApiUrl;
+      // Use our custom function with the URL from state
+      const result = await testStrapiConnectionWithUrl(customUrl);
       
       if (result.success) {
         setTestResult({ 
