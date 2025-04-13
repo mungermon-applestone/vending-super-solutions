@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchTechnologies, fetchTechnologyBySlug, fetchTechnologyBySlugSafe } from '@/services/cms/contentTypes/technologies';
 import { CMSTechnology } from '@/types/cms';
-import { DEFAULT_QUERY_OPTIONS } from './cms/useQueryDefaults';
+import { defaultQueryOptions } from './cms/useQueryDefaults';
 import { QueryOptions } from '@/types/cms';
 
 export function useTechnologySections() {
@@ -13,7 +13,7 @@ export function useTechnologySections() {
       const data = await fetchTechnologies();
       return data || [];
     },
-    ...DEFAULT_QUERY_OPTIONS
+    ...defaultQueryOptions
   });
 
   return { technologies, isLoading, error };
@@ -28,7 +28,7 @@ export function useTechnologyBySlug(slug: string) {
       return await fetchTechnologyBySlugSafe(slug);
     },
     enabled: !!slug,
-    ...DEFAULT_QUERY_OPTIONS
+    ...defaultQueryOptions
   });
 
   return { technology: data, isLoading, error };

@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const SimpleTechnologyPage = () => {
-  const technologies = useTechnologySections();
+  const { technologies = [], isLoading, error } = useTechnologySections();
   const isFetching = useIsFetching({ queryKey: ['technologies'] }) > 0;
 
   return (
