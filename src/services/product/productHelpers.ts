@@ -1,304 +1,217 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
 
 /**
- * Helper function to process benefits before database operations
- * Filters empty benefits and removes duplicates while preserving order
+ * Check if a product slug already exists
  */
-export const processBenefits = (benefits: string[]): string[] => {
-  // Filter out empty benefits and trim whitespace
-  const filteredBenefits = benefits
-    .filter(benefit => benefit.trim() !== '')
-    .map(benefit => benefit.trim());
-  
-  // Deduplicate while preserving original order
-  const seen = new Set<string>();
-  return filteredBenefits.filter(benefit => {
-    const normalized = benefit.toLowerCase();
-    if (seen.has(normalized)) {
-      return false;
-    }
-    seen.add(normalized);
-    return true;
-  });
-};
+export const checkProductSlugExists = async (slug: string, excludeProductId?: string): Promise<boolean> => {
+  console.log(`[productHelpers] Checking if slug "${slug}" exists (excluding product ID: ${excludeProductId || 'none'})`);
 
-/**
- * Add product image to the database
- */
-export const addProductImage = async (data: ProductFormData, productId: string) => {
-  console.log('[productService] Adding image for product:', productId);
-  
-  try {
-    if (data.image.url) {
-      await supabase
-        .from('product_type_images')
-        .insert({
-          product_type_id: productId,
-          url: data.image.url,
-          alt: data.image.alt || data.title
-        });
-      console.log('[productService] Image added successfully');
-    } else {
-      console.log('[productService] No image URL provided, skipping image creation');
-    }
-  } catch (error) {
-    console.error('[productService] Error adding product image:', error);
-    throw error;
+  let query = supabase
+    .from('product_types')
+    .select('id')
+    .eq('slug', slug);
+
+  // If we're excluding a product ID (for updates), add that filter
+  if (excludeProductId) {
+    query = query.neq('id', excludeProductId);
   }
-};
 
-/**
- * Add product benefits to the database
- */
-export const addProductBenefits = async (data: ProductFormData, productId: string) => {
-  console.log('[productService] Adding benefits for product:', productId);
-  
-  try {
-    // Process benefits - filter out empty ones and deduplicate
-    const benefitsToInsert = processBenefits(data.benefits);
-    
-    if (benefitsToInsert.length > 0) {
-      const { error } = await supabase
-        .from('product_type_benefits')
-        .insert(
-          benefitsToInsert.map((benefit, index) => ({
-            product_type_id: productId,
-            benefit,
-            display_order: index
-          }))
-        );
-        
-      if (error) {
-        console.error('[productService] Error inserting benefits:', error);
-        throw error;
-      }
-      console.log('[productService] Benefits added successfully');
-    } else {
-      console.log('[productService] No benefits to insert');
-    }
-  } catch (error) {
-    console.error('[productService] Error adding product benefits:', error);
-    throw error;
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('[productHelpers] Error checking slug existence:', error);
+    throw new Error(`Failed to check if slug exists: ${error.message}`);
   }
+
+  const exists = data.length > 0;
+  console.log(`[productHelpers] Slug "${slug}" exists: ${exists}`);
+  return exists;
 };
 
 /**
- * Add product features to the database
+ * Update a product's image
  */
-export const addProductFeatures = async (data: ProductFormData, productId: string) => {
-  console.log('[productService] Adding features for product:', productId);
+export const updateProductImage = async (data: ProductFormData, productId: string): Promise<void> => {
+  console.log('[productHelpers] Updating product image for product ID:', productId);
   
   try {
-    for (let i = 0; i < data.features.length; i++) {
-      const feature = data.features[i];
-      if (feature.title.trim() !== '') {
-        const { data: newFeature, error: featureError } = await supabase
-          .from('product_type_features')
-          .insert({
-            product_type_id: productId,
-            title: feature.title,
-            description: feature.description,
-            icon: feature.icon || 'check',
-            display_order: i
-          })
-          .select('id')
-          .single();
-
-        if (featureError || !newFeature) {
-          console.error('[productService] Failed to create feature:', featureError);
-          continue;
-        }
-
-        if (feature.screenshotUrl) {
-          const { error: imageError } = await supabase
-            .from('product_type_feature_images')
-            .insert({
-              feature_id: newFeature.id,
-              url: feature.screenshotUrl,
-              alt: feature.screenshotAlt || feature.title
-            });
-            
-          if (imageError) {
-            console.error('[productService] Failed to add feature image:', imageError);
-          }
-        }
-      }
-    }
-    console.log('[productService] Features added successfully');
-  } catch (error) {
-    console.error('[productService] Error adding product features:', error);
-    throw error;
-  }
-};
-
-/**
- * Update product image in the database
- */
-export const updateProductImage = async (data: ProductFormData, productId: string) => {
-  console.log('[productService] Updating image for product:', productId);
-  
-  try {
+    // First check if the product already has an image
     const { data: existingImages, error: fetchError } = await supabase
       .from('product_type_images')
       .select('id')
       .eq('product_type_id', productId);
-      
+
     if (fetchError) {
-      console.error('[productService] Error fetching existing images:', fetchError);
-      throw fetchError;
+      console.error('[productHelpers] Error fetching existing product images:', fetchError);
+      throw new Error(fetchError.message);
     }
 
-    if (existingImages && existingImages.length > 0) {
-      const { error: updateError } = await supabase
-        .from('product_type_images')
-        .update({
-          url: data.image.url,
-          alt: data.image.alt || data.title,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existingImages[0].id);
-        
-      if (updateError) {
-        console.error('[productService] Error updating image:', updateError);
-        throw updateError;
+    // If image data is provided
+    if (data.image && (data.image.url || data.image.alt)) {
+      // If we already have an image, update it
+      if (existingImages && existingImages.length > 0) {
+        const { error: updateError } = await supabase
+          .from('product_type_images')
+          .update({
+            url: data.image.url,
+            alt: data.image.alt,
+            updated_at: new Date().toISOString()
+          })
+          .eq('product_type_id', productId);
+
+        if (updateError) {
+          console.error('[productHelpers] Error updating product image:', updateError);
+          throw new Error(updateError.message);
+        }
+      } 
+      // Otherwise insert a new one
+      else {
+        const { error: insertError } = await supabase
+          .from('product_type_images')
+          .insert({
+            product_type_id: productId,
+            url: data.image.url,
+            alt: data.image.alt
+          });
+
+        if (insertError) {
+          console.error('[productHelpers] Error inserting product image:', insertError);
+          throw new Error(insertError.message);
+        }
       }
-      console.log('[productService] Image updated successfully');
-    } else if (data.image.url) {
-      const { error: insertError } = await supabase
-        .from('product_type_images')
-        .insert({
-          product_type_id: productId,
-          url: data.image.url,
-          alt: data.image.alt || data.title
-        });
-        
-      if (insertError) {
-        console.error('[productService] Error inserting new image:', insertError);
-        throw insertError;
-      }
-      console.log('[productService] New image added successfully');
-    } else {
-      console.log('[productService] No image URL provided, skipping image update/creation');
     }
+
+    console.log('[productHelpers] Product image updated successfully');
   } catch (error) {
-    console.error('[productService] Error updating product image:', error);
+    console.error('[productHelpers] Error in updateProductImage:', error);
     throw error;
   }
 };
 
 /**
- * Update product benefits in the database
+ * Update a product's benefits
  */
-export const updateProductBenefits = async (data: ProductFormData, productId: string) => {
-  console.log('[productService] Updating benefits for product:', productId);
+export const updateProductBenefits = async (data: ProductFormData, productId: string): Promise<void> => {
+  console.log('[productHelpers] Updating benefits for product ID:', productId);
+  console.log('[productHelpers] Benefits data:', data.benefits);
   
   try {
-    // Delete existing benefits
+    // First delete all existing benefits for this product for a clean slate
     const { error: deleteError } = await supabase
       .from('product_type_benefits')
       .delete()
       .eq('product_type_id', productId);
-      
-    if (deleteError) {
-      console.error('[productService] Error deleting existing benefits:', deleteError);
-      throw deleteError;
-    }
 
-    // Process benefits - filter out empty ones and deduplicate
-    const benefitsToInsert = processBenefits(data.benefits);
+    if (deleteError) {
+      console.error('[productHelpers] Error deleting existing benefits:', deleteError);
+      throw new Error(deleteError.message);
+    }
     
-    if (benefitsToInsert.length > 0) {
+    // Filter out empty benefits and insert the new ones
+    const validBenefits = data.benefits.filter(benefit => benefit.trim() !== '');
+    
+    if (validBenefits.length > 0) {
+      const benefitsToInsert = validBenefits.map((benefit, index) => ({
+        product_type_id: productId,
+        benefit: benefit,
+        display_order: index
+      }));
+
       const { error: insertError } = await supabase
         .from('product_type_benefits')
-        .insert(
-          benefitsToInsert.map((benefit, index) => ({
-            product_type_id: productId,
-            benefit,
-            display_order: index
-          }))
-        );
-        
+        .insert(benefitsToInsert);
+
       if (insertError) {
-        console.error('[productService] Error inserting updated benefits:', insertError);
-        throw insertError;
+        console.error('[productHelpers] Error inserting benefits:', insertError);
+        throw new Error(insertError.message);
       }
-      console.log('[productService] Benefits updated successfully');
-    } else {
-      console.log('[productService] No benefits to insert after update');
     }
+
+    console.log(`[productHelpers] ${validBenefits.length} benefits inserted successfully`);
   } catch (error) {
-    console.error('[productService] Error updating product benefits:', error);
+    console.error('[productHelpers] Error in updateProductBenefits:', error);
     throw error;
   }
 };
 
 /**
- * Update product features in the database
+ * Update a product's features
  */
-export const updateProductFeatures = async (data: ProductFormData, productId: string) => {
-  console.log('[productService] Updating features for product:', productId);
+export const updateProductFeatures = async (data: ProductFormData, productId: string): Promise<void> => {
+  console.log('[productHelpers] Updating features for product ID:', productId);
   
   try {
-    // Get existing features
+    // Get existing features to manage their associated images
     const { data: existingFeatures, error: fetchError } = await supabase
       .from('product_type_features')
       .select('id')
       .eq('product_type_id', productId);
-      
+
     if (fetchError) {
-      console.error('[productService] Error fetching existing features:', fetchError);
-      throw fetchError;
+      console.error('[productHelpers] Error fetching existing features:', fetchError);
+      throw new Error(fetchError.message);
     }
 
-    // Delete existing features
-    if (existingFeatures && existingFeatures.length > 0) {
-      const { error: deleteError } = await supabase
+    // First delete all existing features (and cascade to their images)
+    const { error: deleteError } = await supabase
+      .from('product_type_features')
+      .delete()
+      .eq('product_type_id', productId);
+
+    if (deleteError) {
+      console.error('[productHelpers] Error deleting existing features:', deleteError);
+      throw new Error(deleteError.message);
+    }
+
+    // Insert each new feature and its screenshot
+    for (let i = 0; i < data.features.length; i++) {
+      const feature = data.features[i];
+      
+      // Skip features with empty title or description
+      if (!feature.title.trim() || !feature.description.trim()) {
+        console.log('[productHelpers] Skipping empty feature at index:', i);
+        continue;
+      }
+      
+      // Insert the feature
+      const { data: newFeature, error: featureError } = await supabase
         .from('product_type_features')
-        .delete()
-        .eq('product_type_id', productId);
-        
-      if (deleteError) {
-        console.error('[productService] Error deleting existing features:', deleteError);
-        throw deleteError;
+        .insert({
+          product_type_id: productId,
+          title: feature.title,
+          description: feature.description,
+          icon: feature.icon || 'check',
+          display_order: i
+        })
+        .select()
+        .single();
+
+      if (featureError) {
+        console.error('[productHelpers] Error inserting feature:', featureError);
+        throw new Error(featureError.message);
+      }
+
+      // If screenshot data is provided, insert it
+      if (feature.screenshotUrl || feature.screenshotAlt) {
+        const { error: screenshotError } = await supabase
+          .from('product_type_feature_images')
+          .insert({
+            feature_id: newFeature.id,
+            url: feature.screenshotUrl || '',
+            alt: feature.screenshotAlt || ''
+          });
+
+        if (screenshotError) {
+          console.error('[productHelpers] Error inserting feature screenshot:', screenshotError);
+          // Continue with other features even if this screenshot fails
+        }
       }
     }
 
-    // Add new features using the shared helper
-    await addProductFeatures(data, productId);
-    console.log('[productService] Features updated successfully');
+    console.log(`[productHelpers] ${data.features.length} features processed successfully`);
   } catch (error) {
-    console.error('[productService] Error updating product features:', error);
-    throw error;
-  }
-};
-
-/**
- * Check if a product with the specified slug exists
- */
-export const checkProductSlugExists = async (slug: string, excludeId?: string): Promise<boolean> => {
-  try {
-    let query = supabase
-      .from('product_types')
-      .select('id')
-      .eq('slug', slug);
-    
-    // If we're excluding a specific product ID (e.g., for updates)
-    if (excludeId) {
-      query = query.neq('id', excludeId);
-    }
-    
-    const { data, error } = await query.maybeSingle();
-    
-    if (error) {
-      console.error('[productService] Error checking slug existence:', error);
-      throw error;
-    }
-    
-    return !!data;
-  } catch (error) {
-    console.error('[productService] Error in checkProductSlugExists:', error);
+    console.error('[productHelpers] Error in updateProductFeatures:', error);
     throw error;
   }
 };

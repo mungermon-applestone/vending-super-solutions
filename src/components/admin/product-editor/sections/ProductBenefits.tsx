@@ -25,9 +25,21 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
 
   const removeBenefit = (index: number) => {
     const currentBenefits = form.getValues('benefits');
-    if (currentBenefits.length > 1) {
-      form.setValue('benefits', currentBenefits.filter((_, i) => i !== index));
-    }
+    // Remove the benefit at the specified index
+    const updatedBenefits = currentBenefits.filter((_, i) => i !== index);
+    
+    // Ensure we always have at least one benefit field (can be empty)
+    const finalBenefits = updatedBenefits.length === 0 ? [''] : updatedBenefits;
+    
+    // Update the form values
+    form.setValue('benefits', finalBenefits);
+    
+    console.log(`[ProductBenefits] Removed benefit at index ${index}, now have ${finalBenefits.length} benefits`);
+    
+    // Trigger validation after removal to clear any duplicate errors
+    setTimeout(() => {
+      form.trigger('benefits');
+    }, 0);
   };
 
   // Check for duplicate benefits and set form errors
@@ -35,6 +47,11 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     const subscription = form.watch((value, { name }) => {
       if (name?.startsWith('benefits')) {
         const benefits = form.getValues('benefits');
+        
+        // First clear all duplicate errors
+        benefits.forEach((_, index) => {
+          form.clearErrors(`benefits.${index}`);
+        });
         
         // Look for duplicates
         const duplicates = new Map();
@@ -55,8 +72,6 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
               });
             } else {
               duplicates.set(normalizedBenefit, index);
-              // Clear error if it was previously set
-              form.clearErrors(`benefits.${index}`);
             }
           }
         });
@@ -120,7 +135,6 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
               onClick={() => removeBenefit(index)}
               variant="ghost"
               size="icon"
-              disabled={form.watch('benefits').length <= 1}
             >
               <Trash className="h-4 w-4" />
             </Button>

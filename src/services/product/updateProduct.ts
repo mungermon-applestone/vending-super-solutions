@@ -69,7 +69,7 @@ export const updateProduct = async (data: ProductFormData, originalSlug: string,
     // Update product image
     await updateProductImage(data, productId);
     
-    // Update product benefits
+    // Update product benefits - Now with proper cleanup first
     await updateProductBenefits(data, productId);
     
     // Update product features
