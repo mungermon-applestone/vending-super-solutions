@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, CheckCircle, ExternalLink, Loader2, RefreshCw } from 'lucide-react';
@@ -426,12 +425,21 @@ const SimpleConnectionTest: React.FC = () => {
       
       {testResult.status === 'success' && testResult.details?.testedUrl?.includes('/admin') && (
         <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
-          <h4 className="text-sm font-medium text-blue-800 mb-1">Developer Mode Access</h4>
-          <p className="text-xs text-blue-700">
-            To access developer mode and manage content types, log in to the Strapi admin panel.
-            If you need to add the Technology content type to your cloud instance, you can do so from
-            the Content-Type Builder in the admin panel.
+          <h4 className="text-sm font-medium text-blue-800 mb-1">Missing Content Types</h4>
+          <p className="text-xs text-blue-700 mb-2">
+            If you can access the admin panel but don't see the Technology content type, you need to transfer it from your local instance or create it in the cloud.
           </p>
+          <div className="space-y-2 text-xs text-blue-700">
+            <p className="font-medium">Options:</p>
+            <ol className="list-decimal pl-4 space-y-1">
+              <li>Use Strapi's transfer feature to copy your content type from local to cloud</li>
+              <li>Create the Technology content type manually in the cloud admin panel</li>
+              <li>Check if the Technology content type is created but not published</li>
+            </ol>
+            <p className="mt-2">
+              <strong>Note:</strong> Creating or modifying content types in production may require a paid plan.
+            </p>
+          </div>
         </div>
       )}
     </div>
