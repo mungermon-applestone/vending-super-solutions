@@ -1,4 +1,3 @@
-
 import { setCMSProviderConfig } from './providerConfig';
 import { ContentProviderType } from './adapters/types';
 import { strapiConfig, supabaseConfig } from './adapters/contentConfig';
@@ -74,7 +73,30 @@ export function getCMSConfigInfo(): string {
   const { getCMSProviderConfig } = require('./providerConfig');
   const config = getCMSProviderConfig();
   
-  return `CMS Provider Type: ${config.type}
-API URL: ${config.apiUrl || 'N/A'}
-API Key: ${config.apiKey ? '******' : 'Not set'}`;
+  let configInfo = `CMS Provider Type: ${config.type}\n`;
+  
+  if (config.type === ContentProviderType.STRAPI) {
+    configInfo += `API URL: ${config.apiUrl || 'Not set'}\n`;
+    configInfo += `API Key: ${config.apiKey ? '******' : 'Not set'}\n`;
+    
+    // Add connection status
+    if (config.apiUrl) {
+      configInfo += `Connection Status: ${config.apiKey ? 'Fully configured' : 'API URL configured, but key missing'}\n`;
+      configInfo += `Admin URL: ${config.apiUrl.replace(/\/api\/?$/, '/admin')}\n`;
+    } else {
+      configInfo += `Connection Status: Not configured\n`;
+    }
+    
+    // Add setup instructions
+    configInfo += `\nTo configure Strapi, set these environment variables in your .env file:
+VITE_CMS_PROVIDER=strapi
+VITE_STRAPI_API_URL=http://your-strapi-instance:1337/api
+VITE_STRAPI_API_KEY=your_strapi_api_key`;
+  } else {
+    configInfo += `Connection Status: Using default Supabase integration\n`;
+    configInfo += `\nTo use Supabase explicitly, set this environment variable:
+VITE_CMS_PROVIDER=supabase`;
+  }
+  
+  return configInfo;
 }

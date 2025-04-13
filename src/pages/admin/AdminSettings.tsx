@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle, CheckCircle2, RefreshCw, Settings } from 'lucide-react';
 import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
 import CMSConnectionTest from '@/components/admin/cms/CMSConnectionTest';
-import CMSConfigInfo from '@/components/admin/cms/CMSConfigInfo';
+import { CMSProviderDisplay } from '@/components/admin/cms/CMSProviderDisplay';
 
 const AdminSettings: React.FC = () => {
   const { toast } = useToast();
@@ -165,12 +165,12 @@ const AdminSettings: React.FC = () => {
                               <Label htmlFor="strapiUrl">Strapi API URL</Label>
                               <Input 
                                 id="strapiUrl"
-                                placeholder="http://localhost:1337"
+                                placeholder="http://localhost:1337/api"
                                 value={strapiUrl}
                                 onChange={(e) => setStrapiUrl(e.target.value)}
                               />
                               <p className="text-sm text-muted-foreground">
-                                The base URL of your Strapi API
+                                The base URL of your Strapi API (e.g., http://localhost:1337/api)
                               </p>
                             </div>
                             
@@ -211,7 +211,7 @@ const AdminSettings: React.FC = () => {
                 </div>
                 
                 <div>
-                  <CMSConfigInfo />
+                  <CMSProviderDisplay />
                 </div>
               </div>
               
