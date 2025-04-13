@@ -17,6 +17,15 @@ export async function fetchLandingPages(): Promise<LandingPage[]> {
         if (window.__MOCK_DATA && Array.isArray(window.__MOCK_DATA['landing-pages'])) {
           const pages = window.__MOCK_DATA['landing-pages'];
           console.log(`[fetchLandingPages] Found ${pages.length} landing pages in window.__MOCK_DATA`);
+          
+          // Check if the array is empty
+          if (pages.length === 0) {
+            console.warn("[fetchLandingPages] Landing pages array is empty, initializing with mock data");
+            const mockPages = _getMockLandingPages();
+            window.__MOCK_DATA['landing-pages'] = mockPages;
+            return mockPages;
+          }
+          
           return pages;
         } else {
           console.warn("[fetchLandingPages] No landing pages found in window.__MOCK_DATA, initializing now");
@@ -26,6 +35,7 @@ export async function fetchLandingPages(): Promise<LandingPage[]> {
           const mockPages = _getMockLandingPages();
           window.__MOCK_DATA['landing-pages'] = mockPages;
           console.log(`[fetchLandingPages] Initialized ${mockPages.length} landing pages`);
+          console.log(`[fetchLandingPages] First page:`, mockPages[0]);
           return mockPages;
         }
       } else {

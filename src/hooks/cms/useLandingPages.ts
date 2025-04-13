@@ -2,6 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 import { fetchLandingPages, fetchLandingPageByKey, createLandingPage, updateLandingPage, deleteLandingPage } from '@/services/cms/contentTypes/landingPages';
 import { createQueryOptions } from './useQueryDefaults';
+import { initMockLandingPagesData } from '@/services/cms/initMockData';
+
+// Force initialization of mock data
+if (typeof window !== 'undefined') {
+  initMockLandingPagesData();
+}
 
 export function useLandingPages() {
   return useQuery<LandingPage[]>({
@@ -9,31 +15,44 @@ export function useLandingPages() {
     queryFn: async () => {
       console.log('useLandingPages hook fetching data...');
       try {
-        // Force initialization of mock data if needed
-        if (typeof window !== 'undefined' && (!window.__MOCK_DATA || !window.__MOCK_DATA['landing-pages'])) {
-          console.log('useLandingPages: window.__MOCK_DATA not initialized, initializing now');
-          const { initMockLandingPagesData } = await import('@/services/cms/initMockData');
+        // Always force initialization of mock data to ensure it's available
+        if (typeof window !== 'undefined') {
+          console.log('useLandingPages: Initializing mock data before fetch');
           initMockLandingPagesData();
         }
         
         const pages = await fetchLandingPages();
         console.log('useLandingPages hook fetched data:', pages);
         
-        // Force return of an empty array if pages is undefined or null
         if (!pages || !Array.isArray(pages)) {
           console.warn('useLandingPages: fetchLandingPages returned unexpected data type:', typeof pages);
+          
+          // Last resort - check window.__MOCK_DATA directly
+          if (typeof window !== 'undefined' && window.__MOCK_DATA && Array.isArray(window.__MOCK_DATA['landing-pages'])) {
+            console.log('useLandingPages: Fallback to window.__MOCK_DATA directly');
+            return window.__MOCK_DATA['landing-pages'] as LandingPage[];
+          }
+          
           return [];
         }
         
         return pages;
       } catch (error) {
         console.error('Error in useLandingPages:', error);
-        return []; // Return empty array on error to prevent UI from breaking
+        
+        // Last resort - check window.__MOCK_DATA directly
+        if (typeof window !== 'undefined' && window.__MOCK_DATA && Array.isArray(window.__MOCK_DATA['landing-pages'])) {
+          console.log('useLandingPages: Error fallback to window.__MOCK_DATA directly');
+          return window.__MOCK_DATA['landing-pages'] as LandingPage[];
+        }
+        
+        return []; 
       }
     },
     ...createQueryOptions(),
     retry: 3,
-    staleTime: 30000, // 30 seconds
+    staleTime: 0, // Always refetch on component mount
+    refetchOnMount: true,
   });
 }
 

@@ -14,6 +14,7 @@ export function initMockLandingPagesData(): void {
     return;
   }
   
+  // Always force re-initialization of mock data to ensure it's fresh
   if (!window.__MOCK_DATA) {
     console.log("[initMockData] Creating window.__MOCK_DATA object");
     window.__MOCK_DATA = {};
@@ -22,10 +23,13 @@ export function initMockLandingPagesData(): void {
   // Get the mock landing pages data
   const landingPages = _getMockLandingPages();
   
-  // Store the data in the window.__MOCK_DATA object
+  // Always set the mock data, even if it already exists (force refresh)
   window.__MOCK_DATA['landing-pages'] = landingPages;
   
   console.log("[initMockData] Landing pages mock data initialized with", landingPages.length, "items");
+  
+  // Log the data to verify structure
+  console.log("[initMockData] Full landing pages data:", JSON.stringify(landingPages));
   
   // Log the first item to verify data structure is correct
   if (landingPages.length > 0) {

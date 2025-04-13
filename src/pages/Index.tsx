@@ -9,24 +9,30 @@ import MachineTypesSection from '@/components/home/MachineTypesSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CTASection from '@/components/common/CTASection';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
+import { initMockLandingPagesData } from '@/services/cms/initMockData';
 
 const Index = () => {
-  // Add diagnostic logging to help troubleshoot rendering issues
+  // Force initialization of mock data on component mount
   useEffect(() => {
-    console.log('Index page mounted');
-    return () => {
-      console.log('Index page unmounted');
-    };
+    console.log('Index page mounted - forcing mock data initialization');
+    if (typeof window !== 'undefined') {
+      initMockLandingPagesData();
+    }
   }, []);
 
   // Fetch hero content from CMS for the home page
-  const { data: landingPage, isLoading, error } = useLandingPageByKey('home');
+  const { data: landingPage, isLoading, error, refetch } = useLandingPageByKey('home');
 
   useEffect(() => {
     console.log('Index page - Landing page data:', landingPage);
     console.log('Index page - Landing page loading:', isLoading);
     console.log('Index page - Landing page error:', error);
-  }, [landingPage, isLoading, error]);
+    
+    // Force refetch on mount
+    refetch().catch(err => {
+      console.error('Error refetching landing page data:', err);
+    });
+  }, [landingPage, isLoading, error, refetch]);
 
   return (
     <Layout>
