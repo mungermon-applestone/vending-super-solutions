@@ -34,6 +34,7 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     const finalBenefits = updatedBenefits.length === 0 ? [''] : updatedBenefits;
     
     // Force form state to be dirty so it will be saved
+    // IMPORTANT: This is critical for ensuring the form is marked as changed
     form.setValue('benefits', finalBenefits, { 
       shouldDirty: true, 
       shouldTouch: true, 
@@ -42,7 +43,7 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     
     console.log(`[ProductBenefits] After removal: Benefits count=${finalBenefits.length}, data=`, finalBenefits);
     
-    // Trigger validation after removal to clear any duplicate errors
+    // Ensure the form's internal state is correctly updated
     setTimeout(() => {
       form.trigger('benefits');
     }, 0);

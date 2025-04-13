@@ -7,7 +7,8 @@ import {
   checkProductSlugExists,
   updateProductImage, 
   updateProductBenefits, 
-  updateProductFeatures 
+  updateProductFeatures,
+  processBenefits
 } from './productHelpers';
 
 /**
@@ -69,8 +70,11 @@ export const updateProduct = async (data: ProductFormData, originalSlug: string,
     // Deep clean the benefits data (filter out all empty benefits)
     // This step is critical to ensure empty benefits are actually removed
     console.log('[productService] Original benefits before processing:', data.benefits);
-    data.benefits = data.benefits.filter(benefit => benefit.trim() !== '');
-    console.log('[productService] Cleaned benefits after filtering empty ones:', data.benefits);
+    
+    // Use a dedicated function to process and clean benefits
+    data.benefits = processBenefits(data.benefits);
+    
+    console.log('[productService] Cleaned benefits after processing:', data.benefits);
     
     // Update product image
     await updateProductImage(data, productId);
