@@ -489,7 +489,8 @@ export const supabaseProductAdapter: ProductAdapter = {
         features: product.features ? product.features.map(f => ({
           title: f.title,
           description: f.description,
-          icon: f.icon || 'check',
+          // Make sure icon is always a string
+          icon: typeof f.icon === 'string' ? f.icon : 'check',
           screenshotUrl: f.screenshot?.url || '',
           screenshotAlt: f.screenshot?.alt || ''
         })) : []
@@ -503,3 +504,4 @@ export const supabaseProductAdapter: ProductAdapter = {
     }
   }
 };
+

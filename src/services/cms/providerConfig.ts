@@ -31,3 +31,6 @@ export const setCMSProviderConfig = (config: ContentProviderConfig) => {
 export const isUsingProvider = (type: ContentProviderType): boolean => {
   return currentProviderConfig.type === type;
 };
+
+// Re-export ContentProviderType to fix import issues
+export { ContentProviderType } from './adapters/types';

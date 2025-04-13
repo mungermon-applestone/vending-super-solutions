@@ -1,8 +1,10 @@
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as productService from '@/services/cms/products';
 import { cloneBusinessGoal } from '@/services/cms/contentTypes/businessGoals/cloneBusinessGoal';
 import { cloneTechnology } from '@/services/cms/contentTypes/technologies/cloneTechnology';
 import { cloneMachine } from '@/services/cms/contentTypes/machines/cloneMachine';
+import { CMSProductType, CMSBusinessGoal, CMSTechnology, CMSMachine } from '@/types/cms';
 
 /**
  * Hook to clone a product type

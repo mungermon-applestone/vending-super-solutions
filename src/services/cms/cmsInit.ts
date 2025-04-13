@@ -1,5 +1,6 @@
 
-import { setCMSProviderConfig, ContentProviderType } from './providerConfig';
+import { setCMSProviderConfig } from './providerConfig';
+import { ContentProviderType } from './adapters/types';
 import { initMockLandingPagesData } from './initMockData';
 
 /**
