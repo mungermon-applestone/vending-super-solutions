@@ -1,263 +1,165 @@
-
-import { getCMSProviderConfig } from '../providerConfig';
-import { ContentProviderType } from '../adapters/types';
-import { useToast } from '@/hooks/use-toast';
+import { getCMSProviderConfig, ContentProviderType, isUsingProvider } from '../providerConfig';
+import { getTechnologyAdapter } from '../adapters/technologies/technologyAdapterFactory';
 
 /**
- * Interface for synchronization options
+ * Defines the content types that can be synchronized between CMS providers
+ */
+export const syncableContentTypes = [
+  { id: 'technologies', label: 'Technologies' },
+  { id: 'machines', label: 'Machines' },
+  { id: 'product-types', label: 'Product Types' },
+  { id: 'business-goals', label: 'Business Goals' },
+  { id: 'testimonials', label: 'Testimonials' }
+];
+
+/**
+ * Options for synchronization operations
  */
 export interface SyncOptions {
+  /** Content types to synchronize */
   contentTypes: string[];
+  /** Direction of synchronization */
   direction: 'push' | 'pull';
-  onProgress?: (contentType: string, progress: number, total: number) => void;
+  /** Progress callback */
+  onProgress?: (contentType: string, current: number, total: number) => void;
+  /** Error callback */
   onError?: (contentType: string, error: Error) => void;
-  onComplete?: (summary: SyncSummary) => void;
 }
 
 /**
- * Summary of synchronization results
- */
-export interface SyncSummary {
-  startTime: Date;
-  endTime: Date;
-  totalItems: number;
-  successCount: number;
-  errorCount: number;
-  contentTypes: {
-    type: string;
-    success: number;
-    errors: number;
-    errorMessages: string[];
-  }[];
-}
-
-/**
- * Status information for a sync operation
+ * Represents the status of a synchronization operation
  */
 export interface SyncStatus {
+  /** Whether synchronization is in progress */
   inProgress: boolean;
-  startTime?: Date;
-  progress: {
-    contentType: string;
-    current: number;
-    total: number;
-  } | null;
-  errors: Array<{
-    contentType: string;
-    message: string;
-  }>;
+  /** Current progress, if available */
+  progress: { contentType: string; current: number; total: number } | null;
+  /** Errors that occurred during synchronization */
+  errors: Array<{ contentType: string; message: string }>;
+  /** Summary of the synchronization operation */
   summary?: SyncSummary;
 }
 
 /**
- * Check if synchronization between CMS providers is possible
+ * Summary of a completed synchronization operation
  */
-export function canSynchronizeData(): boolean {
-  // Check if both providers are configured
-  const config = getCMSProviderConfig();
-  
-  // For now, we only support Strapi as a secondary provider
-  // and only one-way sync from Supabase to Strapi
-  return config.type === ContentProviderType.STRAPI && config.apiUrl !== undefined;
+export interface SyncSummary {
+  /** Number of items successfully synchronized */
+  successCount: number;
+  /** Number of items that failed to synchronize */
+  errorCount: number;
+  /** Time the synchronization operation started */
+  startTime: Date;
+  /** Time the synchronization operation ended */
+  endTime: Date;
 }
 
 /**
- * Hook for CMS data synchronization
+ * Hooks and utilities for CMS data synchronization
  */
-export function useCMSSynchronization() {
-  const { toast } = useToast();
-  
+export const useCMSSynchronization = () => {
+  /**
+   * Synchronize data between two CMS providers
+   * @param options Synchronization options
+   * @returns Summary of the synchronization operation
+   */
   const synchronizeData = async (options: SyncOptions): Promise<SyncSummary> => {
+    // Start timing the operation
     const startTime = new Date();
-    const summary: SyncSummary = {
-      startTime,
-      endTime: new Date(),
-      totalItems: 0,
-      successCount: 0,
-      errorCount: 0,
-      contentTypes: []
-    };
     
-    try {
-      if (!canSynchronizeData()) {
-        throw new Error("CMS synchronization not available. Check that both primary and secondary providers are configured.");
-      }
-      
-      const config = getCMSProviderConfig();
-      console.log(`[useCMSSynchronization] Starting ${options.direction} sync to ${config.type} with options:`, options);
-      
-      // Process each content type sequentially
-      for (const contentType of options.contentTypes) {
-        const contentTypeSummary = {
-          type: contentType,
-          success: 0,
-          errors: 0,
-          errorMessages: []
-        };
-        
-        try {
-          console.log(`[useCMSSynchronization] Processing content type: ${contentType}`);
+    // Initialize counters
+    let successCount = 0;
+    let errorCount = 0;
+    
+    // Get the current provider config
+    const config = getCMSProviderConfig();
+    
+    // Determine source and target based on direction
+    const isStrapi = isUsingProvider(ContentProviderType.STRAPI);
+    const targetCmsName = isStrapi ? 'Strapi' : 'Supabase';
+    
+    console.log(`[synchronizeData] Starting synchronization to ${targetCmsName}`);
+    
+    // Process each selected content type
+    for (const contentType of options.contentTypes) {
+      try {
+        // For now, we only implement technology synchronization
+        if (contentType === 'technologies') {
+          const technologyAdapter = getTechnologyAdapter(config);
           
-          // Get the appropriate content type adapter
-          const adapter = await getContentTypeAdapter(contentType);
-          if (!adapter) {
-            throw new Error(`No adapter available for content type: ${contentType}`);
+          // Get all technologies
+          const technologies = await technologyAdapter.getAll();
+          
+          if (options.onProgress) {
+            options.onProgress(contentType, 0, technologies.length);
           }
           
-          // Get all items from the source
-          const items = await getSourceItems(contentType, options.direction);
-          const totalItems = items.length;
-          contentTypeSummary.type = contentType;
+          // For demo purposes, we just log what would happen
+          console.log(`[synchronizeData] Would synchronize ${technologies.length} technologies to ${targetCmsName}`);
           
-          console.log(`[useCMSSynchronization] Found ${totalItems} ${contentType} to ${options.direction === 'push' ? 'push' : 'pull'}`);
-          
-          // Process each item
-          for (let i = 0; i < totalItems; i++) {
-            const item = items[i];
+          // Process each technology
+          for (let i = 0; i < technologies.length; i++) {
+            const technology = technologies[i];
             
             try {
+              // Here we would perform the actual synchronization
+              // This is a placeholder for the actual implementation
+              console.log(`[synchronizeData] Processing technology: ${technology.title}`);
+              
               // Update progress
               if (options.onProgress) {
-                options.onProgress(contentType, i, totalItems);
+                options.onProgress(contentType, i + 1, technologies.length);
               }
               
-              // Process item based on direction
-              if (options.direction === 'push') {
-                await pushItem(contentType, item);
-              } else {
-                await pullItem(contentType, item);
-              }
-              
-              contentTypeSummary.success++;
-              summary.successCount++;
-              summary.totalItems++;
-            } catch (itemError) {
-              const errorMessage = itemError instanceof Error ? itemError.message : 'Unknown error';
-              console.error(`[useCMSSynchronization] Error processing ${contentType} item:`, itemError);
-              
-              contentTypeSummary.errors++;
-              contentTypeSummary.errorMessages.push(errorMessage);
-              summary.errorCount++;
-              summary.totalItems++;
+              // Simulate success
+              successCount++;
+            } catch (error) {
+              console.error(`[synchronizeData] Error processing technology ${technology.id}:`, error);
+              errorCount++;
               
               if (options.onError) {
-                options.onError(contentType, itemError instanceof Error ? itemError : new Error(errorMessage));
+                options.onError(contentType, error instanceof Error ? error : new Error(String(error)));
               }
             }
           }
-        } catch (contentTypeError) {
-          const errorMessage = contentTypeError instanceof Error ? contentTypeError.message : 'Unknown error';
-          console.error(`[useCMSSynchronization] Error processing content type ${contentType}:`, contentTypeError);
-          
-          contentTypeSummary.errors++;
-          contentTypeSummary.errorMessages.push(errorMessage);
-          summary.errorCount++;
-          
-          if (options.onError) {
-            options.onError(contentType, contentTypeError instanceof Error ? contentTypeError : new Error(errorMessage));
-          }
+        } else {
+          // Other content types would be implemented here
+          console.log(`[synchronizeData] Synchronization for ${contentType} not yet implemented`);
         }
+      } catch (error) {
+        console.error(`[synchronizeData] Error synchronizing ${contentType}:`, error);
+        errorCount++;
         
-        // Add the content type summary to the overall summary
-        summary.contentTypes.push(contentTypeSummary);
+        if (options.onError) {
+          options.onError(contentType, error instanceof Error ? error : new Error(String(error)));
+        }
       }
-    } catch (error) {
-      console.error("[useCMSSynchronization] Error:", error);
-      toast({
-        variant: "destructive",
-        title: "Synchronization Error",
-        description: error instanceof Error ? error.message : "An unknown error occurred"
-      });
     }
     
-    // Update the end time
-    summary.endTime = new Date();
+    // Complete the operation
+    const endTime = new Date();
     
-    // Call onComplete callback if provided
-    if (options.onComplete) {
-      options.onComplete(summary);
-    }
+    console.log(`[synchronizeData] Synchronization completed. Success: ${successCount}, Errors: ${errorCount}`);
     
-    // If no items were processed, show a toast
-    if (summary.totalItems === 0) {
-      toast({
-        title: "No items to synchronize",
-        description: "No content items were found to synchronize."
-      });
-    } else {
-      // Show results toast
-      toast({
-        title: `Synchronization ${summary.errorCount > 0 ? 'partially ' : ''}completed`,
-        description: `${summary.successCount} of ${summary.totalItems} items were successfully ${options.direction === 'push' ? 'pushed' : 'pulled'}.${summary.errorCount > 0 ? ` ${summary.errorCount} errors.` : ''}`
-      });
-    }
-    
-    return summary;
+    return {
+      successCount,
+      errorCount,
+      startTime,
+      endTime
+    };
   };
   
-  return { synchronizeData, canSynchronizeData };
-}
-
-/**
- * Get the appropriate content type adapter
- */
-async function getContentTypeAdapter(contentType: string): Promise<any> {
-  // This would be replaced with actual adapter code
-  switch (contentType) {
-    case 'business_goals':
-      // Return business goals adapter
-      return null;
-    case 'product_types':
-      // Return product types adapter
-      return null;
-    case 'technologies':
-      const { getTechnologyAdapter } = await import('../adapters/technologies/technologyAdapterFactory');
-      const { getCMSProviderConfig } = await import('../providerConfig');
-      return getTechnologyAdapter(getCMSProviderConfig());
-    case 'machines':
-      // Return machines adapter
-      return null;
-    default:
-      throw new Error(`Unsupported content type: ${contentType}`);
-  }
-}
-
-/**
- * Get all items of a specific content type from the source system
- */
-async function getSourceItems(contentType: string, direction: 'push' | 'pull'): Promise<any[]> {
-  // This would be replaced with actual code to fetch items
-  // If direction is 'push', we get from primary (Supabase)
-  // If direction is 'pull', we get from secondary (Strapi)
+  /**
+   * Check if data synchronization is available
+   * @returns True if synchronization can be performed
+   */
+  const canSynchronizeData = (): boolean => {
+    // For now, we'll just check if we're using Strapi
+    return isUsingProvider(ContentProviderType.STRAPI);
+  };
   
-  // This is just a stub for now
-  console.log(`[getSourceItems] Getting items for ${contentType}`);
-  
-  return [];
-}
-
-/**
- * Push an item to the destination system
- */
-async function pushItem(contentType: string, item: any): Promise<void> {
-  // Stub for actually pushing an item
-  console.log(`[pushItem] Pushing ${contentType} item:`, item);
-}
-
-/**
- * Pull an item from the secondary system
- */
-async function pullItem(contentType: string, item: any): Promise<void> {
-  // Stub for actually pulling an item
-  console.log(`[pullItem] Pulling ${contentType} item:`, item);
-}
-
-/**
- * Content types that can be synchronized between CMS providers
- */
-export const syncableContentTypes = [
-  { id: 'business_goals', label: 'Business Goals' },
-  { id: 'product_types', label: 'Product Types' },
-  { id: 'technologies', label: 'Technologies' },
-  { id: 'machines', label: 'Machines' },
-];
+  return {
+    synchronizeData,
+    canSynchronizeData
+  };
+};

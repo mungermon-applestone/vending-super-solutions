@@ -2,6 +2,7 @@
 import { getCMSProviderConfig } from '../providerConfig';
 import { ContentProviderType } from '../adapters/types';
 import { getStrapiApiKey, getStrapiBaseUrl } from './strapiConfig';
+import { validateTechnologyAdapter } from '../adapters/technologies/technologyAdapterFactory';
 
 /**
  * Test connection to the currently configured CMS provider
@@ -45,7 +46,7 @@ async function testStrapiConnection(): Promise<{
   }
   
   try {
-    // Attempt to connect to Strapi
+    // First, attempt to connect to Strapi base API
     const response = await fetch(`${baseUrl}`, {
       headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {}
     });
@@ -67,6 +68,27 @@ async function testStrapiConnection(): Promise<{
       // Non-JSON response is OK, we just want to check connectivity
     }
     
+    // Next, validate that we can use the technology adapter
+    const canAccessTechnologies = await validateTechnologyAdapter({
+      type: ContentProviderType.STRAPI,
+      strapiApiUrl: baseUrl,
+      strapiApiKey: apiKey
+    });
+    
+    if (!canAccessTechnologies) {
+      return {
+        success: false,
+        message: 'Connected to Strapi, but could not access technologies content type',
+        provider: 'Strapi',
+        details: {
+          apiUrl: baseUrl,
+          apiKeyConfigured: !!apiKey,
+          connectionSuccessful: true,
+          contentTypesAccessible: false
+        }
+      };
+    }
+    
     return {
       success: true,
       message: 'Successfully connected to Strapi',
@@ -74,7 +96,8 @@ async function testStrapiConnection(): Promise<{
       details: {
         apiUrl: baseUrl,
         apiKeyConfigured: !!apiKey,
-        version: responseData?.strapiVersion || 'Unknown'
+        version: responseData?.strapiVersion || 'Unknown',
+        contentTypesAccessible: true
       }
     };
   } catch (error) {
@@ -101,7 +124,7 @@ async function testSupabaseConnection(): Promise<{
     const { supabase } = await import('@/integrations/supabase/client');
     
     // Test a simple query
-    const { data: testData, error } = await supabase.from('machines').select('count(*)');
+    const { data: testData, error } = await supabase.from('technologies').select('count(*)');
     
     if (error) {
       return {
@@ -112,13 +135,31 @@ async function testSupabaseConnection(): Promise<{
       };
     }
     
+    // Also verify the technology adapter works
+    const canAccessTechnologies = await validateTechnologyAdapter({
+      type: ContentProviderType.SUPABASE
+    });
+    
+    if (!canAccessTechnologies) {
+      return {
+        success: false,
+        message: 'Connected to Supabase, but could not access technologies content type',
+        provider: 'Supabase',
+        details: {
+          connectionSuccessful: true,
+          contentTypesAccessible: false
+        }
+      };
+    }
+    
     return {
       success: true,
       message: 'Successfully connected to Supabase',
       provider: 'Supabase',
       details: {
         url: 'Connected via Lovable integration',
-        authenticated: true
+        authenticated: true,
+        contentTypesAccessible: true
       }
     };
   } catch (error) {
@@ -130,3 +171,4 @@ async function testSupabaseConnection(): Promise<{
     };
   }
 }
+

@@ -1,37 +1,37 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { CMSTechnology } from '@/types/cms';
-import { transformTechnologyData } from '../../utils/transformers';
+import { getTechnologyAdapter } from '../../adapters/technologies/technologyAdapterFactory';
+import { getCMSProviderConfig } from '../../providerConfig';
+import { CMSTechnology, QueryOptions } from '@/types/cms';
+import { handleCMSError } from '../../utils/errorHandling';
 
-export async function fetchTechnologies(): Promise<CMSTechnology[]> {
-  console.log('[fetchTechnologies] Fetching all technologies from database');
-
+/**
+ * Fetch technologies from the CMS
+ * @param options Query options for filtering and pagination
+ * @returns Array of technology objects
+ */
+export async function fetchTechnologies(options?: QueryOptions): Promise<CMSTechnology[]> {
   try {
-    // Fetch core technology data
-    const { data: technologies, error } = await supabase
-      .from('technologies')
-      .select(`*`)
-      .order('title', { ascending: true });
-
-    if (error) {
-      throw error;
-    }
-
-    console.log(`[fetchTechnologies] Found ${technologies.length} technologies`);
+    const config = getCMSProviderConfig();
+    const adapter = getTechnologyAdapter(config);
     
-    // Transform the database data into our CMS format
-    // Initialize sections as an empty array since it's not in the database record
-    const transformedData = technologies.map(technology => ({
-      ...technology,
-      sections: [] // Ensure sections always exists as an empty array at minimum
-    })) as CMSTechnology[];
-
-    return transformedData;
+    return await adapter.getAll(options);
   } catch (error) {
-    console.error('[fetchTechnologies] Error fetching technologies:', error);
+    throw handleCMSError(error, 'fetch', 'technologies');
+  }
+}
+
+/**
+ * Fetch technologies with error handling for safe integration between CMS providers
+ * @param options Query options for filtering and pagination
+ * @returns Array of technology objects or empty array on error
+ */
+export async function fetchTechnologiesSafe(options?: QueryOptions): Promise<CMSTechnology[]> {
+  try {
+    return await fetchTechnologies(options);
+  } catch (error) {
+    console.error('[fetchTechnologiesSafe] Error fetching technologies:', error);
     return [];
   }
 }
 
-// Also export with the alternate name for backwards compatibility
-export const getTechnologies = fetchTechnologies;
+export default fetchTechnologies;

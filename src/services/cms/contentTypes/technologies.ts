@@ -14,6 +14,21 @@ import {
 const getTechnologyBySlug = fetchTechnologyBySlug;
 const getTechnologies = fetchTechnologies;
 
+/**
+ * Wrapper around fetchTechnologyBySlug that catches and handles errors
+ * to ensure compatibility between CMS providers
+ */
+export const fetchTechnologyBySlugSafe = async (slug: string) => {
+  try {
+    console.log(`[fetchTechnologyBySlugSafe] Fetching technology with slug: ${slug}`);
+    const technology = await fetchTechnologyBySlug(slug);
+    return technology;
+  } catch (error) {
+    console.error(`[fetchTechnologyBySlugSafe] Error fetching technology with slug ${slug}:`, error);
+    return null;
+  }
+};
+
 export {
   technologyOperations,
   fetchTechnologyBySlug,
@@ -25,3 +40,4 @@ export {
   deleteTechnology,
   cloneTechnology
 };
+
