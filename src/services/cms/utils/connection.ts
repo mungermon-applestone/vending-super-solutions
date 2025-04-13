@@ -50,17 +50,46 @@ async function testStrapiConnection(): Promise<{
   }
   
   try {
-    // First, attempt to connect to Strapi base API
-    const response = await fetch(`${baseUrl}`, {
-      headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {}
-    });
+    // First, attempt to connect to Strapi health endpoint
+    // Most Strapi installations have a health endpoint at /api/healthcheck or /healthcheck
+    // If that fails, fallback to the base URL
+    let response;
+    let endpoint = `${baseUrl.includes('/api') ? baseUrl.replace('/api', '') : baseUrl}/healthcheck`;
+    
+    try {
+      console.log(`[testStrapiConnection] Trying healthcheck at: ${endpoint}`);
+      response = await fetch(endpoint, {
+        headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {}
+      });
+      
+      if (!response.ok) {
+        // Try directly with the provided URL
+        endpoint = baseUrl;
+        console.log(`[testStrapiConnection] Healthcheck failed, trying base URL: ${endpoint}`);
+        response = await fetch(endpoint, {
+          headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {}
+        });
+      }
+    } catch (e) {
+      // If healthcheck fails, try with the base URL
+      endpoint = baseUrl;
+      console.log(`[testStrapiConnection] Healthcheck error, trying base URL: ${endpoint}`);
+      response = await fetch(endpoint, {
+        headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {}
+      });
+    }
     
     if (!response.ok) {
       return {
         success: false,
         message: `Strapi returned status ${response.status}: ${response.statusText}`,
         provider: 'Strapi',
-        details: { status: response.status, statusText: response.statusText }
+        details: { 
+          status: response.status, 
+          statusText: response.statusText,
+          endpoint: endpoint,
+          apiUrl: baseUrl
+        }
       };
     }
     
@@ -109,7 +138,10 @@ async function testStrapiConnection(): Promise<{
       success: false,
       message: `Failed to connect to Strapi: ${error instanceof Error ? error.message : String(error)}`,
       provider: 'Strapi',
-      details: { error: error instanceof Error ? error.message : String(error) }
+      details: { 
+        error: error instanceof Error ? error.message : String(error),
+        apiUrl: baseUrl
+      }
     };
   }
 }

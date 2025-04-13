@@ -94,10 +94,9 @@ const StrapiConfig: React.FC = () => {
       
       // Test connection
       const result = await testCMSConnection();
+      setTestResults(result);
       
       if (result.success) {
-        setTestResults(result);
-        
         // Also test fetching technologies
         try {
           console.log('Testing technology fetch...');
