@@ -7,30 +7,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// Create a modified version of the test function that accepts a custom URL
 const testStrapiConnectionWithUrl = async (customUrl: string, endpoint: string = '') => {
   try {
-    // Process the base URL to ensure it's correctly formatted
     let baseUrl = customUrl.trim();
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.slice(0, -1);
     }
     
-    // Remove /api suffix for now, we'll handle it separately
     const hasApiSuffix = baseUrl.endsWith('/api');
     if (hasApiSuffix) {
       baseUrl = baseUrl.slice(0, -4);
     }
     
-    // Determine the full URL to test based on endpoint provided
     let urlToTest = baseUrl;
     
-    // If endpoint is provided, use it
     if (endpoint) {
-      // Make sure it starts with a slash
       const formattedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-      
-      // Add /api if needed
       const apiPath = hasApiSuffix || urlToTest.includes('/api/') ? '' : '/api';
       urlToTest = `${baseUrl}${apiPath}${formattedEndpoint}`;
     }
@@ -41,7 +33,6 @@ const testStrapiConnectionWithUrl = async (customUrl: string, endpoint: string =
     console.log(`Response from ${urlToTest}:`, response.status, response.statusText);
     
     if (response.ok) {
-      // Try to parse the response as JSON
       try {
         const data = await response.json();
         console.log('Received JSON data:', data);
@@ -53,7 +44,6 @@ const testStrapiConnectionWithUrl = async (customUrl: string, endpoint: string =
         };
       } catch (parseError) {
         console.log(`Response not JSON from ${urlToTest}:`, parseError);
-        // If it's HTML, it might be the Strapi admin UI
         const text = await response.text();
         if (text.includes('<!DOCTYPE html>')) {
           console.log('Received HTML response, likely admin UI');
@@ -88,7 +78,6 @@ const testStrapiConnectionWithUrl = async (customUrl: string, endpoint: string =
   }
 };
 
-// Test multiple endpoints to help diagnose Strapi configuration
 const testStrapiEnvironment = async (baseUrl: string) => {
   let results = {
     success: false,
@@ -102,13 +91,11 @@ const testStrapiEnvironment = async (baseUrl: string) => {
     }
   };
   
-  // Normalize the base URL
   let normalizedUrl = baseUrl.trim();
   if (normalizedUrl.endsWith('/')) {
     normalizedUrl = normalizedUrl.slice(0, -1);
   }
   
-  // Define endpoints to try in order
   const endpoints = [
     '/admin', 
     '/admin/init',
@@ -118,7 +105,6 @@ const testStrapiEnvironment = async (baseUrl: string) => {
     '' // Base URL
   ];
   
-  // Try each endpoint
   for (const endpoint of endpoints) {
     try {
       const url = `${normalizedUrl}${endpoint}`;
@@ -152,11 +138,9 @@ const testStrapiEnvironment = async (baseUrl: string) => {
               break;
             }
           } catch (e) {
-            // Not JSON data, continue to next endpoint
           }
         }
         else {
-          // Check if HTML response contains Strapi admin strings
           try {
             const text = await response.text();
             if (text.includes('strapi') || text.includes('Strapi')) {
@@ -167,13 +151,11 @@ const testStrapiEnvironment = async (baseUrl: string) => {
               break;
             }
           } catch (e) {
-            // Cannot read as text, continue
           }
         }
       }
     } catch (error) {
       console.log(`Error testing endpoint: ${error}`);
-      // Continue with next endpoint
     }
   }
   
@@ -188,13 +170,11 @@ const SimpleConnectionTest: React.FC = () => {
     details?: any;
   }>({ status: 'idle' });
   
-  // Successful URL from previous test
   const defaultUrl = 'https://strong-balance-0789566afc.strapiapp.com';
   
   const [customUrl, setCustomUrl] = useState<string>(defaultUrl);
   const [selectedEndpoint, setSelectedEndpoint] = useState<string>('/admin');
   
-  // Common Strapi endpoints to test
   const commonEndpoints = [
     { value: '/admin', label: '/admin (Admin Interface)' },
     { value: '/admin/init', label: '/admin/init (Admin Check)' },
@@ -207,11 +187,9 @@ const SimpleConnectionTest: React.FC = () => {
     setTestResult({ status: 'loading' });
     
     try {
-      // Extract the endpoint from the custom URL if it contains one
       let baseUrlToTest = customUrl;
       let endpointToTest = selectedEndpoint;
       
-      // Test the connection with the provided URL and endpoint
       const result = await testStrapiConnectionWithUrl(baseUrlToTest, endpointToTest);
       
       if (result.success) {
@@ -221,7 +199,6 @@ const SimpleConnectionTest: React.FC = () => {
           details: result
         });
       } else {
-        // If direct test fails, try the environment diagnostic test
         const envTest = await testStrapiEnvironment(baseUrlToTest);
         
         if (envTest.success) {
@@ -425,20 +402,34 @@ const SimpleConnectionTest: React.FC = () => {
       
       {testResult.status === 'success' && testResult.details?.testedUrl?.includes('/admin') && (
         <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
-          <h4 className="text-sm font-medium text-blue-800 mb-1">Missing Content Types</h4>
+          <h4 className="text-sm font-medium text-blue-800 mb-1">Content Type Builder Limitations</h4>
           <p className="text-xs text-blue-700 mb-2">
-            If you can access the admin panel but don't see the Technology content type, you need to transfer it from your local instance or create it in the cloud.
+            The Technology content type is missing from your Strapi cloud instance. Unfortunately, Strapi Cloud free tier restricts access to the Content-Type Builder, regardless of trial status.
           </p>
           <div className="space-y-2 text-xs text-blue-700">
-            <p className="font-medium">Options:</p>
+            <p className="font-medium">Available options:</p>
             <ol className="list-decimal pl-4 space-y-1">
-              <li>Use Strapi's transfer feature to copy your content type from local to cloud</li>
-              <li>Create the Technology content type manually in the cloud admin panel</li>
-              <li>Check if the Technology content type is created but not published</li>
+              <li>
+                <strong>Use Strapi Transfer:</strong> Export content types from your local instance and import to cloud:
+                <div className="bg-blue-100 p-2 mt-1 rounded font-mono text-2xs">
+                  npx strapi transfer --to https://strong-balance-0789566afc.strapiapp.com --to-token YOUR_TRANSFER_TOKEN
+                </div>
+              </li>
+              <li>
+                <strong>Upgrade to paid plan:</strong> Strapi Cloud paid plans allow Content-Type Builder access in production.
+              </li>
+              <li>
+                <strong>Use local Strapi:</strong> Connect your app to your local Strapi instance during development.
+              </li>
             </ol>
-            <p className="mt-2">
-              <strong>Note:</strong> Creating or modifying content types in production may require a paid plan.
-            </p>
+            <div className="mt-3 p-2 bg-blue-100 rounded">
+              <p className="font-medium">How to get a transfer token:</p>
+              <ol className="list-disc pl-4 space-y-1 mt-1">
+                <li>Log in to your Strapi cloud admin panel</li>
+                <li>Go to Settings → Transfer Tokens</li>
+                <li>Create a new full-access token for transfers</li>
+              </ol>
+            </div>
           </div>
         </div>
       )}
