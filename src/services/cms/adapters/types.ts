@@ -1,57 +1,37 @@
 
 /**
- * Generic type for CMS content adapters
- */
-export interface ContentAdapter<T, CreateInput, UpdateInput> {
-  /**
-   * Fetch all items of this content type
-   */
-  getAll: (filters?: Record<string, any>) => Promise<T[]>;
-  
-  /**
-   * Fetch a single item by slug
-   */
-  getBySlug: (slug: string) => Promise<T | null>;
-  
-  /**
-   * Fetch a single item by ID
-   */
-  getById: (id: string) => Promise<T | null>;
-  
-  /**
-   * Create a new item
-   */
-  create: (data: CreateInput) => Promise<T>;
-  
-  /**
-   * Update an existing item
-   */
-  update: (id: string, data: UpdateInput) => Promise<T>;
-  
-  /**
-   * Delete an item by ID
-   */
-  delete: (id: string) => Promise<boolean>;
-  
-  /**
-   * Clone an existing item
-   */
-  clone?: (id: string) => Promise<T>;
-}
-
-/**
- * Content Provider types for different CMS systems
+ * Enum for content provider types
  */
 export enum ContentProviderType {
-  SUPABASE = 'supabase',
   STRAPI = 'strapi',
+  SUPABASE = 'supabase'
 }
 
 /**
- * Configuration for a content provider
+ * Configuration interface for content providers
  */
 export interface ContentProviderConfig {
   type: ContentProviderType;
-  apiUrl?: string; // For external CMS APIs
-  apiKey?: string; // For external CMS APIs
+  apiUrl?: string;  // Base URL for API (Strapi)
+  apiKey?: string;  // API key for authentication (Strapi)
 }
+
+/**
+ * Base CMS adapter interface
+ */
+export interface CmsAdapter<T, CreateInput, UpdateInput> {
+  getAll: (options?: any) => Promise<T[]>;
+  getBySlug: (slug: string) => Promise<T | null>;
+  getById: (id: string) => Promise<T | null>;
+  create: (data: CreateInput) => Promise<T>;
+  update: (id: string, data: UpdateInput) => Promise<T>;
+  delete: (id: string) => Promise<boolean>;
+  clone?: (id: string) => Promise<T | null>;
+}
+
+/**
+ * Generic function to create a CMS adapter factory
+ */
+export type CmsAdapterFactory<AdapterType> = (
+  config: ContentProviderConfig
+) => AdapterType;

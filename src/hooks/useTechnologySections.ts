@@ -1,184 +1,35 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { TechnologySection } from '@/types/technology';
-import { fetchTechnologies } from '@/services/cms/contentTypes/technologies';
+import { fetchTechnologies, fetchTechnologyBySlug, fetchTechnologyBySlugSafe } from '@/services/cms/contentTypes/technologies';
 import { CMSTechnology } from '@/types/cms';
+import { DEFAULT_QUERY_OPTIONS } from './cms/useQueryDefaults';
+import { QueryOptions } from '@/types/cms';
 
-// Transform CMS data to the format our components expect
-const transformCMSDataToSections = (cmsData: CMSTechnology[] = []): TechnologySection[] => {
-  console.log('Starting transformation of technology CMS data:', cmsData);
-  
-  return cmsData.map(technology => {
-    console.log('Processing technology:', technology.title, technology);
-    
-    // Extract features from technology sections
-    const features = technology.sections?.flatMap(section => {
-      console.log('Processing section:', section.title, 'with features:', section.features?.length || 0);
-      
-      return section.features?.map(feature => {
-        console.log('Processing feature:', feature.title, 'with items:', feature.items?.length || 0);
-        
-        // Create the feature with base properties
-        const transformedFeature = {
-          icon: feature.icon || 'HelpCircle', // Fallback icon
-          title: feature.title || '',
-          description: feature.description || '',
-          items: [] as string[] // Initialize items array with proper type
-        };
-        
-        // Add bullet point items if they exist
-        if (feature.items && Array.isArray(feature.items) && feature.items.length > 0) {
-          console.log('Feature has items:', feature.items);
-          
-          transformedFeature.items = feature.items
-            .sort((a, b) => a.display_order - b.display_order)
-            .map(item => {
-              console.log('Item text:', item.text);
-              return item.text;
-            });
-            
-          console.log('Transformed items:', transformedFeature.items);
-        }
-        
-        return transformedFeature;
-      }) || [];
-    }) || [];
-    
-    console.log('Final features for', technology.title, ':', features);
-    
-    // Return in the format expected by our components
-    return {
-      id: technology.slug,
-      title: technology.title,
-      description: technology.description,
-      features: features.length > 0 ? features.slice(0, 3) : getDummyFeatures(), // Limit to 3 features or use fallback
-      image: technology.image_url || ''
-    };
-  });
-};
-
-// Fallback features in case no features are available
-const getDummyFeatures = () => [
-  {
-    icon: 'Network',
-    title: 'Cloud-native design',
-    description: 'Built for scalability and resilience',
-    items: ['Auto-scaling infrastructure', 'Load balancing across regions', 'High availability design']
-  },
-  {
-    icon: 'BarChart3',
-    title: 'Real-time monitoring',
-    description: 'Live tracking of machine status and performance',
-    items: ['Instant alerts', 'Performance metrics', 'Detailed analytics']
-  },
-  {
-    icon: 'Layers',
-    title: 'Microservices approach',
-    description: 'Modular components for maximum flexibility',
-    items: ['Independent scaling', 'Isolated failure domains', 'Technology diversity']
-  }
-];
-
-// Fallback data in case database fetch fails or returns no results
-const getFallbackTechnologyData = (): TechnologySection[] => [
-  {
-    id: 'architecture',
-    title: 'Architecture',
-    description: 'Our platform is built on a modern, scalable architecture that ensures reliability and performance for all your vending operations.',
-    features: [
-      {
-        icon: 'Network',
-        title: 'Cloud-native design',
-        description: 'Built for scalability and resilience',
-        items: ['Auto-scaling infrastructure', 'Load balancing across regions', 'High availability design']
-      },
-      {
-        icon: 'BarChart3',
-        title: 'Real-time monitoring',
-        description: 'Live tracking of machine status and performance',
-        items: ['Instant alerts', 'Performance metrics', 'Detailed analytics']
-      },
-      {
-        icon: 'Layers',
-        title: 'Microservices approach',
-        description: 'Modular components for maximum flexibility',
-        items: ['Independent scaling', 'Isolated failure domains', 'Technology diversity']
-      }
-    ],
-    image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31'
-  },
-  {
-    id: 'security',
-    title: 'Security',
-    description: 'We take security seriously with multiple layers of protection for your data and operations.',
-    features: [
-      {
-        icon: 'Shield',
-        title: 'SOC 2 Type II certified',
-        description: 'Enterprise-grade security compliance',
-        items: ['Annual audits', 'Continuous monitoring', 'Strict access controls']
-      },
-      {
-        icon: 'Lock',
-        title: 'End-to-end encryption',
-        description: 'Secure data transmission and storage',
-        items: ['AES-256 encryption', 'TLS 1.3 transport security', 'Zero-knowledge protocols']
-      },
-      {
-        icon: 'Shield',
-        title: 'Regular security audits',
-        description: 'Ongoing penetration testing and vulnerability assessment',
-        items: ['External security partners', 'Vulnerability bounty program', 'Continuous threat modeling']
-      }
-    ],
-    image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3'
-  },
-  {
-    id: 'third-party-integrations',
-    title: 'Third-Party Integrations',
-    description: 'Connect your vending operations with your existing business systems and third-party services for seamless data flow.',
-    features: [
-      {
-        icon: 'Layers',
-        title: 'ERP integrations',
-        description: 'Connect with SAP, Oracle, Microsoft Dynamics and more',
-        items: ['Bidirectional data sync', 'Custom field mapping', 'Automated workflows']
-      },
-      {
-        icon: 'Shuffle',
-        title: 'CRM connections',
-        description: 'Salesforce, HubSpot and other CRM platforms',
-        items: ['Customer data integration', 'Sales funnel tracking', 'Unified customer view']
-      },
-      {
-        icon: 'BarChart3',
-        title: 'Analytics platforms',
-        description: 'Export data to PowerBI, Tableau and other BI tools',
-        items: ['Customized dashboards', 'Scheduled exports', 'Real-time data feeds']
-      }
-    ],
-    image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4'
-  }
-];
-
-export const useTechnologySections = (): TechnologySection[] => {
-  // Fetch data from database
-  const { data: cmsData, isError } = useQuery({
+export function useTechnologySections() {
+  // Query to fetch all technologies
+  const { data: technologies = [], isLoading, error } = useQuery({
     queryKey: ['technologies'],
-    queryFn: fetchTechnologies,
+    queryFn: async () => {
+      const data = await fetchTechnologies();
+      return data || [];
+    },
+    ...DEFAULT_QUERY_OPTIONS
   });
-  
-  console.log('Technology CMS data received:', cmsData);
-  
-  // Transform CMS data if available, otherwise use fallback data
-  if (cmsData && Array.isArray(cmsData) && cmsData.length > 0 && !isError) {
-    // Explicitly cast the data to CMSTechnology[] since we know its structure
-    const transformedData = transformCMSDataToSections(cmsData as CMSTechnology[]);
-    console.log('Transformed technology data:', transformedData);
-    return transformedData;
-  }
-  
-  console.log('Using fallback technology data');
-  // Return fallback data if database fetch fails or returns no results
-  return getFallbackTechnologyData();
-};
+
+  return { technologies, isLoading, error };
+}
+
+// Hook to fetch a specific technology by slug
+export function useTechnologyBySlug(slug: string) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['technology', slug],
+    queryFn: async () => {
+      if (!slug) return null;
+      return await fetchTechnologyBySlugSafe(slug);
+    },
+    enabled: !!slug,
+    ...DEFAULT_QUERY_OPTIONS
+  });
+
+  return { technology: data, isLoading, error };
+}

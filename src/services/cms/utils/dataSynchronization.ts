@@ -1,165 +1,304 @@
-import { getCMSProviderConfig, ContentProviderType, isUsingProvider } from '../providerConfig';
-import { getTechnologyAdapter } from '../adapters/technologies/technologyAdapterFactory';
 
-/**
- * Defines the content types that can be synchronized between CMS providers
- */
+import { useState } from 'react';
+import { getCMSProviderConfig, ContentProviderType } from '../providerConfig';
+import { getTechnologyBySlug, getTechnologies, createTechnology, updateTechnology } from '../technologies';
+import { getProductTypeBySlug, getProductTypes, createProductType, updateProductType } from '../productTypes';
+import { getBusinessGoalBySlug, getBusinessGoals, createBusinessGoal, updateBusinessGoal } from '../businessGoals';
+
+// Define content types that can be synchronized
 export const syncableContentTypes = [
   { id: 'technologies', label: 'Technologies' },
+  { id: 'productTypes', label: 'Product Types' },
+  { id: 'businessGoals', label: 'Business Goals' },
   { id: 'machines', label: 'Machines' },
-  { id: 'product-types', label: 'Product Types' },
-  { id: 'business-goals', label: 'Business Goals' },
-  { id: 'testimonials', label: 'Testimonials' }
+  { id: 'testimonials', label: 'Testimonials' },
+  { id: 'caseStudies', label: 'Case Studies' }
 ];
 
-/**
- * Options for synchronization operations
- */
+// Data synchronization options
 export interface SyncOptions {
-  /** Content types to synchronize */
   contentTypes: string[];
-  /** Direction of synchronization */
   direction: 'push' | 'pull';
-  /** Progress callback */
-  onProgress?: (contentType: string, current: number, total: number) => void;
-  /** Error callback */
+  onProgress?: (contentType: string, progress: number, total: number) => void;
   onError?: (contentType: string, error: Error) => void;
+  onComplete?: (summary: SyncSummary) => void;
 }
 
-/**
- * Represents the status of a synchronization operation
- */
+// Sync progress status
 export interface SyncStatus {
-  /** Whether synchronization is in progress */
   inProgress: boolean;
-  /** Current progress, if available */
-  progress: { contentType: string; current: number; total: number } | null;
-  /** Errors that occurred during synchronization */
-  errors: Array<{ contentType: string; message: string }>;
-  /** Summary of the synchronization operation */
+  progress: {
+    contentType: string;
+    current: number;
+    total: number;
+  } | null;
+  errors: {
+    contentType: string;
+    message: string;
+  }[];
   summary?: SyncSummary;
 }
 
-/**
- * Summary of a completed synchronization operation
- */
+// Sync completion summary
 export interface SyncSummary {
-  /** Number of items successfully synchronized */
   successCount: number;
-  /** Number of items that failed to synchronize */
   errorCount: number;
-  /** Time the synchronization operation started */
   startTime: Date;
-  /** Time the synchronization operation ended */
   endTime: Date;
+  totalItems?: number;
+  contentTypes?: string[];
 }
 
 /**
- * Hooks and utilities for CMS data synchronization
+ * Custom hook to handle CMS data synchronization
  */
-export const useCMSSynchronization = () => {
-  /**
-   * Synchronize data between two CMS providers
-   * @param options Synchronization options
-   * @returns Summary of the synchronization operation
-   */
+export function useCMSSynchronization() {
+  const [status, setStatus] = useState<SyncStatus>({
+    inProgress: false,
+    progress: null,
+    errors: []
+  });
+
+  // Check if data synchronization is available
+  const canSynchronizeData = () => {
+    // For now, we're just checking if the CMS provider is configured
+    const config = getCMSProviderConfig();
+    return !!config;
+  };
+
+  // Synchronize data between CMS providers
   const synchronizeData = async (options: SyncOptions): Promise<SyncSummary> => {
-    // Start timing the operation
     const startTime = new Date();
-    
-    // Initialize counters
     let successCount = 0;
     let errorCount = 0;
-    
-    // Get the current provider config
+
+    try {
+      for (const contentType of options.contentTypes) {
+        try {
+          switch (contentType) {
+            case 'technologies':
+              const techResult = await synchronizeTechnologies(options);
+              successCount += techResult.success;
+              errorCount += techResult.error;
+              break;
+            case 'productTypes':
+              const productResult = await synchronizeProductTypes(options);
+              successCount += productResult.success;
+              errorCount += productResult.error;
+              break;
+            case 'businessGoals':
+              const goalResult = await synchronizeBusinessGoals(options);
+              successCount += goalResult.success;
+              errorCount += goalResult.error;
+              break;
+            // Add more content types as needed
+            default:
+              console.log(`[synchronizeData] Content type not implemented: ${contentType}`);
+              break;
+          }
+        } catch (error) {
+          errorCount++;
+          if (options.onError) {
+            options.onError(contentType, error instanceof Error ? error : new Error(String(error)));
+          }
+        }
+      }
+
+      const summary: SyncSummary = {
+        successCount,
+        errorCount,
+        startTime,
+        endTime: new Date(),
+        totalItems: successCount + errorCount,
+        contentTypes: options.contentTypes
+      };
+
+      if (options.onComplete) {
+        options.onComplete(summary);
+      }
+
+      return summary;
+    } catch (error) {
+      console.error('[synchronizeData] Error during synchronization:', error);
+      throw error;
+    }
+  };
+
+  return {
+    status,
+    canSynchronizeData,
+    synchronizeData
+  };
+}
+
+// Synchronize technologies between CMS providers
+async function synchronizeTechnologies(options: SyncOptions): Promise<{ success: number; error: number }> {
+  let success = 0;
+  let error = 0;
+  
+  try {
     const config = getCMSProviderConfig();
+    const currentProvider = config.type;
+    const targetProvider = currentProvider === ContentProviderType.STRAPI 
+      ? ContentProviderType.SUPABASE 
+      : ContentProviderType.STRAPI;
     
-    // Determine source and target based on direction
-    const isStrapi = isUsingProvider(ContentProviderType.STRAPI);
-    const targetCmsName = isStrapi ? 'Strapi' : 'Supabase';
+    // Fetch all technologies from current provider
+    const technologies = await getTechnologies();
     
-    console.log(`[synchronizeData] Starting synchronization to ${targetCmsName}`);
+    if (options.onProgress) {
+      options.onProgress('technologies', 0, technologies.length);
+    }
     
-    // Process each selected content type
-    for (const contentType of options.contentTypes) {
+    // Process each technology
+    for (let i = 0; i < technologies.length; i++) {
+      const tech = technologies[i];
+      
       try {
-        // For now, we only implement technology synchronization
-        if (contentType === 'technologies') {
-          const technologyAdapter = getTechnologyAdapter(config);
-          
-          // Get all technologies
-          const technologies = await technologyAdapter.getAll();
-          
-          if (options.onProgress) {
-            options.onProgress(contentType, 0, technologies.length);
-          }
-          
-          // For demo purposes, we just log what would happen
-          console.log(`[synchronizeData] Would synchronize ${technologies.length} technologies to ${targetCmsName}`);
-          
-          // Process each technology
-          for (let i = 0; i < technologies.length; i++) {
-            const technology = technologies[i];
-            
-            try {
-              // Here we would perform the actual synchronization
-              // This is a placeholder for the actual implementation
-              console.log(`[synchronizeData] Processing technology: ${technology.title}`);
-              
-              // Update progress
-              if (options.onProgress) {
-                options.onProgress(contentType, i + 1, technologies.length);
-              }
-              
-              // Simulate success
-              successCount++;
-            } catch (error) {
-              console.error(`[synchronizeData] Error processing technology ${technology.id}:`, error);
-              errorCount++;
-              
-              if (options.onError) {
-                options.onError(contentType, error instanceof Error ? error : new Error(String(error)));
-              }
-            }
-          }
-        } else {
-          // Other content types would be implemented here
-          console.log(`[synchronizeData] Synchronization for ${contentType} not yet implemented`);
-        }
-      } catch (error) {
-        console.error(`[synchronizeData] Error synchronizing ${contentType}:`, error);
-        errorCount++;
+        // Check if technology exists in target provider
+        const targetTech = await getTechnologyBySlug(tech.slug);
         
-        if (options.onError) {
-          options.onError(contentType, error instanceof Error ? error : new Error(String(error)));
+        if (targetTech) {
+          // Update existing technology
+          await updateTechnology(targetTech.id, {
+            title: tech.title,
+            description: tech.description,
+            visible: tech.visible
+          });
+        } else {
+          // Create new technology
+          await createTechnology({
+            title: tech.title,
+            slug: tech.slug,
+            description: tech.description,
+            visible: tech.visible
+          });
         }
+        
+        success++;
+      } catch (e) {
+        error++;
+        if (options.onError) {
+          options.onError('technologies', e instanceof Error ? e : new Error(String(e)));
+        }
+      }
+      
+      if (options.onProgress) {
+        options.onProgress('technologies', i + 1, technologies.length);
       }
     }
     
-    // Complete the operation
-    const endTime = new Date();
-    
-    console.log(`[synchronizeData] Synchronization completed. Success: ${successCount}, Errors: ${errorCount}`);
-    
-    return {
-      successCount,
-      errorCount,
-      startTime,
-      endTime
-    };
-  };
+    return { success, error };
+  } catch (e) {
+    console.error('[synchronizeTechnologies] Error:', e);
+    throw e;
+  }
+}
+
+// Synchronize product types between CMS providers
+async function synchronizeProductTypes(options: SyncOptions): Promise<{ success: number; error: number }> {
+  let success = 0;
+  let error = 0;
   
-  /**
-   * Check if data synchronization is available
-   * @returns True if synchronization can be performed
-   */
-  const canSynchronizeData = (): boolean => {
-    // For now, we'll just check if we're using Strapi
-    return isUsingProvider(ContentProviderType.STRAPI);
-  };
+  try {
+    // Similar implementation as synchronizeTechnologies
+    const products = await getProductTypes();
+    
+    if (options.onProgress) {
+      options.onProgress('productTypes', 0, products.length);
+    }
+    
+    // Process each product type
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+      
+      try {
+        const targetProduct = await getProductTypeBySlug(product.slug);
+        
+        if (targetProduct) {
+          await updateProductType(targetProduct.id, {
+            title: product.title,
+            description: product.description,
+            visible: product.visible !== false
+          });
+        } else {
+          await createProductType({
+            title: product.title,
+            slug: product.slug,
+            description: product.description,
+            visible: product.visible !== false
+          });
+        }
+        
+        success++;
+      } catch (e) {
+        error++;
+        if (options.onError) {
+          options.onError('productTypes', e instanceof Error ? e : new Error(String(e)));
+        }
+      }
+      
+      if (options.onProgress) {
+        options.onProgress('productTypes', i + 1, products.length);
+      }
+    }
+    
+    return { success, error };
+  } catch (e) {
+    console.error('[synchronizeProductTypes] Error:', e);
+    throw e;
+  }
+}
+
+// Synchronize business goals between CMS providers
+async function synchronizeBusinessGoals(options: SyncOptions): Promise<{ success: number; error: number }> {
+  let success = 0;
+  let error = 0;
   
-  return {
-    synchronizeData,
-    canSynchronizeData
-  };
-};
+  try {
+    const goals = await getBusinessGoals();
+    
+    if (options.onProgress) {
+      options.onProgress('businessGoals', 0, goals.length);
+    }
+    
+    for (let i = 0; i < goals.length; i++) {
+      const goal = goals[i];
+      
+      try {
+        const targetGoal = await getBusinessGoalBySlug(goal.slug);
+        
+        if (targetGoal) {
+          await updateBusinessGoal(targetGoal.id, {
+            title: goal.title,
+            description: goal.description,
+            visible: goal.visible
+          });
+        } else {
+          await createBusinessGoal({
+            title: goal.title,
+            slug: goal.slug,
+            description: goal.description,
+            visible: goal.visible
+          });
+        }
+        
+        success++;
+      } catch (e) {
+        error++;
+        if (options.onError) {
+          options.onError('businessGoals', e instanceof Error ? e : new Error(String(e)));
+        }
+      }
+      
+      if (options.onProgress) {
+        options.onProgress('businessGoals', i + 1, goals.length);
+      }
+    }
+    
+    return { success, error };
+  } catch (e) {
+    console.error('[synchronizeBusinessGoals] Error:', e);
+    throw e;
+  }
+}

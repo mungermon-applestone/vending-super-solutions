@@ -71,8 +71,8 @@ async function testStrapiConnection(): Promise<{
     // Next, validate that we can use the technology adapter
     const canAccessTechnologies = await validateTechnologyAdapter({
       type: ContentProviderType.STRAPI,
-      strapiApiUrl: baseUrl,
-      strapiApiKey: apiKey
+      apiUrl: baseUrl,
+      apiKey: apiKey
     });
     
     if (!canAccessTechnologies) {
@@ -171,4 +171,3 @@ async function testSupabaseConnection(): Promise<{
     };
   }
 }
-
