@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
 import { UseToastReturn } from '@/hooks/use-toast';
@@ -66,7 +65,8 @@ export const updateProduct = async (data: ProductFormData, originalSlug: string,
 
     console.log('[productService] Product type updated successfully');
     
-    // Process and clean the benefits data
+    // Process and clean the benefits data - only keep non-empty benefits
+    // This is critical to ensure we don't reinsert empty benefits
     console.log('[productService] Original benefits before processing:', data.benefits);
     data.benefits = data.benefits.filter(benefit => benefit.trim() !== '');
     console.log('[productService] Cleaned benefits after filtering empty ones:', data.benefits);

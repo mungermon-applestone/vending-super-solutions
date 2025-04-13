@@ -20,7 +20,7 @@ interface ProductBenefitsProps {
 const ProductBenefits = ({ form }: ProductBenefitsProps) => {
   const addBenefit = () => {
     const currentBenefits = form.getValues('benefits');
-    form.setValue('benefits', [...currentBenefits, '']);
+    form.setValue('benefits', [...currentBenefits, ''], { shouldDirty: true });
   };
 
   const removeBenefit = (index: number) => {
@@ -31,10 +31,11 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     // Ensure we always have at least one benefit field (can be empty)
     const finalBenefits = updatedBenefits.length === 0 ? [''] : updatedBenefits;
     
-    // Update the form values
-    form.setValue('benefits', finalBenefits, { shouldDirty: true, shouldTouch: true });
+    // Update the form values with flags to mark the form as changed
+    form.setValue('benefits', finalBenefits, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
     
     console.log(`[ProductBenefits] Removed benefit at index ${index}, now have ${finalBenefits.length} benefits`);
+    console.log(`[ProductBenefits] Updated benefits:`, finalBenefits);
     
     // Trigger validation after removal to clear any duplicate errors
     setTimeout(() => {

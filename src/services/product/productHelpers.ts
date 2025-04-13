@@ -100,22 +100,25 @@ export const addProductImage = updateProductImage;
  */
 export const updateProductBenefits = async (data: ProductFormData, productId: string): Promise<void> => {
   console.log('[productHelpers] Updating benefits for product ID:', productId);
-  console.log('[productHelpers] Benefits data:', data.benefits);
+  console.log('[productHelpers] Benefits data received:', data.benefits);
   
   try {
     // First delete all existing benefits for this product for a clean slate
-    const { error: deleteError } = await supabase
+    console.log('[productHelpers] Deleting all existing benefits for product ID:', productId);
+    const { error: deleteError, count } = await supabase
       .from('product_type_benefits')
-      .delete()
+      .delete({ count: 'exact' })
       .eq('product_type_id', productId);
 
     if (deleteError) {
       console.error('[productHelpers] Error deleting existing benefits:', deleteError);
       throw new Error(deleteError.message);
     }
+    console.log(`[productHelpers] Deleted ${count} existing benefits`);
     
     // Only insert benefits that aren't empty strings
     const validBenefits = data.benefits.filter(benefit => benefit.trim() !== '');
+    console.log(`[productHelpers] Processing ${validBenefits.length} valid benefits after filtering empty ones`);
     
     // Skip the insertion step if there are no valid benefits to insert
     if (validBenefits.length === 0) {
@@ -253,4 +256,3 @@ export const processBenefits = (benefits: string[]): string[] => {
       return true;
     });
 };
-
