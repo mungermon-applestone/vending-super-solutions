@@ -297,6 +297,8 @@ export async function updateLandingPage(id: string, data: Partial<LandingPageFor
   
   // Update the hero content
   if (data.hero) {
+    console.log(`[updateLandingPage] Updating hero content with id ${currentPage.hero_content_id} with data:`, data.hero);
+    
     const { error: heroError } = await supabase
       .from('hero_contents')
       .update({
@@ -316,6 +318,8 @@ export async function updateLandingPage(id: string, data: Partial<LandingPageFor
       console.error(`[updateLandingPage] Error updating hero content with id ${currentPage.hero_content_id}:`, heroError);
       throw heroError;
     }
+    
+    console.log(`[updateLandingPage] Successfully updated hero content with id ${currentPage.hero_content_id}`);
   }
   
   // Update the landing page
@@ -324,6 +328,8 @@ export async function updateLandingPage(id: string, data: Partial<LandingPageFor
   if (data.page_name) updateData.page_name = data.page_name;
   
   if (Object.keys(updateData).length > 0) {
+    console.log(`[updateLandingPage] Updating landing page with id ${id} with data:`, updateData);
+    
     const { error: pageError } = await supabase
       .from('landing_pages')
       .update(updateData)
@@ -333,9 +339,13 @@ export async function updateLandingPage(id: string, data: Partial<LandingPageFor
       console.error(`[updateLandingPage] Error updating landing page with id ${id}:`, pageError);
       throw pageError;
     }
+    
+    console.log(`[updateLandingPage] Successfully updated landing page with id ${id}`);
   }
   
   // Fetch the updated landing page with hero content
+  console.log(`[updateLandingPage] Fetching updated landing page with id ${id}`);
+  
   const { data: updatedPage, error: fetchUpdatedError } = await supabase
     .from('landing_pages')
     .select(`

@@ -81,8 +81,12 @@ export function useUpdateLandingPage() {
     },
     onSuccess: (data: LandingPage) => {
       console.log('Landing page updated successfully:', data);
+      // Invalidate all landing pages queries
       queryClient.invalidateQueries({ queryKey: ['landing-pages'] });
-      queryClient.invalidateQueries({ queryKey: ['landing-pages', data.page_key] });
+      // Also invalidate this specific page
+      if (data.page_key) {
+        queryClient.invalidateQueries({ queryKey: ['landing-pages', data.page_key] });
+      }
     },
     onError: (error) => {
       console.error('Error updating landing page:', error);

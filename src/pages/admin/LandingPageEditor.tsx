@@ -17,7 +17,7 @@ const LandingPageEditor = () => {
   const { toast } = useToast();
   const isEditing = !!id;
   
-  const { data: landingPages = [], isLoading } = useLandingPages();
+  const { data: landingPages = [], isLoading, refetch } = useLandingPages();
   const createMutation = useCreateLandingPage();
   const updateMutation = useUpdateLandingPage();
   
@@ -44,10 +44,16 @@ const LandingPageEditor = () => {
       });
       navigate('/admin/landing-pages');
     }
-  }, [isEditing, landingPages, currentPage, navigate, toast, isLoading]);
+
+    // When editing, ensure we have fresh data
+    if (isEditing && id) {
+      refetch();
+    }
+  }, [isEditing, landingPages, currentPage, navigate, toast, isLoading, id, refetch]);
   
   const handleSubmit = async (data: LandingPageFormData) => {
     console.log("LandingPageEditor - handleSubmit called with data:", data);
+    
     try {
       if (isEditing && id) {
         console.log(`Updating landing page ${id}`);
@@ -65,7 +71,10 @@ const LandingPageEditor = () => {
           description: "Landing page created successfully",
         });
       }
-      navigate('/admin/landing-pages');
+      // Wait a moment for the update to register before navigating
+      setTimeout(() => {
+        navigate('/admin/landing-pages');
+      }, 500);
     } catch (error) {
       console.error("Error in handleSubmit:", error);
       toast({

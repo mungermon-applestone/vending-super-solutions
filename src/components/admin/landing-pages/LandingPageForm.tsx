@@ -23,11 +23,11 @@ const formSchema = z.object({
     subtitle: z.string().min(1, "Subtitle is required"),
     image_url: z.string().min(1, "Image URL is required"),
     image_alt: z.string().min(1, "Image alt text is required"),
-    cta_primary_text: z.string().optional(),
-    cta_primary_url: z.string().optional(),
-    cta_secondary_text: z.string().optional(),
-    cta_secondary_url: z.string().optional(),
-    background_class: z.string().optional(),
+    cta_primary_text: z.string().optional().nullable(),
+    cta_primary_url: z.string().optional().nullable(),
+    cta_secondary_text: z.string().optional().nullable(),
+    cta_secondary_url: z.string().optional().nullable(),
+    background_class: z.string().optional().nullable(),
   })
 });
 
@@ -86,8 +86,18 @@ const LandingPageForm: React.FC<LandingPageFormProps> = ({
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultValues
+    defaultValues: defaultValues,
+    mode: "onChange" // Validate on change
   });
+
+  // Update form when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      // Reset the form with new values when initialData changes
+      form.reset(initialData);
+      console.log("LandingPageForm - Reset form with initialData:", initialData);
+    }
+  }, [initialData, form]);
 
   // Debug form state
   useEffect(() => {
@@ -96,14 +106,39 @@ const LandingPageForm: React.FC<LandingPageFormProps> = ({
       errors: form.formState.errors,
       isDirty: form.formState.isDirty,
       isSubmitting: form.formState.isSubmitting,
-      defaultValues: form.formState.defaultValues
+      defaultValues: form.formState.defaultValues,
+      isValid: form.formState.isValid
     });
   }, [form.formState]);
 
   const handleFormSubmit = async (data: z.infer<typeof formSchema>) => {
     console.log("LandingPageForm - Submitting form with data:", data);
+    
+    if (!form.formState.isValid) {
+      console.log("Form is invalid, showing validation errors");
+      toast({
+        title: "Validation Error",
+        description: "Please check the form for errors and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
-      await onSubmit(data as LandingPageFormData);
+      // Process any null values to empty strings
+      const processedData = {
+        ...data,
+        hero: {
+          ...data.hero,
+          cta_primary_text: data.hero.cta_primary_text || '',
+          cta_primary_url: data.hero.cta_primary_url || '',
+          cta_secondary_text: data.hero.cta_secondary_text || '',
+          cta_secondary_url: data.hero.cta_secondary_url || '',
+          background_class: data.hero.background_class || 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
+        }
+      };
+      
+      await onSubmit(processedData as LandingPageFormData);
     } catch (error) {
       console.error("Error in form submission:", error);
       toast({
@@ -146,20 +181,6 @@ const LandingPageForm: React.FC<LandingPageFormProps> = ({
           <Button 
             type="submit" 
             disabled={isSubmitting}
-            onClick={() => {
-              console.log("Save button clicked");
-              console.log("Form values:", form.getValues());
-              console.log("Form errors:", form.formState.errors);
-              
-              if (!form.formState.isValid) {
-                console.log("Form is invalid, not submitting");
-                toast({
-                  title: "Validation Error",
-                  description: "Please check the form for errors and try again.",
-                  variant: "destructive",
-                });
-              }
-            }}
           >
             {isSubmitting ? "Saving..." : "Save Landing Page"}
           </Button>
