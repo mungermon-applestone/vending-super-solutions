@@ -404,7 +404,7 @@ const SimpleConnectionTest: React.FC = () => {
         <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
           <h4 className="text-sm font-medium text-blue-800 mb-1">Content Type Builder Limitations</h4>
           <p className="text-xs text-blue-700 mb-2">
-            The Technology content type is missing from your Strapi cloud instance. Unfortunately, Strapi Cloud free tier restricts access to the Content-Type Builder, regardless of trial status.
+            The Technology content type is missing from your Strapi cloud instance. Unfortunately, Strapi Cloud restricts access to the Content-Type Builder in production environments.
           </p>
           <div className="space-y-2 text-xs text-blue-700">
             <p className="font-medium">Available options:</p>
@@ -416,7 +416,7 @@ const SimpleConnectionTest: React.FC = () => {
                 </div>
               </li>
               <li>
-                <strong>Upgrade to paid plan:</strong> Strapi Cloud paid plans allow Content-Type Builder access in production.
+                <strong>Contact Strapi Support:</strong> If you've updated to a paid plan, contact Strapi support to request enabling developer mode on your cloud instance.
               </li>
               <li>
                 <strong>Use local Strapi:</strong> Connect your app to your local Strapi instance during development.
@@ -428,6 +428,14 @@ const SimpleConnectionTest: React.FC = () => {
                 <li>Log in to your Strapi cloud admin panel</li>
                 <li>Go to Settings → Transfer Tokens</li>
                 <li>Create a new full-access token for transfers</li>
+              </ol>
+            </div>
+            <div className="mt-3 p-2 bg-blue-100 rounded">
+              <p className="font-medium">Using a local instance with Strapi Cloud:</p>
+              <ol className="list-disc pl-4 space-y-1 mt-1">
+                <li>Create and develop content types locally (NODE_ENV=development npx create-strapi-app@latest my-project)</li>
+                <li>Use the transfer command to move content types to your cloud instance</li>
+                <li>From that point, you can use either environment to manage content</li>
               </ol>
             </div>
           </div>

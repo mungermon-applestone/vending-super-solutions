@@ -6,9 +6,10 @@ import { useTechnologySections } from '@/hooks/useTechnologySections';
 import PageHero from '@/components/common/PageHero';
 import CTASection from '@/components/common/CTASection';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, AlertCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { ArrowRight, AlertCircle, ExternalLink } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import SimpleConnectionTest from '@/components/admin/cms/SimpleConnectionTest';
 
 const TechnologyLanding = () => {
@@ -63,7 +64,7 @@ const TechnologyLanding = () => {
           </div>
         ) : technologies.length === 0 ? (
           <div className="text-center py-12">
-            <Card className="max-w-md mx-auto">
+            <Card className="max-w-lg mx-auto">
               <CardHeader>
                 <CardTitle>No Technology Solutions Found</CardTitle>
               </CardHeader>
@@ -72,25 +73,40 @@ const TechnologyLanding = () => {
                   We couldn't find any technology solutions in the CMS. This might be because:
                 </p>
                 <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-                  <li>No technology content has been created in Strapi yet</li>
-                  <li>Strapi connection is not configured correctly</li>
-                  <li>There might be an issue with the API connection</li>
+                  <li>The "Technology" content type hasn't been created in your Strapi cloud instance</li>
+                  <li>No technology items have been added yet</li>
+                  <li>Strapi cloud requires content types to be transferred from a local instance</li>
                 </ul>
+                
+                <Alert className="mt-4 bg-blue-50 border-blue-200">
+                  <AlertCircle className="h-4 w-4 text-blue-600" />
+                  <AlertTitle className="text-blue-800">Strapi Cloud Limitation</AlertTitle>
+                  <AlertDescription className="text-blue-700">
+                    Strapi Cloud restricts content type builder access in production environments. Use the Strapi Transfer CLI tool to 
+                    transfer content types from a local instance.
+                  </AlertDescription>
+                </Alert>
                 
                 <div className="pt-2">
                   <p className="text-sm font-medium mb-2">Test Strapi Connection:</p>
                   <SimpleConnectionTest />
                 </div>
-                
-                <div className="border-t pt-4 mt-4">
-                  <Link 
-                    to="/admin/technology"
-                    className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
-                  >
-                    Manage Technologies <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </div>
               </CardContent>
+              <CardFooter className="flex flex-wrap gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={() => window.open('https://docs.strapi.io/dev-docs/data-management/transfer', '_blank')}
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Strapi Transfer Docs
+                </Button>
+                
+                <Link to="/admin/settings">
+                  <Button variant="outline">
+                    CMS Settings
+                  </Button>
+                </Link>
+              </CardFooter>
             </Card>
           </div>
         ) : (
