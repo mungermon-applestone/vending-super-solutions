@@ -6,11 +6,12 @@ import { useTechnologySections } from '@/hooks/useTechnologySections';
 import PageHero from '@/components/common/PageHero';
 import CTASection from '@/components/common/CTASection';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { ArrowRight, AlertCircle, ExternalLink } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
+import { ArrowRight, AlertCircle, ExternalLink, Wrench, FileQuestion } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import SimpleConnectionTest from '@/components/admin/cms/SimpleConnectionTest';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const TechnologyLanding = () => {
   const { technologies, isLoading, error } = useTechnologySections();
@@ -64,45 +65,105 @@ const TechnologyLanding = () => {
           </div>
         ) : technologies.length === 0 ? (
           <div className="text-center py-12">
-            <Card className="max-w-lg mx-auto">
+            <Card className="max-w-2xl mx-auto">
               <CardHeader>
-                <CardTitle>No Technology Solutions Found</CardTitle>
+                <CardTitle className="flex items-center justify-center gap-2">
+                  <FileQuestion className="h-6 w-6 text-amber-500" />
+                  <span>No Technology Solutions Found</span>
+                </CardTitle>
+                <CardDescription className="text-center">
+                  We couldn't retrieve any technology solutions from your Strapi CMS
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  We couldn't find any technology solutions in the CMS. This might be because:
-                </p>
-                <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-                  <li>The "Technology" content type hasn't been created in your Strapi cloud instance</li>
-                  <li>No technology items have been added yet</li>
-                  <li>Strapi cloud requires content types to be transferred from a local instance</li>
-                </ul>
-                
-                <Alert className="mt-4 bg-blue-50 border-blue-200">
-                  <AlertCircle className="h-4 w-4 text-blue-600" />
-                  <AlertTitle className="text-blue-800">Strapi Cloud Limitation</AlertTitle>
-                  <AlertDescription className="text-blue-700">
-                    Strapi Cloud restricts content type builder access in production environments. Use the Strapi Transfer CLI tool to 
-                    transfer content types from a local instance.
-                  </AlertDescription>
-                </Alert>
-                
-                <div className="pt-2">
-                  <p className="text-sm font-medium mb-2">Test Strapi Connection:</p>
-                  <SimpleConnectionTest />
-                </div>
+                <Tabs defaultValue="setup">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="setup">Setup Issue</TabsTrigger>
+                    <TabsTrigger value="test">Test Connection</TabsTrigger>
+                    <TabsTrigger value="options">Options</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="setup" className="space-y-4 pt-4">
+                    <Alert className="bg-amber-50 border-amber-200">
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                      <AlertTitle className="text-amber-800">Strapi Cloud Limitations</AlertTitle>
+                      <AlertDescription className="text-amber-700">
+                        Strapi Cloud has two important limitations that are causing this issue:
+                        <ul className="list-disc pl-5 mt-2 space-y-1">
+                          <li>Content-Type Builder is <strong>disabled</strong> in production environments</li>
+                          <li>Data Transfer functionality is <strong>disabled</strong> on free plans</li>
+                        </ul>
+                      </AlertDescription>
+                    </Alert>
+                    
+                    <div className="p-4 border rounded-md bg-gray-50 space-y-2">
+                      <h4 className="font-medium">Why this is happening:</h4>
+                      <p className="text-sm">
+                        The "Technology" content type doesn't exist in your Strapi cloud instance. Normally, you would 
+                        create this using the Content-Type Builder or transfer it from a local instance, but both 
+                        options are restricted in Strapi Cloud without a paid plan.
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        <h4 className="font-medium">Required steps to fix:</h4>
+                        <ol className="list-decimal pl-5 text-sm space-y-1">
+                          <li><strong>Upgrade to a paid plan</strong> (Pro Plan or higher recommended)</li>
+                          <li><strong>Contact Strapi support</strong> to request enabling Developer Mode and Data Transfer</li>
+                          <li>After approval, transfer content types from a local instance</li>
+                        </ol>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="test" className="space-y-4 pt-4">
+                    <div className="p-4 border rounded-md bg-gray-50">
+                      <p className="text-sm mb-4">Test the connection to your Strapi CMS:</p>
+                      <SimpleConnectionTest />
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="options" className="space-y-4 pt-4">
+                    <div className="p-4 border rounded-md bg-gray-50">
+                      <h4 className="font-medium mb-2">Alternative approaches:</h4>
+                      <div className="space-y-4 text-sm">
+                        <div>
+                          <h5 className="font-medium text-indigo-700">Option 1: Create content manually</h5>
+                          <p>Create content entries manually using existing content types in Strapi Cloud.</p>
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-indigo-700">Option 2: Use a local Strapi instance</h5>
+                          <p>For development, use a local Strapi instance with full Content-Type Builder access.</p>
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-indigo-700">Option 3: Switch to a different CMS</h5>
+                          <p>Consider using Supabase or another CMS that doesn't have these limitations.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
-              <CardFooter className="flex flex-wrap gap-2">
+              <CardFooter className="flex flex-wrap gap-3">
                 <Button 
                   variant="outline"
-                  onClick={() => window.open('https://docs.strapi.io/dev-docs/data-management/transfer', '_blank')}
+                  onClick={() => window.open('https://strapi.io/pricing', '_blank')}
+                  size="sm"
                 >
                   <ExternalLink className="mr-2 h-4 w-4" />
-                  Strapi Transfer Docs
+                  Strapi Pricing
+                </Button>
+                
+                <Button 
+                  variant="outline"
+                  onClick={() => window.open('https://docs.strapi.io/dev-docs/deployment/cloud', '_blank')}
+                  size="sm"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Strapi Cloud Docs
                 </Button>
                 
                 <Link to="/admin/settings">
-                  <Button variant="outline">
+                  <Button variant="default" size="sm">
+                    <Wrench className="mr-2 h-4 w-4" />
                     CMS Settings
                   </Button>
                 </Link>

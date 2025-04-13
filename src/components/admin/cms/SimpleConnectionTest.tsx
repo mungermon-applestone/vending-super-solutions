@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, CheckCircle, ExternalLink, Loader2, RefreshCw } from 'lucide-react';
@@ -402,40 +403,53 @@ const SimpleConnectionTest: React.FC = () => {
       
       {testResult.status === 'success' && testResult.details?.testedUrl?.includes('/admin') && (
         <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
-          <h4 className="text-sm font-medium text-blue-800 mb-1">Content Type Builder Limitations</h4>
+          <h4 className="text-sm font-medium text-blue-800 mb-1">Content Type Builder & Transfer Limitations</h4>
           <p className="text-xs text-blue-700 mb-2">
-            The Technology content type is missing from your Strapi cloud instance. Unfortunately, Strapi Cloud restricts access to the Content-Type Builder in production environments.
+            The Technology content type is missing from your Strapi cloud instance. Strapi Cloud restricts both access to the Content-Type Builder and data transfer features in production environments.
           </p>
           <div className="space-y-2 text-xs text-blue-700">
-            <p className="font-medium">Available options:</p>
+            <p className="font-medium">Error: "Data transfer is not enabled on the remote host"</p>
+            <div className="bg-blue-100 p-2 rounded">
+              <p className="font-medium">This error occurs because:</p>
+              <ul className="list-disc pl-4 space-y-1">
+                <li>Strapi Cloud disables data transfers by default on free plans</li>
+                <li>You need to upgrade to at least the Pro plan to enable transfers</li>
+                <li>Even after upgrading, you may need to contact Strapi support to enable transfers</li>
+              </ul>
+            </div>
+            
+            <p className="font-medium mt-3">Available options:</p>
             <ol className="list-decimal pl-4 space-y-1">
               <li>
-                <strong>Use Strapi Transfer:</strong> Export content types from your local instance and import to cloud:
-                <div className="bg-blue-100 p-2 mt-1 rounded font-mono text-2xs">
-                  npx strapi transfer --to https://strong-balance-0789566afc.strapiapp.com --to-token YOUR_TRANSFER_TOKEN
-                </div>
+                <strong>Upgrade your plan & contact support:</strong> Upgrade to the Pro plan and contact Strapi support to request enabling both data transfer and developer mode.
               </li>
               <li>
-                <strong>Contact Strapi Support:</strong> If you've updated to a paid plan, contact Strapi support to request enabling developer mode on your cloud instance.
+                <strong>Create a custom API in your local Strapi:</strong> Create an API endpoint that can export your content types in a format your app can import.
               </li>
               <li>
-                <strong>Use local Strapi:</strong> Connect your app to your local Strapi instance during development.
+                <strong>Manual content creation:</strong> Recreate your content directly in the Strapi cloud admin interface.
+              </li>
+              <li>
+                <strong>Local development:</strong> During development, point your app to a local Strapi instance where you have full control.
               </li>
             </ol>
+            
             <div className="mt-3 p-2 bg-blue-100 rounded">
-              <p className="font-medium">How to get a transfer token:</p>
+              <p className="font-medium">Contacting Strapi Support:</p>
               <ol className="list-disc pl-4 space-y-1 mt-1">
-                <li>Log in to your Strapi cloud admin panel</li>
-                <li>Go to Settings → Transfer Tokens</li>
-                <li>Create a new full-access token for transfers</li>
+                <li>Log in to your Strapi cloud account</li>
+                <li>Go to the Help section</li>
+                <li>Create a support ticket requesting data transfer and developer mode enablement</li>
+                <li>Be sure to mention you've upgraded to a paid plan (if you have)</li>
               </ol>
             </div>
+            
             <div className="mt-3 p-2 bg-blue-100 rounded">
-              <p className="font-medium">Using a local instance with Strapi Cloud:</p>
+              <p className="font-medium">Alternative approach - create your content types manually:</p>
               <ol className="list-disc pl-4 space-y-1 mt-1">
-                <li>Create and develop content types locally (NODE_ENV=development npx create-strapi-app@latest my-project)</li>
-                <li>Use the transfer command to move content types to your cloud instance</li>
-                <li>From that point, you can use either environment to manage content</li>
+                <li>Work with the existing content types available in your cloud instance</li>
+                <li>Access Strapi REST API endpoints directly from your application</li>
+                <li>Focus on utilizing the Single Types and Collection Types that already exist</li>
               </ol>
             </div>
           </div>
