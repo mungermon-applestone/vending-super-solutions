@@ -5,6 +5,9 @@ export { cloneTechnology } from './contentTypes/technologies/cloneTechnology';
 export { fetchTechnologies, fetchTechnologiesSafe } from './contentTypes/technologies/fetchTechnologies';
 export { fetchTechnologyBySlug, getTechnologyBySlug } from './contentTypes/technologies/fetchTechnologyBySlug';
 
+// Import fetchTechnologies function for use in the connection test
+import { fetchTechnologies } from './contentTypes/technologies/fetchTechnologies';
+
 // Export a simple function to test the connection
 export async function testStrapiConnection() {
   try {
