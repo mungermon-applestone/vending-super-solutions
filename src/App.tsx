@@ -1,15 +1,21 @@
 
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
 
-// Lazy load pages for better performance
-const HomePage = lazy(() => import('@/pages/HomePage'));
-const AboutPage = lazy(() => import('@/pages/AboutPage'));
-const TechnologyLanding = lazy(() => import('@/pages/TechnologyLanding'));
-const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
-const StrapiConfig = lazy(() => import('@/pages/admin/StrapiConfig'));
-const StrapiConnectionDebug = lazy(() => import('@/pages/admin/StrapiConnectionDebug'));
+// Create a simple LoadingSpinner component since it's missing
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
+  </div>
+);
+
+// Lazy load pages with correct relative imports
+const HomePage = lazy(() => import('./pages/Index'));
+const AboutPage = lazy(() => import('./pages/AboutUs'));
+const TechnologyLanding = lazy(() => import('./pages/TechnologyLanding'));
+const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
+const StrapiConfig = lazy(() => import('./pages/admin/StrapiConfig'));
+const StrapiConnectionDebug = lazy(() => import('./pages/admin/StrapiConnectionDebug'));
 
 function App() {
   return (
