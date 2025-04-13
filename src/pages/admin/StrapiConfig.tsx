@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,13 +25,25 @@ const StrapiConfig: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<any>(null);
   
+  // Check if we have a valid API URL
+  useEffect(() => {
+    if (!strapiUrl && cmsInfo.apiUrl) {
+      setStrapiUrl(cmsInfo.apiUrl);
+    }
+  }, [cmsInfo.apiUrl]);
+  
   const handleSaveStrapiSettings = () => {
     setIsLoading(true);
     
     try {
+      // Make sure we have a URL
+      if (!strapiUrl.trim()) {
+        throw new Error("Strapi API URL is required");
+      }
+      
       const success = switchCMSProvider({
         providerType: ContentProviderType.STRAPI,
-        strapiApiUrl: strapiUrl,
+        strapiApiUrl: strapiUrl.trim(),
         strapiApiKey: strapiApiKey || undefined
       });
       
@@ -60,14 +73,22 @@ const StrapiConfig: React.FC = () => {
   };
   
   const handleTestConnection = async () => {
+    if (!strapiUrl.trim()) {
+      setErrorMessage("Please enter a valid Strapi API URL");
+      setTestStatus('error');
+      return;
+    }
+    
     setTestStatus('testing');
     setErrorMessage(null);
     
     try {
+      console.log('Testing connection with URL:', strapiUrl);
+      
       // Switch to Strapi temporarily for testing
       switchCMSProvider({
         providerType: ContentProviderType.STRAPI,
-        strapiApiUrl: strapiUrl,
+        strapiApiUrl: strapiUrl.trim(),
         strapiApiKey: strapiApiKey || undefined
       });
       

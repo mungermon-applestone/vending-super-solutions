@@ -15,6 +15,7 @@ export async function testCMSConnection(): Promise<{
   details?: any;
 }> {
   const config = getCMSProviderConfig();
+  console.log('[testCMSConnection] Testing connection with config:', config);
   
   // Test Strapi connection
   if (config.type === ContentProviderType.STRAPI) {
@@ -34,8 +35,11 @@ async function testStrapiConnection(): Promise<{
   provider: 'Strapi';
   details?: any;
 }> {
-  const baseUrl = getStrapiBaseUrl();
-  const apiKey = getStrapiApiKey();
+  const config = getCMSProviderConfig();
+  const baseUrl = config.apiUrl || getStrapiBaseUrl();
+  const apiKey = config.apiKey || getStrapiApiKey();
+  
+  console.log(`[testStrapiConnection] Testing with URL: ${baseUrl}, API key configured: ${!!apiKey}`);
   
   if (!baseUrl) {
     return {

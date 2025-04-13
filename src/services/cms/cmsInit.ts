@@ -14,7 +14,7 @@ export function initCMS() {
   
   // Get Strapi configuration from environment variables
   const strapiApiUrl = import.meta.env.VITE_STRAPI_API_URL || 'https://strong-balance-0789566afc.strapiapp.com/api';
-  const strapiApiKey = import.meta.env.VITE_STRAPI_API_KEY || 'f849f3a6a6e44f303bcc5c97da0ebc887738bcc2dd403380c4bd7a156cfaaef63b2ae711ad1b38ea09b2802055402ee37d1396357ddc280c7e5c1fb758ea82d721f83e052d625bedaa3ba92834f14fe488d85a3a9f28ec4415a6d269d2db9c6944a3d9746827f729f9ea85bfb11543b8e02187ba43f1d3d3857a39a0bc5c0ed6';
+  const strapiApiKey = import.meta.env.VITE_STRAPI_API_KEY || '';
   
   // Use Strapi by default in this application
   console.log(`[initCMS] Using Strapi CMS provider with URL: ${strapiApiUrl}`);
@@ -35,14 +35,19 @@ export function switchCMSProvider(config: {
     console.log(`[switchCMSProvider] Switching to ${ContentProviderType[config.providerType]} provider`);
     
     if (config.providerType === ContentProviderType.STRAPI) {
-      if (!config.strapiApiUrl) {
+      // Ensure we have a valid URL
+      const strapiApiUrl = config.strapiApiUrl || import.meta.env.VITE_STRAPI_API_URL || 'https://strong-balance-0789566afc.strapiapp.com/api';
+      
+      if (!strapiApiUrl) {
         console.error('[switchCMSProvider] Strapi API URL is required');
         return false;
       }
       
+      console.log(`[switchCMSProvider] Setting Strapi config with URL: ${strapiApiUrl}`);
+      
       setCMSProviderConfig(strapiConfig(
-        config.strapiApiUrl,
-        config.strapiApiKey
+        strapiApiUrl,
+        config.strapiApiKey || import.meta.env.VITE_STRAPI_API_KEY || ''
       ));
     } else {
       setCMSProviderConfig(supabaseConfig());
