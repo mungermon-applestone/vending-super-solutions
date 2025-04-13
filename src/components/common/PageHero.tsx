@@ -1,8 +1,8 @@
-
 import React, { useEffect } from 'react';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { LandingPage } from '@/types/landingPage';
 
 interface PageHeroProps {
   pageKey: string;
@@ -38,7 +38,7 @@ const PageHero: React.FC<PageHeroProps> = ({
       isLoading,
       error,
       hasCmsData: !!landingPage,
-      heroContent: landingPage ? landingPage.hero_content : null,
+      heroContent: landingPage ? (landingPage as LandingPage).hero_content : null,
     });
     
     if (error) {
@@ -52,7 +52,9 @@ const PageHero: React.FC<PageHeroProps> = ({
   }, [pageKey, refetch]);
   
   // Use CMS data if available, otherwise fall back to props
-  const heroContent = landingPage?.hero_content || null;
+  // Explicitly cast landingPage to LandingPage type to access hero_content
+  const typedLandingPage = landingPage as LandingPage | null;
+  const heroContent = typedLandingPage?.hero_content || null;
   
   // Debug what content we're actually using
   useEffect(() => {

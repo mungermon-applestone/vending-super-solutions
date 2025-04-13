@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -56,8 +57,8 @@ const ProductsLanding = () => {
                 <Card key={productType.id} className="overflow-hidden hover:shadow-xl transition-shadow">
                   <div className="relative h-48">
                     <img 
-                      src={productType.image_url} 
-                      alt={productType.image_alt || productType.title} 
+                      src={productType.image?.url || 'https://via.placeholder.com/800x500?text=No+Image'} 
+                      alt={productType.image?.alt || productType.title} 
                       className="w-full h-full object-cover"
                     />
                   </div>
