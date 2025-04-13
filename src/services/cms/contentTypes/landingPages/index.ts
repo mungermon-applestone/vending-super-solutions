@@ -1,15 +1,57 @@
+
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 import { useMockData, getMockData, _getMockLandingPages } from '../../mockDataHandler';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '@/integrations/supabase/client';
+import { IS_DEVELOPMENT } from '@/config/cms';
 
 // In a real app, this would be a Supabase query
 export async function fetchLandingPages(): Promise<LandingPage[]> {
   console.log("[fetchLandingPages] Starting to fetch landing pages");
   
-  if (useMockData) {
-    try {
-      console.log("[fetchLandingPages] Using mock data");
+  try {
+    // Always try Supabase first
+    console.log("[fetchLandingPages] Fetching landing pages from Supabase");
+    const { data: landingPagesData, error } = await supabase
+      .from('landing_pages')
+      .select(`
+        id, 
+        page_key, 
+        page_name, 
+        hero_content_id,
+        created_at,
+        updated_at,
+        hero_content:hero_content_id (
+          id, 
+          title, 
+          subtitle, 
+          image_url, 
+          image_alt, 
+          cta_primary_text, 
+          cta_primary_url, 
+          cta_secondary_text, 
+          cta_secondary_url, 
+          background_class,
+          created_at, 
+          updated_at
+        )
+      `);
+      
+    if (error) {
+      console.error("[fetchLandingPages] Supabase error:", error);
+      throw error;
+    }
+    
+    if (landingPagesData && landingPagesData.length > 0) {
+      console.log(`[fetchLandingPages] Found ${landingPagesData.length} landing pages in Supabase`);
+      return landingPagesData as LandingPage[];
+    }
+    
+    console.log("[fetchLandingPages] No landing pages found in Supabase, falling back to mock data");
+    
+    // Fallback to mock data if no records found in Supabase or in development mode
+    if (IS_DEVELOPMENT && useMockData) {
+      console.log("[fetchLandingPages] Using mock data as fallback");
       
       // Check if window.__MOCK_DATA exists and has landing pages data
       if (typeof window !== 'undefined') {
@@ -35,40 +77,77 @@ export async function fetchLandingPages(): Promise<LandingPage[]> {
           const mockPages = _getMockLandingPages();
           window.__MOCK_DATA['landing-pages'] = mockPages;
           console.log(`[fetchLandingPages] Initialized ${mockPages.length} landing pages`);
-          console.log(`[fetchLandingPages] First page:`, mockPages[0]);
           return mockPages;
         }
       } else {
         console.warn("[fetchLandingPages] Window is undefined, using direct mock data");
         return _getMockLandingPages();
       }
-    } catch (error) {
-      console.error("[fetchLandingPages] Error fetching mock landing pages:", error);
-      
-      // As a last resort, return hardcoded mock data
-      console.log("[fetchLandingPages] Returning hardcoded mock data as fallback");
-      return _getMockLandingPages();
     }
-  }
-  
-  // In a real implementation, this would connect to Supabase
-  try {
-    console.log("[fetchLandingPages] Attempting to fetch from Supabase");
-    // This would be replaced with actual Supabase query in a real implementation
+    
+    // If no records in Supabase and not using mock data, return empty array
     return [];
   } catch (error) {
-    console.error("[fetchLandingPages] Error fetching from Supabase:", error);
-    throw error;
+    console.error("[fetchLandingPages] Error fetching landing pages:", error);
+    
+    // As a last resort, return hardcoded mock data
+    console.log("[fetchLandingPages] Returning hardcoded mock data as fallback");
+    return _getMockLandingPages();
   }
 }
 
 export async function fetchLandingPageByKey(key: string): Promise<LandingPage | null> {
   try {
     console.log(`[fetchLandingPageByKey] Fetching landing page with key: ${key}`);
-    const pages = await fetchLandingPages();
-    const page = pages.find(page => page.page_key === key);
-    console.log(`[fetchLandingPageByKey] Found page for key ${key}:`, page ? "Yes" : "No", page);
-    return page || null;
+    
+    // Try to fetch from Supabase first
+    const { data: landingPage, error } = await supabase
+      .from('landing_pages')
+      .select(`
+        id, 
+        page_key, 
+        page_name, 
+        hero_content_id,
+        created_at,
+        updated_at,
+        hero_content:hero_content_id (
+          id, 
+          title, 
+          subtitle, 
+          image_url, 
+          image_alt, 
+          cta_primary_text, 
+          cta_primary_url, 
+          cta_secondary_text, 
+          cta_secondary_url, 
+          background_class,
+          created_at, 
+          updated_at
+        )
+      `)
+      .eq('page_key', key)
+      .single();
+    
+    if (error) {
+      if (error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error(`[fetchLandingPageByKey] Supabase error for key ${key}:`, error);
+      } else {
+        console.log(`[fetchLandingPageByKey] No landing page found in Supabase with key ${key}`);
+      }
+    } else if (landingPage) {
+      console.log(`[fetchLandingPageByKey] Found landing page in Supabase with key ${key}:`, landingPage);
+      return landingPage as LandingPage;
+    }
+    
+    // Fallback to mock data if no records found in Supabase or in development mode
+    if (IS_DEVELOPMENT && useMockData) {
+      const pages = await fetchLandingPages();
+      const page = pages.find(page => page.page_key === key);
+      console.log(`[fetchLandingPageByKey] Mock data result for key ${key}:`, page ? "Found" : "Not found");
+      return page || null;
+    }
+    
+    return null;
   } catch (error) {
     console.error(`[fetchLandingPageByKey] Error fetching landing page with key ${key}:`, error);
     return null;
@@ -78,17 +157,10 @@ export async function fetchLandingPageByKey(key: string): Promise<LandingPage | 
 export async function createLandingPage(data: LandingPageFormData): Promise<LandingPage> {
   console.log("[createLandingPage] Creating new landing page with data:", data);
   
-  const heroId = uuidv4();
-  const pageId = uuidv4();
-  const timestamp = new Date().toISOString();
-  
-  const newPage: LandingPage = {
-    id: pageId,
-    page_key: data.page_key,
-    page_name: data.page_name,
-    hero_content_id: heroId,
-    hero_content: {
-      id: heroId,
+  // Create the hero content first
+  const { data: heroContent, error: heroError } = await supabase
+    .from('hero_contents')
+    .insert({
       title: data.hero.title,
       subtitle: data.hero.subtitle,
       image_url: data.hero.image_url,
@@ -97,31 +169,73 @@ export async function createLandingPage(data: LandingPageFormData): Promise<Land
       cta_primary_url: data.hero.cta_primary_url,
       cta_secondary_text: data.hero.cta_secondary_text,
       cta_secondary_url: data.hero.cta_secondary_url,
-      background_class: data.hero.background_class || 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
-      created_at: timestamp,
-      updated_at: timestamp,
-    },
-    created_at: timestamp,
-    updated_at: timestamp,
-  };
+      background_class: data.hero.background_class || 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light'
+    })
+    .select()
+    .single();
   
-  console.log("[createLandingPage] Created new landing page:", newPage);
+  if (heroError) {
+    console.error("[createLandingPage] Error creating hero content:", heroError);
+    throw heroError;
+  }
   
-  // With mock data, we need to add the new page to our mock data store
-  if (useMockData) {
+  // Now create the landing page that references the hero content
+  const { data: landingPage, error: pageError } = await supabase
+    .from('landing_pages')
+    .insert({
+      page_key: data.page_key,
+      page_name: data.page_name,
+      hero_content_id: heroContent.id
+    })
+    .select(`
+      id, 
+      page_key, 
+      page_name, 
+      hero_content_id,
+      created_at,
+      updated_at,
+      hero_content:hero_content_id (
+        id, 
+        title, 
+        subtitle, 
+        image_url, 
+        image_alt, 
+        cta_primary_text, 
+        cta_primary_url, 
+        cta_secondary_text, 
+        cta_secondary_url, 
+        background_class,
+        created_at, 
+        updated_at
+      )
+    `)
+    .single();
+  
+  if (pageError) {
+    console.error("[createLandingPage] Error creating landing page:", pageError);
+    throw pageError;
+  }
+  
+  console.log("[createLandingPage] Created new landing page:", landingPage);
+  
+  // If in development mode, also update mock data
+  if (IS_DEVELOPMENT && useMockData) {
     try {
       // Get existing landing pages
       const existingPages = await getMockData<LandingPage>('landing-pages');
+      
+      // Convert Supabase data to mock format
+      const newPage: LandingPage = landingPage as LandingPage;
       
       // If another page with the same key already exists, update it instead
       const existingPageIndex = existingPages.findIndex(p => p.page_key === data.page_key);
       
       if (existingPageIndex !== -1) {
-        console.log(`[createLandingPage] Page with key ${data.page_key} already exists, updating instead`);
+        console.log(`[createLandingPage] Page with key ${data.page_key} already exists in mock data, updating instead`);
         existingPages[existingPageIndex] = newPage;
       } else {
         // Add the new page
-        console.log(`[createLandingPage] Adding new page with key ${data.page_key}`);
+        console.log(`[createLandingPage] Adding new page with key ${data.page_key} to mock data`);
         existingPages.push(newPage);
       }
       
@@ -133,51 +247,107 @@ export async function createLandingPage(data: LandingPageFormData): Promise<Land
         window.__MOCK_DATA['landing-pages'] = existingPages;
       }
       
-      console.log(`[createLandingPage] Updated mock data with ${existingPages.length} landing pages:`, existingPages);
+      console.log(`[createLandingPage] Updated mock data with ${existingPages.length} landing pages`);
     } catch (error) {
       console.error('[createLandingPage] Error updating mock landing pages:', error);
     }
   }
   
-  // With Supabase, this would insert the new page and hero content
-  return newPage;
+  return landingPage as LandingPage;
 }
 
 export async function updateLandingPage(id: string, data: Partial<LandingPageFormData>): Promise<LandingPage> {
   console.log(`[updateLandingPage] Updating landing page ${id} with data:`, data);
   
-  const pages = await fetchLandingPages();
-  const pageToUpdate = pages.find(page => page.id === id);
+  // First fetch the current landing page to get the hero_content_id
+  const { data: currentPage, error: fetchError } = await supabase
+    .from('landing_pages')
+    .select('hero_content_id')
+    .eq('id', id)
+    .single();
   
-  if (!pageToUpdate) {
-    console.error(`[updateLandingPage] Landing page with ID ${id} not found`);
-    throw new Error(`Landing page with ID ${id} not found`);
+  if (fetchError) {
+    console.error(`[updateLandingPage] Error fetching landing page with id ${id}:`, fetchError);
+    throw fetchError;
   }
   
-  const updatedPage = {
-    ...pageToUpdate,
-    page_key: data.page_key || pageToUpdate.page_key,
-    page_name: data.page_name || pageToUpdate.page_name,
-    updated_at: new Date().toISOString(),
-    hero_content: {
-      ...pageToUpdate.hero_content,
-      title: data.hero?.title || pageToUpdate.hero_content.title,
-      subtitle: data.hero?.subtitle || pageToUpdate.hero_content.subtitle,
-      image_url: data.hero?.image_url || pageToUpdate.hero_content.image_url,
-      image_alt: data.hero?.image_alt || pageToUpdate.hero_content.image_alt,
-      cta_primary_text: data.hero?.cta_primary_text || pageToUpdate.hero_content.cta_primary_text,
-      cta_primary_url: data.hero?.cta_primary_url || pageToUpdate.hero_content.cta_primary_url,
-      cta_secondary_text: data.hero?.cta_secondary_text || pageToUpdate.hero_content.cta_secondary_text,
-      cta_secondary_url: data.hero?.cta_secondary_url || pageToUpdate.hero_content.cta_secondary_url,
-      background_class: data.hero?.background_class || pageToUpdate.hero_content.background_class,
-      updated_at: new Date().toISOString(),
+  // Update the hero content
+  if (data.hero) {
+    const { error: heroError } = await supabase
+      .from('hero_contents')
+      .update({
+        title: data.hero.title,
+        subtitle: data.hero.subtitle,
+        image_url: data.hero.image_url,
+        image_alt: data.hero.image_alt,
+        cta_primary_text: data.hero.cta_primary_text,
+        cta_primary_url: data.hero.cta_primary_url,
+        cta_secondary_text: data.hero.cta_secondary_text,
+        cta_secondary_url: data.hero.cta_secondary_url,
+        background_class: data.hero.background_class
+      })
+      .eq('id', currentPage.hero_content_id);
+    
+    if (heroError) {
+      console.error(`[updateLandingPage] Error updating hero content with id ${currentPage.hero_content_id}:`, heroError);
+      throw heroError;
     }
-  };
+  }
   
-  console.log("[updateLandingPage] Updated landing page:", updatedPage);
+  // Update the landing page
+  const updateData: any = {};
+  if (data.page_key) updateData.page_key = data.page_key;
+  if (data.page_name) updateData.page_name = data.page_name;
   
-  // With mock data, we need to update our mock data store
-  if (useMockData) {
+  if (Object.keys(updateData).length > 0) {
+    const { error: pageError } = await supabase
+      .from('landing_pages')
+      .update(updateData)
+      .eq('id', id);
+    
+    if (pageError) {
+      console.error(`[updateLandingPage] Error updating landing page with id ${id}:`, pageError);
+      throw pageError;
+    }
+  }
+  
+  // Fetch the updated landing page with hero content
+  const { data: updatedPage, error: fetchUpdatedError } = await supabase
+    .from('landing_pages')
+    .select(`
+      id, 
+      page_key, 
+      page_name, 
+      hero_content_id,
+      created_at,
+      updated_at,
+      hero_content:hero_content_id (
+        id, 
+        title, 
+        subtitle, 
+        image_url, 
+        image_alt, 
+        cta_primary_text, 
+        cta_primary_url, 
+        cta_secondary_text, 
+        cta_secondary_url, 
+        background_class,
+        created_at, 
+        updated_at
+      )
+    `)
+    .eq('id', id)
+    .single();
+  
+  if (fetchUpdatedError) {
+    console.error(`[updateLandingPage] Error fetching updated landing page with id ${id}:`, fetchUpdatedError);
+    throw fetchUpdatedError;
+  }
+  
+  console.log(`[updateLandingPage] Successfully updated landing page with id ${id}:`, updatedPage);
+  
+  // If in development mode, also update mock data
+  if (IS_DEVELOPMENT && useMockData) {
     try {
       // Get existing landing pages
       const existingPages = await getMockData<LandingPage>('landing-pages');
@@ -186,7 +356,7 @@ export async function updateLandingPage(id: string, data: Partial<LandingPageFor
       const pageIndex = existingPages.findIndex(p => p.id === id);
       if (pageIndex !== -1) {
         // Replace the old page with the updated one
-        existingPages[pageIndex] = updatedPage;
+        existingPages[pageIndex] = updatedPage as LandingPage;
         
         // Store updated pages back to mock data
         if (!Array.isArray(window.__MOCK_DATA)) {
@@ -205,14 +375,50 @@ export async function updateLandingPage(id: string, data: Partial<LandingPageFor
     }
   }
   
-  return updatedPage;
+  return updatedPage as LandingPage;
 }
 
 export async function deleteLandingPage(id: string): Promise<void> {
   console.log(`[deleteLandingPage] Deleting landing page with ID: ${id}`);
   
-  // With mock data, we need to remove the page from our mock data store
-  if (useMockData) {
+  // First fetch the hero_content_id
+  const { data: landingPage, error: fetchError } = await supabase
+    .from('landing_pages')
+    .select('hero_content_id')
+    .eq('id', id)
+    .single();
+  
+  if (fetchError) {
+    console.error(`[deleteLandingPage] Error fetching landing page with id ${id}:`, fetchError);
+    throw fetchError;
+  }
+  
+  // Delete the landing page first (due to foreign key constraints)
+  const { error: deletePageError } = await supabase
+    .from('landing_pages')
+    .delete()
+    .eq('id', id);
+  
+  if (deletePageError) {
+    console.error(`[deleteLandingPage] Error deleting landing page with id ${id}:`, deletePageError);
+    throw deletePageError;
+  }
+  
+  // Then delete the hero content
+  const { error: deleteHeroError } = await supabase
+    .from('hero_contents')
+    .delete()
+    .eq('id', landingPage.hero_content_id);
+  
+  if (deleteHeroError) {
+    console.error(`[deleteLandingPage] Error deleting hero content with id ${landingPage.hero_content_id}:`, deleteHeroError);
+    throw deleteHeroError;
+  }
+  
+  console.log(`[deleteLandingPage] Successfully deleted landing page with id ${id} and associated hero content`);
+  
+  // If in development mode, also update mock data
+  if (IS_DEVELOPMENT && useMockData) {
     try {
       // Get existing landing pages
       const existingPages = await getMockData<LandingPage>('landing-pages');
@@ -231,8 +437,6 @@ export async function deleteLandingPage(id: string): Promise<void> {
       console.error('[deleteLandingPage] Error deleting mock landing page:', error);
     }
   }
-  
-  // Implementation would delete both the page and associated hero content
 }
 
 // Define window.__MOCK_DATA type to avoid TypeScript errors

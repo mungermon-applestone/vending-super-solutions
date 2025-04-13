@@ -9,17 +9,8 @@ import MachineTypesSection from '@/components/home/MachineTypesSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CTASection from '@/components/common/CTASection';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
-import { initMockLandingPagesData } from '@/services/cms/initMockData';
 
 const Index = () => {
-  // Force initialization of mock data on component mount
-  useEffect(() => {
-    console.log('Index page mounted - forcing mock data initialization');
-    if (typeof window !== 'undefined') {
-      initMockLandingPagesData();
-    }
-  }, []);
-
   // Fetch hero content from CMS for the home page
   const { data: landingPage, isLoading, error, refetch } = useLandingPageByKey('home');
 
@@ -28,7 +19,7 @@ const Index = () => {
     console.log('Index page - Landing page loading:', isLoading);
     console.log('Index page - Landing page error:', error);
     
-    // Force refetch on mount
+    // Force refetch to ensure the latest data from Supabase
     refetch().catch(err => {
       console.error('Error refetching landing page data:', err);
     });

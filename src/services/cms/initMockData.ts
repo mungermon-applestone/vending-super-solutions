@@ -1,11 +1,12 @@
 
 import { _getMockLandingPages } from './mockDataHandler';
+import { fetchLandingPages } from './contentTypes/landingPages';
 
 /**
  * Initializes mock data for landing pages
  * This is called at application startup to ensure mock data is available
  */
-export function initMockLandingPagesData(): void {
+export async function initMockLandingPagesData(): Promise<void> {
   console.log("[initMockData] Initializing landing pages mock data");
   
   // Ensure the window.__MOCK_DATA object exists
@@ -14,29 +15,44 @@ export function initMockLandingPagesData(): void {
     return;
   }
   
-  // Always force re-initialization of mock data to ensure it's fresh
+  // Always ensure the __MOCK_DATA object exists
   if (!window.__MOCK_DATA) {
     console.log("[initMockData] Creating window.__MOCK_DATA object");
     window.__MOCK_DATA = {};
   }
   
-  // Get the mock landing pages data
-  const landingPages = _getMockLandingPages();
-  
-  // Always set the mock data, even if it already exists (force refresh)
-  window.__MOCK_DATA['landing-pages'] = landingPages;
-  
-  console.log("[initMockData] Landing pages mock data initialized with", landingPages.length, "items");
+  try {
+    // First try to load data from Supabase
+    console.log("[initMockData] Attempting to load landing pages from Supabase");
+    const landingPages = await fetchLandingPages();
+    
+    if (landingPages && landingPages.length > 0) {
+      console.log(`[initMockData] Loaded ${landingPages.length} landing pages from Supabase`);
+      window.__MOCK_DATA['landing-pages'] = landingPages;
+    } else {
+      console.log("[initMockData] No landing pages found in Supabase, using mock data");
+      // Get the mock landing pages data
+      const mockLandingPages = _getMockLandingPages();
+      window.__MOCK_DATA['landing-pages'] = mockLandingPages;
+    }
+    
+    console.log(`[initMockData] Landing pages mock data initialized with ${window.__MOCK_DATA['landing-pages'].length} items`);
+  } catch (error) {
+    console.error("[initMockData] Error initializing landing pages data:", error);
+    
+    // Fallback to mock data
+    const mockLandingPages = _getMockLandingPages();
+    window.__MOCK_DATA['landing-pages'] = mockLandingPages;
+    
+    console.log(`[initMockData] Used fallback mock data with ${mockLandingPages.length} items due to error`);
+  }
   
   // Log the data to verify structure
-  console.log("[initMockData] Full landing pages data:", JSON.stringify(landingPages));
-  
-  // Log the first item to verify data structure is correct
-  if (landingPages.length > 0) {
+  if (window.__MOCK_DATA['landing-pages'] && window.__MOCK_DATA['landing-pages'].length > 0) {
     console.log("[initMockData] First landing page:", {
-      id: landingPages[0].id,
-      key: landingPages[0].page_key,
-      name: landingPages[0].page_name
+      id: window.__MOCK_DATA['landing-pages'][0].id,
+      key: window.__MOCK_DATA['landing-pages'][0].page_key,
+      name: window.__MOCK_DATA['landing-pages'][0].page_name
     });
   }
 }

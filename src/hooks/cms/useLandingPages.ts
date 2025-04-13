@@ -1,13 +1,9 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 import { fetchLandingPages, fetchLandingPageByKey, createLandingPage, updateLandingPage, deleteLandingPage } from '@/services/cms/contentTypes/landingPages';
 import { createQueryOptions } from './useQueryDefaults';
 import { initMockLandingPagesData } from '@/services/cms/initMockData';
-
-// Force initialization of mock data
-if (typeof window !== 'undefined') {
-  initMockLandingPagesData();
-}
 
 export function useLandingPages() {
   return useQuery<LandingPage[]>({
@@ -15,37 +11,17 @@ export function useLandingPages() {
     queryFn: async () => {
       console.log('useLandingPages hook fetching data...');
       try {
-        // Always force initialization of mock data to ensure it's available
-        if (typeof window !== 'undefined') {
-          console.log('useLandingPages: Initializing mock data before fetch');
-          initMockLandingPagesData();
-        }
-        
         const pages = await fetchLandingPages();
         console.log('useLandingPages hook fetched data:', pages);
         
         if (!pages || !Array.isArray(pages)) {
           console.warn('useLandingPages: fetchLandingPages returned unexpected data type:', typeof pages);
-          
-          // Last resort - check window.__MOCK_DATA directly
-          if (typeof window !== 'undefined' && window.__MOCK_DATA && Array.isArray(window.__MOCK_DATA['landing-pages'])) {
-            console.log('useLandingPages: Fallback to window.__MOCK_DATA directly');
-            return window.__MOCK_DATA['landing-pages'] as LandingPage[];
-          }
-          
           return [];
         }
         
         return pages;
       } catch (error) {
         console.error('Error in useLandingPages:', error);
-        
-        // Last resort - check window.__MOCK_DATA directly
-        if (typeof window !== 'undefined' && window.__MOCK_DATA && Array.isArray(window.__MOCK_DATA['landing-pages'])) {
-          console.log('useLandingPages: Error fallback to window.__MOCK_DATA directly');
-          return window.__MOCK_DATA['landing-pages'] as LandingPage[];
-        }
-        
         return []; 
       }
     },
@@ -64,14 +40,16 @@ export function useLandingPageByKey(key: string) {
       try {
         const page = await fetchLandingPageByKey(key);
         console.log(`useLandingPageByKey hook (${key}) fetched data:`, page);
-        return page as LandingPage | null;
+        return page;
       } catch (error) {
         console.error(`Error fetching landing page by key (${key}):`, error);
         return null;
       }
     },
     enabled: !!key,
-    ...createQueryOptions()
+    ...createQueryOptions(),
+    staleTime: 0, // Always refetch
+    refetchOnMount: true,
   });
 }
 

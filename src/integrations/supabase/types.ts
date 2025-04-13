@@ -429,6 +429,86 @@ export type Database = {
           },
         ]
       }
+      hero_contents: {
+        Row: {
+          background_class: string | null
+          created_at: string
+          cta_primary_text: string | null
+          cta_primary_url: string | null
+          cta_secondary_text: string | null
+          cta_secondary_url: string | null
+          id: string
+          image_alt: string
+          image_url: string
+          subtitle: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          background_class?: string | null
+          created_at?: string
+          cta_primary_text?: string | null
+          cta_primary_url?: string | null
+          cta_secondary_text?: string | null
+          cta_secondary_url?: string | null
+          id?: string
+          image_alt: string
+          image_url: string
+          subtitle: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          background_class?: string | null
+          created_at?: string
+          cta_primary_text?: string | null
+          cta_primary_url?: string | null
+          cta_secondary_text?: string | null
+          cta_secondary_url?: string | null
+          id?: string
+          image_alt?: string
+          image_url?: string
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      landing_pages: {
+        Row: {
+          created_at: string
+          hero_content_id: string
+          id: string
+          page_key: string
+          page_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hero_content_id: string
+          id?: string
+          page_key: string
+          page_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hero_content_id?: string
+          id?: string
+          page_key?: string
+          page_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landing_pages_hero_content_id_fkey"
+            columns: ["hero_content_id"]
+            isOneToOne: false
+            referencedRelation: "hero_contents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       machine_features: {
         Row: {
           created_at: string
