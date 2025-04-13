@@ -192,15 +192,29 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
             title: section.title,
             description: section.description,
             sectionType: section.type,
+            displayOrder: section.display_order || 0,
             // Transform features if they exist
-            features: section.features ? section.features.map(feature => ({
+            features: section.features ? section.features.map((feature, index) => ({
               title: feature.title,
               description: feature.description,
               icon: feature.icon,
+              displayOrder: feature.display_order || index,
               // Transform items if they exist
-              items: feature.items ? feature.items.map(item => ({
-                text: item
-              })) : undefined
+              items: feature.items ? 
+                Array.isArray(feature.items) ? feature.items.map((item, itemIndex) => {
+                  if (typeof item === 'string') {
+                    return {
+                      text: item,
+                      displayOrder: itemIndex
+                    };
+                  } else {
+                    return {
+                      text: item.text,
+                      displayOrder: item.display_order || itemIndex
+                    };
+                  }
+                }) 
+                : undefined
             })) : undefined
           })) : undefined
         }
@@ -243,19 +257,33 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
           // Handle image if present
           image: data.image ? { url: data.image.url, alt: data.image.alt } : undefined,
           // Transform sections if they exist
-          sections: data.sections ? data.sections.map(section => ({
+          sections: data.sections ? data.sections.map((section, index) => ({
             title: section.title,
             description: section.description,
             sectionType: section.type,
+            displayOrder: section.display_order || index,
             // Transform features if they exist
-            features: section.features ? section.features.map(feature => ({
-              title: feature.title,
+            features: section.features ? section.features.map((feature, featureIndex) => ({
+              title: feature.title || '',
               description: feature.description,
               icon: feature.icon,
+              displayOrder: feature.display_order || featureIndex,
               // Transform items if they exist
-              items: feature.items ? feature.items.map(item => ({
-                text: item
-              })) : undefined
+              items: feature.items ? 
+                Array.isArray(feature.items) ? feature.items.map((item, itemIndex) => {
+                  if (typeof item === 'string') {
+                    return {
+                      text: item,
+                      displayOrder: itemIndex
+                    };
+                  } else {
+                    return {
+                      text: item.text,
+                      displayOrder: item.display_order || itemIndex
+                    };
+                  }
+                }) 
+                : undefined
             })) : undefined
           })) : undefined
         }
@@ -328,15 +356,17 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
           alt: sourceTechnology.image_alt || '',
         } : undefined,
         // Transform sections if they exist
-        sections: sourceTechnology.sections ? sourceTechnology.sections.map(section => ({
+        sections: sourceTechnology.sections ? sourceTechnology.sections.map((section, index) => ({
           title: section.title,
           description: section.description || undefined,
           type: section.section_type,
+          display_order: section.display_order,
           // Transform features if they exist
-          features: section.features ? section.features.map(feature => ({
+          features: section.features ? section.features.map((feature, featureIndex) => ({
             title: feature.title || undefined,
             description: feature.description || undefined,
             icon: feature.icon || undefined,
+            display_order: feature.display_order,
             // Transform items if they exist
             items: feature.items ? feature.items.map(item => item.text) : undefined
           })) : undefined

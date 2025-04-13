@@ -17,11 +17,13 @@ export interface TechnologyCreateInput {
     title: string;
     description?: string;
     type: string;
+    display_order?: number; // Added to support both adapters
     features?: {
       title?: string;
       description?: string;
       icon?: string;
-      items?: string[];
+      display_order?: number; // Added to support both adapters
+      items?: string[] | {text: string; display_order?: number}[]; // Support both formats
     }[];
   }[];
 }
