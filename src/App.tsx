@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Homepage from './pages/Homepage';
@@ -24,15 +25,15 @@ import ProductEditor from './pages/ProductEditor';
 import AdminMachines from './pages/admin/AdminMachines';
 import MachineEditor from './pages/MachineEditor';
 import AdminBusinessGoals from './pages/admin/AdminBusinessGoals';
-import BusinessGoalEditor from './pages/BusinessGoalEditor';
+import BusinessGoalEditor from './pages/admin/BusinessGoalEditor';
 import AdminTechnology from './pages/admin/AdminTechnology';
 import TechnologyEditor from './pages/TechnologyEditor';
 import AdminCaseStudies from './pages/admin/AdminCaseStudies';
-import CaseStudyEditor from './pages/CaseStudyEditor';
+import CaseStudyEditor from './pages/admin/CaseStudyEditor';
 import AdminBlog from './pages/admin/AdminBlog';
-import BlogEditor from './pages/BlogEditor';
+import BlogEditor from './pages/admin/BlogEditor';
 import AdminLandingPages from './pages/admin/AdminLandingPages';
-import LandingPageEditor from './pages/LandingPageEditor';
+import LandingPageEditor from './pages/admin/LandingPageEditor';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminMedia from './pages/admin/AdminMedia';
 import SignIn from './pages/admin/SignIn';
@@ -98,22 +99,22 @@ function App() {
         <Route path="/admin/machines" element={<AdminMachines />} />
         <Route path="/admin/machines/:machineId" element={<MachineEditor />} />
         <Route path="/admin/business-goals" element={<AdminBusinessGoals />} />
-        <Route path="/admin/business-goals/:businessGoalSlug" element={<BusinessGoalEditor />} />
+        <Route path="/admin/business-goals/:goalSlug" element={<BusinessGoalEditor />} />
         <Route path="/admin/technology" element={<AdminTechnology />} />
         <Route path="/admin/technology/edit/:technologySlug" element={<TechnologyEditor />} />
         <Route path="/admin/technology/new" element={<TechnologyEditor />} />
         <Route path="/admin/case-studies" element={<AdminCaseStudies />} />
-        <Route path="/admin/case-studies/:caseStudyId" element={<CaseStudyEditor />} />
+        <Route path="/admin/case-studies/:caseStudySlug" element={<CaseStudyEditor />} />
         <Route path="/admin/case-studies/new" element={<CaseStudyEditor />} />
         <Route path="/admin/blog" element={<AdminBlog />} />
-        <Route path="/admin/blog/:blogId" element={<BlogEditor />} />
+        <Route path="/admin/blog/:postId" element={<BlogEditor />} />
         <Route path="/admin/blog/new" element={<BlogEditor />} />
         <Route path="/admin/landing-pages" element={<AdminLandingPages />} />
-        <Route path="/admin/landing-pages/:pageId" element={<LandingPageEditor />} />
+        <Route path="/admin/landing-pages/:id" element={<LandingPageEditor />} />
         <Route path="/admin/landing-pages/new" element={<LandingPageEditor />} />
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/media" element={<AdminMedia />} />
-        <Route path="/admin/settings" element={<AdminSettings />} />  {/* Add this line */}
+        <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/signin" element={<SignIn />} />
         
         {/* Individual Machine Routes */}

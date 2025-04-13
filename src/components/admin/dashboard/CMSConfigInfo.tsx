@@ -44,7 +44,7 @@ const CMSConfigInfo: React.FC = () => {
               
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Status:</span>
-                <Badge variant={cmsInfo.isConfigured ? 'success' : 'destructive'}>
+                <Badge variant={cmsInfo.isConfigured ? 'default' : 'destructive'}>
                   {cmsInfo.isConfigured ? 'Configured' : 'Not Configured'}
                 </Badge>
               </div>
