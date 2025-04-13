@@ -33,5 +33,3 @@ export async function cloneTechnology(id: string): Promise<CMSTechnology | null>
     return null;
   }
 }
-
-export { cloneTechnology };
