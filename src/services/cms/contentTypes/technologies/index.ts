@@ -26,7 +26,7 @@ export const technologyOperations: ContentTypeOperations<CMSTechnology> = {
     
     // Return the newly created technology by fetching it
     const technologies = await fetchTechnologies();
-    const newTechnology = technologies.find(tech => tech.id === id);
+    const newTechnology = technologies.find(tech => String(tech.id) === String(id));
     
     if (!newTechnology) {
       throw new Error('Failed to retrieve newly created technology');
