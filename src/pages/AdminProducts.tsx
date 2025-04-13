@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -16,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { getProductTypes } from '@/services/cms';
+import { getProductTypes } from '@/services/cms/products';
 
 const AdminProductsPage = () => {
   const navigate = useNavigate();

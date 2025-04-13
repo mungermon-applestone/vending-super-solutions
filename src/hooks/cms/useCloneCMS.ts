@@ -1,21 +1,20 @@
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import * as cmsService from '@/services/cms';
-import { CMSProductType, CMSBusinessGoal, CMSTechnology, CMSMachine } from '@/types/cms';
+import * as productService from '@/services/cms/products';
+import { cloneBusinessGoal } from '@/services/cms/contentTypes/businessGoals/cloneBusinessGoal';
+import { cloneTechnology } from '@/services/cms/contentTypes/technologies/cloneTechnology';
+import { cloneMachine } from '@/services/cms/contentTypes/machines/cloneMachine';
 
 /**
  * Hook to clone a product type
  */
 export function useCloneProductType() {
   const queryClient = useQueryClient();
+  
   return useMutation({
-    mutationFn: async (id: string): Promise<CMSProductType | null> => {
-      return await cmsService.cloneProductType(id);
-    },
+    mutationFn: productService.cloneProduct,
     onSuccess: () => {
-      // Invalidate queries to fetch fresh data
       queryClient.invalidateQueries({ queryKey: ['productTypes'] });
-    }
+    },
   });
 }
 
@@ -26,7 +25,7 @@ export function useCloneBusinessGoal() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string): Promise<CMSBusinessGoal | null> => {
-      return await cmsService.cloneBusinessGoal(id);
+      return await cloneBusinessGoal(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['businessGoals'] });
@@ -41,7 +40,7 @@ export function useCloneTechnology() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string): Promise<CMSTechnology | null> => {
-      return await cmsService.cloneTechnology(id);
+      return await cloneTechnology(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['technologies'] });
@@ -56,7 +55,7 @@ export function useCloneMachine() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string): Promise<CMSMachine | null> => {
-      return await cmsService.cloneMachine(id);
+      return await cloneMachine(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['machines'] });

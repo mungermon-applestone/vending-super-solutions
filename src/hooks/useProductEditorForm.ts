@@ -3,23 +3,12 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { UseToastReturn } from '@/hooks/use-toast';
 import { NavigateFunction } from 'react-router-dom';
-import { useProductType } from '@/hooks/useCMSData';
+import { useProductType } from '@/hooks/cms/useProductTypes';
 import { ProductFormData } from '@/types/forms';
-import { createProduct, updateProduct } from '@/services/product';
+import { createProduct, updateProduct } from '@/services/cms/products';
 
 /**
  * Custom hook for handling product editor form state and operations
- * 
- * @important When cloning products, special care must be taken to:
- * 1. Correctly reset the form with new values
- * 2. Use explicit value handling in form fields (value={field.value || ''})
- * 3. Ensure form initialization happens only once per product
- * 
- * @param productSlug - The slug of the product to edit (undefined for new product)
- * @param setIsLoading - Function to set loading state
- * @param toast - Toast notification utility
- * @param navigate - Navigation function
- * @param isEditMode - Whether editing an existing product
  */
 export const useProductEditorForm = (
   productSlug: string | undefined,
@@ -89,10 +78,6 @@ export const useProductEditorForm = (
 
   /**
    * Populate form with existing product data when available
-   * 
-   * IMPORTANT: This is where form initialization happens after cloning.
-   * The form must be properly reset with all fields to prevent fields 
-   * from becoming uneditable.
    */
   useEffect(() => {
     if (existingProduct && !isCreating && !formInitialized) {

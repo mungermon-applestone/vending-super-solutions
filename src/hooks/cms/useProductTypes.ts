@@ -1,6 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import * as cmsService from '@/services/cms';
+import * as cmsService from '@/services/cms/products';
 import { CMSProductType } from '@/types/cms';
 import { normalizeSlug, getSlugVariations } from '@/services/cms/utils/slugMatching';
 import { createQueryOptions } from './useQueryDefaults';
@@ -92,3 +92,21 @@ export function useProductType(slug: string | undefined, uuid: string | null = n
     ...createQueryOptions<CMSProductType | null>()
   });
 }
+
+/**
+ * Hook to clone a product type
+ */
+export function useCloneProductType() {
+  return useMutation({
+    mutationFn: cmsService.cloneProduct,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['productTypes'] });
+    },
+  });
+}
+
+// Add the necessary imports at the top
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+// Get query client instance
+const queryClient = useQueryClient();
