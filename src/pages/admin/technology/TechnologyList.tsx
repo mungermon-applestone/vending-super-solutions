@@ -18,7 +18,7 @@ const TechnologyList: React.FC = () => {
   const { technologies, isLoading } = useTechnologySections();
   const cmsInfo = getCMSInfo();
   const isStrapi = cmsInfo.provider === 'Strapi';
-  const { toast } = useToast();
+  const toast = useToast();
   const [isCloningId, setIsCloningId] = useState<string | null>(null);
   
   const handleDeleteClick = (technology: CMSTechnology) => {
