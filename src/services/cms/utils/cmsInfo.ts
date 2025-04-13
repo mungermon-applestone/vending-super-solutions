@@ -1,36 +1,55 @@
 
 import { getCMSProviderConfig } from '../providerConfig';
 import { ContentProviderType } from '../adapters/types';
+import { getStrapiBaseUrl, getStrapiApiKey } from './strapiConfig';
 
 /**
  * Get information about the current CMS configuration
- * Useful for debugging and displaying in admin panels
+ * Useful for displaying in the admin UI
  */
 export function getCMSInfo(): {
   provider: string;
-  apiUrl?: string;
+  apiUrl: string | null;
   isConfigured: boolean;
+  apiKeyConfigured: boolean;
 } {
   const config = getCMSProviderConfig();
   
+  if (config.type === ContentProviderType.STRAPI) {
+    const baseUrl = getStrapiBaseUrl();
+    const apiKey = getStrapiApiKey();
+    
+    return {
+      provider: 'Strapi',
+      apiUrl: baseUrl,
+      isConfigured: !!baseUrl,
+      apiKeyConfigured: !!apiKey
+    };
+  }
+  
+  // Default to Supabase
   return {
-    provider: config.type === ContentProviderType.STRAPI ? 'Strapi' : 'Supabase',
-    apiUrl: config.apiUrl,
-    isConfigured: config.type === ContentProviderType.STRAPI ? !!config.apiUrl : true
+    provider: 'Supabase',
+    apiUrl: null,
+    isConfigured: true,  // Supabase is always configured through the Lovable integration
+    apiKeyConfigured: true
   };
 }
 
 /**
- * Check if the CMS is properly configured
+ * Get a formatted string with CMS configuration info
  */
-export function isCMSConfigured(): boolean {
-  const config = getCMSProviderConfig();
+export function getCMSConfigInfoString(): string {
+  const info = getCMSInfo();
   
-  // Strapi requires an API URL to be configured
-  if (config.type === ContentProviderType.STRAPI) {
-    return !!config.apiUrl;
+  const lines = [
+    `CMS Provider: ${info.provider}`,
+  ];
+  
+  if (info.provider === 'Strapi') {
+    lines.push(`API URL: ${info.apiUrl || 'Not configured'}`);
+    lines.push(`API Key: ${info.apiKeyConfigured ? 'Configured' : 'Not configured'}`);
   }
   
-  // Supabase is always considered configured since it uses the built-in client
-  return true;
+  return lines.join('\n');
 }
