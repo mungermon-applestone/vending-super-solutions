@@ -2,21 +2,23 @@
 // This file is a re-export of the modularized technologies files
 import { technologyOperations } from './technologies/index';
 import {
-  getTechnologyBySlug,
   fetchTechnologyBySlug,
-  getTechnologies,
   fetchTechnologies,
   createTechnology,
   updateTechnology,
   deleteTechnology
 } from './technologies/index';
 
+// Also export with alternate names for backward compatibility
+const getTechnologyBySlug = fetchTechnologyBySlug;
+const getTechnologies = fetchTechnologies;
+
 export {
   technologyOperations,
-  getTechnologyBySlug,
   fetchTechnologyBySlug,
-  getTechnologies,
+  getTechnologyBySlug,
   fetchTechnologies,
+  getTechnologies,
   createTechnology,
   updateTechnology,
   deleteTechnology

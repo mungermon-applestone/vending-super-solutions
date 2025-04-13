@@ -1,9 +1,9 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { CMSTechnology } from '@/types/cms';
-import { handleError, transformTechnologyData } from '../../utils/transformers';
+import { transformTechnologyData } from '../../utils/transformers';
 
-export async function fetchTechnologies<T = CMSTechnology[]>(): Promise<T> {
+export async function fetchTechnologies(): Promise<CMSTechnology[]> {
   console.log('[fetchTechnologies] Fetching all technologies from database');
 
   try {
@@ -24,12 +24,12 @@ export async function fetchTechnologies<T = CMSTechnology[]>(): Promise<T> {
     const transformedData = technologies.map(technology => ({
       ...technology,
       sections: [] // Ensure sections always exists as an empty array at minimum
-    })) as T;
+    })) as CMSTechnology[];
 
     return transformedData;
   } catch (error) {
     console.error('[fetchTechnologies] Error fetching technologies:', error);
-    return [] as unknown as T;
+    return [];
   }
 }
 

@@ -1,12 +1,12 @@
 
 import { CMSTechnology } from '@/types/cms';
-import { getTechnologyAdapter } from '../../adapters/technologies/technologyAdapterFactory';
 import { getCMSProviderConfig } from '../../providerConfig';
+import { getTechnologyAdapter } from '../../adapters/technologies/technologyAdapterFactory';
 
 /**
  * Clone a technology by ID
  * @param id ID of the technology to clone
- * @returns The cloned technology, or null if cloning failed
+ * @returns The cloned technology if successful, null otherwise
  */
 export async function cloneTechnology(id: string): Promise<CMSTechnology | null> {
   try {
@@ -15,23 +15,23 @@ export async function cloneTechnology(id: string): Promise<CMSTechnology | null>
     const adapter = getTechnologyAdapter(getCMSProviderConfig());
     
     if (!adapter.clone) {
-      console.warn(`[CMS:Technology] cloneTechnology: Clone operation not supported by the current adapter`);
+      console.error(`[CMS:Technology] cloneTechnology: Clone operation not supported by adapter`);
       return null;
     }
     
-    const clonedTechnology = await adapter.clone(id);
+    const result = await adapter.clone(id);
     
-    if (clonedTechnology) {
-      console.log(`[CMS:Technology] cloneTechnology: Successfully cloned technology, new ID: ${clonedTechnology.id}`);
+    if (result) {
+      console.log(`[CMS:Technology] cloneTechnology: Successfully cloned technology with ID: ${id} to new technology: ${result.id}`);
     } else {
       console.error(`[CMS:Technology] cloneTechnology: Failed to clone technology with ID: ${id}`);
     }
     
-    return clonedTechnology;
+    return result;
   } catch (error) {
     console.error(`[CMS:Technology] cloneTechnology: Error cloning technology with ID ${id}:`, error);
     return null;
   }
 }
 
-export default cloneTechnology;
+export { cloneTechnology };

@@ -1,4 +1,3 @@
-
 import { CMSTechnology, CMSTechnologySection, CMSTechnologyFeature, CMSTechnologyFeatureItem, CMSTechnologyImage } from '@/types/cms';
 import { TechnologyCreateInput, TechnologyUpdateInput } from '../types';
 
@@ -103,10 +102,8 @@ export function transformInputToStrapiFormat(data: TechnologyCreateInput | Techn
     slug: data.slug,
     description: data.description,
     visible: data.visible || true,
-    image: data.image ? {
-      url: data.image.url,
-      alt: data.image.alt
-    } : null
+    image_url: data.image_url,
+    image_alt: data.image_alt
   };
   
   // We would need to handle sections and their nested data separately

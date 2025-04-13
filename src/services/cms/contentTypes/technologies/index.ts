@@ -47,9 +47,9 @@ export const technologyOperations: ContentTypeOperations<CMSTechnology> = {
 };
 
 // Re-export individual technology operations
-export { default as fetchTechnologies } from './fetchTechnologies';
-export { default as fetchTechnologyBySlug } from './fetchTechnologyBySlug';
-export { default as createTechnology } from './createTechnology';
-export { default as updateTechnology } from './updateTechnology';
-export { default as deleteTechnology } from './deleteTechnology';
-export { default as cloneTechnology } from './cloneTechnology';
+export { fetchTechnologies } from './fetchTechnologies';
+export { fetchTechnologyBySlug } from './fetchTechnologyBySlug';
+export { createTechnology } from './createTechnology';
+export { updateTechnology } from './updateTechnology';
+export { deleteTechnology } from './deleteTechnology';
+export { cloneTechnology } from './cloneTechnology';

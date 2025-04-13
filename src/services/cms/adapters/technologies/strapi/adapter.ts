@@ -151,10 +151,8 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
         slug: newSlug,
         description: sourceTechnology.description,
         visible: sourceTechnology.visible,
-        image: sourceTechnology.image_url ? {
-          url: sourceTechnology.image_url,
-          alt: sourceTechnology.image_alt || '',
-        } : undefined,
+        image_url: sourceTechnology.image_url,
+        image_alt: sourceTechnology.image_alt,
         sections: sourceTechnology.sections ? sourceTechnology.sections.map((section) => ({
           title: section.title,
           description: section.description || undefined,
