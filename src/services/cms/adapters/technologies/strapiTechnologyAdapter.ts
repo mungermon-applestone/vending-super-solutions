@@ -190,30 +190,32 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
           // Transform sections if they exist
           sections: data.sections ? data.sections.map(section => ({
             title: section.title,
-            description: section.description,
+            description: section.description || undefined,
             sectionType: section.type,
             displayOrder: section.display_order || 0,
             // Transform features if they exist
             features: section.features ? section.features.map((feature, index) => ({
-              title: feature.title,
-              description: feature.description,
-              icon: feature.icon,
+              title: feature.title || undefined,
+              description: feature.description || undefined,
+              icon: feature.icon || undefined,
               displayOrder: feature.display_order || index,
               // Transform items if they exist
               items: feature.items ? 
-                (Array.isArray(feature.items) ? feature.items.map((item, itemIndex) => {
-                  if (typeof item === 'string') {
-                    return {
-                      text: item,
-                      displayOrder: itemIndex
-                    };
-                  } else {
-                    return {
-                      text: item.text,
-                      displayOrder: item.display_order || itemIndex
-                    };
-                  }
-                }) : undefined)
+                (Array.isArray(feature.items) ? 
+                  feature.items.map((item, itemIndex) => {
+                    if (typeof item === 'string') {
+                      return {
+                        text: item,
+                        displayOrder: itemIndex
+                      };
+                    } else {
+                      return {
+                        text: item.text,
+                        displayOrder: item.display_order || itemIndex
+                      };
+                    }
+                  }) 
+                : undefined)
             })) : undefined
           })) : undefined
         }
@@ -269,19 +271,21 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
               displayOrder: feature.display_order || featureIndex,
               // Transform items if they exist
               items: feature.items ? 
-                (Array.isArray(feature.items) ? feature.items.map((item, itemIndex) => {
-                  if (typeof item === 'string') {
-                    return {
-                      text: item,
-                      displayOrder: itemIndex
-                    };
-                  } else {
-                    return {
-                      text: item.text,
-                      displayOrder: item.display_order || itemIndex
-                    };
-                  }
-                }) : undefined)
+                (Array.isArray(feature.items) ? 
+                  feature.items.map((item, itemIndex) => {
+                    if (typeof item === 'string') {
+                      return {
+                        text: item,
+                        displayOrder: itemIndex
+                      };
+                    } else {
+                      return {
+                        text: item.text,
+                        displayOrder: item.display_order || itemIndex
+                      };
+                    }
+                  })
+                : undefined)
             })) : undefined
           })) : undefined
         }
