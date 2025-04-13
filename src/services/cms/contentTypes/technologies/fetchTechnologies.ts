@@ -32,3 +32,6 @@ export async function fetchTechnologies<T = CMSTechnology[]>(): Promise<T> {
     return [] as unknown as T;
   }
 }
+
+// Also export with the alternate name for backwards compatibility
+export const getTechnologies = fetchTechnologies;

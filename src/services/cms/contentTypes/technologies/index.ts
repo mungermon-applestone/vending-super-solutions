@@ -1,7 +1,7 @@
 
 // Re-export all technology-related operations
-import { getTechnologies } from './fetchTechnologies';
-import { getTechnologyBySlug } from './fetchTechnologyBySlug';
+import { fetchTechnologies, getTechnologies } from './fetchTechnologies';
+import { fetchTechnologyBySlug, getTechnologyBySlug } from './fetchTechnologyBySlug';
 import { createTechnology } from './createTechnology';
 import { updateTechnology } from './updateTechnology';
 import { deleteTechnology } from './deleteTechnology';
@@ -16,12 +16,18 @@ export const technologyOperations = {
   create: createTechnology,
   update: updateTechnology,
   delete: deleteTechnology,
-  clone: cloneTechnology
+  clone: cloneTechnology,
+  // Add these for ContentTypeOperations compatibility
+  fetchAll: fetchTechnologies,
+  fetchBySlug: fetchTechnologyBySlug,
+  fetchById: (id: string) => Promise.resolve(null) // Placeholder implementation
 };
 
 // Re-export individual functions for backwards compatibility
 export {
+  fetchTechnologies,
   getTechnologies,
+  fetchTechnologyBySlug,
   getTechnologyBySlug,
   createTechnology,
   updateTechnology, 

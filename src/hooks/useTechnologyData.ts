@@ -1,6 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchTechnologyBySlug } from '@/services/cms/contentTypes/technologies';
+import { getTechnologyBySlug } from '@/services/cms/contentTypes/technologies';
 import { CMSTechnology } from '@/types/cms';
 
 export const useTechnologyData = (slug: string) => {
@@ -11,7 +11,7 @@ export const useTechnologyData = (slug: string) => {
     error
   } = useQuery<CMSTechnology | null, Error>({
     queryKey: ['technology', slug],
-    queryFn: () => fetchTechnologyBySlug(slug),
+    queryFn: () => getTechnologyBySlug(slug),
     enabled: !!slug && slug.trim() !== '',
   });
 

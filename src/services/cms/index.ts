@@ -1,52 +1,115 @@
+// This file is maintained for backward compatibility
+// New code should import from the specific modules directly
 
-import { getCMSProviderConfig, setCMSProviderConfig, ContentProviderType } from './providerConfig';
-import { strapiConfig, supabaseConfig } from './adapters/contentConfig';
+// Import services from specialized modules
+import { 
+  getProductTypes, 
+  getProductTypeBySlug, 
+  getProductTypeByUUID, 
+  deleteProductType 
+} from './productTypes';
 
-// Re-export the CMS provider configuration utilities
+import { 
+  getBusinessGoals,
+  getBusinessGoalBySlug 
+} from './businessGoals';
+
+import {
+  getMachines,
+  getMachineBySlug,
+  getMachineById,
+  createNewMachine,
+  updateExistingMachine,
+  removeExistingMachine
+} from './machines';
+
+import {
+  getTechnologies,
+  getTechnologyBySlug,
+  deleteTechnology
+} from './technologies';
+
+import { getTestimonials } from './testimonials';
+
+// Import case studies service
+import {
+  fetchCaseStudies,
+  fetchCaseStudyBySlug,
+  createCaseStudy,
+  updateCaseStudy,
+  deleteCaseStudy
+} from './contentTypes/caseStudies';
+
+// Import landing pages service
+import {
+  fetchLandingPages,
+  fetchLandingPageByKey,
+  createLandingPage,
+  updateLandingPage,
+  deleteLandingPage
+} from './contentTypes/landingPages';
+
+// Import operations for direct access
+import { productTypeOperations } from './contentTypes/productTypes';
+import { businessGoalOperations } from './contentTypes/businessGoals';
+import { technologyOperations } from './contentTypes/technologies';
+import { caseStudyOperations } from './contentTypes/caseStudies/operations';
+import { landingPageOperations } from './contentTypes/landingPages/operations';
+import { cloneProductType } from './contentTypes/productTypes/cloneProductType';
+import { cloneBusinessGoal } from './contentTypes/businessGoals/cloneBusinessGoal';
+import { cloneTechnology } from './contentTypes/technologies/cloneTechnology';
+import { cloneMachine } from './contentTypes/machines/cloneMachine';
+
+// Export standardized content type operations
+export const productTypes = productTypeOperations;
+export const businessGoals = businessGoalOperations;
+export const technologies = technologyOperations;
+export const caseStudies = caseStudyOperations;
+export const landingPages = landingPageOperations;
+
+// Export individual service functions for backward compatibility
 export {
-  getCMSProviderConfig,
-  setCMSProviderConfig,
-  ContentProviderType,
-  strapiConfig,
-  supabaseConfig
+  // Product types
+  getProductTypes,
+  getProductTypeBySlug,
+  getProductTypeByUUID,
+  deleteProductType,
+  cloneProductType,
+  
+  // Business goals
+  getBusinessGoals,
+  getBusinessGoalBySlug,
+  cloneBusinessGoal,
+  
+  // Machines
+  getMachines,
+  getMachineBySlug,
+  getMachineById,
+  createNewMachine,
+  updateExistingMachine,
+  removeExistingMachine,
+  cloneMachine,
+  
+  // Technologies
+  getTechnologies,
+  getTechnologyBySlug,
+  deleteTechnology,
+  cloneTechnology,
+  
+  // Testimonials
+  getTestimonials,
+  
+  // Case Studies
+  fetchCaseStudies,
+  fetchCaseStudyBySlug,
+  createCaseStudy,
+  updateCaseStudy,
+  deleteCaseStudy,
+
+  // Landing Pages
+  fetchLandingPages,
+  fetchLandingPageByKey,
+  createLandingPage,
+  updateLandingPage,
+  deleteLandingPage
 };
-
-// Re-export all CMS services from the existing cms.ts file
-export * from './cms';
-
-/**
- * Configure the CMS to use Strapi
- * @param apiUrl Optional URL to the Strapi API (defaults to environment variable or config)
- * @param apiKey Optional API key for authentication (defaults to environment variable or config)
- */
-export function useStrapi(apiUrl?: string, apiKey?: string): void {
-  console.log('[CMS] Configuring to use Strapi CMS');
-  setCMSProviderConfig(strapiConfig(apiUrl, apiKey));
-}
-
-/**
- * Configure the CMS to use Supabase
- */
-export function useSupabase(): void {
-  console.log('[CMS] Configuring to use Supabase CMS');
-  setCMSProviderConfig(supabaseConfig());
-}
-
-/**
- * Initialize the CMS with the appropriate provider based on environment variables
- * This is called automatically when the application starts
- */
-export function initializeCMS(): void {
-  // Check for Strapi configuration first
-  if (import.meta.env.VITE_CMS_PROVIDER === 'strapi' || import.meta.env.VITE_STRAPI_API_URL) {
-    useStrapi();
-    console.log('[CMS] Initialized with Strapi provider');
-  } else {
-    // Default to Supabase
-    useSupabase();
-    console.log('[CMS] Initialized with Supabase provider (default)');
-  }
-}
-
-// Initialize the CMS when this module is imported
-initializeCMS();
