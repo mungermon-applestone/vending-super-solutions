@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle, Loader2, RefreshCw } from 'lucide-react';
+import { AlertCircle, CheckCircle, ExternalLink, Loader2, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -89,6 +89,98 @@ const testStrapiConnectionWithUrl = async (customUrl: string, endpoint: string =
   }
 };
 
+// Test multiple endpoints to help diagnose Strapi configuration
+const testStrapiEnvironment = async (baseUrl: string) => {
+  let results = {
+    success: false,
+    message: "Failed to connect: All connection attempts failed",
+    details: {
+      attemptedEndpoints: [] as string[],
+      successfulEndpoint: null as string | null,
+      adminAccessible: false,
+      apiAccessible: false,
+      contentTypesAccessible: false
+    }
+  };
+  
+  // Normalize the base URL
+  let normalizedUrl = baseUrl.trim();
+  if (normalizedUrl.endsWith('/')) {
+    normalizedUrl = normalizedUrl.slice(0, -1);
+  }
+  
+  // Define endpoints to try in order
+  const endpoints = [
+    '/admin', 
+    '/admin/init',
+    '/api/technology',
+    '/api/technologies',
+    '/api',
+    '' // Base URL
+  ];
+  
+  // Try each endpoint
+  for (const endpoint of endpoints) {
+    try {
+      const url = `${normalizedUrl}${endpoint}`;
+      results.details.attemptedEndpoints.push(url);
+      
+      const response = await fetch(url);
+      console.log(`Testing ${url}: ${response.status}`);
+      
+      if (response.ok) {
+        if (endpoint.includes('/admin')) {
+          results.details.adminAccessible = true;
+          results.success = true;
+          results.message = `Found Strapi admin interface at ${url}`;
+          results.details.successfulEndpoint = url;
+          break;
+        } 
+        else if (endpoint.includes('/api')) {
+          results.details.apiAccessible = true;
+          
+          try {
+            const data = await response.json();
+            if (data) {
+              results.success = true;
+              results.message = `Successfully connected to Strapi API at ${url}`;
+              results.details.successfulEndpoint = url;
+              
+              if (endpoint.includes('technology') || endpoint.includes('technologies')) {
+                results.details.contentTypesAccessible = true;
+              }
+              
+              break;
+            }
+          } catch (e) {
+            // Not JSON data, continue to next endpoint
+          }
+        }
+        else {
+          // Check if HTML response contains Strapi admin strings
+          try {
+            const text = await response.text();
+            if (text.includes('strapi') || text.includes('Strapi')) {
+              results.details.adminAccessible = true;
+              results.success = true;
+              results.message = `Found Strapi at ${url}`;
+              results.details.successfulEndpoint = url;
+              break;
+            }
+          } catch (e) {
+            // Cannot read as text, continue
+          }
+        }
+      }
+    } catch (error) {
+      console.log(`Error testing endpoint: ${error}`);
+      // Continue with next endpoint
+    }
+  }
+  
+  return results;
+};
+
 const SimpleConnectionTest: React.FC = () => {
   const [activeTab, setActiveTab] = useState("default");
   const [testResult, setTestResult] = useState<{
@@ -101,15 +193,15 @@ const SimpleConnectionTest: React.FC = () => {
   const defaultUrl = 'https://strong-balance-0789566afc.strapiapp.com';
   
   const [customUrl, setCustomUrl] = useState<string>(defaultUrl);
-  const [selectedEndpoint, setSelectedEndpoint] = useState<string>('/api/technology');
+  const [selectedEndpoint, setSelectedEndpoint] = useState<string>('/admin');
   
-  // Common Strapi API endpoints to test
+  // Common Strapi endpoints to test
   const commonEndpoints = [
+    { value: '/admin', label: '/admin (Admin Interface)' },
+    { value: '/admin/init', label: '/admin/init (Admin Check)' },
     { value: '/api/technology', label: '/api/technology (Singular)' },
     { value: '/api/technologies', label: '/api/technologies (Plural)' },
-    { value: '/api/technology?populate=*', label: '/api/technology?populate=* (With relations)' },
-    { value: '/api/technologies?populate=*', label: '/api/technologies?populate=* (With relations)' },
-    { value: '/admin/init', label: '/admin/init (Admin UI check)' }
+    { value: '/api', label: '/api (API Root)' }
   ];
   
   const handleTestConnection = async () => {
@@ -130,11 +222,25 @@ const SimpleConnectionTest: React.FC = () => {
           details: result
         });
       } else {
-        setTestResult({ 
-          status: 'error', 
-          message: result.message,
-          details: result
-        });
+        // If direct test fails, try the environment diagnostic test
+        const envTest = await testStrapiEnvironment(baseUrlToTest);
+        
+        if (envTest.success) {
+          setTestResult({
+            status: 'success',
+            message: envTest.message,
+            details: envTest
+          });
+        } else {
+          setTestResult({ 
+            status: 'error', 
+            message: result.message,
+            details: {
+              ...result.details,
+              environmentTest: envTest
+            }
+          });
+        }
       }
     } catch (error) {
       setTestResult({ 
@@ -142,6 +248,19 @@ const SimpleConnectionTest: React.FC = () => {
         message: `Error testing connection: ${error instanceof Error ? error.message : String(error)}`
       });
     }
+  };
+  
+  const getAdminUrl = () => {
+    let adminUrl = customUrl.trim();
+    if (adminUrl.endsWith('/')) {
+      adminUrl = adminUrl.slice(0, -1);
+    }
+    
+    if (!adminUrl.endsWith('/admin')) {
+      adminUrl = `${adminUrl}/admin`;
+    }
+    
+    return adminUrl;
   };
   
   return (
@@ -175,7 +294,7 @@ const SimpleConnectionTest: React.FC = () => {
             </div>
             
             <div className="space-y-2">
-              <Label>Select API Endpoint</Label>
+              <Label>Select Test Endpoint</Label>
               <Select 
                 value={selectedEndpoint} 
                 onValueChange={setSelectedEndpoint}
@@ -215,7 +334,7 @@ const SimpleConnectionTest: React.FC = () => {
             </div>
             
             <div className="space-y-2">
-              <Label>API Endpoint</Label>
+              <Label>Test Endpoint</Label>
               <Select 
                 value={selectedEndpoint} 
                 onValueChange={setSelectedEndpoint}
@@ -236,25 +355,39 @@ const SimpleConnectionTest: React.FC = () => {
         </TabsContent>
       </Tabs>
       
-      <Button 
-        variant="outline" 
-        size="sm"
-        onClick={handleTestConnection}
-        disabled={testResult.status === 'loading'}
-        className="w-full"
-      >
-        {testResult.status === 'loading' ? (
-          <>
-            <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-            Testing...
-          </>
-        ) : (
-          <>
-            <RefreshCw className="mr-2 h-3 w-3" />
-            Test Connection
-          </>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={handleTestConnection}
+          disabled={testResult.status === 'loading'}
+          className="flex-1"
+        >
+          {testResult.status === 'loading' ? (
+            <>
+              <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+              Testing...
+            </>
+          ) : (
+            <>
+              <RefreshCw className="mr-2 h-3 w-3" />
+              Test Connection
+            </>
+          )}
+        </Button>
+        
+        {testResult.status === 'success' && testResult.details?.testedUrl?.includes('/admin') && (
+          <Button 
+            variant="default" 
+            size="sm"
+            className="flex-1"
+            onClick={() => window.open(getAdminUrl(), '_blank')}
+          >
+            <ExternalLink className="mr-2 h-3 w-3" />
+            Open Admin Panel
+          </Button>
         )}
-      </Button>
+      </div>
       
       <div className="h-px bg-border my-2" />
       
@@ -289,6 +422,17 @@ const SimpleConnectionTest: React.FC = () => {
             </AccordionContent>
           </AccordionItem>
         </Accordion>
+      )}
+      
+      {testResult.status === 'success' && testResult.details?.testedUrl?.includes('/admin') && (
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
+          <h4 className="text-sm font-medium text-blue-800 mb-1">Developer Mode Access</h4>
+          <p className="text-xs text-blue-700">
+            To access developer mode and manage content types, log in to the Strapi admin panel.
+            If you need to add the Technology content type to your cloud instance, you can do so from
+            the Content-Type Builder in the admin panel.
+          </p>
+        </div>
       )}
     </div>
   );
