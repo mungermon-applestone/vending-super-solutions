@@ -2,47 +2,7 @@
 import { CMSTechnology, QueryOptions } from '@/types/cms';
 
 /**
- * Interface for technology adapter implementations
- */
-export interface TechnologyAdapter {
-  /**
-   * Fetches all technologies
-   */
-  getAll: (options?: QueryOptions) => Promise<CMSTechnology[]>;
-  
-  /**
-   * Fetches a technology by its slug
-   */
-  getBySlug: (slug: string) => Promise<CMSTechnology | null>;
-  
-  /**
-   * Fetches a technology by its ID
-   */
-  getById: (id: string) => Promise<CMSTechnology | null>;
-  
-  /**
-   * Creates a new technology
-   */
-  create: (technology: TechnologyCreateInput) => Promise<CMSTechnology>;
-  
-  /**
-   * Updates an existing technology
-   */
-  update: (id: string, technology: TechnologyUpdateInput) => Promise<CMSTechnology>;
-  
-  /**
-   * Deletes a technology
-   */
-  delete: (id: string) => Promise<boolean>;
-  
-  /**
-   * Clones a technology (optional)
-   */
-  clone?: (id: string) => Promise<CMSTechnology | null>;
-}
-
-/**
- * Input data for creating a technology
+ * Input for creating a new technology
  */
 export interface TechnologyCreateInput {
   title: string;
@@ -51,11 +11,23 @@ export interface TechnologyCreateInput {
   image_url?: string;
   image_alt?: string;
   visible?: boolean;
-  sections?: any[];
+  sections?: {
+    title: string;
+    description?: string;
+    type?: string;
+    display_order?: number;
+    features?: {
+      title?: string;
+      description?: string;
+      icon?: string;
+      display_order?: number;
+      items?: string[];
+    }[];
+  }[];
 }
 
 /**
- * Input data for updating a technology
+ * Input for updating an existing technology
  */
 export interface TechnologyUpdateInput {
   title?: string;
@@ -64,5 +36,59 @@ export interface TechnologyUpdateInput {
   image_url?: string;
   image_alt?: string;
   visible?: boolean;
-  sections?: any[];
+  sections?: {
+    id?: string;
+    title?: string;
+    description?: string;
+    type?: string;
+    display_order?: number;
+    features?: {
+      id?: string;
+      title?: string;
+      description?: string;
+      icon?: string;
+      display_order?: number;
+      items?: string[];
+    }[];
+  }[];
+}
+
+/**
+ * Interface for technology adapter implementation
+ */
+export interface TechnologyAdapter {
+  /**
+   * Get all technologies
+   */
+  getAll(options?: QueryOptions): Promise<CMSTechnology[]>;
+  
+  /**
+   * Get technology by slug
+   */
+  getBySlug(slug: string): Promise<CMSTechnology | null>;
+  
+  /**
+   * Get technology by ID
+   */
+  getById(id: string): Promise<CMSTechnology | null>;
+  
+  /**
+   * Create a new technology
+   */
+  create(data: TechnologyCreateInput): Promise<CMSTechnology>;
+  
+  /**
+   * Update an existing technology
+   */
+  update(id: string, data: TechnologyUpdateInput): Promise<CMSTechnology>;
+  
+  /**
+   * Delete a technology
+   */
+  delete(id: string): Promise<boolean>;
+  
+  /**
+   * Clone a technology (optional)
+   */
+  clone?(id: string): Promise<CMSTechnology | null>;
 }

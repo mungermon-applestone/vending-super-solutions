@@ -6,7 +6,8 @@ import {
   fetchTechnologies,
   createTechnology,
   updateTechnology,
-  deleteTechnology
+  deleteTechnology,
+  cloneTechnology
 } from './technologies/index';
 
 // Also export with alternate names for backward compatibility
@@ -21,5 +22,6 @@ export {
   getTechnologies,
   createTechnology,
   updateTechnology,
-  deleteTechnology
+  deleteTechnology,
+  cloneTechnology
 };

@@ -1,65 +1,59 @@
-import { CMSTechnology, CMSTechnologySection, CMSTechnologyFeature, CMSTechnologyFeatureItem, CMSTechnologyImage } from '@/types/cms';
+import { CMSTechnology, CMSTechnologySection, CMSTechnologyFeature, CMSTechnologyImage } from '@/types/cms';
 import { TechnologyCreateInput, TechnologyUpdateInput } from '../types';
 
 /**
- * Transform Strapi technology data to our internal CMSTechnology format
+ * Transform Strapi technology data to our internal format
+ * @param strapiData Raw data from Strapi
+ * @returns Technology in our internal format
  */
 export function transformStrapiTechnologyToInternal(strapiData: any): CMSTechnology {
-  const attributes = strapiData.attributes;
+  const attributes = strapiData.attributes || strapiData;
+  const id = strapiData.id;
   
-  const result: CMSTechnology = {
-    id: strapiData.id,
-    title: attributes.title,
-    slug: attributes.slug,
-    description: attributes.description,
-    visible: attributes.visible ?? true,
-    image_url: attributes.image?.url || attributes.image_url,
-    image_alt: attributes.image?.alt || attributes.image_alt,
-    created_at: attributes.createdAt || attributes.created_at,
-    updated_at: attributes.updatedAt || attributes.updated_at,
-    sections: []
-  };
+  // Transform sections if they exist
+  const sections: CMSTechnologySection[] = [];
   
-  // Process sections if they exist
-  if (attributes.sections && attributes.sections.data) {
-    result.sections = attributes.sections.data.map((sectionData: any) => {
-      const sectionAttributes = sectionData.attributes;
+  if (attributes.sections && Array.isArray(attributes.sections.data)) {
+    attributes.sections.data.forEach((sectionData: any) => {
+      const sectionAttrs = sectionData.attributes || sectionData;
+      
+      // Create the base section
       const section: CMSTechnologySection = {
         id: sectionData.id,
-        technology_id: strapiData.id,
-        section_type: sectionAttributes.section_type,
-        title: sectionAttributes.title,
-        description: sectionAttributes.description,
-        display_order: sectionAttributes.display_order || 0,
+        technology_id: id,
+        section_type: sectionAttrs.type || sectionAttrs.section_type || 'default',
+        title: sectionAttrs.title,
+        description: sectionAttrs.description,
+        display_order: sectionAttrs.display_order || 0,
         features: [],
         images: []
       };
       
-      // Process features if they exist
-      if (sectionAttributes.features && sectionAttributes.features.data) {
-        section.features = sectionAttributes.features.data.map((featureData: any) => {
-          const featureAttributes = featureData.attributes;
+      // Add features if they exist
+      if (sectionAttrs.features && Array.isArray(sectionAttrs.features.data)) {
+        section.features = sectionAttrs.features.data.map((featureData: any) => {
+          const featureAttrs = featureData.attributes || featureData;
+          
           const feature: CMSTechnologyFeature = {
             id: featureData.id,
-            section_id: sectionData.id,
-            title: featureAttributes.title,
-            description: featureAttributes.description,
-            icon: featureAttributes.icon,
-            display_order: featureAttributes.display_order || 0,
+            section_id: section.id,
+            title: featureAttrs.title || '',
+            description: featureAttrs.description,
+            icon: featureAttrs.icon,
+            display_order: featureAttrs.display_order || 0,
             items: []
           };
           
-          // Process feature items if they exist
-          if (featureAttributes.items && featureAttributes.items.data) {
-            feature.items = featureAttributes.items.data.map((itemData: any) => {
-              const itemAttributes = itemData.attributes;
-              const item: CMSTechnologyFeatureItem = {
+          // Add feature items if they exist
+          if (featureAttrs.items && Array.isArray(featureAttrs.items.data)) {
+            feature.items = featureAttrs.items.data.map((itemData: any) => {
+              const itemAttrs = itemData.attributes || itemData;
+              return {
                 id: itemData.id,
-                feature_id: featureData.id,
-                text: itemAttributes.text,
-                display_order: itemAttributes.display_order || 0
+                feature_id: feature.id,
+                text: itemAttrs.text || '',
+                display_order: itemAttrs.display_order || 0
               };
-              return item;
             });
           }
           
@@ -67,47 +61,63 @@ export function transformStrapiTechnologyToInternal(strapiData: any): CMSTechnol
         });
       }
       
-      // Process images if they exist
-      if (sectionAttributes.images && sectionAttributes.images.data) {
-        section.images = sectionAttributes.images.data.map((imageData: any) => {
-          const imageAttributes = imageData.attributes;
+      // Add images if they exist
+      if (sectionAttrs.images && Array.isArray(sectionAttrs.images.data)) {
+        section.images = sectionAttrs.images.data.map((imageData: any) => {
+          const imageAttrs = imageData.attributes || imageData;
+          
           const image: CMSTechnologyImage = {
             id: imageData.id,
-            technology_id: strapiData.id,
-            section_id: sectionData.id,
-            url: imageAttributes.url,
-            alt: imageAttributes.alt,
-            width: imageAttributes.width,
-            height: imageAttributes.height,
-            display_order: imageAttributes.display_order || 0
+            technology_id: id,
+            section_id: section.id,
+            url: imageAttrs.url,
+            alt: imageAttrs.alt || '',
+            width: imageAttrs.width,
+            height: imageAttrs.height,
+            display_order: imageAttrs.display_order || 0
           };
+          
           return image;
         });
       }
       
-      return section;
+      sections.push(section);
     });
   }
   
-  return result;
+  // Construct the full technology object
+  return {
+    id: id,
+    slug: attributes.slug,
+    title: attributes.title,
+    description: attributes.description,
+    image_url: attributes.image_url || null,
+    image_alt: attributes.image_alt || null,
+    visible: typeof attributes.visible === 'boolean' ? attributes.visible : true,
+    created_at: attributes.createdAt || attributes.created_at,
+    updated_at: attributes.updatedAt || attributes.updated_at,
+    sections: sections
+  };
 }
 
 /**
- * Transform our internal input format to Strapi format for creating/updating technologies
+ * Transform our internal data format to Strapi format for create/update operations
+ * @param data Input data in our internal format
+ * @returns Data formatted for Strapi API
  */
 export function transformInputToStrapiFormat(data: TechnologyCreateInput | TechnologyUpdateInput): any {
-  // Base technology data
+  // Map our internal format to Strapi's expected format
   const strapiData = {
-    title: data.title,
-    slug: data.slug,
-    description: data.description,
-    visible: data.visible || true,
-    image_url: data.image_url,
-    image_alt: data.image_alt
+    data: {
+      title: data.title,
+      slug: data.slug,
+      description: data.description,
+      image_url: data.image_url,
+      image_alt: data.image_alt,
+      visible: data.visible,
+      // Other fields would be transformed here
+    }
   };
-  
-  // We would need to handle sections and their nested data separately
-  // as Strapi often requires creating related entities in separate requests
   
   return strapiData;
 }
