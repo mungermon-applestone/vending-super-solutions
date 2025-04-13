@@ -10,32 +10,84 @@ const testStrapiConnectionWithUrl = async (customUrl: string) => {
   try {
     console.log(`Testing connection to: ${customUrl}`);
     
-    // Make a simple fetch request to check if the API is accessible
-    const response = await fetch(`${customUrl}/technology?populate=*`);
+    // Try multiple endpoints to find the right one
+    const endpointsToTry = [
+      '/technology?populate=*', // Standard collection endpoint
+      '/api/technology?populate=*', // With /api prefix if not already included
+      '/technologies?populate=*', // Plural collection name
+      '/api/technologies?populate=*', // Plural with /api prefix
+      '' // Just test the base URL
+    ];
     
-    if (!response.ok) {
-      return {
-        success: false,
-        message: `Failed to connect: Server returned ${response.status} ${response.statusText}`,
-        details: { status: response.status, statusText: response.statusText }
-      };
+    // Remove /api from the URL if it's already there to avoid double /api/api
+    const baseUrl = customUrl.endsWith('/api') 
+      ? customUrl 
+      : customUrl.endsWith('/') 
+        ? customUrl.slice(0, -1) 
+        : customUrl;
+    
+    let lastError = null;
+    
+    // Try each endpoint until one works
+    for (const endpoint of endpointsToTry) {
+      try {
+        const url = `${baseUrl}${endpoint}`;
+        console.log(`Trying endpoint: ${url}`);
+        
+        const response = await fetch(url);
+        
+        if (response.ok) {
+          // Try to parse the response as JSON
+          try {
+            const data = await response.json();
+            return {
+              success: true,
+              message: `Successfully connected to Strapi API at ${url}`,
+              data: data,
+              testedUrl: url
+            };
+          } catch (parseError) {
+            console.log(`Response not JSON from ${url}:`, parseError);
+            // If it's HTML, it might be the Strapi admin UI
+            const text = await response.text();
+            if (text.includes('<!DOCTYPE html>')) {
+              return {
+                success: true,
+                message: `Connected to Strapi at ${url} but received HTML (likely admin UI)`,
+                testedUrl: url,
+                details: { 
+                  info: 'Received HTML response - this might be the Strapi admin interface',
+                  status: response.status
+                }
+              };
+            }
+          }
+        } else {
+          lastError = {
+            status: response.status,
+            statusText: response.statusText,
+            url: url
+          };
+          console.log(`Endpoint ${url} returned ${response.status} ${response.statusText}`);
+        }
+      } catch (error) {
+        console.log(`Error trying ${endpoint}:`, error);
+        lastError = {
+          error: error instanceof Error ? error.message : String(error),
+          url: `${baseUrl}${endpoint}`
+        };
+      }
     }
     
-    // Try to parse the response as JSON
-    try {
-      const data = await response.json();
-      return {
-        success: true,
-        message: `Successfully connected to Strapi API at ${customUrl}`,
-        data: data
-      };
-    } catch (parseError) {
-      return {
-        success: false,
-        message: `Connected, but received invalid JSON response: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
-        details: { parseError: String(parseError) }
-      };
-    }
+    // If we got here, none of the endpoints worked
+    return {
+      success: false,
+      message: `Failed to connect: ${lastError?.status ? `Server returned ${lastError.status} ${lastError.statusText || ''}` : 'All connection attempts failed'}`,
+      details: { 
+        ...lastError,
+        attemptedEndpoints: endpointsToTry.map(e => `${baseUrl}${e}`)
+      }
+    };
   } catch (error) {
     return {
       success: false,
