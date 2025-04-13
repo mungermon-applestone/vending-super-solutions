@@ -242,7 +242,7 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
     
     try {
       // First, get the technology to clone
-      const technology = await this.getById(id);
+      const technology = await strapiTechnologyAdapter.getById(id);
       if (!technology) {
         throw new Error(`Technology with ID "${id}" not found`);
       }
@@ -271,7 +271,7 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
       };
       
       // Create the cloned technology
-      return await this.create(clonedTechnology);
+      return await strapiTechnologyAdapter.create(clonedTechnology);
     } catch (error) {
       console.error(`[strapiTechnologyAdapter] Error cloning technology with ID "${id}":`, error);
       throw error;

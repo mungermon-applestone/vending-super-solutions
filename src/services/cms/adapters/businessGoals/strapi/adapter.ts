@@ -211,7 +211,7 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
     
     try {
       // First, get the business goal to clone
-      const businessGoal = await this.getById(id);
+      const businessGoal = await strapiBusinessGoalAdapter.getById(id);
       if (!businessGoal) {
         throw new Error(`Business goal with ID "${id}" not found`);
       }
@@ -240,7 +240,7 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
       };
       
       // Create the cloned business goal
-      return await this.create(clonedBusinessGoal);
+      return await strapiBusinessGoalAdapter.create(clonedBusinessGoal);
     } catch (error) {
       console.error(`[strapiBusinessGoalAdapter] Error cloning business goal with ID "${id}":`, error);
       throw error;
