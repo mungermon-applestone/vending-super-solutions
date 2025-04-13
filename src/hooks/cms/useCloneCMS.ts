@@ -1,68 +1,120 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import * as cmsService from '@/services/cms/contentTypes/productTypes';
+import { cloneProductType } from '@/services/cms/contentTypes/productTypes/cloneProductType';
 import { cloneBusinessGoal } from '@/services/cms/contentTypes/businessGoals/cloneBusinessGoal';
 import { cloneTechnology } from '@/services/cms/contentTypes/technologies/cloneTechnology';
 import { cloneMachine } from '@/services/cms/contentTypes/machines/cloneMachine';
-import { cloneProductType } from '@/services/cms/contentTypes/productTypes/cloneProductType';
 import { CMSProductType, CMSBusinessGoal, CMSTechnology, CMSMachine } from '@/types/cms';
+import { useToast } from '@/hooks/use-toast';
 
 /**
- * Hook to clone a product type
+ * Hook for cloning a product type
  */
-export function useCloneProductType() {
+export const useCloneProductType = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
   return useMutation({
-    mutationFn: async (id: string): Promise<CMSProductType | null> => {
-      return await cloneProductType(id);
+    mutationFn: (id: string) => cloneProductType(id),
+    onSuccess: (clonedProductType: CMSProductType | null) => {
+      if (clonedProductType) {
+        queryClient.invalidateQueries({ queryKey: ['productTypes'] });
+        toast({
+          title: 'Product Type Cloned',
+          description: `${clonedProductType.title} has been created.`
+        });
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['productTypes'] });
+    onError: (error: Error) => {
+      toast({
+        title: 'Clone Failed',
+        description: error.message,
+        variant: 'destructive'
+      });
     }
   });
-}
+};
 
 /**
- * Hook to clone a business goal
+ * Hook for cloning a business goal
  */
-export function useCloneBusinessGoal() {
+export const useCloneBusinessGoal = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
   return useMutation({
-    mutationFn: async (id: string): Promise<CMSBusinessGoal | null> => {
-      return await cloneBusinessGoal(id);
+    mutationFn: (id: string) => cloneBusinessGoal(id),
+    onSuccess: (clonedBusinessGoal: CMSBusinessGoal | null) => {
+      if (clonedBusinessGoal) {
+        queryClient.invalidateQueries({ queryKey: ['businessGoals'] });
+        toast({
+          title: 'Business Goal Cloned',
+          description: `${clonedBusinessGoal.title} has been created.`
+        });
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['businessGoals'] });
+    onError: (error: Error) => {
+      toast({
+        title: 'Clone Failed',
+        description: error.message,
+        variant: 'destructive'
+      });
     }
   });
-}
+};
 
 /**
- * Hook to clone a technology
+ * Hook for cloning a technology
  */
-export function useCloneTechnology() {
+export const useCloneTechnology = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
   return useMutation({
-    mutationFn: async (id: string): Promise<CMSTechnology | null> => {
-      return await cloneTechnology(id);
+    mutationFn: (id: string) => cloneTechnology(id),
+    onSuccess: (clonedTechnology: CMSTechnology | null) => {
+      if (clonedTechnology) {
+        queryClient.invalidateQueries({ queryKey: ['technologies'] });
+        toast({
+          title: 'Technology Cloned',
+          description: `${clonedTechnology.title} has been created.`
+        });
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['technologies'] });
+    onError: (error: Error) => {
+      toast({
+        title: 'Clone Failed',
+        description: error.message,
+        variant: 'destructive'
+      });
     }
   });
-}
+};
 
 /**
- * Hook to clone a machine
+ * Hook for cloning a machine
  */
-export function useCloneMachine() {
+export const useCloneMachine = () => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
   return useMutation({
-    mutationFn: async (id: string): Promise<CMSMachine | null> => {
-      return await cloneMachine(id);
+    mutationFn: (id: string) => cloneMachine(id),
+    onSuccess: (clonedMachine: CMSMachine | null) => {
+      if (clonedMachine) {
+        queryClient.invalidateQueries({ queryKey: ['machines'] });
+        toast({
+          title: 'Machine Cloned',
+          description: `${clonedMachine.title} has been created.`
+        });
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['machines'] });
+    onError: (error: Error) => {
+      toast({
+        title: 'Clone Failed',
+        description: error.message,
+        variant: 'destructive'
+      });
     }
   });
-}
+};

@@ -1,33 +1,30 @@
 
-import { ContentTypeOperations } from '../types';
-import { CMSTechnology } from '@/types/cms';
-import { fetchTechnologies } from './fetchTechnologies';
-import { fetchTechnologyBySlug } from './fetchTechnologyBySlug';
+// Re-export all technology-related operations
+import { getTechnologies } from './fetchTechnologies';
+import { getTechnologyBySlug } from './fetchTechnologyBySlug';
 import { createTechnology } from './createTechnology';
 import { updateTechnology } from './updateTechnology';
 import { deleteTechnology } from './deleteTechnology';
 import { cloneTechnology } from './cloneTechnology';
 
-export const technologyOperations: ContentTypeOperations<CMSTechnology> = {
-  fetchAll: async () => fetchTechnologies(),
-  fetchBySlug: fetchTechnologyBySlug,
-  fetchById: async (id) => {
-    // Find by ID by getting all technologies and filtering
-    const techs = await fetchTechnologies();
-    return techs.find(tech => tech.id === id) || null;
-  },
+/**
+ * Centralized operations object for technology management
+ */
+export const technologyOperations = {
+  getAll: getTechnologies,
+  getBySlug: getTechnologyBySlug,
   create: createTechnology,
   update: updateTechnology,
   delete: deleteTechnology,
   clone: cloneTechnology
 };
 
-// Export individual operations for direct imports
+// Re-export individual functions for backwards compatibility
 export {
-  fetchTechnologies,
-  fetchTechnologyBySlug,
+  getTechnologies,
+  getTechnologyBySlug,
   createTechnology,
-  updateTechnology,
+  updateTechnology, 
   deleteTechnology,
   cloneTechnology
 };

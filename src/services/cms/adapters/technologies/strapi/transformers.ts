@@ -1,6 +1,5 @@
-
 import { CMSTechnology, CMSTechnologyFeature, CMSTechnologyFeatureItem, CMSTechnologySection } from '@/types/cms';
-import { TechnologyCreateInput, TechnologyUpdateInput } from './types';
+import { TechnologyCreateInput, TechnologyUpdateInput } from '../types';
 
 /**
  * Transform Strapi response data to our internal CMSTechnology format

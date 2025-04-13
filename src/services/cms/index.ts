@@ -1,103 +1,52 @@
 
-// Import content type handlers
-import {
-  fetchBusinessGoalBySlug,
-  fetchBusinessGoals,
-  cloneBusinessGoal
-} from './contentTypes/businessGoals/index';
+import { getCMSProviderConfig, setCMSProviderConfig, ContentProviderType } from './providerConfig';
+import { strapiConfig, supabaseConfig } from './adapters/contentConfig';
 
-import {
-  fetchMachines as getMachines,
-  fetchMachineById as getMachineById,
-  cloneMachine
-} from './contentTypes/machines/index';
-
-import {
-  fetchProductTypeBySlug,
-  fetchProductTypeByUUID,
-  fetchProductTypes,
-  deleteProductType,
-  cloneProductType
-} from './contentTypes/productTypes/index';
-
-import {
-  fetchTechnologyBySlug,
-  fetchTechnologies,
-  createTechnology,
-  updateTechnology,
-  deleteTechnology,
-  cloneTechnology
-} from './contentTypes/technologies/index';
-
-import { fetchTestimonials } from './contentTypes/testimonials';
-
-import {
-  fetchBlogPosts,
-  fetchBlogPostBySlug,
-  createBlogPost,
-  updateBlogPost,
-  deleteBlogPost,
-  cloneBlogPost,
-  getAdjacentPosts
-} from './contentTypes/blog/index';
-
-import {
-  fetchLandingPages,
-  fetchLandingPageByKey,
-  createLandingPage,
-  updateLandingPage,
-  deleteLandingPage
-} from './contentTypes/landingPages/index';
-
-// Define getMachineBySlug locally since it doesn't exist in the imports
-const getMachineBySlug = async (type: string, id: string) => {
-  const machines = await getMachines({ type, slug: id });
-  return machines.length > 0 ? machines[0] : null;
-};
-
+// Re-export the CMS provider configuration utilities
 export {
-  // Business Goals
-  fetchBusinessGoalBySlug,
-  fetchBusinessGoals,
-  cloneBusinessGoal,
-  
-  // Machines
-  getMachines,
-  getMachineBySlug,
-  getMachineById,
-  cloneMachine,
-  
-  // Product Types
-  fetchProductTypeBySlug,
-  fetchProductTypeByUUID,
-  fetchProductTypes,
-  deleteProductType,
-  cloneProductType,
-  
-  // Technologies
-  fetchTechnologyBySlug,
-  fetchTechnologies,
-  createTechnology,
-  updateTechnology,
-  deleteTechnology,
-  cloneTechnology,
-  
-  // Testimonials
-  fetchTestimonials,
-
-  // Blog Posts
-  fetchBlogPosts,
-  fetchBlogPostBySlug,
-  createBlogPost,
-  updateBlogPost,
-  deleteBlogPost,
-  cloneBlogPost,
-  getAdjacentPosts,
-
-  // Landing Pages
-  fetchLandingPages,
-  fetchLandingPageByKey,
-  createLandingPage,
-  updateLandingPage,
-  deleteLandingPage,
+  getCMSProviderConfig,
+  setCMSProviderConfig,
+  ContentProviderType,
+  strapiConfig,
+  supabaseConfig
 };
+
+// Re-export all CMS services from the existing cms.ts file
+export * from './cms';
+
+/**
+ * Configure the CMS to use Strapi
+ * @param apiUrl Optional URL to the Strapi API (defaults to environment variable or config)
+ * @param apiKey Optional API key for authentication (defaults to environment variable or config)
+ */
+export function useStrapi(apiUrl?: string, apiKey?: string): void {
+  console.log('[CMS] Configuring to use Strapi CMS');
+  setCMSProviderConfig(strapiConfig(apiUrl, apiKey));
+}
+
+/**
+ * Configure the CMS to use Supabase
+ */
+export function useSupabase(): void {
+  console.log('[CMS] Configuring to use Supabase CMS');
+  setCMSProviderConfig(supabaseConfig());
+}
+
+/**
+ * Initialize the CMS with the appropriate provider based on environment variables
+ * This is called automatically when the application starts
+ */
+export function initializeCMS(): void {
+  // Check for Strapi configuration first
+  if (import.meta.env.VITE_CMS_PROVIDER === 'strapi' || import.meta.env.VITE_STRAPI_API_URL) {
+    useStrapi();
+    console.log('[CMS] Initialized with Strapi provider');
+  } else {
+    // Default to Supabase
+    useSupabase();
+    console.log('[CMS] Initialized with Supabase provider (default)');
+  }
+}
+
+// Initialize the CMS when this module is imported
+initializeCMS();

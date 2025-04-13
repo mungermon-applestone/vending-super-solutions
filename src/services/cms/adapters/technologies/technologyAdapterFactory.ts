@@ -2,7 +2,7 @@
 import { TechnologyAdapter } from './types';
 import { ContentProviderConfig, ContentProviderType } from '../types';
 import { supabseTechnologyAdapter } from './supabseTechnologyAdapter';
-import { strapiTechnologyAdapter } from './strapiTechnologyAdapter';
+import { strapiTechnologyAdapter } from './strapi';
 
 /**
  * Factory function to get the appropriate technology adapter based on configuration

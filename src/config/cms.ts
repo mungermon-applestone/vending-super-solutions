@@ -1,4 +1,6 @@
 
+import { STRAPI_API_URL, STRAPI_API_KEY, STRAPI_ENDPOINTS } from './strapiCms';
+
 /**
  * CMS Configuration
  * 
@@ -40,16 +42,7 @@ export const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1481495278953-0
 
 // Strapi specific configuration
 export const STRAPI_CONFIG = {
-  API_URL: import.meta.env.VITE_STRAPI_API_URL || 'http://localhost:1337',
-  API_KEY: import.meta.env.VITE_STRAPI_API_KEY || '',
-  ENDPOINTS: {
-    PRODUCT_TYPES: '/api/product-types',
-    BUSINESS_GOALS: '/api/business-goals',
-    TECHNOLOGIES: '/api/technologies',
-    MACHINES: '/api/machines',
-    TESTIMONIALS: '/api/testimonials',
-    CASE_STUDIES: '/api/case-studies',
-    BLOG_POSTS: '/api/blog-posts',
-    MEDIA: '/api/upload/files',
-  }
+  API_URL: STRAPI_API_URL,
+  API_KEY: STRAPI_API_KEY,
+  ENDPOINTS: STRAPI_ENDPOINTS
 };
