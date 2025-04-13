@@ -1,18 +1,25 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchTechnologies, fetchTechnologyBySlug } from '@/services/cms/technology';
+import { getCMSProviderConfig, ContentProviderType } from '@/services/cms/providerConfig';
+import { fetchTechnologies } from '@/services/cms/technology';
 import { CMSTechnology } from '@/types/cms';
+import { initCMS } from '@/services/cms/cmsInit';
+
+// Make sure we initialize CMS to use Strapi
+initCMS();
 
 export function useTechnologySections() {
   // Query to fetch all technologies
   const { data: technologies = [], isLoading, error } = useQuery({
     queryKey: ['technologies'],
     queryFn: async () => {
+      console.log('[useTechnologySections] Fetching technologies from CMS');
       try {
         const data = await fetchTechnologies();
+        console.log('[useTechnologySections] Fetched technologies:', data);
         return data || [];
       } catch (err) {
-        console.error('Error fetching technologies:', err);
+        console.error('[useTechnologySections] Error fetching technologies:', err);
         return [];
       }
     }
@@ -28,9 +35,12 @@ export function useTechnologyBySlug(slug: string) {
     queryFn: async () => {
       if (!slug) return null;
       try {
-        return await fetchTechnologyBySlug(slug);
+        const { fetchTechnologyBySlug } = await import('@/services/cms/technology');
+        const technology = await fetchTechnologyBySlug(slug);
+        console.log(`[useTechnologyBySlug] Fetched technology with slug "${slug}":`, technology);
+        return technology;
       } catch (err) {
-        console.error(`Error fetching technology with slug ${slug}:`, err);
+        console.error(`[useTechnologyBySlug] Error fetching technology with slug ${slug}:`, err);
         return null;
       }
     },

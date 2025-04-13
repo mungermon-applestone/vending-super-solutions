@@ -1,76 +1,73 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { testCMSConnection } from '@/services/cms/utils/connection';
-import { Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader2, RefreshCw } from 'lucide-react';
+import { testStrapiConnection } from '@/services/cms/technology';
 
-/**
- * A simple CMS connection test component that can be used anywhere
- */
 const SimpleConnectionTest: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<{
-    success: boolean;
-    message: string;
-  } | null>(null);
-
-  const runTest = async () => {
-    setIsLoading(true);
-    setResult(null);
+  const [testResult, setTestResult] = useState<{
+    status: 'idle' | 'loading' | 'success' | 'error';
+    message?: string;
+  }>({ status: 'idle' });
+  
+  const handleTestConnection = async () => {
+    setTestResult({ status: 'loading' });
     
     try {
-      const connectionResult = await testCMSConnection();
+      const result = await testStrapiConnection();
       
-      setResult({
-        success: connectionResult.success,
-        message: connectionResult.message
-      });
+      if (result.success) {
+        setTestResult({ 
+          status: 'success', 
+          message: result.message 
+        });
+      } else {
+        setTestResult({ 
+          status: 'error', 
+          message: result.message 
+        });
+      }
     } catch (error) {
-      setResult({
-        success: false,
-        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      setTestResult({ 
+        status: 'error', 
+        message: `Error testing connection: ${error instanceof Error ? error.message : String(error)}`
       });
-    } finally {
-      setIsLoading(false);
     }
   };
-
+  
   return (
-    <div className="space-y-4">
+    <div>
       <Button 
-        onClick={runTest} 
-        disabled={isLoading}
-        variant="outline"
+        variant="outline" 
         size="sm"
+        onClick={handleTestConnection}
+        disabled={testResult.status === 'loading'}
         className="w-full"
       >
-        {isLoading ? (
+        {testResult.status === 'loading' ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Testing Connection...
+            <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+            Testing...
           </>
         ) : (
-          'Test Connection'
+          <>
+            <RefreshCw className="mr-2 h-3 w-3" />
+            Test Connection
+          </>
         )}
       </Button>
       
-      {result && (
-        <div className={`p-3 rounded-md text-sm ${
-          result.success ? 'bg-green-50 border border-green-100' : 'bg-red-50 border border-red-100'
-        }`}>
-          <div className="flex items-center gap-2">
-            {result.success ? (
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            ) : (
-              <XCircle className="h-4 w-4 text-red-600" />
-            )}
-            <span className={result.success ? 'text-green-800' : 'text-red-800'}>
-              {result.success ? 'Connection Successful' : 'Connection Failed'}
-            </span>
-          </div>
-          <p className="mt-1 text-xs">
-            {result.message}
-          </p>
+      {testResult.status === 'success' && (
+        <div className="mt-2 text-xs text-green-600 flex items-center">
+          <CheckCircle className="mr-1 h-3 w-3" />
+          {testResult.message}
+        </div>
+      )}
+      
+      {testResult.status === 'error' && (
+        <div className="mt-2 text-xs text-red-600 flex items-center">
+          <AlertCircle className="mr-1 h-3 w-3" />
+          {testResult.message}
         </div>
       )}
     </div>

@@ -6,11 +6,14 @@ import { useTechnologySections } from '@/hooks/useTechnologySections';
 import PageHero from '@/components/common/PageHero';
 import CTASection from '@/components/common/CTASection';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowRight, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import SimpleConnectionTest from '@/components/admin/cms/SimpleConnectionTest';
 
 const TechnologyLanding = () => {
-  const { technologies, isLoading } = useTechnologySections();
+  const { technologies, isLoading, error } = useTechnologySections();
+  console.log('TechnologyLanding rendering with technologies:', technologies);
   
   return (
     <Layout>
@@ -32,6 +35,16 @@ const TechnologyLanding = () => {
           Discover how our advanced technology solutions can transform your vending operations
         </p>
         
+        {error && (
+          <Alert variant="destructive" className="mb-8">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error loading technologies</AlertTitle>
+            <AlertDescription>
+              {error instanceof Error ? error.message : 'An unknown error occurred'}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
@@ -50,7 +63,35 @@ const TechnologyLanding = () => {
           </div>
         ) : technologies.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No technology solutions found.</p>
+            <Card className="max-w-md mx-auto">
+              <CardHeader>
+                <CardTitle>No Technology Solutions Found</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  We couldn't find any technology solutions in the CMS. This might be because:
+                </p>
+                <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
+                  <li>No technology content has been created in Strapi yet</li>
+                  <li>Strapi connection is not configured correctly</li>
+                  <li>There might be an issue with the API connection</li>
+                </ul>
+                
+                <div className="pt-2">
+                  <p className="text-sm font-medium mb-2">Test Strapi Connection:</p>
+                  <SimpleConnectionTest />
+                </div>
+                
+                <div className="border-t pt-4 mt-4">
+                  <Link 
+                    to="/admin/technology"
+                    className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
+                  >
+                    Manage Technologies <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
