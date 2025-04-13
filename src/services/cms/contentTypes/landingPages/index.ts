@@ -44,7 +44,19 @@ export async function fetchLandingPages(): Promise<LandingPage[]> {
     
     if (landingPagesData && landingPagesData.length > 0) {
       console.log(`[fetchLandingPages] Found ${landingPagesData.length} landing pages in Supabase`);
-      return landingPagesData as LandingPage[];
+      
+      // Fix the type issue: Supabase returns hero_content as an array but we need an object
+      const typedLandingPages = landingPagesData.map(page => {
+        // Extract the first (and should be only) item from hero_content array
+        const heroContent = Array.isArray(page.hero_content) ? page.hero_content[0] : page.hero_content;
+        
+        return {
+          ...page,
+          hero_content: heroContent
+        } as LandingPage;
+      });
+      
+      return typedLandingPages;
     }
     
     console.log("[fetchLandingPages] No landing pages found in Supabase, falling back to mock data");
@@ -136,7 +148,14 @@ export async function fetchLandingPageByKey(key: string): Promise<LandingPage | 
       }
     } else if (landingPage) {
       console.log(`[fetchLandingPageByKey] Found landing page in Supabase with key ${key}:`, landingPage);
-      return landingPage as LandingPage;
+      
+      // Fix the type issue: Supabase returns hero_content as an array but we need an object
+      const heroContent = Array.isArray(landingPage.hero_content) ? landingPage.hero_content[0] : landingPage.hero_content;
+      
+      return {
+        ...landingPage,
+        hero_content: heroContent
+      } as LandingPage;
     }
     
     // Fallback to mock data if no records found in Supabase or in development mode
@@ -218,25 +237,30 @@ export async function createLandingPage(data: LandingPageFormData): Promise<Land
   
   console.log("[createLandingPage] Created new landing page:", landingPage);
   
+  // Fix the type issue: Supabase returns hero_content as an array but we need an object
+  const heroContentFixed = Array.isArray(landingPage.hero_content) ? landingPage.hero_content[0] : landingPage.hero_content;
+  
+  const typedLandingPage = {
+    ...landingPage,
+    hero_content: heroContentFixed
+  } as LandingPage;
+  
   // If in development mode, also update mock data
   if (IS_DEVELOPMENT && useMockData) {
     try {
       // Get existing landing pages
       const existingPages = await getMockData<LandingPage>('landing-pages');
       
-      // Convert Supabase data to mock format
-      const newPage: LandingPage = landingPage as LandingPage;
-      
       // If another page with the same key already exists, update it instead
       const existingPageIndex = existingPages.findIndex(p => p.page_key === data.page_key);
       
       if (existingPageIndex !== -1) {
         console.log(`[createLandingPage] Page with key ${data.page_key} already exists in mock data, updating instead`);
-        existingPages[existingPageIndex] = newPage;
+        existingPages[existingPageIndex] = typedLandingPage;
       } else {
         // Add the new page
         console.log(`[createLandingPage] Adding new page with key ${data.page_key} to mock data`);
-        existingPages.push(newPage);
+        existingPages.push(typedLandingPage);
       }
       
       // Store updated pages back to mock data
@@ -253,7 +277,7 @@ export async function createLandingPage(data: LandingPageFormData): Promise<Land
     }
   }
   
-  return landingPage as LandingPage;
+  return typedLandingPage;
 }
 
 export async function updateLandingPage(id: string, data: Partial<LandingPageFormData>): Promise<LandingPage> {
@@ -346,6 +370,14 @@ export async function updateLandingPage(id: string, data: Partial<LandingPageFor
   
   console.log(`[updateLandingPage] Successfully updated landing page with id ${id}:`, updatedPage);
   
+  // Fix the type issue: Supabase returns hero_content as an array but we need an object
+  const heroContentFixed = Array.isArray(updatedPage.hero_content) ? updatedPage.hero_content[0] : updatedPage.hero_content;
+  
+  const typedUpdatedPage = {
+    ...updatedPage,
+    hero_content: heroContentFixed
+  } as LandingPage;
+  
   // If in development mode, also update mock data
   if (IS_DEVELOPMENT && useMockData) {
     try {
@@ -356,10 +388,10 @@ export async function updateLandingPage(id: string, data: Partial<LandingPageFor
       const pageIndex = existingPages.findIndex(p => p.id === id);
       if (pageIndex !== -1) {
         // Replace the old page with the updated one
-        existingPages[pageIndex] = updatedPage as LandingPage;
+        existingPages[pageIndex] = typedUpdatedPage;
         
         // Store updated pages back to mock data
-        if (!Array.isArray(window.__MOCK_DATA)) {
+        if (!window.__MOCK_DATA) {
           window.__MOCK_DATA = {};
         }
         if (!window.__MOCK_DATA['landing-pages']) {
@@ -375,7 +407,7 @@ export async function updateLandingPage(id: string, data: Partial<LandingPageFor
     }
   }
   
-  return updatedPage as LandingPage;
+  return typedUpdatedPage;
 }
 
 export async function deleteLandingPage(id: string): Promise<void> {
@@ -427,7 +459,7 @@ export async function deleteLandingPage(id: string): Promise<void> {
       const filteredPages = existingPages.filter(p => p.id !== id);
       
       // Store updated pages back to mock data
-      if (!Array.isArray(window.__MOCK_DATA)) {
+      if (!window.__MOCK_DATA) {
         window.__MOCK_DATA = {};
       }
       window.__MOCK_DATA['landing-pages'] = filteredPages;
