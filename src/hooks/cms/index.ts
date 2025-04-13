@@ -8,7 +8,8 @@ export * from './useTestimonials';
 export * from './useQueryDefaults';
 export * from './useLandingPages';
 
-// Re-export hooks from useCloneCMS, but avoid the duplicate useCloneProductType
+// Re-export hooks from useCloneCMS, exclude the duplicate useCloneProductType
+// which is already exported from useProductTypes
 import {
   useCloneBusinessGoal,
   useCloneTechnology,

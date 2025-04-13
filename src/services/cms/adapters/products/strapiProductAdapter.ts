@@ -1,32 +1,44 @@
 
-/**
- * Placeholder for Strapi adapter implementation
- * This will be implemented during the Strapi integration phase
- */
 import { CMSProductType } from '@/types/cms';
 import { ProductAdapter, ProductCreateInput, ProductUpdateInput } from './types';
 
-// Placeholder for Strapi adapter - to be implemented
+/**
+ * Implementation of the Product Adapter for Strapi CMS
+ * This will be implemented when we integrate with Strapi
+ */
 export const strapiProductAdapter: ProductAdapter = {
-  getAll: async () => {
+  getAll: async (): Promise<CMSProductType[]> => {
+    console.log('[strapiProductAdapter] getAll method called, but not implemented');
     throw new Error('Strapi adapter not yet implemented');
   },
-  getBySlug: async () => {
+  
+  getBySlug: async (slug: string): Promise<CMSProductType | null> => {
+    console.log(`[strapiProductAdapter] getBySlug method called with slug "${slug}", but not implemented`);
     throw new Error('Strapi adapter not yet implemented');
   },
-  getById: async () => {
+  
+  getById: async (id: string): Promise<CMSProductType | null> => {
+    console.log(`[strapiProductAdapter] getById method called with id "${id}", but not implemented`);
     throw new Error('Strapi adapter not yet implemented');
   },
-  create: async () => {
+  
+  create: async (data: ProductCreateInput): Promise<CMSProductType> => {
+    console.log('[strapiProductAdapter] create method called, but not implemented', data);
     throw new Error('Strapi adapter not yet implemented');
   },
-  update: async () => {
+  
+  update: async (id: string, data: ProductUpdateInput): Promise<CMSProductType> => {
+    console.log(`[strapiProductAdapter] update method called for id "${id}", but not implemented`, data);
     throw new Error('Strapi adapter not yet implemented');
   },
-  delete: async () => {
+  
+  delete: async (id: string): Promise<boolean> => {
+    console.log(`[strapiProductAdapter] delete method called for id "${id}", but not implemented`);
     throw new Error('Strapi adapter not yet implemented');
   },
-  clone: async () => {
+  
+  clone: async (id: string): Promise<CMSProductType> => {
+    console.log(`[strapiProductAdapter] clone method called for id "${id}", but not implemented`);
     throw new Error('Strapi adapter not yet implemented');
   }
 };
