@@ -159,7 +159,7 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
         slug: newSlug,
         description: sourceGoal.description,
         visible: sourceGoal.visible,
-        icon: sourceGoal.icon,
+        icon: typeof sourceGoal.icon === 'string' ? sourceGoal.icon : undefined,
         image: sourceGoal.image ? {
           url: sourceGoal.image_url || '',
           alt: sourceGoal.image_alt || '',
@@ -168,7 +168,7 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
         features: sourceGoal.features?.map(feature => ({
           title: feature.title,
           description: feature.description,
-          icon: feature.icon,
+          icon: typeof feature.icon === 'string' ? feature.icon : undefined,
           screenshot: feature.screenshot ? {
             url: feature.screenshot.url,
             alt: feature.screenshot.alt,
