@@ -8,16 +8,12 @@ export * from './useTestimonials';
 export * from './useQueryDefaults';
 export * from './useLandingPages';
 
-// Re-export hooks from useCloneCMS, exclude the duplicate useCloneProductType
+// Export the clone hooks directly from useCloneCMS
+// This resolves the duplicate export issue by not re-exporting useCloneProductType
 // which is already exported from useProductTypes
-import {
-  useCloneBusinessGoal,
-  useCloneTechnology,
-  useCloneMachine,
-} from './useCloneCMS';
-
 export {
   useCloneBusinessGoal,
   useCloneTechnology,
   useCloneMachine,
-};
+  useCloneProductType  // Explicitly export useCloneProductType
+} from './useCloneCMS';

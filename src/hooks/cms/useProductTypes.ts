@@ -93,20 +93,4 @@ export function useProductType(slug: string | undefined, uuid: string | null = n
   });
 }
 
-// Import the necessary hooks inside the function that uses them
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-
-/**
- * Hook to clone a product type
- */
-export function useCloneProductType() {
-  // Move useQueryClient inside the hook function
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: cmsService.cloneProduct,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['productTypes'] });
-    },
-  });
-}
+// Removed the useCloneProductType function as it's now imported from useCloneCMS.ts

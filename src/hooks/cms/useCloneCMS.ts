@@ -4,7 +4,23 @@ import * as cmsService from '@/services/cms/contentTypes/productTypes';
 import { cloneBusinessGoal } from '@/services/cms/contentTypes/businessGoals/cloneBusinessGoal';
 import { cloneTechnology } from '@/services/cms/contentTypes/technologies/cloneTechnology';
 import { cloneMachine } from '@/services/cms/contentTypes/machines/cloneMachine';
+import { cloneProductType } from '@/services/cms/contentTypes/productTypes/cloneProductType';
 import { CMSProductType, CMSBusinessGoal, CMSTechnology, CMSMachine } from '@/types/cms';
+
+/**
+ * Hook to clone a product type
+ */
+export function useCloneProductType() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string): Promise<CMSProductType | null> => {
+      return await cloneProductType(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['productTypes'] });
+    }
+  });
+}
 
 /**
  * Hook to clone a business goal
