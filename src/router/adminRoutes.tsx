@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { Route } from 'react-router-dom';
-import AdminHome from '@/pages/admin/AdminHome';
+import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminMachines from '@/pages/admin/AdminMachines';
-import AdminTechnologies from '@/pages/admin/AdminTechnologies';
+import AdminTechnology from '@/pages/admin/AdminTechnology';
+import AdminProducts from '@/pages/admin/AdminProducts';
 import AdminBusinessGoals from '@/pages/admin/AdminBusinessGoals';
-import AdminProductTypes from '@/pages/admin/AdminProductTypes';
 import AdminSettings from '@/pages/admin/AdminSettings';
 import StrapiIntegration from '@/pages/admin/StrapiIntegration';
 
@@ -16,11 +16,11 @@ import StrapiIntegration from '@/pages/admin/StrapiIntegration';
  */
 export const adminRoutes = (
   <Route path="/admin">
-    <Route index element={<AdminHome />} />
+    <Route index element={<AdminDashboard />} />
     <Route path="machines" element={<AdminMachines />} />
-    <Route path="technologies" element={<AdminTechnologies />} />
+    <Route path="technology" element={<AdminTechnology />} />
+    <Route path="products" element={<AdminProducts />} />
     <Route path="business-goals" element={<AdminBusinessGoals />} />
-    <Route path="product-types" element={<AdminProductTypes />} />
     <Route path="settings" element={<AdminSettings />} />
     <Route path="strapi" element={<StrapiIntegration />} />
     {/* Add other admin routes as needed */}

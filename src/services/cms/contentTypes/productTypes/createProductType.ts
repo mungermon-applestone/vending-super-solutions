@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { handleCMSError, logCMSOperation } from '../types';
 import { CMSProductType } from '@/types/cms';
 
 /**
@@ -10,7 +9,7 @@ import { CMSProductType } from '@/types/cms';
  */
 export async function createProductType(data: any): Promise<CMSProductType> {
   try {
-    logCMSOperation('createProductType', 'Product Type', `Creating new product type: ${data.title}`);
+    console.log('[CMS:Product Type] createProductType: Creating new product type:', data.title);
     
     const { data: productType, error } = await supabase
       .from('product_types')
@@ -19,14 +18,16 @@ export async function createProductType(data: any): Promise<CMSProductType> {
       .single();
       
     if (error) {
-      handleCMSError('createProductType', 'Product Type', error);
+      console.error('[CMS:Product Type] Error in createProductType:', error);
       throw error;
     }
     
-    logCMSOperation('createProductType', 'Product Type', `Successfully created product type with ID: ${productType.id}`);
+    console.log('[CMS:Product Type] createProductType: Successfully created product type with ID:', productType.id);
     return productType as CMSProductType;
   } catch (error) {
-    handleCMSError('createProductType', 'Product Type', error);
+    console.error('[CMS:Product Type] Error in createProductType:', error);
     throw error;
   }
 }
+
+export default createProductType;

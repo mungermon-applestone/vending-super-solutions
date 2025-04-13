@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { handleCMSError, logCMSOperation } from '../types';
 import { CMSProductType } from '@/types/cms';
 
 /**
@@ -11,7 +10,7 @@ import { CMSProductType } from '@/types/cms';
  */
 export async function updateProductType(id: string, data: any): Promise<CMSProductType> {
   try {
-    logCMSOperation('updateProductType', 'Product Type', `Updating product type with ID: ${id}`);
+    console.log(`[CMS:Product Type] updateProductType: Updating product type with ID: ${id}`);
     
     const { data: updatedProductType, error } = await supabase
       .from('product_types')
@@ -21,14 +20,16 @@ export async function updateProductType(id: string, data: any): Promise<CMSProdu
       .single();
       
     if (error) {
-      handleCMSError('updateProductType', 'Product Type', error);
+      console.error('[CMS:Product Type] Error in updateProductType:', error);
       throw error;
     }
     
-    logCMSOperation('updateProductType', 'Product Type', `Successfully updated product type with ID: ${id}`);
+    console.log(`[CMS:Product Type] updateProductType: Successfully updated product type with ID: ${id}`);
     return updatedProductType as CMSProductType;
   } catch (error) {
-    handleCMSError('updateProductType', 'Product Type', error);
+    console.error('[CMS:Product Type] Error in updateProductType:', error);
     throw error;
   }
 }
+
+export default updateProductType;

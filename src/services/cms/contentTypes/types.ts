@@ -40,3 +40,24 @@ export interface ContentTypeOperations<T> {
    */
   clone?: (id: string, newData?: any) => Promise<T>;
 }
+
+/**
+ * Log a CMS operation for debugging and auditing purposes
+ * @param operation The operation name
+ * @param contentType The content type being operated on
+ * @param message The log message
+ */
+export function logCMSOperation(operation: string, contentType: string, message: string): void {
+  console.log(`[CMS:${contentType}] ${operation}: ${message}`);
+}
+
+/**
+ * Handle and log CMS errors
+ * @param operation The operation name
+ * @param contentType The content type being operated on
+ * @param error The error object
+ */
+export function handleCMSError(operation: string, contentType: string, error: any): void {
+  console.error(`[CMS:${contentType}] Error in ${operation}:`, error);
+  // Additional error handling logic can be added here
+}

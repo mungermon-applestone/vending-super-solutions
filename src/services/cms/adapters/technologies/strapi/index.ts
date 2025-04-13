@@ -1,4 +1,4 @@
-import { TechnologyAdapter } from '../types';
+import { TechnologyAdapter, TechnologyCreateInput, TechnologyUpdateInput } from '../types';
 import { CMSTechnology, CMSTechnologySection, QueryOptions } from '@/types/cms';
 import { buildTechnologyEndpoint, buildStrapiFilters, fetchFromStrapi } from './helpers';
 
@@ -9,7 +9,7 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
   /**
    * Fetches all technologies from Strapi
    */
-  getAllTechnologies: async (options?: QueryOptions): Promise<CMSTechnology[]> => {
+  getAll: async (options?: QueryOptions): Promise<CMSTechnology[]> => {
     try {
       console.log('[strapiTechnologyAdapter] Fetching all technologies from Strapi');
       const queryParams = options ? buildStrapiFilters(options) : new URLSearchParams();
@@ -32,7 +32,7 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
   /**
    * Fetches a technology by its slug
    */
-  getTechnologyBySlug: async (slug: string): Promise<CMSTechnology | null> => {
+  getBySlug: async (slug: string): Promise<CMSTechnology | null> => {
     try {
       console.log(`[strapiTechnologyAdapter] Fetching technology with slug: ${slug}`);
       const queryParams = new URLSearchParams();
@@ -54,29 +54,53 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
   },
   
   /**
+   * Fetches a technology by its ID
+   */
+  getById: async (id: string): Promise<CMSTechnology | null> => {
+    try {
+      console.log(`[strapiTechnologyAdapter] Fetching technology with id: ${id}`);
+      
+      const endpoint = buildTechnologyEndpoint(id);
+      const response = await fetchFromStrapi<any>(endpoint);
+      
+      if (!response.data) {
+        console.warn(`[strapiTechnologyAdapter] No technology found with id: ${id}`);
+        return null;
+      }
+      
+      return transformStrapiTechnology(response.data);
+    } catch (error) {
+      console.error(`[strapiTechnologyAdapter] Error fetching technology with id ${id}:`, error);
+      throw error;
+    }
+  },
+  
+  /**
    * Creates a new technology in Strapi
    */
-  createTechnology: async (technology: Partial<CMSTechnology>): Promise<string> => {
+  create: async (technology: TechnologyCreateInput): Promise<CMSTechnology> => {
     try {
       console.log('[strapiTechnologyAdapter] Creating new technology:', technology.title);
       
       // Transform to Strapi format
       const strapiTechnology = {
-        title: technology.title,
-        slug: technology.slug,
-        description: technology.description,
-        visible: technology.visible ?? true,
-        // Other properties would be added here as needed
+        data: {
+          title: technology.title,
+          slug: technology.slug,
+          description: technology.description,
+          visible: technology.visible ?? true,
+          // Other properties would be added here as needed
+        }
       };
       
       const endpoint = buildTechnologyEndpoint();
       const response = await fetchFromStrapi<any>(endpoint, 'POST', strapiTechnology);
       
-      if (!response.data || !response.data.id) {
+      if (!response.data) {
         throw new Error('Failed to create technology: Invalid response from Strapi');
       }
       
-      return response.data.id;
+      return transformStrapiTechnology(response.data);
     } catch (error) {
       console.error('[strapiTechnologyAdapter] Error creating technology:', error);
       throw error;
@@ -86,23 +110,29 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
   /**
    * Updates an existing technology in Strapi
    */
-  updateTechnology: async (id: string, technology: Partial<CMSTechnology>): Promise<boolean> => {
+  update: async (id: string, technology: TechnologyUpdateInput): Promise<CMSTechnology> => {
     try {
       console.log(`[strapiTechnologyAdapter] Updating technology with id: ${id}`);
       
       // Transform to Strapi format
       const strapiTechnology = {
-        title: technology.title,
-        slug: technology.slug,
-        description: technology.description,
-        visible: technology.visible,
-        // Other properties would be added here as needed
+        data: {
+          title: technology.title,
+          slug: technology.slug,
+          description: technology.description,
+          visible: technology.visible,
+          // Other properties would be added here as needed
+        }
       };
       
       const endpoint = buildTechnologyEndpoint(id);
-      await fetchFromStrapi<any>(endpoint, 'PUT', strapiTechnology);
+      const response = await fetchFromStrapi<any>(endpoint, 'PUT', strapiTechnology);
       
-      return true;
+      if (!response.data) {
+        throw new Error('Failed to update technology: Invalid response from Strapi');
+      }
+      
+      return transformStrapiTechnology(response.data);
     } catch (error) {
       console.error(`[strapiTechnologyAdapter] Error updating technology ${id}:`, error);
       throw error;
@@ -112,7 +142,7 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
   /**
    * Deletes a technology from Strapi
    */
-  deleteTechnology: async (id: string): Promise<boolean> => {
+  delete: async (id: string): Promise<boolean> => {
     try {
       console.log(`[strapiTechnologyAdapter] Deleting technology with id: ${id}`);
       
@@ -123,6 +153,40 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
     } catch (error) {
       console.error(`[strapiTechnologyAdapter] Error deleting technology ${id}:`, error);
       throw error;
+    }
+  },
+  
+  /**
+   * Clones a technology
+   */
+  clone: async (id: string): Promise<CMSTechnology | null> => {
+    try {
+      console.log(`[strapiTechnologyAdapter] Cloning technology with id: ${id}`);
+      
+      // First, get the original technology
+      const originalTechnology = await strapiTechnologyAdapter.getById(id);
+      
+      if (!originalTechnology) {
+        throw new Error(`Technology with id ${id} not found`);
+      }
+      
+      // Create a new technology based on the original
+      const clonedData: TechnologyCreateInput = {
+        title: `${originalTechnology.title} (copy)`,
+        slug: `${originalTechnology.slug}-copy`,
+        description: originalTechnology.description,
+        image_url: originalTechnology.image_url,
+        image_alt: originalTechnology.image_alt,
+        visible: originalTechnology.visible
+      };
+      
+      // Create the cloned technology
+      const clonedTechnology = await strapiTechnologyAdapter.create(clonedData);
+      
+      return clonedTechnology;
+    } catch (error) {
+      console.error(`[strapiTechnologyAdapter] Error cloning technology ${id}:`, error);
+      return null;
     }
   }
 };
