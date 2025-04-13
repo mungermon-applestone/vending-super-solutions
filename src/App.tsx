@@ -7,15 +7,18 @@ import AdminSettings from './pages/admin/AdminSettings';
 import StrapiIntegration from './pages/admin/StrapiIntegration';
 import StrapiConfig from './pages/admin/StrapiConfig';
 import TechnologyList from './pages/admin/technology/TechnologyList';
+import TechnologyLanding from './pages/TechnologyLanding';
+import TechnologyDetail from './pages/TechnologyDetail';
 
-// We need to modify the routes to add our Strapi configuration page
 function App() {
   // Check if we are in a development environment
   const isDevelopment = import.meta.env.DEV;
   
   return (
     <Routes>
-      {/* Only include routes for pages that actually exist */}
+      {/* Public Routes */}
+      <Route path="/technology" element={<TechnologyLanding />} />
+      <Route path="/technology/:slug" element={<TechnologyDetail />} />
       
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminDashboard />} />

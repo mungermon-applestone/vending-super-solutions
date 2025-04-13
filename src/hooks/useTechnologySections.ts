@@ -1,19 +1,21 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchTechnologies, fetchTechnologyBySlug, fetchTechnologyBySlugSafe } from '@/services/cms/contentTypes/technologies';
+import { fetchTechnologies, fetchTechnologyBySlug } from '@/services/cms/technology';
 import { CMSTechnology } from '@/types/cms';
-import { defaultQueryOptions } from './cms/useQueryDefaults';
-import { QueryOptions } from '@/types/cms';
 
 export function useTechnologySections() {
   // Query to fetch all technologies
   const { data: technologies = [], isLoading, error } = useQuery({
     queryKey: ['technologies'],
     queryFn: async () => {
-      const data = await fetchTechnologies();
-      return data || [];
-    },
-    ...defaultQueryOptions
+      try {
+        const data = await fetchTechnologies();
+        return data || [];
+      } catch (err) {
+        console.error('Error fetching technologies:', err);
+        return [];
+      }
+    }
   });
 
   return { technologies, isLoading, error };
@@ -25,10 +27,14 @@ export function useTechnologyBySlug(slug: string) {
     queryKey: ['technology', slug],
     queryFn: async () => {
       if (!slug) return null;
-      return await fetchTechnologyBySlugSafe(slug);
+      try {
+        return await fetchTechnologyBySlug(slug);
+      } catch (err) {
+        console.error(`Error fetching technology with slug ${slug}:`, err);
+        return null;
+      }
     },
-    enabled: !!slug,
-    ...defaultQueryOptions
+    enabled: !!slug
   });
 
   return { technology: data, isLoading, error };
