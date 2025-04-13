@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,7 +24,6 @@ const StrapiConfig: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<any>(null);
   
-  // Check if we have a valid API URL
   useEffect(() => {
     if (!strapiUrl && cmsInfo.apiUrl) {
       setStrapiUrl(cmsInfo.apiUrl);
@@ -36,7 +34,6 @@ const StrapiConfig: React.FC = () => {
     setIsLoading(true);
     
     try {
-      // Make sure we have a URL
       if (!strapiUrl.trim()) {
         throw new Error("Strapi API URL is required");
       }
@@ -53,7 +50,6 @@ const StrapiConfig: React.FC = () => {
           description: "Successfully configured Strapi CMS integration.",
         });
         
-        // Reload after a short delay
         setTimeout(() => {
           window.location.reload();
         }, 1500);
@@ -85,29 +81,24 @@ const StrapiConfig: React.FC = () => {
     try {
       console.log('Testing connection with URL:', strapiUrl);
       
-      // Switch to Strapi temporarily for testing
       switchCMSProvider({
         providerType: ContentProviderType.STRAPI,
         strapiApiUrl: strapiUrl.trim(),
         strapiApiKey: strapiApiKey || undefined
       });
       
-      // Test connection
       const result = await testCMSConnection();
       console.log('Connection test result:', result);
       setTestResults(result);
       
       if (result.success) {
-        // Also test fetching technologies
         try {
           console.log('Testing technology fetch...');
           const technologies = await fetchTechnologies({ limit: 5 });
           console.log(`Fetched ${technologies.length} technologies`);
           
-          // If we get here, the connection is good
           setTestStatus('success');
           
-          // Add technologies to the test results
           setTestResults(prev => ({
             ...prev,
             technologies: technologies.map(t => ({ id: t.id, title: t.title }))
@@ -115,8 +106,6 @@ const StrapiConfig: React.FC = () => {
         } catch (fetchError) {
           console.error('Error fetching technologies:', fetchError);
           
-          // If we can connect but not fetch technologies, still consider it a success
-          // but add a warning about content types
           setTestStatus('success');
           setTestResults(prev => ({
             ...prev,
@@ -145,6 +134,9 @@ const StrapiConfig: React.FC = () => {
               Configure integration with your Strapi CMS
             </p>
           </div>
+          <Button variant="outline" onClick={() => window.location.href = '/admin/strapi-debug'}>
+            Troubleshoot Connection
+          </Button>
         </div>
         
         <div className="grid gap-8">
