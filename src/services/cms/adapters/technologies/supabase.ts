@@ -264,7 +264,7 @@ export const supabaseTechnologyAdapter: TechnologyAdapter = {
               const feature = section.features[j];
               
               // Create feature
-              const { error: featureError } = await supabase
+              const { data: featureData, error: featureError } = await supabase
                 .from('technology_features')
                 .insert({
                   section_id: sectionData.id,
@@ -272,7 +272,9 @@ export const supabaseTechnologyAdapter: TechnologyAdapter = {
                   description: feature.description,
                   icon: feature.icon,
                   display_order: feature.display_order || j
-                });
+                })
+                .select()
+                .single();
                 
               if (featureError) {
                 throw handleCMSError(featureError, 'create (feature)', 'Technology', data.id);
@@ -281,7 +283,7 @@ export const supabaseTechnologyAdapter: TechnologyAdapter = {
               // Handle feature items if provided
               if (feature.items && feature.items.length > 0) {
                 const featureItems = feature.items.map((item, k) => ({
-                  feature_id: feature.id,
+                  feature_id: featureData.id,  // Use featureData.id instead of feature.id
                   text: item,
                   display_order: k
                 }));
@@ -361,11 +363,12 @@ export const supabaseTechnologyAdapter: TechnologyAdapter = {
         const { error: featureItemsError } = await supabase
           .from('technology_feature_items')
           .delete()
-          .in('feature_id', function() {
-            this.select('id')
+          .in('feature_id', 
+            supabase
               .from('technology_features')
-              .in('section_id', sectionIds);
-          });
+              .select('id')
+              .in('section_id', sectionIds)
+          );
           
         if (featureItemsError) {
           throw handleCMSError(featureItemsError, 'delete (feature items)', 'Technology', id);
