@@ -1,62 +1,42 @@
+
 import { QueryOptions } from '@/types/cms';
 
 /**
- * Standard interface for all content type operations
- * This ensures consistent API across all content types
+ * Generic operations interface for content types
  */
 export interface ContentTypeOperations<T> {
   /**
-   * Fetch all content items of this type
+   * Fetch all items
    */
   fetchAll: (options?: QueryOptions) => Promise<T[]>;
   
   /**
-   * Fetch a content item by its slug
+   * Fetch a single item by slug
    */
   fetchBySlug: (slug: string) => Promise<T | null>;
   
   /**
-   * Fetch a content item by its ID
+   * Fetch a single item by ID
    */
   fetchById: (id: string) => Promise<T | null>;
   
   /**
-   * Create a new content item
+   * Create a new item
    */
-  create: (data: any) => Promise<T | string>;
+  create: (data: any) => Promise<T>;
   
   /**
-   * Update an existing content item
+   * Update an existing item
    */
-  update: (idOrSlug: string, data: any) => Promise<T | boolean>;
+  update: (id: string, data: any) => Promise<T>;
   
   /**
-   * Delete a content item
+   * Delete an item
    */
-  delete: (idOrSlug: string) => Promise<boolean>;
+  delete: (id: string) => Promise<boolean>;
   
   /**
-   * Clone a content item
+   * Clone an item (optional)
    */
-  clone?: (id: string) => Promise<T | null>;
-}
-
-/**
- * Utility function to log CMS operations for debugging
- * @param operation Name of the operation
- * @param contentType Type of content being operated on
- * @param message Log message
- */
-export function logCMSOperation(operation: string, contentType: string, message: string): void {
-  console.log(`[${contentType}:${operation}] ${message}`);
-}
-
-/**
- * Utility function to handle CMS errors consistently
- * @param operation Name of the operation
- * @param contentType Type of content being operated on
- * @param error Error that occurred
- */
-export function handleCMSError(operation: string, contentType: string, error: any): void {
-  console.error(`[${contentType}:${operation}] Error:`, error);
+  clone?: (id: string, newData?: any) => Promise<T>;
 }

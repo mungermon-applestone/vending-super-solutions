@@ -2,30 +2,23 @@
 import { ContentProviderConfig, ContentProviderType } from './types';
 
 /**
- * Default configuration values for content providers
+ * Configure Strapi as the CMS provider
+ * @param apiUrl The base URL for the Strapi API
+ * @param apiKey Optional API key for authentication with Strapi
  */
-export const defaultContentConfig: ContentProviderConfig = {
-  type: ContentProviderType.SUPABASE
-};
-
-/**
- * Get configuration for Strapi content provider
- * @param apiUrl URL of the Strapi API
- * @param apiKey Optional API key for authentication
- */
-export const strapiConfig = (apiUrl?: string, apiKey?: string): ContentProviderConfig => {
+export function strapiConfig(apiUrl: string, apiKey?: string): ContentProviderConfig {
   return {
     type: ContentProviderType.STRAPI,
-    apiUrl: apiUrl || process.env.STRAPI_API_URL || 'http://localhost:1337',
-    apiKey: apiKey || process.env.STRAPI_API_KEY
+    apiUrl: apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl,
+    apiKey
   };
-};
+}
 
 /**
- * Get configuration for Supabase content provider
+ * Configure Supabase as the CMS provider
  */
-export const supabaseConfig = (): ContentProviderConfig => {
+export function supabaseConfig(): ContentProviderConfig {
   return {
     type: ContentProviderType.SUPABASE
   };
-};
+}
