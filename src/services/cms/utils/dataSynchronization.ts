@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { getCMSProviderConfig, ContentProviderType } from '../providerConfig';
 import { getTechnologyBySlug, getTechnologies } from '../technologies';
@@ -39,7 +38,7 @@ export interface SyncStatus {
   summary?: SyncSummary;
 }
 
-// ContentType summary format
+// ContentType summary format - ensure it's not a string type
 export interface ContentTypeSummary {
   type: string;
   success: number;
@@ -53,7 +52,7 @@ export interface SyncSummary {
   startTime: Date;
   endTime: Date;
   totalItems?: number;
-  contentTypes?: (string | ContentTypeSummary)[];
+  contentTypes?: ContentTypeSummary[]; // Ensure this is only ContentTypeSummary[] and not (string | ContentTypeSummary)[]
 }
 
 /**

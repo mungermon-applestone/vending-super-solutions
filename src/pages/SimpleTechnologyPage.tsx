@@ -22,6 +22,8 @@ const mapTechnologyData = (tech) => {
 
   // Extract image URL from the technology or its sections
   const imageUrl = tech.image_url || 
+    (tech.image && typeof tech.image === 'string' ? tech.image : 
+    tech.image?.url) || 
     tech.sections?.[0]?.images?.[0]?.url || 
     'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789';
 

@@ -1,4 +1,3 @@
-
 export interface CMSImage {
   id: string;
   url: string;
@@ -84,6 +83,8 @@ export interface CMSTechnology {
   created_at?: string;
   updated_at?: string;
   sections?: CMSTechnologySection[];
+  features?: CMSTechnologyFeature[];
+  image?: CMSImage | string;
 }
 
 export interface CMSTechnologySection {
