@@ -16,7 +16,7 @@ export const STRAPI_ENDPOINTS = {
   // Content types
   PRODUCT_TYPES: '/api/product-types',
   BUSINESS_GOALS: '/api/business-goals',
-  TECHNOLOGIES: '/api/technologies',
+  TECHNOLOGIES: '/api/technology', // Changed from '/api/technologies' to '/api/technology'
   MACHINES: '/api/machines',
   TESTIMONIALS: '/api/testimonials',
   CASE_STUDIES: '/api/case-studies',
