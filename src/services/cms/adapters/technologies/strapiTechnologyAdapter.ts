@@ -3,6 +3,7 @@ import { CMSTechnology } from '@/types/cms';
 import { TechnologyAdapter, TechnologyCreateInput, TechnologyUpdateInput } from './types';
 import { buildStrapiUrl, createStrapiHeaders } from '../../utils/strapiConfig';
 import { STRAPI_CONFIG } from '@/config/cms';
+import { transformStrapiDataToTechnology, transformInputToStrapiFormat } from './strapiTechnologyTransformers';
 
 /**
  * Implementation of the Technology Adapter for Strapi CMS
@@ -48,27 +49,7 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
       const data = await response.json();
       
       // Transform Strapi response to our internal format
-      // This is placeholder code and will need to be adjusted based on actual Strapi response format
-      return data.data.map((item: any) => ({
-        id: item.id,
-        title: item.attributes.title,
-        slug: item.attributes.slug,
-        description: item.attributes.description,
-        image_url: item.attributes.image?.data?.attributes?.url,
-        image_alt: item.attributes.image?.data?.attributes?.alternativeText,
-        visible: item.attributes.visible,
-        created_at: item.attributes.createdAt,
-        updated_at: item.attributes.updatedAt,
-        // Transform sections if they exist
-        sections: item.attributes.sections?.data?.map((section: any) => ({
-          id: section.id,
-          title: section.attributes.title,
-          description: section.attributes.description,
-          section_type: section.attributes.sectionType,
-          display_order: section.attributes.displayOrder,
-          // Add other section fields as needed
-        }))
-      }));
+      return data.data.map((item: any) => transformStrapiDataToTechnology(item));
     } catch (error) {
       console.error('[strapiTechnologyAdapter] Error fetching technologies:', error);
       throw error;
@@ -98,27 +79,7 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
       }
       
       // Transform the first result from Strapi format to our internal format
-      const item = data.data[0];
-      return {
-        id: item.id,
-        title: item.attributes.title,
-        slug: item.attributes.slug,
-        description: item.attributes.description,
-        image_url: item.attributes.image?.data?.attributes?.url,
-        image_alt: item.attributes.image?.data?.attributes?.alternativeText,
-        visible: item.attributes.visible,
-        created_at: item.attributes.createdAt,
-        updated_at: item.attributes.updatedAt,
-        // Transform sections if they exist
-        sections: item.attributes.sections?.data?.map((section: any) => ({
-          id: section.id,
-          title: section.attributes.title,
-          description: section.attributes.description,
-          section_type: section.attributes.sectionType,
-          display_order: section.attributes.displayOrder,
-          // Add other section fields as needed
-        }))
-      };
+      return transformStrapiDataToTechnology(data.data[0]);
     } catch (error) {
       console.error(`[strapiTechnologyAdapter] Error fetching technology by slug "${slug}":`, error);
       throw error;
@@ -146,27 +107,7 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
       const data = await response.json();
       
       // Transform from Strapi format to our internal format
-      const item = data.data;
-      return {
-        id: item.id,
-        title: item.attributes.title,
-        slug: item.attributes.slug,
-        description: item.attributes.description,
-        image_url: item.attributes.image?.data?.attributes?.url,
-        image_alt: item.attributes.image?.data?.attributes?.alternativeText,
-        visible: item.attributes.visible,
-        created_at: item.attributes.createdAt,
-        updated_at: item.attributes.updatedAt,
-        // Transform sections if they exist
-        sections: item.attributes.sections?.data?.map((section: any) => ({
-          id: section.id,
-          title: section.attributes.title,
-          description: section.attributes.description,
-          section_type: section.attributes.sectionType,
-          display_order: section.attributes.displayOrder,
-          // Add other section fields as needed
-        }))
-      };
+      return transformStrapiDataToTechnology(data.data);
     } catch (error) {
       console.error(`[strapiTechnologyAdapter] Error fetching technology by ID "${id}":`, error);
       throw error;
@@ -178,48 +119,7 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
     
     try {
       // Transform our data format to Strapi format
-      const strapiData = {
-        data: {
-          title: data.title,
-          slug: data.slug,
-          description: data.description,
-          visible: data.visible,
-          // Handle image if present
-          // This is placeholder and will need to be adjusted based on Strapi media handling
-          image: data.image ? { url: data.image.url, alt: data.image.alt } : undefined,
-          // Transform sections if they exist
-          sections: data.sections ? data.sections.map(section => ({
-            title: section.title,
-            description: section.description || undefined,
-            sectionType: section.type,
-            displayOrder: section.display_order || 0,
-            // Transform features if they exist
-            features: section.features ? section.features.map((feature, index) => ({
-              title: feature.title || undefined,
-              description: feature.description || undefined,
-              icon: feature.icon || undefined,
-              displayOrder: feature.display_order || index,
-              // Transform items if they exist
-              items: feature.items ? 
-                (Array.isArray(feature.items) ? 
-                  feature.items.map((item, itemIndex) => {
-                    if (typeof item === 'string') {
-                      return {
-                        text: item,
-                        displayOrder: itemIndex
-                      };
-                    } else {
-                      return {
-                        text: item.text,
-                        displayOrder: item.display_order || itemIndex
-                      };
-                    }
-                  }) 
-                : undefined)
-            })) : undefined
-          })) : undefined
-        }
-      };
+      const strapiData = transformInputToStrapiFormat(data);
       
       const url = buildStrapiUrl(STRAPI_CONFIG.ENDPOINTS.TECHNOLOGIES);
       
@@ -246,50 +146,9 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
   update: async (id: string, data: TechnologyUpdateInput): Promise<CMSTechnology> => {
     console.log(`[strapiTechnologyAdapter] Updating technology with ID: ${id}`, data);
     
-    // Similar implementation to create, but using PUT method
     try {
       // Transform our data format to Strapi format
-      const strapiData = {
-        data: {
-          title: data.title,
-          slug: data.slug,
-          description: data.description,
-          visible: data.visible,
-          // Handle image if present
-          image: data.image ? { url: data.image.url, alt: data.image.alt } : undefined,
-          // Transform sections if they exist
-          sections: data.sections ? data.sections.map((section, index) => ({
-            title: section.title,
-            description: section.description,
-            sectionType: section.type,
-            displayOrder: section.display_order || index,
-            // Transform features if they exist
-            features: section.features ? section.features.map((feature, featureIndex) => ({
-              title: feature.title || '',
-              description: feature.description,
-              icon: feature.icon,
-              displayOrder: feature.display_order || featureIndex,
-              // Transform items if they exist
-              items: feature.items ? 
-                (Array.isArray(feature.items) ? 
-                  feature.items.map((item, itemIndex) => {
-                    if (typeof item === 'string') {
-                      return {
-                        text: item,
-                        displayOrder: itemIndex
-                      };
-                    } else {
-                      return {
-                        text: item.text,
-                        displayOrder: item.display_order || itemIndex
-                      };
-                    }
-                  })
-                : undefined)
-            })) : undefined
-          })) : undefined
-        }
-      };
+      const strapiData = transformInputToStrapiFormat(data);
       
       const url = buildStrapiUrl(`${STRAPI_CONFIG.ENDPOINTS.TECHNOLOGIES}/${id}`);
       
@@ -357,19 +216,16 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
           url: sourceTechnology.image_url,
           alt: sourceTechnology.image_alt || '',
         } : undefined,
-        // Transform sections if they exist
-        sections: sourceTechnology.sections ? sourceTechnology.sections.map((section, index) => ({
+        sections: sourceTechnology.sections ? sourceTechnology.sections.map((section) => ({
           title: section.title,
           description: section.description || undefined,
           type: section.section_type,
           display_order: section.display_order,
-          // Transform features if they exist
-          features: section.features ? section.features.map((feature, featureIndex) => ({
+          features: section.features ? section.features.map((feature) => ({
             title: feature.title || undefined,
             description: feature.description || undefined,
             icon: feature.icon || undefined,
             display_order: feature.display_order,
-            // Transform items if they exist
             items: feature.items ? feature.items.map(item => item.text) : undefined
           })) : undefined
         })) : undefined
