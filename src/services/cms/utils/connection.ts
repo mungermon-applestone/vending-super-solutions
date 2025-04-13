@@ -1,116 +1,132 @@
 
 import { getCMSProviderConfig } from '../providerConfig';
 import { ContentProviderType } from '../adapters/types';
-import { getStrapiBaseUrl, getStrapiApiKey } from './strapiConfig';
+import { getStrapiApiKey, getStrapiBaseUrl } from './strapiConfig';
 
 /**
- * Result of a connection test
+ * Test connection to the currently configured CMS provider
+ * @returns Object with success flag and connection details
  */
-export interface ConnectionTestResult {
+export async function testCMSConnection(): Promise<{
   success: boolean;
   message: string;
+  provider: string;
   details?: any;
-}
-
-/**
- * Test the connection to the configured CMS provider
- * @returns Promise resolving to connection test result
- */
-export async function testCMSConnection(): Promise<ConnectionTestResult> {
+}> {
   const config = getCMSProviderConfig();
   
-  console.log(`[testCMSConnection] Testing connection to ${config.type} CMS`);
-  
-  try {
-    // Test connection based on provider type
-    if (config.type === ContentProviderType.STRAPI) {
-      return await testStrapiConnection();
-    }
-    
-    // Supabase is always connected if we got this far
-    return {
-      success: true,
-      message: 'Connection to Supabase established'
-    };
-  } catch (error) {
-    console.error('[testCMSConnection] Error testing connection:', error);
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : 'Unknown error'
-    };
+  // Test Strapi connection
+  if (config.type === ContentProviderType.STRAPI) {
+    return await testStrapiConnection();
   }
+  
+  // Test Supabase connection (default)
+  return await testSupabaseConnection();
 }
 
 /**
- * Test the connection to Strapi CMS
+ * Test connection to the Strapi CMS
  */
-async function testStrapiConnection(): Promise<ConnectionTestResult> {
+async function testStrapiConnection(): Promise<{
+  success: boolean;
+  message: string;
+  provider: 'Strapi';
+  details?: any;
+}> {
   const baseUrl = getStrapiBaseUrl();
   const apiKey = getStrapiApiKey();
   
   if (!baseUrl) {
     return {
       success: false,
-      message: 'Strapi API URL not configured'
+      message: 'Strapi API URL not configured',
+      provider: 'Strapi'
     };
   }
   
   try {
-    // Try to fetch the Strapi server info
-    const url = `${baseUrl}`;
-    
-    // Build headers if API key is available
-    const headers: Record<string, string> = {};
-    if (apiKey) {
-      headers.Authorization = `Bearer ${apiKey}`;
-    }
-    
-    // Make the request
-    const response = await fetch(url, { headers });
+    // Attempt to connect to Strapi
+    const response = await fetch(`${baseUrl}`, {
+      headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {}
+    });
     
     if (!response.ok) {
-      throw new Error(`Failed to connect to Strapi: ${response.statusText}`);
+      return {
+        success: false,
+        message: `Strapi returned status ${response.status}: ${response.statusText}`,
+        provider: 'Strapi',
+        details: { status: response.status, statusText: response.statusText }
+      };
     }
     
-    // Check API key if provided
-    if (apiKey) {
-      try {
-        // Try to fetch a protected endpoint to verify API key
-        const authCheckResponse = await fetch(`${baseUrl}/users/me`, {
-          headers: { Authorization: `Bearer ${apiKey}` }
-        });
-        
-        if (!authCheckResponse.ok) {
-          return {
-            success: false,
-            message: 'Connected to Strapi, but API key validation failed'
-          };
-        }
-        
-        return {
-          success: true,
-          message: 'Successfully connected to Strapi with valid API key'
-        };
-      } catch (authError) {
-        return {
-          success: false,
-          message: 'Connected to Strapi, but failed to validate API key',
-          details: authError
-        };
-      }
+    let responseData;
+    try {
+      responseData = await response.json();
+    } catch (e) {
+      console.log('[testStrapiConnection] Unable to parse JSON response');
+      // Non-JSON response is OK, we just want to check connectivity
     }
     
     return {
       success: true,
-      message: 'Successfully connected to Strapi (no API key validation)'
+      message: 'Successfully connected to Strapi',
+      provider: 'Strapi',
+      details: {
+        apiUrl: baseUrl,
+        apiKeyConfigured: !!apiKey,
+        version: responseData?.strapiVersion || 'Unknown'
+      }
     };
   } catch (error) {
-    console.error('[testStrapiConnection] Error connecting to Strapi:', error);
     return {
       success: false,
-      message: error instanceof Error 
-        ? `Failed to connect to Strapi: ${error.message}`
-        : 'Unknown error connecting to Strapi'
+      message: `Failed to connect to Strapi: ${error instanceof Error ? error.message : String(error)}`,
+      provider: 'Strapi',
+      details: { error: error instanceof Error ? error.message : String(error) }
+    };
+  }
+}
+
+/**
+ * Test connection to the Supabase CMS
+ */
+async function testSupabaseConnection(): Promise<{
+  success: boolean;
+  message: string;
+  provider: 'Supabase';
+  details?: any;
+}> {
+  try {
+    // Import the supabase client
+    const { supabase } = await import('@/integrations/supabase/client');
+    
+    // Test a simple query
+    const { data: testData, error } = await supabase.from('machines').select('count(*)');
+    
+    if (error) {
+      return {
+        success: false,
+        message: `Failed to connect to Supabase: ${error.message}`,
+        provider: 'Supabase',
+        details: { error: error.message }
+      };
+    }
+    
+    return {
+      success: true,
+      message: 'Successfully connected to Supabase',
+      provider: 'Supabase',
+      details: {
+        url: 'Connected via Lovable integration',
+        authenticated: true
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `Failed to connect to Supabase: ${error instanceof Error ? error.message : String(error)}`,
+      provider: 'Supabase',
+      details: { error: error instanceof Error ? error.message : String(error) }
     };
   }
 }

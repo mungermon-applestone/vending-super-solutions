@@ -3,7 +3,7 @@ import { CMSBusinessGoal } from '@/types/cms';
 import { BusinessGoalAdapter, BusinessGoalCreateInput, BusinessGoalUpdateInput } from '../types';
 import { buildBusinessGoalEndpoint, buildStrapiFilters, fetchFromStrapi } from './helpers';
 import { transformStrapiDataToBusinessGoal, transformInputToStrapiFormat } from './transformers';
-import { getStrapiApiKey, getStrapiBaseUrl } from '../../../utils/strapiConfig';
+import { getStrapiApiKey, getStrapiBaseUrl, validateStrapiConfig } from '../../../utils/strapiConfig';
 
 /**
  * Implementation of the Business Goal Adapter for Strapi CMS
@@ -90,18 +90,10 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
   create: async (data: BusinessGoalCreateInput): Promise<CMSBusinessGoal> => {
     console.log('[strapiBusinessGoalAdapter] Creating new business goal:', data);
     
-    const baseUrl = getStrapiBaseUrl();
-    const apiKey = getStrapiApiKey();
-    
-    if (!baseUrl) {
-      throw new Error('Strapi API URL not configured');
-    }
-    
-    if (!apiKey) {
-      throw new Error('Strapi API key not configured, required for content creation');
-    }
-    
     try {
+      validateStrapiConfig();
+      const baseUrl = getStrapiBaseUrl();
+      
       // Transform our input data to Strapi format
       const strapiData = transformInputToStrapiFormat(data);
       
@@ -110,7 +102,7 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`
+          Authorization: `Bearer ${getStrapiApiKey()}`
         },
         body: JSON.stringify({ data: strapiData })
       });
@@ -135,18 +127,10 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
   update: async (id: string, data: BusinessGoalUpdateInput): Promise<CMSBusinessGoal> => {
     console.log(`[strapiBusinessGoalAdapter] Updating business goal with ID: ${id}`, data);
     
-    const baseUrl = getStrapiBaseUrl();
-    const apiKey = getStrapiApiKey();
-    
-    if (!baseUrl) {
-      throw new Error('Strapi API URL not configured');
-    }
-    
-    if (!apiKey) {
-      throw new Error('Strapi API key not configured, required for content update');
-    }
-    
     try {
+      validateStrapiConfig();
+      const baseUrl = getStrapiBaseUrl();
+      
       // Transform our input data to Strapi format
       const strapiData = transformInputToStrapiFormat(data);
       
@@ -155,7 +139,7 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`
+          Authorization: `Bearer ${getStrapiApiKey()}`
         },
         body: JSON.stringify({ data: strapiData })
       });
@@ -175,23 +159,15 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
   delete: async (id: string): Promise<boolean> => {
     console.log(`[strapiBusinessGoalAdapter] Deleting business goal with ID: ${id}`);
     
-    const baseUrl = getStrapiBaseUrl();
-    const apiKey = getStrapiApiKey();
-    
-    if (!baseUrl) {
-      throw new Error('Strapi API URL not configured');
-    }
-    
-    if (!apiKey) {
-      throw new Error('Strapi API key not configured, required for content deletion');
-    }
-    
     try {
+      validateStrapiConfig();
+      const baseUrl = getStrapiBaseUrl();
+      
       // Send the DELETE request
       const response = await fetch(`${baseUrl}/business-goals/${id}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${apiKey}`
+          Authorization: `Bearer ${getStrapiApiKey()}`
         }
       });
       

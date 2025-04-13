@@ -1,86 +1,59 @@
 
-import { STRAPI_CONFIG } from '@/config/cms';
-import { ContentProviderConfig, ContentProviderType } from '../adapters/types';
+/**
+ * Utility functions for Strapi configuration
+ */
 
 /**
- * Gets the Strapi base URL, checking environment variables and configuration
+ * Get the base URL for the Strapi API from environment variables
  */
-export function getStrapiBaseUrl(): string {
-  // First check environment variables
-  const envUrl = import.meta.env.VITE_STRAPI_API_URL;
-  if (envUrl) {
-    return envUrl;
-  }
-  
-  // Then check config
-  return STRAPI_CONFIG.API_URL;
+export function getStrapiBaseUrl(): string | undefined {
+  return import.meta.env.VITE_STRAPI_API_URL || undefined;
 }
 
 /**
- * Gets the Strapi API key, checking environment variables and configuration
+ * Get the API key for authenticating with Strapi from environment variables
  */
 export function getStrapiApiKey(): string | undefined {
-  // First check environment variables
-  const envKey = import.meta.env.VITE_STRAPI_API_KEY;
-  if (envKey) {
-    return envKey;
-  }
-  
-  // Then check config
-  return STRAPI_CONFIG.API_KEY;
+  return import.meta.env.VITE_STRAPI_API_KEY || undefined;
 }
 
 /**
- * Build a complete Strapi API URL for an endpoint
- * @param endpoint API endpoint (e.g., "/api/technologies")
- * @returns Full URL to the Strapi API endpoint
+ * Build headers for Strapi API requests including authorization if API key is available
  */
-export function buildStrapiUrl(endpoint: string): string {
-  const baseUrl = getStrapiBaseUrl();
-  // Ensure we don't have double slashes
-  if (baseUrl.endsWith('/') && endpoint.startsWith('/')) {
-    return `${baseUrl}${endpoint.substring(1)}`;
-  }
-  
-  // Ensure we have a slash between base URL and endpoint
-  if (!baseUrl.endsWith('/') && !endpoint.startsWith('/')) {
-    return `${baseUrl}/${endpoint}`;
-  }
-  
-  return `${baseUrl}${endpoint}`;
-}
-
-/**
- * Create headers for Strapi API requests
- * @returns Headers object with authorization if API key is available
- */
-export function createStrapiHeaders(): HeadersInit {
+export function getStrapiHeaders(includeAuth: boolean = true): HeadersInit {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
   
-  const apiKey = getStrapiApiKey();
-  if (apiKey) {
-    headers['Authorization'] = `Bearer ${apiKey}`;
+  if (includeAuth) {
+    const apiKey = getStrapiApiKey();
+    if (apiKey) {
+      headers['Authorization'] = `Bearer ${apiKey}`;
+    }
   }
   
   return headers;
 }
 
 /**
- * Check if we have the minimum required Strapi configuration
+ * Check if Strapi is properly configured
  */
-export function hasStrapiConfig(): boolean {
-  return !!getStrapiBaseUrl();
+export function isStrapiConfigured(): boolean {
+  return !!getStrapiBaseUrl() && !!getStrapiApiKey();
 }
 
 /**
- * Create a complete Strapi configuration object
+ * Validate Strapi configuration and throw an error if not properly configured
  */
-export function createStrapiConfig(): ContentProviderConfig {
-  return {
-    type: ContentProviderType.STRAPI,
-    apiUrl: getStrapiBaseUrl(),
-    apiKey: getStrapiApiKey()
-  };
+export function validateStrapiConfig(): void {
+  const baseUrl = getStrapiBaseUrl();
+  const apiKey = getStrapiApiKey();
+  
+  if (!baseUrl) {
+    throw new Error('Strapi API URL not configured. Set VITE_STRAPI_API_URL environment variable.');
+  }
+  
+  if (!apiKey) {
+    throw new Error('Strapi API key not configured. Set VITE_STRAPI_API_KEY environment variable.');
+  }
 }
