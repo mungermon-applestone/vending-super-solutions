@@ -156,7 +156,7 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
       const newId = responseData.data.id;
       
       // Fetch the complete technology with all populated relations
-      return await this.getById(newId);
+      return await strapiTechnologyAdapter.getById(newId);
     } catch (error) {
       console.error('[strapiTechnologyAdapter] Error creating technology:', error);
       throw error;
@@ -196,7 +196,7 @@ export const strapiTechnologyAdapter: TechnologyAdapter = {
       }
       
       // Fetch the updated technology with all populated relations
-      return await this.getById(id);
+      return await strapiTechnologyAdapter.getById(id);
     } catch (error) {
       console.error(`[strapiTechnologyAdapter] Error updating technology with ID "${id}":`, error);
       throw error;

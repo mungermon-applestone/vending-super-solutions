@@ -2,7 +2,7 @@
 import { CMSTechnology } from '@/types/cms';
 import { TechnologyAdapter, TechnologyCreateInput, TechnologyUpdateInput } from '../types';
 import { buildTechnologyEndpoint, buildStrapiFilters, fetchFromStrapi } from './helpers';
-import { transformStrapiDataToTechnology, transformInputToStrapiFormat } from './transformers';
+import { transformStrapiTechnologyToInternal as transformStrapiDataToTechnology, transformInputToStrapiFormat } from './transformers';
 
 /**
  * Implementation of the Technology Adapter for Strapi CMS

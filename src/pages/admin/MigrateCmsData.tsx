@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -46,7 +45,6 @@ const MigrateCmsData = () => {
   const cmsInfo = getCMSInfo();
   const { synchronizeData, canSynchronizeData } = useCMSSynchronization();
 
-  // Handle content type selection
   const handleContentTypeToggle = (contentTypeId: string) => {
     setSelectedContentTypes(prev => 
       prev.includes(contentTypeId)
@@ -55,7 +53,6 @@ const MigrateCmsData = () => {
     );
   };
 
-  // Handle connection test
   const handleTestConnection = async () => {
     setIsLoading(true);
     try {
@@ -89,7 +86,6 @@ const MigrateCmsData = () => {
     }
   };
   
-  // Start migration for the specified content type
   const handleMigrate = async (contentType: string) => {
     setIsLoading(true);
     try {
@@ -131,7 +127,6 @@ const MigrateCmsData = () => {
     }
   };
 
-  // Handle sync data
   const handleSyncData = async () => {
     if (selectedContentTypes.length === 0) {
       toast({

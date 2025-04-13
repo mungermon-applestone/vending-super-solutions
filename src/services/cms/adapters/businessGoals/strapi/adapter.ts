@@ -125,7 +125,7 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
       const newId = responseData.data.id;
       
       // Fetch the complete business goal with all populated relations
-      return await this.getById(newId);
+      return await strapiBusinessGoalAdapter.getById(newId);
     } catch (error) {
       console.error('[strapiBusinessGoalAdapter] Error creating business goal:', error);
       throw error;
@@ -165,7 +165,7 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
       }
       
       // Fetch the updated business goal with all populated relations
-      return await this.getById(id);
+      return await strapiBusinessGoalAdapter.getById(id);
     } catch (error) {
       console.error(`[strapiBusinessGoalAdapter] Error updating business goal with ID "${id}":`, error);
       throw error;
