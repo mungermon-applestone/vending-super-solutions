@@ -12,7 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { migrateBusinessGoalData } from '@/utils/businessGoalMigration';
 import { migrateMachinesData } from '@/utils/machineMigration';
 import { migrateTechnologyData } from '@/utils/technologyMigration';
-import { useCMSSynchronization, syncableContentTypes, SyncSummary } from '@/services/cms/utils/dataSynchronization';
+import { useCMSSynchronization, syncableContentTypes, SyncSummary, ContentTypeSummary } from '@/services/cms/utils/dataSynchronization';
 import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
 import { ContentProviderType } from '@/services/cms/adapters/types';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -523,9 +523,7 @@ const MigrateCmsData = () => {
                           <ul className="list-disc list-inside mt-1">
                             {syncSummary.contentTypes?.map((type, index) => (
                               <li key={index}>
-                                {typeof type === 'string' 
-                                  ? type.replace('_', ' ') 
-                                  : `${type.type.replace('_', ' ')}: ${type.success} successes, ${type.errors} errors`}
+                                {`${type.type.replace('_', ' ')}: ${type.success} successes, ${type.errors} errors`}
                               </li>
                             ))}
                           </ul>
