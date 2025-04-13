@@ -94,6 +94,7 @@ const StrapiConfig: React.FC = () => {
       
       // Test connection
       const result = await testCMSConnection();
+      console.log('Connection test result:', result);
       setTestResults(result);
       
       if (result.success) {
@@ -113,8 +114,15 @@ const StrapiConfig: React.FC = () => {
           }));
         } catch (fetchError) {
           console.error('Error fetching technologies:', fetchError);
-          setErrorMessage(`Connection successful, but couldn't fetch technologies: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`);
-          setTestStatus('error');
+          
+          // If we can connect but not fetch technologies, still consider it a success
+          // but add a warning about content types
+          setTestStatus('success');
+          setTestResults(prev => ({
+            ...prev,
+            warningMessage: `Connected successfully, but couldn't fetch technologies: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`,
+            contentTypeAccessible: false
+          }));
         }
       } else {
         setErrorMessage(result.message);
@@ -279,6 +287,11 @@ const StrapiConfig: React.FC = () => {
                           Found {testResults.technologies.length} technologies in your Strapi CMS.
                         </p>
                       )}
+                      {testResults?.warningMessage && (
+                        <p className="mt-2 text-amber-700 font-medium">
+                          Warning: {testResults.warningMessage}
+                        </p>
+                      )}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -287,13 +300,20 @@ const StrapiConfig: React.FC = () => {
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Connection failed</AlertTitle>
-                    <AlertDescription>
-                      {errorMessage || 'Could not connect to Strapi CMS with the provided credentials.'}
+                    <AlertDescription className="space-y-2">
+                      <p>{errorMessage || 'Could not connect to Strapi CMS with the provided credentials.'}</p>
+                      
+                      {testResults && (
+                        <div className="mt-2 text-sm">
+                          <p><strong>Endpoint tried:</strong> {testResults?.details?.endpointTried || 'Unknown'}</p>
+                          <p><strong>URL used:</strong> {testResults?.details?.endpoint || 'Unknown'}</p>
+                        </div>
+                      )}
                     </AlertDescription>
                   </Alert>
                 )}
                 
-                {testResults && testStatus === 'success' && (
+                {testResults && (
                   <div className="mt-4 border rounded-md p-4 bg-gray-50">
                     <h3 className="font-medium mb-2">Connection Details</h3>
                     <pre className="text-xs overflow-auto max-h-40 p-2 bg-white border rounded">

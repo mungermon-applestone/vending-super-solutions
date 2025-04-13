@@ -50,45 +50,67 @@ async function testStrapiConnection(): Promise<{
   }
   
   try {
-    // First, attempt to connect to Strapi health endpoint
-    // Most Strapi installations have a health endpoint at /api/healthcheck or /healthcheck
-    // If that fails, fallback to the base URL
-    let response;
-    let endpoint = `${baseUrl.includes('/api') ? baseUrl.replace('/api', '') : baseUrl}/healthcheck`;
+    // Try multiple endpoints progressively to find one that works
+    // 1. Try the root API endpoint
+    // 2. Try /api endpoint if not already specified
+    // 3. Try accessing a known content type endpoint
+    
+    let response = null;
+    let endpoint = baseUrl;
+    let endpointTried = 'API root';
+    
+    const headers = apiKey ? { 
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    } : { 
+      'Content-Type': 'application/json' 
+    };
+    
+    console.log(`[testStrapiConnection] Trying endpoint: ${endpoint}`);
     
     try {
-      console.log(`[testStrapiConnection] Trying healthcheck at: ${endpoint}`);
-      response = await fetch(endpoint, {
-        headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {}
-      });
+      // First attempt - provided URL
+      response = await fetch(endpoint, { headers });
       
-      if (!response.ok) {
-        // Try directly with the provided URL
-        endpoint = baseUrl;
-        console.log(`[testStrapiConnection] Healthcheck failed, trying base URL: ${endpoint}`);
-        response = await fetch(endpoint, {
-          headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {}
-        });
+      // If that fails, try adding /api if not already there
+      if (!response.ok && !baseUrl.endsWith('/api')) {
+        endpoint = `${baseUrl}/api`;
+        endpointTried = 'API with /api suffix';
+        console.log(`[testStrapiConnection] First attempt failed, trying: ${endpoint}`);
+        response = await fetch(endpoint, { headers });
       }
-    } catch (e) {
-      // If healthcheck fails, try with the base URL
-      endpoint = baseUrl;
-      console.log(`[testStrapiConnection] Healthcheck error, trying base URL: ${endpoint}`);
-      response = await fetch(endpoint, {
-        headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {}
-      });
+      
+      // If that fails too, try the technologies endpoint
+      if (!response.ok) {
+        endpoint = `${baseUrl}/technologies`;
+        endpointTried = 'technologies endpoint';
+        console.log(`[testStrapiConnection] Second attempt failed, trying: ${endpoint}`);
+        response = await fetch(endpoint, { headers });
+      }
+    } catch (error) {
+      console.error('[testStrapiConnection] Fetch error:', error);
+      return {
+        success: false,
+        message: `Failed to connect to Strapi: Network error`,
+        provider: 'Strapi',
+        details: { 
+          error: error instanceof Error ? error.message : String(error),
+          apiUrl: baseUrl
+        }
+      };
     }
     
     if (!response.ok) {
       return {
         success: false,
-        message: `Strapi returned status ${response.status}: ${response.statusText}`,
+        message: `Strapi returned status ${response.status} from ${endpointTried}`,
         provider: 'Strapi',
         details: { 
           status: response.status, 
           statusText: response.statusText,
           endpoint: endpoint,
-          apiUrl: baseUrl
+          apiUrl: baseUrl,
+          endpointTried
         }
       };
     }
@@ -96,28 +118,45 @@ async function testStrapiConnection(): Promise<{
     let responseData;
     try {
       responseData = await response.json();
+      console.log('[testStrapiConnection] Response data:', responseData);
     } catch (e) {
       console.log('[testStrapiConnection] Unable to parse JSON response');
-      // Non-JSON response is OK, we just want to check connectivity
+      // Non-JSON response is OK for some endpoints, we just want to check connectivity
     }
     
     // Next, validate that we can use the technology adapter
-    const canAccessTechnologies = await validateTechnologyAdapter({
-      type: ContentProviderType.STRAPI,
-      apiUrl: baseUrl,
-      apiKey: apiKey
-    });
-    
-    if (!canAccessTechnologies) {
+    try {
+      const canAccessTechnologies = await validateTechnologyAdapter({
+        type: ContentProviderType.STRAPI,
+        apiUrl: baseUrl,
+        apiKey: apiKey
+      });
+      
+      if (!canAccessTechnologies) {
+        return {
+          success: false,
+          message: 'Connected to Strapi, but could not access technologies content type',
+          provider: 'Strapi',
+          details: {
+            apiUrl: baseUrl,
+            apiKeyConfigured: !!apiKey,
+            connectionSuccessful: true,
+            contentTypesAccessible: false
+          }
+        };
+      }
+    } catch (error) {
+      console.error('[testStrapiConnection] Error validating technology adapter:', error);
       return {
         success: false,
-        message: 'Connected to Strapi, but could not access technologies content type',
+        message: 'Connected to Strapi API, but could not validate content type access',
         provider: 'Strapi',
         details: {
           apiUrl: baseUrl,
           apiKeyConfigured: !!apiKey,
           connectionSuccessful: true,
-          contentTypesAccessible: false
+          contentTypesAccessible: false,
+          error: error instanceof Error ? error.message : String(error)
         }
       };
     }
@@ -130,7 +169,9 @@ async function testStrapiConnection(): Promise<{
         apiUrl: baseUrl,
         apiKeyConfigured: !!apiKey,
         version: responseData?.strapiVersion || 'Unknown',
-        contentTypesAccessible: true
+        contentTypesAccessible: true,
+        endpoint: endpoint,
+        endpointTried
       }
     };
   } catch (error) {
