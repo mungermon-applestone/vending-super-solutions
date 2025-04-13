@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, CheckCircle, Loader2, RefreshCw } from 'lucide-react';
@@ -33,6 +34,14 @@ const testStrapiConnectionWithUrl = async (customUrl: string) => {
       `${baseUrl}/api`,                        // Just the API base path
       baseUrl                                  // The base URL itself
     ];
+    
+    // Add specific endpoints for the cloud.strapi.io domain
+    if (baseUrl.includes('cloud.strapi.io')) {
+      endpointsToTry.unshift(
+        `${baseUrl}/api/technology`,
+        `${baseUrl}/api/technologies`
+      );
+    }
     
     console.log('Endpoints to try:', endpointsToTry);
     
@@ -116,7 +125,7 @@ const SimpleConnectionTest: React.FC = () => {
   }>({ status: 'idle' });
   
   const [customUrl, setCustomUrl] = useState<string>(
-    import.meta.env.VITE_STRAPI_API_URL || 'https://strong-balance-0789566afc.strapiapp.com/api'
+    import.meta.env.VITE_STRAPI_API_URL || 'https://cloud.strapi.io/projects/applestone-strapi-6b2a2544e3'
   );
   
   const handleTestConnection = async () => {
