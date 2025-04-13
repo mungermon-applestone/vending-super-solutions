@@ -6,130 +6,78 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // Create a modified version of the test function that accepts a custom URL
-const testStrapiConnectionWithUrl = async (customUrl: string) => {
+const testStrapiConnectionWithUrl = async (customUrl: string, endpoint: string = '') => {
   try {
-    console.log(`Testing connection to: ${customUrl}`);
-    
-    // Process the URL to ensure it's correctly formatted
-    // Remove trailing slash if present
+    // Process the base URL to ensure it's correctly formatted
     let baseUrl = customUrl.trim();
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.slice(0, -1);
     }
     
-    // Remove /api suffix for now, we'll try with and without it
+    // Remove /api suffix for now, we'll handle it separately
     const hasApiSuffix = baseUrl.endsWith('/api');
     if (hasApiSuffix) {
       baseUrl = baseUrl.slice(0, -4);
     }
     
-    console.log(`Processed base URL: ${baseUrl}`);
+    // Determine the full URL to test based on endpoint provided
+    let urlToTest = baseUrl;
     
-    // Try multiple endpoints to find the right one
-    const endpointsToTry = [];
-    
-    // Strapi Cloud-specific endpoints
-    if (baseUrl.includes('cloud.strapi.io')) {
-      endpointsToTry.push(
-        `${baseUrl}/api/technology`,
-        `${baseUrl}/api/technologies`,
-        `${baseUrl}/api/content-api/technology`,
-        `${baseUrl}/api/content-api/technologies`,
-        `${baseUrl}/api/content-manager/collection-types`
-      );
+    // If endpoint is provided, use it
+    if (endpoint) {
+      // Make sure it starts with a slash
+      const formattedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+      
+      // Add /api if needed
+      const apiPath = hasApiSuffix || urlToTest.includes('/api/') ? '' : '/api';
+      urlToTest = `${baseUrl}${apiPath}${formattedEndpoint}`;
     }
     
-    // Regular endpoints for both Cloud and self-hosted
-    endpointsToTry.push(
-      `${baseUrl}/api/technology?populate=*`,  // Standard API path with singular
-      `${baseUrl}/api/technologies?populate=*`, // Standard API path with plural
-      `${baseUrl}/api/technology`,  // Without population
-      `${baseUrl}/api/technologies`, // Without population
-      `${baseUrl}/api/content-type-builder/content-types`, // Content type builder API
-      `${baseUrl}/api`, // Just the API base path
-      baseUrl     // The base URL itself
-    );
+    console.log(`Testing connection to: ${urlToTest}`);
     
-    // If it's the Strapi Cloud deployment URL format
-    if (baseUrl.includes('strapiapp.com')) {
-      // Try common variations of the API path for Strapi Cloud
-      endpointsToTry.unshift(
-        `${baseUrl}/api/technology`,
-        `${baseUrl}/api/technologies`,
-        // Add admin API endpoints to detect if we can at least connect
-        `${baseUrl}/admin/init`
-      );
-    }
+    const response = await fetch(urlToTest);
+    console.log(`Response from ${urlToTest}:`, response.status, response.statusText);
     
-    console.log('Endpoints to try:', endpointsToTry);
-    
-    let lastError = null;
-    let urlsTried = [];
-    
-    // Try each endpoint until one works
-    for (const url of endpointsToTry) {
+    if (response.ok) {
+      // Try to parse the response as JSON
       try {
-        console.log(`Trying endpoint: ${url}`);
-        urlsTried.push(url);
-        
-        const response = await fetch(url);
-        console.log(`Response from ${url}:`, response.status, response.statusText);
-        
-        if (response.ok) {
-          // Try to parse the response as JSON
-          try {
-            const data = await response.json();
-            console.log('Received JSON data:', data);
-            return {
-              success: true,
-              message: `Successfully connected to Strapi API at ${url}`,
-              data: data,
-              testedUrl: url,
-              allUrlsTried: urlsTried
-            };
-          } catch (parseError) {
-            console.log(`Response not JSON from ${url}:`, parseError);
-            // If it's HTML, it might be the Strapi admin UI
-            const text = await response.text();
-            if (text.includes('<!DOCTYPE html>')) {
-              console.log('Received HTML response, likely admin UI');
-              return {
-                success: true,
-                message: `Connected to Strapi at ${url} but received HTML (likely admin UI)`,
-                testedUrl: url,
-                allUrlsTried: urlsTried,
-                details: { 
-                  info: 'Received HTML response - this might be the Strapi admin interface',
-                  status: response.status
-                }
-              };
+        const data = await response.json();
+        console.log('Received JSON data:', data);
+        return {
+          success: true,
+          message: `Successfully connected to Strapi API at ${urlToTest}`,
+          data: data,
+          testedUrl: urlToTest
+        };
+      } catch (parseError) {
+        console.log(`Response not JSON from ${urlToTest}:`, parseError);
+        // If it's HTML, it might be the Strapi admin UI
+        const text = await response.text();
+        if (text.includes('<!DOCTYPE html>')) {
+          console.log('Received HTML response, likely admin UI');
+          return {
+            success: true,
+            message: `Connected to Strapi at ${urlToTest} but received HTML (likely admin UI)`,
+            testedUrl: urlToTest,
+            details: { 
+              info: 'Received HTML response - this might be the Strapi admin interface',
+              status: response.status
             }
-          }
-        } else {
-          lastError = {
-            status: response.status,
-            statusText: response.statusText,
-            url: url
           };
         }
-      } catch (error) {
-        console.error(`Error trying ${url}:`, error);
-        lastError = {
-          error: error instanceof Error ? error.message : String(error),
-          url: url
-        };
       }
     }
     
-    // If we got here, none of the endpoints worked
     return {
       success: false,
-      message: `Failed to connect: ${lastError?.status ? `Server returned ${lastError.status} ${lastError.statusText || ''}` : 'All connection attempts failed'}`,
+      message: `Failed to connect: Server returned ${response.status} ${response.statusText || ''}`,
       details: { 
-        ...lastError,
-        attemptedEndpoints: urlsTried
+        status: response.status,
+        statusText: response.statusText,
+        url: urlToTest
       }
     };
   } catch (error) {
@@ -149,23 +97,31 @@ const SimpleConnectionTest: React.FC = () => {
     details?: any;
   }>({ status: 'idle' });
   
-  // Use both URLs as potential defaults
-  const potentialUrls = [
-    'https://cloud.strapi.io/projects/applestone-strapi-6b2a2544e3',
-    'https://strong-balance-0789566afc.strapiapp.com'
-  ];
-  
-  const envUrl = import.meta.env.VITE_STRAPI_API_URL;
-  const defaultUrl = envUrl || potentialUrls[1]; // Prefer the strapiapp.com URL by default
+  // Successful URL from previous test
+  const defaultUrl = 'https://strong-balance-0789566afc.strapiapp.com';
   
   const [customUrl, setCustomUrl] = useState<string>(defaultUrl);
+  const [selectedEndpoint, setSelectedEndpoint] = useState<string>('/api/technology');
+  
+  // Common Strapi API endpoints to test
+  const commonEndpoints = [
+    { value: '/api/technology', label: '/api/technology (Singular)' },
+    { value: '/api/technologies', label: '/api/technologies (Plural)' },
+    { value: '/api/technology?populate=*', label: '/api/technology?populate=* (With relations)' },
+    { value: '/api/technologies?populate=*', label: '/api/technologies?populate=* (With relations)' },
+    { value: '/admin/init', label: '/admin/init (Admin UI check)' }
+  ];
   
   const handleTestConnection = async () => {
     setTestResult({ status: 'loading' });
     
     try {
-      // Use our custom function with the URL from state
-      const result = await testStrapiConnectionWithUrl(customUrl);
+      // Extract the endpoint from the custom URL if it contains one
+      let baseUrlToTest = customUrl;
+      let endpointToTest = selectedEndpoint;
+      
+      // Test the connection with the provided URL and endpoint
+      const result = await testStrapiConnectionWithUrl(baseUrlToTest, endpointToTest);
       
       if (result.success) {
         setTestResult({ 
@@ -192,53 +148,90 @@ const SimpleConnectionTest: React.FC = () => {
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="default">Default URL</TabsTrigger>
+          <TabsTrigger value="default">Working URL</TabsTrigger>
           <TabsTrigger value="custom">Custom URL</TabsTrigger>
         </TabsList>
         
         <TabsContent value="default" className="pt-2">
-          <div className="space-y-2">
-            <p className="text-sm">Test with one of these default URLs:</p>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <div className="flex-grow">
+                <Input 
+                  value={defaultUrl} 
+                  readOnly 
+                  className="bg-muted"
+                />
+              </div>
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={() => {
+                  setCustomUrl(defaultUrl);
+                  handleTestConnection();
+                }}
+              >
+                Test
+              </Button>
+            </div>
+            
             <div className="space-y-2">
-              {potentialUrls.map((url, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <Button 
-                    variant={customUrl === url ? "default" : "outline"} 
-                    size="sm"
-                    className="w-full justify-start overflow-hidden text-ellipsis"
-                    onClick={() => setCustomUrl(url)}
-                  >
-                    <span className="truncate">{url}</span>
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => {
-                      setCustomUrl(url);
-                      handleTestConnection();
-                    }}
-                  >
-                    Test
-                  </Button>
-                </div>
-              ))}
+              <Label>Select API Endpoint</Label>
+              <Select 
+                value={selectedEndpoint} 
+                onValueChange={setSelectedEndpoint}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an endpoint" />
+                </SelectTrigger>
+                <SelectContent>
+                  {commonEndpoints.map((endpoint) => (
+                    <SelectItem key={endpoint.value} value={endpoint.value}>
+                      {endpoint.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Select an endpoint to test with the base URL
+              </p>
             </div>
           </div>
         </TabsContent>
         
         <TabsContent value="custom" className="pt-2">
-          <div className="space-y-2">
-            <Label htmlFor="strapiUrl">Test with a different Strapi URL:</Label>
-            <Input 
-              id="strapiUrl"
-              value={customUrl}
-              onChange={(e) => setCustomUrl(e.target.value)}
-              placeholder="https://your-strapi-instance.com/api"
-              className="font-mono text-sm"
-            />
-            <p className="text-xs text-muted-foreground">
-              Make sure this points to your Strapi API base URL (with /api at the end if needed)
-            </p>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="strapiUrl">Test with a different Strapi URL:</Label>
+              <Input 
+                id="strapiUrl"
+                value={customUrl}
+                onChange={(e) => setCustomUrl(e.target.value)}
+                placeholder="https://your-strapi-instance.com"
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Make sure this points to your Strapi instance base URL
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>API Endpoint</Label>
+              <Select 
+                value={selectedEndpoint} 
+                onValueChange={setSelectedEndpoint}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an endpoint" />
+                </SelectTrigger>
+                <SelectContent>
+                  {commonEndpoints.map((endpoint) => (
+                    <SelectItem key={endpoint.value} value={endpoint.value}>
+                      {endpoint.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
@@ -262,6 +255,12 @@ const SimpleConnectionTest: React.FC = () => {
           </>
         )}
       </Button>
+      
+      <div className="h-px bg-border my-2" />
+      
+      <div className="text-xs text-muted-foreground">
+        Test URL: <span className="font-mono">{customUrl}{selectedEndpoint}</span>
+      </div>
       
       {testResult.status === 'success' && (
         <div className="mt-2 text-xs text-green-600 flex items-center">
@@ -289,23 +288,6 @@ const SimpleConnectionTest: React.FC = () => {
               </pre>
             </AccordionContent>
           </AccordionItem>
-          
-          {testResult.details.allUrlsTried && (
-            <AccordionItem value="urls-tried">
-              <AccordionTrigger className="text-xs font-medium">
-                URLs Attempted ({testResult.details.allUrlsTried.length})
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-1 text-xs">
-                  {testResult.details.allUrlsTried.map((url: string, index: number) => (
-                    <div key={index} className="font-mono p-1 border-b last:border-b-0">
-                      {url}
-                    </div>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          )}
         </Accordion>
       )}
     </div>
