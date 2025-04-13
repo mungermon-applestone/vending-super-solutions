@@ -23,7 +23,11 @@ const MigrateBusinessGoalData = () => {
       const migratedData = await migrateBusinessGoalData();
       console.log('Migration complete:', migratedData);
       
-      setResults(migratedData);
+      // Convert to array if needed, or use empty array if false is returned
+      const resultsArray = migratedData === false ? [] : 
+                          Array.isArray(migratedData) ? migratedData : 
+                          [migratedData];
+      setResults(resultsArray);
       setIsSuccess(true);
     } catch (err) {
       console.error('Migration error:', err);
@@ -40,7 +44,7 @@ const MigrateBusinessGoalData = () => {
         
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Migrate Business Goals Data</CardTitle>
+            <CardTitle>Migrate Business Goal Data</CardTitle>
             <CardDescription>
               This utility will migrate business goal data to the CMS. Use with caution as it may create duplicate entries.
             </CardDescription>

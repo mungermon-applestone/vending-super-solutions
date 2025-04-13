@@ -23,7 +23,9 @@ const MigrateMachinesData = () => {
       const migratedData = await migrateMachinesData();
       console.log('Migration complete:', migratedData);
       
-      setResults(migratedData);
+      // Convert to array if not already an array
+      const resultsArray = Array.isArray(migratedData) ? migratedData : [migratedData];
+      setResults(resultsArray);
       setIsSuccess(true);
     } catch (err) {
       console.error('Migration error:', err);

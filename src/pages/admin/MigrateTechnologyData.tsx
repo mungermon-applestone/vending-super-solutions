@@ -23,7 +23,11 @@ const MigrateTechnologyData = () => {
       const migratedData = await migrateTechnologyData();
       console.log('Migration complete:', migratedData);
       
-      setResults(migratedData);
+      // Convert to array if needed, or use empty array if false is returned
+      const resultsArray = migratedData === false ? [] : 
+                          Array.isArray(migratedData) ? migratedData : 
+                          [migratedData];
+      setResults(resultsArray);
       setIsSuccess(true);
     } catch (err) {
       console.error('Migration error:', err);
