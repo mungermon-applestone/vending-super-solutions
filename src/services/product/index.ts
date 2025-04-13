@@ -10,7 +10,7 @@ import {
   updateProductBenefits, 
   updateProductFeatures,
   checkProductSlugExists
-} from './productHelpers';
+} from './helpers';
 
 export { 
   // Main operations
