@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +11,7 @@ import { ContentProviderType } from '@/services/cms/adapters/types';
 import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
 import { testCMSConnection } from '@/services/cms/utils/connection';
 import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
-import { fetchTechnologiesSafe } from '@/services/cms/contentTypes/technologies';
+import { fetchTechnologies } from '@/services/cms/contentTypes/technologies';
 
 const StrapiConfig: React.FC = () => {
   const { toast } = useToast();
@@ -81,7 +80,7 @@ const StrapiConfig: React.FC = () => {
         // Also test fetching technologies
         try {
           console.log('Testing technology fetch...');
-          const technologies = await fetchTechnologiesSafe({ limit: 5 });
+          const technologies = await fetchTechnologies({ limit: 5 });
           console.log(`Fetched ${technologies.length} technologies`);
           
           // If we get here, the connection is good
