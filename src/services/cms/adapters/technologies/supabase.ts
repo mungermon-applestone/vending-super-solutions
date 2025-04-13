@@ -359,19 +359,28 @@ export const supabaseTechnologyAdapter: TechnologyAdapter = {
       if (sections && sections.length > 0) {
         const sectionIds = sections.map(section => section.id);
         
-        // Delete feature items
-        const { error: featureItemsError } = await supabase
-          .from('technology_feature_items')
-          .delete()
-          .in('feature_id', 
-            supabase
-              .from('technology_features')
-              .select('id')
-              .in('section_id', sectionIds)
-          );
+        // First, we need to get all feature IDs for these sections
+        const { data: features, error: featuresQueryError } = await supabase
+          .from('technology_features')
+          .select('id')
+          .in('section_id', sectionIds);
           
-        if (featureItemsError) {
-          throw handleCMSError(featureItemsError, 'delete (feature items)', 'Technology', id);
+        if (featuresQueryError) {
+          throw handleCMSError(featuresQueryError, 'delete (fetch features)', 'Technology', id);
+        }
+        
+        // Now use the feature IDs array to delete feature items
+        if (features && features.length > 0) {
+          const featureIds = features.map(feature => feature.id);
+          
+          const { error: featureItemsError } = await supabase
+            .from('technology_feature_items')
+            .delete()
+            .in('feature_id', featureIds);
+            
+          if (featureItemsError) {
+            throw handleCMSError(featureItemsError, 'delete (feature items)', 'Technology', id);
+          }
         }
         
         // Delete features
