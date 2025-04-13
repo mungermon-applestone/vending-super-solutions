@@ -1,99 +1,116 @@
 
 import { getCMSProviderConfig } from '../providerConfig';
 import { ContentProviderType } from '../adapters/types';
-import { buildStrapiUrl, createStrapiHeaders } from './strapiConfig';
+import { getStrapiBaseUrl, getStrapiApiKey } from './strapiConfig';
 
 /**
- * Test connection to Strapi CMS
- * @returns Connection status and details
+ * Result of a connection test
  */
-export async function testStrapiConnection(): Promise<{
+export interface ConnectionTestResult {
   success: boolean;
-  statusCode?: number;
   message: string;
   details?: any;
-}> {
+}
+
+/**
+ * Test the connection to the configured CMS provider
+ * @returns Promise resolving to connection test result
+ */
+export async function testCMSConnection(): Promise<ConnectionTestResult> {
   const config = getCMSProviderConfig();
   
-  if (config.type !== ContentProviderType.STRAPI) {
-    return {
-      success: false,
-      message: 'Current CMS provider is not Strapi'
-    };
-  }
-  
-  if (!config.apiUrl) {
-    return {
-      success: false,
-      message: 'Strapi API URL is not configured'
-    };
-  }
+  console.log(`[testCMSConnection] Testing connection to ${config.type} CMS`);
   
   try {
-    // Test connection to Strapi API
-    console.log(`[testStrapiConnection] Testing connection to ${config.apiUrl}`);
-    const url = buildStrapiUrl('/api');
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: createStrapiHeaders()
-    });
-    
-    const statusCode = response.status;
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      return {
-        success: false,
-        statusCode,
-        message: `Failed to connect to Strapi API: ${response.statusText} (${statusCode})`,
-        details: errorText
-      };
+    // Test connection based on provider type
+    if (config.type === ContentProviderType.STRAPI) {
+      return await testStrapiConnection();
     }
     
-    const data = await response.json();
-    
+    // Supabase is always connected if we got this far
     return {
       success: true,
-      statusCode,
-      message: 'Successfully connected to Strapi API',
-      details: data
+      message: 'Connection to Supabase established'
     };
   } catch (error) {
-    console.error('[testStrapiConnection] Connection error:', error);
+    console.error('[testCMSConnection] Error testing connection:', error);
     return {
       success: false,
-      message: `Error connecting to Strapi API: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      details: error
+      message: error instanceof Error ? error.message : 'Unknown error'
     };
   }
 }
 
 /**
- * Test connection to the current CMS provider
- * @returns Connection status and details
+ * Test the connection to Strapi CMS
  */
-export async function testCMSConnection(): Promise<{
-  success: boolean;
-  statusCode?: number;
-  message: string;
-  provider: string;
-  details?: any;
-}> {
-  const config = getCMSProviderConfig();
+async function testStrapiConnection(): Promise<ConnectionTestResult> {
+  const baseUrl = getStrapiBaseUrl();
+  const apiKey = getStrapiApiKey();
   
-  if (config.type === ContentProviderType.STRAPI) {
-    const result = await testStrapiConnection();
+  if (!baseUrl) {
     return {
-      ...result,
-      provider: 'Strapi'
+      success: false,
+      message: 'Strapi API URL not configured'
     };
   }
   
-  // Default to Supabase
-  return {
-    success: true,
-    message: 'Using Supabase as CMS provider (no connection test needed)',
-    provider: 'Supabase'
-  };
+  try {
+    // Try to fetch the Strapi server info
+    const url = `${baseUrl}`;
+    
+    // Build headers if API key is available
+    const headers: Record<string, string> = {};
+    if (apiKey) {
+      headers.Authorization = `Bearer ${apiKey}`;
+    }
+    
+    // Make the request
+    const response = await fetch(url, { headers });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to connect to Strapi: ${response.statusText}`);
+    }
+    
+    // Check API key if provided
+    if (apiKey) {
+      try {
+        // Try to fetch a protected endpoint to verify API key
+        const authCheckResponse = await fetch(`${baseUrl}/users/me`, {
+          headers: { Authorization: `Bearer ${apiKey}` }
+        });
+        
+        if (!authCheckResponse.ok) {
+          return {
+            success: false,
+            message: 'Connected to Strapi, but API key validation failed'
+          };
+        }
+        
+        return {
+          success: true,
+          message: 'Successfully connected to Strapi with valid API key'
+        };
+      } catch (authError) {
+        return {
+          success: false,
+          message: 'Connected to Strapi, but failed to validate API key',
+          details: authError
+        };
+      }
+    }
+    
+    return {
+      success: true,
+      message: 'Successfully connected to Strapi (no API key validation)'
+    };
+  } catch (error) {
+    console.error('[testStrapiConnection] Error connecting to Strapi:', error);
+    return {
+      success: false,
+      message: error instanceof Error 
+        ? `Failed to connect to Strapi: ${error.message}`
+        : 'Unknown error connecting to Strapi'
+    };
+  }
 }

@@ -3,6 +3,7 @@ import { CMSBusinessGoal } from '@/types/cms';
 import { BusinessGoalAdapter, BusinessGoalCreateInput, BusinessGoalUpdateInput } from '../types';
 import { buildBusinessGoalEndpoint, buildStrapiFilters, fetchFromStrapi } from './helpers';
 import { transformStrapiDataToBusinessGoal, transformInputToStrapiFormat } from './transformers';
+import { getStrapiApiKey, getStrapiBaseUrl } from '../../../utils/strapiConfig';
 
 /**
  * Implementation of the Business Goal Adapter for Strapi CMS
@@ -89,16 +90,42 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
   create: async (data: BusinessGoalCreateInput): Promise<CMSBusinessGoal> => {
     console.log('[strapiBusinessGoalAdapter] Creating new business goal:', data);
     
+    const baseUrl = getStrapiBaseUrl();
+    const apiKey = getStrapiApiKey();
+    
+    if (!baseUrl) {
+      throw new Error('Strapi API URL not configured');
+    }
+    
+    if (!apiKey) {
+      throw new Error('Strapi API key not configured, required for content creation');
+    }
+    
     try {
-      // Transform our data format to Strapi format
+      // Transform our input data to Strapi format
       const strapiData = transformInputToStrapiFormat(data);
       
-      const url = buildBusinessGoalEndpoint();
+      // Send the POST request to create the business goal
+      const response = await fetch(`${baseUrl}/business-goals`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({ data: strapiData })
+      });
       
-      const responseData = await fetchFromStrapi<any>(url, 'POST', strapiData);
+      if (!response.ok) {
+        throw new Error(`Failed to create business goal in Strapi: ${response.statusText}`);
+      }
       
-      // Return the created business goal
-      return transformStrapiDataToBusinessGoal(responseData.data);
+      const responseData = await response.json();
+      
+      // Get the ID of the newly created business goal
+      const newId = responseData.data.id;
+      
+      // Fetch the complete business goal with all populated relations
+      return await this.getById(newId);
     } catch (error) {
       console.error('[strapiBusinessGoalAdapter] Error creating business goal:', error);
       throw error;
@@ -108,18 +135,39 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
   update: async (id: string, data: BusinessGoalUpdateInput): Promise<CMSBusinessGoal> => {
     console.log(`[strapiBusinessGoalAdapter] Updating business goal with ID: ${id}`, data);
     
+    const baseUrl = getStrapiBaseUrl();
+    const apiKey = getStrapiApiKey();
+    
+    if (!baseUrl) {
+      throw new Error('Strapi API URL not configured');
+    }
+    
+    if (!apiKey) {
+      throw new Error('Strapi API key not configured, required for content update');
+    }
+    
     try {
-      // Transform our data format to Strapi format
+      // Transform our input data to Strapi format
       const strapiData = transformInputToStrapiFormat(data);
       
-      const url = buildBusinessGoalEndpoint(id);
+      // Send the PUT request to update the business goal
+      const response = await fetch(`${baseUrl}/business-goals/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({ data: strapiData })
+      });
       
-      const responseData = await fetchFromStrapi<any>(url, 'PUT', strapiData);
+      if (!response.ok) {
+        throw new Error(`Failed to update business goal in Strapi: ${response.statusText}`);
+      }
       
-      // Return the updated business goal
-      return transformStrapiDataToBusinessGoal(responseData.data);
+      // Fetch the updated business goal with all populated relations
+      return await this.getById(id);
     } catch (error) {
-      console.error(`[strapiBusinessGoalAdapter] Error updating business goal "${id}":`, error);
+      console.error(`[strapiBusinessGoalAdapter] Error updating business goal with ID "${id}":`, error);
       throw error;
     }
   },
@@ -127,14 +175,33 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
   delete: async (id: string): Promise<boolean> => {
     console.log(`[strapiBusinessGoalAdapter] Deleting business goal with ID: ${id}`);
     
+    const baseUrl = getStrapiBaseUrl();
+    const apiKey = getStrapiApiKey();
+    
+    if (!baseUrl) {
+      throw new Error('Strapi API URL not configured');
+    }
+    
+    if (!apiKey) {
+      throw new Error('Strapi API key not configured, required for content deletion');
+    }
+    
     try {
-      const url = buildBusinessGoalEndpoint(id);
+      // Send the DELETE request
+      const response = await fetch(`${baseUrl}/business-goals/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${apiKey}`
+        }
+      });
       
-      await fetchFromStrapi<boolean>(url, 'DELETE');
+      if (!response.ok) {
+        throw new Error(`Failed to delete business goal in Strapi: ${response.statusText}`);
+      }
       
       return true;
     } catch (error) {
-      console.error(`[strapiBusinessGoalAdapter] Error deleting business goal "${id}":`, error);
+      console.error(`[strapiBusinessGoalAdapter] Error deleting business goal with ID "${id}":`, error);
       throw error;
     }
   },
@@ -143,43 +210,39 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
     console.log(`[strapiBusinessGoalAdapter] Cloning business goal with ID: ${id}`);
     
     try {
-      // First get the business goal to clone
-      const sourceGoal = await strapiBusinessGoalAdapter.getById(id);
-      
-      if (!sourceGoal) {
+      // First, get the business goal to clone
+      const businessGoal = await this.getById(id);
+      if (!businessGoal) {
         throw new Error(`Business goal with ID "${id}" not found`);
       }
       
-      // Create a new slug with "-copy" suffix
-      const newSlug = `${sourceGoal.slug}-copy`;
-      
-      // Create a copy with modified title and slug
-      const cloneData: BusinessGoalCreateInput = {
-        title: `${sourceGoal.title} (Copy)`,
-        slug: newSlug,
-        description: sourceGoal.description,
-        visible: sourceGoal.visible,
-        icon: typeof sourceGoal.icon === 'string' ? sourceGoal.icon : undefined,
-        image: sourceGoal.image ? {
-          url: sourceGoal.image_url || '',
-          alt: sourceGoal.image_alt || '',
+      // Create a new business goal based on the existing one
+      const clonedBusinessGoal: BusinessGoalCreateInput = {
+        title: `${businessGoal.title} (Copy)`,
+        slug: `${businessGoal.slug}-copy-${Math.floor(Date.now() / 1000)}`,
+        description: businessGoal.description,
+        visible: businessGoal.visible,
+        icon: businessGoal.icon,
+        image: businessGoal.image ? {
+          url: businessGoal.image.url,
+          alt: businessGoal.image.alt
         } : undefined,
-        benefits: sourceGoal.benefits,
-        features: sourceGoal.features?.map(feature => ({
+        benefits: businessGoal.benefits,
+        features: businessGoal.features?.map(feature => ({
           title: feature.title,
           description: feature.description,
-          icon: typeof feature.icon === 'string' ? feature.icon : undefined,
+          icon: feature.icon,
           screenshot: feature.screenshot ? {
             url: feature.screenshot.url,
-            alt: feature.screenshot.alt,
+            alt: feature.screenshot.alt
           } : undefined
         }))
       };
       
-      // Create the clone
-      return await strapiBusinessGoalAdapter.create(cloneData);
+      // Create the cloned business goal
+      return await this.create(clonedBusinessGoal);
     } catch (error) {
-      console.error(`[strapiBusinessGoalAdapter] Error cloning business goal "${id}":`, error);
+      console.error(`[strapiBusinessGoalAdapter] Error cloning business goal with ID "${id}":`, error);
       throw error;
     }
   }

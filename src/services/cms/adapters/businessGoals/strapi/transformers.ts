@@ -1,68 +1,65 @@
 
-import { CMSBusinessGoal, CMSFeature, CMSImage } from '@/types/cms';
+import { CMSBusinessGoal, CMSFeature } from '@/types/cms';
 import { BusinessGoalCreateInput, BusinessGoalUpdateInput } from '../types';
 
 /**
- * Transform Strapi data structure to our internal CMSBusinessGoal format
- * @param data Strapi business goal data
- * @returns CMSBusinessGoal object
+ * Transform Strapi business goal data to our internal format
  */
-export function transformStrapiDataToBusinessGoal(data: any): CMSBusinessGoal {
-  const attributes = data.attributes;
+export function transformStrapiDataToBusinessGoal(strapiData: any): CMSBusinessGoal {
+  const attributes = strapiData.attributes;
   
-  // Transform main business goal data
   const businessGoal: CMSBusinessGoal = {
-    id: data.id,
+    id: strapiData.id,
     title: attributes.title,
     slug: attributes.slug,
     description: attributes.description,
     visible: attributes.visible ?? true,
+    icon: attributes.icon,
+    image: attributes.image?.data ? {
+      id: attributes.image.data.id,
+      url: attributes.image.data.attributes.url,
+      alt: attributes.image.data.attributes.alternativeText || attributes.image.data.attributes.alt || attributes.title,
+      width: attributes.image.data.attributes.width,
+      height: attributes.image.data.attributes.height
+    } : undefined,
     created_at: attributes.createdAt,
     updated_at: attributes.updatedAt,
-    icon: attributes.icon || undefined
+    features: [],
+    benefits: []
   };
   
-  // Transform image if available
-  if (attributes.image && attributes.image.data) {
-    const imageData = attributes.image.data;
-    const imageAttr = imageData.attributes;
-    
-    businessGoal.image = {
-      id: imageData.id,
-      url: imageAttr.url,
-      alt: imageAttr.alternativeText || attributes.title,
-      width: imageAttr.width,
-      height: imageAttr.height
-    };
-    
-    businessGoal.image_url = imageAttr.url;
-    businessGoal.image_alt = imageAttr.alternativeText || attributes.title;
+  // Handle Strapi media field format which might be different
+  if (attributes.image_url) {
+    businessGoal.image_url = attributes.image_url;
+  } else if (businessGoal.image) {
+    businessGoal.image_url = businessGoal.image.url;
   }
   
-  // Transform benefits if available
-  if (attributes.benefits && attributes.benefits.data) {
-    businessGoal.benefits = attributes.benefits.data.map((item: any) => item.attributes.text);
+  if (attributes.image_alt) {
+    businessGoal.image_alt = attributes.image_alt;
+  } else if (businessGoal.image) {
+    businessGoal.image_alt = businessGoal.image.alt;
   }
   
-  // Transform features if available
+  // Process features if they exist
   if (attributes.features && attributes.features.data) {
-    businessGoal.features = attributes.features.data.map((featureData: any): CMSFeature => {
-      const featureAttr = featureData.attributes;
+    businessGoal.features = attributes.features.data.map((featureData: any) => {
+      const featureAttributes = featureData.attributes;
       const feature: CMSFeature = {
         id: featureData.id,
-        title: featureAttr.title,
-        description: featureAttr.description,
-        icon: featureAttr.icon,
-        display_order: featureAttr.display_order
+        title: featureAttributes.title,
+        description: featureAttributes.description,
+        icon: featureAttributes.icon,
+        display_order: featureAttributes.display_order || 0
       };
       
-      // Add screenshot if available
-      if (featureAttr.screenshot && featureAttr.screenshot.data) {
-        const screenshotData = featureAttr.screenshot.data;
+      // Process screenshot if it exists
+      if (featureAttributes.screenshot && featureAttributes.screenshot.data) {
+        const screenshotData = featureAttributes.screenshot.data;
         feature.screenshot = {
           id: screenshotData.id,
           url: screenshotData.attributes.url,
-          alt: screenshotData.attributes.alternativeText || featureAttr.title,
+          alt: screenshotData.attributes.alternativeText || screenshotData.attributes.alt || `${feature.title} screenshot`,
           width: screenshotData.attributes.width,
           height: screenshotData.attributes.height
         };
@@ -72,65 +69,39 @@ export function transformStrapiDataToBusinessGoal(data: any): CMSBusinessGoal {
     });
   }
   
+  // Process benefits if they exist
+  if (attributes.benefits && attributes.benefits.data) {
+    businessGoal.benefits = attributes.benefits.data.map((benefitData: any) => 
+      benefitData.attributes.text
+    );
+  }
+  
   return businessGoal;
 }
 
 /**
- * Transform our internal data structure to Strapi format for creating/updating
- * @param data BusinessGoalCreateInput or BusinessGoalUpdateInput
- * @returns Strapi formatted data
+ * Transform our internal input format to Strapi format for creating/updating business goals
  */
 export function transformInputToStrapiFormat(data: BusinessGoalCreateInput | BusinessGoalUpdateInput): any {
-  // Base data transformation
-  const strapiData: any = {
+  // Base business goal data
+  const strapiData: Record<string, any> = {
     title: data.title,
     slug: data.slug,
     description: data.description,
-    visible: data.visible !== undefined ? data.visible : true,
-    icon: data.icon || null
+    visible: data.visible || true,
+    icon: data.icon
   };
   
-  // Handle image if provided
+  // Handle image
   if (data.image) {
-    if (typeof data.image === 'string') {
-      // If image is provided as ID
-      strapiData.image = data.image;
-    } else if (data.image.url) {
-      // If image is provided as object with URL
-      // This would require handling file upload separately
-      // For now, we'll just log a warning
-      console.warn('[transformInputToStrapiFormat] Image object provided - file upload handling required');
-    }
+    strapiData.image = {
+      url: data.image.url,
+      alt: data.image.alt
+    };
   }
   
-  // Handle benefits if provided
-  if (data.benefits && data.benefits.length > 0) {
-    strapiData.benefits = data.benefits.map(text => ({ text }));
-  }
-  
-  // Handle features if provided
-  if (data.features && data.features.length > 0) {
-    strapiData.features = data.features.map((feature, index) => {
-      const featureData: any = {
-        title: feature.title,
-        description: feature.description,
-        icon: feature.icon || null,
-        display_order: index
-      };
-      
-      // Handle screenshot if provided
-      if (feature.screenshot) {
-        if (typeof feature.screenshot === 'string') {
-          featureData.screenshot = feature.screenshot;
-        } else if (feature.screenshot.url) {
-          // This would require handling file upload separately
-          console.warn('[transformInputToStrapiFormat] Screenshot object provided - file upload handling required');
-        }
-      }
-      
-      return featureData;
-    });
-  }
+  // We would need to handle features and benefits separately
+  // as Strapi often requires creating related entities in separate requests
   
   return strapiData;
 }

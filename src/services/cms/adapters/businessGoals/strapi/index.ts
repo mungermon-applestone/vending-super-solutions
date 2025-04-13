@@ -1,6 +1,7 @@
 
-import { strapiBusinessGoalAdapter } from './adapter';
+import { adapter } from './adapter';
 
-export { strapiBusinessGoalAdapter };
-export * from './helpers';
-export * from './transformers';
+/**
+ * Re-export the adapter implementation
+ */
+export const strapiBusinessGoalAdapter = adapter;

@@ -1,98 +1,73 @@
-
-import { getCMSProviderConfig } from '../../../providerConfig';
-import { buildStrapiUrl, createStrapiHeaders } from '../../../utils/strapiConfig';
-import { STRAPI_CONFIG } from '@/config/cms';
+import { getStrapiBaseUrl, getStrapiApiKey } from '../../../utils/strapiConfig';
 
 /**
- * Builds the Strapi API URL for business goal endpoints
- * @param endpoint Specific endpoint or path after the base business goal URL
- * @returns Full Strapi API URL
+ * Build the endpoint URL for business goals
+ * @param path Optional path to append to the base endpoint
+ * @returns The full URL for the business goals endpoint
  */
-export function buildBusinessGoalEndpoint(endpoint?: string): string {
-  const basePath = STRAPI_CONFIG.ENDPOINTS.BUSINESS_GOALS;
-  if (!endpoint) {
-    return buildStrapiUrl(basePath);
-  }
-  
-  // Ensure we don't have double slashes
-  if (endpoint.startsWith('/')) {
-    return buildStrapiUrl(`${basePath}${endpoint}`);
-  }
-  
-  return buildStrapiUrl(`${basePath}/${endpoint}`);
-}
-
-/**
- * Converts filter parameters to Strapi query format
- * @param filters Object containing filter parameters
- * @returns URLSearchParams object with formatted Strapi filters
- */
-export function buildStrapiFilters(filters?: Record<string, any>): URLSearchParams {
-  const queryParams = new URLSearchParams();
-  
-  // Add populate parameter to include related data
-  queryParams.append('populate', 'benefits');
-  queryParams.append('populate', 'features');
-  queryParams.append('populate', 'features.screenshot');
-  queryParams.append('populate', 'image');
-  
-  if (!filters || Object.keys(filters).length === 0) {
-    return queryParams;
-  }
-  
-  // Handle visibility filter
-  if (filters.visible !== undefined) {
-    queryParams.append('filters[visible][$eq]', filters.visible.toString());
-  }
-  
-  // Handle search filter
-  if (filters.search) {
-    queryParams.append('filters[$or][0][title][$containsi]', filters.search);
-    queryParams.append('filters[$or][1][description][$containsi]', filters.search);
-    queryParams.append('filters[$or][2][slug][$containsi]', filters.search);
-  }
-  
-  return queryParams;
-}
-
-/**
- * Fetches data from Strapi API
- * @param url API endpoint URL
- * @param method HTTP method
- * @param body Optional request body
- * @returns Response data
- */
-export async function fetchFromStrapi<T>(
-  url: string, 
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-  body?: any
-): Promise<T> {
-  const config = getCMSProviderConfig();
-  if (!config.apiUrl) {
+export function buildBusinessGoalEndpoint(path?: string): string {
+  const baseUrl = getStrapiBaseUrl();
+  if (!baseUrl) {
     throw new Error('Strapi API URL not configured');
   }
   
-  const options: RequestInit = {
-    method,
-    headers: createStrapiHeaders()
-  };
+  const endpoint = `${baseUrl}/business-goals`;
   
-  if (body && (method === 'POST' || method === 'PUT')) {
-    options.body = JSON.stringify({ data: body });
+  if (path) {
+    // If path starts with ? or /, just append it
+    if (path.startsWith('?') || path.startsWith('/')) {
+      return `${endpoint}${path}`;
+    }
+    // Otherwise, add / before the path
+    return `${endpoint}/${path}`;
   }
   
-  console.log(`[fetchFromStrapi] ${method} ${url}`);
+  return endpoint;
+}
+
+/**
+ * Build query parameters for filtering and population
+ */
+export function buildStrapiFilters(filters?: Record<string, any>): URLSearchParams {
+  const params = new URLSearchParams();
+  
+  // Add default population
+  params.append('populate', 'image,features,features.screenshot,benefits');
+  
+  // Add filters if provided
+  if (filters && Object.keys(filters).length > 0) {
+    for (const [key, value] of Object.entries(filters)) {
+      if (value !== undefined && value !== null) {
+        params.append(`filters[${key}]`, String(value));
+      }
+    }
+  }
+  
+  return params;
+}
+
+/**
+ * Fetch data from Strapi API with authorization if available
+ */
+export async function fetchFromStrapi<T>(url: string, method: string = 'GET', body?: any): Promise<T> {
+  const apiKey = getStrapiApiKey();
+  
+  // Build request options
+  const options: RequestInit = {
+    method,
+    headers: {
+      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+      ...(body ? { 'Content-Type': 'application/json' } : {})
+    },
+    ...(body ? { body: JSON.stringify({ data: body }) } : {})
+  };
+  
+  // Make the request
   const response = await fetch(url, options);
   
   if (!response.ok) {
-    const errorText = await response.text();
-    console.error(`[fetchFromStrapi] Error: ${response.status} ${response.statusText}`, errorText);
     throw new Error(`Strapi API error: ${response.status} ${response.statusText}`);
   }
   
-  if (method === 'DELETE') {
-    return true as unknown as T;
-  }
-  
-  return await response.json();
+  return response.json() as Promise<T>;
 }

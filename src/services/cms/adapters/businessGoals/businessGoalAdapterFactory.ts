@@ -1,8 +1,8 @@
 
-import { BusinessGoalAdapter } from './types';
 import { ContentProviderConfig, ContentProviderType } from '../types';
-import { supabaseBusinessGoalAdapter } from './supabaseBusinessGoalAdapter';
+import { BusinessGoalAdapter } from './types';
 import { strapiBusinessGoalAdapter } from './strapiBusinessGoalAdapter';
+import { supabaseBusinessGoalAdapter } from './supabaseBusinessGoalAdapter';
 
 /**
  * Factory function to get the appropriate business goal adapter based on configuration
