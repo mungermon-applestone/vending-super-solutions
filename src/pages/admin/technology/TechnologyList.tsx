@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,11 +10,32 @@ import TechnologyTableRow from '@/components/admin/technology/TechnologyTableRow
 import StrapiIntegrationInfo from '@/components/admin/technology/StrapiIntegrationInfo';
 import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { cloneTechnology, deleteTechnology } from '@/services/cms/technology';
+import { CMSTechnology } from '@/types/cms';
 
 const TechnologyList: React.FC = () => {
   const { technologies, isLoading } = useTechnologySections();
   const cmsInfo = getCMSInfo();
   const isStrapi = cmsInfo.provider === 'Strapi';
+  const { toast } = useToast();
+  const [isCloningId, setIsCloningId] = useState<string | null>(null);
+  
+  const handleDeleteClick = (technology: CMSTechnology) => {
+    // This would normally open a confirmation dialog
+    console.log(`Delete clicked for ${technology.title}`);
+  };
+  
+  const handleCloneClick = async (technology: CMSTechnology) => {
+    try {
+      setIsCloningId(technology.id);
+      await cloneTechnology(technology.id, { toast });
+    } catch (error) {
+      console.error('Error cloning technology:', error);
+    } finally {
+      setIsCloningId(null);
+    }
+  };
   
   return (
     <Layout>
@@ -76,6 +97,9 @@ const TechnologyList: React.FC = () => {
                   <TechnologyTableRow 
                     key={technology.id} 
                     technology={technology}
+                    onDeleteClick={handleDeleteClick}
+                    onCloneClick={handleCloneClick}
+                    isCloningId={isCloningId}
                   />
                 ))
               )}
