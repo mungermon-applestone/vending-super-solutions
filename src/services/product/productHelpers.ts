@@ -114,24 +114,28 @@ export const updateProductBenefits = async (data: ProductFormData, productId: st
       throw new Error(deleteError.message);
     }
     
-    // Filter out empty benefits and insert the new ones
+    // Only insert benefits that aren't empty strings
     const validBenefits = data.benefits.filter(benefit => benefit.trim() !== '');
     
-    if (validBenefits.length > 0) {
-      const benefitsToInsert = validBenefits.map((benefit, index) => ({
-        product_type_id: productId,
-        benefit: benefit,
-        display_order: index
-      }));
+    // Skip the insertion step if there are no valid benefits to insert
+    if (validBenefits.length === 0) {
+      console.log('[productHelpers] No valid benefits to insert');
+      return;
+    }
+    
+    const benefitsToInsert = validBenefits.map((benefit, index) => ({
+      product_type_id: productId,
+      benefit: benefit,
+      display_order: index
+    }));
 
-      const { error: insertError } = await supabase
-        .from('product_type_benefits')
-        .insert(benefitsToInsert);
+    const { error: insertError } = await supabase
+      .from('product_type_benefits')
+      .insert(benefitsToInsert);
 
-      if (insertError) {
-        console.error('[productHelpers] Error inserting benefits:', insertError);
-        throw new Error(insertError.message);
-      }
+    if (insertError) {
+      console.error('[productHelpers] Error inserting benefits:', insertError);
+      throw new Error(insertError.message);
     }
 
     console.log(`[productHelpers] ${validBenefits.length} benefits inserted successfully`);
@@ -249,3 +253,4 @@ export const processBenefits = (benefits: string[]): string[] => {
       return true;
     });
 };
+

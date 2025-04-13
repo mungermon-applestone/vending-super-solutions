@@ -32,7 +32,7 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     const finalBenefits = updatedBenefits.length === 0 ? [''] : updatedBenefits;
     
     // Update the form values
-    form.setValue('benefits', finalBenefits);
+    form.setValue('benefits', finalBenefits, { shouldDirty: true, shouldTouch: true });
     
     console.log(`[ProductBenefits] Removed benefit at index ${index}, now have ${finalBenefits.length} benefits`);
     
@@ -91,6 +91,16 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
   const totalBenefitsCount = form.watch('benefits').filter(benefit => benefit.trim() !== '').length;
   const hasDuplicates = uniqueBenefitsCount < totalBenefitsCount;
 
+  // Debug the current benefits state when it changes
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      if (value.benefits) {
+        console.log('[ProductBenefits] Current benefits:', value.benefits);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
   return (
     <Card>
       <CardHeader>
@@ -117,7 +127,7 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
       </CardHeader>
       <CardContent>
         {form.watch('benefits').map((benefit, index) => (
-          <div key={index} className="flex items-center gap-2 mb-4">
+          <div key={`benefit-${index}`} className="flex items-center gap-2 mb-4">
             <FormField
               control={form.control}
               name={`benefits.${index}`}

@@ -66,6 +66,11 @@ export const updateProduct = async (data: ProductFormData, originalSlug: string,
 
     console.log('[productService] Product type updated successfully');
     
+    // Process and clean the benefits data
+    console.log('[productService] Original benefits before processing:', data.benefits);
+    data.benefits = data.benefits.filter(benefit => benefit.trim() !== '');
+    console.log('[productService] Cleaned benefits after filtering empty ones:', data.benefits);
+    
     // Update product image
     await updateProductImage(data, productId);
     
