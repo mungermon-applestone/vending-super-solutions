@@ -39,6 +39,13 @@ export interface SyncStatus {
   summary?: SyncSummary;
 }
 
+// ContentType summary format
+export interface ContentTypeSummary {
+  type: string;
+  success: number;
+  errors: number;
+}
+
 // Sync completion summary
 export interface SyncSummary {
   successCount: number;
@@ -46,7 +53,7 @@ export interface SyncSummary {
   startTime: Date;
   endTime: Date;
   totalItems?: number;
-  contentTypes?: string[];
+  contentTypes?: (string | ContentTypeSummary)[];
 }
 
 /**
@@ -71,6 +78,7 @@ export function useCMSSynchronization() {
     const startTime = new Date();
     let successCount = 0;
     let errorCount = 0;
+    const contentTypeSummaries: ContentTypeSummary[] = [];
 
     try {
       for (const contentType of options.contentTypes) {
@@ -80,16 +88,31 @@ export function useCMSSynchronization() {
               const techResult = await synchronizeTechnologies(options);
               successCount += techResult.success;
               errorCount += techResult.error;
+              contentTypeSummaries.push({
+                type: contentType,
+                success: techResult.success,
+                errors: techResult.error
+              });
               break;
             case 'productTypes':
               const productResult = await synchronizeProductTypes(options);
               successCount += productResult.success;
               errorCount += productResult.error;
+              contentTypeSummaries.push({
+                type: contentType,
+                success: productResult.success,
+                errors: productResult.error
+              });
               break;
             case 'businessGoals':
               const goalResult = await synchronizeBusinessGoals(options);
               successCount += goalResult.success;
               errorCount += goalResult.error;
+              contentTypeSummaries.push({
+                type: contentType,
+                success: goalResult.success,
+                errors: goalResult.error
+              });
               break;
             // Add more content types as needed
             default:
@@ -98,6 +121,11 @@ export function useCMSSynchronization() {
           }
         } catch (error) {
           errorCount++;
+          contentTypeSummaries.push({
+            type: contentType,
+            success: 0,
+            errors: 1
+          });
           if (options.onError) {
             options.onError(contentType, error instanceof Error ? error : new Error(String(error)));
           }
@@ -110,7 +138,7 @@ export function useCMSSynchronization() {
         startTime,
         endTime: new Date(),
         totalItems: successCount + errorCount,
-        contentTypes: options.contentTypes
+        contentTypes: contentTypeSummaries
       };
 
       if (options.onComplete) {

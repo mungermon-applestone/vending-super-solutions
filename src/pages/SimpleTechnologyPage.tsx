@@ -8,10 +8,38 @@ import { useTechnologySections } from '@/hooks/useTechnologySections';
 import { useIsFetching } from '@tanstack/react-query';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TechFeature } from '@/types/technology';
+
+// Helper function to transform CMSTechnology data to the format expected by TechnologySection
+const mapTechnologyData = (tech) => {
+  // Extract features from technology sections if available
+  const features: TechFeature[] = tech.sections?.[0]?.features?.map(feature => ({
+    icon: feature.icon || 'server',
+    title: feature.title || '',
+    description: feature.description || '',
+    items: feature.items?.map(item => item.text) || []
+  })) || [];
+
+  // Extract image URL from the technology or its sections
+  const imageUrl = tech.image_url || 
+    tech.sections?.[0]?.images?.[0]?.url || 
+    'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789';
+
+  return {
+    id: tech.id,
+    title: tech.title,
+    description: tech.description,
+    features: features,
+    image: imageUrl
+  };
+};
 
 const SimpleTechnologyPage = () => {
   const { technologies = [], isLoading, error } = useTechnologySections();
   const isFetching = useIsFetching({ queryKey: ['technologies'] }) > 0;
+
+  // Transform technology data for rendering
+  const transformedTechnologies = technologies.map(mapTechnologyData);
 
   return (
     <Layout>
@@ -46,7 +74,7 @@ const SimpleTechnologyPage = () => {
       )}
 
       {/* Error State */}
-      {technologies.length === 0 && !isFetching && (
+      {transformedTechnologies.length === 0 && !isFetching && (
         <div className="container max-w-7xl mx-auto px-4 py-12">
           <Alert variant="destructive">
             <AlertDescription>
@@ -57,9 +85,9 @@ const SimpleTechnologyPage = () => {
       )}
 
       {/* Technology Sections */}
-      {!isFetching && technologies.length > 0 && (
+      {!isFetching && transformedTechnologies.length > 0 && (
         <>
-          {technologies.map((tech, index) => (
+          {transformedTechnologies.map((tech, index) => (
             <TechnologySection
               key={tech.id}
               id={tech.id}

@@ -521,9 +521,11 @@ const MigrateCmsData = () => {
                           
                           <h4 className="font-medium mt-2">Content Types:</h4>
                           <ul className="list-disc list-inside mt-1">
-                            {syncSummary.contentTypes.map((type, index) => (
+                            {syncSummary.contentTypes?.map((type, index) => (
                               <li key={index}>
-                                {type.type.replace('_', ' ')}: {type.success} successes, {type.errors} errors
+                                {typeof type === 'string' 
+                                  ? type.replace('_', ' ') 
+                                  : `${type.type.replace('_', ' ')}: ${type.success} successes, ${type.errors} errors`}
                               </li>
                             ))}
                           </ul>
