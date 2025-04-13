@@ -4,7 +4,7 @@ import Layout from '@/components/layout/Layout';
 import AdminControls from '@/components/admin/AdminControls';
 import AdminNavBar from '@/components/admin/AdminNavBar';
 import { Button } from '@/components/ui/button';
-import { Plus, AlertTriangle } from 'lucide-react';
+import { Plus, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useLandingPages } from '@/hooks/cms/useLandingPages';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
@@ -31,14 +31,29 @@ const AdminLandingPages = () => {
     if (error) {
       console.error("[AdminLandingPages] Error details:", error);
     }
-  }, [landingPages, isLoading, error]);
-
-  // Try to fetch data on initial load and when component mounts
-  useEffect(() => {
-    refetch().catch(err => {
-      console.error("[AdminLandingPages] Error refetching data:", err);
+    
+    // Force refetch on component mount
+    refetch().then(result => {
+      console.log("[AdminLandingPages] Refetch result:", result);
+    }).catch(err => {
+      console.error("[AdminLandingPages] Refetch error:", err);
     });
   }, [refetch]);
+
+  const handleRefreshData = () => {
+    refetch().then(result => {
+      toast({
+        title: "Data refreshed",
+        description: `Found ${result.data?.length || 0} landing pages`,
+      });
+    }).catch(err => {
+      toast({
+        title: "Refresh failed",
+        description: "Could not refresh landing pages data",
+        variant: "destructive",
+      });
+    });
+  };
 
   const handleDeletePage = async (id: string) => {
     try {
@@ -92,9 +107,14 @@ const AdminLandingPages = () => {
             <h1 className="text-2xl font-bold">Landing Pages</h1>
             <p className="text-gray-500">Manage hero content for landing pages</p>
           </div>
-          <Button onClick={() => navigate('/admin/landing-pages/new')} className="flex items-center">
-            <Plus size={16} className="mr-2" /> Add Landing Page
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleRefreshData} className="flex items-center">
+              <RefreshCw size={16} className="mr-2" /> Refresh Data
+            </Button>
+            <Button onClick={() => navigate('/admin/landing-pages/new')} className="flex items-center">
+              <Plus size={16} className="mr-2" /> Add Landing Page
+            </Button>
+          </div>
         </div>
 
         {/* Debug info - show in all environments to help diagnose issues */}
@@ -109,6 +129,9 @@ const AdminLandingPages = () => {
           {error && (
             <p className="text-sm text-red-500">Error Message: {error instanceof Error ? error.message : 'Unknown error'}</p>
           )}
+          <Button variant="ghost" size="sm" onClick={handleRefreshData} className="mt-2">
+            <RefreshCw size={12} className="mr-1" /> Retry Loading Data
+          </Button>
         </div>
         
         {isLoading && (

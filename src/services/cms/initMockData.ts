@@ -8,14 +8,32 @@ import { _getMockLandingPages } from './mockDataHandler';
 export function initMockLandingPagesData(): void {
   console.log("[initMockData] Initializing landing pages mock data");
   
-  if (typeof window !== 'undefined') {
-    if (!window.__MOCK_DATA) {
-      window.__MOCK_DATA = {};
-    }
-    
-    // Initialize landing pages mock data
-    window.__MOCK_DATA['landing-pages'] = _getMockLandingPages();
-    console.log("[initMockData] Landing pages mock data initialized:", window.__MOCK_DATA['landing-pages'].length);
+  // Ensure the window.__MOCK_DATA object exists
+  if (typeof window === 'undefined') {
+    console.warn("[initMockData] Window is undefined, cannot initialize mock data");
+    return;
+  }
+  
+  if (!window.__MOCK_DATA) {
+    console.log("[initMockData] Creating window.__MOCK_DATA object");
+    window.__MOCK_DATA = {};
+  }
+  
+  // Get the mock landing pages data
+  const landingPages = _getMockLandingPages();
+  
+  // Store the data in the window.__MOCK_DATA object
+  window.__MOCK_DATA['landing-pages'] = landingPages;
+  
+  console.log("[initMockData] Landing pages mock data initialized with", landingPages.length, "items");
+  
+  // Log the first item to verify data structure is correct
+  if (landingPages.length > 0) {
+    console.log("[initMockData] First landing page:", {
+      id: landingPages[0].id,
+      key: landingPages[0].page_key,
+      name: landingPages[0].page_name
+    });
   }
 }
 

@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 import { fetchLandingPages, fetchLandingPageByKey, createLandingPage, updateLandingPage, deleteLandingPage } from '@/services/cms/contentTypes/landingPages';
@@ -10,6 +9,13 @@ export function useLandingPages() {
     queryFn: async () => {
       console.log('useLandingPages hook fetching data...');
       try {
+        // Force initialization of mock data if needed
+        if (typeof window !== 'undefined' && (!window.__MOCK_DATA || !window.__MOCK_DATA['landing-pages'])) {
+          console.log('useLandingPages: window.__MOCK_DATA not initialized, initializing now');
+          const { initMockLandingPagesData } = await import('@/services/cms/initMockData');
+          initMockLandingPagesData();
+        }
+        
         const pages = await fetchLandingPages();
         console.log('useLandingPages hook fetched data:', pages);
         
@@ -26,8 +32,8 @@ export function useLandingPages() {
       }
     },
     ...createQueryOptions(),
-    retry: 2,
-    staleTime: 60000, // 1 minute
+    retry: 3,
+    staleTime: 30000, // 30 seconds
   });
 }
 

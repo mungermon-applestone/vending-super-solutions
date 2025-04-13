@@ -1,4 +1,3 @@
-
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 import { useMockData, getMockData, _getMockLandingPages } from '../../mockDataHandler';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,34 +11,33 @@ export async function fetchLandingPages(): Promise<LandingPage[]> {
     try {
       console.log("[fetchLandingPages] Using mock data");
       
-      // Initialize mock data if it doesn't exist
-      if (typeof window !== 'undefined' && (!window.__MOCK_DATA || !window.__MOCK_DATA['landing-pages'])) {
-        console.log("[fetchLandingPages] Window mock data not initialized, doing it now");
-        if (!window.__MOCK_DATA) window.__MOCK_DATA = {};
-        
-        // Set the mock data directly without any dynamic imports
-        window.__MOCK_DATA['landing-pages'] = _getMockLandingPages();
-        console.log("[fetchLandingPages] Initialized landing pages mock data with count:", 
-          window.__MOCK_DATA['landing-pages'].length);
+      // Check if window.__MOCK_DATA exists and has landing pages data
+      if (typeof window !== 'undefined') {
+        // Direct access to window.__MOCK_DATA
+        if (window.__MOCK_DATA && Array.isArray(window.__MOCK_DATA['landing-pages'])) {
+          const pages = window.__MOCK_DATA['landing-pages'];
+          console.log(`[fetchLandingPages] Found ${pages.length} landing pages in window.__MOCK_DATA`);
+          return pages;
+        } else {
+          console.warn("[fetchLandingPages] No landing pages found in window.__MOCK_DATA, initializing now");
+          
+          // Initialize if not found
+          if (!window.__MOCK_DATA) window.__MOCK_DATA = {};
+          const mockPages = _getMockLandingPages();
+          window.__MOCK_DATA['landing-pages'] = mockPages;
+          console.log(`[fetchLandingPages] Initialized ${mockPages.length} landing pages`);
+          return mockPages;
+        }
+      } else {
+        console.warn("[fetchLandingPages] Window is undefined, using direct mock data");
+        return _getMockLandingPages();
       }
-      
-      // Get the mock data directly from window.__MOCK_DATA first
-      if (window.__MOCK_DATA && Array.isArray(window.__MOCK_DATA['landing-pages'])) {
-        console.log(`[fetchLandingPages] Returning ${window.__MOCK_DATA['landing-pages'].length} landing pages from window.__MOCK_DATA`);
-        return window.__MOCK_DATA['landing-pages'];
-      }
-      
-      // Fallback to getMockData
-      const landingPages = await getMockData<LandingPage>('landing-pages');
-      console.log(`[fetchLandingPages] Fetched ${landingPages.length} landing pages via getMockData`);
-      return landingPages;
     } catch (error) {
       console.error("[fetchLandingPages] Error fetching mock landing pages:", error);
       
-      // As a last resort, return hardcoded mock data directly from the function
-      const directMockData = _getMockLandingPages();
-      console.log(`[fetchLandingPages] Returning ${directMockData.length} landing pages directly from _getMockLandingPages`);
-      return directMockData;
+      // As a last resort, return hardcoded mock data
+      console.log("[fetchLandingPages] Returning hardcoded mock data as fallback");
+      return _getMockLandingPages();
     }
   }
   
