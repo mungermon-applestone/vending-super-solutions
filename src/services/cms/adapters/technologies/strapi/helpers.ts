@@ -1,6 +1,6 @@
 
 import { STRAPI_CONFIG } from '@/config/cms';
-import { buildStrapiUrl, createStrapiHeaders } from '../../../utils/strapiConfig';
+import { getStrapiBaseUrl, getStrapiHeaders } from '../../../utils/strapiConfig';
 
 /**
  * Builds the Strapi API URL for technology endpoints
@@ -19,6 +19,22 @@ export function buildTechnologyEndpoint(endpoint?: string): string {
   }
   
   return buildStrapiUrl(`${basePath}/${endpoint}`);
+}
+
+/**
+ * Helper function to build Strapi URLs
+ */
+function buildStrapiUrl(path: string): string {
+  const baseUrl = getStrapiBaseUrl();
+  if (!baseUrl) {
+    throw new Error('Strapi base URL is not configured');
+  }
+  
+  // Normalize the URL by removing trailing slashes from base and leading slashes from path
+  const normalizedBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  
+  return `${normalizedBase}${normalizedPath}`;
 }
 
 /**
@@ -60,7 +76,7 @@ export async function fetchFromStrapi<T>(
 ): Promise<T> {
   const options: RequestInit = {
     method,
-    headers: createStrapiHeaders()
+    headers: getStrapiHeaders()
   };
   
   if (body && (method === 'POST' || method === 'PUT')) {

@@ -4,7 +4,7 @@ import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import CMSConfigInfo from '@/components/admin/cms/CMSConfigInfo';
-import { CMSProviderDisplay } from '@/components/admin/cms/CMSProviderDisplay';
+import CMSProviderDisplay from '@/components/admin/cms/CMSProviderDisplay';
 import ContentSynchronization from '@/components/admin/cms/ContentSynchronization';
 import CMSConnectionTest from '@/components/admin/cms/CMSConnectionTest';
 import { getCMSInfo } from '@/services/cms/utils/cmsInfo';

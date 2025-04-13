@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle, CheckCircle2, RefreshCw, Settings } from 'lucide-react';
 import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
 import CMSConnectionTest from '@/components/admin/cms/CMSConnectionTest';
-import { CMSProviderDisplay } from '@/components/admin/cms/CMSProviderDisplay';
+import CMSProviderDisplay from '@/components/admin/cms/CMSProviderDisplay';
 
 const AdminSettings: React.FC = () => {
   const { toast } = useToast();
