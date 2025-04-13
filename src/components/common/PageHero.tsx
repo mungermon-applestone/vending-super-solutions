@@ -27,11 +27,12 @@ const PageHero: React.FC<PageHeroProps> = ({
   fallbackSecondaryButtonText,
   fallbackSecondaryButtonUrl,
 }) => {
+  // Add refetchOnMount and refetchInterval options to ensure fresh data
   const { data: landingPage, isLoading, error, refetch } = useLandingPageByKey(pageKey);
   
-  // Add enhanced debugging to track what's happening - in all environments
+  // Enhanced debugging to track what's happening
   useEffect(() => {
-    console.log(`PageHero component for ${pageKey} - mounted`);
+    console.log(`PageHero component for ${pageKey} - mounted/updated`);
     console.log(`PageHero component for ${pageKey}:`, {
       landingPage,
       isLoading,
@@ -44,11 +45,11 @@ const PageHero: React.FC<PageHeroProps> = ({
       console.error(`PageHero component for ${pageKey} - Error:`, error);
     }
     
-    // Try to refetch on mount to ensure we have the latest data
+    // Force refetch when component mounts to ensure we have the latest data
     refetch().catch(err => {
       console.error(`PageHero component for ${pageKey} - Refetch error:`, err);
     });
-  }, [pageKey, landingPage, isLoading, error, refetch]);
+  }, [pageKey, refetch]);
   
   // Use CMS data if available, otherwise fall back to props
   const heroContent = landingPage?.hero_content || null;
@@ -59,8 +60,10 @@ const PageHero: React.FC<PageHeroProps> = ({
       usingCmsData: !!heroContent,
       title: heroContent?.title || fallbackTitle,
       subtitle: heroContent?.subtitle || fallbackSubtitle,
+      imageUrl: heroContent?.image_url || fallbackImage,
+      buttonText: heroContent?.cta_primary_text || fallbackPrimaryButtonText,
     });
-  }, [heroContent, pageKey, fallbackTitle, fallbackSubtitle]);
+  }, [heroContent, pageKey, fallbackTitle, fallbackSubtitle, fallbackImage, fallbackPrimaryButtonText]);
   
   const title = heroContent?.title || fallbackTitle;
   const subtitle = heroContent?.subtitle || fallbackSubtitle;

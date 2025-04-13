@@ -9,6 +9,7 @@ import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import CaseStudyCarousel from '@/components/case-studies/CaseStudyCarousel';
 import { getBusinessGoalCaseStudies } from '@/data/caseStudiesData';
+import PageHero from '@/components/common/PageHero';
 
 const BusinessGoalsLanding = () => {
   const { data: businessGoals, isLoading, error } = useBusinessGoals();
@@ -19,42 +20,18 @@ const BusinessGoalsLanding = () => {
 
   return (
     <Layout>
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-slate-50 to-slate-100 py-16">
-        <div className="container-wide">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-vending-blue-dark mb-6">
-                Business Goals
-              </h1>
-              <p className="text-lg text-gray-700 mb-8 max-w-2xl">
-                Our comprehensive vending solutions help you achieve your business goals 
-                with powerful technology and customizable options.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button asChild className="bg-vending-blue text-white hover:bg-vending-blue-dark">
-                  <Link to="/contact">Request a Demo</Link>
-                </Button>
-                <Button asChild variant="outline">
-                  <Link to="/products">Explore Solutions</Link>
-                </Button>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-                <img 
-                  src="https://images.unsplash.com/photo-1553877522-43269d4ea984" 
-                  alt="Business Goals" 
-                  className="w-full h-auto object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
-                <p className="font-bold">Strategy-driven solutions</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Hero Section using PageHero */}
+      <PageHero 
+        pageKey="business-goals"
+        fallbackTitle="Business Goals"
+        fallbackSubtitle="Our comprehensive vending solutions help you achieve your business goals with powerful technology and customizable options."
+        fallbackImage="https://images.unsplash.com/photo-1553877522-43269d4ea984"
+        fallbackImageAlt="Business Goals"
+        fallbackPrimaryButtonText="Request a Demo"
+        fallbackPrimaryButtonUrl="/contact"
+        fallbackSecondaryButtonText="Explore Solutions"
+        fallbackSecondaryButtonUrl="/products"
+      />
 
       <div className="container mx-auto py-12">
         <div className="max-w-4xl mx-auto mb-12 text-center">

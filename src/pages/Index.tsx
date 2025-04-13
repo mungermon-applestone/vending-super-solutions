@@ -11,19 +11,15 @@ import CTASection from '@/components/common/CTASection';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
 
 const Index = () => {
-  // Fetch hero content from CMS for the home page
-  const { data: landingPage, isLoading, error, refetch } = useLandingPageByKey('home');
+  // Explicit key for the home page hero content
+  const { refetch } = useLandingPageByKey('home');
 
   useEffect(() => {
-    console.log('Index page - Landing page data:', landingPage);
-    console.log('Index page - Landing page loading:', isLoading);
-    console.log('Index page - Landing page error:', error);
-    
     // Force refetch to ensure the latest data from Supabase
     refetch().catch(err => {
       console.error('Error refetching landing page data:', err);
     });
-  }, [landingPage, isLoading, error, refetch]);
+  }, [refetch]);
 
   return (
     <Layout>

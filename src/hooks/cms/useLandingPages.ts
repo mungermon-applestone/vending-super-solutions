@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 import { fetchLandingPages, fetchLandingPageByKey, createLandingPage, updateLandingPage, deleteLandingPage } from '@/services/cms/contentTypes/landingPages';
@@ -27,17 +26,21 @@ export function useLandingPages() {
     },
     ...createQueryOptions(),
     retry: 3,
-    staleTime: 0, // Always refetch on component mount
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
     refetchOnMount: true,
   });
 }
 
 export function useLandingPageByKey(key: string) {
+  const queryClient = useQueryClient();
+
   return useQuery<LandingPage | null>({
     queryKey: ['landing-pages', key],
     queryFn: async () => {
       console.log(`useLandingPageByKey hook fetching data for key: ${key}`);
       try {
+        // Force a fresh fetch from the database
         const page = await fetchLandingPageByKey(key);
         console.log(`useLandingPageByKey hook (${key}) fetched data:`, page);
         return page;
@@ -48,8 +51,15 @@ export function useLandingPageByKey(key: string) {
     },
     enabled: !!key,
     ...createQueryOptions(),
-    staleTime: 0, // Always refetch
-    refetchOnMount: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes - reduced from 0 to prevent excessive fetching
+    refetchOnWindowFocus: true, // Refetch when window gets focus
+    refetchOnMount: 'always', // Always refetch when component mounts
+    onSuccess: (data) => {
+      // Invalidate related queries to ensure data consistency
+      if (data) {
+        queryClient.invalidateQueries({ queryKey: ['landing-pages'] });
+      }
+    }
   });
 }
 

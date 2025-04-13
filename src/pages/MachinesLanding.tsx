@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -9,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useMachines } from '@/hooks/useMachinesData';
 import { Wifi } from '@/components/ui/Wifi';
 import { CMSMachine } from '@/types/cms';
+import PageHero from '@/components/common/PageHero';
 
 const MachinesLanding = () => {
   const location = useLocation();
@@ -72,36 +72,18 @@ const MachinesLanding = () => {
 
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-4xl sm:text-5xl font-bold leading-tight text-vending-blue-dark mb-6">
-                Our Machines
-              </h1>
-              <p className="text-xl text-gray-700 mb-8">
-                Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Button asChild variant="default">
-                  <a href="#vending-machines">Vending Machines</a>
-                </Button>
-                <Button asChild variant="outline">
-                  <a href="#smart-lockers">Smart Lockers</a>
-                </Button>
-              </div>
-            </div>
-            <div className="relative">
-              <img 
-                src="https://images.unsplash.com/photo-1493723843671-1d655e66ac1c" 
-                alt="Various vending machines" 
-                className="rounded-lg shadow-xl"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section using PageHero component */}
+      <PageHero 
+        pageKey="machines"
+        fallbackTitle="Our Machines"
+        fallbackSubtitle="Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs."
+        fallbackImage="https://images.unsplash.com/photo-1493723843671-1d655e66ac1c"
+        fallbackImageAlt="Various vending machines"
+        fallbackPrimaryButtonText="Vending Machines"
+        fallbackPrimaryButtonUrl="#vending-machines"
+        fallbackSecondaryButtonText="Smart Lockers"
+        fallbackSecondaryButtonUrl="#smart-lockers"
+      />
 
       {/* Vending Machines Section */}
       <section id="vending-machines" className="py-16 bg-gray-50">
