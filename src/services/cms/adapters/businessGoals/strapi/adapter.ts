@@ -231,11 +231,12 @@ export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
         features: businessGoal.features?.map(feature => ({
           title: feature.title,
           description: feature.description,
-          icon: feature.icon,
+          icon: typeof feature.icon === 'string' ? feature.icon : undefined,
           screenshot: feature.screenshot ? {
             url: feature.screenshot.url,
             alt: feature.screenshot.alt
-          } : undefined
+          } : undefined,
+          display_order: feature.display_order
         }))
       };
       
