@@ -25,17 +25,22 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
 
   const removeBenefit = (index: number) => {
     const currentBenefits = form.getValues('benefits');
+    console.log(`[ProductBenefits] Before removal: Benefits count=${currentBenefits.length}, data=`, currentBenefits);
+    
     // Remove the benefit at the specified index
     const updatedBenefits = currentBenefits.filter((_, i) => i !== index);
     
     // Ensure we always have at least one benefit field (can be empty)
     const finalBenefits = updatedBenefits.length === 0 ? [''] : updatedBenefits;
     
-    // Update the form values with flags to mark the form as changed
-    form.setValue('benefits', finalBenefits, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
+    // Force form state to be dirty so it will be saved
+    form.setValue('benefits', finalBenefits, { 
+      shouldDirty: true, 
+      shouldTouch: true, 
+      shouldValidate: true 
+    });
     
-    console.log(`[ProductBenefits] Removed benefit at index ${index}, now have ${finalBenefits.length} benefits`);
-    console.log(`[ProductBenefits] Updated benefits:`, finalBenefits);
+    console.log(`[ProductBenefits] After removal: Benefits count=${finalBenefits.length}, data=`, finalBenefits);
     
     // Trigger validation after removal to clear any duplicate errors
     setTimeout(() => {
