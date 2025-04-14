@@ -19,24 +19,24 @@ interface ProductBenefitsProps {
 
 const ProductBenefits = ({ form }: ProductBenefitsProps) => {
   const addBenefit = () => {
-    const currentBenefits = form.getValues('benefits');
-    form.setValue('benefits', [...currentBenefits, '']);
+    const currentBenefits = [...form.getValues('benefits')];
+    form.setValue('benefits', [...currentBenefits, ''], { shouldDirty: true });
   };
 
   const removeBenefit = (index: number) => {
-    const currentBenefits = form.getValues('benefits');
-    console.log(`[ProductBenefits] Before removal: Benefits count=${currentBenefits.length}`);
+    const currentBenefits = [...form.getValues('benefits')];
+    console.log(`[ProductBenefits] Before removal: Benefits count=${currentBenefits.length}`, currentBenefits);
     
-    // Filter out the benefit at the specified index
+    // Create a new array without the item at the specified index
     const updatedBenefits = currentBenefits.filter((_, i) => i !== index);
     
     // Always have at least one empty benefit field for UX
     const finalBenefits = updatedBenefits.length === 0 ? [''] : updatedBenefits;
     
-    console.log(`[ProductBenefits] After removal: Benefits count=${finalBenefits.length}`);
+    console.log(`[ProductBenefits] After removal: Benefits count=${finalBenefits.length}`, finalBenefits);
     
-    // Replace entire benefits array
-    form.setValue('benefits', finalBenefits);
+    // Replace entire benefits array with a completely new array
+    form.setValue('benefits', [...finalBenefits], { shouldDirty: true });
   };
 
   useEffect(() => {

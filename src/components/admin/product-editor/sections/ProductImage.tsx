@@ -11,7 +11,7 @@ const ProductImage = ({ form }) => {
   useEffect(() => {
     // Ensure image object is properly initialized
     if (!form.getValues("image")) {
-      form.setValue("image", { url: "", alt: "" });
+      form.setValue("image", { url: "", alt: "" }, { shouldDirty: true });
     }
   }, [form]);
   
@@ -33,15 +33,13 @@ const ProductImage = ({ form }) => {
                     value={field.value || ""}
                     onChange={(url) => {
                       console.log("[ProductImage] Selected new image URL:", url);
-                      // Update both the field and directly set the form value
-                      field.onChange(url);
                       
-                      // Ensure the image object exists before setting a property on it
-                      const currentImage = form.getValues("image") || {};
-                      form.setValue("image", {
-                        ...currentImage,
-                        url: url
-                      }, { shouldDirty: true, shouldTouch: true });
+                      // Use a more direct approach to update form values
+                      form.setValue("image.url", url, { 
+                        shouldDirty: true, 
+                        shouldTouch: true,
+                        shouldValidate: true 
+                      });
                     }}
                     buttonLabel="Select Product Image"
                   />
@@ -62,15 +60,12 @@ const ProductImage = ({ form }) => {
                     placeholder="Description for accessibility" 
                     {...field} 
                     onChange={(e) => {
-                      // Update both the field and directly set form value
-                      field.onChange(e);
-                      
-                      // Ensure the image object exists before setting a property on it
-                      const currentImage = form.getValues("image") || {};
-                      form.setValue("image", {
-                        ...currentImage,
-                        alt: e.target.value
-                      }, { shouldDirty: true, shouldTouch: true });
+                      // Use a more direct approach to update form values
+                      form.setValue("image.alt", e.target.value, { 
+                        shouldDirty: true,
+                        shouldTouch: true,
+                        shouldValidate: true
+                      });
                     }}
                   />
                 </FormControl>

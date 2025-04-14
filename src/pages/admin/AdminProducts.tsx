@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import RunRegressionTest from '@/components/admin/testing/RunRegressionTest';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, RefreshCw } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -30,11 +30,29 @@ const AdminProducts: React.FC = () => {
   const { mutateAsync: cloneProductType, isPending: isCloning } = useCloneProductType();
   const navigate = useNavigate();
   
-  // Force refresh products when component mounts
-  React.useEffect(() => {
+  // Force refresh products when component mounts AND when products is empty
+  useEffect(() => {
     console.log("[AdminProducts] Component mounted, refreshing products data");
     queryClient.invalidateQueries({ queryKey: ['productTypes'] });
   }, [queryClient]);
+  
+  useEffect(() => {
+    // If products array is empty after loading completes, try refetching
+    if (!isLoading && products && products.length === 0) {
+      console.log("[AdminProducts] No products found after loading, triggering refetch");
+      refetch();
+    }
+  }, [products, isLoading, refetch]);
+  
+  const handleRefresh = () => {
+    console.log("[AdminProducts] Manual refresh requested");
+    queryClient.invalidateQueries({ queryKey: ['productTypes'] });
+    refetch();
+    toast({
+      title: "Refreshing products",
+      description: "Reloading product data from the database.",
+    });
+  };
   
   const handleClone = async (id: string) => {
     try {
@@ -71,7 +89,18 @@ const AdminProducts: React.FC = () => {
               Manage your product types
             </p>
           </div>
-          <RunRegressionTest />
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefresh}
+              disabled={isLoading || fetchStatus === 'fetching'}
+            >
+              <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <RunRegressionTest />
+          </div>
         </div>
         
         {isLoading ? (

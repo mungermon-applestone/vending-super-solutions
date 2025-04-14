@@ -86,26 +86,26 @@ export const useProductEditorForm = (
       console.log('[useProductEditorForm] Populating form with product data:', existingProduct);
       
       try {
+        // Deep clone any objects to avoid reference issues
+        const deepClone = (obj) => JSON.parse(JSON.stringify(obj));
+        
         // Create a new object from the existing product data to avoid reference issues
         const productData: ProductFormData = {
           title: existingProduct.title || '',
           slug: existingProduct.slug || '',
           description: existingProduct.description || '',
-          image: {
-            url: existingProduct.image?.url || '',
-            alt: existingProduct.image?.alt || ''
-          },
+          image: deepClone(existingProduct.image) || { url: '', alt: '' },
           benefits: existingProduct.benefits && existingProduct.benefits.length > 0 
             ? [...existingProduct.benefits] 
             : [''],
           features: existingProduct.features && existingProduct.features.length > 0 
-            ? existingProduct.features.map(feature => ({
+            ? deepClone(existingProduct.features.map(feature => ({
                 title: feature.title || '',
                 description: feature.description || '',
                 icon: typeof feature.icon === 'string' ? feature.icon : 'check',
                 screenshotUrl: feature.screenshot?.url || '',
                 screenshotAlt: feature.screenshot?.alt || ''
-              })) 
+              })))
             : [
                 {
                   title: '',
@@ -149,11 +149,17 @@ export const useProductEditorForm = (
     setIsLoading(true);
     
     try {
+      // Deep clean the benefits data - filter out empty benefits
+      // Create a new array to avoid any reference issues
+      const cleanedBenefits = [...data.benefits]
+        .filter(benefit => benefit.trim() !== '');
+      
       // Make sure the image object is properly structured
+      // Create a new object to avoid any reference issues
       const cleanedData: ProductFormData = {
         ...data,
         image: data.image || { url: "", alt: "" },
-        benefits: data.benefits.filter(benefit => benefit.trim() !== '')
+        benefits: cleanedBenefits
       };
       
       console.log('[useProductEditorForm] Cleaned data for submission:', cleanedData);
