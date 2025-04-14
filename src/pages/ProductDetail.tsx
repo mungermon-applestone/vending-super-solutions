@@ -5,6 +5,10 @@ import { useProductType } from '@/hooks/cms/useProductTypes';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ProductHeroSection from '@/components/products/ProductHeroSection';
+import ProductFeaturesList from '@/components/products/ProductFeaturesList';
+import ProductExamples from '@/components/products/ProductExamples';
+import CTASection from '@/components/common/CTASection';
 
 const ProductDetail = () => {
   const { productSlug } = useParams<{ productSlug: string }>();
@@ -59,48 +63,54 @@ const ProductDetail = () => {
     );
   }
 
+  // Prepare the image URL for the hero section
+  const heroImage = product.image?.url || '/placeholder.svg';
+  
+  // Prepare benefits list (ensure it's an array)
+  const benefits = Array.isArray(product.benefits) ? product.benefits : [];
+
   return (
     <Layout>
-      <div className="container py-10">
-        <Button asChild variant="outline" className="mb-6">
+      {/* Back Navigation */}
+      <div className="container pt-6">
+        <Button asChild variant="outline" size="sm">
           <Link to="/products">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Products
           </Link>
         </Button>
-
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="p-8">
-            <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
-            <p className="text-gray-600 mb-6">{product.description}</p>
-            
-            {product.features && product.features.length > 0 && (
-              <div className="mt-8">
-                <h2 className="text-xl font-semibold mb-4">Features</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {product.features.map((feature, index) => (
-                    <div key={index} className="p-4 border rounded-md">
-                      <h3 className="font-medium">{feature.title}</h3>
-                      <p className="text-gray-600">{feature.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {product.benefits && product.benefits.length > 0 && (
-              <div className="mt-8">
-                <h2 className="text-xl font-semibold mb-4">Benefits</h2>
-                <ul className="list-disc pl-5 space-y-2">
-                  {product.benefits.map((benefit, index) => (
-                    <li key={index}>{typeof benefit === 'string' ? benefit : String(benefit)}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
+
+      {/* Hero Section */}
+      <ProductHeroSection
+        productType={product.title}
+        description={product.description}
+        image={heroImage}
+        benefits={benefits}
+      />
+
+      {/* Features Section */}
+      {product.features && product.features.length > 0 && (
+        <section className="py-12 bg-white">
+          <div className="container">
+            <h2 className="text-3xl font-bold mb-8 text-center">Features</h2>
+            <ProductFeaturesList features={product.features} />
+          </div>
+        </section>
+      )}
+
+      {/* Examples Section */}
+      {product.examples && product.examples.length > 0 && (
+        <section className="py-12 bg-gray-50">
+          <div className="container">
+            <h2 className="text-3xl font-bold mb-8 text-center">Applications</h2>
+            <ProductExamples examples={product.examples} />
+          </div>
+        </section>
+      )}
+
+      {/* Call to Action */}
+      <CTASection />
     </Layout>
   );
 };

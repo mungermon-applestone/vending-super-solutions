@@ -1,44 +1,46 @@
 
-import { CMSProductType } from '@/types/cms';
-import { ProductAdapter, ProductCreateInput, ProductUpdateInput } from './types';
+import { CMSProductType } from "@/types/cms";
+import { ProductAdapter } from "./types";
+import { supabaseProductAdapter } from "./supabaseProductAdapter";
 
 /**
- * Implementation of the Product Adapter for Strapi CMS
- * This will be implemented when we integrate with Strapi
+ * Temporary implementation of the Strapi product adapter
+ * This adapter currently falls back to the Supabase adapter
+ * as we have not fully implemented Strapi functionality
  */
 export const strapiProductAdapter: ProductAdapter = {
-  getAll: async (): Promise<CMSProductType[]> => {
-    console.log('[strapiProductAdapter] getAll method called, but not implemented');
-    throw new Error('Strapi adapter not yet implemented');
+  getAll: async (filters?: Record<string, any>): Promise<CMSProductType[]> => {
+    console.log('[strapiProductAdapter] Falling back to Supabase adapter for getAll');
+    return await supabaseProductAdapter.getAll(filters);
   },
   
   getBySlug: async (slug: string): Promise<CMSProductType | null> => {
-    console.log(`[strapiProductAdapter] getBySlug method called with slug "${slug}", but not implemented`);
-    throw new Error('Strapi adapter not yet implemented');
+    console.log(`[strapiProductAdapter] Falling back to Supabase adapter for getBySlug: ${slug}`);
+    return await supabaseProductAdapter.getBySlug(slug);
   },
   
   getById: async (id: string): Promise<CMSProductType | null> => {
-    console.log(`[strapiProductAdapter] getById method called with id "${id}", but not implemented`);
-    throw new Error('Strapi adapter not yet implemented');
+    console.log(`[strapiProductAdapter] Falling back to Supabase adapter for getById: ${id}`);
+    return await supabaseProductAdapter.getById(id);
   },
   
-  create: async (data: ProductCreateInput): Promise<CMSProductType> => {
-    console.log('[strapiProductAdapter] create method called, but not implemented', data);
-    throw new Error('Strapi adapter not yet implemented');
+  create: async (data: any): Promise<CMSProductType> => {
+    console.log('[strapiProductAdapter] Falling back to Supabase adapter for create');
+    return await supabaseProductAdapter.create(data);
   },
   
-  update: async (id: string, data: ProductUpdateInput): Promise<CMSProductType> => {
-    console.log(`[strapiProductAdapter] update method called for id "${id}", but not implemented`, data);
-    throw new Error('Strapi adapter not yet implemented');
+  update: async (id: string, data: any): Promise<CMSProductType> => {
+    console.log(`[strapiProductAdapter] Falling back to Supabase adapter for update: ${id}`);
+    return await supabaseProductAdapter.update(id, data);
   },
   
   delete: async (id: string): Promise<boolean> => {
-    console.log(`[strapiProductAdapter] delete method called for id "${id}", but not implemented`);
-    throw new Error('Strapi adapter not yet implemented');
+    console.log(`[strapiProductAdapter] Falling back to Supabase adapter for delete: ${id}`);
+    return await supabaseProductAdapter.delete(id);
   },
   
   clone: async (id: string): Promise<CMSProductType> => {
-    console.log(`[strapiProductAdapter] clone method called for id "${id}", but not implemented`);
-    throw new Error('Strapi adapter not yet implemented');
+    console.log(`[strapiProductAdapter] Falling back to Supabase adapter for clone: ${id}`);
+    return await supabaseProductAdapter.clone(id);
   }
 };

@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Loader2 } from 'lucide-react';
 
+/**
+ * Landing page that redirects to the database-driven products page
+ */
 const ProductsLanding: React.FC = () => {
   const navigate = useNavigate();
   
