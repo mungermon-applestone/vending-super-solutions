@@ -14,6 +14,7 @@ import AdminLayout from './components/AdminLayout';
 import ProductEditorPage from './pages/ProductEditor';
 import NotFound from './pages/NotFound';
 import AdminSettings from './pages/admin/AdminSettings';
+import { Toaster } from "./components/ui/toaster";
 
 // Create a simpler router structure to fix the build issues
 const router = createBrowserRouter([
@@ -71,7 +72,10 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <RouterProvider router={router} />
+    <>
+      <RouterProvider router={router} />
+      <Toaster />
+    </>
   );
 }
 
