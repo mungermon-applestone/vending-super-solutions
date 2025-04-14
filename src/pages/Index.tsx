@@ -9,7 +9,7 @@ import MachineTypesSection from '@/components/home/MachineTypesSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CTASection from '@/components/common/CTASection';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
-import { initCMS } from '@/services/cms/initCMS';
+import { initCMS } from '@/services/cms/cmsInit';
 
 // Initialize the CMS configuration
 initCMS();

@@ -8,7 +8,7 @@ import BusinessGoalsSection from '@/components/home/BusinessGoalsSection';
 import MachineTypesSection from '@/components/home/MachineTypesSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CTASection from '@/components/common/CTASection';
-import { initCMS } from '@/services/cms/initCMS';
+import { initCMS } from '@/services/cms/cmsInit';
 
 // Initialize the CMS configuration
 initCMS();

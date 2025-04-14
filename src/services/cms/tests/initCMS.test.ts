@@ -1,6 +1,6 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initCMS } from '../initCMS';
+import { initCMS } from '../cmsInit';
 import { getCMSProviderConfig } from '../providerConfig';
 import { ContentProviderType } from '../adapters/types';
 
