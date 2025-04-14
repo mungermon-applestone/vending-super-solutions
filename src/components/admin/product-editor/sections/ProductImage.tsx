@@ -6,6 +6,8 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 
 const ProductImage = ({ form }) => {
+  console.log("[ProductImage] Rendering with image URL:", form.watch("image.url"));
+  
   return (
     <Card>
       <CardHeader>
@@ -23,8 +25,13 @@ const ProductImage = ({ form }) => {
                   <MediaSelector
                     value={field.value || ""}
                     onChange={(url) => {
-                      form.setValue("image.url", url);
-                      console.log("[ProductImage] Selected image URL:", url);
+                      // Force proper form state update to ensure the change is detected
+                      form.setValue("image.url", url, { 
+                        shouldDirty: true, 
+                        shouldTouch: true, 
+                        shouldValidate: true 
+                      });
+                      console.log("[ProductImage] Selected image URL updated to:", url);
                     }}
                     buttonLabel="Select Product Image"
                   />

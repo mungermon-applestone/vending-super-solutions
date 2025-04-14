@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Image, X } from 'lucide-react';
@@ -18,8 +18,15 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedMediaIds, setSelectedMediaIds] = useState<string[]>([]);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string>(value);
   
-  console.log("[MediaSelector] Rendering with value:", value);
+  // Make sure to update local state when the external value changes
+  useEffect(() => {
+    setCurrentImageUrl(value);
+    console.log("[MediaSelector] Value prop updated:", value);
+  }, [value]);
+  
+  console.log("[MediaSelector] Rendering with value:", value, "and currentImageUrl:", currentImageUrl);
   
   const handleOpenChange = (open: boolean) => {
     console.log("[MediaSelector] Dialog open state changed to:", open);
@@ -33,12 +40,16 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
   const handleSelectMedia = (mediaId: string, url: string) => {
     console.log("[MediaSelector] Selected media:", mediaId, url);
     setSelectedMediaIds([mediaId]);
+    setCurrentImageUrl(url);
+    
+    // Call the onChange prop to propagate the change upwards
     onChange(url);
     setIsOpen(false);
   };
   
   const handleRemove = () => {
     console.log("[MediaSelector] Removing selected image");
+    setCurrentImageUrl('');
     onChange('');
     setSelectedMediaIds([]);
   };
@@ -46,10 +57,10 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
   return (
     <>
       <div className="space-y-2">
-        {value ? (
+        {currentImageUrl ? (
           <div className="relative border rounded-md overflow-hidden">
             <img 
-              src={value} 
+              src={currentImageUrl} 
               alt="Selected media"
               className="max-h-48 object-contain mx-auto" 
             />
@@ -66,14 +77,14 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
         
         <Button
           type="button"
-          variant={value ? "outline" : "default"}
+          variant={currentImageUrl ? "outline" : "default"}
           onClick={() => {
             console.log("[MediaSelector] Opening media selection dialog");
             setIsOpen(true);
           }}
         >
           <Image className="mr-2 h-4 w-4" />
-          {value ? "Change Image" : buttonLabel}
+          {currentImageUrl ? "Change Image" : buttonLabel}
         </Button>
       </div>
       

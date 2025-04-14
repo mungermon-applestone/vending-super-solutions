@@ -41,9 +41,9 @@ export const updateProductBenefits = async (data: ProductFormData, productId: st
     }
     console.log(`[benefitHelpers] Deleted ${count} existing benefits`);
     
-    // Only insert benefits that aren't empty strings
-    const validBenefits = data.benefits.filter(benefit => benefit.trim() !== '');
-    console.log(`[benefitHelpers] Processing ${validBenefits.length} valid benefits after filtering empty ones`);
+    // Clean benefits data to remove empties
+    const validBenefits = processBenefits(data.benefits);
+    console.log(`[benefitHelpers] Processing ${validBenefits.length} valid benefits after filtering empty and duplicate ones`);
     
     // Skip the insertion step if there are no valid benefits to insert
     if (validBenefits.length === 0) {

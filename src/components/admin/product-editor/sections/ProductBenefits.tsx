@@ -20,7 +20,11 @@ interface ProductBenefitsProps {
 const ProductBenefits = ({ form }: ProductBenefitsProps) => {
   const addBenefit = () => {
     const currentBenefits = form.getValues('benefits');
-    form.setValue('benefits', [...currentBenefits, ''], { shouldDirty: true });
+    form.setValue('benefits', [...currentBenefits, ''], { 
+      shouldDirty: true, 
+      shouldTouch: true, 
+      shouldValidate: true 
+    });
   };
 
   const removeBenefit = (index: number) => {
@@ -34,7 +38,6 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     const finalBenefits = updatedBenefits.length === 0 ? [''] : updatedBenefits;
     
     // Force form state to be dirty so it will be saved
-    // IMPORTANT: This is critical for ensuring the form is marked as changed
     form.setValue('benefits', finalBenefits, { 
       shouldDirty: true, 
       shouldTouch: true, 
@@ -42,11 +45,6 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     });
     
     console.log(`[ProductBenefits] After removal: Benefits count=${finalBenefits.length}, data=`, finalBenefits);
-    
-    // Ensure the form's internal state is correctly updated
-    setTimeout(() => {
-      form.trigger('benefits');
-    }, 0);
   };
 
   // Check for duplicate benefits and set form errors
@@ -152,6 +150,7 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
               onClick={() => removeBenefit(index)}
               variant="ghost"
               size="icon"
+              aria-label={`Remove benefit ${index + 1}`}
             >
               <Trash className="h-4 w-4" />
             </Button>

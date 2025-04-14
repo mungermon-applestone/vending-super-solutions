@@ -22,7 +22,7 @@ interface ProductEditorFormProps {
 
 const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormProps) => {
   const navigate = useNavigate();
-  const toast = useToast();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isCloning, setIsCloning] = useState(false);
   const cloneProductMutation = useCloneProductType();
@@ -58,7 +58,15 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
 
   const handleFormSubmit = form.handleSubmit((data) => {
     console.log('[ProductEditorForm] Form submitted with data:', data);
-    onSubmit(data);
+    
+    // Clean up benefits to remove any empty values
+    const cleanedData = {
+      ...data,
+      benefits: data.benefits.filter(benefit => benefit.trim() !== '')
+    };
+    
+    console.log('[ProductEditorForm] Cleaned data for submit:', cleanedData);
+    onSubmit(cleanedData);
   });
 
   const handleCloneProduct = async () => {
@@ -69,7 +77,7 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
       const clonedProduct = await cloneProductMutation.mutateAsync(productId);
       
       if (clonedProduct) {
-        toast.toast({
+        toast({
           title: "Product cloned",
           description: `Product has been cloned successfully.`
         });
@@ -79,7 +87,7 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
       }
     } catch (error) {
       console.error("Error cloning product:", error);
-      toast.toast({
+      toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to clone product. Please try again.",
         variant: "destructive",

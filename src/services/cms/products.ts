@@ -65,8 +65,15 @@ export async function getProductTypeByUUID(uuid: string): Promise<CMSProductType
 export async function createProduct(data: ProductFormData, toast?: UseToastReturn): Promise<string> {
   console.log('[products.ts] Creating new product:', data);
   try {
+    // Ensure data is properly structured before creating
+    const cleanedData = {
+      ...data,
+      // Remove empty benefits
+      benefits: data.benefits.filter(benefit => benefit.trim() !== ''),
+    };
+    
     const adapter = getProductAdapter(getCMSProviderConfig());
-    const result = await adapter.create(data);
+    const result = await adapter.create(cleanedData);
     
     if (toast) {
       toast.toast({
@@ -102,6 +109,21 @@ export async function updateProduct(
   console.log('[products.ts] Updating product:', originalSlug, data);
   
   try {
+    // Make sure to clean the benefits data to remove empty strings
+    // This is critical for ensuring empty benefits are actually deleted
+    const cleanedData = {
+      ...data,
+      benefits: data.benefits.filter(benefit => benefit.trim() !== ''),
+    };
+    
+    console.log('[products.ts] Cleaned data for update:', {
+      title: cleanedData.title,
+      slug: cleanedData.slug,
+      benefitsCount: cleanedData.benefits.length,
+      featuresCount: cleanedData.features.length,
+      imageUrl: cleanedData.image?.url
+    });
+    
     const adapter = getProductAdapter(getCMSProviderConfig());
     
     // First get the product ID from the original slug
@@ -112,7 +134,7 @@ export async function updateProduct(
     }
     
     const result = await adapter.update(product.id, {
-      ...data,
+      ...cleanedData,
       originalSlug
     });
     
