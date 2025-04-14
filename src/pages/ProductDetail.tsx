@@ -1,94 +1,106 @@
 
-import React, { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import ProductHeroSection from '@/components/products/ProductHeroSection';
-import ProductFeaturesList from '@/components/products/ProductFeaturesList';
-import ProductExamples from '@/components/products/ProductExamples';
-import ProductVideoSection from '@/components/products/ProductVideoSection';
-import CTASection from '@/components/common/CTASection';
-import { useProductType } from '@/hooks/useCMSData';
-import ProductDetailSkeleton from '@/components/products/ProductDetailSkeleton';
-import { productFallbacks } from '@/data/productFallbacks';
+import { useProductType } from '@/hooks/cms/useProductTypes';
+import { Button } from '@/components/ui/button';
+import { Loader2, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const ProductDetail = () => {
-  const navigate = useNavigate();
   const { productSlug } = useParams<{ productSlug: string }>();
-  
-  // Use the hook from useCMSData with clearer enabled condition
-  const { 
-    data: productTypeData, 
-    isLoading, 
-    error, 
-    refetch 
-  } = useProductType(productSlug);
-  
-  // Log what we're receiving from the API to help debug
-  useEffect(() => {
-    console.log("Product data from API:", {
-      productTypeData,
-      isLoading,
-      error,
-      slug: productSlug
-    });
-    
-    if (error) {
-      console.error("Error loading product data:", error);
-    }
-  }, [productTypeData, isLoading, error, productSlug]);
-  
-  // Force refetch when product info changes
-  useEffect(() => {
-    if (productSlug) {
-      console.log(`ProductDetail: Product slug changed, refetching data for ${productSlug}`);
-      refetch();
-    }
-  }, [productSlug, refetch]);
-  
-  // Use CMS data if available, otherwise try fallbacks, default to grocery
-  const fallbackData = productFallbacks[productSlug || ''] || productFallbacks['grocery'];
-  const currentProductData = productTypeData || fallbackData;
-  
-  console.log("ProductDetail using data:", {
-    isUsingFallbackData: !productTypeData,
-    currentProductData: {
-      title: currentProductData.title,
-      description: currentProductData?.description?.substring(0, 50) + '...'
-    }
-  });
-  
+  const { data: product, isLoading, error } = useProductType(productSlug || '');
+
   if (isLoading) {
     return (
       <Layout>
-        <ProductDetailSkeleton />
+        <div className="container py-16 text-center">
+          <Loader2 className="h-10 w-10 animate-spin mx-auto" />
+          <p className="mt-4">Loading product information...</p>
+        </div>
       </Layout>
     );
   }
-  
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="container py-16">
+          <div className="max-w-2xl mx-auto text-center">
+            <h1 className="text-xl font-semibold text-red-500 mb-4">Error Loading Product</h1>
+            <p className="mb-6">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
+            <Button asChild>
+              <Link to="/products">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Products
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!product) {
+    return (
+      <Layout>
+        <div className="container py-16">
+          <div className="max-w-2xl mx-auto text-center">
+            <h1 className="text-xl font-semibold mb-4">Product Not Found</h1>
+            <p className="mb-6">We couldn't find the product "{productSlug}" in the database.</p>
+            <Button asChild>
+              <Link to="/products">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Products
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-      <ProductHeroSection 
-        productType={currentProductData.title}
-        description={currentProductData.description}
-        image={currentProductData.image.url}
-        benefits={currentProductData.benefits}
-      />
-      
-      <ProductFeaturesList features={currentProductData.features} />
-      
-      {currentProductData.examples && currentProductData.examples.length > 0 && (
-        <ProductExamples examples={currentProductData.examples} />
-      )}
-      
-      {currentProductData.video && (
-        <ProductVideoSection
-          title={currentProductData.video.title}
-          description={currentProductData.video.description}
-          thumbnailImage={currentProductData.video.thumbnailImage.url}
-        />
-      )}
-      
-      <CTASection />
+      <div className="container py-10">
+        <Button asChild variant="outline" className="mb-6">
+          <Link to="/products">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Products
+          </Link>
+        </Button>
+
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="p-8">
+            <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
+            <p className="text-gray-600 mb-6">{product.description}</p>
+            
+            {product.features && product.features.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Features</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {product.features.map((feature, index) => (
+                    <div key={feature.id || index} className="p-4 border rounded-md">
+                      <h3 className="font-medium">{feature.title}</h3>
+                      <p className="text-gray-600">{feature.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {product.benefits && product.benefits.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Benefits</h2>
+                <ul className="list-disc pl-5 space-y-2">
+                  {product.benefits.map((benefit, index) => (
+                    <li key={benefit.id || index}>{benefit.benefit}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </Layout>
   );
 };

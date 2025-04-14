@@ -1,51 +1,38 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+
+import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useBusinessGoal } from '@/hooks/useCMSData';
+import { useBusinessGoal } from '@/hooks/cms/useBusinessGoals';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check, ChevronRight } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import InquiryForm from '@/components/machines/contact/InquiryForm';
+import { Loader2, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
-import BusinessGoalFeatures from '@/components/businessGoals/BusinessGoalFeatures';
-import CaseStudyCarousel from '@/components/case-studies/CaseStudyCarousel';
-import { getBusinessGoalCaseStudies } from '@/data/caseStudiesData';
 
 const BusinessGoalDetail = () => {
   const { goalSlug } = useParams<{ goalSlug: string }>();
-  const { data: goal, isLoading, error } = useBusinessGoal(goalSlug);
-  
-  const businessGoalCaseStudies = getBusinessGoalCaseStudies();
-
-  const renderFeatureIcon = (iconName: string | undefined) => {
-    return <Check className="h-6 w-6" />;
-  };
+  const { data: goal, isLoading, error } = useBusinessGoal(goalSlug || '');
 
   if (isLoading) {
     return (
       <Layout>
-        <div className="container mx-auto py-10">
-          <Skeleton className="h-16 w-3/4 mb-6" />
-          <Skeleton className="h-8 w-full mb-4" />
-          <Skeleton className="h-8 w-full mb-4" />
-          <Skeleton className="h-8 w-2/3" />
+        <div className="container py-16 text-center">
+          <Loader2 className="h-10 w-10 animate-spin mx-auto" />
+          <p className="mt-4">Loading business goal information...</p>
         </div>
       </Layout>
     );
   }
 
-  if (error || !goal) {
+  if (error) {
     return (
       <Layout>
-        <div className="container mx-auto py-10">
-          <div className="bg-red-50 border border-red-200 rounded-md p-6">
-            <h1 className="text-2xl font-bold text-red-800 mb-4">Error Loading Business Goal</h1>
-            <p className="text-red-600 mb-6">
-              {error instanceof Error ? error.message : 'This business goal could not be found.'}
-            </p>
+        <div className="container py-16">
+          <div className="max-w-2xl mx-auto text-center">
+            <h1 className="text-xl font-semibold text-red-500 mb-4">Error Loading Business Goal</h1>
+            <p className="mb-6">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
             <Button asChild>
               <Link to="/goals">
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back to Business Goals
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Business Goals
               </Link>
             </Button>
           </div>
@@ -54,80 +41,74 @@ const BusinessGoalDetail = () => {
     );
   }
 
-  const featuresWithIcons = goal.features?.map(feature => ({
-    ...feature,
-    icon: renderFeatureIcon(feature.icon?.toString())
-  })) || [];
-
+  if (!goal) {
+    return (
+      <Layout>
+        <div className="container py-16">
+          <div className="max-w-2xl mx-auto text-center">
+            <h1 className="text-xl font-semibold mb-4">Business Goal Not Found</h1>
+            <p className="mb-6">We couldn't find the business goal "{goalSlug}" in the database.</p>
+            <Button asChild>
+              <Link to="/goals">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Business Goals
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+  
   return (
     <Layout>
-      <div className="bg-gray-50 border-b border-gray-200">
-        <div className="container mx-auto py-3">
-          <nav className="flex items-center text-sm">
-            <Link to="/" className="text-gray-500 hover:text-vending-blue">Home</Link>
-            <ChevronRight className="h-4 w-4 mx-2 text-gray-400" />
-            <Link to="/goals" className="text-gray-500 hover:text-vending-blue">Business Goals</Link>
-            <ChevronRight className="h-4 w-4 mx-2 text-gray-400" />
-            <span className="text-vending-blue font-medium">{goal.title}</span>
-          </nav>
-        </div>
+      <div className="mb-6">
+        <BusinessGoalHero
+          title={goal.title}
+          description={goal.description}
+          icon={<span className="text-white text-2xl">🎯</span>} // Placeholder icon
+          image={goal.image_url || 'https://placehold.co/800x400?text=No+Image'}
+        />
       </div>
 
-      <BusinessGoalHero
-        title={goal.title}
-        description={goal.description}
-        icon={renderFeatureIcon(goal.icon?.toString())}
-        image={goal.image?.url || 'https://placehold.co/600x400?text=Business+Goal'}
-      />
+      <div className="container py-10">
+        <Button asChild variant="outline" className="mb-6">
+          <Link to="/goals">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Business Goals
+          </Link>
+        </Button>
 
-      {featuresWithIcons.length > 0 && (
-        <BusinessGoalFeatures features={featuresWithIcons} />
-      )}
-
-      <CaseStudyCarousel 
-        title={`${goal.title} Success Stories`}
-        subtitle="See how our solutions have helped organizations achieve their goals"
-        caseStudies={businessGoalCaseStudies}
-      />
-
-      {goal.benefits && goal.benefits.length > 0 && (
-        <section className="py-16 bg-vending-gray">
-          <div className="container-wide">
-            <h2 className="text-3xl font-bold text-center text-vending-blue-dark mb-8">
-              Key Benefits
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {goal.benefits.map((benefit, index) => (
-                <div key={index} className="bg-white p-6 rounded-lg shadow-sm flex">
-                  <div className="mr-4 text-vending-teal">
-                    <Check className="h-6 w-6" />
-                  </div>
-                  <p className="text-gray-700">{benefit}</p>
+        {goal.features && goal.features.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-8 mb-8">
+            <h2 className="text-2xl font-semibold mb-6">Key Features</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {goal.features.map((feature, index) => (
+                <div key={feature.id || index} className="p-6 border rounded-lg">
+                  <h3 className="text-xl font-medium mb-2">{feature.title}</h3>
+                  <p className="text-gray-600">{feature.description}</p>
                 </div>
               ))}
             </div>
           </div>
-        </section>
-      )}
+        )}
 
-      <section className="py-16 bg-vending-blue text-white">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to achieve your {goal.title} goals?</h2>
-          <p className="text-xl mb-8 max-w-3xl mx-auto">
-            Our team is ready to help you implement the right vending solution for your business needs.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button className="bg-white text-vending-blue hover:bg-gray-100" asChild>
-              <Link to="/contact">Request a Demo</Link>
-            </Button>
-            <Button variant="outline" className="border-white text-white hover:bg-vending-blue-dark" asChild>
-              <Link to="/products">Explore Products</Link>
-            </Button>
+        {goal.benefits && goal.benefits.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-8">
+            <h2 className="text-2xl font-semibold mb-6">Benefits</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {goal.benefits.map((benefit, index) => (
+                <div key={benefit.id || index} className="flex items-start">
+                  <div className="bg-vending-teal-light rounded-full p-2 mr-3 flex-shrink-0">
+                    <span className="text-vending-teal">✓</span>
+                  </div>
+                  <p>{benefit.benefit}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
-
-      <InquiryForm title={`${goal.title} Solutions`} />
+        )}
+      </div>
     </Layout>
   );
 };
