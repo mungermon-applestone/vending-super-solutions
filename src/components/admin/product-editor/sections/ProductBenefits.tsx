@@ -21,20 +21,37 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
   // Get current benefits array
   const benefits = form.watch('benefits') || [];
   
+  // Initialize with one empty benefit if none exist
+  useEffect(() => {
+    if (!form.getValues('benefits') || !Array.isArray(form.getValues('benefits'))) {
+      console.log('[ProductBenefits] Initializing benefits array with one empty benefit');
+      form.setValue('benefits', [''], { shouldDirty: false });
+    }
+  }, [form]);
+  
   // Add a new empty benefit
   const addBenefit = () => {
     console.log("[ProductBenefits] Adding new benefit");
-    const currentBenefits = [...benefits];
+    // Create a new copy of the array to ensure React detects the change
+    const currentBenefits = Array.isArray(form.getValues('benefits')) 
+      ? [...form.getValues('benefits')] 
+      : [];
     form.setValue('benefits', [...currentBenefits, ''], { shouldDirty: true });
   };
 
   // Remove a benefit by index
   const removeBenefit = (indexToRemove: number) => {
     console.log(`[ProductBenefits] Removing benefit at index ${indexToRemove}`);
-    const filteredBenefits = benefits.filter((_, idx) => idx !== indexToRemove);
+    const currentBenefits = Array.isArray(form.getValues('benefits'))
+      ? [...form.getValues('benefits')]
+      : [];
+      
+    const filteredBenefits = currentBenefits.filter((_, idx) => idx !== indexToRemove);
     
-    // If we removed the last item, add an empty one for UX
+    // Ensure we always have at least one input field for UX
     const newBenefits = filteredBenefits.length === 0 ? [''] : filteredBenefits;
+    
+    console.log('[ProductBenefits] New benefits after removal:', newBenefits);
     
     // Important: Create a completely new array to ensure React/form detect the change
     form.setValue('benefits', [...newBenefits], { shouldDirty: true });
@@ -45,6 +62,11 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     const subscription = form.watch((_, { name }) => {
       if (name?.startsWith('benefits')) {
         const currentBenefits = form.getValues('benefits');
+        
+        if (!Array.isArray(currentBenefits)) {
+          return;
+        }
+        
         console.log('[ProductBenefits] Benefits changed:', currentBenefits);
         
         // Clear all existing errors first
@@ -130,6 +152,9 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
             </Button>
           </div>
         ))}
+        <div className="text-xs text-muted-foreground mt-2">
+          Empty benefits and duplicates will be automatically removed on save.
+        </div>
       </CardContent>
     </Card>
   );

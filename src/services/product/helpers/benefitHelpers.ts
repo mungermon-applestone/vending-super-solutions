@@ -4,24 +4,36 @@ import { ProductFormData } from '@/types/forms';
 
 /**
  * Process benefits to remove duplicates and empty entries
+ * Returns a clean, deduplicated array of benefits
  */
-export const processBenefits = (benefits: string[]): string[] => {
-  // Simple helper to filter out empty benefits and remove duplicates
-  const uniqueBenefits = new Set<string>();
-  return benefits
-    .filter(benefit => benefit.trim() !== '')
-    .filter(benefit => {
-      const normalized = benefit.trim().toLowerCase();
-      if (uniqueBenefits.has(normalized)) {
-        return false;
-      }
-      uniqueBenefits.add(normalized);
-      return true;
-    });
+export const processBenefits = (benefits: string[] | undefined): string[] => {
+  console.log('[benefitHelpers] Processing benefits input:', benefits);
+  
+  // Guard against invalid input
+  if (!Array.isArray(benefits)) {
+    console.log('[benefitHelpers] Benefits is not an array, returning empty array');
+    return [];
+  }
+  
+  // First filter out empty strings and whitespace-only entries
+  const nonEmptyBenefits = benefits.filter(benefit => 
+    benefit && typeof benefit === 'string' && benefit.trim() !== ''
+  );
+  
+  // Then remove duplicates using Set for efficiency
+  const uniqueBenefits = [...new Set(nonEmptyBenefits.map(b => b.trim()))];
+  
+  console.log(`[benefitHelpers] Original benefits count: ${benefits.length}`);
+  console.log(`[benefitHelpers] Non-empty benefits count: ${nonEmptyBenefits.length}`);
+  console.log(`[benefitHelpers] Unique benefits count: ${uniqueBenefits.length}`);
+  console.log('[benefitHelpers] Final processed benefits:', uniqueBenefits);
+  
+  return uniqueBenefits;
 };
 
 /**
- * Update a product's benefits
+ * Update a product's benefits by first completely removing existing ones
+ * and then adding the new ones
  */
 export const updateProductBenefits = async (data: ProductFormData, productId: string): Promise<void> => {
   console.log('[benefitHelpers] Updating benefits for product ID:', productId);
@@ -42,9 +54,13 @@ export const updateProductBenefits = async (data: ProductFormData, productId: st
     
     console.log('[benefitHelpers] Successfully deleted all existing benefits');
     
-    // Clean benefits data to remove empties and duplicates
-    const validBenefits = processBenefits(data.benefits);
-    console.log(`[benefitHelpers] Processing ${validBenefits.length} valid benefits after filtering`);
+    // Clean benefits data again to ensure quality before insertion
+    // This is redundant with the processing in updateProduct, but serves as a safety net
+    const validBenefits = Array.isArray(data.benefits) 
+      ? processBenefits(data.benefits)
+      : [];
+    
+    console.log(`[benefitHelpers] Processing ${validBenefits.length} valid benefits for insertion`);
     
     // Skip the insertion step if there are no valid benefits to insert
     if (validBenefits.length === 0) {

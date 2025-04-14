@@ -12,6 +12,7 @@ const ProductImage = ({ form }) => {
   useEffect(() => {
     // Ensure image object is properly initialized
     if (!form.getValues("image")) {
+      console.log("[ProductImage] Initializing image object");
       form.setValue("image", { url: "", alt: "" }, { shouldDirty: true });
     }
   }, [form]);
@@ -46,8 +47,14 @@ const ProductImage = ({ form }) => {
                     onChange={(url) => {
                       console.log("[ProductImage] Selected new image URL:", url);
                       
-                      // Use form.setValue to properly update form values
-                      form.setValue("image.url", url, { 
+                      // Ensure the image object exists
+                      const currentImage = form.getValues("image") || {};
+                      
+                      // Update the image URL in the form
+                      form.setValue("image", {
+                        ...currentImage,
+                        url: url
+                      }, { 
                         shouldDirty: true, 
                         shouldTouch: true,
                         shouldValidate: true 
@@ -71,6 +78,19 @@ const ProductImage = ({ form }) => {
                   <Input 
                     placeholder="Description for accessibility" 
                     {...field} 
+                    onChange={(e) => {
+                      // Ensure the image object exists
+                      const currentImage = form.getValues("image") || {};
+                      
+                      // Update the alt text in the form
+                      form.setValue("image", {
+                        ...currentImage,
+                        alt: e.target.value
+                      }, { 
+                        shouldDirty: true,
+                        shouldTouch: true
+                      });
+                    }}
                   />
                 </FormControl>
                 <FormMessage />

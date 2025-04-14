@@ -21,12 +21,17 @@ export const updateProductImage = async (data: ProductFormData, productId: strin
       throw new Error(fetchError.message);
     }
 
-    // If image data is provided
-    if (data.image && data.image.url) {
+    const hasExistingImage = existingImages && existingImages.length > 0;
+    console.log('[imageHelpers] Product has existing image:', hasExistingImage);
+
+    // If image data is provided with a URL
+    if (data.image && data.image.url && data.image.url.trim() !== '') {
       console.log('[imageHelpers] Processing image update with URL:', data.image.url);
       
       // If we already have an image, update it
-      if (existingImages && existingImages.length > 0) {
+      if (hasExistingImage) {
+        console.log('[imageHelpers] Updating existing image record');
+        
         const { error: updateError } = await supabase
           .from('product_type_images')
           .update({
@@ -45,6 +50,8 @@ export const updateProductImage = async (data: ProductFormData, productId: strin
       } 
       // Otherwise insert a new one
       else {
+        console.log('[imageHelpers] Creating new image record');
+        
         const { error: insertError } = await supabase
           .from('product_type_images')
           .insert({
@@ -60,11 +67,14 @@ export const updateProductImage = async (data: ProductFormData, productId: strin
         
         console.log('[imageHelpers] Inserted new image successfully');
       }
-    } else {
-      console.log('[imageHelpers] No image URL provided, skipping image update');
+    } 
+    // If image URL is empty or not provided but we have existing images
+    else if (hasExistingImage) {
+      // This is a case where the user might want to remove the image
+      console.log('[imageHelpers] No valid image URL provided. Leaving existing image unchanged.');
     }
 
-    console.log('[imageHelpers] Product image updated successfully');
+    console.log('[imageHelpers] Product image update completed');
   } catch (error) {
     console.error('[imageHelpers] Error in updateProductImage:', error);
     throw error;

@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -21,9 +22,10 @@ export const processBenefits = (benefits: string[] | undefined): string[] => {
   });
   
   // Remove duplicates by converting to Set and back to array
-  const uniqueBenefits = [...new Set(nonEmptyBenefits)];
+  const uniqueBenefits = [...new Set(nonEmptyBenefits.map(b => b.trim()))];
   
   console.log(`[productHelpers] processBenefits: Processed ${benefits.length} benefits into ${uniqueBenefits.length} unique benefits`);
+  console.log('[productHelpers] processBenefits: Final benefits list:', uniqueBenefits);
   
   return uniqueBenefits;
 };
