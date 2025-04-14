@@ -14,11 +14,11 @@ import {
  * @returns The product type extracted from the URL and UUID if available
  */
 export const useProductTypeFromUrl = () => {
-  const params = useParams<{ productType: string }>();
+  const params = useParams<{ productType: string; id: string }>();
   const location = useLocation();
 
   const productInfo = useMemo(() => {
-    // First priority: Check URL params
+    // First priority: Check URL params for 'productType'
     if (params.productType) {
       console.log("[useProductTypeFromUrl] Using productType from URL params:", params.productType);
       
@@ -28,6 +28,20 @@ export const useProductTypeFromUrl = () => {
       
       return { 
         slug: normalizeSlug(slug || params.productType),
+        uuid 
+      };
+    }
+    
+    // Check for 'id' param (used in new routes)
+    if (params.id) {
+      console.log("[useProductTypeFromUrl] Using id from URL params:", params.id);
+      
+      // Parse the combined slug if it contains UUID
+      const { slug, uuid } = parseSlugWithUUID(params.id);
+      console.log(`[useProductTypeFromUrl] Parsed slug: "${slug}", UUID: "${uuid || 'none'}"`);
+      
+      return { 
+        slug: normalizeSlug(slug || params.id),
         uuid 
       };
     }
@@ -56,7 +70,9 @@ export const useProductTypeFromUrl = () => {
     }
 
     // Third priority: Check if we're on an edit page
-    if (location.pathname.includes('/admin/products/edit/')) {
+    if (location.pathname.includes('/admin/products/edit/') || 
+        location.pathname.includes('/admin/product-types/edit/')) {
+      
       const editPathParts = location.pathname.split('/');
       const lastPathPart = editPathParts[editPathParts.length - 1];
       
@@ -86,7 +102,7 @@ export const useProductTypeFromUrl = () => {
       slug: '',
       uuid: null 
     };
-  }, [params.productType, location.pathname]);
+  }, [params.productType, params.id, location.pathname]);
 
   // Add effect to log URL changes
   useEffect(() => {

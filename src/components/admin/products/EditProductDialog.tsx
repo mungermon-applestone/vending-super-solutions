@@ -13,7 +13,7 @@ export const EditProductDialog: React.FC<EditProductDialogProps> = ({ product })
   const navigate = useNavigate();
   
   const handleEditClick = () => {
-    navigate(`/admin/product-types/edit/${product.slug}`);
+    navigate(`/admin/products/edit/${product.slug}`);
   };
   
   return (

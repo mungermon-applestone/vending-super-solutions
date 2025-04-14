@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // Public pages
@@ -49,6 +48,11 @@ function App() {
         <Route path="/admin/products" element={<AdminProducts />} />
         <Route path="/admin/products/new" element={<ProductEditor />} />
         <Route path="/admin/products/edit/:id" element={<ProductEditor />} />
+        
+        {/* Legacy product routes - keep for backward compatibility */}
+        <Route path="/admin/product-types/new" element={<ProductEditor />} />
+        <Route path="/admin/product-types/edit/:id" element={<ProductEditor />} />
+        
         <Route path="/admin/machines" element={<AdminMachines />} />
         <Route path="/admin/machines/new" element={<MachineEditor />} />
         <Route path="/admin/machines/edit/:id" element={<MachineEditor />} />
