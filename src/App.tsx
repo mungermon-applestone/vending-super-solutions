@@ -9,6 +9,8 @@ import BusinessGoals from './pages/BusinessGoals';
 import MachineDetail from './pages/MachineDetail';
 import ProductDetail from './pages/ProductDetail';
 import BusinessGoalDetail from './pages/BusinessGoalDetail';
+import TechnologyLanding from './pages/TechnologyLanding';
+import TechnologyDetail from './pages/TechnologyDetail';
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
         <Route path="/machines/:machineType/:machineId" element={<MachineDetail />} />
         <Route path="/goals" element={<BusinessGoals />} />
         <Route path="/goals/:goalSlug" element={<BusinessGoalDetail />} />
+        <Route path="/technology" element={<TechnologyLanding />} />
+        <Route path="/technology/:slug" element={<TechnologyDetail />} />
       </Routes>
     </BrowserRouter>
   );
