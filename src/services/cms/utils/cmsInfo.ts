@@ -1,42 +1,61 @@
+import { supabase } from '@/integrations/supabase/client';
 
-/**
- * Provides information about the current CMS configuration
- */
+export const getContentfulConfig = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('contentful_config')
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('[getContentfulConfig] Error fetching config:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('[getContentfulConfig] Unexpected error:', error);
+    return null;
+  }
+};
+
 import { getCMSProviderConfig, ContentProviderType } from '../providerConfig';
 
-/**
- * Get information about the currently configured CMS
- */
-export function getCMSInfo() {
-  const config = getCMSProviderConfig();
-  const isStrapi = config.type === ContentProviderType.STRAPI;
-  
-  return {
-    provider: isStrapi ? 'Strapi' : 'Supabase',
-    apiUrl: isStrapi ? config.apiUrl : undefined,
-    apiKeyConfigured: isStrapi && !!config.apiKey,
-    isConfigured: isStrapi ? (!!config.apiUrl && !!config.apiKey) : true,
-    status: isStrapi 
-      ? (!!config.apiUrl && !!config.apiKey) 
-        ? 'configured' 
-        : (!!config.apiUrl || !!config.apiKey) 
-          ? 'partial' 
-          : 'unconfigured'
-      : 'configured',
-    adminUrl: isStrapi ? getStrapiAdminUrl(config.apiUrl) : undefined
-  };
+interface CMSInfo {
+  provider: string;
+  status: 'configured' | 'partial' | 'not-configured';
+  isConfigured: boolean;
+  adminUrl?: string;
+  apiUrl?: string;
+  apiKeyConfigured?: boolean;
 }
 
-/**
- * Get the admin URL for a Strapi instance
- */
-function getStrapiAdminUrl(apiUrl?: string): string | undefined {
-  if (!apiUrl) return undefined;
+export const getCMSInfo = (): CMSInfo => {
+  const config = getCMSProviderConfig();
   
-  // If the URL ends with /api, remove it to get the base URL
-  const baseUrl = apiUrl.endsWith('/api')
-    ? apiUrl.slice(0, -4)
-    : apiUrl;
+  if (config.type === ContentProviderType.STRAPI) {
+    const apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL;
+    const apiKey = process.env.NEXT_PUBLIC_STRAPI_API_KEY;
+    
+    const isApiUrlConfigured = !!apiUrl && apiUrl.trim() !== '';
+    const isApiKeyConfigured = !!apiKey && apiKey.trim() !== '';
+    
+    const isConfigured = isApiUrlConfigured;
+    
+    return {
+      provider: 'Strapi',
+      status: isConfigured ? 'configured' : 'not-configured',
+      isConfigured: isConfigured,
+      adminUrl: apiUrl ? `${apiUrl}/admin` : undefined,
+      apiUrl: apiUrl,
+      apiKeyConfigured: isApiKeyConfigured
+    };
+  }
   
-  return `${baseUrl}/admin`;
-}
+  return {
+    provider: 'Supabase',
+    status: 'configured',
+    isConfigured: true,
+    adminUrl: 'https://supabase.com/dashboard'
+  };
+};
