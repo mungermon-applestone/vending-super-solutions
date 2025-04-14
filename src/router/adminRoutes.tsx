@@ -1,86 +1,78 @@
-import { RouteObject } from "react-router-dom";
-import Admin from "@/pages/Admin";
-import Machines from "@/pages/Machines";
-import Machine from "@/pages/Machine";
-import ProductTypes from "@/pages/ProductTypes";
-import ProductType from "@/pages/ProductType";
-import BusinessGoals from "@/pages/BusinessGoals";
-import BusinessGoal from "@/pages/BusinessGoal";
-import Technologies from "@/pages/Technologies";
-import Technology from "@/pages/Technology";
-import CaseStudies from "@/pages/CaseStudies";
-import CaseStudy from "@/pages/CaseStudy";
-import Testimonials from "@/pages/Testimonials";
-import Settings from "@/pages/Settings";
-import LandingPages from "@/pages/LandingPages";
-import LandingPage from "@/pages/LandingPage";
 
-// Import the new ContentfulManagement page
-import ContentfulManagement from '@/pages/admin/ContentfulManagement'; 
+import { RouteObject } from "react-router-dom";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminMachines from "@/pages/admin/AdminMachines";
+import AdminProducts from "@/pages/admin/AdminProducts";
+import AdminBusinessGoals from "@/pages/admin/AdminBusinessGoals";
+import AdminTechnology from "@/pages/admin/AdminTechnology";
+import AdminCaseStudies from "@/pages/admin/AdminCaseStudies";
+import AdminLandingPages from "@/pages/admin/AdminLandingPages";
+import AdminSettings from "@/pages/admin/AdminSettings";
+import ContentfulManagement from '@/pages/admin/ContentfulManagement';
 
 export const adminRoutes: RouteObject[] = [
   {
     path: "",
-    element: <Admin />,
+    element: <AdminDashboard />,
   },
   {
     path: "machines",
-    element: <Machines />,
+    element: <AdminMachines />,
   },
   {
     path: "machines/:machineSlug",
-    element: <Machine />,
+    element: <AdminMachines />, // Using same component with a parameter
   },
   {
     path: "product-types",
-    element: <ProductTypes />,
+    element: <AdminProducts />, // Using the admin products page for product types
   },
   {
     path: "product-types/:productTypeSlug",
-    element: <ProductType />,
+    element: <AdminProducts />, // Using same component with a parameter
   },
   {
     path: "business-goals",
-    element: <BusinessGoals />,
+    element: <AdminBusinessGoals />,
   },
   {
     path: "business-goals/:businessGoalSlug",
-    element: <BusinessGoal />,
+    element: <AdminBusinessGoals />, // Using same component with a parameter
   },
   {
     path: "technologies",
-    element: <Technologies />,
+    element: <AdminTechnology />,
   },
   {
     path: "technologies/:technologySlug",
-    element: <Technology />,
+    element: <AdminTechnology />, // Using same component with a parameter
   },
   {
     path: "case-studies",
-    element: <CaseStudies />,
+    element: <AdminCaseStudies />,
   },
   {
     path: "case-studies/:caseStudySlug",
-    element: <CaseStudy />,
+    element: <AdminCaseStudies />, // Using same component with a parameter
   },
   {
     path: "testimonials",
-    element: <Testimonials />,
+    element: <AdminDashboard />, // Using dashboard as fallback since Testimonials page isn't available
   },
   {
     path: "settings",
-    element: <Settings />,
+    element: <AdminSettings />,
   },
   {
     path: "landing-pages",
-    element: <LandingPages />,
+    element: <AdminLandingPages />,
   },
   {
     path: "landing-pages/:landingPageKey",
-    element: <LandingPage />,
+    element: <AdminLandingPages />, // Using same component with a parameter
   },
   
-  // Add the new ContentfulManagement route
+  // Contentful management route
   {
     path: "contentful",
     element: <ContentfulManagement />
