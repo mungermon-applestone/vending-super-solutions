@@ -1,19 +1,32 @@
 
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useProductType } from '@/hooks/cms/useProductTypes';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ProductFeaturesList from '@/components/products/ProductFeaturesList';
 import ProductExamples from '@/components/products/ProductExamples';
 import CTASection from '@/components/common/CTASection';
+import { useEffect } from 'react';
 
+/**
+ * Product detail page that displays detailed information about a specific product
+ */
 const ProductDetail = () => {
   const { productSlug } = useParams<{ productSlug: string }>();
   const { data: product, isLoading, error } = useProductType(productSlug || '');
+  
+  // Log product data for debugging
+  useEffect(() => {
+    if (product) {
+      console.log('[ProductDetail] Loaded product data:', product);
+    } else if (!isLoading) {
+      console.log('[ProductDetail] No product data found for slug:', productSlug);
+    }
+  }, [product, isLoading, productSlug]);
 
+  // Loading state
   if (isLoading) {
     return (
       <Layout>
@@ -25,6 +38,7 @@ const ProductDetail = () => {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <Layout>
@@ -44,6 +58,7 @@ const ProductDetail = () => {
     );
   }
 
+  // Not found state
   if (!product) {
     return (
       <Layout>
