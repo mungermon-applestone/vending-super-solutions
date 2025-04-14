@@ -13,6 +13,7 @@ import RootLayout from './components/RootLayout';
 import AdminLayout from './components/AdminLayout';
 import ProductEditorPage from './pages/ProductEditor';
 import NotFound from './pages/NotFound';
+import AdminSettings from './pages/admin/AdminSettings';
 
 // Create a simpler router structure to fix the build issues
 const router = createBrowserRouter([
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
       {
         path: "/admin/data-purge",
         element: <DataPurgePage />,
+      },
+      {
+        path: "/admin/settings",
+        element: <AdminSettings />,
       },
     ]
   },
