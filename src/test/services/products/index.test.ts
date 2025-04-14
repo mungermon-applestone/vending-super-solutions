@@ -1,5 +1,5 @@
 
-import { describe, it } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 // This is an index file to help organize and run all product service tests
 describe('Product Services', () => {
