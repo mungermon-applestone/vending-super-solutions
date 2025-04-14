@@ -4,22 +4,55 @@ import { supabase } from '@/integrations/supabase/client';
 export const getContentfulConfig = async () => {
   try {
     console.log('[getContentfulConfig] Fetching Contentful config from Supabase...');
+    
+    // First, check if the table exists and has any rows
+    const { count, error: countError } = await supabase
+      .from('contentful_config')
+      .select('*', { count: 'exact', head: true });
+    
+    if (countError) {
+      console.error('[getContentfulConfig] Error checking table:', countError);
+      return null;
+    }
+    
+    console.log(`[getContentfulConfig] Found ${count} configurations in table`);
+    
+    if (count === 0) {
+      console.warn('[getContentfulConfig] No records found in contentful_config table');
+      return null;
+    }
+    
+    // Now fetch the actual data
     const { data, error } = await supabase
       .from('contentful_config')
       .select('*')
-      .maybeSingle(); // Changed from single() to maybeSingle() to avoid errors when no data exists
+      .limit(1)
+      .single();
 
     if (error) {
       console.error('[getContentfulConfig] Error fetching config:', error);
-      return null;
+      // Try alternative approach if single() fails
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('contentful_config')
+        .select('*')
+        .limit(1);
+        
+      if (fallbackError || !fallbackData || fallbackData.length === 0) {
+        console.error('[getContentfulConfig] Fallback also failed:', fallbackError);
+        return null;
+      }
+      
+      console.log('[getContentfulConfig] Fallback succeeded, using first row:', fallbackData[0]);
+      return fallbackData[0];
     }
 
-    if (!data) {
-      console.warn('[getContentfulConfig] No Contentful configuration found in database');
-      return null;
-    }
-
-    console.log('[getContentfulConfig] Fetched configuration:', data);
+    console.log('[getContentfulConfig] Fetched configuration:', {
+      spaceId: data?.space_id,
+      envId: data?.environment_id,
+      hasToken: !!data?.management_token,
+      tokenLength: data?.management_token?.length
+    });
+    
     return data;
   } catch (error) {
     console.error('[getContentfulConfig] Unexpected error:', error);
