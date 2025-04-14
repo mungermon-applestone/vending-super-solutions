@@ -18,13 +18,34 @@ export const testContentfulConnection = async () => {
     });
 
     // Try to fetch the space to verify connection
-    const space = await client.getSpace(config.space_id);
-
-    return {
-      success: true,
-      message: 'Successfully connected to Contentful',
-      spaceId: space.sys.id
-    };
+    try {
+      const space = await client.getSpace(config.space_id);
+      
+      return {
+        success: true,
+        message: 'Successfully connected to Contentful',
+        spaceId: space.sys.id
+      };
+    } catch (apiError: any) {
+      // Extract detailed error information from Contentful's error response
+      const errorDetails = apiError.details || {};
+      const requestDetails = apiError.request || {};
+      
+      return {
+        success: false,
+        message: apiError.message || 'Connection to Contentful failed',
+        errorData: {
+          status: apiError.status,
+          statusText: apiError.statusText,
+          details: errorDetails,
+          request: {
+            url: requestDetails.url,
+            method: requestDetails.method,
+            // Don't include sensitive headers in the response
+          }
+        }
+      };
+    }
   } catch (error) {
     console.error('[testContentfulConnection] Connection error:', error);
     return {
