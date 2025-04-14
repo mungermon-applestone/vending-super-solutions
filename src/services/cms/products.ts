@@ -72,6 +72,8 @@ export async function createProduct(data: ProductFormData, toast?: UseToastRetur
       benefits: data.benefits.filter(benefit => benefit.trim() !== ''),
     };
     
+    console.log('[products.ts] Cleaned benefits for create:', cleanedData.benefits);
+    
     const adapter = getProductAdapter(getCMSProviderConfig());
     const result = await adapter.create(cleanedData);
     
@@ -106,7 +108,8 @@ export async function updateProduct(
   originalSlug: string, 
   toast?: UseToastReturn
 ): Promise<string> {
-  console.log('[products.ts] Updating product:', originalSlug, data);
+  console.log('[products.ts] Updating product:', originalSlug);
+  console.log('[products.ts] Update data benefits:', data.benefits);
   
   try {
     // Make sure to clean the benefits data to remove empty strings
@@ -116,6 +119,7 @@ export async function updateProduct(
       benefits: data.benefits.filter(benefit => benefit.trim() !== ''),
     };
     
+    console.log('[products.ts] Cleaned benefits for update:', cleanedData.benefits);
     console.log('[products.ts] Cleaned data for update:', {
       title: cleanedData.title,
       slug: cleanedData.slug,
@@ -132,6 +136,9 @@ export async function updateProduct(
     if (!product) {
       throw new Error(`Product with slug "${originalSlug}" not found`);
     }
+    
+    console.log('[products.ts] Found product ID for update:', product.id);
+    console.log('[products.ts] Current benefits before update:', product.benefits);
     
     const result = await adapter.update(product.id, {
       ...cleanedData,

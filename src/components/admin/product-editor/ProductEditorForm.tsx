@@ -22,7 +22,7 @@ interface ProductEditorFormProps {
 
 const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormProps) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isCloning, setIsCloning] = useState(false);
   const cloneProductMutation = useCloneProductType();
@@ -39,7 +39,7 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
     form, 
     onSubmit,
     productId
-  } = useProductEditorForm(productSlug, setIsLoading, useToast(), navigate, isEditMode, uuid);
+  } = useProductEditorForm(productSlug, setIsLoading, toast, navigate, isEditMode, uuid);
 
   useEffect(() => {
     // Add debugging to track form value changes
@@ -59,13 +59,16 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
   const handleFormSubmit = form.handleSubmit((data) => {
     console.log('[ProductEditorForm] Form submitted with data:', data);
     
-    // Clean up benefits to remove any empty values
+    // Clean up benefits to remove any empty values and log them explicitly
+    const cleanedBenefits = data.benefits.filter(benefit => benefit.trim() !== '');
+    console.log('[ProductEditorForm] Cleaned benefits before submit:', cleanedBenefits);
+    
     const cleanedData = {
       ...data,
-      benefits: data.benefits.filter(benefit => benefit.trim() !== '')
+      benefits: cleanedBenefits
     };
     
-    console.log('[ProductEditorForm] Cleaned data for submit:', cleanedData);
+    console.log('[ProductEditorForm] Final cleaned data for submit:', cleanedData);
     onSubmit(cleanedData);
   });
 
@@ -77,7 +80,7 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
       const clonedProduct = await cloneProductMutation.mutateAsync(productId);
       
       if (clonedProduct) {
-        toast({
+        toast.toast({
           title: "Product cloned",
           description: `Product has been cloned successfully.`
         });
@@ -87,7 +90,7 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
       }
     } catch (error) {
       console.error("Error cloning product:", error);
-      toast({
+      toast.toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to clone product. Please try again.",
         variant: "destructive",

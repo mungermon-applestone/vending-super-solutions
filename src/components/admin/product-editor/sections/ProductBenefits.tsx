@@ -37,14 +37,14 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     // Ensure we always have at least one benefit field (can be empty)
     const finalBenefits = updatedBenefits.length === 0 ? [''] : updatedBenefits;
     
+    console.log(`[ProductBenefits] After removal: Benefits count=${finalBenefits.length}, data=`, finalBenefits);
+    
     // Force form state to be dirty so it will be saved
     form.setValue('benefits', finalBenefits, { 
       shouldDirty: true, 
       shouldTouch: true, 
       shouldValidate: true 
     });
-    
-    console.log(`[ProductBenefits] After removal: Benefits count=${finalBenefits.length}, data=`, finalBenefits);
   };
 
   // Check for duplicate benefits and set form errors
@@ -52,6 +52,7 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     const subscription = form.watch((value, { name }) => {
       if (name?.startsWith('benefits')) {
         const benefits = form.getValues('benefits');
+        console.log('[ProductBenefits] Benefits changed:', benefits);
         
         // First clear all duplicate errors
         benefits.forEach((_, index) => {
