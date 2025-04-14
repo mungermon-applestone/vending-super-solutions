@@ -1,4 +1,3 @@
-
 import { getContentfulConfig } from './cmsInfo';
 import { createClient } from 'contentful-management';
 
@@ -16,26 +15,18 @@ export const testContentfulConnection = async () => {
       } : 'No config found');
     
     if (!config) {
-      console.warn('[testContentfulConnection] No configuration found in the database');
+      console.warn('[testContentfulConnection] No Contentful configuration found in the database');
       return {
         success: false,
         message: 'No Contentful configuration found in the database'
       };
     }
 
-    if (!config.space_id) {
-      console.error('[testContentfulConnection] Space ID missing from configuration');
+    if (!config.management_token?.startsWith('CFPAT-')) {
+      console.error('[testContentfulConnection] Invalid token type detected. Ensure you are using a Contentful Management API (CMA) token.');
       return {
         success: false,
-        message: 'Space ID missing from Contentful configuration'
-      };
-    }
-
-    if (!config.management_token) {
-      console.error('[testContentfulConnection] Management token missing from configuration');
-      return {
-        success: false,
-        message: 'Management token missing from Contentful configuration'
+        message: 'Invalid token type. Please use a Contentful Management API (CMA) token that starts with CFPAT-'
       };
     }
 
@@ -44,7 +35,6 @@ export const testContentfulConnection = async () => {
       accessToken: config.management_token
     });
 
-    // Try to fetch the space to verify connection
     try {
       console.log(`[testContentfulConnection] Attempting to get space with ID: ${config.space_id}`);
       const space = await client.getSpace(config.space_id);
@@ -58,11 +48,9 @@ export const testContentfulConnection = async () => {
     } catch (apiError: any) {
       console.error('[testContentfulConnection] API Error:', apiError);
       
-      // Extract detailed error information from Contentful's error response
       const errorDetails = apiError.details || {};
       const requestDetails = apiError.request || {};
       
-      // Check for specific error codes to provide better guidance
       let userMessage = apiError.message || 'Connection to Contentful failed';
       
       if (apiError.status === 403) {
@@ -96,5 +84,4 @@ export const testContentfulConnection = async () => {
   }
 };
 
-// Export the function with the expected name for backward compatibility
 export const testCMSConnection = testContentfulConnection;
