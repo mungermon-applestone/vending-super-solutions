@@ -3,17 +3,20 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { testContentfulConnection } from '@/services/cms/utils/connection';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, CheckCircle, AlertTriangle } from 'lucide-react';
+import { RefreshCw, CheckCircle, AlertTriangle, Settings } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Link } from 'react-router-dom';
 
 const CMSConnectionTest: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorDetails, setErrorDetails] = useState<any>(null);
+  const [noConfigFound, setNoConfigFound] = useState(false);
   const { toast } = useToast();
 
   const handleConnectionTest = async () => {
     setIsLoading(true);
     setErrorDetails(null);
+    setNoConfigFound(false);
     
     try {
       const result = await testContentfulConnection();
@@ -30,6 +33,11 @@ const CMSConnectionTest: React.FC = () => {
           variant: 'default'
         });
       } else {
+        // Check if this is a configuration missing error
+        if (result.message === 'No Contentful configuration found') {
+          setNoConfigFound(true);
+        }
+        
         // Store error details for display
         if (result.errorData) {
           setErrorDetails(result.errorData);
@@ -80,6 +88,22 @@ const CMSConnectionTest: React.FC = () => {
           )}
         </Button>
       </div>
+      
+      {noConfigFound && (
+        <Alert variant="warning" className="mt-4 border-amber-200 bg-amber-50">
+          <AlertDescription>
+            <div className="space-y-2">
+              <p className="font-medium text-amber-800">No Contentful configuration found</p>
+              <p className="text-sm text-amber-700">
+                Please add your Contentful credentials in the Contentful Configuration section below.
+              </p>
+              <p className="text-sm text-amber-700">
+                You'll need to enter your Space ID and Management Token to connect to Contentful.
+              </p>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
       
       {errorDetails && (
         <Alert variant="destructive" className="mt-4">
