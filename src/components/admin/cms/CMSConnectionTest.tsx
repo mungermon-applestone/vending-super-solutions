@@ -19,7 +19,9 @@ const CMSConnectionTest: React.FC = () => {
     setNoConfigFound(false);
     
     try {
+      console.log('[CMSConnectionTest] Starting Contentful connection test');
       const result = await testContentfulConnection();
+      console.log('[CMSConnectionTest] Test result:', result);
 
       if (result.success) {
         toast({
@@ -34,7 +36,8 @@ const CMSConnectionTest: React.FC = () => {
         });
       } else {
         // Check if this is a configuration missing error
-        if (result.message === 'No Contentful configuration found') {
+        if (result.message.includes('No Contentful configuration found')) {
+          console.warn('[CMSConnectionTest] No Contentful configuration found in database');
           setNoConfigFound(true);
         }
         
@@ -55,6 +58,7 @@ const CMSConnectionTest: React.FC = () => {
         });
       }
     } catch (error) {
+      console.error('[CMSConnectionTest] Unexpected error during test:', error);
       toast({
         title: 'Unexpected Error',
         description: (

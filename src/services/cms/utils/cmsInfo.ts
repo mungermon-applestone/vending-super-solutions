@@ -3,13 +3,19 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const getContentfulConfig = async () => {
   try {
+    console.log('[getContentfulConfig] Fetching Contentful config from Supabase...');
     const { data, error } = await supabase
       .from('contentful_config')
       .select('*')
-      .single();
+      .maybeSingle(); // Changed from single() to maybeSingle() to avoid errors when no data exists
 
     if (error) {
       console.error('[getContentfulConfig] Error fetching config:', error);
+      return null;
+    }
+
+    if (!data) {
+      console.warn('[getContentfulConfig] No Contentful configuration found in database');
       return null;
     }
 
