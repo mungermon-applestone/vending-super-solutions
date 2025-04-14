@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { 
   getProductTypes, 
@@ -127,7 +126,14 @@ describe('Product Services', () => {
         id: 'cloned-123', 
         title: 'Cloned Product', 
         slug: 'cloned-product',
-        description: 'This is a cloned product'
+        description: 'This is a cloned product',
+        image: {
+          id: 'image-123',
+          url: 'https://example.com/cloned-image.jpg',
+          alt: 'Cloned product image'
+        },
+        benefits: [],
+        features: []
       };
       
       vi.mocked(supabase.from).mockReturnValue({
