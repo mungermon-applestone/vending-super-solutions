@@ -11,7 +11,8 @@ import {
   ServerCog,
   BarChartBig,
   Aperture,
-  Axe
+  Axe,
+  FileJson
 } from 'lucide-react';
 
 interface NavItem {
@@ -63,6 +64,11 @@ const AdminNavigation: React.FC = () => {
       title: "Data Management",
       icon: <DatabaseIcon className="h-5 w-5" />,
       href: "/admin/data-purge",
+    },
+    {
+      title: "Contentful",
+      icon: <FileJson className="h-5 w-5" />,
+      href: "/admin/contentful",
     },
     {
       title: "Settings",
