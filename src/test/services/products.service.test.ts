@@ -121,7 +121,8 @@ describe('Product Services', () => {
   
   describe('cloneProduct', () => {
     it('should clone a product successfully', async () => {
-      const productId = 'product-123'; // Ensure productId is passed
+      const productId = 'product-123';
+      
       const mockClonedProduct = { 
         id: 'cloned-123', 
         title: 'Cloned Product', 
@@ -142,7 +143,7 @@ describe('Product Services', () => {
         single: vi.fn().mockResolvedValue({ data: mockClonedProduct, error: null })
       } as any);
       
-      const result = await cloneProduct(productId); // Pass productId explicitly
+      const result = await cloneProduct(productId);
       
       expect(result).toEqual(mockClonedProduct);
       expect(supabase.from).toHaveBeenCalledWith('product_types');
@@ -220,7 +221,6 @@ describe('Product Services', () => {
         ...mockProductFormData
       };
       
-      // First mock the getBySlug call
       vi.mocked(supabase.from).mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnValue({
@@ -231,7 +231,6 @@ describe('Product Services', () => {
         })
       } as any);
       
-      // Then mock the update call
       vi.mocked(supabase.from).mockReturnValueOnce({
         eq: vi.fn().mockReturnValue({
           update: vi.fn().mockResolvedValue({
@@ -251,7 +250,6 @@ describe('Product Services', () => {
     it('should delete a product', async () => {
       const productSlug = 'product-to-delete';
       
-      // Mock the getBySlug call
       vi.mocked(supabase.from).mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnValue({
@@ -262,7 +260,6 @@ describe('Product Services', () => {
         })
       } as any);
       
-      // Mock the delete call
       vi.mocked(supabase.from).mockReturnValueOnce({
         eq: vi.fn().mockReturnValue({
           delete: vi.fn().mockResolvedValue({ 
