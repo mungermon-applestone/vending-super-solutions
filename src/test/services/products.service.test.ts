@@ -1,3 +1,4 @@
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { 
   getProductTypes, 
@@ -144,15 +145,33 @@ describe('Product Services', () => {
   
   describe('createProduct', () => {
     it('should create a new product', async () => {
-      const mockProduct = { 
-        id: 'new-product', 
+      const mockProductFormData: ProductFormData = { 
         title: 'New Product', 
         slug: 'new-product',
-        description: 'This is a new product'
+        description: 'This is a new product',
+        image: {
+          url: 'https://example.com/image.jpg',
+          alt: 'Product image'
+        },
+        benefits: ['Benefit 1', 'Benefit 2'],
+        features: [
+          {
+            title: 'Feature 1',
+            description: 'Feature 1 description',
+            icon: 'icon-1',
+            screenshotUrl: 'https://example.com/screenshot1.jpg',
+            screenshotAlt: 'Feature 1 screenshot'
+          }
+        ]
+      };
+      
+      const mockCreatedProduct = {
+        id: 'new-product-id',
+        ...mockProductFormData
       };
       
       const mockResponse = {
-        data: mockProduct,
+        data: mockCreatedProduct,
         error: null
       };
       
@@ -160,52 +179,96 @@ describe('Product Services', () => {
         insert: vi.fn().mockResolvedValue(mockResponse)
       } as any);
       
-      const result = await createProduct(mockProduct);
+      const result = await createProduct(mockProductFormData);
       
-      expect(result).toEqual(mockProduct);
+      expect(result).toBe(mockCreatedProduct.id);
     });
   });
   
   describe('updateProduct', () => {
     it('should update an existing product', async () => {
-      const productId = 'product-123';
-      const mockUpdatedProduct = { 
-        id: 'product-123', 
-        title: 'Updated Product', 
+      const originalSlug = 'original-product';
+      
+      const mockProductFormData: ProductFormData = { 
+        title: 'Updated Product',
         slug: 'updated-product',
-        description: 'This is an updated product'
+        description: 'This is an updated product',
+        image: {
+          url: 'https://example.com/updated-image.jpg',
+          alt: 'Updated product image'
+        },
+        benefits: ['Updated Benefit 1', 'Updated Benefit 2'],
+        features: [
+          {
+            title: 'Updated Feature',
+            description: 'Updated feature description',
+            icon: 'updated-icon',
+            screenshotUrl: 'https://example.com/updated-screenshot.jpg',
+            screenshotAlt: 'Updated feature screenshot'
+          }
+        ]
       };
       
-      const mockResponse = {
-        data: mockUpdatedProduct,
-        error: null
+      const mockUpdatedProduct = {
+        id: 'product-123',
+        ...mockProductFormData
       };
       
-      vi.mocked(supabase.from).mockReturnValue({
+      // First mock the getBySlug call
+      vi.mocked(supabase.from).mockReturnValueOnce({
+        select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnValue({
-          update: vi.fn().mockResolvedValue(mockResponse)
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: { id: 'product-123' },
+            error: null
+          })
         })
       } as any);
       
-      const result = await updateProduct(productId, mockUpdatedProduct);
+      // Then mock the update call
+      vi.mocked(supabase.from).mockReturnValueOnce({
+        eq: vi.fn().mockReturnValue({
+          update: vi.fn().mockResolvedValue({
+            data: mockUpdatedProduct,
+            error: null
+          })
+        })
+      } as any);
       
-      expect(result).toEqual(mockUpdatedProduct);
+      const result = await updateProduct(mockProductFormData, originalSlug);
+      
+      expect(result).toBe(mockUpdatedProduct.id);
     });
   });
   
   describe('deleteProduct', () => {
     it('should delete a product', async () => {
-      const productId = 'product-123';
+      const productSlug = 'product-to-delete';
       
-      vi.mocked(supabase.from).mockReturnValue({
+      // Mock the getBySlug call
+      vi.mocked(supabase.from).mockReturnValueOnce({
+        select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnValue({
-          delete: vi.fn().mockResolvedValue({ data: null, error: null })
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: { id: 'product-123' },
+            error: null
+          })
         })
       } as any);
       
-      const result = await deleteProduct(productId);
+      // Mock the delete call
+      vi.mocked(supabase.from).mockReturnValueOnce({
+        eq: vi.fn().mockReturnValue({
+          delete: vi.fn().mockResolvedValue({ 
+            data: true, 
+            error: null 
+          })
+        })
+      } as any);
       
-      expect(result).toBeNull();
+      const result = await deleteProduct(productSlug);
+      
+      expect(result).toBe(true);
     });
   });
 });
