@@ -1,78 +1,98 @@
-
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Database, Settings, Server, Box, Target, List, Layers } from 'lucide-react';
-import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
+import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import {
+  HomeIcon,
+  LayoutDashboard,
+  Settings,
+  Image,
+  ListOrdered,
+  DatabaseIcon,
+  ServerCog,
+  BarChartBig,
+  Aperture,
+  Axe
+} from 'lucide-react';
+
+interface NavItem {
+  title: string;
+  href: string;
+  icon: React.ReactNode;
+}
 
 const AdminNavigation: React.FC = () => {
   const location = useLocation();
-  const cmsInfo = getCMSInfo();
   
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
-  
-  const navItems = [
-    { 
-      path: "/admin", 
-      label: "Dashboard", 
-      icon: <Layers className="h-4 w-4 mr-2" /> 
+  const navigationItems: NavItem[] = [
+    {
+      title: "Dashboard",
+      icon: <LayoutDashboard className="h-5 w-5" />,
+      href: "/admin",
     },
-    { 
-      path: "/admin/machines", 
-      label: "Machines", 
-      icon: <Box className="h-4 w-4 mr-2" /> 
+    {
+      title: "Products",
+      icon: <ListOrdered className="h-5 w-5" />,
+      href: "/admin/products",
     },
-    { 
-      path: "/admin/product-types", 
-      label: "Product Types", 
-      icon: <List className="h-4 w-4 mr-2" /> 
+    {
+      title: "Media",
+      icon: <Image className="h-5 w-5" />,
+      href: "/admin/media",
     },
-    { 
-      path: "/admin/business-goals", 
-      label: "Business Goals", 
-      icon: <Target className="h-4 w-4 mr-2" /> 
+    {
+      title: "Machines",
+      icon: <Aperture className="h-5 w-5" />,
+      href: "/admin/machines",
     },
-    { 
-      path: "/admin/technologies", 
-      label: "Technologies", 
-      icon: <Database className="h-4 w-4 mr-2" /> 
+    {
+      title: "Technologies",
+      icon: <ServerCog className="h-5 w-5" />,
+      href: "/admin/technologies",
     },
-    { 
-      path: "/admin/settings", 
-      label: "Settings", 
-      icon: <Settings className="h-4 w-4 mr-2" /> 
-    }
+    {
+      title: "Business Goals",
+      icon: <BarChartBig className="h-5 w-5" />,
+      href: "/admin/business-goals",
+    },
+    {
+      title: "Regression Tests",
+      icon: <Axe className="h-5 w-5" />,
+      href: "/admin/regression-tests",
+    },
+    {
+      title: "Data Management",
+      icon: <DatabaseIcon className="h-5 w-5" />,
+      href: "/admin/data-purge",
+    },
+    {
+      title: "Settings",
+      icon: <Settings className="h-5 w-5" />,
+      href: "/admin/settings",
+    },
   ];
   
-  // Add Strapi integration link if Strapi is the active CMS provider
-  if (cmsInfo.provider === 'Strapi') {
-    navItems.splice(navItems.length - 1, 0, { 
-      path: "/admin/strapi", 
-      label: "Strapi Integration", 
-      icon: <Server className="h-4 w-4 mr-2" /> 
-    });
-  }
-  
   return (
-    <nav className="space-y-1 py-4">
-      {navItems.map((item) => (
-        <Link key={item.path} to={item.path}>
-          <Button
-            variant={isActive(item.path) ? "default" : "ghost"}
-            className={cn(
-              "w-full justify-start",
-              isActive(item.path) ? "" : "text-muted-foreground"
-            )}
+    <aside className="w-64 bg-gray-50 border-r border-gray-200 h-full py-8 px-4">
+      <div className="mb-8">
+        <Link to="/" className="flex items-center space-x-2 font-bold text-lg text-gray-800">
+          <HomeIcon className="h-6 w-6" />
+          <span>Admin Panel</span>
+        </Link>
+      </div>
+      
+      <nav className="space-y-2">
+        {navigationItems.map((item) => (
+          <Link
+            key={item.title}
+            to={item.href}
+            className={`flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors duration-200 ${location.pathname === item.href ? 'bg-gray-100 font-medium' : 'text-gray-600'}`}
           >
             {item.icon}
-            {item.label}
-          </Button>
-        </Link>
-      ))}
-    </nav>
+            <span>{item.title}</span>
+          </Link>
+        ))}
+      </nav>
+    </aside>
   );
 };
 
