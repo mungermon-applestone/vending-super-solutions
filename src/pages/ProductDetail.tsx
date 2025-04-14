@@ -93,7 +93,7 @@ const ProductDetail = () => {
                 <h2 className="text-xl font-semibold mb-4">Benefits</h2>
                 <ul className="list-disc pl-5 space-y-2">
                   {product.benefits.map((benefit, index) => (
-                    <li key={index}>{typeof benefit === 'string' ? benefit : benefit.benefit}</li>
+                    <li key={index}>{typeof benefit === 'string' ? benefit : benefit.text}</li>
                   ))}
                 </ul>
               </div>
