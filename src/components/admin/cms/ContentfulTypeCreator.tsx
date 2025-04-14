@@ -283,8 +283,8 @@ const contentTypeTemplates: Record<string, ContentTypeProps> = {
         type: 'Symbol',
         required: true,
         validations: [
-          {
-            unique: true,
+          { unique: true },
+          { 
             regexp: {
               pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
               flags: ''
@@ -299,7 +299,7 @@ const contentTypeTemplates: Record<string, ContentTypeProps> = {
         type: 'Symbol',
         required: true,
         validations: [
-          {
+          { 
             in: ['vending', 'locker'],
             message: 'Type must be either vending or locker'
           }
@@ -311,7 +311,7 @@ const contentTypeTemplates: Record<string, ContentTypeProps> = {
         type: 'Symbol',
         required: false,
         validations: [
-          {
+          { 
             in: ['ambient', 'refrigerated', 'frozen', 'multi', 'controlled'],
             message: 'Invalid temperature type'
           }
