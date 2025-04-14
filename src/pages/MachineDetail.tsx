@@ -1,6 +1,5 @@
 
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import CTASection from '@/components/common/CTASection';
 import { getMachineBySlug } from '@/services/cms';
@@ -12,19 +11,23 @@ import MachineDetailDeployments from '@/components/machineDetail/MachineDetailDe
 import MachineDetailGallery from '@/components/machineDetail/MachineDetailGallery';
 import MachineDetailInquiry from '@/components/machineDetail/MachineDetailInquiry';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
+import { Loader2 } from 'lucide-react';
 
 const MachineDetail = () => {
   const { machineId, machineType } = useParams<{ machineType: string, machineId: string }>();
 
   // Use our specialized hook that handles fetching by slug
   const { data: machine, isLoading, error } = useMachineBySlug(machineType, machineId);
+  
+  console.log("Fetching machine:", machineType, machineId);
+  console.log("Machine data:", machine);
 
   if (isLoading) {
     return (
       <Layout>
         <div className="py-24 text-center">
-          <div className="animate-pulse rounded-md bg-gray-200 h-8 w-1/4 mx-auto mb-4"></div>
-          <div className="animate-pulse rounded-md bg-gray-200 h-4 w-1/2 mx-auto"></div>
+          <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
+          <p>Loading machine information...</p>
         </div>
       </Layout>
     );

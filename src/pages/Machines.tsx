@@ -16,6 +16,8 @@ const Machines = () => {
     queryClient.invalidateQueries({ queryKey: ['machines'] });
   };
   
+  console.log("Machines data:", machines);
+  
   return (
     <Layout>
       <div className="container py-10">

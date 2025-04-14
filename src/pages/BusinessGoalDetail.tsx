@@ -11,6 +11,9 @@ const BusinessGoalDetail = () => {
   const { goalSlug } = useParams<{ goalSlug: string }>();
   const { data: goal, isLoading, error } = useBusinessGoal(goalSlug || '');
 
+  console.log("Fetching goal with slug:", goalSlug);
+  console.log("Goal data:", goal);
+
   if (isLoading) {
     return (
       <Layout>

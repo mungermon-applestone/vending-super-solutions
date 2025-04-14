@@ -16,6 +16,8 @@ const BusinessGoals = () => {
     queryClient.invalidateQueries({ queryKey: ['businessGoals'] });
   };
   
+  console.log("Business goals data:", businessGoals);
+  
   return (
     <Layout>
       <div className="container py-10">
