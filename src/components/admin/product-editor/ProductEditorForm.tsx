@@ -39,7 +39,7 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
     form, 
     onSubmit,
     productId
-  } = useProductEditorForm(productSlug, setIsLoading, toast, navigate, isEditMode, uuid);
+  } = useProductEditorForm(productSlug, setIsLoading, useToast(), navigate, isEditMode, uuid);
 
   useEffect(() => {
     // Add debugging to track form value changes
