@@ -11,6 +11,8 @@ import DataPurgePage from './pages/admin/DataPurge';
 import ErrorPage from './components/ErrorPage';
 import RootLayout from './components/RootLayout';
 import AdminLayout from './components/AdminLayout';
+import ProductEditorPage from './pages/ProductEditor';
+import NotFound from './pages/NotFound';
 
 // Create a simpler router structure to fix the build issues
 const router = createBrowserRouter([
@@ -39,6 +41,14 @@ const router = createBrowserRouter([
         element: <AdminProducts />,
       },
       {
+        path: "/admin/products/new",
+        element: <ProductEditorPage />,
+      },
+      {
+        path: "/admin/products/edit/:slug",
+        element: <ProductEditorPage />,
+      },
+      {
         path: "/admin/migrate-cms",
         element: <MigrateCmsData />,
       },
@@ -48,6 +58,10 @@ const router = createBrowserRouter([
       },
     ]
   },
+  {
+    path: "*",
+    element: <NotFound />,
+  }
 ]);
 
 function App() {

@@ -2,7 +2,7 @@
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import RunRegressionTest from '@/components/admin/testing/RunRegressionTest';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import {
@@ -14,10 +14,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import { useProductTypes } from '@/hooks/cms/useProductTypes';
 import { CMSProductType } from '@/types/cms';
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
 import { EditProductDialog } from '@/components/admin/products/EditProductDialog';
 import { DeleteProductDialog } from '@/components/admin/products/DeleteProductDialog';
 import { useCloneProductType } from '@/hooks/cms/useCloneCMS';
@@ -26,6 +26,7 @@ import { toast } from '@/hooks/use-toast';
 const AdminProducts: React.FC = () => {
   const { data: products, isLoading, error, refetch, status, fetchStatus } = useProductTypes();
   const { mutateAsync: cloneProductType, isPending: isCloning } = useCloneProductType();
+  const navigate = useNavigate();
   
   const handleClone = async (id: string) => {
     try {
@@ -42,6 +43,14 @@ const AdminProducts: React.FC = () => {
         description: error instanceof Error ? error.message : "An error occurred while cloning the product.",
       });
     }
+  };
+
+  const handleAddNewProduct = () => {
+    navigate('/admin/products/new');
+  };
+
+  const handleEditProduct = (slug: string) => {
+    navigate(`/admin/products/edit/${slug}`);
   };
 
   return (
@@ -94,7 +103,13 @@ const AdminProducts: React.FC = () => {
                     <TableCell>{product.slug}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <EditProductDialog product={product} />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditProduct(product.slug)}
+                        >
+                          Edit
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"
@@ -113,12 +128,10 @@ const AdminProducts: React.FC = () => {
               <TableFooter>
                 <TableRow>
                   <TableCell colSpan={4}>
-                    <Link to="/admin/product-types/new">
-                      <Button variant="secondary">
-                        <PlusCircle className="w-4 h-4 mr-2" />
-                        Add New Product
-                      </Button>
-                    </Link>
+                    <Button variant="secondary" onClick={handleAddNewProduct}>
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Add New Product
+                    </Button>
                   </TableCell>
                 </TableRow>
               </TableFooter>
@@ -130,11 +143,9 @@ const AdminProducts: React.FC = () => {
             <p className="text-sm text-muted-foreground">
               It looks like you haven't created any product types yet.
             </p>
-            <Link to="/admin/product-types/new">
-              <Button variant="secondary" size="sm" className="mt-2">
-                Create your first product
-              </Button>
-            </Link>
+            <Button variant="secondary" size="sm" className="mt-2" onClick={handleAddNewProduct}>
+              Create your first product
+            </Button>
           </div>
         )}
       </div>
