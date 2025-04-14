@@ -149,15 +149,24 @@ export const useProductEditorForm = (
     setIsLoading(true);
     
     try {
+      // Make sure the image object is properly structured
+      const cleanedData: ProductFormData = {
+        ...data,
+        image: data.image || { url: "", alt: "" },
+        benefits: data.benefits.filter(benefit => benefit.trim() !== '')
+      };
+      
+      console.log('[useProductEditorForm] Cleaned data for submission:', cleanedData);
+      
       if (isCreating) {
         console.log('[useProductEditorForm] Creating new product');
-        await createProduct(data, toast);
+        await createProduct(cleanedData, toast);
         navigate('/admin/products');
       } else if (productSlug && productSlug !== 'new') {
         console.log(`[useProductEditorForm] Updating product: ${productSlug}`);
-        console.log('[useProductEditorForm] Form data for update:', data);
+        console.log('[useProductEditorForm] Form data for update:', cleanedData);
         
-        await updateProduct(data, productSlug, toast);
+        await updateProduct(cleanedData, productSlug, toast);
         navigate('/admin/products');
       }
     } catch (error) {

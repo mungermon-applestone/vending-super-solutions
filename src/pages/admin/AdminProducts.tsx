@@ -22,11 +22,19 @@ import { EditProductDialog } from '@/components/admin/products/EditProductDialog
 import { DeleteProductDialog } from '@/components/admin/products/DeleteProductDialog';
 import { useCloneProductType } from '@/hooks/cms/useCloneCMS';
 import { toast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 const AdminProducts: React.FC = () => {
+  const queryClient = useQueryClient();
   const { data: products, isLoading, error, refetch, status, fetchStatus } = useProductTypes();
   const { mutateAsync: cloneProductType, isPending: isCloning } = useCloneProductType();
   const navigate = useNavigate();
+  
+  // Force refresh products when component mounts
+  React.useEffect(() => {
+    console.log("[AdminProducts] Component mounted, refreshing products data");
+    queryClient.invalidateQueries({ queryKey: ['productTypes'] });
+  }, [queryClient]);
   
   const handleClone = async (id: string) => {
     try {
@@ -103,13 +111,7 @@ const AdminProducts: React.FC = () => {
                     <TableCell>{product.slug}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditProduct(product.slug)}
-                        >
-                          Edit
-                        </Button>
+                        <EditProductDialog product={product} />
                         <Button
                           variant="outline"
                           size="sm"

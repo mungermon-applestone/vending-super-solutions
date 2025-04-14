@@ -8,6 +8,13 @@ import { Input } from '@/components/ui/input';
 const ProductImage = ({ form }) => {
   console.log("[ProductImage] Rendering with image URL:", form.watch("image.url"));
   
+  useEffect(() => {
+    // Ensure image object is properly initialized
+    if (!form.getValues("image")) {
+      form.setValue("image", { url: "", alt: "" });
+    }
+  }, [form]);
+  
   return (
     <Card>
       <CardHeader>
@@ -26,9 +33,15 @@ const ProductImage = ({ form }) => {
                     value={field.value || ""}
                     onChange={(url) => {
                       console.log("[ProductImage] Selected new image URL:", url);
-                      // Simple direct update to ensure it's always properly set
-                      form.setValue("image.url", url);
+                      // Update both the field and directly set the form value
                       field.onChange(url);
+                      
+                      // Ensure the image object exists before setting a property on it
+                      const currentImage = form.getValues("image") || {};
+                      form.setValue("image", {
+                        ...currentImage,
+                        url: url
+                      }, { shouldDirty: true, shouldTouch: true });
                     }}
                     buttonLabel="Select Product Image"
                   />
@@ -48,6 +61,17 @@ const ProductImage = ({ form }) => {
                   <Input 
                     placeholder="Description for accessibility" 
                     {...field} 
+                    onChange={(e) => {
+                      // Update both the field and directly set form value
+                      field.onChange(e);
+                      
+                      // Ensure the image object exists before setting a property on it
+                      const currentImage = form.getValues("image") || {};
+                      form.setValue("image", {
+                        ...currentImage,
+                        alt: e.target.value
+                      }, { shouldDirty: true, shouldTouch: true });
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
