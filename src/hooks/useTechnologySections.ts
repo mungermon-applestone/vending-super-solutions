@@ -1,6 +1,8 @@
+
 import { CMSTechnology } from '@/types/cms';
 import { useCMSQuery } from './useCMSQuery';
 import { improvedTechnologyAdapter } from '@/services/cms/adapters/technologies/improvedTechnologyAdapter';
+import { useQuery } from '@tanstack/react-query'; // Add this import for useQuery
 
 type UseTechnologySectionsOptions = {
   slug?: string;

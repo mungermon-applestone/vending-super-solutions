@@ -2,7 +2,7 @@
 import { CMSTechnology, QueryOptions } from '@/types/cms';
 import { TechnologyAdapter, TechnologyCreateInput, TechnologyUpdateInput } from './types';
 import { BaseCmsAdapter, createBaseCmsAdapter } from '../baseCmsAdapter';
-import { ContentProviderConfig } from '../types';
+import { ContentProviderConfig, ContentProviderType } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -453,37 +453,37 @@ export const createImprovedTechnologyAdapter = (
 
 export const improvedTechnologyAdapter: TechnologyAdapter = {
   getAll: async (options?: QueryOptions) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: 'supabase' });
+    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
     return await adapter.getAll(options);
   },
   
   getBySlug: async (slug: string) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: 'supabase' });
+    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
     return await adapter.getBySlug(slug);
   },
   
   getById: async (id: string) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: 'supabase' });
+    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
     return await adapter.getById(id);
   },
   
   create: async (data: TechnologyCreateInput) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: 'supabase' });
+    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
     return await adapter.create(data);
   },
   
   update: async (id: string, data: TechnologyUpdateInput) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: 'supabase' });
+    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
     return await adapter.update(id, data);
   },
   
   delete: async (id: string) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: 'supabase' });
+    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
     return await adapter.delete(id);
   },
   
   clone: async (id: string) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: 'supabase' });
+    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
     return await adapter.clone(id);
   }
 };

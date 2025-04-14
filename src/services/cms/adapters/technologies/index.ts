@@ -33,5 +33,4 @@ export function getTechnologyAdapter(config: ContentProviderConfig): TechnologyA
 // Export the improved adapter as the default implementation
 export { improvedTechnologyAdapter };
 
-// Export the factory for contexts where dynamic adapter selection is needed
-export { getTechnologyAdapter };
+// No duplicate export of getTechnologyAdapter here
