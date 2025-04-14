@@ -65,10 +65,10 @@ export async function getProductTypeByUUID(uuid: string): Promise<CMSProductType
 export async function createProduct(data: ProductFormData, toast?: UseToastReturn): Promise<string> {
   console.log('[products.ts] Creating new product:', data);
   try {
-    // Ensure data is properly structured before creating
+    // IMPORTANT: Ensure data is properly structured before creating
+    // Explicitly filter out empty benefits to prevent data issues
     const cleanedData = {
       ...data,
-      // Remove empty benefits
       benefits: data.benefits.filter(benefit => benefit.trim() !== ''),
     };
     
@@ -109,17 +109,17 @@ export async function updateProduct(
   toast?: UseToastReturn
 ): Promise<string> {
   console.log('[products.ts] Updating product:', originalSlug);
-  console.log('[products.ts] Update data benefits:', data.benefits);
+  console.log('[products.ts] Update data benefits before filtering:', data.benefits);
   
   try {
-    // Make sure to clean the benefits data to remove empty strings
-    // This is critical for ensuring empty benefits are actually deleted
+    // CRITICAL FIX: Explicitly filter out empty benefits at the service level
+    // This ensures the adapter only receives valid benefits
     const cleanedData = {
       ...data,
       benefits: data.benefits.filter(benefit => benefit.trim() !== ''),
     };
     
-    console.log('[products.ts] Cleaned benefits for update:', cleanedData.benefits);
+    console.log('[products.ts] Cleaned benefits for update (non-empty only):', cleanedData.benefits);
     console.log('[products.ts] Cleaned data for update:', {
       title: cleanedData.title,
       slug: cleanedData.slug,

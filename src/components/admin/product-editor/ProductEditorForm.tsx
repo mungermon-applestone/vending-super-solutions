@@ -41,8 +41,8 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
     productId
   } = useProductEditorForm(productSlug, setIsLoading, toast, navigate, isEditMode, uuid);
 
+  // Debug to track form value changes
   useEffect(() => {
-    // Add debugging to track form value changes
     const subscription = form.watch((value) => {
       console.log('[ProductEditorForm] Form values changed:', value);
     });

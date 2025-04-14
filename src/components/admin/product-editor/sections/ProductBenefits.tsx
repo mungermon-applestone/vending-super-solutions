@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { 
@@ -34,20 +33,19 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     // Remove the benefit at the specified index
     const updatedBenefits = currentBenefits.filter((_, i) => i !== index);
     
-    // Ensure we always have at least one benefit field (can be empty)
+    // Always have at least one empty benefit field for UX
     const finalBenefits = updatedBenefits.length === 0 ? [''] : updatedBenefits;
     
     console.log(`[ProductBenefits] After removal: Benefits count=${finalBenefits.length}, data=`, finalBenefits);
     
-    // Force form state to be dirty so it will be saved
-    form.setValue('benefits', finalBenefits, { 
+    // Important: Replace entire benefits array - this forces a complete rerender of the benefits array
+    form.setValue('benefits', [...finalBenefits], { 
       shouldDirty: true, 
       shouldTouch: true, 
       shouldValidate: true 
     });
   };
 
-  // Check for duplicate benefits and set form errors
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name?.startsWith('benefits')) {
@@ -87,7 +85,6 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     return () => subscription.unsubscribe();
   }, [form]);
 
-  // Find unique benefit count to provide user feedback
   const uniqueBenefitsCount = new Set(
     form.watch('benefits')
       .filter(benefit => benefit.trim() !== '')
@@ -97,7 +94,6 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
   const totalBenefitsCount = form.watch('benefits').filter(benefit => benefit.trim() !== '').length;
   const hasDuplicates = uniqueBenefitsCount < totalBenefitsCount;
 
-  // Debug the current benefits state when it changes
   useEffect(() => {
     const subscription = form.watch((value) => {
       if (value.benefits) {

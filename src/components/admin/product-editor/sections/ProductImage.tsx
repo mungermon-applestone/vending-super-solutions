@@ -36,14 +36,19 @@ const ProductImage = ({ form }) => {
                     value={field.value || ""}
                     onChange={(url) => {
                       console.log("[ProductImage] Selected image URL explicitly updated to:", url);
-                      // Force direct change to the form value with all flags active
+                      
+                      // Important: Directly update both the form state AND field value
                       form.setValue("image.url", url, { 
                         shouldDirty: true, 
                         shouldTouch: true, 
                         shouldValidate: true 
                       });
-                      // Also set the field value directly to ensure it's registered
+                      
+                      // Also set field value to ensure all React Hook Form mechanisms are triggered
                       field.onChange(url);
+                      
+                      // Force the form to register a change
+                      form.trigger("image.url");
                     }}
                     buttonLabel="Select Product Image"
                   />
