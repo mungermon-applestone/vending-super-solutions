@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { 
   getProductTypes, 
@@ -120,7 +119,6 @@ describe('Product Services', () => {
     });
   });
   
-  // Fix the issue with cloneProduct expecting an argument
   describe('cloneProduct', () => {
     it('should clone a product successfully', async () => {
       const productId = 'product-123';
@@ -131,23 +129,83 @@ describe('Product Services', () => {
         description: 'This is a cloned product'
       };
       
-      const mockResponse = {
-        data: mockClonedProduct,
-        error: null
-      };
-      
       vi.mocked(supabase.from).mockReturnValue({
-        // Mock implementation for cloning
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        insert: vi.fn().mockResolvedValue(mockResponse)
+        single: vi.fn().mockResolvedValue({ data: mockClonedProduct, error: null })
       } as any);
       
       const result = await cloneProduct(productId);
       
       expect(result).toEqual(mockClonedProduct);
+      expect(supabase.from).toHaveBeenCalledWith('product_types');
     });
   });
   
-  // Additional tests for createProduct, updateProduct, deleteProduct
+  describe('createProduct', () => {
+    it('should create a new product', async () => {
+      const mockProduct = { 
+        id: 'new-product', 
+        title: 'New Product', 
+        slug: 'new-product',
+        description: 'This is a new product'
+      };
+      
+      const mockResponse = {
+        data: mockProduct,
+        error: null
+      };
+      
+      vi.mocked(supabase.from).mockReturnValue({
+        insert: vi.fn().mockResolvedValue(mockResponse)
+      } as any);
+      
+      const result = await createProduct(mockProduct);
+      
+      expect(result).toEqual(mockProduct);
+    });
+  });
+  
+  describe('updateProduct', () => {
+    it('should update an existing product', async () => {
+      const productId = 'product-123';
+      const mockUpdatedProduct = { 
+        id: 'product-123', 
+        title: 'Updated Product', 
+        slug: 'updated-product',
+        description: 'This is an updated product'
+      };
+      
+      const mockResponse = {
+        data: mockUpdatedProduct,
+        error: null
+      };
+      
+      vi.mocked(supabase.from).mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          update: vi.fn().mockResolvedValue(mockResponse)
+        })
+      } as any);
+      
+      const result = await updateProduct(productId, mockUpdatedProduct);
+      
+      expect(result).toEqual(mockUpdatedProduct);
+    });
+  });
+  
+  describe('deleteProduct', () => {
+    it('should delete a product', async () => {
+      const productId = 'product-123';
+      
+      vi.mocked(supabase.from).mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          delete: vi.fn().mockResolvedValue({ data: null, error: null })
+        })
+      } as any);
+      
+      const result = await deleteProduct(productId);
+      
+      expect(result).toBeNull();
+    });
+  });
 });
