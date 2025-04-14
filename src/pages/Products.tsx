@@ -17,6 +17,8 @@ const Products = () => {
     queryClient.invalidateQueries({ queryKey: ['productTypes'] });
   };
   
+  console.log("Products data:", products);
+  
   return (
     <Layout>
       {/* Hero Section from Database */}
