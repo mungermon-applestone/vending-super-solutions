@@ -79,7 +79,7 @@ const ProductDetail = () => {
                 <h2 className="text-xl font-semibold mb-4">Features</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {product.features.map((feature, index) => (
-                    <div key={feature.id || index} className="p-4 border rounded-md">
+                    <div key={index} className="p-4 border rounded-md">
                       <h3 className="font-medium">{feature.title}</h3>
                       <p className="text-gray-600">{feature.description}</p>
                     </div>
@@ -93,7 +93,7 @@ const ProductDetail = () => {
                 <h2 className="text-xl font-semibold mb-4">Benefits</h2>
                 <ul className="list-disc pl-5 space-y-2">
                   {product.benefits.map((benefit, index) => (
-                    <li key={benefit.id || index}>{benefit.benefit}</li>
+                    <li key={index}>{typeof benefit === 'string' ? benefit : benefit.benefit}</li>
                   ))}
                 </ul>
               </div>

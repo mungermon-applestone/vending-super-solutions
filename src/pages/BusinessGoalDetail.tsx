@@ -84,7 +84,7 @@ const BusinessGoalDetail = () => {
             <h2 className="text-2xl font-semibold mb-6">Key Features</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {goal.features.map((feature, index) => (
-                <div key={feature.id || index} className="p-6 border rounded-lg">
+                <div key={index} className="p-6 border rounded-lg">
                   <h3 className="text-xl font-medium mb-2">{feature.title}</h3>
                   <p className="text-gray-600">{feature.description}</p>
                 </div>
@@ -98,11 +98,11 @@ const BusinessGoalDetail = () => {
             <h2 className="text-2xl font-semibold mb-6">Benefits</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {goal.benefits.map((benefit, index) => (
-                <div key={benefit.id || index} className="flex items-start">
+                <div key={index} className="flex items-start">
                   <div className="bg-vending-teal-light rounded-full p-2 mr-3 flex-shrink-0">
                     <span className="text-vending-teal">✓</span>
                   </div>
-                  <p>{benefit.benefit}</p>
+                  <p>{typeof benefit === 'string' ? benefit : benefit.benefit}</p>
                 </div>
               ))}
             </div>
