@@ -25,13 +25,13 @@ const ProductImage = ({ form }) => {
                   <MediaSelector
                     value={field.value || ""}
                     onChange={(url) => {
-                      // Force proper form state update to ensure the change is detected
+                      console.log("[ProductImage] Selected image URL updated to:", url);
+                      // Force proper form state update with all hooks triggered
                       form.setValue("image.url", url, { 
                         shouldDirty: true, 
                         shouldTouch: true, 
                         shouldValidate: true 
                       });
-                      console.log("[ProductImage] Selected image URL updated to:", url);
                     }}
                     buttonLabel="Select Product Image"
                   />
