@@ -385,6 +385,33 @@ export type Database = {
         }
         Relationships: []
       }
+      contentful_config: {
+        Row: {
+          created_at: string | null
+          environment_id: string
+          id: string
+          management_token: string
+          space_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          environment_id?: string
+          id?: string
+          management_token: string
+          space_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          environment_id?: string
+          id?: string
+          management_token?: string
+          space_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       deployment_examples: {
         Row: {
           created_at: string

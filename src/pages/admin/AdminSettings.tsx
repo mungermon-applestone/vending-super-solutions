@@ -12,6 +12,7 @@ import { AlertTriangle, CheckCircle2, RefreshCw, Settings } from 'lucide-react';
 import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
 import CMSConnectionTest from '@/components/admin/cms/CMSConnectionTest';
 import CMSProviderDisplay from '@/components/admin/cms/CMSProviderDisplay';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminSettings: React.FC = () => {
   const { toast } = useToast();
@@ -23,7 +24,11 @@ const AdminSettings: React.FC = () => {
   const [strapiUrl, setStrapiUrl] = useState<string>(cmsInfo.apiUrl || '');
   const [strapiApiKey, setStrapiApiKey] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-  
+    // Contentful configuration state
+    const [spaceId, setSpaceId] = useState('');
+    const [environmentId, setEnvironmentId] = useState('master');
+    const [managementToken, setManagementToken] = useState('');
+
   const handleSaveCmsSettings = () => {
     setIsLoading(true);
     
@@ -53,6 +58,47 @@ const AdminSettings: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+    const handleSaveContentfulConfig = async () => {
+        setIsLoading(true);
+
+        try {
+            // Validate inputs
+            if (!spaceId || !managementToken) {
+                throw new Error('Space ID and Management Token are required');
+            }
+
+            // Insert or update Contentful configuration
+            const { data, error } = await supabase
+                .from('contentful_config')
+                .upsert({
+                    space_id: spaceId,
+                    environment_id: environmentId || 'master',
+                    management_token: managementToken
+                })
+                .select();
+
+            if (error) throw error;
+
+            toast({
+                title: 'Contentful Configuration',
+                description: 'Credentials saved successfully',
+                variant: 'default'
+            });
+
+            // Clear sensitive inputs after saving
+            setManagementToken('');
+        } catch (error) {
+            console.error('Error saving Contentful config:', error);
+            toast({
+                title: 'Error',
+                description: error instanceof Error ? error.message : 'Failed to save configuration',
+                variant: 'destructive'
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
   
   return (
     <Layout>
@@ -220,6 +266,79 @@ const AdminSettings: React.FC = () => {
                   <CMSConnectionTest />
                 </CardContent>
               </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Contentful Configuration</CardTitle>
+                        <CardDescription>
+                            Enter your Contentful Management API credentials
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label htmlFor="spaceId" className="block text-sm font-medium">
+                                        Space ID
+                                    </label>
+                                    <Input
+                                        id="spaceId"
+                                        value={spaceId}
+                                        onChange={(e) => setSpaceId(e.target.value)}
+                                        placeholder="Your Contentful Space ID"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label htmlFor="environmentId" className="block text-sm font-medium">
+                                        Environment ID (Optional)
+                                    </label>
+                                    <Input
+                                        id="environmentId"
+                                        value={environmentId}
+                                        onChange={(e) => setEnvironmentId(e.target.value)}
+                                        placeholder="master"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label htmlFor="managementToken" className="block text-sm font-medium">
+                                    Management Token
+                                </label>
+                                <Input
+                                    id="managementToken"
+                                    type="password"
+                                    value={managementToken}
+                                    onChange={(e) => setManagementToken(e.target.value)}
+                                    placeholder="Your Contentful Management API Token"
+                                />
+                            </div>
+
+                            <div className="pt-4">
+                                <Button
+                                    onClick={handleSaveContentfulConfig}
+                                    disabled={isLoading || !spaceId || !managementToken}
+                                    className="w-full"
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <CheckCircle2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        'Save Contentful Configuration'
+                                    )}
+                                </Button>
+                            </div>
+
+                            <div className="mt-4 text-sm text-muted-foreground flex items-center gap-2">
+                                <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                                <p>Ensure your Management Token has the necessary permissions to modify content types.</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
           </TabsContent>
           
