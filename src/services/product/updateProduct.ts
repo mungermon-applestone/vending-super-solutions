@@ -5,11 +5,13 @@ import { UseToastReturn } from '@/hooks/use-toast';
 import { registerSlugChange } from '@/services/cms/utils/slugMatching';
 import { 
   checkProductSlugExists,
-  updateProductImage, 
-  updateProductBenefits, 
-  updateProductFeatures,
   processBenefits
 } from './productHelpers';
+import {
+  updateProductImage, 
+  updateProductBenefits, 
+  updateProductFeatures
+} from './helpers';
 
 /**
  * Update an existing product

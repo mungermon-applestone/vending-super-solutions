@@ -2,12 +2,12 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
 import { UseToastReturn } from '@/hooks/use-toast';
+import { checkProductSlugExists } from './productHelpers';
 import { 
-  checkProductSlugExists,
   addProductImage, 
   addProductBenefits, 
   addProductFeatures 
-} from './productHelpers';
+} from './helpers';
 
 /**
  * Create a new product
