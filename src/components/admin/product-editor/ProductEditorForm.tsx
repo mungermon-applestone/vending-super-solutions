@@ -26,11 +26,7 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
   const [isLoading, setIsLoading] = useState(false);
   const [isCloning, setIsCloning] = useState(false);
   const cloneProductMutation = useCloneProductType();
-  const [forceUpdate, setForceUpdate] = useState(0); // Use this to force re-renders
-  
-  console.log('[ProductEditorForm] Rendering with product slug:', productSlug);
-  console.log('[ProductEditorForm] Rendering with product uuid:', uuid);
-  console.log('[ProductEditorForm] isEditMode flag:', isEditMode);
+  const [forceUpdate, setForceUpdate] = useState(0); 
   
   // Use our custom hook for form handling
   const { 
@@ -49,7 +45,6 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
     return () => subscription.unsubscribe();
   }, [form]);
 
-  // Add useEffect to detect product slug changes
   useEffect(() => {
     console.log(`[ProductEditorForm] Product slug changed to: ${productSlug || 'new'}`);
     console.log(`[ProductEditorForm] Product uuid changed to: ${uuid || 'none'}`);
@@ -59,7 +54,7 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
   const handleFormSubmit = form.handleSubmit((data) => {
     console.log('[ProductEditorForm] Form submitted with data:', data);
     
-    // Clean up benefits to remove any empty values and log them explicitly
+    // Clean up benefits to remove any empty values
     const cleanedBenefits = data.benefits.filter(benefit => benefit.trim() !== '');
     console.log('[ProductEditorForm] Cleaned benefits before submit:', cleanedBenefits);
     
@@ -85,7 +80,6 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
           description: `Product has been cloned successfully.`
         });
         
-        // Navigate to the newly cloned product
         navigate(`/admin/products/edit/${clonedProduct.slug}`);
       }
     } catch (error) {
@@ -114,11 +108,6 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
     );
   }
 
-  // Debug form values
-  console.log('[ProductEditorForm] Current form values:', form.getValues());
-  console.log('[ProductEditorForm] Form is dirty:', form.formState.isDirty);
-  console.log('[ProductEditorForm] Form is valid:', form.formState.isValid);
-
   return (
     <div className="container py-10">
       <h1 className="text-3xl font-bold mb-6">
@@ -129,7 +118,7 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
         <form 
           onSubmit={handleFormSubmit} 
           className="space-y-8"
-          key={`${productSlug || 'new'}-${forceUpdate}`} // Force re-render when product or forceUpdate changes
+          key={`${productSlug || 'new'}-${forceUpdate}`}
         >
           <BasicInformation form={form} />
           <ProductImage form={form} />

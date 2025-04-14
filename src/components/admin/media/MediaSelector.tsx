@@ -26,8 +26,6 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
     console.log("[MediaSelector] Value prop updated:", value);
   }, [value]);
   
-  console.log("[MediaSelector] Rendering with value:", value, "and currentImageUrl:", currentImageUrl);
-  
   const handleOpenChange = (open: boolean) => {
     console.log("[MediaSelector] Dialog open state changed to:", open);
     setIsOpen(open);

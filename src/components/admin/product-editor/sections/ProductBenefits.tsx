@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { 
@@ -19,31 +20,23 @@ interface ProductBenefitsProps {
 const ProductBenefits = ({ form }: ProductBenefitsProps) => {
   const addBenefit = () => {
     const currentBenefits = form.getValues('benefits');
-    form.setValue('benefits', [...currentBenefits, ''], { 
-      shouldDirty: true, 
-      shouldTouch: true, 
-      shouldValidate: true 
-    });
+    form.setValue('benefits', [...currentBenefits, '']);
   };
 
   const removeBenefit = (index: number) => {
     const currentBenefits = form.getValues('benefits');
-    console.log(`[ProductBenefits] Before removal: Benefits count=${currentBenefits.length}, data=`, currentBenefits);
+    console.log(`[ProductBenefits] Before removal: Benefits count=${currentBenefits.length}`);
     
-    // Remove the benefit at the specified index
+    // Filter out the benefit at the specified index
     const updatedBenefits = currentBenefits.filter((_, i) => i !== index);
     
     // Always have at least one empty benefit field for UX
     const finalBenefits = updatedBenefits.length === 0 ? [''] : updatedBenefits;
     
-    console.log(`[ProductBenefits] After removal: Benefits count=${finalBenefits.length}, data=`, finalBenefits);
+    console.log(`[ProductBenefits] After removal: Benefits count=${finalBenefits.length}`);
     
-    // Important: Replace entire benefits array - this forces a complete rerender of the benefits array
-    form.setValue('benefits', [...finalBenefits], { 
-      shouldDirty: true, 
-      shouldTouch: true, 
-      shouldValidate: true 
-    });
+    // Replace entire benefits array
+    form.setValue('benefits', finalBenefits);
   };
 
   useEffect(() => {
@@ -52,7 +45,7 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
         const benefits = form.getValues('benefits');
         console.log('[ProductBenefits] Benefits changed:', benefits);
         
-        // First clear all duplicate errors
+        // Clear all duplicate errors
         benefits.forEach((_, index) => {
           form.clearErrors(`benefits.${index}`);
         });
@@ -85,34 +78,16 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     return () => subscription.unsubscribe();
   }, [form]);
 
-  const uniqueBenefitsCount = new Set(
-    form.watch('benefits')
-      .filter(benefit => benefit.trim() !== '')
-      .map(benefit => benefit.trim().toLowerCase())
-  ).size;
-
-  const totalBenefitsCount = form.watch('benefits').filter(benefit => benefit.trim() !== '').length;
-  const hasDuplicates = uniqueBenefitsCount < totalBenefitsCount;
-
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      if (value.benefits) {
-        console.log('[ProductBenefits] Current benefits:', value.benefits);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form]);
-
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex justify-between">
           <div className="flex items-center gap-2">
             <span>Benefits</span>
-            {hasDuplicates && (
+            {form.formState.errors.benefits && (
               <div className="flex items-center text-destructive text-sm gap-1">
                 <AlertCircle className="h-4 w-4" />
-                <span>Duplicate benefits found</span>
+                <span>Issues found with benefits</span>
               </div>
             )}
           </div>

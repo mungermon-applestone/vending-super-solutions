@@ -6,7 +6,7 @@ import { ProductFormData } from '@/types/forms';
  * Process benefits to remove duplicates and empty entries
  */
 export const processBenefits = (benefits: string[]): string[] => {
-  // Filter out empty benefits and remove duplicates
+  // Simple helper to filter out empty benefits and remove duplicates
   const uniqueBenefits = new Set<string>();
   return benefits
     .filter(benefit => benefit.trim() !== '')
@@ -28,24 +28,23 @@ export const updateProductBenefits = async (data: ProductFormData, productId: st
   console.log('[benefitHelpers] Benefits data received:', data.benefits);
   
   try {
-    // IMPORTANT: First delete ALL existing benefits for this product
-    // This ensures a clean slate and prevents orphaned or duplicate benefits
-    console.log('[benefitHelpers] Deleting all existing benefits for product ID:', productId);
-    const { error: deleteError, count } = await supabase
+    // CRITICAL: First delete ALL existing benefits for this product
+    // This ensures a clean slate and prevents duplicated benefits
+    const { error: deleteError } = await supabase
       .from('product_type_benefits')
-      .delete({ count: 'exact' })
+      .delete()
       .eq('product_type_id', productId);
 
     if (deleteError) {
       console.error('[benefitHelpers] Error deleting existing benefits:', deleteError);
       throw new Error(deleteError.message);
     }
-    console.log(`[benefitHelpers] Deleted ${count} existing benefits`);
+    
+    console.log('[benefitHelpers] Successfully deleted all existing benefits');
     
     // Clean benefits data to remove empties and duplicates
     const validBenefits = processBenefits(data.benefits);
-    console.log(`[benefitHelpers] Processing ${validBenefits.length} valid benefits after filtering empty and duplicate ones`);
-    console.log('[benefitHelpers] Valid benefits:', validBenefits);
+    console.log(`[benefitHelpers] Processing ${validBenefits.length} valid benefits after filtering`);
     
     // Skip the insertion step if there are no valid benefits to insert
     if (validBenefits.length === 0) {

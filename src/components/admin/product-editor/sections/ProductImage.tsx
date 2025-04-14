@@ -8,16 +8,6 @@ import { Input } from '@/components/ui/input';
 const ProductImage = ({ form }) => {
   console.log("[ProductImage] Rendering with image URL:", form.watch("image.url"));
   
-  // Add effect to track image URL changes
-  useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === 'image.url') {
-        console.log("[ProductImage] Image URL changed in form:", value.image?.url);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form]);
-  
   return (
     <Card>
       <CardHeader>
@@ -35,20 +25,10 @@ const ProductImage = ({ form }) => {
                   <MediaSelector
                     value={field.value || ""}
                     onChange={(url) => {
-                      console.log("[ProductImage] Selected image URL explicitly updated to:", url);
-                      
-                      // Important: Directly update both the form state AND field value
-                      form.setValue("image.url", url, { 
-                        shouldDirty: true, 
-                        shouldTouch: true, 
-                        shouldValidate: true 
-                      });
-                      
-                      // Also set field value to ensure all React Hook Form mechanisms are triggered
+                      console.log("[ProductImage] Selected new image URL:", url);
+                      // Simple direct update to ensure it's always properly set
+                      form.setValue("image.url", url);
                       field.onChange(url);
-                      
-                      // Force the form to register a change
-                      form.trigger("image.url");
                     }}
                     buttonLabel="Select Product Image"
                   />
