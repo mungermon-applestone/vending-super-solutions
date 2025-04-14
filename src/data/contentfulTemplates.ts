@@ -1,5 +1,4 @@
-
-import { ContentTypeTemplate } from '@/types/contentful-admin';
+import { ContentTypeTemplate, AVAILABLE_ICONS } from '@/types/contentful-admin';
 
 export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
   blogPost: {
@@ -178,6 +177,12 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           name: 'Icon',
           type: 'Symbol',
           required: false,
+          validations: [
+            {
+              in: AVAILABLE_ICONS.map(icon => icon.value),
+              message: 'Please select a valid icon'
+            }
+          ]
         },
         {
           id: 'screenshot',
@@ -290,14 +295,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           type: 'Symbol',
           required: true,
           validations: [
-            { unique: true },
-            {
-              regexp: {
-                pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
-                flags: ''
-              },
-              message: 'Slug must contain only lowercase letters, numbers, and hyphens'
-            }
+            { unique: true }
           ]
         },
         {
@@ -355,9 +353,51 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           required: false,
         },
         {
-          id: 'specs',
-          name: 'Specifications',
-          type: 'Object',
+          id: 'dimensions',
+          name: 'Dimensions',
+          type: 'Symbol',
+          required: false,
+        },
+        {
+          id: 'weight',
+          name: 'Weight',
+          type: 'Symbol',
+          required: false,
+        },
+        {
+          id: 'powerRequirements',
+          name: 'Power Requirements',
+          type: 'Symbol',
+          required: false,
+        },
+        {
+          id: 'capacity',
+          name: 'Capacity',
+          type: 'Symbol',
+          required: false,
+        },
+        {
+          id: 'paymentOptions',
+          name: 'Payment Options',
+          type: 'Symbol',
+          required: false,
+        },
+        {
+          id: 'connectivity',
+          name: 'Connectivity',
+          type: 'Symbol',
+          required: false,
+        },
+        {
+          id: 'manufacturer',
+          name: 'Manufacturer',
+          type: 'Symbol',
+          required: false,
+        },
+        {
+          id: 'warranty',
+          name: 'Warranty',
+          type: 'Symbol',
           required: false,
         },
         {

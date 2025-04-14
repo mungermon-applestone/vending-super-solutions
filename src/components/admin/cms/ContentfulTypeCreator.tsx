@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { createContentType, deleteContentType } from '@/services/cms/utils/contentfulManagement';
-import { FileCode, Plus, Trash2, Check, AlertCircle } from 'lucide-react';
+import { FileCode, Plus, Trash2, Check, AlertCircle, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { contentTypeTemplates } from '@/data/contentfulTemplates';
 import { TemplateDetails } from './TemplateDetails';
@@ -169,6 +169,29 @@ const ContentfulTypeCreator: React.FC = () => {
         
         {selectedTemplate && (
           <TemplateDetails template={contentTypeTemplates[selectedTemplate]} />
+        )}
+
+        {selectedTemplate === 'machine' && (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertTitle>About Machine Specifications</AlertTitle>
+            <AlertDescription className="text-sm">
+              The Machine content type now includes individual fields for common specifications 
+              (dimensions, weight, capacity, etc.) instead of a single JSON object field. This makes
+              it easier for content creators to input structured specification data.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {selectedTemplate === 'feature' && (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertTitle>About Feature Icons</AlertTitle>
+            <AlertDescription className="text-sm">
+              The Feature content type includes a dropdown for selecting from a predefined list of 
+              icons from the Lucide icon library. These icons can be directly used in the UI.
+            </AlertDescription>
+          </Alert>
         )}
         
         {result && (

@@ -4,6 +4,8 @@ import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CMSConnectionTest from '@/components/admin/cms/CMSConnectionTest';
 import ContentfulTypeCreator from '@/components/admin/cms/ContentfulTypeCreator';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Info } from 'lucide-react';
 
 const ContentfulManagement: React.FC = () => {
   return (
@@ -17,6 +19,25 @@ const ContentfulManagement: React.FC = () => {
             </p>
           </div>
         </div>
+        
+        <Alert className="mb-6">
+          <Info className="h-4 w-4" />
+          <AlertTitle>About Content Type Management</AlertTitle>
+          <AlertDescription>
+            <p className="mb-2">
+              This tool currently supports creating predefined content types in your Contentful space. 
+              To modify existing content types, you'll need to:
+            </p>
+            <ol className="list-decimal ml-5 space-y-1">
+              <li>Delete the existing content type from Contentful</li>
+              <li>Create a new content type with the updated definition</li>
+            </ol>
+            <p className="mt-2">
+              Note: Deleting a content type will also delete any entries of that type in Contentful.
+              Make sure to back up your content before deleting content types.
+            </p>
+          </AlertDescription>
+        </Alert>
         
         <Tabs defaultValue="connection">
           <TabsList className="mb-8">
