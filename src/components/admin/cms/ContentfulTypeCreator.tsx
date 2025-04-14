@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -15,7 +14,6 @@ import { ContentTypeProps } from '@/services/cms/types/contentfulTypes';
 import { Trash2, Plus, FileCode, Check, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-// Sample content type templates
 const contentTypeTemplates: Record<string, ContentTypeProps> = {
   blogPost: {
     id: 'blogPost',
@@ -256,6 +254,103 @@ const contentTypeTemplates: Record<string, ContentTypeProps> = {
             }
           ]
         },
+        required: false,
+      },
+      {
+        id: 'visible',
+        name: 'Visible',
+        type: 'Boolean',
+        required: false,
+      }
+    ]
+  },
+  machine: {
+    id: 'machine',
+    name: 'Machine',
+    description: 'A vending or locker machine with specifications',
+    displayField: 'title',
+    publish: true,
+    fields: [
+      {
+        id: 'title',
+        name: 'Title',
+        type: 'Symbol',
+        required: true,
+      },
+      {
+        id: 'slug',
+        name: 'Slug',
+        type: 'Symbol',
+        required: true,
+        validations: [
+          {
+            unique: true,
+            regexp: {
+              pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+              flags: ''
+            },
+            message: 'Slug must contain only lowercase letters, numbers, and hyphens'
+          }
+        ]
+      },
+      {
+        id: 'type',
+        name: 'Type',
+        type: 'Symbol',
+        required: true,
+        validations: [
+          {
+            in: ['vending', 'locker'],
+            message: 'Type must be either vending or locker'
+          }
+        ]
+      },
+      {
+        id: 'temperature',
+        name: 'Temperature',
+        type: 'Symbol',
+        required: false,
+        validations: [
+          {
+            in: ['ambient', 'refrigerated', 'frozen', 'multi', 'controlled'],
+            message: 'Invalid temperature type'
+          }
+        ]
+      },
+      {
+        id: 'description',
+        name: 'Description',
+        type: 'Text',
+        required: true,
+      },
+      {
+        id: 'features',
+        name: 'Features',
+        type: 'Array',
+        items: {
+          type: 'Symbol'
+        },
+        required: false,
+      },
+      {
+        id: 'images',
+        name: 'Images',
+        type: 'Array',
+        items: {
+          type: 'Link',
+          linkType: 'Asset',
+          validations: [
+            {
+              linkMimetypeGroup: ['image']
+            }
+          ]
+        },
+        required: false,
+      },
+      {
+        id: 'specs',
+        name: 'Specifications',
+        type: 'Object',
         required: false,
       },
       {
