@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -10,367 +11,16 @@ import {
 } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { createContentType, deleteContentType } from '@/services/cms/utils/contentfulManagement';
-import { ContentTypeProps } from '@/services/cms/types/contentfulTypes';
-import { Trash2, Plus, FileCode, Check, AlertCircle } from 'lucide-react';
+import { FileCode, Plus, Trash2, Check, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-const contentTypeTemplates: Record<string, ContentTypeProps> = {
-  blogPost: {
-    id: 'blogPost',
-    name: 'Blog Post',
-    description: 'A blog post with rich text content',
-    displayField: 'title',
-    publish: true,
-    fields: [
-      {
-        id: 'title',
-        name: 'Title',
-        type: 'Symbol',
-        required: true,
-      },
-      {
-        id: 'slug',
-        name: 'Slug',
-        type: 'Symbol',
-        required: true,
-        validations: [
-          {
-            unique: true,
-            regexp: {
-              pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
-              flags: ''
-            },
-            message: 'Slug must contain only lowercase letters, numbers, and hyphens'
-          }
-        ]
-      },
-      {
-        id: 'publishDate',
-        name: 'Publish Date',
-        type: 'Date',
-        required: false,
-      },
-      {
-        id: 'featuredImage',
-        name: 'Featured Image',
-        type: 'Link',
-        linkType: 'Asset',
-        required: false,
-      },
-      {
-        id: 'content',
-        name: 'Content',
-        type: 'RichText',
-        required: true,
-      },
-      {
-        id: 'excerpt',
-        name: 'Excerpt',
-        type: 'Text',
-        required: false,
-      },
-      {
-        id: 'author',
-        name: 'Author',
-        type: 'Symbol',
-        required: false,
-      },
-      {
-        id: 'tags',
-        name: 'Tags',
-        type: 'Array',
-        items: {
-          type: 'Symbol'
-        },
-        required: false,
-      }
-    ]
-  },
-  productType: {
-    id: 'productType',
-    name: 'Product Type',
-    description: 'A vending machine product type',
-    displayField: 'title',
-    publish: true,
-    fields: [
-      {
-        id: 'title',
-        name: 'Title',
-        type: 'Symbol',
-        required: true,
-      },
-      {
-        id: 'slug',
-        name: 'Slug',
-        type: 'Symbol',
-        required: true,
-        validations: [
-          {
-            unique: true,
-          }
-        ]
-      },
-      {
-        id: 'description',
-        name: 'Description',
-        type: 'Text',
-        required: true,
-      },
-      {
-        id: 'image',
-        name: 'Main Image',
-        type: 'Link',
-        linkType: 'Asset',
-        required: false,
-      },
-      {
-        id: 'benefits',
-        name: 'Benefits',
-        type: 'Array',
-        items: {
-          type: 'Symbol',
-        },
-        required: false,
-      },
-      {
-        id: 'features',
-        name: 'Features',
-        type: 'Array',
-        items: {
-          type: 'Link',
-          linkType: 'Entry',
-          validations: [
-            {
-              linkContentType: ['feature']
-            }
-          ]
-        },
-        required: false,
-      },
-      {
-        id: 'visible',
-        name: 'Visible',
-        type: 'Boolean',
-        required: false,
-      }
-    ]
-  },
-  feature: {
-    id: 'feature',
-    name: 'Feature',
-    description: 'A feature for products or business goals',
-    displayField: 'title',
-    publish: true,
-    fields: [
-      {
-        id: 'title',
-        name: 'Title',
-        type: 'Symbol',
-        required: true,
-      },
-      {
-        id: 'description',
-        name: 'Description',
-        type: 'Text',
-        required: true,
-      },
-      {
-        id: 'icon',
-        name: 'Icon',
-        type: 'Symbol',
-        required: false,
-      },
-      {
-        id: 'screenshot',
-        name: 'Screenshot',
-        type: 'Link',
-        linkType: 'Asset',
-        required: false,
-      }
-    ]
-  },
-  businessGoal: {
-    id: 'businessGoal',
-    name: 'Business Goal',
-    description: 'A business goal',
-    displayField: 'title',
-    publish: true,
-    fields: [
-      {
-        id: 'title',
-        name: 'Title',
-        type: 'Symbol',
-        required: true,
-      },
-      {
-        id: 'slug',
-        name: 'Slug',
-        type: 'Symbol',
-        required: true,
-        validations: [
-          {
-            unique: true,
-          }
-        ]
-      },
-      {
-        id: 'description',
-        name: 'Description',
-        type: 'Text',
-        required: true,
-      },
-      {
-        id: 'image',
-        name: 'Image',
-        type: 'Link',
-        linkType: 'Asset',
-        required: false,
-      },
-      {
-        id: 'icon',
-        name: 'Icon',
-        type: 'Symbol',
-        required: false,
-      },
-      {
-        id: 'benefits',
-        name: 'Benefits',
-        type: 'Array',
-        items: {
-          type: 'Symbol',
-        },
-        required: false,
-      },
-      {
-        id: 'features',
-        name: 'Features',
-        type: 'Array',
-        items: {
-          type: 'Link',
-          linkType: 'Entry',
-          validations: [
-            {
-              linkContentType: ['feature']
-            }
-          ]
-        },
-        required: false,
-      },
-      {
-        id: 'visible',
-        name: 'Visible',
-        type: 'Boolean',
-        required: false,
-      }
-    ]
-  },
-  machine: {
-    id: 'machine',
-    name: 'Machine',
-    description: 'A vending or locker machine with specifications',
-    displayField: 'title',
-    publish: true,
-    fields: [
-      {
-        id: 'title',
-        name: 'Title',
-        type: 'Symbol',
-        required: true,
-      },
-      {
-        id: 'slug',
-        name: 'Slug',
-        type: 'Symbol',
-        required: true,
-        validations: [
-          { unique: true },
-          { 
-            regexp: {
-              pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
-              flags: ''
-            },
-            message: 'Slug must contain only lowercase letters, numbers, and hyphens'
-          }
-        ]
-      },
-      {
-        id: 'type',
-        name: 'Type',
-        type: 'Symbol',
-        required: true,
-        validations: [
-          { 
-            in: ['vending', 'locker'],
-            message: 'Type must be either vending or locker'
-          }
-        ]
-      },
-      {
-        id: 'temperature',
-        name: 'Temperature',
-        type: 'Symbol',
-        required: false,
-        validations: [
-          { 
-            in: ['ambient', 'refrigerated', 'frozen', 'multi', 'controlled'],
-            message: 'Invalid temperature type'
-          }
-        ]
-      },
-      {
-        id: 'description',
-        name: 'Description',
-        type: 'Text',
-        required: true,
-      },
-      {
-        id: 'features',
-        name: 'Features',
-        type: 'Array',
-        items: {
-          type: 'Symbol'
-        },
-        required: false,
-      },
-      {
-        id: 'images',
-        name: 'Images',
-        type: 'Array',
-        items: {
-          type: 'Link',
-          linkType: 'Asset',
-          validations: [
-            {
-              linkMimetypeGroup: ['image']
-            }
-          ]
-        },
-        required: false,
-      },
-      {
-        id: 'specs',
-        name: 'Specifications',
-        type: 'Object',
-        required: false,
-      },
-      {
-        id: 'visible',
-        name: 'Visible',
-        type: 'Boolean',
-        required: false,
-      }
-    ]
-  },
-};
+import { contentTypeTemplates } from '@/data/contentfulTemplates';
+import { TemplateDetails } from './TemplateDetails';
+import { ContentTypeCreatorResult } from '@/types/contentful-admin';
 
 const ContentfulTypeCreator: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [isCreating, setIsCreating] = useState(false);
-  const [result, setResult] = useState<{
-    success?: boolean;
-    message?: string;
-    contentTypeId?: string;
-  } | null>(null);
+  const [result, setResult] = useState<ContentTypeCreatorResult | null>(null);
   const { toast } = useToast();
 
   const handleCreateContentType = async () => {
@@ -387,7 +37,7 @@ const ContentfulTypeCreator: React.FC = () => {
     setResult(null);
 
     try {
-      const template = contentTypeTemplates[selectedTemplate];
+      const template = contentTypeTemplates[selectedTemplate].contentType;
       const response = await createContentType(template);
       
       if (response.success) {
@@ -496,20 +146,20 @@ const ContentfulTypeCreator: React.FC = () => {
         <div>
           <h3 className="text-sm font-medium mb-3">Available Content Type Templates</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {Object.entries(contentTypeTemplates).map(([id, template]) => (
+            {Object.values(contentTypeTemplates).map((template) => (
               <Button
-                key={id}
-                variant={selectedTemplate === id ? "default" : "outline"}
+                key={template.id}
+                variant={selectedTemplate === template.id ? "default" : "outline"}
                 className={`justify-start text-left h-auto py-3 ${
-                  selectedTemplate === id ? "" : "hover:bg-muted/50"
+                  selectedTemplate === template.id ? "" : "hover:bg-muted/50"
                 }`}
-                onClick={() => setSelectedTemplate(id)}
+                onClick={() => setSelectedTemplate(template.id)}
               >
                 <div className="flex flex-col items-start">
                   <span className="font-medium">{template.name}</span>
                   <span className="text-xs text-muted-foreground mt-1">{template.description}</span>
                   <span className="text-xs text-muted-foreground mt-1">
-                    {template.fields.length} fields • ID: {template.id}
+                    {template.contentType.fields.length} fields • ID: {template.contentType.id}
                   </span>
                 </div>
               </Button>
@@ -518,27 +168,7 @@ const ContentfulTypeCreator: React.FC = () => {
         </div>
         
         {selectedTemplate && (
-          <div className="border rounded-md p-3 bg-muted/30">
-            <h4 className="font-medium mb-2 text-sm">
-              Template Details: {contentTypeTemplates[selectedTemplate].name}
-            </h4>
-            <div className="text-xs space-y-1 text-muted-foreground">
-              <p><strong>ID:</strong> {contentTypeTemplates[selectedTemplate].id}</p>
-              <p><strong>Display Field:</strong> {contentTypeTemplates[selectedTemplate].displayField}</p>
-              <p><strong>Fields:</strong> {contentTypeTemplates[selectedTemplate].fields.length}</p>
-              <details>
-                <summary className="cursor-pointer hover:text-foreground">View Fields</summary>
-                <ul className="ml-2 mt-1 space-y-1">
-                  {contentTypeTemplates[selectedTemplate].fields.map((field) => (
-                    <li key={field.id}>
-                      <strong>{field.name}</strong> ({field.type})
-                      {field.required && <span className="text-red-500">*</span>}
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            </div>
-          </div>
+          <TemplateDetails template={contentTypeTemplates[selectedTemplate]} />
         )}
         
         {result && (
