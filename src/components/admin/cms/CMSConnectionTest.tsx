@@ -17,24 +17,36 @@ const CMSConnectionTest: React.FC = () => {
       if (result.success) {
         toast({
           title: 'Contentful Connection',
-          description: result.message,
-          variant: 'default',
-          icon: <CheckCircle className="text-green-500" />
+          description: (
+            <div className="flex items-center gap-2">
+              <CheckCircle className="text-green-500" />
+              <span>{result.message}</span>
+            </div>
+          ),
+          variant: 'default'
         });
       } else {
         toast({
           title: 'Connection Error',
-          description: result.message,
-          variant: 'destructive',
-          icon: <AlertTriangle className="text-red-500" />
+          description: (
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="text-red-500" />
+              <span>{result.message}</span>
+            </div>
+          ),
+          variant: 'destructive'
         });
       }
     } catch (error) {
       toast({
         title: 'Unexpected Error',
-        description: 'Failed to test Contentful connection',
-        variant: 'destructive',
-        icon: <AlertTriangle className="text-red-500" />
+        description: (
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="text-red-500" />
+            <span>Failed to test Contentful connection</span>
+          </div>
+        ),
+        variant: 'destructive'
       });
     } finally {
       setIsLoading(false);

@@ -33,3 +33,6 @@ export const testContentfulConnection = async () => {
     };
   }
 };
+
+// Export the function with the expected name for backward compatibility
+export const testCMSConnection = testContentfulConnection;
