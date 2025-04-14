@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { runCMSDiagnostics, getCMSDiagnosticsReport } from '@/services/cms/utils/diagnostics';
-import { AlertTriangle, CheckCircle, Info, XCircle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Info, XCircle, RefreshCw, Database } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const CMSDiagnostics: React.FC = () => {
@@ -17,18 +16,47 @@ const CMSDiagnostics: React.FC = () => {
     firstRow?: any;
   } | null>(null);
   
+  const [tablesCheck, setTablesCheck] = useState<{
+    [key: string]: {
+      exists: boolean;
+      rowCount: number;
+    }
+  }>({});
+
   const runDiagnostics = async () => {
     setIsRunning(true);
     try {
-      // Run general CMS diagnostics
       const result = await runCMSDiagnostics();
       setDiagnostics(result);
       
-      // Get detailed HTML report
       const report = await getCMSDiagnosticsReport();
       setDetailedReport(report);
       
-      // Perform specific product type table check
+      const tables = ['product_types', 'business_goals', 'technologies', 'machines'];
+      const tableChecks: any = {};
+      
+      for (const table of tables) {
+        try {
+          const { data, error, count } = await supabase
+            .from(table)
+            .select('*', { count: 'exact' })
+            .range(0, 0);
+            
+          tableChecks[table] = {
+            exists: !error,
+            rowCount: count || 0
+          };
+        } catch (err) {
+          console.error(`Error checking ${table} table:`, err);
+          tableChecks[table] = {
+            exists: false,
+            rowCount: 0
+          };
+        }
+      }
+      
+      setTablesCheck(tableChecks);
+      
       const { data, error, count } = await supabase
         .from('product_types')
         .select('*', { count: 'exact' })
@@ -54,7 +82,7 @@ const CMSDiagnostics: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle>CMS Diagnostics</CardTitle>
-        <CardDescription>Comprehensive diagnostic check of your CMS configuration</CardDescription>
+        <CardDescription>Comprehensive diagnostic check of your Supabase CMS configuration</CardDescription>
       </CardHeader>
       <CardContent>
         {isRunning ? (
@@ -63,7 +91,6 @@ const CMSDiagnostics: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {/* General Diagnostics */}
             <div>
               <h3 className="font-semibold mb-2">CMS Connection</h3>
               {diagnostics && (
@@ -78,7 +105,7 @@ const CMSDiagnostics: React.FC = () => {
                   ) : (
                     <XCircle className="h-4 w-4 text-red-600" />
                   )}
-                  <AlertTitle>{diagnostics.provider} CMS Status</AlertTitle>
+                  <AlertTitle>Supabase CMS Status</AlertTitle>
                   <AlertDescription>
                     Overall Status: {diagnostics.status.toUpperCase()}
                   </AlertDescription>
@@ -86,34 +113,40 @@ const CMSDiagnostics: React.FC = () => {
               )}
             </div>
             
-            {/* Product Types Table Check */}
             <div>
-              <h3 className="font-semibold mb-2">Product Types Table</h3>
-              {productTypeCheck && (
-                <Alert 
-                  variant={productTypeCheck.exists && productTypeCheck.rowCount > 0 ? 'default' : 'destructive'}
-                >
-                  {productTypeCheck.exists && productTypeCheck.rowCount > 0 ? (
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <XCircle className="h-4 w-4 text-red-600" />
-                  )}
-                  <AlertTitle>Product Types Table</AlertTitle>
-                  <AlertDescription>
-                    {productTypeCheck.exists 
-                      ? `Table exists with ${productTypeCheck.rowCount} rows` 
-                      : 'Table is missing or inaccessible'}
-                  </AlertDescription>
-                </Alert>
-              )}
+              <h3 className="font-semibold mb-2">Database Tables Status</h3>
+              <div className="space-y-2">
+                {Object.entries(tablesCheck).map(([table, status]) => (
+                  <Alert 
+                    key={table}
+                    variant={status.exists && status.rowCount > 0 ? 'default' : 'destructive'}
+                  >
+                    {status.exists && status.rowCount > 0 ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : status.exists ? (
+                      <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-red-600" />
+                    )}
+                    <AlertTitle>{table.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())} Table</AlertTitle>
+                    <AlertDescription>
+                      {status.exists 
+                        ? `Table exists with ${status.rowCount} rows` 
+                        : 'Table is missing or inaccessible'}
+                    </AlertDescription>
+                  </Alert>
+                ))}
+              </div>
             </div>
             
-            {/* Detailed Report */}
             {detailedReport && (
-              <div 
-                className="border rounded p-4 bg-gray-50 max-h-64 overflow-y-auto text-xs"
-                dangerouslySetInnerHTML={{ __html: detailedReport }}
-              />
+              <div>
+                <h3 className="font-semibold mb-2">Detailed Report</h3>
+                <div 
+                  className="border rounded p-4 bg-gray-50 max-h-64 overflow-y-auto text-xs"
+                  dangerouslySetInnerHTML={{ __html: detailedReport }}
+                />
+              </div>
             )}
           </div>
         )}

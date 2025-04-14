@@ -9,18 +9,19 @@ import { supabaseConfig } from './adapters/contentConfig';
 export function initCMS() {
   console.log('[initCMS] Initializing CMS configuration...');
   
-  // Always use Supabase as the CMS provider
+  // We're only using Supabase as the CMS provider
   console.log('[initCMS] Using Supabase CMS provider');
   setCMSProviderConfig(supabaseConfig());
+  
+  console.log('[initCMS] CMS initialization complete');
   return true;
 }
 
 /**
- * This function is kept for backwards compatibility but now only supports Supabase
- * @param options Optional configuration options (ignored in current implementation)
+ * This function is kept for backward compatibility but now only supports Supabase
  */
 export function switchCMSProvider(_options?: any) {
-  console.log('[switchCMSProvider] Switching to Supabase provider');
+  console.log('[switchCMSProvider] Using Supabase provider');
   setCMSProviderConfig(supabaseConfig());
   return true;
 }

@@ -3,7 +3,6 @@ import { ContentProviderConfig, ContentProviderType } from './adapters/types';
 
 /**
  * Default content provider configuration
- * This can be updated at runtime to switch CMS providers
  */
 let currentProviderConfig: ContentProviderConfig = {
   type: ContentProviderType.SUPABASE
@@ -32,5 +31,5 @@ export const isUsingProvider = (type: ContentProviderType): boolean => {
   return currentProviderConfig.type === type;
 };
 
-// Re-export ContentProviderType to fix import issues
+// Re-export ContentProviderType for convenience
 export { ContentProviderType } from './adapters/types';
