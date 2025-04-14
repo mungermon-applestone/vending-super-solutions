@@ -102,7 +102,7 @@ const BusinessGoalDetail = () => {
                   <div className="bg-vending-teal-light rounded-full p-2 mr-3 flex-shrink-0">
                     <span className="text-vending-teal">✓</span>
                   </div>
-                  <p>{typeof benefit === 'string' ? benefit : benefit.toString()}</p>
+                  <p>{typeof benefit === 'string' ? benefit : String(benefit)}</p>
                 </div>
               ))}
             </div>
