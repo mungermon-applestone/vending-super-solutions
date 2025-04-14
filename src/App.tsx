@@ -2,7 +2,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // Public pages
-import Home from './pages/Index';
+import Home from './pages/Home';
 import Products from './pages/Products';
 import Machines from './pages/Machines';
 import BusinessGoals from './pages/BusinessGoals';
