@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Loader2, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import PageHero from '@/components/common/PageHero';
 
 const Products = () => {
   const { data: products, isLoading, error, refetch } = useProductTypes();
@@ -18,6 +19,15 @@ const Products = () => {
   
   return (
     <Layout>
+      {/* Hero Section from Database */}
+      <PageHero 
+        pageKey="products" 
+        fallbackTitle="" 
+        fallbackSubtitle="" 
+        fallbackImage="" 
+        fallbackImageAlt="" 
+      />
+
       <div className="container py-10">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
           <div>

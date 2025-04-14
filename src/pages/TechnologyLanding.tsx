@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -29,15 +28,11 @@ const TechnologyLanding = () => {
   return (
     <Layout>
       <PageHero 
-        pageKey="technology"
-        fallbackTitle="Enterprise-Grade Technology"
-        fallbackSubtitle="Our platform is built with security, scalability, and flexibility in mind to power your vending operations."
-        fallbackImage="https://images.unsplash.com/photo-1550751827-4bd374c3f58b"
-        fallbackImageAlt="Technology circuit board and digital interface"
-        fallbackPrimaryButtonText="Learn More"
-        fallbackPrimaryButtonUrl="/contact"
-        fallbackSecondaryButtonText="View Tech Specs"
-        fallbackSecondaryButtonUrl="#tech-details"
+        pageKey="technology" 
+        fallbackTitle="" 
+        fallbackSubtitle="" 
+        fallbackImage="" 
+        fallbackImageAlt="" 
       />
       
       <div className="container mx-auto py-16" id="tech-details">

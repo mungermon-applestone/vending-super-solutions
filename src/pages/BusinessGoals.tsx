@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Loader2, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import PageHero from '@/components/common/PageHero';
 
 const BusinessGoals = () => {
   const { data: businessGoals, isLoading, error, refetch } = useBusinessGoals();
@@ -20,6 +21,15 @@ const BusinessGoals = () => {
   
   return (
     <Layout>
+      {/* Hero Section from Database */}
+      <PageHero 
+        pageKey="business-goals" 
+        fallbackTitle="" 
+        fallbackSubtitle="" 
+        fallbackImage="" 
+        fallbackImageAlt="" 
+      />
+
       <div className="container py-10">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
           <div>
