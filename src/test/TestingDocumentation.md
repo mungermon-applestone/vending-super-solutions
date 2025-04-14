@@ -8,10 +8,10 @@
 #### Service Layer
 - `getProductTypes()` ✅
 - `getProductTypeBySlug()` ✅
-- `createProduct()`
-- `updateProduct()`
-- `deleteProduct()`
-- `cloneProduct()`
+- `createProduct()` ✅
+- `updateProduct()` ✅
+- `deleteProduct()` ✅
+- `cloneProduct()` ✅
 
 #### Component Tests
 - AdminProducts page ✅

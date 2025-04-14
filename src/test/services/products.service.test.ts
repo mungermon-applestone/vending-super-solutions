@@ -120,5 +120,34 @@ describe('Product Services', () => {
     });
   });
   
-  // Additional tests would cover createProduct, updateProduct, deleteProduct, and cloneProduct
+  // Fix the issue with cloneProduct expecting an argument
+  describe('cloneProduct', () => {
+    it('should clone a product successfully', async () => {
+      const productId = 'product-123';
+      const mockClonedProduct = { 
+        id: 'cloned-123', 
+        title: 'Cloned Product', 
+        slug: 'cloned-product',
+        description: 'This is a cloned product'
+      };
+      
+      const mockResponse = {
+        data: mockClonedProduct,
+        error: null
+      };
+      
+      vi.mocked(supabase.from).mockReturnValue({
+        // Mock implementation for cloning
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        insert: vi.fn().mockResolvedValue(mockResponse)
+      } as any);
+      
+      const result = await cloneProduct(productId);
+      
+      expect(result).toEqual(mockClonedProduct);
+    });
+  });
+  
+  // Additional tests for createProduct, updateProduct, deleteProduct
 });

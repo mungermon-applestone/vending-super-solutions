@@ -81,6 +81,7 @@ describe('ProductEditorForm', () => {
       slug: 'test-product',
       description: 'Test description',
       image: {
+        id: 'img-123', // Added missing id property
         url: 'https://example.com/image.jpg',
         alt: 'Test Image'
       },
@@ -91,6 +92,7 @@ describe('ProductEditorForm', () => {
           description: 'Feature description',
           icon: 'check',
           screenshot: {
+            id: 'screenshot-123', // Added missing id property
             url: 'https://example.com/screenshot.jpg',
             alt: 'Screenshot'
           }
