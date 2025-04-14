@@ -9,6 +9,10 @@ import MachineTypesSection from '@/components/home/MachineTypesSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CTASection from '@/components/common/CTASection';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
+import { initCMS } from '@/services/cms/initCMS';
+
+// Initialize the CMS configuration
+initCMS();
 
 const Index = () => {
   // Explicit key for the home page hero content

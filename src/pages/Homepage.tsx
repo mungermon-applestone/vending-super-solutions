@@ -1,12 +1,12 @@
 
 import React from 'react';
-import Index from './Index';
+import Home from './Home';
 
-// This component just re-exports the Index component to provide compatibility
+// This component just re-exports the Home component to provide compatibility
 // with both naming conventions (Homepage and Index)
 const Homepage: React.FC = () => {
   console.log('Homepage component rendering');
-  return <Index />;
+  return <Home />;
 };
 
 export default Homepage;
