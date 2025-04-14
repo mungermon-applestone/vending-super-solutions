@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import MobileNavItem from './MobileNavItem';
@@ -21,7 +20,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
           <MobileNavItem title="Home" path="/" onClick={onClose} />
           <MobileNavItem title="Products" path="/products" onClick={onClose} />
           <MobileNavItem title="Machines" path="/machines" onClick={onClose} />
-          <MobileNavItem title="Business Goals" path="/business-goals" onClick={onClose} />
+          <MobileNavItem title="Business Goals" path="/goals" onClick={onClose} />
           <MobileNavItem title="Technology" path="/technology" onClick={onClose} />
           <MobileNavItem title="Contact Us" path="/contact" onClick={onClose} />
           <MobileNavItem title="About Us" path="/about" onClick={onClose} />
