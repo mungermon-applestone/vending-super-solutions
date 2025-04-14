@@ -1,36 +1,29 @@
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter } from 'react-router-dom';
 
-// Create a custom render function that includes providers
-const AllProviders = ({ children }: { children: React.ReactNode }) => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
+// Create a query client for testing
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
     },
-  });
+  },
+});
 
-  return (
+// Custom render function that wraps components with necessary providers
+const customRender = (
+  ui: ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>
+) => {
+  return render(
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        {children}
-      </BrowserRouter>
-    </QueryClientProvider>
+      {ui}
+    </QueryClientProvider>,
+    options
   );
 };
 
-const customRender = (
-  ui: React.ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
-) => 
-  render(ui, { wrapper: AllProviders, ...options });
-
-// Re-export everything
 export * from '@testing-library/react';
-
-// Override render method
 export { customRender as render };
