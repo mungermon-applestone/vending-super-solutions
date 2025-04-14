@@ -1,34 +1,77 @@
-
-import { useQuery } from '@tanstack/react-query';
-import { getCMSProviderConfig, ContentProviderType } from '@/services/cms/providerConfig';
-import { fetchTechnologies } from '@/services/cms/technology';
 import { CMSTechnology } from '@/types/cms';
-import { initCMS } from '@/services/cms/cmsInit';
+import { useCMSQuery } from './useCMSQuery';
+import { improvedTechnologyAdapter } from '@/services/cms/adapters/technologies/improvedTechnologyAdapter';
 
-// Make sure we initialize CMS to use Strapi
-initCMS();
+type UseTechnologySectionsOptions = {
+  slug?: string;
+  enableToasts?: boolean;
+  refetchInterval?: number | false;
+};
 
-export function useTechnologySections() {
-  // Query to fetch all technologies
-  const { data: technologies = [], isLoading, error } = useQuery({
-    queryKey: ['technologies'],
-    queryFn: async () => {
-      console.log('[useTechnologySections] Fetching technologies from CMS');
-      try {
-        const data = await fetchTechnologies();
-        console.log('[useTechnologySections] Fetched technologies:', data);
-        return data || [];
-      } catch (err) {
-        console.error('[useTechnologySections] Error fetching technologies:', err);
-        return [];
+/**
+ * Custom hook to fetch technologies with sections
+ */
+export function useTechnologySections(options: UseTechnologySectionsOptions = {}) {
+  const { slug, enableToasts = false, refetchInterval = false } = options;
+  
+  // If slug is provided, fetch a single technology by slug
+  if (slug) {
+    const fetchTechnology = async () => {
+      console.log(`[useTechnologySections] Fetching technology by slug: ${slug}`);
+      const technology = await improvedTechnologyAdapter.getBySlug(slug);
+      
+      if (!technology) {
+        throw new Error(`Technology with slug "${slug}" not found`);
       }
+      
+      return technology;
+    };
+    
+    const query = useCMSQuery<CMSTechnology>({
+      queryKey: ['technology', slug],
+      queryFn: fetchTechnology,
+      enableToasts,
+      refetchInterval
+    });
+    
+    return {
+      technology: query.data,
+      isLoading: query.isLoading,
+      error: query.error,
+      refetch: query.refetch
+    };
+  }
+  
+  // Otherwise, fetch all technologies
+  const fetchAllTechnologies = async () => {
+    console.log('[useTechnologySections] Fetching all technologies');
+    try {
+      const technologies = await improvedTechnologyAdapter.getAll();
+      return technologies;
+    } catch (error) {
+      console.error('[useTechnologySections] Error fetching technologies:', error);
+      throw error;
     }
+  };
+  
+  const query = useCMSQuery<CMSTechnology[]>({
+    queryKey: ['technologies'],
+    queryFn: fetchAllTechnologies,
+    enableToasts,
+    refetchInterval,
+    initialData: []
   });
-
-  return { technologies, isLoading, error };
+  
+  return {
+    technologies: query.data || [],
+    isLoading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch
+  };
 }
 
-// Hook to fetch a specific technology by slug
+export default useTechnologySections;
+
 export function useTechnologyBySlug(slug: string) {
   const { data, isLoading, error } = useQuery({
     queryKey: ['technology', slug],

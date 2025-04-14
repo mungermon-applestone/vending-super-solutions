@@ -7,15 +7,24 @@ import PageHero from '@/components/common/PageHero';
 import CTASection from '@/components/common/CTASection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
-import { ArrowRight, AlertCircle, ExternalLink, Wrench, FileQuestion } from 'lucide-react';
+import { ArrowRight, AlertCircle, ExternalLink, Wrench, FileQuestion, RefreshCcw, Database, BookOpen } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import SimpleConnectionTest from '@/components/admin/cms/SimpleConnectionTest';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 const TechnologyLanding = () => {
-  const { technologies, isLoading, error } = useTechnologySections();
+  const { technologies, isLoading, error, refetch } = useTechnologySections();
+  const hasTechnologies = technologies && technologies.length > 0;
   console.log('TechnologyLanding rendering with technologies:', technologies);
+  
+  const handleRefresh = async () => {
+    toast.loading("Refreshing content...");
+    await refetch();
+    toast.success("Content refreshed");
+  };
   
   return (
     <Layout>
@@ -32,10 +41,24 @@ const TechnologyLanding = () => {
       />
       
       <div className="container mx-auto py-16" id="tech-details">
-        <h2 className="text-3xl font-bold text-center mb-2">Our Technology Solutions</h2>
-        <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-          Discover how our advanced technology solutions can transform your vending operations
-        </p>
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-3xl font-bold mb-2">Our Technology Solutions</h2>
+            <p className="text-muted-foreground max-w-2xl">
+              Discover how our advanced technology solutions can transform your vending operations
+            </p>
+          </div>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            className="flex items-center gap-2"
+          >
+            <RefreshCcw className="h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
         
         {error && (
           <Alert variant="destructive" className="mb-8">
@@ -43,6 +66,14 @@ const TechnologyLanding = () => {
             <AlertTitle>Error loading technologies</AlertTitle>
             <AlertDescription>
               {error instanceof Error ? error.message : 'An unknown error occurred'}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => refetch()} 
+                className="ml-2"
+              >
+                Try again
+              </Button>
             </AlertDescription>
           </Alert>
         )}
@@ -63,7 +94,7 @@ const TechnologyLanding = () => {
               </Card>
             ))}
           </div>
-        ) : technologies.length === 0 ? (
+        ) : !hasTechnologies ? (
           <div className="text-center py-12">
             <Card className="max-w-2xl mx-auto">
               <CardHeader>
@@ -72,101 +103,132 @@ const TechnologyLanding = () => {
                   <span>No Technology Solutions Found</span>
                 </CardTitle>
                 <CardDescription className="text-center">
-                  We couldn't retrieve any technology solutions from your Strapi CMS
+                  We couldn't retrieve any technology items from the database
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Tabs defaultValue="setup">
+                <Tabs defaultValue="database">
                   <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="setup">Setup Issue</TabsTrigger>
+                    <TabsTrigger value="database">Database</TabsTrigger>
                     <TabsTrigger value="test">Test Connection</TabsTrigger>
-                    <TabsTrigger value="options">Options</TabsTrigger>
+                    <TabsTrigger value="docs">Documentation</TabsTrigger>
                   </TabsList>
                   
-                  <TabsContent value="setup" className="space-y-4 pt-4">
-                    <Alert className="bg-amber-50 border-amber-200">
-                      <AlertCircle className="h-4 w-4 text-amber-600" />
-                      <AlertTitle className="text-amber-800">Strapi Cloud Limitations</AlertTitle>
-                      <AlertDescription className="text-amber-700">
-                        Strapi Cloud has two important limitations that are causing this issue:
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                          <li>Content-Type Builder is <strong>disabled</strong> in production environments</li>
-                          <li>Data Transfer functionality is <strong>disabled</strong> on free plans</li>
-                        </ul>
+                  <TabsContent value="database" className="space-y-4 pt-4">
+                    <Alert className="bg-blue-50 border-blue-200">
+                      <Database className="h-4 w-4 text-blue-600" />
+                      <AlertTitle className="text-blue-800">Using Homegrown CMS</AlertTitle>
+                      <AlertDescription className="text-blue-700">
+                        Your application is currently using a homegrown CMS solution connected to your Supabase database.
+                        <div className="mt-2">
+                          <Badge variant="secondary" className="mr-2 mb-2">technologies</Badge>
+                          <Badge variant="secondary" className="mr-2 mb-2">technology_sections</Badge>
+                          <Badge variant="secondary" className="mr-2 mb-2">technology_features</Badge>
+                          <Badge variant="secondary" className="mr-2 mb-2">technology_feature_items</Badge>
+                        </div>
                       </AlertDescription>
                     </Alert>
                     
                     <div className="p-4 border rounded-md bg-gray-50 space-y-2">
-                      <h4 className="font-medium">Why this is happening:</h4>
-                      <p className="text-sm">
-                        The "Technology" content type doesn't exist in your Strapi cloud instance. Normally, you would 
-                        create this using the Content-Type Builder or transfer it from a local instance, but both 
-                        options are restricted in Strapi Cloud without a paid plan.
-                      </p>
-                      <div className="mt-3 space-y-2">
-                        <h4 className="font-medium">Required steps to fix:</h4>
-                        <ol className="list-decimal pl-5 text-sm space-y-1">
-                          <li><strong>Upgrade to a paid plan</strong> (Pro Plan or higher recommended)</li>
-                          <li><strong>Contact Strapi support</strong> to request enabling Developer Mode and Data Transfer</li>
-                          <li>After approval, transfer content types from a local instance</li>
-                        </ol>
+                      <h4 className="font-medium">No technology content found because:</h4>
+                      <ul className="list-disc pl-5 space-y-1 text-sm">
+                        <li>You may not have created any technology entries yet</li>
+                        <li>The tables may not exist in your Supabase database</li>
+                        <li>There might be Row Level Security (RLS) preventing access</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="p-4 border rounded-md bg-gray-50 space-y-2 border-l-4 border-l-blue-500">
+                      <h4 className="font-medium">Next steps:</h4>
+                      <ol className="list-decimal pl-5 text-sm space-y-1">
+                        <li>Check your Supabase database for the required tables</li>
+                        <li>Create a test technology entry through the admin interface</li>
+                        <li>Verify the adapter implementation is correct</li>
+                      </ol>
+                      <div className="flex gap-2 mt-3">
+                        <Link to="/admin/technology">
+                          <Button variant="default" size="sm">
+                            <Wrench className="mr-2 h-4 w-4" />
+                            Manage Technologies
+                          </Button>
+                        </Link>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleRefresh}
+                        >
+                          <RefreshCcw className="mr-2 h-4 w-4" />
+                          Refresh
+                        </Button>
                       </div>
                     </div>
                   </TabsContent>
                   
                   <TabsContent value="test" className="space-y-4 pt-4">
                     <div className="p-4 border rounded-md bg-gray-50">
-                      <p className="text-sm mb-4">Test the connection to your Strapi CMS:</p>
+                      <p className="text-sm mb-4">Test the database connection:</p>
                       <SimpleConnectionTest />
                     </div>
                   </TabsContent>
                   
-                  <TabsContent value="options" className="space-y-4 pt-4">
+                  <TabsContent value="docs" className="space-y-4 pt-4">
                     <div className="p-4 border rounded-md bg-gray-50">
-                      <h4 className="font-medium mb-2">Alternative approaches:</h4>
+                      <h4 className="font-medium mb-2">Homegrown CMS Documentation</h4>
+                      <p className="text-sm mb-3">
+                        Your application uses a custom CMS implementation with Supabase. Here's how the technologies content type works:
+                      </p>
                       <div className="space-y-4 text-sm">
-                        <div>
-                          <h5 className="font-medium text-indigo-700">Option 1: Create content manually</h5>
-                          <p>Create content entries manually using existing content types in Strapi Cloud.</p>
+                        <div className="p-3 bg-white rounded border">
+                          <h5 className="font-medium text-blue-700">Data Structure</h5>
+                          <p className="mb-2">Technologies consist of:</p>
+                          <ul className="list-disc pl-5 space-y-1">
+                            <li>Basic details (title, slug, description)</li>
+                            <li>Sections (grouped content areas)</li>
+                            <li>Features (individual capabilities)</li>
+                            <li>Items (detail points for features)</li>
+                          </ul>
                         </div>
-                        <div>
-                          <h5 className="font-medium text-indigo-700">Option 2: Use a local Strapi instance</h5>
-                          <p>For development, use a local Strapi instance with full Content-Type Builder access.</p>
+                        
+                        <div className="p-3 bg-white rounded border">
+                          <h5 className="font-medium text-blue-700">Creating Content</h5>
+                          <p className="mb-0">
+                            Use the Admin interface to create and manage technology content. Each technology can have multiple sections,
+                            and each section can have multiple features.
+                          </p>
                         </div>
-                        <div>
-                          <h5 className="font-medium text-indigo-700">Option 3: Switch to a different CMS</h5>
-                          <p>Consider using Supabase or another CMS that doesn't have these limitations.</p>
-                        </div>
+                        
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          asChild
+                        >
+                          <Link to="/admin/settings">
+                            <BookOpen className="mr-2 h-4 w-4" />
+                            View Full Documentation
+                          </Link>
+                        </Button>
                       </div>
                     </div>
                   </TabsContent>
                 </Tabs>
               </CardContent>
               <CardFooter className="flex flex-wrap gap-3">
-                <Button 
-                  variant="outline"
-                  onClick={() => window.open('https://strapi.io/pricing', '_blank')}
-                  size="sm"
-                >
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Strapi Pricing
-                </Button>
-                
-                <Button 
-                  variant="outline"
-                  onClick={() => window.open('https://docs.strapi.io/dev-docs/deployment/cloud', '_blank')}
-                  size="sm"
-                >
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Strapi Cloud Docs
-                </Button>
-                
-                <Link to="/admin/settings">
+                <Link to="/admin/technology">
                   <Button variant="default" size="sm">
                     <Wrench className="mr-2 h-4 w-4" />
-                    CMS Settings
+                    Manage Technologies
                   </Button>
                 </Link>
+                
+                <Button 
+                  variant="outline"
+                  onClick={() => window.open('https://supabase.com/dashboard', '_blank')}
+                  size="sm"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Supabase Dashboard
+                </Button>
               </CardFooter>
             </Card>
           </div>
