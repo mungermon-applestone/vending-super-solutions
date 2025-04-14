@@ -6,7 +6,10 @@ export const testContentfulConnection = async () => {
   try {
     const config = await getContentfulConfig();
     
+    console.log('[testContentfulConnection] Fetched configuration:', config);
+    
     if (!config) {
+      console.warn('[testContentfulConnection] No configuration found');
       return {
         success: false,
         message: 'No Contentful configuration found'
@@ -27,6 +30,8 @@ export const testContentfulConnection = async () => {
         spaceId: space.sys.id
       };
     } catch (apiError: any) {
+      console.error('[testContentfulConnection] API Error:', apiError);
+      
       // Extract detailed error information from Contentful's error response
       const errorDetails = apiError.details || {};
       const requestDetails = apiError.request || {};
@@ -41,7 +46,6 @@ export const testContentfulConnection = async () => {
           request: {
             url: requestDetails.url,
             method: requestDetails.method,
-            // Don't include sensitive headers in the response
           }
         }
       };
