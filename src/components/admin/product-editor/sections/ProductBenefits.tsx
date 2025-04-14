@@ -18,57 +18,59 @@ interface ProductBenefitsProps {
 }
 
 const ProductBenefits = ({ form }: ProductBenefitsProps) => {
+  // Get current benefits array
+  const benefits = form.watch('benefits') || [];
+  
+  // Add a new empty benefit
   const addBenefit = () => {
-    const currentBenefits = [...form.getValues('benefits')];
+    console.log("[ProductBenefits] Adding new benefit");
+    const currentBenefits = [...benefits];
     form.setValue('benefits', [...currentBenefits, ''], { shouldDirty: true });
   };
 
-  const removeBenefit = (index: number) => {
-    const currentBenefits = [...form.getValues('benefits')];
-    console.log(`[ProductBenefits] Before removal: Benefits count=${currentBenefits.length}`, currentBenefits);
+  // Remove a benefit by index
+  const removeBenefit = (indexToRemove: number) => {
+    console.log(`[ProductBenefits] Removing benefit at index ${indexToRemove}`);
+    const filteredBenefits = benefits.filter((_, idx) => idx !== indexToRemove);
     
-    // Create a new array without the item at the specified index
-    const updatedBenefits = currentBenefits.filter((_, i) => i !== index);
+    // If we removed the last item, add an empty one for UX
+    const newBenefits = filteredBenefits.length === 0 ? [''] : filteredBenefits;
     
-    // Always have at least one empty benefit field for UX
-    const finalBenefits = updatedBenefits.length === 0 ? [''] : updatedBenefits;
-    
-    console.log(`[ProductBenefits] After removal: Benefits count=${finalBenefits.length}`, finalBenefits);
-    
-    // Replace entire benefits array with a completely new array
-    form.setValue('benefits', [...finalBenefits], { shouldDirty: true });
+    // Important: Create a completely new array to ensure React/form detect the change
+    form.setValue('benefits', [...newBenefits], { shouldDirty: true });
   };
 
+  // Watch for duplicate benefits and mark them as errors
   useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
+    const subscription = form.watch((_, { name }) => {
       if (name?.startsWith('benefits')) {
-        const benefits = form.getValues('benefits');
-        console.log('[ProductBenefits] Benefits changed:', benefits);
+        const currentBenefits = form.getValues('benefits');
+        console.log('[ProductBenefits] Benefits changed:', currentBenefits);
         
-        // Clear all duplicate errors
-        benefits.forEach((_, index) => {
+        // Clear all existing errors first
+        currentBenefits.forEach((_, index) => {
           form.clearErrors(`benefits.${index}`);
         });
         
-        // Look for duplicates
-        const duplicates = new Map();
-        benefits.forEach((benefit, index) => {
-          if (benefit.trim()) {
-            const normalizedBenefit = benefit.trim().toLowerCase();
-            if (duplicates.has(normalizedBenefit)) {
-              // Set error on current field
+        // Check for duplicates (only among non-empty values)
+        const valuesSeen = new Map();
+        currentBenefits.forEach((benefit, index) => {
+          if (benefit && benefit.trim()) {
+            const normalized = benefit.trim().toLowerCase();
+            if (valuesSeen.has(normalized)) {
+              // Set error on this field
               form.setError(`benefits.${index}`, { 
                 type: 'duplicate', 
                 message: 'Duplicate benefit' 
               });
               
-              // Set error on the original field
-              form.setError(`benefits.${duplicates.get(normalizedBenefit)}`, { 
+              // Also mark the original occurrence
+              form.setError(`benefits.${valuesSeen.get(normalized)}`, { 
                 type: 'duplicate', 
                 message: 'Duplicate benefit' 
               });
             } else {
-              duplicates.set(normalizedBenefit, index);
+              valuesSeen.set(normalized, index);
             }
           }
         });
@@ -103,7 +105,7 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {form.watch('benefits').map((benefit, index) => (
+        {benefits.map((benefit, index) => (
           <div key={`benefit-${index}`} className="flex items-center gap-2 mb-4">
             <FormField
               control={form.control}

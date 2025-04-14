@@ -149,30 +149,36 @@ export const useProductEditorForm = (
     setIsLoading(true);
     
     try {
-      // Deep clean the benefits data - filter out empty benefits
-      // Create a new array to avoid any reference issues
-      const cleanedBenefits = [...data.benefits]
-        .filter(benefit => benefit.trim() !== '');
-      
-      // Make sure the image object is properly structured
-      // Create a new object to avoid any reference issues
-      const cleanedData: ProductFormData = {
-        ...data,
-        image: data.image || { url: "", alt: "" },
-        benefits: cleanedBenefits
+      // Create a completely new data object to avoid any reference issues
+      const formattedData: ProductFormData = {
+        title: data.title.trim(),
+        slug: data.slug.trim(),
+        description: data.description.trim(),
+        // Ensure image is properly formatted
+        image: {
+          url: data.image?.url || "",
+          alt: data.image?.alt || ""
+        },
+        // Filter out empty benefits
+        benefits: Array.isArray(data.benefits) 
+          ? [...data.benefits].filter(benefit => benefit && benefit.trim() !== '')
+          : [],
+        // Clean up features
+        features: Array.isArray(data.features)
+          ? data.features.filter(feature => feature.title.trim() !== '' || feature.description.trim() !== '')
+          : []
       };
       
-      console.log('[useProductEditorForm] Cleaned data for submission:', cleanedData);
+      console.log('[useProductEditorForm] Cleaned data for submission:', formattedData);
       
       if (isCreating) {
         console.log('[useProductEditorForm] Creating new product');
-        await createProduct(cleanedData, toast);
+        await createProduct(formattedData, toast);
         navigate('/admin/products');
       } else if (productSlug && productSlug !== 'new') {
         console.log(`[useProductEditorForm] Updating product: ${productSlug}`);
-        console.log('[useProductEditorForm] Form data for update:', cleanedData);
         
-        await updateProduct(cleanedData, productSlug, toast);
+        await updateProduct(formattedData, productSlug, toast);
         navigate('/admin/products');
       }
     } catch (error) {

@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
 
@@ -6,6 +7,7 @@ import { ProductFormData } from '@/types/forms';
  */
 export const updateProductImage = async (data: ProductFormData, productId: string): Promise<void> => {
   console.log('[imageHelpers] Updating product image for product ID:', productId);
+  console.log('[imageHelpers] Image data:', data.image);
   
   try {
     // First check if the product already has an image
@@ -20,14 +22,16 @@ export const updateProductImage = async (data: ProductFormData, productId: strin
     }
 
     // If image data is provided
-    if (data.image && (data.image.url || data.image.alt)) {
+    if (data.image && data.image.url) {
+      console.log('[imageHelpers] Processing image update with URL:', data.image.url);
+      
       // If we already have an image, update it
       if (existingImages && existingImages.length > 0) {
         const { error: updateError } = await supabase
           .from('product_type_images')
           .update({
             url: data.image.url,
-            alt: data.image.alt,
+            alt: data.image.alt || '',
             updated_at: new Date().toISOString()
           })
           .eq('product_type_id', productId);
@@ -36,6 +40,8 @@ export const updateProductImage = async (data: ProductFormData, productId: strin
           console.error('[imageHelpers] Error updating product image:', updateError);
           throw new Error(updateError.message);
         }
+        
+        console.log('[imageHelpers] Updated existing image successfully');
       } 
       // Otherwise insert a new one
       else {
@@ -44,14 +50,18 @@ export const updateProductImage = async (data: ProductFormData, productId: strin
           .insert({
             product_type_id: productId,
             url: data.image.url,
-            alt: data.image.alt
+            alt: data.image.alt || ''
           });
 
         if (insertError) {
           console.error('[imageHelpers] Error inserting product image:', insertError);
           throw new Error(insertError.message);
         }
+        
+        console.log('[imageHelpers] Inserted new image successfully');
       }
+    } else {
+      console.log('[imageHelpers] No image URL provided, skipping image update');
     }
 
     console.log('[imageHelpers] Product image updated successfully');

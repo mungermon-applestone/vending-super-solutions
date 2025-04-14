@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Save, Copy } from 'lucide-react';
+import { Save, Copy, AlertCircle } from 'lucide-react';
 import { Form } from '@/components/ui/form';
 import { useProductEditorForm } from '@/hooks/useProductEditorForm';
 import { useCloneProductType } from '@/hooks/cms/useCloneCMS';
+import { Separator } from '@/components/ui/separator';
 
 // Import form sections
 import BasicInformation from './sections/BasicInformation';
@@ -25,8 +26,8 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isCloning, setIsCloning] = useState(false);
+  const [formKey, setFormKey] = useState(0);
   const cloneProductMutation = useCloneProductType();
-  const [forceUpdate, setForceUpdate] = useState(0); 
   
   // Use our custom hook for form handling
   const { 
@@ -45,26 +46,16 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
     return () => subscription.unsubscribe();
   }, [form]);
 
+  // Force re-render the form when product changes
   useEffect(() => {
     console.log(`[ProductEditorForm] Product slug changed to: ${productSlug || 'new'}`);
     console.log(`[ProductEditorForm] Product uuid changed to: ${uuid || 'none'}`);
-    setForceUpdate(prev => prev + 1); // Force a re-render when product changes
+    setFormKey(prevKey => prevKey + 1);
   }, [productSlug, uuid]);
 
   const handleFormSubmit = form.handleSubmit((data) => {
     console.log('[ProductEditorForm] Form submitted with data:', data);
-    
-    // Clean up benefits to remove any empty values
-    const cleanedBenefits = data.benefits.filter(benefit => benefit.trim() !== '');
-    console.log('[ProductEditorForm] Cleaned benefits before submit:', cleanedBenefits);
-    
-    const cleanedData = {
-      ...data,
-      benefits: cleanedBenefits
-    };
-    
-    console.log('[ProductEditorForm] Final cleaned data for submit:', cleanedData);
-    onSubmit(cleanedData);
+    onSubmit(data);
   });
 
   const handleCloneProduct = async () => {
@@ -108,24 +99,37 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
     );
   }
 
+  // Calculate if the form has any errors
+  const hasFormErrors = Object.keys(form.formState.errors).length > 0;
+
   return (
     <div className="container py-10">
       <h1 className="text-3xl font-bold mb-6">
         {isCreating ? 'Create New Product' : `Edit Product: ${form.watch('title') || 'Loading...'}`}
       </h1>
+      
+      {hasFormErrors && (
+        <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-6 flex gap-2 items-center">
+          <AlertCircle className="h-5 w-5" />
+          <p>Please fix the errors in the form before submitting.</p>
+        </div>
+      )}
 
       <Form {...form}>
         <form 
           onSubmit={handleFormSubmit} 
           className="space-y-8"
-          key={`${productSlug || 'new'}-${forceUpdate}`}
+          key={`${formKey}-${productSlug || 'new'}`}
         >
           <BasicInformation form={form} />
+          <Separator className="my-8" />
           <ProductImage form={form} />
+          <Separator className="my-8" />
           <ProductBenefits form={form} />
+          <Separator className="my-8" />
           <ProductFeatures form={form} />
 
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-end gap-4 pt-4">
             {!isCreating && productId && (
               <Button
                 type="button"
@@ -147,7 +151,7 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
             </Button>
             <Button 
               type="submit" 
-              disabled={isLoading} 
+              disabled={isLoading || hasFormErrors} 
               className="gap-2"
             >
               {isLoading ? 'Saving...' : <><Save className="h-4 w-4" /> Save Product</>}

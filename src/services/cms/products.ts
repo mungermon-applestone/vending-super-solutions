@@ -69,7 +69,7 @@ export async function createProduct(data: ProductFormData, toast?: UseToastRetur
     // Explicitly filter out empty benefits to prevent data issues
     const cleanedData = {
       ...data,
-      benefits: data.benefits.filter(benefit => benefit.trim() !== ''),
+      benefits: data.benefits.filter(benefit => benefit && benefit.trim() !== ''),
     };
     
     console.log('[products.ts] Cleaned benefits for create:', cleanedData.benefits);
@@ -109,24 +109,30 @@ export async function updateProduct(
   toast?: UseToastReturn
 ): Promise<string> {
   console.log('[products.ts] Updating product:', originalSlug);
-  console.log('[products.ts] Update data benefits before filtering:', data.benefits);
+  console.log('[products.ts] Update data:', {
+    title: data.title,
+    slug: data.slug,
+    imageUrl: data.image?.url,
+    imageAlt: data.image?.alt,
+    benefitsCount: data.benefits?.length || 0,
+    rawBenefits: data.benefits
+  });
   
   try {
-    // CRITICAL FIX: Explicitly filter out empty benefits at the service level
-    // This ensures the adapter only receives valid benefits
+    // IMPORTANT: Create a fresh version of the data to update with cleaned benefits
+    const cleanedBenefits = Array.isArray(data.benefits) 
+      ? data.benefits.filter(benefit => benefit && benefit.trim() !== '')
+      : [];
+      
+    // Remove any duplicate benefits
+    const uniqueBenefits = [...new Set(cleanedBenefits)];
+    
+    console.log('[products.ts] Cleaned benefits for update:', uniqueBenefits);
+    
     const cleanedData = {
       ...data,
-      benefits: data.benefits.filter(benefit => benefit.trim() !== ''),
+      benefits: uniqueBenefits,
     };
-    
-    console.log('[products.ts] Cleaned benefits for update (non-empty only):', cleanedData.benefits);
-    console.log('[products.ts] Cleaned data for update:', {
-      title: cleanedData.title,
-      slug: cleanedData.slug,
-      benefitsCount: cleanedData.benefits.length,
-      featuresCount: cleanedData.features.length,
-      imageUrl: cleanedData.image?.url
-    });
     
     const adapter = getProductAdapter(getCMSProviderConfig());
     
@@ -140,10 +146,7 @@ export async function updateProduct(
     console.log('[products.ts] Found product ID for update:', product.id);
     console.log('[products.ts] Current benefits before update:', product.benefits);
     
-    const result = await adapter.update(product.id, {
-      ...cleanedData,
-      originalSlug
-    });
+    const result = await adapter.update(product.id, cleanedData);
     
     if (toast) {
       toast.toast({

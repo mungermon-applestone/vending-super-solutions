@@ -6,7 +6,8 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 
 const ProductImage = ({ form }) => {
-  console.log("[ProductImage] Rendering with image URL:", form.watch("image.url"));
+  const imageUrl = form.watch("image.url");
+  console.log("[ProductImage] Rendering with image URL:", imageUrl);
   
   useEffect(() => {
     // Ensure image object is properly initialized
@@ -22,6 +23,17 @@ const ProductImage = ({ form }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          {/* Show image preview if it exists */}
+          {imageUrl && (
+            <div className="rounded-md overflow-hidden border border-gray-200">
+              <img 
+                src={imageUrl} 
+                alt={form.watch("image.alt") || "Product"} 
+                className="w-full h-auto max-h-[200px] object-cover"
+              />
+            </div>
+          )}
+          
           <FormField
             control={form.control}
             name="image.url"
@@ -34,7 +46,7 @@ const ProductImage = ({ form }) => {
                     onChange={(url) => {
                       console.log("[ProductImage] Selected new image URL:", url);
                       
-                      // Use a more direct approach to update form values
+                      // Use form.setValue to properly update form values
                       form.setValue("image.url", url, { 
                         shouldDirty: true, 
                         shouldTouch: true,
@@ -59,14 +71,6 @@ const ProductImage = ({ form }) => {
                   <Input 
                     placeholder="Description for accessibility" 
                     {...field} 
-                    onChange={(e) => {
-                      // Use a more direct approach to update form values
-                      form.setValue("image.alt", e.target.value, { 
-                        shouldDirty: true,
-                        shouldTouch: true,
-                        shouldValidate: true
-                      });
-                    }}
                   />
                 </FormControl>
                 <FormMessage />
