@@ -62,9 +62,20 @@ export const testContentfulConnection = async () => {
       const errorDetails = apiError.details || {};
       const requestDetails = apiError.request || {};
       
+      // Check for specific error codes to provide better guidance
+      let userMessage = apiError.message || 'Connection to Contentful failed';
+      
+      if (apiError.status === 403) {
+        userMessage = 'Authentication failed: The provided token is invalid or does not have sufficient permissions. Please check your Contentful Management Token.';
+      } else if (apiError.status === 404) {
+        userMessage = `Space not found: Could not find a Contentful space with ID "${config.space_id}". Please verify your Space ID.`;
+      } else if (apiError.status === 401) {
+        userMessage = 'Unauthorized: The provided Management Token is invalid or expired. Please generate a new token in Contentful.';
+      }
+      
       return {
         success: false,
-        message: apiError.message || 'Connection to Contentful failed',
+        message: userMessage,
         errorData: {
           status: apiError.status,
           statusText: apiError.statusText,

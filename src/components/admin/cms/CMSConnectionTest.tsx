@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { testContentfulConnection } from '@/services/cms/utils/connection';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, CheckCircle, AlertTriangle, Settings, Database } from 'lucide-react';
+import { RefreshCw, CheckCircle, AlertTriangle, Settings, Database, ExternalLink } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
 
 const CMSConnectionTest: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -192,8 +193,43 @@ const CMSConnectionTest: React.FC = () => {
                 <p><strong>Request URL:</strong> {errorDetails.request.url}</p>
               )}
               <p className="text-xs text-gray-100 mt-2">
-                This error typically indicates an invalid or expired management token. 
-                Please check your Contentful credentials in the settings page.
+                {errorDetails.status === 403 && (
+                  <>
+                    This 403 error indicates that your Management Token is invalid or doesn't have sufficient permissions.
+                    <div className="mt-2">
+                      <Link 
+                        to="/admin/settings" 
+                        className="inline-flex items-center text-blue-300 hover:text-blue-200"
+                      >
+                        <Settings className="h-3 w-3 mr-1" /> 
+                        Update Contentful Credentials
+                      </Link>
+                    </div>
+                    <div className="mt-1">
+                      <a 
+                        href="https://app.contentful.com/account/token" 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-blue-300 hover:text-blue-200"
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" /> 
+                        Generate New Contentful Token
+                      </a>
+                    </div>
+                  </>
+                )}
+                {errorDetails.status === 404 && (
+                  <>
+                    This 404 error indicates that the Space ID could not be found. 
+                    Please check your Space ID in the Contentful settings.
+                  </>
+                )}
+                {!errorDetails.status && (
+                  <>
+                    This error typically indicates an authentication issue. 
+                    Please check your Contentful credentials in the settings page.
+                  </>
+                )}
               </p>
             </div>
           </AlertDescription>
