@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { switchCMSProvider } from '@/services/cms/cmsInit';
-import { ContentProviderType } from '@/services/cms/adapters/types';
 import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
 import { testCMSConnection } from '@/services/cms/utils/connection';
 import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
@@ -38,26 +37,22 @@ const StrapiConfig: React.FC = () => {
         throw new Error("Strapi API URL is required");
       }
       
-      const success = switchCMSProvider({
-        providerType: ContentProviderType.STRAPI,
-        strapiApiUrl: strapiUrl.trim(),
-        strapiApiKey: strapiApiKey || undefined
-      });
+      const success = switchCMSProvider();
       
       if (success) {
         toast({
-          title: "Strapi settings updated",
-          description: "Successfully configured Strapi CMS integration.",
+          title: "Supabase settings updated",
+          description: "Successfully configured CMS integration.",
         });
         
         setTimeout(() => {
           window.location.reload();
         }, 1500);
       } else {
-        throw new Error("Failed to update Strapi settings");
+        throw new Error("Failed to update CMS settings");
       }
     } catch (error) {
-      console.error("Error saving Strapi settings:", error);
+      console.error("Error saving settings:", error);
       toast({
         variant: "destructive",
         title: "Error saving settings",
@@ -70,7 +65,7 @@ const StrapiConfig: React.FC = () => {
   
   const handleTestConnection = async () => {
     if (!strapiUrl.trim()) {
-      setErrorMessage("Please enter a valid Strapi API URL");
+      setErrorMessage("Please enter a valid API URL");
       setTestStatus('error');
       return;
     }
@@ -81,11 +76,7 @@ const StrapiConfig: React.FC = () => {
     try {
       console.log('Testing connection with URL:', strapiUrl);
       
-      switchCMSProvider({
-        providerType: ContentProviderType.STRAPI,
-        strapiApiUrl: strapiUrl.trim(),
-        strapiApiKey: strapiApiKey || undefined
-      });
+      switchCMSProvider();
       
       const result = await testCMSConnection();
       console.log('Connection test result:', result);

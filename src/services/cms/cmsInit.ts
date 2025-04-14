@@ -17,8 +17,9 @@ export function initCMS() {
 
 /**
  * This function is kept for backwards compatibility but now only supports Supabase
+ * @param options Optional configuration options (ignored in current implementation)
  */
-export function switchCMSProvider() {
+export function switchCMSProvider(_options?: any) {
   console.log('[switchCMSProvider] Switching to Supabase provider');
   setCMSProviderConfig(supabaseConfig());
   return true;

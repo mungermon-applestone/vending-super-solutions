@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import RunRegressionTest from '@/components/admin/testing/RunRegressionTest';
@@ -24,7 +25,7 @@ import { toast } from '@/hooks/use-toast';
 
 const AdminProducts: React.FC = () => {
   const { data: products, isLoading, error, refetch, status, fetchStatus } = useProductTypes();
-  const { mutateAsync: cloneProductType, isLoading: isCloning } = useCloneProductType();
+  const { mutateAsync: cloneProductType, isPending: isCloning } = useCloneProductType();
   
   const handleClone = async (id: string) => {
     try {

@@ -3,7 +3,6 @@ import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { switchCMSProvider } from '@/services/cms/cmsInit';
-import { ContentProviderType } from '@/services/cms/adapters/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,16 +28,12 @@ const AdminSettings: React.FC = () => {
     setIsLoading(true);
     
     try {
-      const success = switchCMSProvider({
-        providerType: cmsProvider === 'strapi' ? ContentProviderType.STRAPI : ContentProviderType.SUPABASE,
-        strapiApiUrl: strapiUrl,
-        strapiApiKey: strapiApiKey || undefined
-      });
+      const success = switchCMSProvider();
       
       if (success) {
         toast({
           title: "CMS settings updated",
-          description: `Successfully switched to ${cmsProvider === 'strapi' ? 'Strapi' : 'Supabase'} CMS provider.`,
+          description: "Successfully switched to Supabase CMS provider.",
         });
         
         setTimeout(() => {
