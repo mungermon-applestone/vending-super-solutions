@@ -13,6 +13,7 @@ export const EditProductDialog: React.FC<EditProductDialogProps> = ({ product })
   const navigate = useNavigate();
   
   const handleEditClick = () => {
+    // Use the new route format but maintain compatibility with both URL patterns
     navigate(`/admin/products/edit/${product.slug}`);
   };
   

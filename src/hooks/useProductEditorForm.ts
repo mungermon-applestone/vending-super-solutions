@@ -15,7 +15,8 @@ export const useProductEditorForm = (
   setIsLoading: (isLoading: boolean) => void,
   toast: UseToastReturn,
   navigate: NavigateFunction,
-  isEditMode?: boolean
+  isEditMode?: boolean,
+  uuid?: string | null
 ) => {
   // We're in create mode if explicitly set NOT in edit mode, or if productSlug is falsy ('new' or undefined)
   const isCreatingState = isEditMode === false || !productSlug || productSlug === 'new';
@@ -23,6 +24,7 @@ export const useProductEditorForm = (
   const [formInitialized, setFormInitialized] = useState(false);
   
   console.log('[useProductEditorForm] Initialized with productSlug:', productSlug);
+  console.log('[useProductEditorForm] Initialized with UUID:', uuid);
   console.log('[useProductEditorForm] isEditMode flag:', isEditMode);
   console.log('[useProductEditorForm] isCreating mode:', isCreating);
   
@@ -52,7 +54,7 @@ export const useProductEditorForm = (
     data: existingProduct, 
     isLoading: isLoadingProduct, 
     error 
-  } = useProductType(isCreating ? undefined : productSlug);
+  } = useProductType(isCreating ? undefined : productSlug, uuid);
   
   console.log('[useProductEditorForm] Existing product data:', existingProduct);
   
@@ -68,13 +70,13 @@ export const useProductEditorForm = (
 
   // Force reset form completely when product changes
   useEffect(() => {
-    if (productSlug) {
-      console.log('[useProductEditorForm] Product slug changed to:', productSlug);
+    if (productSlug || uuid) {
+      console.log('[useProductEditorForm] Product identifier changed');
       // Reset form to clean state
       form.reset(defaultValues);
       setFormInitialized(false);
     }
-  }, [productSlug, form]);
+  }, [productSlug, uuid, form]);
 
   /**
    * Populate form with existing product data when available

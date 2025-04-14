@@ -16,10 +16,11 @@ import ProductFeatures from './sections/ProductFeatures';
 
 interface ProductEditorFormProps {
   productSlug?: string;
+  uuid?: string | null;
   isEditMode?: boolean;
 }
 
-const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) => {
+const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormProps) => {
   const navigate = useNavigate();
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -28,6 +29,7 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
   const [forceUpdate, setForceUpdate] = useState(0); // Use this to force re-renders
   
   console.log('[ProductEditorForm] Rendering with product slug:', productSlug);
+  console.log('[ProductEditorForm] Rendering with product uuid:', uuid);
   console.log('[ProductEditorForm] isEditMode flag:', isEditMode);
   
   // Use our custom hook for form handling
@@ -37,7 +39,7 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
     form, 
     onSubmit,
     productId
-  } = useProductEditorForm(productSlug, setIsLoading, toast, navigate, isEditMode);
+  } = useProductEditorForm(productSlug, setIsLoading, toast, navigate, isEditMode, uuid);
 
   useEffect(() => {
     // Add debugging to track form value changes
@@ -50,8 +52,9 @@ const ProductEditorForm = ({ productSlug, isEditMode }: ProductEditorFormProps) 
   // Add useEffect to detect product slug changes
   useEffect(() => {
     console.log(`[ProductEditorForm] Product slug changed to: ${productSlug || 'new'}`);
+    console.log(`[ProductEditorForm] Product uuid changed to: ${uuid || 'none'}`);
     setForceUpdate(prev => prev + 1); // Force a re-render when product changes
-  }, [productSlug]);
+  }, [productSlug, uuid]);
 
   const handleFormSubmit = form.handleSubmit((data) => {
     console.log('[ProductEditorForm] Form submitted with data:', data);
