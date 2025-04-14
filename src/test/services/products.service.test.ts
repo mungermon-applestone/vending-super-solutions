@@ -1,3 +1,4 @@
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { 
   getProductTypes, 
@@ -121,7 +122,7 @@ describe('Product Services', () => {
   
   describe('cloneProduct', () => {
     it('should clone a product successfully', async () => {
-      const productId = 'product-123';
+      const productId = 'product-123'; // Added this line to fix the error
       const mockClonedProduct = { 
         id: 'cloned-123', 
         title: 'Cloned Product', 
@@ -142,7 +143,7 @@ describe('Product Services', () => {
         single: vi.fn().mockResolvedValue({ data: mockClonedProduct, error: null })
       } as any);
       
-      const result = await cloneProduct(productId);
+      const result = await cloneProduct(productId); // Pass productId here
       
       expect(result).toEqual(mockClonedProduct);
       expect(supabase.from).toHaveBeenCalledWith('product_types');
@@ -278,3 +279,4 @@ describe('Product Services', () => {
     });
   });
 });
+
