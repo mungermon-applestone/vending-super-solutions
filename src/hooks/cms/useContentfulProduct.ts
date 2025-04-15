@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { CMSProductType } from '@/types/cms';
+import { toast } from '@/components/ui/use-toast';
 
 export function useContentfulProduct(slug: string) {
   return useQuery({
@@ -10,6 +11,11 @@ export function useContentfulProduct(slug: string) {
       console.log(`[useContentfulProduct] Fetching product with slug: ${slug}`);
       try {
         const client = await getContentfulClient();
+        
+        if (!client) {
+          console.error('[useContentfulProduct] Failed to get Contentful client - check credentials');
+          throw new Error('Missing Contentful configuration. Please set up your Contentful credentials.');
+        }
         
         const entries = await client.getEntries({
           content_type: 'productType',
@@ -34,7 +40,7 @@ export function useContentfulProduct(slug: string) {
           benefits: fields.benefits as string[] || [],
           image: fields.image ? {
             id: (fields.image as any).sys.id,
-            url: (fields.image as any).fields.file.url,
+            url: `https:${(fields.image as any).fields.file.url}`, // Add https: prefix
             alt: (fields.image as any).fields.title || fields.title,
           } : undefined,
           features: fields.features ? (fields.features as any[]).map(feature => ({

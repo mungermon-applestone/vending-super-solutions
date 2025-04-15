@@ -1,4 +1,3 @@
-
 import { createClient } from 'contentful';
 import { getContentfulConfig } from './cmsInfo';
 
@@ -20,7 +19,7 @@ export const getContentfulClient = async () => {
     
     if (!config || !config.space_id || !config.delivery_token) {
       console.error('[getContentfulClient] Missing Contentful configuration');
-      throw new Error('Missing Contentful configuration. Please set up your Contentful credentials.');
+      return null;
     }
     
     contentfulClient = createClient({
@@ -32,7 +31,7 @@ export const getContentfulClient = async () => {
     return contentfulClient;
   } catch (error) {
     console.error('[getContentfulClient] Error creating Contentful client:', error);
-    throw error;
+    return null;
   }
 };
 

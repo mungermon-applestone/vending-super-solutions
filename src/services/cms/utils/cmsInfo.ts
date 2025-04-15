@@ -49,9 +49,16 @@ export const getContentfulConfig = async () => {
     console.log('[getContentfulConfig] Fetched configuration:', {
       spaceId: data?.space_id,
       envId: data?.environment_id,
+      hasDeliveryToken: !!data?.delivery_token,
       hasToken: !!data?.management_token,
+      deliveryTokenLength: data?.delivery_token?.length,
       tokenLength: data?.management_token?.length
     });
+    
+    // Check if we have the delivery token which is needed for content retrieval
+    if (!data?.delivery_token) {
+      console.warn('[getContentfulConfig] No delivery token found in configuration');
+    }
     
     return data;
   } catch (error) {

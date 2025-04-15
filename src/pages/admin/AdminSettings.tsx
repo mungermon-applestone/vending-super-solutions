@@ -28,6 +28,7 @@ const AdminSettings: React.FC = () => {
     const [spaceId, setSpaceId] = useState('');
     const [environmentId, setEnvironmentId] = useState('master');
     const [managementToken, setManagementToken] = useState('');
+    const [deliveryToken, setDeliveryToken] = useState('');
 
   const handleSaveCmsSettings = () => {
     setIsLoading(true);
@@ -68,13 +69,18 @@ const AdminSettings: React.FC = () => {
                 throw new Error('Space ID and Management Token are required');
             }
 
+            if (!deliveryToken) {
+                throw new Error('Delivery Token is required for content retrieval');
+            }
+
             // Insert or update Contentful configuration
             const { data, error } = await supabase
                 .from('contentful_config')
                 .upsert({
                     space_id: spaceId,
                     environment_id: environmentId || 'master',
-                    management_token: managementToken
+                    management_token: managementToken,
+                    delivery_token: deliveryToken
                 })
                 .select();
 
@@ -88,6 +94,7 @@ const AdminSettings: React.FC = () => {
 
             // Clear sensitive inputs after saving
             setManagementToken('');
+            setDeliveryToken('');
         } catch (error) {
             console.error('Error saving Contentful config:', error);
             toast({
@@ -271,7 +278,7 @@ const AdminSettings: React.FC = () => {
                     <CardHeader>
                         <CardTitle>Contentful Configuration</CardTitle>
                         <CardDescription>
-                            Enter your Contentful Management API credentials
+                            Enter your Contentful API credentials
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -304,21 +311,36 @@ const AdminSettings: React.FC = () => {
 
                             <div className="space-y-2">
                                 <label htmlFor="managementToken" className="block text-sm font-medium">
-                                    Management Token
+                                    Management Token (CMA)
                                 </label>
                                 <Input
                                     id="managementToken"
                                     type="password"
                                     value={managementToken}
                                     onChange={(e) => setManagementToken(e.target.value)}
-                                    placeholder="Your Contentful Management API Token"
+                                    placeholder="Your Contentful Management API Token (CFPAT-...)"
                                 />
+                                <p className="text-xs text-muted-foreground">Used for content management operations</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label htmlFor="deliveryToken" className="block text-sm font-medium">
+                                    Delivery Token (CDA)
+                                </label>
+                                <Input
+                                    id="deliveryToken"
+                                    type="password"
+                                    value={deliveryToken}
+                                    onChange={(e) => setDeliveryToken(e.target.value)}
+                                    placeholder="Your Contentful Content Delivery API Token"
+                                />
+                                <p className="text-xs text-muted-foreground">Required for retrieving content on the frontend</p>
                             </div>
 
                             <div className="pt-4">
                                 <Button
                                     onClick={handleSaveContentfulConfig}
-                                    disabled={isLoading || !spaceId || !managementToken}
+                                    disabled={isLoading || !spaceId || !managementToken || !deliveryToken}
                                     className="w-full"
                                 >
                                     {isLoading ? (
@@ -334,7 +356,7 @@ const AdminSettings: React.FC = () => {
 
                             <div className="mt-4 text-sm text-muted-foreground flex items-center gap-2">
                                 <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                                <p>Ensure your Management Token has the necessary permissions to modify content types.</p>
+                                <p>You need both the Management (CMA) and Delivery (CDA) tokens for full functionality.</p>
                             </div>
                         </div>
                     </CardContent>
