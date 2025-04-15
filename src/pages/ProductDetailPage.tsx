@@ -99,10 +99,10 @@ const ProductDetailPage = () => {
               </div>
               
               <div>
-                {product.images && product.images.length > 0 ? (
+                {product.image ? (
                   <img 
-                    src={product.images[0].url} 
-                    alt={product.images[0].alt || product.title} 
+                    src={product.image.url} 
+                    alt={product.image.alt || product.title} 
                     className="w-full rounded-lg shadow-lg object-cover h-72 lg:h-96"
                     onError={(e) => {
                       e.currentTarget.src = "https://via.placeholder.com/800x600?text=Product+Image";

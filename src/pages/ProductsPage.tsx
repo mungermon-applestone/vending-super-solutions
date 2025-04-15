@@ -69,10 +69,10 @@ const ProductsPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {productTypes.map((product) => (
               <div key={product.id} className="border border-gray-200 rounded-lg overflow-hidden transition-all hover:shadow-lg">
-                {product.images && product.images.length > 0 && (
+                {product.image && (
                   <img 
-                    src={product.images[0].url} 
-                    alt={product.images[0].alt || product.title} 
+                    src={product.image.url} 
+                    alt={product.image.alt || product.title} 
                     className="w-full h-48 object-cover"
                     onError={(e) => {
                       e.currentTarget.src = "https://via.placeholder.com/400x200?text=Product+Image";

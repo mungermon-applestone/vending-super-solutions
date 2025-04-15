@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -7,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check } from 'lucide-react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
+import { CMSMachine } from '@/types/cms';
 
 const MachineDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -66,8 +66,16 @@ const MachineDetailPage = () => {
     );
   }
   
-  // Use our existing MachinePageTemplate component to display the machine details
-  return <MachinePageTemplate machine={machine} />;
+  const machineData = {
+    ...machine,
+    type: machine.type as "vending" | "locker",
+    specs: machine.specs || {},
+    features: machine.features || [],
+    deploymentExamples: machine.deploymentExamples || [],
+    images: machine.images || []
+  };
+  
+  return <MachinePageTemplate machine={machineData} />;
 };
 
 export default MachineDetailPage;

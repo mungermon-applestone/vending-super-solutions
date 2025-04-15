@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -67,7 +66,7 @@ const BusinessGoalDetailPage = () => {
     );
   }
   
-  const icon = businessGoal.icon ? (
+  const icon = businessGoal?.icon ? (
     <MachineTypeIcon type={businessGoal.icon} size={24} className="text-white" />
   ) : (
     <div className="h-6 w-6 bg-white rounded-full"></div>
@@ -75,16 +74,14 @@ const BusinessGoalDetailPage = () => {
   
   return (
     <Layout>
-      {/* Hero Section */}
       <BusinessGoalHero
-        title={businessGoal.title}
-        description={businessGoal.description}
+        title={businessGoal?.title || ''}
+        description={businessGoal?.description || ''}
         icon={icon}
-        image={businessGoal.image?.url || "https://via.placeholder.com/1200x800?text=Business+Goal+Image"}
+        image={businessGoal?.image?.url || "https://via.placeholder.com/1200x800?text=Business+Goal+Image"}
       />
       
-      {/* Features */}
-      {businessGoal.features && businessGoal.features.length > 0 && (
+      {businessGoal?.features && businessGoal.features.length > 0 && (
         <section className="py-16 bg-white">
           <div className="container mx-auto">
             <div className="max-w-6xl mx-auto">
@@ -107,8 +104,7 @@ const BusinessGoalDetailPage = () => {
         </section>
       )}
       
-      {/* Benefits */}
-      {businessGoal.benefits && businessGoal.benefits.length > 0 && (
+      {businessGoal?.benefits && businessGoal.benefits.length > 0 && (
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto">
             <div className="max-w-6xl mx-auto">
@@ -128,12 +124,11 @@ const BusinessGoalDetailPage = () => {
         </section>
       )}
       
-      {/* CTA Section */}
       <section className="py-16 bg-vending-blue-dark text-white">
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">Ready to Achieve Your Business Goals?</h2>
           <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Contact our team today to learn more about how we can help you with {businessGoal.title}.
+            Contact our team today to learn more about how we can help you with {businessGoal?.title || 'your business goals'}.
           </p>
           <Button size="lg" className="bg-vending-teal hover:bg-vending-teal-dark">Contact Us</Button>
         </div>

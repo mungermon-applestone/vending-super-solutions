@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -7,6 +6,17 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import PageHero from '@/components/common/PageHero';
+import { CMSImage } from '@/types/cms';
+
+const getImageProps = (image: CMSImage | string | undefined) => {
+  if (!image) return { url: '', alt: '' };
+  
+  if (typeof image === 'string') {
+    return { url: image, alt: 'Technology image' };
+  }
+  
+  return { url: image.url, alt: image.alt || 'Technology image' };
+}
 
 const TechnologyPage = () => {
   const { data: technologies, isLoading, error } = useTechnologies();
@@ -14,7 +24,6 @@ const TechnologyPage = () => {
   
   return (
     <Layout>
-      {/* Hero Section using PageHero */}
       <PageHero 
         pageKey="technology"
         fallbackTitle="Our Technology"
@@ -67,32 +76,36 @@ const TechnologyPage = () => {
 
         {technologies && technologies.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {technologies.map((tech) => (
-              <div key={tech.id} className="border border-gray-200 rounded-lg overflow-hidden transition-all hover:shadow-lg">
-                {tech.image && (
-                  <img 
-                    src={tech.image.url} 
-                    alt={tech.image.alt || tech.title} 
-                    className="w-full h-48 object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = "https://via.placeholder.com/400x200?text=Technology+Image";
-                    }}
-                  />
-                )}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-3">{tech.title}</h3>
-                  <p className="text-gray-600 mb-4 line-clamp-3">{tech.description}</p>
-                  <Button 
-                    variant="ghost" 
-                    className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
-                    onClick={() => navigate(`/technology/${tech.slug}`)}
-                  >
-                    Learn more
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
+            {technologies.map((tech) => {
+              const imageData = tech.image ? getImageProps(tech.image) : { url: '', alt: '' };
+              
+              return (
+                <div key={tech.id} className="border border-gray-200 rounded-lg overflow-hidden transition-all hover:shadow-lg">
+                  {tech.image && (
+                    <img 
+                      src={imageData.url} 
+                      alt={imageData.alt || tech.title} 
+                      className="w-full h-48 object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "https://via.placeholder.com/400x200?text=Technology+Image";
+                      }}
+                    />
+                  )}
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold mb-3">{tech.title}</h3>
+                    <p className="text-gray-600 mb-4 line-clamp-3">{tech.description}</p>
+                    <Button 
+                      variant="ghost" 
+                      className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
+                      onClick={() => navigate(`/technology/${tech.slug}`)}
+                    >
+                      Learn more
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

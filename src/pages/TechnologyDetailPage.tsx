@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -7,6 +6,17 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { CMSImage } from '@/types/cms';
+
+const getImageProps = (image: CMSImage | string | undefined) => {
+  if (!image) return { url: '', alt: '' };
+  
+  if (typeof image === 'string') {
+    return { url: image, alt: 'Technology image' };
+  }
+  
+  return { url: image.url, alt: image.alt || 'Technology image' };
+}
 
 const TechnologyDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -66,6 +76,8 @@ const TechnologyDetailPage = () => {
     );
   }
   
+  const imageData = technology && technology.image ? getImageProps(technology.image) : { url: '', alt: '' };
+  
   return (
     <Layout>
       <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light py-16">
@@ -75,12 +87,12 @@ const TechnologyDetailPage = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Technologies
             </Link>
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">{technology.title}</h1>
-            <p className="text-xl text-gray-700 mb-6">{technology.description}</p>
-            {technology.image && (
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">{technology?.title}</h1>
+            <p className="text-xl text-gray-700 mb-6">{technology?.description}</p>
+            {technology?.image && (
               <img 
-                src={technology.image.url} 
-                alt={technology.image.alt || technology.title} 
+                src={imageData.url} 
+                alt={imageData.alt} 
                 className="w-full rounded-lg shadow-lg mb-8 object-cover h-72 md:h-96"
                 onError={(e) => {
                   e.currentTarget.src = "https://via.placeholder.com/1200x600?text=Technology+Image";
@@ -91,8 +103,7 @@ const TechnologyDetailPage = () => {
         </div>
       </div>
       
-      {/* Render technology sections if available */}
-      {technology.sections && technology.sections.length > 0 ? (
+      {technology?.sections && technology.sections.length > 0 ? (
         <div className="container mx-auto py-12">
           <div className="max-w-4xl mx-auto">
             {technology.sections.map((section, index) => (
@@ -100,7 +111,6 @@ const TechnologyDetailPage = () => {
                 <h2 className="text-3xl font-bold mb-6">{section.title}</h2>
                 <p className="text-lg text-gray-700 mb-6">{section.description}</p>
                 
-                {/* Features */}
                 {section.features && section.features.length > 0 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     {section.features.map(feature => (
