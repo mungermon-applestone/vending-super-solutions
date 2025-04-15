@@ -388,6 +388,7 @@ export type Database = {
       contentful_config: {
         Row: {
           created_at: string | null
+          delivery_token: string | null
           environment_id: string
           id: string
           management_token: string
@@ -396,6 +397,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          delivery_token?: string | null
           environment_id?: string
           id?: string
           management_token: string
@@ -404,6 +406,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          delivery_token?: string | null
           environment_id?: string
           id?: string
           management_token?: string

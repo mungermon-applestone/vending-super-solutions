@@ -1,3 +1,4 @@
+
 import { createClient } from 'contentful';
 import { getContentfulConfig } from './cmsInfo';
 
@@ -18,7 +19,7 @@ export const getContentfulClient = async () => {
     const config = await getContentfulConfig();
     
     if (!config || !config.space_id || !config.delivery_token) {
-      console.error('[getContentfulClient] Missing Contentful configuration');
+      console.error('[getContentfulClient] Missing Contentful configuration - ensure both Space ID and Delivery Token are set');
       return null;
     }
     

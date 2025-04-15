@@ -24,11 +24,11 @@ const AdminSettings: React.FC = () => {
   const [strapiUrl, setStrapiUrl] = useState<string>(cmsInfo.apiUrl || '');
   const [strapiApiKey, setStrapiApiKey] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-    // Contentful configuration state
-    const [spaceId, setSpaceId] = useState('');
-    const [environmentId, setEnvironmentId] = useState('master');
-    const [managementToken, setManagementToken] = useState('');
-    const [deliveryToken, setDeliveryToken] = useState('');
+  
+  const [spaceId, setSpaceId] = useState('');
+  const [environmentId, setEnvironmentId] = useState('master');
+  const [managementToken, setManagementToken] = useState('');
+  const [deliveryToken, setDeliveryToken] = useState('');
 
   const handleSaveCmsSettings = () => {
     setIsLoading(true);
@@ -60,53 +60,53 @@ const AdminSettings: React.FC = () => {
     }
   };
 
-    const handleSaveContentfulConfig = async () => {
-        setIsLoading(true);
+  const handleSaveContentfulConfig = async () => {
+    setIsLoading(true);
 
-        try {
-            // Validate inputs
-            if (!spaceId || !managementToken) {
-                throw new Error('Space ID and Management Token are required');
-            }
+    try {
+      // Validate inputs
+      if (!spaceId || !managementToken) {
+        throw new Error('Space ID and Management Token are required');
+      }
 
-            if (!deliveryToken) {
-                throw new Error('Delivery Token is required for content retrieval');
-            }
+      if (!deliveryToken) {
+        throw new Error('Delivery Token is required for content retrieval');
+      }
 
-            // Insert or update Contentful configuration
-            const { data, error } = await supabase
-                .from('contentful_config')
-                .upsert({
-                    space_id: spaceId,
-                    environment_id: environmentId || 'master',
-                    management_token: managementToken,
-                    delivery_token: deliveryToken
-                })
-                .select();
+      // Insert or update Contentful configuration
+      const { data, error } = await supabase
+        .from('contentful_config')
+        .upsert({
+          space_id: spaceId,
+          environment_id: environmentId || 'master',
+          management_token: managementToken,
+          delivery_token: deliveryToken
+        })
+        .select();
 
-            if (error) throw error;
+      if (error) throw error;
 
-            toast({
-                title: 'Contentful Configuration',
-                description: 'Credentials saved successfully',
-                variant: 'default'
-            });
+      toast({
+        title: 'Contentful Configuration',
+        description: 'Credentials saved successfully',
+        variant: 'default'
+      });
 
-            // Clear sensitive inputs after saving
-            setManagementToken('');
-            setDeliveryToken('');
-        } catch (error) {
-            console.error('Error saving Contentful config:', error);
-            toast({
-                title: 'Error',
-                description: error instanceof Error ? error.message : 'Failed to save configuration',
-                variant: 'destructive'
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-  
+      // Clear sensitive inputs after saving
+      setManagementToken('');
+      setDeliveryToken('');
+    } catch (error) {
+      console.error('Error saving Contentful config:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to save configuration',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Layout>
       <div className="container py-10">

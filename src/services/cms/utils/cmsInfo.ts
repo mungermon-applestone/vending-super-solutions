@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export const getContentfulConfig = async () => {
@@ -42,23 +41,19 @@ export const getContentfulConfig = async () => {
         return null;
       }
       
-      console.log('[getContentfulConfig] Fallback succeeded, using first row:', fallbackData[0]);
+      console.log('[getContentfulConfig] Fallback succeeded, using first row');
       return fallbackData[0];
     }
 
-    console.log('[getContentfulConfig] Fetched configuration:', {
+    // Log configuration status but not the actual tokens
+    console.log('[getContentfulConfig] Configuration status:', {
       spaceId: data?.space_id,
       envId: data?.environment_id,
       hasDeliveryToken: !!data?.delivery_token,
-      hasToken: !!data?.management_token,
+      hasManagementToken: !!data?.management_token,
       deliveryTokenLength: data?.delivery_token?.length,
-      tokenLength: data?.management_token?.length
+      managementTokenLength: data?.management_token?.length
     });
-    
-    // Check if we have the delivery token which is needed for content retrieval
-    if (!data?.delivery_token) {
-      console.warn('[getContentfulConfig] No delivery token found in configuration');
-    }
     
     return data;
   } catch (error) {

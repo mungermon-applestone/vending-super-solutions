@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { CMSProductType } from '@/types/cms';
@@ -13,8 +12,8 @@ export function useContentfulProduct(slug: string) {
         const client = await getContentfulClient();
         
         if (!client) {
-          console.error('[useContentfulProduct] Failed to get Contentful client - check credentials');
-          throw new Error('Missing Contentful configuration. Please set up your Contentful credentials.');
+          console.error('[useContentfulProduct] Failed to get Contentful client - check Delivery Token in Admin Settings');
+          throw new Error('Missing Contentful configuration. Please set up your Contentful credentials in Admin Settings.');
         }
         
         const entries = await client.getEntries({
@@ -31,7 +30,6 @@ export function useContentfulProduct(slug: string) {
         const entry = entries.items[0];
         const fields = entry.fields;
         
-        // Transform Contentful response to match our CMSProductType interface
         const product: CMSProductType = {
           id: entry.sys.id,
           title: fields.title as string,
@@ -40,7 +38,7 @@ export function useContentfulProduct(slug: string) {
           benefits: fields.benefits as string[] || [],
           image: fields.image ? {
             id: (fields.image as any).sys.id,
-            url: `https:${(fields.image as any).fields.file.url}`, // Add https: prefix
+            url: `https:${(fields.image as any).fields.file.url}`,
             alt: (fields.image as any).fields.title || fields.title,
           } : undefined,
           features: fields.features ? (fields.features as any[]).map(feature => ({
@@ -58,6 +56,15 @@ export function useContentfulProduct(slug: string) {
         throw error;
       }
     },
-    enabled: !!slug
+    enabled: !!slug,
+    meta: {
+      onError: (error: Error) => {
+        toast({
+          title: "Error Loading Product",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
+    }
   });
 }
