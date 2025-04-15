@@ -4,6 +4,7 @@ import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyHeroSimple from '@/components/technology/TechnologyHeroSimple';
 import TechnologySection from '@/components/technology/TechnologySection';
+import TechnologySections from '@/components/technology/TechnologySections';
 import { useContentfulTechnology } from '@/hooks/cms/useContentfulTechnology';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -70,6 +71,9 @@ const SimpleTechnologyPage = () => {
     return image.alt || fallback || '';
   };
 
+  console.log('Technology data:', mainTechnology);
+  console.log('Technology sections:', mainTechnology.sections);
+
   return (
     <Layout>
       <TechnologyHeroSimple
@@ -79,22 +83,42 @@ const SimpleTechnologyPage = () => {
         imageAlt={getImageAlt(mainTechnology.image, mainTechnology.title)}
       />
       
-      {mainTechnology.sections?.map((section, index) => {
-        // Get image URL safely
-        const sectionImageUrl = section.sectionImage?.url || '';
+      {mainTechnology.sections && mainTechnology.sections.length > 0 ? (
+        <div className="pb-12">
+          {mainTechnology.sections.map((section, index) => {
+            console.log('Rendering section:', section);
+            
+            // Extract bullet points if they exist
+            const bulletPoints = section.bulletPoints || [];
+            
+            // Get section image URL safely 
+            const sectionImageUrl = section.sectionImage && section.sectionImage.fields ? 
+              `https:${section.sectionImage.fields.file.url}` : '';
+              
+            console.log('Section image URL:', sectionImageUrl);
 
-        return (
-          <TechnologySection
-            key={section.id}
-            id={section.id}
-            title={section.title}
-            summary={section.description || ''}
-            bulletPoints={section.bulletPoints || []}
-            image={sectionImageUrl}
-            index={index}
-          />
-        );
-      })}
+            return (
+              <TechnologySection
+                key={section.id || `section-${index}`}
+                id={section.id || `section-${index}`}
+                title={section.title || ''}
+                summary={section.summary || section.description || ''}
+                bulletPoints={bulletPoints}
+                image={sectionImageUrl}
+                index={index}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        <div className="container mx-auto py-12 text-center">
+          <Alert>
+            <AlertDescription>
+              No technology sections available.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
       
       <CTASection />
       <InquiryForm title="Technology Solutions" />
