@@ -30,7 +30,7 @@ export interface CMSMachine {
   id: string;
   title: string;
   slug: string;
-  type: string;
+  type: 'vending' | 'locker';
   description: string;
   features?: string[];
   images?: CMSImage[];

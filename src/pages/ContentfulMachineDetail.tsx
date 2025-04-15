@@ -23,12 +23,15 @@ const ContentfulMachineDetail: React.FC = () => {
         }))
       : [];
 
+    // Ensure type is strictly "vending" or "locker"
+    const machineType = machine.type === 'locker' ? 'locker' : 'vending';
+
     return {
       id: machine.id,
       slug: machine.slug,
       title: machine.title,
-      type: machine.type,
-      temperature: machine.temperature,
+      type: machineType,
+      temperature: machine.temperature || 'ambient',
       description: machine.description,
       images: machine.images || [],
       specs: machine.specs || {},

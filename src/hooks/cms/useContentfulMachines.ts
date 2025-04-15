@@ -63,30 +63,35 @@ export function useContentfulMachines() {
       try {
         const entries = await fetchContentfulEntries<any>('machine');
         
-        return entries.map(entry => ({
-          id: entry.id,
-          title: entry.title,
-          slug: entry.slug,
-          type: entry.type || 'vending',
-          description: entry.description,
-          temperature: entry.temperature || 'ambient',
-          features: entry.features || [],
-          images: entry.images ? entry.images.map((image: any) => ({
-            id: image.sys?.id,
-            url: `https:${image.fields?.file?.url}`,
-            alt: image.fields?.title || entry.title
-          })) : [],
-          specs: {
-            dimensions: entry.dimensions,
-            weight: entry.weight,
-            capacity: entry.capacity,
-            powerRequirements: entry.powerRequirements,
-            paymentOptions: entry.paymentOptions,
-            connectivity: entry.connectivity,
-            manufacturer: entry.manufacturer,
-            warranty: entry.warranty
-          }
-        })) as CMSMachine[];
+        return entries.map(entry => {
+          // Ensure machine type is one of the allowed values
+          const machineType = entry.type === 'locker' ? 'locker' : 'vending';
+          
+          return {
+            id: entry.id,
+            title: entry.title,
+            slug: entry.slug,
+            type: machineType,
+            description: entry.description,
+            temperature: entry.temperature || 'ambient',
+            features: entry.features || [],
+            images: entry.images ? entry.images.map((image: any) => ({
+              id: image.sys?.id,
+              url: `https:${image.fields?.file?.url}`,
+              alt: image.fields?.title || entry.title
+            })) : [],
+            specs: {
+              dimensions: entry.dimensions,
+              weight: entry.weight,
+              capacity: entry.capacity,
+              powerRequirements: entry.powerRequirements,
+              paymentOptions: entry.paymentOptions,
+              connectivity: entry.connectivity,
+              manufacturer: entry.manufacturer,
+              warranty: entry.warranty
+            }
+          };
+        }) as CMSMachine[];
       } catch (error) {
         console.error('[useContentfulMachines] Error:', error);
         // In preview environment, return fallback data
@@ -122,11 +127,14 @@ export function useContentfulMachine(slug: string | undefined) {
         }
 
         const entry = entries[0];
+        // Ensure machine type is one of the allowed values
+        const machineType = entry.type === 'locker' ? 'locker' : 'vending';
+        
         return {
           id: entry.id,
           title: entry.title,
           slug: entry.slug,
-          type: entry.type || 'vending',
+          type: machineType,
           description: entry.description,
           temperature: entry.temperature || 'ambient',
           features: entry.features || [],

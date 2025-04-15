@@ -67,8 +67,11 @@ const MachineDetailPage = () => {
   }
   
   // Ensure we have deploymentExamples (even if empty) to satisfy the MachinePageTemplate interface
+  // Also ensure that the machine type is strictly "vending" or "locker"
   const formattedMachine = {
     ...machine,
+    // Force type to be one of the allowed values in the union type
+    type: machine.type === 'locker' ? 'locker' : 'vending' as 'vending' | 'locker',
     deploymentExamples: machine.deploymentExamples || [],
   };
   
