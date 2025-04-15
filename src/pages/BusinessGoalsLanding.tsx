@@ -1,7 +1,8 @@
+
 import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useBusinessGoals } from '@/hooks/useCMSData';
+import { useContentfulBusinessGoals } from '@/hooks/cms/useContentfulBusinessGoals';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -12,15 +13,13 @@ import { getBusinessGoalCaseStudies } from '@/data/caseStudiesData';
 import PageHero from '@/components/common/PageHero';
 
 const BusinessGoalsLanding = () => {
-  const { data: businessGoals, isLoading, error } = useBusinessGoals();
+  const { data: businessGoals, isLoading, error } = useContentfulBusinessGoals();
   const navigate = useNavigate();
-  
-  // Get business goals case studies
   const businessGoalCaseStudies = getBusinessGoalCaseStudies();
 
   return (
     <Layout>
-      {/* Hero Section using PageHero */}
+      {/* Hero Section */}
       <PageHero 
         pageKey="business-goals"
         fallbackTitle="Business Goals"
@@ -33,6 +32,7 @@ const BusinessGoalsLanding = () => {
         fallbackSecondaryButtonUrl="/products"
       />
 
+      {/* Business Goals Grid */}
       <div className="container mx-auto py-12">
         <div className="max-w-4xl mx-auto mb-12 text-center">
           <h2 className="text-3xl font-bold text-vending-blue-dark mb-6">Achieve Your Business Objectives</h2>
@@ -73,7 +73,7 @@ const BusinessGoalsLanding = () => {
 
         {businessGoals && businessGoals.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {businessGoals.map((goal) => (
+            {businessGoals.filter(goal => goal.visible !== false).map((goal) => (
               <div 
                 key={goal.id} 
                 className="border border-gray-200 rounded-lg p-6 bg-white hover:border-vending-blue transition-colors duration-300 card-hover"
