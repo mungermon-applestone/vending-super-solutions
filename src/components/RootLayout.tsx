@@ -24,12 +24,42 @@ const RootLayout = () => {
               </li>
               <li>
                 <NavLink 
-                  to="/contentful/machines" 
+                  to="/products" 
+                  className={({ isActive }) => 
+                    isActive ? "text-blue-600 font-medium" : "text-gray-800 hover:text-blue-600"
+                  }
+                >
+                  Products
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
+                  to="/machines" 
                   className={({ isActive }) => 
                     isActive ? "text-blue-600 font-medium" : "text-gray-800 hover:text-blue-600"
                   }
                 >
                   Machines
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
+                  to="/technology" 
+                  className={({ isActive }) => 
+                    isActive ? "text-blue-600 font-medium" : "text-gray-800 hover:text-blue-600"
+                  }
+                >
+                  Technology
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
+                  to="/business" 
+                  className={({ isActive }) => 
+                    isActive ? "text-blue-600 font-medium" : "text-gray-800 hover:text-blue-600"
+                  }
+                >
+                  Business
                 </NavLink>
               </li>
               <li>
