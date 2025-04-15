@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, NavLink } from 'react-router-dom';
 
 const RootLayout = () => {
   return (
@@ -12,10 +12,35 @@ const RootLayout = () => {
           <nav>
             <ul className="flex space-x-6">
               <li>
-                <Link to="/" className="text-gray-800 hover:text-blue-600">Home</Link>
+                <NavLink 
+                  to="/" 
+                  className={({ isActive }) => 
+                    isActive ? "text-blue-600 font-medium" : "text-gray-800 hover:text-blue-600"
+                  }
+                  end
+                >
+                  Home
+                </NavLink>
               </li>
               <li>
-                <Link to="/admin" className="text-gray-800 hover:text-blue-600">Admin</Link>
+                <NavLink 
+                  to="/contentful/machines" 
+                  className={({ isActive }) => 
+                    isActive ? "text-blue-600 font-medium" : "text-gray-800 hover:text-blue-600"
+                  }
+                >
+                  Machines
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
+                  to="/admin" 
+                  className={({ isActive }) => 
+                    isActive ? "text-blue-600 font-medium" : "text-gray-800 hover:text-blue-600"
+                  }
+                >
+                  Admin
+                </NavLink>
               </li>
             </ul>
           </nav>

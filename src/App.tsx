@@ -11,6 +11,8 @@ import AdminLayout from './components/AdminLayout';
 import NotFound from './pages/NotFound';
 import { Toaster } from "./components/ui/toaster";
 import { adminRoutes } from './router/adminRoutes';
+import ContentfulMachines from './pages/ContentfulMachines';
+import ContentfulMachineDetail from './pages/ContentfulMachineDetail';
 
 // Create a simpler router structure to fix the build issues
 const router = createBrowserRouter([
@@ -23,6 +25,15 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <div className="p-10 text-center"><h1 className="text-3xl font-bold">Welcome to the Application</h1></div>,
+      },
+      // Contentful routes
+      {
+        path: "contentful/machines",
+        element: <ContentfulMachines />,
+      },
+      {
+        path: "contentful/machines/:slug",
+        element: <ContentfulMachineDetail />,
       },
     ]
   },
