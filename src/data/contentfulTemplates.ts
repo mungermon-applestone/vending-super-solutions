@@ -18,12 +18,14 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           name: 'Title',
           type: 'Symbol',
           required: true,
+          localized: false,
         },
         {
           id: 'slug',
           name: 'Slug',
           type: 'Symbol',
           required: true,
+          localized: false,
           validations: [
             { unique: true },
             {
@@ -40,6 +42,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           name: 'Publish Date',
           type: 'Date',
           required: false,
+          localized: false,
         },
         {
           id: 'featuredImage',
@@ -47,24 +50,28 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           type: 'Link',
           linkType: 'Asset',
           required: false,
+          localized: false,
         },
         {
           id: 'content',
           name: 'Content',
           type: 'RichText',
           required: true,
+          localized: false,
         },
         {
           id: 'excerpt',
           name: 'Excerpt',
           type: 'Text',
           required: false,
+          localized: false,
         },
         {
           id: 'author',
           name: 'Author',
           type: 'Symbol',
           required: false,
+          localized: false,
         },
         {
           id: 'tags',
@@ -74,6 +81,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
             type: 'Symbol'
           },
           required: false,
+          localized: false,
         }
       ]
     }
@@ -94,12 +102,14 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           name: 'Title',
           type: 'Symbol',
           required: true,
+          localized: false,
         },
         {
           id: 'slug',
           name: 'Slug',
           type: 'Symbol',
           required: true,
+          localized: false,
           validations: [
             { unique: true }
           ]
@@ -109,6 +119,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           name: 'Description',
           type: 'Text',
           required: true,
+          localized: false,
         },
         {
           id: 'image',
@@ -116,6 +127,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           type: 'Link',
           linkType: 'Asset',
           required: false,
+          localized: false,
         },
         {
           id: 'benefits',
@@ -125,6 +137,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
             type: 'Symbol',
           },
           required: false,
+          localized: false,
         },
         {
           id: 'features',
@@ -140,12 +153,14 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
             ]
           },
           required: false,
+          localized: false,
         },
         {
           id: 'visible',
           name: 'Visible',
           type: 'Boolean',
           required: false,
+          localized: false,
         }
       ]
     }
@@ -166,18 +181,21 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           name: 'Title',
           type: 'Symbol',
           required: true,
+          localized: false,
         },
         {
           id: 'description',
           name: 'Description',
           type: 'Text',
           required: true,
+          localized: false,
         },
         {
           id: 'icon',
           name: 'Icon',
           type: 'Symbol',
           required: false,
+          localized: false,
           validations: [
             {
               in: AVAILABLE_ICONS.map(icon => icon.value),
@@ -191,6 +209,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           type: 'Link',
           linkType: 'Asset',
           required: false,
+          localized: false,
         }
       ]
     }
@@ -211,12 +230,14 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           name: 'Title',
           type: 'Symbol',
           required: true,
+          localized: false,
         },
         {
           id: 'slug',
           name: 'Slug',
           type: 'Symbol',
           required: true,
+          localized: false,
           validations: [
             { unique: true }
           ]
@@ -226,6 +247,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           name: 'Description',
           type: 'Text',
           required: true,
+          localized: false,
         },
         {
           id: 'image',
@@ -233,12 +255,14 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           type: 'Link',
           linkType: 'Asset',
           required: false,
+          localized: false,
         },
         {
           id: 'icon',
           name: 'Icon',
           type: 'Symbol',
           required: false,
+          localized: false,
         },
         {
           id: 'benefits',
@@ -248,6 +272,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
             type: 'Symbol',
           },
           required: false,
+          localized: false,
         },
         {
           id: 'features',
@@ -263,12 +288,14 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
             ]
           },
           required: false,
+          localized: false,
         },
         {
           id: 'visible',
           name: 'Visible',
           type: 'Boolean',
           required: false,
+          localized: false,
         }
       ]
     }
@@ -289,12 +316,14 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           name: 'Title',
           type: 'Symbol',
           required: true,
+          localized: false,
         },
         {
           id: 'slug',
           name: 'Slug',
           type: 'Symbol',
           required: true,
+          localized: false,
           validations: [
             { unique: true }
           ]
@@ -304,6 +333,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           name: 'Type',
           type: 'Symbol',
           required: true,
+          localized: false,
           validations: [
             {
               in: ['vending', 'locker'],
@@ -316,6 +346,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           name: 'Temperature',
           type: 'Symbol',
           required: false,
+          localized: false,
           validations: [
             {
               in: ['ambient', 'refrigerated', 'frozen', 'multi', 'controlled'],
@@ -328,6 +359,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
           name: 'Description',
           type: 'Text',
           required: true,
+          localized: false,
         },
         {
           id: 'features',
@@ -337,6 +369,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
             type: 'Symbol'
           },
           required: false,
+          localized: false,
         },
         {
           id: 'images',
@@ -352,60 +385,70 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
             ]
           },
           required: false,
+          localized: false,
         },
         {
           id: 'dimensions',
           name: 'Dimensions',
           type: 'Symbol',
           required: false,
+          localized: false,
         },
         {
           id: 'weight',
           name: 'Weight',
           type: 'Symbol',
           required: false,
+          localized: false,
         },
         {
           id: 'powerRequirements',
           name: 'Power Requirements',
           type: 'Symbol',
           required: false,
+          localized: false,
         },
         {
           id: 'capacity',
           name: 'Capacity',
           type: 'Symbol',
           required: false,
+          localized: false,
         },
         {
           id: 'paymentOptions',
           name: 'Payment Options',
           type: 'Symbol',
           required: false,
+          localized: false,
         },
         {
           id: 'connectivity',
           name: 'Connectivity',
           type: 'Symbol',
           required: false,
+          localized: false,
         },
         {
           id: 'manufacturer',
           name: 'Manufacturer',
           type: 'Symbol',
           required: false,
+          localized: false,
         },
         {
           id: 'warranty',
           name: 'Warranty',
           type: 'Symbol',
           required: false,
+          localized: false,
         },
         {
           id: 'visible',
           name: 'Visible',
           type: 'Boolean',
           required: false,
+          localized: false,
         }
       ]
     }

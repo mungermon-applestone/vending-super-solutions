@@ -50,7 +50,7 @@ export interface FieldProps {
   name: string;
   type: ContentfulFieldType;
   required: boolean; // Changed from optional to required to match Contentful SDK
-  localized?: boolean;
+  localized: boolean; // Changed from optional to required to match Contentful SDK
   disabled?: boolean;
   omitted?: boolean;
   linkType?: ContentfulLinkType;
