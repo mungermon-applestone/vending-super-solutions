@@ -13,6 +13,7 @@ import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
 import CMSConnectionTest from '@/components/admin/cms/CMSConnectionTest';
 import CMSProviderDisplay from '@/components/admin/cms/CMSProviderDisplay';
 import { supabase } from '@/integrations/supabase/client';
+import { resetContentfulClient } from '@/services/cms/utils/contentfulClient';
 
 const AdminSettings: React.FC = () => {
   const { toast } = useToast();
