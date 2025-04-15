@@ -1,4 +1,3 @@
-
 import { createClient } from 'contentful';
 import { getContentfulConfig } from './cmsInfo';
 
@@ -18,18 +17,23 @@ export const getContentfulClient = async () => {
     console.log('[getContentfulClient] Creating new Contentful client');
     const config = await getContentfulConfig();
     
-    if (!config || !config.space_id || !config.delivery_token) {
-      console.error('[getContentfulClient] Missing Contentful configuration - ensure both Space ID and Delivery Token are set');
-      if (config) {
-        console.warn('[getContentfulClient] Config found but missing required fields:', { 
-          hasSpaceId: !!config.space_id, 
-          hasDeliveryToken: !!config.delivery_token 
-        });
-        
-        if (!config.delivery_token) {
-          throw new Error("Missing Contentful Delivery Token. Please add your Content Delivery API token in Admin Settings.");
-        }
-      }
+    // Add more detailed logging for configuration
+    console.log('[getContentfulClient] Configuration received:', {
+      hasConfig: !!config,
+      hasSpaceId: config?.space_id ? 'Yes' : 'No',
+      hasDeliveryToken: config?.delivery_token ? 'Yes' : 'No',
+      hasManagementToken: config?.management_token ? 'Yes' : 'No',
+      environmentId: config?.environment_id || 'master'
+    });
+    
+    if (!config || !config.space_id) {
+      console.error('[getContentfulClient] Missing Space ID');
+      return null;
+    }
+    
+    // Require at least the delivery token
+    if (!config.delivery_token) {
+      console.error('[getContentfulClient] Missing Delivery Token (CDA)');
       return null;
     }
     
@@ -42,7 +46,7 @@ export const getContentfulClient = async () => {
     console.log('[getContentfulClient] Successfully created Contentful client');
     return contentfulClient;
   } catch (error) {
-    console.error('[getContentfulClient] Error creating Contentful client:', error);
+    console.error('[getContentfulClient] Comprehensive error creating Contentful client:', error);
     throw error;
   }
 };
