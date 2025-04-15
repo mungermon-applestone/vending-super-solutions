@@ -1,4 +1,3 @@
-
 import React, { ReactNode } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -73,7 +72,6 @@ const BusinessGoalDetailPage = () => {
     <div className="h-6 w-6 bg-white rounded-full"></div>
   );
   
-  // Helper function to render content of any type safely as ReactNode
   const renderContent = (content: any): ReactNode => {
     if (content === null || content === undefined) {
       return '';
