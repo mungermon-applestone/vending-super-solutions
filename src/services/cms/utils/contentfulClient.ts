@@ -1,3 +1,4 @@
+
 import { createClient } from 'contentful';
 import { getContentfulConfig } from './cmsInfo';
 
@@ -26,14 +27,29 @@ export const getContentfulClient = async () => {
       environmentId: config?.environment_id || 'master'
     });
     
+    // If we're in preview mode and don't have config, return null gracefully to enable fallbacks
+    const isPreviewEnvironment = window.location.hostname.includes('lovableproject.com');
+    
     if (!config || !config.space_id) {
       console.error('[getContentfulClient] Missing Space ID');
+      
+      if (isPreviewEnvironment) {
+        console.log('[getContentfulClient] Preview environment detected, allowing fallback content');
+        return null;
+      }
+      
       return null;
     }
     
     // Require at least the delivery token
     if (!config.delivery_token) {
       console.error('[getContentfulClient] Missing Delivery Token (CDA)');
+      
+      if (isPreviewEnvironment) {
+        console.log('[getContentfulClient] Preview environment detected, allowing fallback content');
+        return null;
+      }
+      
       return null;
     }
     
@@ -47,6 +63,13 @@ export const getContentfulClient = async () => {
     return contentfulClient;
   } catch (error) {
     console.error('[getContentfulClient] Comprehensive error creating Contentful client:', error);
+    
+    // Check if we're in preview environment
+    if (window.location.hostname.includes('lovableproject.com')) {
+      console.log('[getContentfulClient] Preview environment detected, allowing fallback content');
+      return null;
+    }
+    
     throw error;
   }
 };
