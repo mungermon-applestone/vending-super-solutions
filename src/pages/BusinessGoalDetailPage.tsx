@@ -131,7 +131,7 @@ const BusinessGoalDetailPage = () => {
                   <div key={feature.id} className="bg-gray-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
                     {feature.icon && (
                       <div className="mb-4 text-vending-blue">
-                        {getIconComponent(feature.icon)}
+                        {getIconComponent(typeof feature.icon === 'string' ? feature.icon : undefined)}
                       </div>
                     )}
                     <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
