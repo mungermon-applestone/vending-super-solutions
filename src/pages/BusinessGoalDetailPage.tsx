@@ -116,9 +116,13 @@ const BusinessGoalDetailPage = () => {
                       <ArrowLeft className="h-4 w-4 transform rotate-180" />
                     </div>
                     <p className="text-gray-800">
-                      {typeof benefit === 'object' 
-                        ? JSON.stringify(benefit) 
-                        : String(benefit)}
+                      {(() => {
+                        if (benefit === null || benefit === undefined) return '';
+                        if (typeof benefit === 'string') return benefit;
+                        if (typeof benefit === 'number') return benefit.toString();
+                        if (typeof benefit === 'object') return JSON.stringify(benefit);
+                        return String(benefit);
+                      })()}
                     </p>
                   </div>
                 ))}
