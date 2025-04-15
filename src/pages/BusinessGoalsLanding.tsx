@@ -17,6 +17,8 @@ const BusinessGoalsLanding = () => {
   const navigate = useNavigate();
   const businessGoalCaseStudies = getBusinessGoalCaseStudies();
 
+  console.log('BusinessGoals data:', businessGoals);
+
   return (
     <Layout>
       {/* Hero Section */}

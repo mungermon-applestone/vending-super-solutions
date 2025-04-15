@@ -19,6 +19,7 @@ import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import BusinessGoalsPage from './pages/BusinessGoalsPage';
 import BusinessGoalDetailPage from './pages/BusinessGoalDetailPage';
+import BusinessGoalsLanding from './pages/BusinessGoalsLanding';
 import MachinesPage from './pages/MachinesPage';
 import MachineDetailPage from './pages/MachineDetailPage';
 import Home from './pages/Home';
@@ -52,12 +53,22 @@ const router = createBrowserRouter([
         path: "products/:slug",
         element: <ProductDetailPage />,
       },
+      // Business Goals routes - add both paths for consistent access
       {
         path: "business",
         element: <BusinessGoalsPage />,
       },
       {
         path: "business/:slug",
+        element: <BusinessGoalDetailPage />,
+      },
+      // Add new route for /goals
+      {
+        path: "goals",
+        element: <BusinessGoalsLanding />,
+      },
+      {
+        path: "goals/:slug",
         element: <BusinessGoalDetailPage />,
       },
       {
