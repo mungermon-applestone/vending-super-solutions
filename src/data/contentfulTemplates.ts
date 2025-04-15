@@ -31,7 +31,7 @@ export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
             {
               regexp: {
                 pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
-                flags: ''
+                flags: '' // Ensuring flags is explicitly set
               },
               message: 'Slug must contain only lowercase letters, numbers, and hyphens'
             }

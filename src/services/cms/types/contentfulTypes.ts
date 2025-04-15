@@ -36,7 +36,7 @@ export interface ValidationOptions {
   };
   regexp?: {
     pattern: string;
-    flags?: string;
+    flags: string; // Changed from optional to required
   };
   unique?: boolean;
   [key: string]: any;
