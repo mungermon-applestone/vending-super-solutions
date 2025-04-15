@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { ContentfulTechnology } from '@/types/contentful';
@@ -19,6 +20,8 @@ export function useContentfulTechnology() {
         }
         
         const mappedEntries = entries.map(entry => {
+          console.log('[useContentfulTechnology] Processing entry:', entry.fields.title);
+          
           // Map technology sections with proper field access
           let sections: CMSTechnologySection[] = [];
           
@@ -38,12 +41,21 @@ export function useContentfulTechnology() {
               // Process the section image
               let sectionImage = null;
               if (sectionFields.sectionImage) {
-                const imageFields = sectionFields.sectionImage.fields;
-                if (imageFields && imageFields.file && imageFields.file.url) {
-                  sectionImage = {
-                    url: `https:${imageFields.file.url}`,
-                    alt: imageFields.title || sectionFields.title || ''
-                  };
+                console.log('[useContentfulTechnology] Section has image:', sectionFields.sectionImage);
+                
+                // Handle different image data structures
+                if (typeof sectionFields.sectionImage === 'string') {
+                  sectionImage = sectionFields.sectionImage;
+                } else if (sectionFields.sectionImage.fields) {
+                  const imageFields = sectionFields.sectionImage.fields;
+                  if (imageFields && imageFields.file && imageFields.file.url) {
+                    sectionImage = {
+                      url: `https:${imageFields.file.url}`,
+                      alt: imageFields.title || sectionFields.title || ''
+                    };
+                  }
+                } else if (sectionFields.sectionImage.url) {
+                  sectionImage = sectionFields.sectionImage;
                 }
               }
               
@@ -70,6 +82,8 @@ export function useContentfulTechnology() {
             });
           }
           
+          console.log('[useContentfulTechnology] Mapped sections:', sections);
+          
           return {
             id: entry.sys?.id || '',
             title: entry.fields.title || '',
@@ -78,7 +92,7 @@ export function useContentfulTechnology() {
             visible: entry.fields.visible ?? true,
             image: entry.fields.image ? {
               id: entry.fields.image.sys?.id || '',
-              url: `https:${entry.fields.image.fields?.file?.url || ''}`,
+              url: entry.fields.image.fields?.file?.url ? `https:${entry.fields.image.fields.file.url}` : '',
               alt: entry.fields.image.fields?.title || entry.fields.title || ''
             } : undefined,
             sections

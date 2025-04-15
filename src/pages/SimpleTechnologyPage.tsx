@@ -4,18 +4,20 @@ import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyHeroSimple from '@/components/technology/TechnologyHeroSimple';
 import TechnologySection from '@/components/technology/TechnologySection';
-import TechnologySections from '@/components/technology/TechnologySections';
-import { useContentfulTechnology } from '@/hooks/cms/useContentfulTechnology';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import CTASection from '@/components/common/CTASection';
-import { CMSImage } from '@/types/cms';
+import useTechnologySections from '@/hooks/useTechnologySections';
 
 const SimpleTechnologyPage = () => {
-  const { data: technologies = [], isLoading, error } = useContentfulTechnology();
+  // Use the custom hook to fetch technology data
+  const { technologies = [], isLoading, error } = useTechnologySections();
   
-  // Use the first technology entry for the hero section
+  // Use the first technology entry for the page
   const mainTechnology = technologies[0];
+  
+  console.log('Technologies from hook:', technologies);
+  console.log('Main technology:', mainTechnology);
   
   if (isLoading) {
     return (
@@ -58,29 +60,29 @@ const SimpleTechnologyPage = () => {
   }
 
   // Helper function to safely get image URL
-  const getImageUrl = (image?: CMSImage | string): string => {
+  const getImageUrl = (image: any): string => {
     if (!image) return '';
-    if (typeof image === 'string') return image;
-    return image.url;
+    
+    if (typeof image === 'string') {
+      return image;
+    }
+    
+    if (image.url) {
+      return image.url;
+    }
+    
+    return '';
   };
+
+  console.log('Sections available:', mainTechnology.sections);
   
-  // Helper function to safely get image alt text
-  const getImageAlt = (image?: CMSImage | string, fallback?: string): string => {
-    if (!image) return fallback || '';
-    if (typeof image === 'string') return fallback || '';
-    return image.alt || fallback || '';
-  };
-
-  console.log('Technology data:', mainTechnology);
-  console.log('Technology sections:', mainTechnology.sections);
-
   return (
     <Layout>
       <TechnologyHeroSimple
         title={mainTechnology.title}
         description={mainTechnology.description}
         imageUrl={getImageUrl(mainTechnology.image)}
-        imageAlt={getImageAlt(mainTechnology.image, mainTechnology.title)}
+        imageAlt={mainTechnology.image?.alt || mainTechnology.title}
       />
       
       {mainTechnology.sections && mainTechnology.sections.length > 0 ? (
@@ -88,29 +90,16 @@ const SimpleTechnologyPage = () => {
           {mainTechnology.sections.map((section, index) => {
             console.log('Rendering section:', section);
             
-            // Extract bullet points if they exist
-            const bulletPoints = section.bulletPoints || [];
-            
             // Get section image URL safely
-            let sectionImageUrl = '';
+            const sectionImageUrl = getImageUrl(section.sectionImage);
             
-            if (section.sectionImage) {
-              if (typeof section.sectionImage === 'string') {
-                sectionImageUrl = section.sectionImage;
-              } else if (section.sectionImage.url) {
-                sectionImageUrl = section.sectionImage.url;
-              }
-            }
-            
-            console.log('Section image URL:', sectionImageUrl);
-
             return (
               <TechnologySection
                 key={section.id || `section-${index}`}
                 id={section.id || `section-${index}`}
                 title={section.title || ''}
                 summary={section.summary || section.description || ''}
-                bulletPoints={bulletPoints}
+                bulletPoints={section.bulletPoints || []}
                 image={sectionImageUrl}
                 index={index}
               />
