@@ -30,7 +30,7 @@ const mapTechnologyData = (tech) => {
   return {
     id: tech.id,
     title: tech.title,
-    description: tech.description,
+    summary: tech.description, // Changed from description to summary
     features: features,
     image: imageUrl
   };
@@ -94,8 +94,7 @@ const SimpleTechnologyPage = () => {
               key={tech.id}
               id={tech.id}
               title={tech.title}
-              description={tech.description}
-              features={tech.features}
+              summary={tech.summary} // Changed from description to summary
               image={tech.image}
               index={index}
             />
