@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { CMSBusinessGoal } from '@/types/cms';
+import { ContentfulBusinessGoal, ContentfulFeature } from '@/types/contentful';
 
 export function useContentfulBusinessGoals() {
   return useQuery({
@@ -9,22 +10,22 @@ export function useContentfulBusinessGoals() {
     queryFn: async () => {
       console.log('[useContentfulBusinessGoals] Fetching all business goals');
       try {
-        const entries = await fetchContentfulEntries<any>('businessGoal');
+        const entries = await fetchContentfulEntries<ContentfulBusinessGoal>('businessGoal');
         
         return entries.map(entry => ({
           id: entry.sys?.id,
-          title: entry.title,
-          slug: entry.slug,
-          description: entry.description,
-          icon: entry.icon,
-          visible: entry.visible ?? true,
-          image: entry.image ? {
-            id: entry.image.sys?.id,
-            url: `https:${entry.image.fields?.file?.url}`,
-            alt: entry.image.fields?.title || entry.title
+          title: entry.fields.title,
+          slug: entry.fields.slug,
+          description: entry.fields.description,
+          icon: entry.fields.icon,
+          visible: entry.fields.visible ?? true,
+          image: entry.fields.image ? {
+            id: entry.fields.image.sys?.id,
+            url: `https:${entry.fields.image.fields?.file?.url}`,
+            alt: entry.fields.image.fields?.title || entry.fields.title
           } : undefined,
-          benefits: entry.benefits || [],
-          features: (entry.features || []).map((feature: any) => ({
+          benefits: entry.fields.benefits || [],
+          features: (entry.fields.features || []).map((feature: any) => ({
             id: feature.sys?.id,
             title: feature.fields?.title,
             description: feature.fields?.description,
@@ -56,7 +57,7 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
       
       console.log(`[useContentfulBusinessGoal] Fetching business goal with slug: ${slug}`);
       try {
-        const entries = await fetchContentfulEntries<any>('businessGoal', {
+        const entries = await fetchContentfulEntries<ContentfulBusinessGoal>('businessGoal', {
           'fields.slug': slug
         });
         
@@ -68,18 +69,18 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
         const entry = entries[0];
         return {
           id: entry.sys?.id,
-          title: entry.title,
-          slug: entry.slug,
-          description: entry.description,
-          icon: entry.icon,
-          visible: entry.visible ?? true,
-          image: entry.image ? {
-            id: entry.image.sys?.id,
-            url: `https:${entry.image.fields?.file?.url}`,
-            alt: entry.image.fields?.title || entry.title
+          title: entry.fields.title,
+          slug: entry.fields.slug,
+          description: entry.fields.description,
+          icon: entry.fields.icon,
+          visible: entry.fields.visible ?? true,
+          image: entry.fields.image ? {
+            id: entry.fields.image.sys?.id,
+            url: `https:${entry.fields.image.fields?.file?.url}`,
+            alt: entry.fields.image.fields?.title || entry.fields.title
           } : undefined,
-          benefits: entry.benefits || [],
-          features: (entry.features || []).map((feature: any) => ({
+          benefits: entry.fields.benefits || [],
+          features: (entry.fields.features || []).map((feature: any) => ({
             id: feature.sys?.id,
             title: feature.fields?.title,
             description: feature.fields?.description,

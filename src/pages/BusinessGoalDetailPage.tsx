@@ -2,7 +2,7 @@
 import React, { ReactNode } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useBusinessGoal } from '@/hooks/cms/useBusinessGoals';
+import { useContentfulBusinessGoal } from '@/hooks/cms/useContentfulBusinessGoals';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check } from 'lucide-react';
@@ -11,7 +11,9 @@ import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
 
 const BusinessGoalDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: businessGoal, isLoading, error } = useBusinessGoal(slug || '');
+  const { data: businessGoal, isLoading, error } = useContentfulBusinessGoal(slug || '');
+  
+  console.log('Business Goal Detail:', businessGoal);
   
   if (isLoading) {
     return (
@@ -40,7 +42,7 @@ const BusinessGoalDetailPage = () => {
               <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Business Goal</h3>
               <p className="text-red-600">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
               <Button asChild variant="outline" className="mt-4">
-                <Link to="/business">Return to Business Goals</Link>
+                <Link to="/goals">Return to Business Goals</Link>
               </Button>
             </div>
           </div>
@@ -58,7 +60,7 @@ const BusinessGoalDetailPage = () => {
               <h3 className="text-lg font-semibold text-amber-800 mb-2">Business Goal Not Found</h3>
               <p className="text-amber-600">The business goal you're looking for doesn't exist or has been removed.</p>
               <Button asChild variant="outline" className="mt-4">
-                <Link to="/business">Return to Business Goals</Link>
+                <Link to="/goals">Return to Business Goals</Link>
               </Button>
             </div>
           </div>
@@ -73,22 +75,7 @@ const BusinessGoalDetailPage = () => {
     <div className="h-6 w-6 bg-white rounded-full"></div>
   );
   
-  // Function to safely convert any content to string representation
-  const renderContent = (content: any): string => {
-    if (content === null || content === undefined) {
-      return '';
-    }
-    if (typeof content === 'string') {
-      return content;
-    }
-    if (typeof content === 'number' || typeof content === 'boolean') {
-      return String(content);
-    }
-    if (typeof content === 'object') {
-      return JSON.stringify(content);
-    }
-    return String(content);
-  };
+  const imageUrl = businessGoal.image?.url || "https://via.placeholder.com/1200x800?text=Business+Goal+Image";
   
   return (
     <Layout>
@@ -96,7 +83,7 @@ const BusinessGoalDetailPage = () => {
         title={businessGoal?.title || ''}
         description={businessGoal?.description || ''}
         icon={icon}
-        image={businessGoal?.image?.url || "https://via.placeholder.com/1200x800?text=Business+Goal+Image"}
+        image={imageUrl}
       />
       
       {businessGoal?.features && businessGoal.features.length > 0 && (
@@ -109,7 +96,7 @@ const BusinessGoalDetailPage = () => {
                   <div key={feature.id} className="bg-gray-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
                     {feature.icon && (
                       <div className="mb-4 text-vending-blue">
-                        <MachineTypeIcon type={String(feature.icon)} />
+                        <MachineTypeIcon type={feature.icon} />
                       </div>
                     )}
                     <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
@@ -133,7 +120,7 @@ const BusinessGoalDetailPage = () => {
                     <div className="bg-vending-teal rounded-full p-2 mr-4 text-white flex-shrink-0">
                       <Check className="h-4 w-4" />
                     </div>
-                    <p className="text-gray-800">{String(benefit)}</p>
+                    <p className="text-gray-800">{benefit}</p>
                   </div>
                 ))}
               </div>
