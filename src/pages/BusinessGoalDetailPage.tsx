@@ -120,7 +120,7 @@ const BusinessGoalDetailPage = () => {
                     <div className="bg-vending-teal rounded-full p-2 mr-4 text-white flex-shrink-0">
                       <Check className="h-4 w-4" />
                     </div>
-                    <p className="text-gray-800">{benefit}</p>
+                    <p className="text-gray-800">{String(benefit)}</p>
                   </div>
                 ))}
               </div>
