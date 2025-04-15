@@ -66,10 +66,39 @@ const BusinessGoalsLanding = () => {
           </div>
         )}
 
-        {businessGoals && businessGoals.length === 0 && !isLoading && !error && (
+        {!isLoading && !error && (!businessGoals || businessGoals.length === 0) && (
           <div className="bg-gray-50 border border-gray-200 rounded-md p-6 text-center">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">No Business Goals Found</h3>
             <p className="text-gray-600">Check back later for information on how our solutions can help your business.</p>
+            
+            {/* Fallback content for preview environments */}
+            {window.location.hostname.includes('lovable') && (
+              <div className="mt-8">
+                <h4 className="text-md font-semibold text-gray-700 mb-2">Preview Environment</h4>
+                <p className="text-gray-600 mb-4">Using fallback business goals data for demonstration purposes</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* Fallback business goals */}
+                  <FallbackBusinessGoal 
+                    title="Expand Footprint" 
+                    description="Grow your business with scalable vending solutions that adapt to various locations and needs."
+                    icon="trending-up"
+                    slug="expand-footprint"
+                  />
+                  <FallbackBusinessGoal 
+                    title="Increase Revenue" 
+                    description="Drive more sales through smart inventory management and targeted marketing campaigns."
+                    icon="dollar-sign"
+                    slug="increase-revenue"
+                  />
+                  <FallbackBusinessGoal 
+                    title="Customer Satisfaction" 
+                    description="Enhance user experience with intuitive interfaces and reliable service."
+                    icon="users"
+                    slug="customer-satisfaction"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -117,6 +146,36 @@ const BusinessGoalsLanding = () => {
       {/* Inquiry Form */}
       <InquiryForm title="Business Goal Solutions" />
     </Layout>
+  );
+};
+
+// Fallback business goal component for preview environments
+const FallbackBusinessGoal = ({ title, description, icon, slug }: {
+  title: string;
+  description: string;
+  icon: string;
+  slug: string;
+}) => {
+  const navigate = useNavigate();
+  
+  return (
+    <div className="border border-amber-100 bg-amber-50 rounded-lg p-6 hover:border-amber-300 transition-colors duration-300">
+      <div className="mb-4">
+        <div className="bg-amber-100 p-3 rounded-full w-12 h-12 flex items-center justify-center text-amber-800">
+          <MachineTypeIcon type={icon} />
+        </div>
+      </div>
+      <h3 className="text-xl font-semibold mb-3">{title}</h3>
+      <p className="text-gray-700 mb-4 line-clamp-3">{description}</p>
+      <Button 
+        variant="outline"
+        className="border-amber-500 text-amber-700 hover:bg-amber-100 hover:text-amber-800 flex items-center"
+        onClick={() => navigate(`/goals/${slug}`)}
+      >
+        Preview
+        <ArrowRight className="ml-2 h-4 w-4" />
+      </Button>
+    </div>
   );
 };
 

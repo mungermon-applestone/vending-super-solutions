@@ -28,7 +28,8 @@ export const getContentfulClient = async () => {
     });
     
     // If we're in preview mode and don't have config, return null gracefully to enable fallbacks
-    const isPreviewEnvironment = window.location.hostname.includes('lovableproject.com');
+    const isPreviewEnvironment = window.location.hostname.includes('lovable') || 
+                                window.location.hostname.includes('preview');
     
     if (!config || !config.space_id) {
       console.error('[getContentfulClient] Missing Space ID');
@@ -65,7 +66,8 @@ export const getContentfulClient = async () => {
     console.error('[getContentfulClient] Comprehensive error creating Contentful client:', error);
     
     // Check if we're in preview environment
-    if (window.location.hostname.includes('lovableproject.com')) {
+    if (window.location.hostname.includes('lovable') || 
+        window.location.hostname.includes('preview')) {
       console.log('[getContentfulClient] Preview environment detected, allowing fallback content');
       return null;
     }
@@ -90,7 +92,15 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
     
     if (!client) {
       console.error('[fetchContentfulEntries] Failed to get Contentful client');
-      return [];
+      
+      // In preview environments, we want to return an empty array instead of throwing
+      if (window.location.hostname.includes('lovable') || 
+          window.location.hostname.includes('preview')) {
+        console.log('[fetchContentfulEntries] Preview environment, returning empty array');
+        return [] as T[];
+      }
+      
+      return [] as T[];
     }
     
     const query = {
@@ -101,13 +111,17 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
     const response = await client.getEntries(query);
     console.log(`[fetchContentfulEntries] Fetched ${response.items.length} entries`);
     
-    return response.items.map((item: any) => ({
-      id: item.sys.id,
-      ...item.fields
-    })) as T[];
+    return response.items as T[];
   } catch (error) {
     console.error(`[fetchContentfulEntries] Error fetching ${contentType}:`, error);
-    return [];
+    
+    // In preview environments, we want to return an empty array instead of throwing
+    if (window.location.hostname.includes('lovable') || 
+        window.location.hostname.includes('preview')) {
+      return [] as T[];
+    }
+    
+    return [] as T[];
   }
 };
 

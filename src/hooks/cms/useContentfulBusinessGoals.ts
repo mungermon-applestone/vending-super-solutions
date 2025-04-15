@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { CMSBusinessGoal } from '@/types/cms';
-import { ContentfulBusinessGoal, ContentfulFeature } from '@/types/contentful';
+import { ContentfulBusinessGoal } from '@/types/contentful';
 
 export function useContentfulBusinessGoals() {
   return useQuery({
@@ -12,7 +12,14 @@ export function useContentfulBusinessGoals() {
       try {
         const entries = await fetchContentfulEntries<ContentfulBusinessGoal>('businessGoal');
         
-        return entries.map(entry => ({
+        console.log('[useContentfulBusinessGoals] Raw entries:', entries);
+        
+        if (!entries || entries.length === 0) {
+          console.log('[useContentfulBusinessGoals] No entries found, returning empty array');
+          return [];
+        }
+        
+        const mappedEntries = entries.map(entry => ({
           id: entry.sys?.id,
           title: entry.fields.title,
           slug: entry.fields.slug,
@@ -24,7 +31,7 @@ export function useContentfulBusinessGoals() {
             url: `https:${entry.fields.image.fields?.file?.url}`,
             alt: entry.fields.image.fields?.title || entry.fields.title
           } : undefined,
-          benefits: entry.fields.benefits || [],
+          benefits: (entry.fields.benefits || []).map(benefit => String(benefit)),
           features: (entry.fields.features || []).map((feature: any) => ({
             id: feature.sys?.id,
             title: feature.fields?.title,
@@ -37,15 +44,22 @@ export function useContentfulBusinessGoals() {
             } : undefined
           }))
         })) as CMSBusinessGoal[];
+        
+        console.log('[useContentfulBusinessGoals] Mapped entries:', mappedEntries);
+        
+        return mappedEntries;
       } catch (error) {
         console.error('[useContentfulBusinessGoals] Error:', error);
         if (window.location.hostname.includes('lovable')) {
           // Return fallback data in preview environment
+          console.log('[useContentfulBusinessGoals] Returning empty array for preview environment');
           return [];
         }
         throw error;
       }
-    }
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false
   });
 }
 
@@ -79,7 +93,7 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
             url: `https:${entry.fields.image.fields?.file?.url}`,
             alt: entry.fields.image.fields?.title || entry.fields.title
           } : undefined,
-          benefits: entry.fields.benefits || [],
+          benefits: (entry.fields.benefits || []).map(benefit => String(benefit)),
           features: (entry.fields.features || []).map((feature: any) => ({
             id: feature.sys?.id,
             title: feature.fields?.title,
@@ -97,6 +111,8 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
         return null;
       }
     },
-    enabled: !!slug
+    enabled: !!slug,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false
   });
 }
