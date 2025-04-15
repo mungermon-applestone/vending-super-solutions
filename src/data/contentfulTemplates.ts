@@ -1,3 +1,4 @@
+
 import { ContentTypeTemplate, AVAILABLE_ICONS } from '@/types/contentful-admin';
 
 export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
