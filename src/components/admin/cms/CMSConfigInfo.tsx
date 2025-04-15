@@ -28,40 +28,44 @@ const CMSConfigInfo: React.FC = () => {
             </Badge>
           </div>
           
-          {cmsInfo.provider === 'Strapi' && (
+          {cmsInfo.provider === 'Contentful' && (
             <>
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1">
                   <Server className="h-4 w-4" />
-                  <span className="font-medium">API URL:</span>
+                  <span className="font-medium">Space ID:</span>
                 </span>
-                {cmsInfo.apiUrl ? (
-                  <span className="text-sm font-mono bg-muted px-2 py-1 rounded">
-                    {cmsInfo.apiUrl}
-                  </span>
-                ) : (
-                  <Badge variant="destructive" className="flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    Not Configured
-                  </Badge>
-                )}
+                <Badge variant="outline">
+                  Configured
+                </Badge>
               </div>
               
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-1">
                   <Key className="h-4 w-4" />
-                  <span className="font-medium">API Key:</span>
+                  <span className="font-medium">Delivery Token:</span>
                 </span>
-                {cmsInfo.apiKeyConfigured ? (
-                  <Badge variant="outline" className="text-green-600 border-green-600 flex items-center gap-1">
-                    <CheckCircle className="h-3 w-3" /> 
-                    Configured
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="text-amber-600 border-amber-600">
-                    Not Set
-                  </Badge>
-                )}
+                <Badge 
+                  variant="outline" 
+                  className="text-green-600 border-green-600 flex items-center gap-1"
+                >
+                  <CheckCircle className="h-3 w-3" /> 
+                  Configured
+                </Badge>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <Key className="h-4 w-4" />
+                  <span className="font-medium">Management Token:</span>
+                </span>
+                <Badge 
+                  variant="outline" 
+                  className="text-green-600 border-green-600 flex items-center gap-1"
+                >
+                  <CheckCircle className="h-3 w-3" /> 
+                  Configured
+                </Badge>
               </div>
             </>
           )}
