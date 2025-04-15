@@ -1,6 +1,7 @@
 
 import React, { ReactNode } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Star } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useContentfulBusinessGoal } from '@/hooks/cms/useContentfulBusinessGoals';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -72,10 +73,10 @@ const BusinessGoalDetailPage = () => {
   const icon = businessGoal?.icon ? (
     <MachineTypeIcon type={businessGoal.icon} className="text-white" />
   ) : (
-    <div className="h-6 w-6 bg-white rounded-full"></div>
+    <Star className="text-white h-6 w-6" />
   );
   
-  const imageUrl = businessGoal.image?.url || "https://via.placeholder.com/1200x800?text=Business+Goal+Image";
+  const imageUrl = businessGoal?.image?.url || "https://via.placeholder.com/1200x800?text=Business+Goal+Image";
   
   return (
     <Layout>
