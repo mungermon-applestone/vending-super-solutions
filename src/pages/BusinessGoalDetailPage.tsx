@@ -73,11 +73,15 @@ const BusinessGoalDetailPage = () => {
     <div className="h-6 w-6 bg-white rounded-full"></div>
   );
   
-  const renderContent = (content: any): ReactNode => {
+  // Function to safely convert any content to string representation
+  const renderContent = (content: any): string => {
     if (content === null || content === undefined) {
       return '';
     }
-    if (typeof content === 'string' || typeof content === 'number' || typeof content === 'boolean') {
+    if (typeof content === 'string') {
+      return content;
+    }
+    if (typeof content === 'number' || typeof content === 'boolean') {
       return String(content);
     }
     if (typeof content === 'object') {
@@ -105,7 +109,7 @@ const BusinessGoalDetailPage = () => {
                   <div key={feature.id} className="bg-gray-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
                     {feature.icon && (
                       <div className="mb-4 text-vending-blue">
-                        <MachineTypeIcon type={feature.icon} />
+                        <MachineTypeIcon type={String(feature.icon)} />
                       </div>
                     )}
                     <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
