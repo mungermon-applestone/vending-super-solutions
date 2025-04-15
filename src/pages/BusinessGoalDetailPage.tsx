@@ -1,14 +1,48 @@
 
 import React, { ReactNode } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star } from 'lucide-react';
+import { Star, Check, Shield, Server, Settings, Bell, Battery, ClipboardCheck, RefreshCcw, TrendingUp, PieChart, Map, UserCheck } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useContentfulBusinessGoal } from '@/hooks/cms/useContentfulBusinessGoals';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check as CheckIcon } from 'lucide-react';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
 import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
+
+// Function to get the icon component based on icon name from Contentful
+const getIconComponent = (iconName: string | undefined): ReactNode => {
+  if (!iconName) return <Star className="h-6 w-6" />;
+  
+  switch (iconName.toLowerCase()) {
+    case 'check':
+      return <Check className="h-6 w-6" />;
+    case 'shield':
+      return <Shield className="h-6 w-6" />;
+    case 'server':
+      return <Server className="h-6 w-6" />;
+    case 'settings':
+      return <Settings className="h-6 w-6" />;
+    case 'bell':
+      return <Bell className="h-6 w-6" />;
+    case 'battery':
+      return <Battery className="h-6 w-6" />;
+    case 'clipboard-check':
+      return <ClipboardCheck className="h-6 w-6" />;
+    case 'refresh-ccw':
+      return <RefreshCcw className="h-6 w-6" />;
+    case 'trending-up':
+      return <TrendingUp className="h-6 w-6" />;
+    case 'pie-chart':
+      return <PieChart className="h-6 w-6" />;
+    case 'map':
+      return <Map className="h-6 w-6" />;
+    case 'user-check':
+      return <UserCheck className="h-6 w-6" />;
+    default:
+      return <Star className="h-6 w-6" />;
+  }
+};
 
 const BusinessGoalDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -97,7 +131,7 @@ const BusinessGoalDetailPage = () => {
                   <div key={feature.id} className="bg-gray-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
                     {feature.icon && (
                       <div className="mb-4 text-vending-blue">
-                        <MachineTypeIcon type={feature.icon} />
+                        {getIconComponent(feature.icon)}
                       </div>
                     )}
                     <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
@@ -119,7 +153,7 @@ const BusinessGoalDetailPage = () => {
                 {businessGoal.benefits.map((benefit, index) => (
                   <div key={index} className="bg-white rounded-lg p-6 shadow-sm flex items-start">
                     <div className="bg-vending-teal rounded-full p-2 mr-4 text-white flex-shrink-0">
-                      <Check className="h-4 w-4" />
+                      <CheckIcon className="h-4 w-4" />
                     </div>
                     <p className="text-gray-800">{String(benefit)}</p>
                   </div>
