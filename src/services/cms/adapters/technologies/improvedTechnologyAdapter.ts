@@ -1,85 +1,209 @@
-
-import { CMSTechnology, QueryOptions } from '@/types/cms';
+import { createClient } from '@supabase/supabase-js';
 import { TechnologyAdapter, TechnologyCreateInput, TechnologyUpdateInput } from './types';
-import { BaseCmsAdapter, createBaseCmsAdapter } from '../baseCmsAdapter';
-import { ContentProviderConfig, ContentProviderType } from '../types';
+import { CMSTechnology, CMSTechnologySection, CMSTechnologyFeature, CMSTechnologyFeatureItem } from '@/types/cms';
 import { supabase } from '@/integrations/supabase/client';
+import { transformTechnologyData } from './supabase';
+import { handleCMSError } from '@/services/cms/utils/errorHandling';
 
 /**
- * Extended technology adapter that handles relationships between
- * technologies, sections, features, and items
+ * Improved adapter for Technology content type with better error handling
+ * and more reliable data processing
  */
-export class ImprovedTechnologyAdapter extends BaseCmsAdapter<CMSTechnology, TechnologyCreateInput, TechnologyUpdateInput> implements TechnologyAdapter {
-  constructor(config: ContentProviderConfig) {
-    super('technologies', config);
-  }
-  
+export const improvedTechnologyAdapter: TechnologyAdapter = {
   /**
-   * Override getAll to include section relationships
+   * Get all technologies from Supabase
    */
-  async getAll(options?: QueryOptions): Promise<CMSTechnology[]> {
+  async getAll(options = {}) {
     try {
-      console.log(`[technologies:getAll] Fetching technologies with options:`, options);
+      console.log('[improvedTechnologyAdapter] Fetching all technologies');
       
-      // Get all technologies first
-      const technologies = await super.getAll(options);
+      // Query technologies table
+      const { data: technologiesData, error: technologiesError } = await supabase
+        .from('technologies')
+        .select('*')
+        .eq('visible', true)
+        .order('created_at', { ascending: false });
       
-      // Enhance with sections and other related data
-      const enhancedTechnologies = await Promise.all(
-        technologies.map(async (tech) => this.enhanceTechnologyWithRelations(tech))
-      );
+      if (technologiesError) throw technologiesError;
       
-      return enhancedTechnologies;
+      console.log(`[improvedTechnologyAdapter] Fetched ${technologiesData.length} technologies`);
+      
+      // If no technologies found, return empty array
+      if (!technologiesData || technologiesData.length === 0) {
+        return [];
+      }
+      
+      // Get all technology IDs to fetch their sections
+      const technologyIds = technologiesData.map(tech => tech.id);
+      
+      // Fetch all sections for these technologies
+      const { data: sectionsData, error: sectionsError } = await supabase
+        .from('technology_sections')
+        .select('*, features:technology_features(*)')
+        .in('technology_id', technologyIds)
+        .order('display_order', { ascending: true });
+      
+      if (sectionsError) throw sectionsError;
+      
+      console.log(`[improvedTechnologyAdapter] Fetched ${sectionsData?.length || 0} sections`);
+      
+      // For each feature, fetch its items
+      const featureIds = sectionsData
+        ?.flatMap(section => section.features || [])
+        .map(feature => feature.id)
+        .filter(Boolean) || [];
+      
+      let featureItems = [];
+      
+      if (featureIds.length > 0) {
+        const { data: itemsData, error: itemsError } = await supabase
+          .from('technology_feature_items')
+          .select('*')
+          .in('feature_id', featureIds)
+          .order('display_order', { ascending: true });
+        
+        if (itemsError) throw itemsError;
+        
+        featureItems = itemsData || [];
+        console.log(`[improvedTechnologyAdapter] Fetched ${featureItems.length} feature items`);
+      }
+      
+      // Fetch all images for these technologies and their sections
+      const { data: imagesData, error: imagesError } = await supabase
+        .from('technology_images')
+        .select('*')
+        .in('technology_id', technologyIds)
+        .order('display_order', { ascending: true });
+      
+      if (imagesError) throw imagesError;
+      
+      console.log(`[improvedTechnologyAdapter] Fetched ${imagesData?.length || 0} images`);
+      
+      // Map feature items to their features
+      sectionsData?.forEach(section => {
+        if (section.features) {
+          section.features.forEach(feature => {
+            feature.items = featureItems.filter(item => item.feature_id === feature.id);
+          });
+        }
+      });
+      
+      // Map sections and images to their technologies
+      const technologies: CMSTechnology[] = technologiesData.map(tech => {
+        const techSections = sectionsData?.filter(section => section.technology_id === tech.id) || [];
+        const techImages = imagesData?.filter(image => image.technology_id === tech.id) || [];
+        
+        return {
+          ...tech,
+          sections: techSections,
+          images: techImages
+        };
+      });
+      
+      console.log('[improvedTechnologyAdapter] Returning mapped technologies:', technologies);
+      
+      return technologies;
     } catch (error) {
-      console.error(`[technologies:getAll] Error:`, error);
-      throw error;
+      console.error('[improvedTechnologyAdapter.getAll] Error:', error);
+      throw handleCMSError(error, 'fetch', 'technologies');
     }
-  }
+  },
   
   /**
-   * Override getBySlug to include section relationships
+   * Get a technology by slug
    */
-  async getBySlug(slug: string): Promise<CMSTechnology | null> {
+  async getBySlug(slug) {
     try {
-      const technology = await super.getBySlug(slug);
+      console.log(`[improvedTechnologyAdapter] Fetching technology by slug: ${slug}`);
       
-      if (!technology) {
+      const { data: techData, error: techError } = await supabase
+        .from('technologies')
+        .select('*')
+        .eq('slug', slug)
+        .eq('visible', true)
+        .single();
+      
+      if (techError) {
+        if (techError.code === 'PGRST116') {
+          console.log(`[improvedTechnologyAdapter] Technology with slug "${slug}" not found`);
+          return null;
+        }
+        throw techError;
+      }
+      
+      if (!techData) {
         return null;
       }
       
-      // Enhance with sections and other related data
-      return await this.enhanceTechnologyWithRelations(technology);
-    } catch (error) {
-      console.error(`[technologies:getBySlug] Error:`, error);
-      throw error;
-    }
-  }
-  
-  /**
-   * Override getById to include section relationships
-   */
-  async getById(id: string): Promise<CMSTechnology | null> {
-    try {
-      const technology = await super.getById(id);
+      // Fetch sections for this technology
+      const { data: sectionsData, error: sectionsError } = await supabase
+        .from('technology_sections')
+        .select('*, features:technology_features(*)')
+        .eq('technology_id', techData.id)
+        .order('display_order', { ascending: true });
       
-      if (!technology) {
-        return null;
+      if (sectionsError) throw sectionsError;
+      
+      // For each feature, fetch its items
+      const featureIds = sectionsData
+        ?.flatMap(section => section.features || [])
+        .map(feature => feature.id)
+        .filter(Boolean) || [];
+      
+      let featureItems = [];
+      
+      if (featureIds.length > 0) {
+        const { data: itemsData, error: itemsError } = await supabase
+          .from('technology_feature_items')
+          .select('*')
+          .in('feature_id', featureIds)
+          .order('display_order', { ascending: true });
+        
+        if (itemsError) throw itemsError;
+        
+        featureItems = itemsData || [];
       }
       
-      // Enhance with sections and other related data
-      return await this.enhanceTechnologyWithRelations(technology);
+      // Fetch images for this technology
+      const { data: imagesData, error: imagesError } = await supabase
+        .from('technology_images')
+        .select('*')
+        .eq('technology_id', techData.id)
+        .order('display_order', { ascending: true });
+      
+      if (imagesError) throw imagesError;
+      
+      // Map feature items to their features
+      sectionsData?.forEach(section => {
+        if (section.features) {
+          section.features.forEach(feature => {
+            feature.items = featureItems.filter(item => item.feature_id === feature.id);
+          });
+        }
+      });
+      
+      // Assemble the complete technology object
+      const technology: CMSTechnology = {
+        ...techData,
+        sections: sectionsData || [],
+        images: imagesData || []
+      };
+      
+      console.log(`[improvedTechnologyAdapter] Returning technology:`, technology);
+      
+      return technology;
     } catch (error) {
-      console.error(`[technologies:getById] Error:`, error);
-      throw error;
+      console.error(`[improvedTechnologyAdapter.getBySlug] Error fetching technology by slug "${slug}":`, error);
+      return null;
     }
-  }
+  },
   
   /**
-   * Enhanced create method that handles related data
+   * Create a new technology
    */
-  async create(data: TechnologyCreateInput): Promise<CMSTechnology> {
+  async create(data) {
     try {
-      console.log('[technologies:create] Creating new technology with data:', data);
+      console.log('[improvedTechnologyAdapter:create] Creating new technology with data:', data);
       
       // Extract sections for separate insertion
       const { sections, ...techData } = data;
@@ -92,7 +216,7 @@ export class ImprovedTechnologyAdapter extends BaseCmsAdapter<CMSTechnology, Tec
         .single();
         
       if (error) {
-        console.error('[technologies:create] Error creating technology:', error);
+        console.error('[improvedTechnologyAdapter:create] Error creating technology:', error);
         throw error;
       }
       
@@ -104,17 +228,17 @@ export class ImprovedTechnologyAdapter extends BaseCmsAdapter<CMSTechnology, Tec
       // Return the complete technology with relations
       return await this.getById(technology.id) as CMSTechnology;
     } catch (error) {
-      console.error('[technologies:create] Error:', error);
+      console.error('[improvedTechnologyAdapter:create] Error:', error);
       throw error;
     }
-  }
+  },
   
   /**
-   * Enhanced update method that handles related data
+   * Update an existing technology
    */
-  async update(id: string, data: TechnologyUpdateInput): Promise<CMSTechnology> {
+  async update(id, data) {
     try {
-      console.log(`[technologies:update] Updating technology ${id} with data:`, data);
+      console.log(`[improvedTechnologyAdapter:update] Updating technology ${id} with data:`, data);
       
       // Extract sections for separate processing
       const { sections, ...techData } = data;
@@ -129,7 +253,7 @@ export class ImprovedTechnologyAdapter extends BaseCmsAdapter<CMSTechnology, Tec
         .eq('id', id);
         
       if (error) {
-        console.error('[technologies:update] Error updating technology:', error);
+        console.error('[improvedTechnologyAdapter:update] Error updating technology:', error);
         throw error;
       }
       
@@ -141,17 +265,17 @@ export class ImprovedTechnologyAdapter extends BaseCmsAdapter<CMSTechnology, Tec
       // Return the complete technology with relations
       return await this.getById(id) as CMSTechnology;
     } catch (error) {
-      console.error('[technologies:update] Error:', error);
+      console.error('[improvedTechnologyAdapter:update] Error:', error);
       throw error;
     }
-  }
+  },
   
   /**
-   * Override delete method to handle cascading deletion
+   * Delete a technology
    */
-  async delete(id: string): Promise<boolean> {
+  async delete(id) {
     try {
-      console.log(`[technologies:delete] Deleting technology ${id} and related data`);
+      console.log(`[improvedTechnologyAdapter:delete] Deleting technology ${id} and related data`);
       
       // First, get all sections for this technology
       const { data: sections } = await supabase
@@ -196,294 +320,131 @@ export class ImprovedTechnologyAdapter extends BaseCmsAdapter<CMSTechnology, Tec
         .eq('id', id);
         
       if (error) {
-        console.error('[technologies:delete] Error deleting technology:', error);
+        console.error('[improvedTechnologyAdapter:delete] Error deleting technology:', error);
         throw error;
       }
       
       return true;
     } catch (error) {
-      console.error('[technologies:delete] Error:', error);
+      console.error('[improvedTechnologyAdapter:delete] Error:', error);
       throw error;
     }
-  }
+  },
   
   /**
-   * Private helper methods
+   * Get a technology by ID
    */
-  
-  /**
-   * Enhance a technology with its related sections, features and items
-   */
-  private async enhanceTechnologyWithRelations(technology: CMSTechnology): Promise<CMSTechnology> {
-    // Fetch sections
-    const { data: sections } = await supabase
-      .from('technology_sections')
-      .select('*')
-      .eq('technology_id', technology.id)
-      .order('display_order', { ascending: true });
+  async getById(id) {
+    try {
+      const technology = await supabase
+        .from('technologies')
+        .select('*')
+        .eq('id', id)
+        .single();
       
-    // For each section, fetch features
-    const sectionsWithFeatures = await Promise.all(
-      (sections || []).map(async (section) => {
-        const { data: features } = await supabase
-          .from('technology_features')
-          .select('*')
-          .eq('section_id', section.id)
-          .order('display_order', { ascending: true });
-          
-        // For each feature, fetch items
-        const featuresWithItems = await Promise.all(
-          (features || []).map(async (feature) => {
-            const { data: items } = await supabase
-              .from('technology_feature_items')
-              .select('*')
-              .eq('feature_id', feature.id)
-              .order('display_order', { ascending: true });
-              
-            return { ...feature, items: items || [] };
-          })
-        );
-        
-        return { ...section, features: featuresWithItems || [] };
-      })
-    );
-    
-    return { 
-      ...technology,
-      sections: sectionsWithFeatures
-    };
-  }
-  
-  /**
-   * Process sections for a technology (create, update, delete)
-   */
-  private async processSections(technologyId: string, sections: any[]): Promise<void> {
-    // Get existing sections
-    const { data: existingSections } = await supabase
-      .from('technology_sections')
-      .select('id')
-      .eq('technology_id', technologyId);
-      
-    const existingSectionIds = (existingSections || []).map(section => section.id);
-    const updatedSectionIds: string[] = [];
-    
-    // Process each section
-    for (let i = 0; i < sections.length; i++) {
-      const section = sections[i];
-      const { features, ...sectionData } = section;
-      
-      // Process the section (create or update)
-      let sectionId: string;
-      
-      if (section.id) {
-        // Update existing section
-        await supabase
-          .from('technology_sections')
-          .update({
-            ...sectionData,
-            display_order: i,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', section.id);
-          
-        sectionId = section.id;
-        updatedSectionIds.push(section.id);
-      } else {
-        // Create new section
-        const { data: newSection } = await supabase
-          .from('technology_sections')
-          .insert({
-            ...sectionData,
-            technology_id: technologyId,
-            display_order: i
-          })
-          .select()
-          .single();
-          
-        sectionId = newSection.id;
-        updatedSectionIds.push(newSection.id);
+      if (!technology) {
+        return null;
       }
       
-      // Process features if provided
-      if (features && features.length > 0) {
-        await this.processFeatures(sectionId, features);
-      }
-    }
-    
-    // Delete sections that weren't updated
-    const sectionsToDelete = existingSectionIds.filter(id => !updatedSectionIds.includes(id));
-    if (sectionsToDelete.length > 0) {
-      await supabase
+      // Fetch sections for this technology
+      const { data: sectionsData, error: sectionsError } = await supabase
         .from('technology_sections')
-        .delete()
-        .in('id', sectionsToDelete);
+        .select('*, features:technology_features(*)')
+        .eq('technology_id', technology.id)
+        .order('display_order', { ascending: true });
+      
+      if (sectionsError) throw sectionsError;
+      
+      // For each feature, fetch its items
+      const featureIds = sectionsData
+        ?.flatMap(section => section.features || [])
+        .map(feature => feature.id)
+        .filter(Boolean) || [];
+      
+      let featureItems = [];
+      
+      if (featureIds.length > 0) {
+        const { data: itemsData, error: itemsError } = await supabase
+          .from('technology_feature_items')
+          .select('*')
+          .in('feature_id', featureIds)
+          .order('display_order', { ascending: true });
+        
+        if (itemsError) throw itemsError;
+        
+        featureItems = itemsData || [];
+      }
+      
+      // Fetch images for this technology
+      const { data: imagesData, error: imagesError } = await supabase
+        .from('technology_images')
+        .select('*')
+        .eq('technology_id', technology.id)
+        .order('display_order', { ascending: true });
+      
+      if (imagesError) throw imagesError;
+      
+      // Map feature items to their features
+      sectionsData?.forEach(section => {
+        if (section.features) {
+          section.features.forEach(feature => {
+            feature.items = featureItems.filter(item => item.feature_id === feature.id);
+          });
+        }
+      });
+      
+      // Assemble the complete technology object
+      const technology: CMSTechnology = {
+        ...technology,
+        sections: sectionsData || [],
+        images: imagesData || []
+      };
+      
+      return technology;
+    } catch (error) {
+      console.error('[improvedTechnologyAdapter:getById] Error:', error);
+      throw error;
     }
-  }
+  },
   
   /**
-   * Process features for a section (create, update, delete)
+   * Clone a technology
    */
-  private async processFeatures(sectionId: string, features: any[]): Promise<void> {
-    // Get existing features
-    const { data: existingFeatures } = await supabase
-      .from('technology_features')
-      .select('id')
-      .eq('section_id', sectionId);
+  async clone(id) {
+    try {
+      console.log('[improvedTechnologyAdapter:clone] Cloning technology with id:', id);
       
-    const existingFeatureIds = (existingFeatures || []).map(feature => feature.id);
-    const updatedFeatureIds: string[] = [];
-    
-    // Process each feature
-    for (let i = 0; i < features.length; i++) {
-      const feature = features[i];
-      const { items, ...featureData } = feature;
+      const { data: techData, error: techError } = await supabase
+        .from('technologies')
+        .select('*')
+        .eq('id', id)
+        .single();
       
-      // Process the feature (create or update)
-      let featureId: string;
-      
-      if (feature.id) {
-        // Update existing feature
-        await supabase
-          .from('technology_features')
-          .update({
-            ...featureData,
-            display_order: i,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', feature.id);
-          
-        featureId = feature.id;
-        updatedFeatureIds.push(feature.id);
-      } else {
-        // Create new feature
-        const { data: newFeature } = await supabase
-          .from('technology_features')
-          .insert({
-            ...featureData,
-            section_id: sectionId,
-            display_order: i
-          })
-          .select()
-          .single();
-          
-        featureId = newFeature.id;
-        updatedFeatureIds.push(newFeature.id);
+      if (techError) {
+        console.error('[improvedTechnologyAdapter:clone] Error cloning technology:', techError);
+        throw techError;
       }
       
-      // Process items if provided
-      if (items && items.length > 0) {
-        await this.processFeatureItems(featureId, items);
+      if (!techData) {
+        return null;
       }
-    }
-    
-    // Delete features that weren't updated
-    const featuresToDelete = existingFeatureIds.filter(id => !updatedFeatureIds.includes(id));
-    if (featuresToDelete.length > 0) {
-      await supabase
-        .from('technology_features')
-        .delete()
-        .in('id', featuresToDelete);
-    }
-  }
-  
-  /**
-   * Process items for a feature (create, update, delete)
-   */
-  private async processFeatureItems(featureId: string, items: any[]): Promise<void> {
-    // Get existing items
-    const { data: existingItems } = await supabase
-      .from('technology_feature_items')
-      .select('id')
-      .eq('feature_id', featureId);
       
-    const existingItemIds = (existingItems || []).map(item => item.id);
-    const updatedItemIds: string[] = [];
-    
-    // Process each item
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
+      // Create a new technology with the same data
+      const { data: clonedTech, error: clonedTechError } = await supabase
+        .from('technologies')
+        .insert(techData)
+        .select()
+        .single();
       
-      if (item.id) {
-        // Update existing item
-        await supabase
-          .from('technology_feature_items')
-          .update({
-            ...item,
-            display_order: i,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', item.id);
-          
-        updatedItemIds.push(item.id);
-      } else {
-        // Create new item
-        const { data: newItem } = await supabase
-          .from('technology_feature_items')
-          .insert({
-            ...item,
-            feature_id: featureId,
-            display_order: i
-          })
-          .select()
-          .single();
-          
-        updatedItemIds.push(newItem.id);
+      if (clonedTechError) {
+        console.error('[improvedTechnologyAdapter:clone] Error creating cloned technology:', clonedTechError);
+        throw clonedTechError;
       }
+      
+      return clonedTech;
+    } catch (error) {
+      console.error('[improvedTechnologyAdapter:clone] Error:', error);
+      throw error;
     }
-    
-    // Delete items that weren't updated
-    const itemsToDelete = existingItemIds.filter(id => !updatedItemIds.includes(id));
-    if (itemsToDelete.length > 0) {
-      await supabase
-        .from('technology_feature_items')
-        .delete()
-        .in('id', itemsToDelete);
-    }
-  }
-}
-
-/**
- * Create a factory function for the improved technology adapter
- */
-export const createImprovedTechnologyAdapter = (
-  config: ContentProviderConfig
-): TechnologyAdapter => {
-  return new ImprovedTechnologyAdapter(config);
-};
-
-export const improvedTechnologyAdapter: TechnologyAdapter = {
-  getAll: async (options?: QueryOptions) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
-    return await adapter.getAll(options);
-  },
-  
-  getBySlug: async (slug: string) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
-    return await adapter.getBySlug(slug);
-  },
-  
-  getById: async (id: string) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
-    return await adapter.getById(id);
-  },
-  
-  create: async (data: TechnologyCreateInput) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
-    return await adapter.create(data);
-  },
-  
-  update: async (id: string, data: TechnologyUpdateInput) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
-    return await adapter.update(id, data);
-  },
-  
-  delete: async (id: string) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
-    return await adapter.delete(id);
-  },
-  
-  clone: async (id: string) => {
-    const adapter = new ImprovedTechnologyAdapter({ type: ContentProviderType.SUPABASE });
-    return await adapter.clone(id);
   }
 };

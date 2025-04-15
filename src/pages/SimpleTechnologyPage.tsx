@@ -9,6 +9,7 @@ import { useIsFetching } from '@tanstack/react-query';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TechFeature } from '@/types/technology';
+import { toast } from 'sonner';
 
 // Helper function to transform CMSTechnology data to the format expected by TechnologySection
 const mapTechnologyData = (tech) => {
@@ -27,11 +28,15 @@ const mapTechnologyData = (tech) => {
     tech.sections?.[0]?.images?.[0]?.url || 
     'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789';
 
+  // Extract bulletPoints from sections if available
+  const bulletPoints = tech.sections?.[0]?.bulletPoints || [];
+
   return {
     id: tech.id,
     title: tech.title,
     summary: tech.description, // Changed from description to summary
     features: features,
+    bulletPoints: bulletPoints,
     image: imageUrl
   };
 };
@@ -42,6 +47,10 @@ const SimpleTechnologyPage = () => {
 
   // Transform technology data for rendering
   const transformedTechnologies = technologies.map(mapTechnologyData);
+  
+  // Debug logging to inspect the data
+  console.log('Technologies from CMS:', technologies);
+  console.log('Transformed technologies:', transformedTechnologies);
 
   return (
     <Layout>
@@ -81,6 +90,9 @@ const SimpleTechnologyPage = () => {
           <Alert variant="destructive">
             <AlertDescription>
               We're having trouble loading technology information. Please try again later.
+              <button onClick={() => toast.info("Attempting to refresh...")} className="ml-2 underline">
+                Refresh
+              </button>
             </AlertDescription>
           </Alert>
         </div>
@@ -94,7 +106,8 @@ const SimpleTechnologyPage = () => {
               key={tech.id}
               id={tech.id}
               title={tech.title}
-              summary={tech.summary} // Changed from description to summary
+              summary={tech.summary}
+              bulletPoints={tech.bulletPoints}
               image={tech.image}
               index={index}
             />

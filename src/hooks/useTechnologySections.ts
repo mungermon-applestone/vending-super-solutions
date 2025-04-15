@@ -2,7 +2,7 @@
 import { CMSTechnology } from '@/types/cms';
 import { useCMSQuery } from './useCMSQuery';
 import { improvedTechnologyAdapter } from '@/services/cms/adapters/technologies/improvedTechnologyAdapter';
-import { useQuery } from '@tanstack/react-query'; // Add this import for useQuery
+import { useQuery } from '@tanstack/react-query';
 
 type UseTechnologySectionsOptions = {
   slug?: string;
@@ -49,6 +49,7 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
     console.log('[useTechnologySections] Fetching all technologies');
     try {
       const technologies = await improvedTechnologyAdapter.getAll();
+      console.log('[useTechnologySections] Retrieved technologies:', technologies);
       return technologies;
     } catch (error) {
       console.error('[useTechnologySections] Error fetching technologies:', error);
