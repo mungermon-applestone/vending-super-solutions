@@ -8,6 +8,7 @@ import { useContentfulTechnology } from '@/hooks/cms/useContentfulTechnology';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import CTASection from '@/components/common/CTASection';
+import { CMSImage } from '@/types/cms';
 
 const SimpleTechnologyPage = () => {
   const { data: technologies = [], isLoading, error } = useContentfulTechnology();
@@ -55,26 +56,45 @@ const SimpleTechnologyPage = () => {
     );
   }
 
+  // Helper function to safely get image URL
+  const getImageUrl = (image?: CMSImage | string): string => {
+    if (!image) return '';
+    if (typeof image === 'string') return image;
+    return image.url;
+  };
+  
+  // Helper function to safely get image alt text
+  const getImageAlt = (image?: CMSImage | string, fallback?: string): string => {
+    if (!image) return fallback || '';
+    if (typeof image === 'string') return fallback || '';
+    return image.alt || fallback || '';
+  };
+
   return (
     <Layout>
       <TechnologyHeroSimple
         title={mainTechnology.title}
         description={mainTechnology.description}
-        imageUrl={mainTechnology.image?.url}
-        imageAlt={mainTechnology.image?.alt || mainTechnology.title}
+        imageUrl={getImageUrl(mainTechnology.image)}
+        imageAlt={getImageAlt(mainTechnology.image, mainTechnology.title)}
       />
       
-      {mainTechnology.sections?.map((section, index) => (
-        <TechnologySection
-          key={section.id}
-          id={section.id}
-          title={section.title}
-          summary={section.description || ''}
-          bulletPoints={section.bulletPoints || []}
-          image={section.sectionImage?.fields?.file?.url || ''}
-          index={index}
-        />
-      ))}
+      {mainTechnology.sections?.map((section, index) => {
+        // Get image URL safely
+        const sectionImageUrl = section.sectionImage?.url || '';
+
+        return (
+          <TechnologySection
+            key={section.id}
+            id={section.id}
+            title={section.title}
+            summary={section.description || ''}
+            bulletPoints={section.bulletPoints || []}
+            image={sectionImageUrl}
+            index={index}
+          />
+        );
+      })}
       
       <CTASection />
       <InquiryForm title="Technology Solutions" />

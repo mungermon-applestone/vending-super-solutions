@@ -1,7 +1,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { TechnologyAdapter, TechnologyCreateInput, TechnologyUpdateInput } from './types';
-import { CMSTechnology, CMSTechnologySection, CMSTechnologyFeature, CMSTechnologyFeatureItem } from '@/types/cms';
+import { CMSTechnology, CMSTechnologySection, CMSTechnologyFeature, CMSImage } from '@/types/cms';
 import { supabase } from '@/integrations/supabase/client';
 import { handleCMSError } from '@/services/cms/utils/errorHandling';
 
@@ -32,6 +32,7 @@ export const improvedTechnologyAdapter: TechnologyAdapter = {
         visible: tech.visible,
         sections: [],
         image: tech.image_url ? {
+          id: tech.id + '-image', // Generate an ID for the image
           url: tech.image_url,
           alt: tech.image_alt || tech.title
         } : undefined
@@ -67,6 +68,7 @@ export const improvedTechnologyAdapter: TechnologyAdapter = {
         visible: tech.visible,
         sections: [],
         image: tech.image_url ? {
+          id: tech.id + '-image',
           url: tech.image_url,
           alt: tech.image_alt || tech.title
         } : undefined
@@ -88,8 +90,8 @@ export const improvedTechnologyAdapter: TechnologyAdapter = {
           slug: data.slug,
           description: data.description,
           visible: data.visible,
-          image_url: data.image?.url,
-          image_alt: data.image?.alt
+          image_url: data.image_url,
+          image_alt: data.image_alt
         })
         .select()
         .single();
@@ -98,7 +100,7 @@ export const improvedTechnologyAdapter: TechnologyAdapter = {
         throw error || new Error('Failed to create technology');
       }
       
-      return {
+      const technology: CMSTechnology = {
         id: createdTech.id,
         title: createdTech.title,
         slug: createdTech.slug,
@@ -106,10 +108,13 @@ export const improvedTechnologyAdapter: TechnologyAdapter = {
         visible: createdTech.visible,
         sections: [],
         image: createdTech.image_url ? {
+          id: createdTech.id + '-image',
           url: createdTech.image_url,
           alt: createdTech.image_alt || createdTech.title
         } : undefined
       };
+      
+      return technology;
     } catch (error) {
       console.error('[improvedTechnologyAdapter:create] Error:', error);
       throw error;
@@ -125,8 +130,8 @@ export const improvedTechnologyAdapter: TechnologyAdapter = {
           slug: data.slug,
           description: data.description,
           visible: data.visible,
-          image_url: data.image?.url,
-          image_alt: data.image?.alt,
+          image_url: data.image_url,
+          image_alt: data.image_alt,
           updated_at: new Date().toISOString()
         })
         .eq('id', id)
@@ -137,7 +142,7 @@ export const improvedTechnologyAdapter: TechnologyAdapter = {
         throw error || new Error('Failed to update technology');
       }
       
-      return {
+      const technology: CMSTechnology = {
         id: updatedTech.id,
         title: updatedTech.title,
         slug: updatedTech.slug,
@@ -145,10 +150,13 @@ export const improvedTechnologyAdapter: TechnologyAdapter = {
         visible: updatedTech.visible,
         sections: [],
         image: updatedTech.image_url ? {
+          id: updatedTech.id + '-image',
           url: updatedTech.image_url,
           alt: updatedTech.image_alt || updatedTech.title
         } : undefined
       };
+      
+      return technology;
     } catch (error) {
       console.error('[improvedTechnologyAdapter:update] Error:', error);
       throw error;
@@ -181,12 +189,22 @@ export const improvedTechnologyAdapter: TechnologyAdapter = {
         throw new Error('Technology to clone not found');
       }
       
+      // Extract image information for the clone
+      const imageUrl = originalTech.image && typeof originalTech.image !== 'string' 
+        ? originalTech.image.url 
+        : undefined;
+        
+      const imageAlt = originalTech.image && typeof originalTech.image !== 'string'
+        ? originalTech.image.alt
+        : undefined;
+        
       const newTech = await this.create({
         title: `${originalTech.title} (Copy)`,
         slug: `${originalTech.slug}-copy-${Math.floor(Date.now() / 1000)}`,
         description: originalTech.description,
         visible: originalTech.visible,
-        image: originalTech.image
+        image_url: imageUrl,
+        image_alt: imageAlt
       });
       
       return newTech;
@@ -208,7 +226,7 @@ export const improvedTechnologyAdapter: TechnologyAdapter = {
         return null;
       }
       
-      return {
+      const technology: CMSTechnology = {
         id: tech.id,
         title: tech.title,
         slug: tech.slug,
@@ -216,10 +234,13 @@ export const improvedTechnologyAdapter: TechnologyAdapter = {
         visible: tech.visible,
         sections: [],
         image: tech.image_url ? {
+          id: tech.id + '-image',
           url: tech.image_url,
           alt: tech.image_alt || tech.title
         } : undefined
       };
+      
+      return technology;
     } catch (error) {
       console.error('[improvedTechnologyAdapter:getById] Error:', error);
       return null;
