@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import CTASection from '@/components/common/CTASection';
 import useTechnologySections from '@/hooks/useTechnologySections';
+import { CMSImage } from '@/types/cms';
 
 const SimpleTechnologyPage = () => {
   // Use the custom hook to fetch technology data
@@ -19,6 +20,24 @@ const SimpleTechnologyPage = () => {
   console.log('Technologies from hook:', technologies);
   console.log('Main technology:', mainTechnology);
   
+  // Helper function to safely get image URL and alt
+  const getImageProps = (image: string | CMSImage | undefined): { url: string; alt: string } => {
+    if (!image) return { url: '', alt: '' };
+    
+    if (typeof image === 'string') {
+      return { 
+        url: image, 
+        alt: 'Technology image' 
+      };
+    }
+    
+    // If it's a CMSImage object
+    return {
+      url: typeof image === 'string' ? image : (image.url || ''),
+      alt: typeof image === 'string' ? 'Technology image' : (image.alt || 'Technology image')
+    };
+  };
+
   if (isLoading) {
     return (
       <Layout>
@@ -59,30 +78,18 @@ const SimpleTechnologyPage = () => {
     );
   }
 
-  // Helper function to safely get image URL
-  const getImageUrl = (image: any): string => {
-    if (!image) return '';
-    
-    if (typeof image === 'string') {
-      return image;
-    }
-    
-    if (image.url) {
-      return image.url;
-    }
-    
-    return '';
-  };
-
   console.log('Sections available:', mainTechnology.sections);
+  
+  // Get hero image props
+  const heroImageProps = getImageProps(mainTechnology.image);
   
   return (
     <Layout>
       <TechnologyHeroSimple
         title={mainTechnology.title}
         description={mainTechnology.description}
-        imageUrl={getImageUrl(mainTechnology.image)}
-        imageAlt={mainTechnology.image?.alt || mainTechnology.title}
+        imageUrl={heroImageProps.url}
+        imageAlt={heroImageProps.alt}
       />
       
       {mainTechnology.sections && mainTechnology.sections.length > 0 ? (
@@ -90,8 +97,8 @@ const SimpleTechnologyPage = () => {
           {mainTechnology.sections.map((section, index) => {
             console.log('Rendering section:', section);
             
-            // Get section image URL safely
-            const sectionImageUrl = getImageUrl(section.sectionImage);
+            // Get section image props
+            const sectionImageProps = getImageProps(section.sectionImage || section.image);
             
             return (
               <TechnologySection
@@ -100,7 +107,7 @@ const SimpleTechnologyPage = () => {
                 title={section.title || ''}
                 summary={section.summary || section.description || ''}
                 bulletPoints={section.bulletPoints || []}
-                image={sectionImageUrl}
+                image={sectionImageProps.url}
                 index={index}
               />
             );
