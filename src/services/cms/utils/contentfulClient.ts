@@ -20,6 +20,12 @@ export const getContentfulClient = async () => {
     
     if (!config || !config.space_id || !config.delivery_token) {
       console.error('[getContentfulClient] Missing Contentful configuration - ensure both Space ID and Delivery Token are set');
+      if (config) {
+        console.warn('[getContentfulClient] Config found but missing required fields:', { 
+          hasSpaceId: !!config.space_id, 
+          hasDeliveryToken: !!config.delivery_token 
+        });
+      }
       return null;
     }
     
@@ -29,11 +35,18 @@ export const getContentfulClient = async () => {
       environment: config.environment_id || 'master',
     });
     
+    console.log('[getContentfulClient] Successfully created Contentful client');
     return contentfulClient;
   } catch (error) {
     console.error('[getContentfulClient] Error creating Contentful client:', error);
     return null;
   }
+};
+
+// Add a function to reset the client - useful when config changes
+export const resetContentfulClient = () => {
+  console.log('[contentfulClient] Resetting Contentful client');
+  contentfulClient = null;
 };
 
 /**
@@ -43,6 +56,11 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
   try {
     console.log(`[fetchContentfulEntries] Fetching entries for content type: ${contentType}`);
     const client = await getContentfulClient();
+    
+    if (!client) {
+      console.error('[fetchContentfulEntries] Failed to get Contentful client');
+      return [];
+    }
     
     const query = {
       content_type: contentType,
@@ -69,6 +87,11 @@ export const fetchContentfulEntry = async <T>(entryId: string): Promise<T | null
   try {
     console.log(`[fetchContentfulEntry] Fetching entry with ID: ${entryId}`);
     const client = await getContentfulClient();
+    
+    if (!client) {
+      console.error('[fetchContentfulEntry] Failed to get Contentful client');
+      return null;
+    }
     
     const entry = await client.getEntry(entryId);
     

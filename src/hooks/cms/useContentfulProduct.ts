@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { CMSProductType } from '@/types/cms';
@@ -12,9 +13,12 @@ export function useContentfulProduct(slug: string) {
         const client = await getContentfulClient();
         
         if (!client) {
-          console.error('[useContentfulProduct] Failed to get Contentful client - check Delivery Token in Admin Settings');
+          console.error('[useContentfulProduct] Failed to get Contentful client - check configuration in Admin Settings');
           throw new Error('Missing Contentful configuration. Please set up your Contentful credentials in Admin Settings.');
         }
+        
+        // Log that we're making the query to help with debugging
+        console.log(`[useContentfulProduct] Querying Contentful for product with slug: ${slug}`);
         
         const entries = await client.getEntries({
           content_type: 'productType',
@@ -49,10 +53,22 @@ export function useContentfulProduct(slug: string) {
           })) : []
         };
         
-        console.log(`[useContentfulProduct] Transformed product:`, product);
+        console.log(`[useContentfulProduct] Successfully transformed product:`, product);
         return product;
       } catch (error) {
         console.error(`[useContentfulProduct] Error fetching product:`, error);
+        
+        // Provide more specific error messages for common issues
+        if (error instanceof Error) {
+          if (error.message.includes('401')) {
+            throw new Error('Authentication failed. Please check your Contentful Delivery Token in Admin Settings.');
+          } else if (error.message.includes('404')) {
+            throw new Error(`Could not find product "${slug}". Please check if the product exists in Contentful.`);
+          } else if (error.message.includes('Network Error')) {
+            throw new Error('Network error. Please check your internet connection and try again.');
+          }
+        }
+        
         throw error;
       }
     },

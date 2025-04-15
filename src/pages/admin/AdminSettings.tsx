@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -29,6 +29,42 @@ const AdminSettings: React.FC = () => {
   const [environmentId, setEnvironmentId] = useState('master');
   const [managementToken, setManagementToken] = useState('');
   const [deliveryToken, setDeliveryToken] = useState('');
+  const [configId, setConfigId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchContentfulConfig();
+  }, []);
+
+  const fetchContentfulConfig = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('contentful_config')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.error('[AdminSettings] Error fetching Contentful config:', error);
+        return;
+      }
+
+      if (data) {
+        console.log('[AdminSettings] Found existing Contentful config:', {
+          id: data.id,
+          spaceId: data.space_id,
+          environmentId: data.environment_id,
+          hasManagementToken: !!data.management_token,
+          hasDeliveryToken: !!data.delivery_token
+        });
+        
+        setConfigId(data.id);
+        setSpaceId(data.space_id || '');
+        setEnvironmentId(data.environment_id || 'master');
+      }
+    } catch (err) {
+      console.error('[AdminSettings] Unexpected error fetching config:', err);
+    }
+  };
 
   const handleSaveCmsSettings = () => {
     setIsLoading(true);
@@ -73,18 +109,41 @@ const AdminSettings: React.FC = () => {
         throw new Error('Delivery Token is required for content retrieval');
       }
 
+      console.log(`[AdminSettings] ${configId ? 'Updating' : 'Creating new'} Contentful configuration`);
+
+      // Prepare the data object
+      const configData = {
+        space_id: spaceId,
+        environment_id: environmentId || 'master',
+        management_token: managementToken,
+        delivery_token: deliveryToken
+      };
+
+      // If we have a configId, use it to update the existing record
+      if (configId) {
+        configData['id'] = configId;
+      }
+
       // Insert or update Contentful configuration
       const { data, error } = await supabase
         .from('contentful_config')
-        .upsert({
-          space_id: spaceId,
-          environment_id: environmentId || 'master',
-          management_token: managementToken,
-          delivery_token: deliveryToken
-        })
+        .upsert(configData)
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[AdminSettings] Error saving Contentful config:', error);
+        throw error;
+      }
+
+      console.log('[AdminSettings] Contentful config saved successfully:', {
+        configId: data?.[0]?.id,
+        saved: !!data?.[0]
+      });
+
+      // Update the configId with the saved record ID
+      if (data && data.length > 0) {
+        setConfigId(data[0].id);
+      }
 
       toast({
         title: 'Contentful Configuration',
@@ -95,8 +154,13 @@ const AdminSettings: React.FC = () => {
       // Clear sensitive inputs after saving
       setManagementToken('');
       setDeliveryToken('');
+      
+      // Refresh the client to use the new credentials
+      await fetch('/api/refresh-cms-client', { method: 'POST' }).catch(() => {
+        // This endpoint might not exist, just suppress errors
+      });
     } catch (error) {
-      console.error('Error saving Contentful config:', error);
+      console.error('[AdminSettings] Error saving Contentful config:', error);
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to save configuration',
@@ -283,6 +347,15 @@ const AdminSettings: React.FC = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
+                            {configId && (
+                                <Alert className="bg-blue-50 border-blue-200">
+                                    <AlertTitle className="text-blue-800">Configuration Found</AlertTitle>
+                                    <AlertDescription className="text-blue-700">
+                                        Existing Contentful configuration detected. Updating your tokens will overwrite the previous configuration.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                            
                             <div className="grid md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label htmlFor="spaceId" className="block text-sm font-medium">
@@ -345,7 +418,7 @@ const AdminSettings: React.FC = () => {
                                 >
                                     {isLoading ? (
                                         <>
-                                            <CheckCircle2 className="mr-2 h-4 w-4 animate-spin" />
+                                            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                                             Saving...
                                         </>
                                     ) : (

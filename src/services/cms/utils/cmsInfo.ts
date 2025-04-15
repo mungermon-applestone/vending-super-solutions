@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export const getContentfulConfig = async () => {
@@ -26,11 +27,11 @@ export const getContentfulConfig = async () => {
       .from('contentful_config')
       .select('*')
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('[getContentfulConfig] Error fetching config:', error);
-      // Try alternative approach if single() fails
+      // Try alternative approach if maybeSingle() fails
       const { data: fallbackData, error: fallbackError } = await supabase
         .from('contentful_config')
         .select('*')
@@ -47,6 +48,7 @@ export const getContentfulConfig = async () => {
 
     // Log configuration status but not the actual tokens
     console.log('[getContentfulConfig] Configuration status:', {
+      configId: data?.id,
       spaceId: data?.space_id,
       envId: data?.environment_id,
       hasDeliveryToken: !!data?.delivery_token,
@@ -70,6 +72,7 @@ export interface CMSInfo {
   adminUrl?: string;
   apiUrl?: string;
   apiKeyConfigured?: boolean;
+  contentfulConfigured?: boolean;
 }
 
 // Content provider type enum
@@ -114,6 +117,7 @@ export const getCMSInfo = (): CMSInfo => {
     provider: 'Contentful',
     status: 'configured', // Assuming Contentful is always configured via Supabase
     isConfigured: true,
-    adminUrl: 'https://app.contentful.com/'
+    adminUrl: 'https://app.contentful.com/',
+    contentfulConfigured: true // This will be determined dynamically in components that need it
   };
 };
