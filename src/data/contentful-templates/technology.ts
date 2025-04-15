@@ -68,8 +68,7 @@ export const technologyContentType: ContentTypeProps = {
       id: 'visible',
       name: 'Visible',
       type: 'Boolean',
-      required: false,
-      defaultValue: true
+      required: false
     }
   ],
   publish: true
@@ -112,8 +111,7 @@ export const technologySectionContentType: ContentTypeProps = {
       name: 'Display Order',
       type: 'Integer',
       required: false,
-      localized: false,
-      defaultValue: 0
+      localized: false
     },
     {
       id: 'features',
@@ -189,8 +187,7 @@ export const technologyFeatureContentType: ContentTypeProps = {
       name: 'Display Order',
       type: 'Integer',
       required: false,
-      localized: false,
-      defaultValue: 0
+      localized: false
     },
     {
       id: 'items',
