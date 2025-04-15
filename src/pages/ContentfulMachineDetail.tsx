@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useContentfulMachineBySlug } from '@/hooks/useContentfulMachines';
+import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const ContentfulMachineDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: machine, isLoading, error } = useContentfulMachineBySlug(slug);
+  const { data: machine, isLoading, error } = useContentfulMachine(slug);
 
   const formattedMachine = useMemo(() => {
     if (!machine) return null;

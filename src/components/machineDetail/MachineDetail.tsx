@@ -30,12 +30,15 @@ const MachineDetail: React.FC<MachineDetailProps> = ({ machine }) => {
     });
   }
   
+  // Ensure deploymentExamples exists (even if empty)
+  const deploymentExamples = machine.deploymentExamples || [];
+  
   return (
     <>
       <MachineDetailHero machine={machine} />
       <MachineDetailSpecifications specs={formattedSpecs} />
       <MachineDetailFeatures features={machine.features || []} />
-      <MachineDetailDeployments deploymentExamples={machine.deploymentExamples || []} />
+      <MachineDetailDeployments deploymentExamples={deploymentExamples} />
       <MachineDetailGallery title={machine.title} images={machine.images || []} />
       <MachineDetailInquiry machineTitle={machine.title} />
       <CTASection />

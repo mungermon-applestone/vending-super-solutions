@@ -27,6 +27,31 @@ const fallbackMachineData: Record<string, CMSMachine> = {
       weight: '800 lbs',
       capacity: '500+ items'
     }
+  },
+  'combi-3000': {
+    id: 'fallback-combi-3000',
+    title: 'Combi 3000',
+    slug: 'combi-3000',
+    type: 'vending',
+    description: 'Combination vending system with multiple product categories and temperature zones.',
+    temperature: 'multi',
+    features: [
+      'Multiple temperature zones',
+      'Digital touchscreen interface',
+      'Remote inventory management',
+      'Multi-product categories'
+    ],
+    images: [{
+      id: 'fallback-combi-image',
+      url: 'https://images.unsplash.com/photo-1527256351016-8ad33ff833fc',
+      alt: 'Combi 3000 Vending Machine'
+    }],
+    specs: {
+      dimensions: '78"H x 45"W x 38"D',
+      weight: '820 lbs',
+      capacity: '600+ items',
+      powerRequirements: '110V, 10 amps'
+    }
   }
 };
 

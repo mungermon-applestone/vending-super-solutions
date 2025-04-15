@@ -2,16 +2,15 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useMachine } from '@/hooks/cms/useMachines';
+import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
-import { CMSMachine } from '@/types/cms';
 
 const MachineDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: machine, isLoading, error } = useMachine(slug || '');
+  const { data: machine, isLoading, error } = useContentfulMachine(slug || '');
   
   if (isLoading) {
     return (
@@ -67,22 +66,13 @@ const MachineDetailPage = () => {
     );
   }
   
-  // Transform machine data to match the required interface
-  const machineData = {
+  // Ensure we have deploymentExamples (even if empty) to satisfy the MachinePageTemplate interface
+  const formattedMachine = {
     ...machine,
-    type: (machine.type || 'vending') as "vending" | "locker",
-    // Provide default value if temperature is missing
-    temperature: machine.temperature || 'ambient',
-    specs: machine.specs || {},
-    features: machine.features || [],
     deploymentExamples: machine.deploymentExamples || [],
-    images: (machine.images || []).map(image => ({
-      url: typeof image === 'string' ? image : image.url,
-      alt: typeof image === 'string' ? 'Machine image' : (image.alt || 'Machine image')
-    }))
   };
   
-  return <MachinePageTemplate machine={machineData} />;
+  return <MachinePageTemplate machine={formattedMachine} />;
 };
 
 export default MachineDetailPage;
