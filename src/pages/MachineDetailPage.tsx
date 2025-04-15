@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -66,13 +67,19 @@ const MachineDetailPage = () => {
     );
   }
   
+  // Transform machine data to match the required interface
   const machineData = {
     ...machine,
-    type: machine.type as "vending" | "locker",
+    type: (machine.type || 'vending') as "vending" | "locker",
+    // Provide default value if temperature is missing
+    temperature: machine.temperature || 'ambient',
     specs: machine.specs || {},
     features: machine.features || [],
     deploymentExamples: machine.deploymentExamples || [],
-    images: machine.images || []
+    images: (machine.images || []).map(image => ({
+      url: typeof image === 'string' ? image : image.url,
+      alt: typeof image === 'string' ? 'Machine image' : (image.alt || 'Machine image')
+    }))
   };
   
   return <MachinePageTemplate machine={machineData} />;

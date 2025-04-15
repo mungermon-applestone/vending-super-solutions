@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -67,7 +68,7 @@ const BusinessGoalDetailPage = () => {
   }
   
   const icon = businessGoal?.icon ? (
-    <MachineTypeIcon type={businessGoal.icon} size={24} className="text-white" />
+    <MachineTypeIcon type={businessGoal.icon} className="text-white" />
   ) : (
     <div className="h-6 w-6 bg-white rounded-full"></div>
   );
@@ -115,7 +116,7 @@ const BusinessGoalDetailPage = () => {
                     <div className="bg-vending-teal rounded-full p-2 mr-4 text-white flex-shrink-0">
                       <ArrowLeft className="h-4 w-4 transform rotate-180" />
                     </div>
-                    <p className="text-gray-800">{benefit}</p>
+                    <p className="text-gray-800">{typeof benefit === 'string' ? benefit : String(benefit)}</p>
                   </div>
                 ))}
               </div>
