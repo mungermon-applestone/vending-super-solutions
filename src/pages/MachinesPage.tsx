@@ -1,17 +1,17 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useMachines } from '@/hooks/cms/useMachines';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight } from 'lucide-react';
 import PageHero from '@/components/common/PageHero';
 
 const MachinesPage = () => {
-  const { data: machines, isLoading, error } = useMachines();
+  const { data: machines, isLoading, error } = useContentfulMachines();
   const navigate = useNavigate();
-  
+
   return (
     <Layout>
       {/* Hero Section using PageHero */}
@@ -96,7 +96,7 @@ const MachinesPage = () => {
         {machines && machines.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {machines.map((machine) => (
-              <div key={machine.id} className="border border-gray-200 rounded-lg overflow-hidden transition-all hover:shadow-lg">
+              <Card key={machine.id} className="overflow-hidden transition-all hover:shadow-lg">
                 {machine.images && machine.images.length > 0 && (
                   <img 
                     src={machine.images[0].url} 
@@ -107,14 +107,23 @@ const MachinesPage = () => {
                     }}
                   />
                 )}
-                <div className="p-6">
+                <CardHeader>
+                  <CardTitle>{machine.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-bold">{machine.title}</h3>
                     <span className="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-700">
                       {machine.type === 'vending' ? 'Vending' : 'Locker'}
                     </span>
+                    {machine.temperature && (
+                      <span className="text-xs px-2 py-1 bg-blue-100 rounded-full text-blue-700">
+                        {machine.temperature}
+                      </span>
+                    )}
                   </div>
                   <p className="text-gray-600 mb-4 line-clamp-3">{machine.description}</p>
+                </CardContent>
+                <CardFooter>
                   <Button 
                     variant="ghost" 
                     className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
@@ -123,8 +132,8 @@ const MachinesPage = () => {
                     Learn more
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                </div>
-              </div>
+                </CardFooter>
+              </Card>
             ))}
           </div>
         )}
