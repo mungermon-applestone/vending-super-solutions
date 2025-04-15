@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -72,6 +73,15 @@ const BusinessGoalDetailPage = () => {
     <div className="h-6 w-6 bg-white rounded-full"></div>
   );
   
+  // Helper function to safely convert any benefit to a string
+  const formatBenefit = (benefit: any): string => {
+    if (benefit === null || benefit === undefined) return '';
+    if (typeof benefit === 'string') return benefit;
+    if (typeof benefit === 'number') return benefit.toString();
+    if (typeof benefit === 'object') return JSON.stringify(benefit);
+    return String(benefit);
+  };
+  
   return (
     <Layout>
       <BusinessGoalHero
@@ -115,15 +125,7 @@ const BusinessGoalDetailPage = () => {
                     <div className="bg-vending-teal rounded-full p-2 mr-4 text-white flex-shrink-0">
                       <ArrowLeft className="h-4 w-4 transform rotate-180" />
                     </div>
-                    <p className="text-gray-800">
-                      {(() => {
-                        if (benefit === null || benefit === undefined) return '';
-                        if (typeof benefit === 'string') return benefit;
-                        if (typeof benefit === 'number') return benefit.toString();
-                        if (typeof benefit === 'object') return JSON.stringify(benefit);
-                        return String(benefit);
-                      })()}
-                    </p>
+                    <p className="text-gray-800">{formatBenefit(benefit)}</p>
                   </div>
                 ))}
               </div>
