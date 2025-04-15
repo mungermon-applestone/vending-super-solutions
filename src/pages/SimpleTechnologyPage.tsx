@@ -92,7 +92,6 @@ const SimpleTechnologyPage = () => {
             const bulletPoints = section.bulletPoints || [];
             
             // Get section image URL safely
-            // Update: Handle the section image differently based on its structure
             let sectionImageUrl = '';
             
             if (section.sectionImage) {

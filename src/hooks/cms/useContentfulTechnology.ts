@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { ContentfulTechnology } from '@/types/contentful';
@@ -27,32 +26,45 @@ export function useContentfulTechnology() {
             console.log('[useContentfulTechnology] Processing sections:', entry.fields.sections.length);
             
             sections = entry.fields.sections.map((sectionEntry: any) => {
-              console.log('[useContentfulTechnology] Section entry:', sectionEntry);
+              console.log('[useContentfulTechnology] Processing section entry:', sectionEntry);
               
               // Access section fields properly
-              const section = sectionEntry.fields || {};
+              const sectionFields = sectionEntry.fields || {};
               const sectionId = sectionEntry.sys?.id || '';
               
               // Process bullet points if they exist
-              const bulletPoints = Array.isArray(section.bulletPoints) ? section.bulletPoints : [];
+              const bulletPoints = Array.isArray(sectionFields.bulletPoints) ? sectionFields.bulletPoints : [];
+              
+              // Process the section image
+              let sectionImage = null;
+              if (sectionFields.sectionImage) {
+                const imageFields = sectionFields.sectionImage.fields;
+                if (imageFields && imageFields.file && imageFields.file.url) {
+                  sectionImage = {
+                    url: `https:${imageFields.file.url}`,
+                    alt: imageFields.title || sectionFields.title || ''
+                  };
+                }
+              }
               
               console.log('[useContentfulTechnology] Mapped section:', {
                 id: sectionId,
-                title: section.title,
-                summary: section.summary,
-                bulletPoints
+                title: sectionFields.title,
+                summary: sectionFields.summary,
+                bulletPoints,
+                sectionImage
               });
               
               return {
                 id: sectionId,
-                title: section.title || '',
-                summary: section.summary || '',
-                description: section.summary || '',
+                title: sectionFields.title || '',
+                summary: sectionFields.summary || '',
+                description: sectionFields.summary || '',
                 section_type: 'technology',
-                display_order: section.displayOrder || 0,
+                display_order: sectionFields.displayOrder || 0,
                 technology_id: entry.sys?.id || '',
                 bulletPoints,
-                sectionImage: section.sectionImage || null,
+                sectionImage,
                 features: []
               };
             });
