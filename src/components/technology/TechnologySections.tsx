@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { CMSTechnologySection } from '@/types/cms';
-import TechnologyFeatureSection from './TechnologyFeatureSection';
+import TechnologySection from './TechnologySection';
 
 interface TechnologySectionsProps {
   sections: CMSTechnologySection[];
@@ -14,12 +14,17 @@ const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => 
   );
 
   return (
-    <div className="py-16">
-      {sortedSections.map((section) => (
-        <TechnologyFeatureSection 
+    <div>
+      {sortedSections.map((section, index) => (
+        <TechnologySection 
           key={section.id} 
-          section={section}
-          alternateLayout={section.display_order % 2 === 0}
+          id={section.id}
+          title={section.title}
+          summary={section.description}
+          bulletPoints={section.bullet_points}
+          image={section.image?.url || ''}
+          index={index}
+          className={index === 0 ? 'pt-0' : ''}
         />
       ))}
     </div>

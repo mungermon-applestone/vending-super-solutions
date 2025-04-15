@@ -4,7 +4,7 @@ import { ContentTypeProps } from "@/services/cms/types/contentfulTypes";
 export const technologySectionContentType: ContentTypeProps = {
   id: 'technologySection',
   name: 'Technology Section',
-  description: 'A section within the technology page',
+  description: 'A section within the technology page with alternating layout',
   displayField: 'title',
   fields: [
     {
@@ -15,21 +15,32 @@ export const technologySectionContentType: ContentTypeProps = {
       localized: false
     },
     {
-      id: 'description',
-      name: 'Description',
+      id: 'summary',
+      name: 'Summary',
       type: 'Text',
+      required: true,
+      localized: false
+    },
+    {
+      id: 'bulletPoints',
+      name: 'Bullet Points',
+      type: 'Array',
+      items: {
+        type: 'Symbol'
+      },
       required: false,
       localized: false
     },
     {
-      id: 'sectionType',
-      name: 'Section Type',
-      type: 'Symbol',
+      id: 'image',
+      name: 'Section Image',
+      type: 'Link',
+      linkType: 'Asset',
       required: true,
       localized: false,
       validations: [
         {
-          in: ['architecture', 'security', 'integration', 'hardware', 'standards', 'analytics']
+          linkMimetypeGroup: ['image']
         }
       ]
     },
@@ -37,22 +48,6 @@ export const technologySectionContentType: ContentTypeProps = {
       id: 'displayOrder',
       name: 'Display Order',
       type: 'Integer',
-      required: false,
-      localized: false
-    },
-    {
-      id: 'features',
-      name: 'Features',
-      type: 'Array',
-      items: {
-        type: 'Link',
-        linkType: 'Entry',
-        validations: [
-          {
-            linkContentType: ['technologyFeature']
-          }
-        ]
-      },
       required: false,
       localized: false
     }
