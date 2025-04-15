@@ -66,15 +66,27 @@ const MachineDetailPage = () => {
     );
   }
   
-  // Ensure we have deploymentExamples (even if empty) to satisfy the MachinePageTemplate interface
-  // Also ensure that the machine type is strictly "vending" or "locker" and temperature is always provided
+  // Format machine data to match MachinePageTemplate requirements
   const formattedMachine = {
-    ...machine,
-    // Force type to be one of the allowed values in the union type
+    id: machine.id,
+    slug: machine.slug,
+    title: machine.title,
+    // Ensure type is strictly "vending" or "locker"
     type: machine.type === 'locker' ? 'locker' : 'vending' as 'vending' | 'locker',
     // Ensure temperature is always set
     temperature: machine.temperature || 'ambient',
-    deploymentExamples: machine.deploymentExamples || [],
+    description: machine.description,
+    // Ensure images is always an array with the required format
+    images: Array.isArray(machine.images) ? machine.images.map(img => ({
+      url: img.url,
+      alt: img.alt
+    })) : [],
+    // Ensure specs is an object
+    specs: machine.specs || {},
+    // Ensure features is an array
+    features: machine.features || [],
+    // Ensure deploymentExamples is an array
+    deploymentExamples: machine.deploymentExamples || []
   };
   
   return <MachinePageTemplate machine={formattedMachine} />;

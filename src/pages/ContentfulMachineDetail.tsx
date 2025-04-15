@@ -33,8 +33,14 @@ const ContentfulMachineDetail: React.FC = () => {
       type: machineType,
       temperature: machine.temperature || 'ambient',
       description: machine.description,
-      images: machine.images || [],
+      // Ensure images is always an array with the required format
+      images: Array.isArray(machine.images) ? machine.images.map(img => ({
+        url: img.url,
+        alt: img.alt
+      })) : [],
+      // Ensure specs is an object
       specs: machine.specs || {},
+      // Ensure features is an array
       features: machine.features || [],
       deploymentExamples
     };
