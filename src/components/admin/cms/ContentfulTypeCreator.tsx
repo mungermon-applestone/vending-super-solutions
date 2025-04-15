@@ -13,7 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { createContentType, deleteContentType } from '@/services/cms/utils/contentfulManagement';
 import { FileCode, Plus, Trash2, Check, AlertCircle, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { contentTypeTemplates } from '@/data/contentful-templates';
+import { contentfulTemplates } from '@/data/contentful-templates';
 import { TemplateDetails } from './TemplateDetails';
 import { ContentTypeCreatorResult } from '@/types/contentful-admin';
 
@@ -37,7 +37,7 @@ const ContentfulTypeCreator: React.FC = () => {
     setResult(null);
 
     try {
-      const template = contentTypeTemplates[selectedTemplate].contentType;
+      const template = contentfulTemplates[selectedTemplate].contentType;
       const response = await createContentType(template);
       
       if (response.success) {
@@ -146,7 +146,7 @@ const ContentfulTypeCreator: React.FC = () => {
         <div>
           <h3 className="text-sm font-medium mb-3">Available Content Type Templates</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {Object.values(contentTypeTemplates).map((template) => (
+            {Object.values(contentfulTemplates).map((template) => (
               <Button
                 key={template.id}
                 variant={selectedTemplate === template.id ? "default" : "outline"}
@@ -168,7 +168,7 @@ const ContentfulTypeCreator: React.FC = () => {
         </div>
         
         {selectedTemplate && (
-          <TemplateDetails template={contentTypeTemplates[selectedTemplate]} />
+          <TemplateDetails template={contentfulTemplates[selectedTemplate]} />
         )}
 
         {selectedTemplate === 'machine' && (

@@ -68,7 +68,8 @@ export const technologyContentType: ContentTypeProps = {
       id: 'visible',
       name: 'Visible',
       type: 'Boolean',
-      required: false
+      required: false,
+      localized: false
     }
   ],
   publish: true
