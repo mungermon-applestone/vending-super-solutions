@@ -91,10 +91,18 @@ const SimpleTechnologyPage = () => {
             // Extract bullet points if they exist
             const bulletPoints = section.bulletPoints || [];
             
-            // Get section image URL safely 
-            const sectionImageUrl = section.sectionImage && section.sectionImage.fields ? 
-              `https:${section.sectionImage.fields.file.url}` : '';
-              
+            // Get section image URL safely
+            // Update: Handle the section image differently based on its structure
+            let sectionImageUrl = '';
+            
+            if (section.sectionImage) {
+              if (typeof section.sectionImage === 'string') {
+                sectionImageUrl = section.sectionImage;
+              } else if (section.sectionImage.url) {
+                sectionImageUrl = section.sectionImage.url;
+              }
+            }
+            
             console.log('Section image URL:', sectionImageUrl);
 
             return (
