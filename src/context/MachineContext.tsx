@@ -1,14 +1,14 @@
 
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface MachineContextType {
   selectedMachine: string | null;
-  setSelectedMachine: (machine: string | null) => void;
+  setSelectedMachine: (id: string | null) => void;
 }
 
 const MachineContext = createContext<MachineContextType | undefined>(undefined);
 
-export const useMachineContext = (): MachineContextType => {
+export const useMachineContext = () => {
   const context = useContext(MachineContext);
   if (context === undefined) {
     throw new Error('useMachineContext must be used within a MachineProvider');

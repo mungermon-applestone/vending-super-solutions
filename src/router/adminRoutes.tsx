@@ -1,4 +1,3 @@
-
 import { RouteObject } from "react-router-dom";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminMachines from "@/pages/admin/AdminMachines";
@@ -72,7 +71,6 @@ export const adminRoutes: RouteObject[] = [
     element: <AdminLandingPages />, // Using same component with a parameter
   },
   
-  // Contentful management route
   {
     path: "contentful",
     element: <ContentfulManagement />

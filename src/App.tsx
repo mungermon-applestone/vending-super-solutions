@@ -109,7 +109,10 @@ const router = createBrowserRouter([
     path: "/admin/data/migrate-machines",
     element: <MigrateMachinesData />,
   },
-  ...adminRoutes,
+  ...adminRoutes.map(route => ({
+    path: `/admin/${route.path}`,
+    element: route.element
+  })),
   {
     path: "*",
     element: <NotFound />,
