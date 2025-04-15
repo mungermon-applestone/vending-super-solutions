@@ -101,27 +101,45 @@ const AdminSettings: React.FC = () => {
 
     try {
       // Validate inputs
-      if (!spaceId || !managementToken) {
-        throw new Error('Space ID and Management Token are required');
+      if (!spaceId) {
+        throw new Error('Space ID is required');
       }
 
+      // Check if at least one token is provided
+      if (!managementToken && !deliveryToken) {
+        throw new Error('At least one token (Management or Delivery) must be provided');
+      }
+      
+      // If delivery token is not provided, show a strong warning
       if (!deliveryToken) {
-        throw new Error('Delivery Token is required for content retrieval');
+        toast({
+          title: 'Warning',
+          description: 'Delivery Token is required for content retrieval. Without it, your application may not display content properly.',
+          variant: 'destructive'
+        });
+        return;
       }
 
       console.log(`[AdminSettings] ${configId ? 'Updating' : 'Creating new'} Contentful configuration`);
 
-      // Prepare the data object
-      const configData = {
+      // Prepare the data object with the fields that should be updated
+      let configData: Record<string, any> = {
         space_id: spaceId,
         environment_id: environmentId || 'master',
-        management_token: managementToken,
-        delivery_token: deliveryToken
       };
+      
+      // Only update tokens that were provided (to avoid wiping out existing tokens)
+      if (managementToken) {
+        configData.management_token = managementToken;
+      }
+      
+      if (deliveryToken) {
+        configData.delivery_token = deliveryToken;
+      }
 
-      // If we have a configId, use it to update the existing record
+      // If we have a configId, use it for the upsert
       if (configId) {
-        configData['id'] = configId;
+        configData.id = configId;
       }
 
       // Insert or update Contentful configuration
@@ -137,7 +155,8 @@ const AdminSettings: React.FC = () => {
 
       console.log('[AdminSettings] Contentful config saved successfully:', {
         configId: data?.[0]?.id,
-        saved: !!data?.[0]
+        saved: !!data?.[0],
+        fields: Object.keys(configData).filter(k => k !== 'management_token' && k !== 'delivery_token')
       });
 
       // Update the configId with the saved record ID
@@ -155,10 +174,17 @@ const AdminSettings: React.FC = () => {
       setManagementToken('');
       setDeliveryToken('');
       
-      // Refresh the client to use the new credentials
-      await fetch('/api/refresh-cms-client', { method: 'POST' }).catch(() => {
-        // This endpoint might not exist, just suppress errors
-      });
+      // Reset the client to use the new credentials
+      resetContentfulClient();
+      
+      // Try to refresh the client
+      try {
+        await fetch('/api/refresh-cms-client', { method: 'POST' }).catch(() => {
+          // This endpoint might not exist, just suppress errors
+        });
+      } catch (e) {
+        console.log('No refresh client endpoint available:', e);
+      }
     } catch (error) {
       console.error('[AdminSettings] Error saving Contentful config:', error);
       toast({
@@ -398,7 +424,7 @@ const AdminSettings: React.FC = () => {
 
                             <div className="space-y-2">
                                 <label htmlFor="deliveryToken" className="block text-sm font-medium">
-                                    Delivery Token (CDA)
+                                    Delivery Token (CDA) <span className="text-red-500">*</span>
                                 </label>
                                 <Input
                                     id="deliveryToken"
@@ -406,14 +432,15 @@ const AdminSettings: React.FC = () => {
                                     value={deliveryToken}
                                     onChange={(e) => setDeliveryToken(e.target.value)}
                                     placeholder="Your Contentful Content Delivery API Token"
+                                    className="border-red-200 focus:ring-red-500" 
                                 />
-                                <p className="text-xs text-muted-foreground">Required for retrieving content on the frontend</p>
+                                <p className="text-xs text-red-600 font-medium">Required for retrieving content on the frontend</p>
                             </div>
 
                             <div className="pt-4">
                                 <Button
                                     onClick={handleSaveContentfulConfig}
-                                    disabled={isLoading || !spaceId || !managementToken || !deliveryToken}
+                                    disabled={isLoading || !spaceId || (!managementToken && !deliveryToken)}
                                     className="w-full"
                                 >
                                     {isLoading ? (

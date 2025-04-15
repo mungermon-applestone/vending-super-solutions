@@ -25,6 +25,10 @@ export const getContentfulClient = async () => {
           hasSpaceId: !!config.space_id, 
           hasDeliveryToken: !!config.delivery_token 
         });
+        
+        if (!config.delivery_token) {
+          throw new Error("Missing Contentful Delivery Token. Please add your Content Delivery API token in Admin Settings.");
+        }
       }
       return null;
     }
@@ -39,7 +43,7 @@ export const getContentfulClient = async () => {
     return contentfulClient;
   } catch (error) {
     console.error('[getContentfulClient] Error creating Contentful client:', error);
-    return null;
+    throw error;
   }
 };
 
