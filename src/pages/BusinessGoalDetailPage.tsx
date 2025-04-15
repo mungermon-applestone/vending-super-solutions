@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -116,7 +115,11 @@ const BusinessGoalDetailPage = () => {
                     <div className="bg-vending-teal rounded-full p-2 mr-4 text-white flex-shrink-0">
                       <ArrowLeft className="h-4 w-4 transform rotate-180" />
                     </div>
-                    <p className="text-gray-800">{typeof benefit === 'string' ? benefit : String(benefit)}</p>
+                    <p className="text-gray-800">
+                      {typeof benefit === 'object' 
+                        ? JSON.stringify(benefit) 
+                        : String(benefit)}
+                    </p>
                   </div>
                 ))}
               </div>
