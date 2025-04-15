@@ -92,8 +92,16 @@ export interface CMSTechnologySection {
   technology_id: string;
   section_type: string;
   title: string;
+  summary?: string;
   description?: string;
   display_order: number;
+  bulletPoints?: string[];
+  sectionImage?: {
+    url: string;
+  };
+  image?: {
+    url: string;
+  };
   features?: CMSTechnologyFeature[];
   images?: CMSTechnologyImage[];
 }

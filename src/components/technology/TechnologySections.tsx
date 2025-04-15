@@ -20,9 +20,9 @@ const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => 
           key={section.id} 
           id={section.id}
           title={section.title}
-          summary={section.description}
-          bulletPoints={section.bullet_points}
-          image={section.image?.url || ''}
+          summary={section.summary || section.description}
+          bulletPoints={section.bulletPoints || []}
+          image={section.sectionImage?.url || section.image?.url || ''}
           index={index}
           className={index === 0 ? 'pt-0' : ''}
         />

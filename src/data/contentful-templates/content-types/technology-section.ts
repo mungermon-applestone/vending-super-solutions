@@ -26,13 +26,20 @@ export const technologySectionContentType: ContentTypeProps = {
       name: 'Bullet Points',
       type: 'Array',
       items: {
-        type: 'Symbol'
+        type: 'Symbol',
+        validations: [
+          {
+            size: {
+              max: 200
+            }
+          }
+        ]
       },
       required: false,
       localized: false
     },
     {
-      id: 'image',
+      id: 'sectionImage',
       name: 'Section Image',
       type: 'Link',
       linkType: 'Asset',
