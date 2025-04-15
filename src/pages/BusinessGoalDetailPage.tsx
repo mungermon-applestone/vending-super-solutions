@@ -1,10 +1,11 @@
+
 import React, { ReactNode } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useBusinessGoal } from '@/hooks/cms/useBusinessGoals';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
 import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
 
@@ -126,7 +127,7 @@ const BusinessGoalDetailPage = () => {
                 {businessGoal.benefits.map((benefit, index) => (
                   <div key={index} className="bg-white rounded-lg p-6 shadow-sm flex items-start">
                     <div className="bg-vending-teal rounded-full p-2 mr-4 text-white flex-shrink-0">
-                      <ArrowLeft className="h-4 w-4 transform rotate-180" />
+                      <Check className="h-4 w-4" />
                     </div>
                     <p className="text-gray-800">{String(benefit)}</p>
                   </div>
