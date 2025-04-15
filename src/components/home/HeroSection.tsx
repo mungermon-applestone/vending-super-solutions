@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
@@ -10,12 +10,7 @@ import { LandingPage } from '@/types/landingPage';
 const HeroSection = () => {
   const { data: landingPage, isLoading, error } = useLandingPageByKey('home');
   
-  useEffect(() => {
-    // Log status of landing page data loading
-    console.log("Hero section loading:", isLoading);
-    if (error) console.error("Error loading landing page:", error);
-    if (landingPage) console.log("Loaded landing page:", landingPage);
-  }, [landingPage, isLoading, error]);
+  console.log("Hero section rendering", { landingPage, isLoading, error });
   
   // If we're loading, show a skeleton
   if (isLoading) {
@@ -48,9 +43,16 @@ const HeroSection = () => {
     );
   }
   
+  if (error) {
+    console.error("Error loading landing page data:", error);
+  }
+  
   // Type assertion to ensure landingPage is treated correctly
-  const typedLandingPage = landingPage as LandingPage;
+  const typedLandingPage = landingPage as LandingPage | undefined;
   const hero = typedLandingPage?.hero_content;
+  
+  // Add more debugging to see what we're actually getting
+  console.log("Hero content:", hero);
   
   return (
     <div className={hero?.background_class || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"}>
@@ -106,6 +108,7 @@ const HeroSection = () => {
                 className="w-full h-auto object-cover"
                 onError={(e) => {
                   e.currentTarget.src = "https://images.unsplash.com/photo-1605810230434-7631ac76ec81";
+                  console.log("Image failed to load, using fallback");
                 }}
               />
             </div>

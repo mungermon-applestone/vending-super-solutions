@@ -34,8 +34,6 @@ export function useLandingPages() {
 }
 
 export function useLandingPageByKey(key: string) {
-  const queryClient = useQueryClient();
-
   return useQuery<LandingPage | null>({
     queryKey: ['landing-pages', key],
     queryFn: async () => {
@@ -54,6 +52,7 @@ export function useLandingPageByKey(key: string) {
     ...createQueryOptions(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true, // Refetch when window gets focus
+    refetchInterval: 60 * 1000, // Refetch every minute
     refetchOnMount: 'always', // Always refetch when component mounts
   });
 }

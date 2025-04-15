@@ -21,6 +21,7 @@ import BusinessGoalsPage from './pages/BusinessGoalsPage';
 import BusinessGoalDetailPage from './pages/BusinessGoalDetailPage';
 import MachinesPage from './pages/MachinesPage';
 import MachineDetailPage from './pages/MachineDetailPage';
+import Home from './pages/Home';
 
 // Create a simpler router structure to fix the build issues
 const router = createBrowserRouter([
@@ -32,7 +33,7 @@ const router = createBrowserRouter([
       // Public routes
       {
         index: true,
-        element: <div className="p-10 text-center"><h1 className="text-3xl font-bold">Welcome to the Application</h1></div>,
+        element: <Home />,
       },
       // Main site routes
       {
