@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CMSTechnology, CMSTechnologySection } from '@/types/cms';
+import { CMSTechnologySection } from '@/types/cms';
 import TechnologyFeatureSection from './TechnologyFeatureSection';
 
 interface TechnologySectionsProps {

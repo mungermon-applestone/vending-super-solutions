@@ -1,15 +1,20 @@
 
-import { blogPostTemplate } from './blog-post';
-import { productTypeTemplate } from './product-type';
-import { featureTemplate } from './feature';
-import { businessGoalTemplate } from './business-goal';
-import { machineTemplate } from './machine';
-import { ContentTypeTemplate } from '@/types/contentful-admin';
+import { businessGoalContentType } from './business-goal';
+import { featureContentType } from './feature';
+import { machineContentType } from './machine';
+import { productTypeContentType } from './product-type';
+import { blogPostContentType } from './blog-post';
+import { technologyContentType, technologySectionContentType, technologyFeatureContentType } from './technology';
 
-export const contentTypeTemplates: Record<string, ContentTypeTemplate> = {
-  blogPost: blogPostTemplate,
-  productType: productTypeTemplate,
-  feature: featureTemplate,
-  businessGoal: businessGoalTemplate,
-  machine: machineTemplate,
+export const contentfulTemplates = {
+  businessGoal: businessGoalContentType,
+  feature: featureContentType,
+  machine: machineContentType,
+  productType: productTypeContentType,
+  blogPost: blogPostContentType,
+  technology: technologyContentType,
+  technologySection: technologySectionContentType,
+  technologyFeature: technologyFeatureContentType
 };
+
+export default contentfulTemplates;

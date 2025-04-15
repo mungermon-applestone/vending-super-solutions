@@ -1,49 +1,86 @@
 
 import React from 'react';
-import * as LucideIcons from 'lucide-react';
-import { Check } from 'lucide-react';
+import { 
+  Cloud, 
+  Clock, 
+  Box, 
+  Network, 
+  UploadCloud, 
+  ArrowDownToLine,
+  ShieldCheck, 
+  CreditCard,
+  Database, 
+  Users, 
+  Mail,
+  Layers,
+  BarChartBig,
+  Zap,
+  Wifi,
+  Settings
+} from 'lucide-react';
+
+type IconType = 
+  | 'Cloud'
+  | 'Clock'
+  | 'Box'
+  | 'Network'
+  | 'UploadCloud'
+  | 'ArrowDownToLine'
+  | 'ShieldCheck'
+  | 'CreditCard'
+  | 'Database'
+  | 'Users'
+  | 'Mail'
+  | 'Layers'
+  | 'BarChartBig'
+  | 'Zap'
+  | 'Wifi'
+  | 'Settings'
+  | string;
 
 interface TechnologyFeatureItemProps {
-  icon: string;
+  icon?: IconType;
   title: string;
   description: string;
-  items?: string[]; // Items prop for bullet points
+  items?: string[];
 }
 
-const TechnologyFeatureItem: React.FC<TechnologyFeatureItemProps> = ({ 
-  icon, 
-  title, 
-  description,
-  items = [] // Default to empty array
-}) => {
-  // Dynamically get the icon component from lucide-react
-  const IconComponent = (LucideIcons as any)[icon] || LucideIcons.HelpCircle;
-  
-  // Log props to help debug
-  console.log(`TechnologyFeatureItem rendering: ${title}`, {
-    icon,
-    description,
-    itemsCount: items?.length || 0,
-    items
-  });
-  
+const TechnologyFeatureItem = ({ icon, title, description, items }: TechnologyFeatureItemProps) => {
+  const getIconComponent = (iconName: string) => {
+    switch (iconName) {
+      case 'Cloud': return <Cloud className="h-6 w-6" />;
+      case 'Clock': return <Clock className="h-6 w-6" />;
+      case 'Box': return <Box className="h-6 w-6" />;
+      case 'Network': return <Network className="h-6 w-6" />;
+      case 'UploadCloud': return <UploadCloud className="h-6 w-6" />;
+      case 'ArrowDownToLine': return <ArrowDownToLine className="h-6 w-6" />;
+      case 'ShieldCheck': return <ShieldCheck className="h-6 w-6" />;
+      case 'CreditCard': return <CreditCard className="h-6 w-6" />;
+      case 'Database': return <Database className="h-6 w-6" />;
+      case 'Users': return <Users className="h-6 w-6" />;
+      case 'Mail': return <Mail className="h-6 w-6" />;
+      case 'Layers': return <Layers className="h-6 w-6" />;
+      case 'BarChartBig': return <BarChartBig className="h-6 w-6" />;
+      case 'Zap': return <Zap className="h-6 w-6" />;
+      case 'Wifi': return <Wifi className="h-6 w-6" />;
+      case 'Settings': return <Settings className="h-6 w-6" />;
+      default: return <Settings className="h-6 w-6" />;
+    }
+  };
+
   return (
     <div className="flex items-start gap-4">
-      <div className="flex-shrink-0 mt-1 bg-blue-50 p-2 rounded-full">
-        <IconComponent className="h-5 w-5 text-blue-500" />
+      <div className="mt-1 flex-shrink-0 rounded-full bg-blue-50 p-3 text-blue-600">
+        {icon && getIconComponent(icon)}
       </div>
-      <div className="text-left">
-        <h3 className="font-medium text-lg leading-tight mb-0.5">{title}</h3>
-        <p className="text-gray-600">{description}</p>
+      <div>
+        <h4 className="text-lg font-medium">{title}</h4>
+        <p className="mt-1 text-gray-600">{description}</p>
         
-        {/* Display bullet points if available */}
         {items && items.length > 0 && (
-          <ul className="mt-2 space-y-1">
-            {items.map((item, index) => (
-              <li key={index} className="flex items-start gap-1.5">
-                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-gray-700">{item}</span>
-              </li>
+          <ul className="mt-2 space-y-1 list-disc list-inside text-sm text-gray-600">
+            {items.map((item, i) => (
+              <li key={i}>{item}</li>
             ))}
           </ul>
         )}

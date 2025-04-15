@@ -47,3 +47,43 @@ export interface ContentfulBusinessGoal {
     visible?: boolean;
   };
 }
+
+export interface ContentfulTechnologyFeature {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title: string;
+    description: string;
+    icon?: string;
+    displayOrder?: number;
+    items?: string[];
+  };
+}
+
+export interface ContentfulTechnologySection {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title: string;
+    description?: string;
+    sectionType: string;
+    displayOrder?: number;
+    features?: ContentfulTechnologyFeature[];
+  };
+}
+
+export interface ContentfulTechnology {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title: string;
+    slug: string;
+    description: string;
+    visible?: boolean;
+    image?: ContentfulAsset;
+    sections?: ContentfulTechnologySection[];
+  };
+}

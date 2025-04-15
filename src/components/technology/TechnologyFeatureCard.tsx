@@ -1,48 +1,70 @@
 
 import React from 'react';
-import { CMSTechnologyFeature } from '@/types/cms';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import * as Icons from 'lucide-react';
+import { CMSTechnologyFeature } from '@/types/cms';
+import { 
+  Cloud, 
+  Clock, 
+  Box, 
+  Network, 
+  UploadCloud, 
+  ArrowDownToLine,
+  ShieldCheck, 
+  CreditCard,
+  Database, 
+  Users, 
+  Mail,
+  Layers,
+  BarChartBig,
+  Zap,
+  Wifi,
+  Settings
+} from 'lucide-react';
 
 interface TechnologyFeatureCardProps {
   feature: CMSTechnologyFeature;
 }
 
 const TechnologyFeatureCard: React.FC<TechnologyFeatureCardProps> = ({ feature }) => {
-  // Dynamically get the icon component
-  const IconComponent = feature.icon ? 
-    (Icons as any)[feature.icon] || Icons.CheckCircle : 
-    Icons.CheckCircle;
+  const getIconComponent = (iconName: string | undefined) => {
+    if (!iconName) return <Settings className="h-6 w-6" />;
+    
+    switch (iconName) {
+      case 'Cloud': return <Cloud className="h-6 w-6" />;
+      case 'Clock': return <Clock className="h-6 w-6" />;
+      case 'Box': return <Box className="h-6 w-6" />;
+      case 'Network': return <Network className="h-6 w-6" />;
+      case 'UploadCloud': return <UploadCloud className="h-6 w-6" />;
+      case 'ArrowDownToLine': return <ArrowDownToLine className="h-6 w-6" />;
+      case 'ShieldCheck': return <ShieldCheck className="h-6 w-6" />;
+      case 'CreditCard': return <CreditCard className="h-6 w-6" />;
+      case 'Database': return <Database className="h-6 w-6" />;
+      case 'Users': return <Users className="h-6 w-6" />;
+      case 'Mail': return <Mail className="h-6 w-6" />;
+      case 'Layers': return <Layers className="h-6 w-6" />;
+      case 'BarChartBig': return <BarChartBig className="h-6 w-6" />;
+      case 'Zap': return <Zap className="h-6 w-6" />;
+      case 'Wifi': return <Wifi className="h-6 w-6" />;
+      case 'Settings': return <Settings className="h-6 w-6" />;
+      default: return <Settings className="h-6 w-6" />;
+    }
+  };
   
-  // Sort items by display order if they exist
-  const sortedItems = feature.items && [...feature.items].sort(
-    (a, b) => a.display_order - b.display_order
-  );
-
   return (
     <Card className="h-full">
-      <CardHeader>
-        <div className="flex items-start space-x-4">
-          <div className="rounded-full bg-primary/10 p-2">
-            <IconComponent className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <CardTitle className="text-xl">{feature.title}</CardTitle>
-          </div>
+      <CardHeader className="pb-3">
+        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+          {getIconComponent(feature.icon)}
         </div>
+        <CardTitle className="text-lg">{feature.title}</CardTitle>
       </CardHeader>
       <CardContent>
-        {feature.description && (
-          <p className="text-muted-foreground mb-4">{feature.description}</p>
-        )}
+        <p className="text-muted-foreground">{feature.description}</p>
         
-        {sortedItems && sortedItems.length > 0 && (
-          <ul className="space-y-2 mt-4">
-            {sortedItems.map((item) => (
-              <li key={item.id} className="flex items-center gap-2 text-sm">
-                <Icons.Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                <span>{item.text}</span>
-              </li>
+        {feature.items && feature.items.length > 0 && (
+          <ul className="mt-4 list-disc list-inside text-sm text-gray-600">
+            {feature.items.map((item, i) => (
+              <li key={i} className="mb-1">{item.text}</li>
             ))}
           </ul>
         )}
