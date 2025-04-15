@@ -4,118 +4,79 @@ import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyHeroSimple from '@/components/technology/TechnologyHeroSimple';
 import TechnologySection from '@/components/technology/TechnologySection';
-import { useTechnologySections } from '@/hooks/useTechnologySections';
-import { useIsFetching } from '@tanstack/react-query';
+import { useContentfulTechnology } from '@/hooks/cms/useContentfulTechnology';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TechFeature } from '@/types/technology';
-import { toast } from 'sonner';
-
-// Helper function to transform CMSTechnology data to the format expected by TechnologySection
-const mapTechnologyData = (tech) => {
-  // Extract features from technology sections if available
-  const features: TechFeature[] = tech.sections?.[0]?.features?.map(feature => ({
-    icon: feature.icon || 'server',
-    title: feature.title || '',
-    description: feature.description || '',
-    items: feature.items?.map(item => item.text) || []
-  })) || [];
-
-  // Extract image URL from the technology or its sections
-  const imageUrl = tech.image_url || 
-    (tech.image && typeof tech.image === 'string' ? tech.image : 
-    tech.image?.url) || 
-    tech.sections?.[0]?.images?.[0]?.url || 
-    'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789';
-
-  // Extract bulletPoints from sections if available
-  const bulletPoints = tech.sections?.[0]?.bulletPoints || [];
-
-  return {
-    id: tech.id,
-    title: tech.title,
-    summary: tech.description, // Changed from description to summary
-    features: features,
-    bulletPoints: bulletPoints,
-    image: imageUrl
-  };
-};
+import CTASection from '@/components/common/CTASection';
 
 const SimpleTechnologyPage = () => {
-  const { technologies = [], isLoading, error } = useTechnologySections();
-  const isFetching = useIsFetching({ queryKey: ['technologies'] }) > 0;
-
-  // Transform technology data for rendering
-  const transformedTechnologies = technologies.map(mapTechnologyData);
+  const { data: technologies = [], isLoading, error } = useContentfulTechnology();
   
-  // Debug logging to inspect the data
-  console.log('Technologies from CMS:', technologies);
-  console.log('Transformed technologies:', transformedTechnologies);
-
-  return (
-    <Layout>
-      {/* Hero Section */}
-      <TechnologyHeroSimple 
-        title="Our Technology Platform"
-        description="Powerful, reliable, and secure technology solutions designed specifically for the vending industry"
-        imageUrl="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789"
-        imageAlt="Vending Technology Platform"
-      />
-
-      {/* Loading State */}
-      {isFetching && (
-        <div className="container max-w-7xl mx-auto px-4 py-12">
-          <div className="space-y-12">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="flex flex-col md:flex-row gap-8">
-                <Skeleton className="h-64 w-full md:w-1/2" />
-                <div className="w-full md:w-1/2 space-y-4">
-                  <Skeleton className="h-10 w-3/4" />
-                  <Skeleton className="h-24 w-full" />
-                  <div className="grid grid-cols-1 gap-4">
-                    <Skeleton className="h-20" />
-                    <Skeleton className="h-20" />
-                    <Skeleton className="h-20" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+  // Use the first technology entry for the hero section
+  const mainTechnology = technologies[0];
+  
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-12">
+          <Skeleton className="h-64 w-full mb-8" />
+          <Skeleton className="h-32 w-3/4 mb-4" />
+          <Skeleton className="h-24 w-full" />
         </div>
-      )}
+      </Layout>
+    );
+  }
 
-      {/* Error State */}
-      {transformedTechnologies.length === 0 && !isFetching && (
-        <div className="container max-w-7xl mx-auto px-4 py-12">
+  if (error) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-12">
           <Alert variant="destructive">
             <AlertDescription>
-              We're having trouble loading technology information. Please try again later.
-              <button onClick={() => toast.info("Attempting to refresh...")} className="ml-2 underline">
-                Refresh
-              </button>
+              {error instanceof Error ? error.message : 'Failed to load technology information'}
             </AlertDescription>
           </Alert>
         </div>
-      )}
+      </Layout>
+    );
+  }
 
-      {/* Technology Sections */}
-      {!isFetching && transformedTechnologies.length > 0 && (
-        <>
-          {transformedTechnologies.map((tech, index) => (
-            <TechnologySection
-              key={tech.id}
-              id={tech.id}
-              title={tech.title}
-              summary={tech.summary}
-              bulletPoints={tech.bulletPoints}
-              image={tech.image}
-              index={index}
-            />
-          ))}
-        </>
-      )}
+  if (!mainTechnology) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-12">
+          <Alert>
+            <AlertDescription>
+              No technology information available.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </Layout>
+    );
+  }
 
-      {/* Contact Form */}
+  return (
+    <Layout>
+      <TechnologyHeroSimple
+        title={mainTechnology.title}
+        description={mainTechnology.description}
+        imageUrl={mainTechnology.image?.url}
+        imageAlt={mainTechnology.image?.alt || mainTechnology.title}
+      />
+      
+      {mainTechnology.sections?.map((section, index) => (
+        <TechnologySection
+          key={section.id}
+          id={section.id}
+          title={section.title}
+          summary={section.description || ''}
+          bulletPoints={section.bulletPoints || []}
+          image={section.sectionImage?.fields?.file?.url || ''}
+          index={index}
+        />
+      ))}
+      
+      <CTASection />
       <InquiryForm title="Technology Solutions" />
     </Layout>
   );
