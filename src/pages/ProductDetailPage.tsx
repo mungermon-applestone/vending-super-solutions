@@ -2,14 +2,15 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useProductType } from '@/hooks/cms/useProductTypes';
+import { useContentfulProduct } from '@/hooks/cms/useContentfulProduct';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import ProductHeroSection from '@/components/products/ProductHeroSection';
 
 const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: product, isLoading, error } = useProductType(slug || '');
+  const { data: product, isLoading, error } = useContentfulProduct(slug || '');
   
   if (isLoading) {
     return (
@@ -20,9 +21,6 @@ const ProductDetailPage = () => {
             <Skeleton className="h-6 w-full mb-2" />
             <Skeleton className="h-6 w-full mb-8" />
             <Skeleton className="h-96 w-full rounded-lg mb-8" />
-            <Skeleton className="h-6 w-full mb-2" />
-            <Skeleton className="h-6 w-full mb-2" />
-            <Skeleton className="h-6 w-3/4" />
           </div>
         </div>
       </Layout>
@@ -64,62 +62,25 @@ const ProductDetailPage = () => {
       </Layout>
     );
   }
-  
+
   return (
     <Layout>
-      <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light py-16">
+      <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
         <div className="container mx-auto">
-          <div className="max-w-6xl mx-auto">
-            <Link to="/products" className="flex items-center text-vending-blue-dark hover:text-vending-blue mb-6">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Products
-            </Link>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-6">{product.title}</h1>
-                <p className="text-xl text-gray-700 mb-6">{product.description}</p>
-                
-                {/* Benefits */}
-                {product.benefits && product.benefits.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-xl font-semibold mb-4">Key Benefits</h3>
-                    <ul className="space-y-2">
-                      {product.benefits.map((benefit, index) => (
-                        <li key={index} className="flex items-start">
-                          <Check className="h-5 w-5 text-vending-teal mr-2 flex-shrink-0 mt-1" />
-                          <span>{benefit}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                
-                <Button className="mt-4">Request Information</Button>
-              </div>
-              
-              <div>
-                {product.image ? (
-                  <img 
-                    src={product.image.url} 
-                    alt={product.image.alt || product.title} 
-                    className="w-full rounded-lg shadow-lg object-cover h-72 lg:h-96"
-                    onError={(e) => {
-                      e.currentTarget.src = "https://via.placeholder.com/800x600?text=Product+Image";
-                    }}
-                  />
-                ) : (
-                  <div className="w-full rounded-lg bg-gray-200 h-72 lg:h-96 flex items-center justify-center">
-                    <span className="text-gray-500">No image available</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <Link to="/products" className="inline-flex items-center text-vending-blue-dark hover:text-vending-blue py-6">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Products
+          </Link>
         </div>
       </div>
-      
-      {/* Features */}
+
+      <ProductHeroSection
+        productType={product.title}
+        description={product.description}
+        image={product.image?.url || "/placeholder.svg"}
+        benefits={product.benefits || []}
+      />
+
       {product.features && product.features.length > 0 && (
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto">
@@ -137,13 +98,12 @@ const ProductDetailPage = () => {
           </div>
         </section>
       )}
-      
-      {/* CTA Section */}
+
       <section className="py-16 bg-vending-blue-dark text-white">
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
           <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Contact our team today to learn more about the {product.title} and how it can benefit your business.
+            Contact our team today to learn more about {product.title} and how it can benefit your business.
           </p>
           <Button size="lg" className="bg-vending-teal hover:bg-vending-teal-dark">Contact Us</Button>
         </div>
