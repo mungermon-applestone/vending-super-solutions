@@ -13,7 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { createContentType, deleteContentType } from '@/services/cms/utils/contentfulManagement';
 import { FileCode, Plus, Trash2, Check, AlertCircle, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { contentTypeTemplates } from '@/data/contentfulTemplates';
+import { contentTypeTemplates } from '@/data/contentful-templates';
 import { TemplateDetails } from './TemplateDetails';
 import { ContentTypeCreatorResult } from '@/types/contentful-admin';
 
