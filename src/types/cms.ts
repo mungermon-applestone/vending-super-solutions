@@ -90,20 +90,22 @@ export interface CMSTechnology {
 export interface CMSTechnologySection {
   id: string;
   technology_id: string;
-  section_type: string;
   title: string;
-  summary?: string;
   description?: string;
+  summary?: string;
+  section_type: string;
   display_order: number;
+  features?: CMSTechnologyFeature[];
+  images?: CMSTechnologyImage[];
   bulletPoints?: string[];
   sectionImage?: {
     url: string;
+    alt?: string;
   };
   image?: {
     url: string;
+    alt?: string;
   };
-  features?: CMSTechnologyFeature[];
-  images?: CMSTechnologyImage[];
 }
 
 export interface CMSTechnologyFeature {

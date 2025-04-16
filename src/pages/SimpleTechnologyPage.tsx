@@ -22,12 +22,33 @@ const mapTechnologyData = (tech: CMSTechnology) => {
     items: feature.items?.map(item => item.text) || []
   })) || [];
 
-  // Get the summary from the description field
-  const summaryText = tech.description || tech.sections?.[0]?.description || '';
+  // Get the summary from the appropriate fields
+  // First check if sections exist and have summary field directly
+  let summaryText = '';
   
-  console.log(`[mapTechnologyData] Technology summary for '${tech.title}':`, {
-    description: tech.description,
+  if (tech.sections && tech.sections.length > 0) {
+    // Look for summary field first (as per Contentful schema)
+    if (tech.sections[0].summary) {
+      summaryText = tech.sections[0].summary;
+      console.log(`[mapTechnologyData] Found summary in tech.sections[0].summary: "${summaryText.substring(0, 50)}..."`);
+    } 
+    // Fall back to description if no summary found
+    else if (tech.sections[0].description) {
+      summaryText = tech.sections[0].description;
+      console.log(`[mapTechnologyData] Using description as fallback: "${summaryText.substring(0, 50)}..."`);
+    }
+  } 
+  // If no sections or no summary/description in sections, try technology-level description
+  else if (tech.description) {
+    summaryText = tech.description;
+    console.log(`[mapTechnologyData] Using tech.description: "${summaryText.substring(0, 50)}..."`);
+  }
+  
+  console.log(`[mapTechnologyData] Technology '${tech.title}' summary data:`, {
+    hasSections: !!tech.sections && tech.sections.length > 0,
+    sectionSummary: tech.sections?.[0]?.summary,
     sectionDescription: tech.sections?.[0]?.description,
+    techDescription: tech.description,
     finalSummary: summaryText,
     summaryLength: summaryText.length
   });
