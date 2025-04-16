@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyHeroSimple from '@/components/technology/TechnologyHeroSimple';
@@ -9,9 +10,10 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TechFeature } from '@/types/technology';
 import { AlertTriangle } from 'lucide-react';
+import { CMSTechnology } from '@/types/cms';
 
 // Helper function to transform CMSTechnology data to the format expected by TechnologySection
-const mapTechnologyData = (tech) => {
+const mapTechnologyData = (tech: CMSTechnology) => {
   // Extract features from technology sections if available
   const features: TechFeature[] = tech.sections?.[0]?.features?.map(feature => ({
     icon: feature.icon || 'server',
@@ -20,25 +22,26 @@ const mapTechnologyData = (tech) => {
     items: feature.items?.map(item => item.text) || []
   })) || [];
 
-  // According to the Contentful schema, the main description is stored in the "description" field
-  // Make sure we extract this value and use it as the summary
+  // Extract the main summary from the description field (most reliable source)
   const summary = tech.description || '';
   
-  console.log(`Processing tech '${tech.title}' with title: '${tech.title}'`);
-  console.log(`Processing tech '${tech.title}' with description field: '${summary}'`);
+  // Log detailed information about the extracted summary
+  console.log(`[mapTechnologyData] Processing tech '${tech.title}'`, {
+    techId: tech.id,
+    summarySource: 'description',
+    summaryValue: summary,
+    summaryLength: summary?.length || 0,
+    rawDescription: tech.description
+  });
   
   // Extract bullet points if available
   const bulletPoints = tech.sections?.[0]?.bulletPoints || [];
 
   // Extract image URL from the technology or its sections with proper fallbacks
   const imageUrl = 
-    // Check for direct image_url
     (tech.image_url) || 
-    // Check for image object with url property
     (tech.image && typeof tech.image === 'object' && tech.image.url) ||
-    // Check for string image
     (tech.image && typeof tech.image === 'string' ? tech.image : '') ||
-    // Check for section images
     (tech.sections?.[0]?.sectionImage?.url) ||
     (tech.sections?.[0]?.image?.url) ||
     (tech.sections?.[0]?.images?.[0]?.url) ||
@@ -63,7 +66,20 @@ const SimpleTechnologyPage = () => {
   // Transform technology data for rendering
   const transformedTechnologies = technologies.map(mapTechnologyData);
 
-  console.log("Transformed Technologies:", transformedTechnologies);
+  // Log the transformed technologies to help debug the summary issue
+  useEffect(() => {
+    if (transformedTechnologies.length > 0) {
+      console.log("[SimpleTechnologyPage] Transformed Technologies:", transformedTechnologies);
+      transformedTechnologies.forEach(tech => {
+        console.log(`[SimpleTechnologyPage] Tech '${tech.title}' summary:`, {
+          summary: tech.summary,
+          summaryType: typeof tech.summary,
+          summaryLength: tech.summary?.length || 0,
+          hasSummaryContent: !!tech.summary && tech.summary.trim() !== ''
+        });
+      });
+    }
+  }, [transformedTechnologies]);
 
   return (
     <Layout>

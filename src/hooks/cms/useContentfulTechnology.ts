@@ -22,11 +22,19 @@ export function useContentfulTechnology() {
         const mappedEntries = entries.map(entry => {
           console.log('[useContentfulTechnology] Processing entry:', entry.fields);
           
+          // Make sure we log the description field specifically to verify it exists
+          console.log(`[useContentfulTechnology] Entry '${entry.fields.title}' description:`, {
+            hasDescription: !!entry.fields.description,
+            descriptionValue: entry.fields.description,
+            descriptionType: typeof entry.fields.description,
+            descriptionLength: entry.fields.description?.length
+          });
+          
           return {
             id: entry.sys?.id,
             title: entry.fields.title,
             slug: entry.fields.slug,
-            description: entry.fields.description, // Make sure we capture the description field
+            description: entry.fields.description, // Ensure description is properly mapped
             visible: entry.fields.visible ?? true,
             image: entry.fields.image ? {
               id: entry.fields.image.sys?.id,
@@ -56,7 +64,13 @@ export function useContentfulTechnology() {
           };
         }) as CMSTechnology[];
         
-        console.log('[useContentfulTechnology] Mapped entries:', mappedEntries);
+        console.log('[useContentfulTechnology] Mapped entries with descriptions:', 
+          mappedEntries.map(entry => ({ 
+            title: entry.title, 
+            description: entry.description,
+            descriptionLength: entry.description?.length || 0
+          }))
+        );
         
         return mappedEntries;
       } catch (error) {
@@ -92,13 +106,16 @@ export function useContentfulTechnologyBySlug(slug: string | undefined) {
         }
 
         const entry = entries[0];
-        console.log(`[useContentfulTechnologyBySlug] Found entry with title: ${entry.fields.title}, description: ${entry.fields.description}`);
+        console.log(`[useContentfulTechnologyBySlug] Found entry with title: ${entry.fields.title}`, {
+          description: entry.fields.description,
+          descriptionLength: entry.fields.description?.length || 0
+        });
         
         return {
           id: entry.sys?.id,
           title: entry.fields.title,
           slug: entry.fields.slug,
-          description: entry.fields.description, // Correctly map the description field
+          description: entry.fields.description, // Ensure description is mapped correctly
           visible: entry.fields.visible ?? true,
           image: entry.fields.image ? {
             id: entry.fields.image.sys?.id,

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { cn } from "@/lib/utils";
 
 interface TechnologySectionProps {
@@ -26,16 +26,16 @@ const TechnologySection = ({
   // Ensure image is valid and includes proper fallback
   const imageUrl = image || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
 
-  // Debug logging
-  console.log(`TechnologySection rendering: ${title}`, {
-    title,
-    summary: summary || '(empty summary)',
-    summaryType: typeof summary,
-    summaryLength: summary?.length || 0,
-    hasSummary: !!summary,
-    bulletPoints,
-    imageUrl
-  });
+  // Debug logging on component mount and whenever summary changes
+  useEffect(() => {
+    console.log(`[TechnologySection] ${title} - Summary:`, {
+      summaryValue: summary,
+      summaryType: typeof summary,
+      summaryLength: summary?.length || 0,
+      hasSummaryContent: !!summary && summary.trim() !== '',
+      trimmedSummary: summary?.trim() || '(empty after trim)'
+    });
+  }, [title, summary]);
 
   return (
     <section id={id} className={cn("py-16 bg-gradient-to-b from-white to-gray-50", className)}>
@@ -50,7 +50,7 @@ const TechnologySection = ({
                 className="absolute inset-0 w-full h-full object-cover"
                 onError={(e) => {
                   e.currentTarget.src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
-                  console.log("Image failed to load, using fallback");
+                  console.log(`[TechnologySection] Image failed to load for "${title}", using fallback`);
                 }}
               />
             </div>
@@ -61,9 +61,15 @@ const TechnologySection = ({
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
               
-              {/* Summary display with debug border to make it visible during development */}
-              {summary && summary.trim() !== '' && (
-                <p className="text-lg text-muted-foreground">{summary}</p>
+              {/* Summary display with better debug info */}
+              {summary && summary.trim() !== '' ? (
+                <p className="text-lg text-muted-foreground" data-testid="technology-summary">
+                  {summary}
+                </p>
+              ) : (
+                <div className="hidden">
+                  {console.log(`[TechnologySection] Summary not displayed for "${title}" - empty or undefined`)}
+                </div>
               )}
               
               {bulletPoints && bulletPoints.length > 0 && (
