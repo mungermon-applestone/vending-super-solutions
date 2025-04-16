@@ -7,6 +7,7 @@ import { RefreshCw, CheckCircle, AlertTriangle, Settings, Database, ExternalLink
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
+import { resetContentfulClient } from '@/services/cms/utils/contentfulClient';
 
 const CMSConnectionTest: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -69,6 +70,7 @@ const CMSConnectionTest: React.FC = () => {
     
     try {
       console.log('[CMSConnectionTest] Starting Contentful connection test');
+      resetContentfulClient(); // Reset client to ensure we get a fresh connection
       const result = await testContentfulConnection();
       console.log('[CMSConnectionTest] Test result:', result);
 

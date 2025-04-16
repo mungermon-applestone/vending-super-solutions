@@ -124,9 +124,9 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
     const response = await client.getEntries(query);
     console.log(`[fetchContentfulEntries] Fetched ${response.items.length} entries for ${contentType}`);
     
-    if (contentType === 'businessGoal') {
-      // Special handling for business goals to help debug
-      console.log(`[fetchContentfulEntries] Business goals content details:`, {
+    if (contentType === 'productType') {
+      // Special handling for product types to help debug
+      console.log(`[fetchContentfulEntries] Product types content details:`, {
         count: response.items.length,
         items: response.items.map(item => ({
           id: item.sys?.id,
