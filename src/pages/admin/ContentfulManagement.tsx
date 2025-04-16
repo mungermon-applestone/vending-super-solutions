@@ -4,6 +4,7 @@ import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CMSConnectionTest from '@/components/admin/cms/CMSConnectionTest';
 import ContentfulTypeCreator from '@/components/admin/cms/ContentfulTypeCreator';
+import ContentfulHeroContent from '@/components/admin/cms/ContentfulHeroContent';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 
@@ -43,6 +44,7 @@ const ContentfulManagement: React.FC = () => {
           <TabsList className="mb-8">
             <TabsTrigger value="connection">Connection</TabsTrigger>
             <TabsTrigger value="content-types">Content Types</TabsTrigger>
+            <TabsTrigger value="hero-content">Hero Content</TabsTrigger>
           </TabsList>
           
           <TabsContent value="connection">
@@ -54,6 +56,12 @@ const ContentfulManagement: React.FC = () => {
           <TabsContent value="content-types">
             <div className="grid gap-6">
               <ContentfulTypeCreator />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="hero-content">
+            <div className="grid gap-6">
+              <ContentfulHeroContent />
             </div>
           </TabsContent>
         </Tabs>
