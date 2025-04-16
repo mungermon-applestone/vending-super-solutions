@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { ContentfulTechnology } from '@/types/contentful';
@@ -43,8 +44,9 @@ export function useContentfulTechnology() {
               // Process bullet points if they exist
               const bulletPoints = Array.isArray(sectionFields.bulletPoints) ? sectionFields.bulletPoints : [];
               
-              // Process the section image
-              let sectionImage: CMSImage | undefined = undefined;
+              // Process the section image - simplified to just provide the URL directly
+              let sectionImage: any = undefined;
+              
               if (sectionFields.sectionImage) {
                 // Check if this is a resolved asset or a link
                 if (sectionFields.sectionImage.fields && sectionFields.sectionImage.fields.file) {
@@ -57,6 +59,8 @@ export function useContentfulTechnology() {
                   };
                 } else if (sectionFields.sectionImage.sys && sectionFields.sectionImage.sys.type === 'Link') {
                   console.warn('[useContentfulTechnology] Section image is a Link reference but not resolved:', sectionFields.sectionImage);
+                  // Provide empty object with just url
+                  sectionImage = { url: '' };
                 }
               }
               

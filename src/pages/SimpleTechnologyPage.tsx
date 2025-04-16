@@ -20,22 +20,25 @@ const SimpleTechnologyPage = () => {
   console.log('Technologies from hook:', technologies);
   console.log('Main technology:', mainTechnology);
   
-  // Helper function to safely get image URL and alt
-  const getImageProps = (image: string | CMSImage | undefined): { url: string; alt: string } => {
-    if (!image) return { url: '', alt: '' };
+  // Helper function to safely get image URL
+  const getImageUrl = (image: any): string => {
+    if (!image) return '';
     
     if (typeof image === 'string') {
-      return { 
-        url: image, 
-        alt: 'Technology image' 
-      };
+      return image;
+    }
+    
+    // If it's an object with url property
+    if (image.url) {
+      return image.url;
     }
     
     // If it's a CMSImage object
-    return {
-      url: image.url || '',
-      alt: image.alt || 'Technology image'
-    };
+    if (image.id && image.alt) {
+      return image.url || '';
+    }
+    
+    return '';
   };
 
   if (isLoading) {
@@ -80,16 +83,19 @@ const SimpleTechnologyPage = () => {
 
   console.log('Sections available:', mainTechnology.sections);
   
-  // Get hero image props
-  const heroImageProps = getImageProps(mainTechnology.image);
+  // Get hero image URL
+  const heroImageUrl = getImageUrl(mainTechnology.image);
+  const heroImageAlt = typeof mainTechnology.image === 'object' && 'alt' in mainTechnology.image 
+    ? mainTechnology.image.alt 
+    : 'Technology image';
   
   return (
     <Layout>
       <TechnologyHeroSimple
         title={mainTechnology.title}
         description={mainTechnology.description}
-        imageUrl={heroImageProps.url}
-        imageAlt={heroImageProps.alt}
+        imageUrl={heroImageUrl}
+        imageAlt={heroImageAlt}
       />
       
       {mainTechnology.sections && mainTechnology.sections.length > 0 ? (
@@ -97,9 +103,9 @@ const SimpleTechnologyPage = () => {
           {mainTechnology.sections.map((section, index) => {
             console.log('Rendering section:', section);
             
-            // Get section image properly
+            // Get section image URL directly
             const sectionImage = section.sectionImage || section.image;
-            const imageProps = getImageProps(sectionImage);
+            const imageUrl = getImageUrl(sectionImage);
             
             return (
               <TechnologySection
@@ -108,7 +114,7 @@ const SimpleTechnologyPage = () => {
                 title={section.title || ''}
                 summary={section.summary || section.description || ''}
                 bulletPoints={section.bulletPoints || []}
-                image={imageProps.url} // Just pass the URL string, not the object
+                image={imageUrl}
                 index={index}
               />
             );
