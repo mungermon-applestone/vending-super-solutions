@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyHeroSimple from '@/components/technology/TechnologyHeroSimple';
@@ -9,7 +9,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import CTASection from '@/components/common/CTASection';
 import useTechnologySections from '@/hooks/useTechnologySections';
 import { CMSImage } from '@/types/cms';
-import { toast } from 'sonner';
 
 const SimpleTechnologyPage = () => {
   // Use the custom hook to fetch technology data
@@ -21,12 +20,6 @@ const SimpleTechnologyPage = () => {
   console.log('Technologies from hook:', technologies);
   console.log('Main technology:', mainTechnology);
   
-  useEffect(() => {
-    if (mainTechnology) {
-      console.log('Technology sections data structure:', mainTechnology.sections);
-    }
-  }, [mainTechnology]);
-  
   // Helper function to safely get image URL
   const getImageUrl = (image: any): string => {
     if (!image) return '';
@@ -36,8 +29,13 @@ const SimpleTechnologyPage = () => {
     }
     
     // If it's an object with url property
-    if (image && image.url) {
+    if (image.url) {
       return image.url;
+    }
+    
+    // If it's a CMSImage object
+    if (image.id && image.alt) {
+      return image.url || '';
     }
     
     return '';
@@ -56,7 +54,6 @@ const SimpleTechnologyPage = () => {
   }
 
   if (error) {
-    console.error('Error loading technology data:', error);
     return (
       <Layout>
         <div className="container mx-auto py-12">
@@ -71,7 +68,6 @@ const SimpleTechnologyPage = () => {
   }
 
   if (!mainTechnology) {
-    toast.error('No technology data available');
     return (
       <Layout>
         <div className="container mx-auto py-12">
@@ -93,9 +89,6 @@ const SimpleTechnologyPage = () => {
     ? mainTechnology.image.alt 
     : 'Technology image';
   
-  // Check if sections is an array, if not, force it to be an empty array
-  const sections = Array.isArray(mainTechnology.sections) ? mainTechnology.sections : [];
-  
   return (
     <Layout>
       <TechnologyHeroSimple
@@ -105,9 +98,9 @@ const SimpleTechnologyPage = () => {
         imageAlt={heroImageAlt}
       />
       
-      {sections && sections.length > 0 ? (
+      {mainTechnology.sections && mainTechnology.sections.length > 0 ? (
         <div className="pb-12">
-          {sections.map((section, index) => {
+          {mainTechnology.sections.map((section, index) => {
             console.log('Rendering section:', section);
             
             // Get section image URL directly

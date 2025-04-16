@@ -1,3 +1,4 @@
+
 import { CMSTechnology } from '@/types/cms';
 import { useCMSQuery } from './useCMSQuery';
 import { improvedTechnologyAdapter } from '@/services/cms/adapters/technologies/improvedTechnologyAdapter';
@@ -25,12 +26,7 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
     try {
       const technologies = await improvedTechnologyAdapter.getAll();
       console.log('[useTechnologySections] Retrieved technologies from Supabase:', technologies);
-      
-      // Ensure each technology has a sections array
-      return technologies.map(tech => ({
-        ...tech,
-        sections: Array.isArray(tech.sections) ? tech.sections : []
-      }));
+      return technologies;
     } catch (error) {
       console.error('[useTechnologySections] Error fetching technologies from Supabase:', error);
       throw error;
@@ -46,21 +42,9 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
   });
   
   // Combine results, preferring Contentful data if available
-  let data = [];
-  
-  if (contentfulQuery.data && contentfulQuery.data.length > 0) {
-    console.log('[useTechnologySections] Using Contentful data:', contentfulQuery.data);
-    data = contentfulQuery.data;
-  } else if (supabaseQuery.data && supabaseQuery.data.length > 0) {
-    console.log('[useTechnologySections] Using Supabase data:', supabaseQuery.data);
-    data = supabaseQuery.data;
-  }
-  
-  // Ensure each technology has its sections array initialized
-  data = data.map(tech => ({
-    ...tech,
-    sections: Array.isArray(tech.sections) ? tech.sections : []
-  }));
+  const data = contentfulQuery.data && contentfulQuery.data.length > 0 
+    ? contentfulQuery.data 
+    : supabaseQuery.data || [];
   
   const isLoading = contentfulQuery.isLoading || supabaseQuery.isLoading;
   const error = contentfulQuery.error || supabaseQuery.error;

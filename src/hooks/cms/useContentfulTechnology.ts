@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { ContentfulTechnology } from '@/types/contentful';
@@ -25,7 +26,7 @@ export function useContentfulTechnology() {
           let sections: CMSTechnologySection[] = [];
           
           if (entry.fields.sections && Array.isArray(entry.fields.sections)) {
-            console.log('[useContentfulTechnology] Processing sections. Count:', entry.fields.sections.length);
+            console.log('[useContentfulTechnology] Processing sections:', entry.fields.sections.length);
             
             sections = entry.fields.sections.map((sectionRef: any) => {
               // For linked entries, we need to access their fields
@@ -43,22 +44,23 @@ export function useContentfulTechnology() {
               // Process bullet points if they exist
               const bulletPoints = Array.isArray(sectionFields.bulletPoints) ? sectionFields.bulletPoints : [];
               
-              // Process the section image - simplified approach
-              let imageUrl = '';
-              let sectionImage = null;
+              // Process the section image - simplified to just provide the URL directly
+              let sectionImage: any = undefined;
               
               if (sectionFields.sectionImage) {
                 // Check if this is a resolved asset or a link
                 if (sectionFields.sectionImage.fields && sectionFields.sectionImage.fields.file) {
                   // This is a properly resolved asset
-                  imageUrl = `https:${sectionFields.sectionImage.fields.file.url}`;
+                  const imageFile = sectionFields.sectionImage.fields.file;
                   sectionImage = {
                     id: sectionFields.sectionImage.sys?.id || '',
-                    url: imageUrl,
+                    url: `https:${imageFile.url}`,
                     alt: sectionFields.sectionImage.fields.title || sectionFields.title || 'Section image'
                   };
                 } else if (sectionFields.sectionImage.sys && sectionFields.sectionImage.sys.type === 'Link') {
                   console.warn('[useContentfulTechnology] Section image is a Link reference but not resolved:', sectionFields.sectionImage);
+                  // Provide empty object with just url
+                  sectionImage = { url: '' };
                 }
               }
               
@@ -74,7 +76,6 @@ export function useContentfulTechnology() {
                 technology_id: entry.sys?.id || '',
                 bulletPoints,
                 sectionImage,
-                image: sectionImage, // Adding both formats for compatibility
                 features: []
               };
             }).filter(Boolean) as CMSTechnologySection[];
@@ -94,19 +95,15 @@ export function useContentfulTechnology() {
             }
           }
           
-          // Create the technology object with guaranteed sections
-          const technology: CMSTechnology = {
+          return {
             id: entry.sys?.id || '',
             title: entry.fields.title || '',
             slug: entry.fields.slug || '',
             description: entry.fields.description || '',
             visible: entry.fields.visible ?? true,
             image: mainImage,
-            sections: sections
-          };
-          
-          console.log('[useContentfulTechnology] Created technology object:', technology);
-          return technology;
+            sections
+          } as CMSTechnology;
         });
         
         console.log('[useContentfulTechnology] Final mapped entries:', mappedEntries);
