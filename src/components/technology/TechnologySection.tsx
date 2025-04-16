@@ -37,10 +37,6 @@ const TechnologySection = ({
     });
   }, [title, summary]);
 
-  // Process summary for display - ensure it's a string and trim whitespace
-  const displaySummary = typeof summary === 'string' ? summary.trim() : '';
-  const showSummary = displaySummary !== '';
-
   return (
     <section id={id} className={cn("py-16 bg-gradient-to-b from-white to-gray-50", className)}>
       <div className="container max-w-7xl mx-auto px-4">
@@ -65,19 +61,11 @@ const TechnologySection = ({
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
               
-              {showSummary && (
+              {/* Always try to display the summary with proper error handling */}
+              {summary && (
                 <p className="text-lg text-muted-foreground" data-testid="technology-summary">
-                  {displaySummary}
+                  {summary}
                 </p>
-              )}
-              
-              {!showSummary && (
-                <div className="hidden" data-testid="missing-summary">
-                  {(() => {
-                    console.log(`[TechnologySection] Summary not displayed for "${title}" - empty or undefined`);
-                    return null;
-                  })()}
-                </div>
               )}
               
               {bulletPoints && bulletPoints.length > 0 && (
