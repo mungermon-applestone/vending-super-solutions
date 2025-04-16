@@ -10,36 +10,38 @@ import { Link } from 'react-router-dom';
 
 const ContentfulManagement: React.FC = () => {
   return (
-    <AdminLayout>
-      <div className="container mx-auto py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Contentful Content Management</h1>
-          <Link to="/admin/settings">
-            <Button variant="outline">Back to Settings</Button>
-          </Link>
+    <div className="flex min-h-screen">
+      <div className="flex-1 overflow-auto">
+        <div className="container mx-auto py-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">Contentful Content Management</h1>
+            <Link to="/admin/settings">
+              <Button variant="outline">Back to Settings</Button>
+            </Link>
+          </div>
+          
+          <Tabs defaultValue="types">
+            <TabsList className="mb-6">
+              <TabsTrigger value="types">Content Types</TabsTrigger>
+              <TabsTrigger value="hero">Hero Content</TabsTrigger>
+              <TabsTrigger value="products">Product Types</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="types">
+              <ContentfulTypeCreator />
+            </TabsContent>
+            
+            <TabsContent value="hero">
+              <ContentfulHeroContent />
+            </TabsContent>
+            
+            <TabsContent value="products">
+              <ContentfulProductTypes />
+            </TabsContent>
+          </Tabs>
         </div>
-        
-        <Tabs defaultValue="types">
-          <TabsList className="mb-6">
-            <TabsTrigger value="types">Content Types</TabsTrigger>
-            <TabsTrigger value="hero">Hero Content</TabsTrigger>
-            <TabsTrigger value="products">Product Types</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="types">
-            <ContentfulTypeCreator />
-          </TabsContent>
-          
-          <TabsContent value="hero">
-            <ContentfulHeroContent />
-          </TabsContent>
-          
-          <TabsContent value="products">
-            <ContentfulProductTypes />
-          </TabsContent>
-        </Tabs>
       </div>
-    </AdminLayout>
+    </div>
   );
 };
 
