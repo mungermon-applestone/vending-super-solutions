@@ -100,3 +100,6 @@ export const testContentfulConnection = async () => {
     };
   }
 };
+
+// Add the alias for testCMSConnection to make existing code work
+export const testCMSConnection = testContentfulConnection;
