@@ -46,16 +46,18 @@ export function useContentfulTechnology() {
       // Transform entries to our app format
       const technologies = entries.items.map(entry => {
         const fields = entry.fields;
+        const technologyId = entry.sys.id;
         
         console.log(`[useContentfulTechnology] Processing technology entry:`, {
-          id: entry.sys.id,
+          id: technologyId,
           title: fields.title,
           hasSections: Array.isArray(fields.sections) ? fields.sections.length : 0
         });
         
         // Process sections if they exist
-        const sections = fields.sections ? (fields.sections as any[]).map(section => {
+        const sections = fields.sections ? (fields.sections as any[]).map((section, index) => {
           const sectionFields = section.fields;
+          const sectionId = section.sys.id;
           
           // Process features if they exist for this section
           const features = sectionFields.features ? 
@@ -64,9 +66,11 @@ export function useContentfulTechnology() {
               
               return {
                 id: feature.sys.id,
+                section_id: sectionId,
                 title: featureFields.title,
                 description: featureFields.description,
                 icon: featureFields.icon || undefined,
+                display_order: featureFields.displayOrder || index,
                 image: featureFields.image ? {
                   id: (featureFields.image as any).sys.id,
                   url: `https:${(featureFields.image as any).fields.file.url}`,
@@ -75,39 +79,45 @@ export function useContentfulTechnology() {
               };
             }) : [];
           
+          // Create a section object that matches the CMSTechnologySection type
           return {
-            id: section.sys.id,
+            id: sectionId,
+            technology_id: technologyId,
             title: sectionFields.title,
             subtitle: sectionFields.subtitle || '',
             description: sectionFields.description || '',
+            summary: sectionFields.summary || '',
+            section_type: sectionFields.sectionType || 'feature',
+            display_order: sectionFields.displayOrder || index,
             features: features,
+            images: [],
+            bulletPoints: sectionFields.bulletPoints || [],
             image: sectionFields.image ? {
               id: (sectionFields.image as any).sys.id,
               url: `https:${(sectionFields.image as any).fields.file.url}`,
               alt: sectionFields.imageAlt || sectionFields.title
             } : undefined,
-            backgroundColor: sectionFields.backgroundColor || 'white',
-            displayOrder: sectionFields.displayOrder || 0
+            sectionImage: sectionFields.sectionImage ? {
+              url: `https:${(sectionFields.sectionImage as any).fields.file.url}`,
+              alt: sectionFields.imageAlt || sectionFields.title
+            } : undefined
           };
         }) : [];
         
         // Create the technology object based on our app's data structure
-        // Adding the missing required fields: slug and visible
         return {
-          id: entry.sys.id,
+          id: technologyId,
           title: fields.title as string,
           subtitle: fields.subtitle as string || '',
           description: fields.description as string || '',
-          // Add the missing slug field, use the slug from fields or generate one from title
           slug: (fields.slug as string) || ((fields.title as string)?.toLowerCase().replace(/\s+/g, '-') || ''),
-          // Add the missing visible field with default value true
           visible: typeof fields.visible === 'boolean' ? fields.visible : true,
           image: fields.heroImage ? {
             id: (fields.heroImage as any).sys.id,
             url: `https:${(fields.heroImage as any).fields.file.url}`,
             alt: (fields.heroImage as any).fields.title || fields.title,
           } : undefined,
-          sections: sections.sort((a, b) => a.displayOrder - b.displayOrder),
+          sections: sections,
           primaryButtonText: fields.primaryButtonText as string || 'Contact Us',
           primaryButtonUrl: fields.primaryButtonUrl as string || '/contact',
           secondaryButtonText: fields.secondaryButtonText as string || 'Learn More',
