@@ -8,31 +8,34 @@ interface TechnologySectionsProps {
 }
 
 const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => {
+  // Handle case when sections is undefined or empty
+  if (!sections || sections.length === 0) {
+    console.warn('[TechnologySections] No sections provided');
+    return (
+      <div className="py-12 text-center">
+        <p className="text-muted-foreground">No technology sections available.</p>
+      </div>
+    );
+  }
+
   // Sort sections by display order
   const sortedSections = [...sections].sort(
     (a, b) => a.display_order - b.display_order
   );
 
-  // Debug logging for incoming sections
-  console.log('[TechnologySections] Incoming sections:', sections);
-
   return (
     <div>
       {sortedSections.map((section, index) => {
-        // Detailed logging for each section
-        console.log(`[TechnologySections] Processing section ${index}:`, {
-          id: section.id,
-          title: section.title,
-          summary: section.summary,
-          hasSummary: !!section.summary,
-          summaryLength: section.summary?.length,
-          image: section.sectionImage?.url || section.image?.url || ''
-        });
+        // Skip sections without a title as they're likely invalid
+        if (!section.title) {
+          console.warn(`[TechnologySections] Section at index ${index} has no title, skipping`);
+          return null;
+        }
         
         return (
           <TechnologySection 
-            key={section.id} 
-            id={section.id}
+            key={section.id || `section-${index}`} 
+            id={section.id || `section-${index}`}
             title={section.title}
             summary={section.summary || ''}
             bulletPoints={section.bulletPoints || []}
