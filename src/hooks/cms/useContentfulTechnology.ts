@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { ContentfulTechnology } from '@/types/contentful';
-import { CMSTechnology, CMSTechnologySection, CMSTechnologyFeature, CMSImage } from '@/types/cms';
+import { CMSTechnology, CMSTechnologySection, CMSTechnologyFeature } from '@/types/cms';
 
 export function useContentfulTechnology() {
   return useQuery({
@@ -19,94 +19,40 @@ export function useContentfulTechnology() {
           return [];
         }
         
-        const mappedEntries = entries.map(entry => {
-          console.log('[useContentfulTechnology] Processing entry:', entry.fields.title);
-          
-          // Map technology sections with proper field access
-          let sections: CMSTechnologySection[] = [];
-          
-          if (entry.fields.sections && Array.isArray(entry.fields.sections)) {
-            console.log('[useContentfulTechnology] Processing sections:', entry.fields.sections.length);
-            
-            sections = entry.fields.sections.map((sectionRef: any) => {
-              // For linked entries, we need to access their fields
-              if (sectionRef.sys && sectionRef.sys.type === 'Link') {
-                console.error('[useContentfulTechnology] Section is a Link reference but not resolved:', sectionRef);
-                return null;
-              }
-              
-              // If properly resolved by Contentful SDK, we can access the fields directly
-              const sectionFields = sectionRef.fields || {};
-              const sectionId = sectionRef.sys?.id || '';
-              
-              console.log('[useContentfulTechnology] Processing section:', sectionId, sectionFields);
-              
-              // Process bullet points if they exist
-              const bulletPoints = Array.isArray(sectionFields.bulletPoints) ? sectionFields.bulletPoints : [];
-              
-              // Process the section image - simplified to just provide the URL directly
-              let sectionImage: any = undefined;
-              
-              if (sectionFields.sectionImage) {
-                // Check if this is a resolved asset or a link
-                if (sectionFields.sectionImage.fields && sectionFields.sectionImage.fields.file) {
-                  // This is a properly resolved asset
-                  const imageFile = sectionFields.sectionImage.fields.file;
-                  sectionImage = {
-                    id: sectionFields.sectionImage.sys?.id || '',
-                    url: `https:${imageFile.url}`,
-                    alt: sectionFields.sectionImage.fields.title || sectionFields.title || 'Section image'
-                  };
-                } else if (sectionFields.sectionImage.sys && sectionFields.sectionImage.sys.type === 'Link') {
-                  console.warn('[useContentfulTechnology] Section image is a Link reference but not resolved:', sectionFields.sectionImage);
-                  // Provide empty object with just url
-                  sectionImage = { url: '' };
-                }
-              }
-              
-              console.log('[useContentfulTechnology] Processed section image:', sectionImage);
-              
-              return {
-                id: sectionId,
-                title: sectionFields.title || '',
-                summary: sectionFields.summary || '',
-                description: sectionFields.summary || '',
-                section_type: 'technology',
-                display_order: sectionFields.displayOrder || 0,
-                technology_id: entry.sys?.id || '',
-                bulletPoints,
-                sectionImage,
-                features: []
-              };
-            }).filter(Boolean) as CMSTechnologySection[];
-          }
-          
-          console.log('[useContentfulTechnology] Mapped sections:', sections);
-          
-          // Process the main technology image
-          let mainImage: CMSImage | undefined;
-          if (entry.fields.image) {
-            if (entry.fields.image.fields && entry.fields.image.fields.file) {
-              mainImage = {
-                id: entry.fields.image.sys?.id || '',
-                url: `https:${entry.fields.image.fields.file.url}`,
-                alt: entry.fields.image.fields.title || entry.fields.title || 'Technology image'
-              };
-            }
-          }
-          
-          return {
-            id: entry.sys?.id || '',
-            title: entry.fields.title || '',
-            slug: entry.fields.slug || '',
-            description: entry.fields.description || '',
-            visible: entry.fields.visible ?? true,
-            image: mainImage,
-            sections
-          } as CMSTechnology;
-        });
+        const mappedEntries = entries.map(entry => ({
+          id: entry.sys?.id,
+          title: entry.fields.title,
+          slug: entry.fields.slug,
+          description: entry.fields.description,
+          visible: entry.fields.visible ?? true,
+          image: entry.fields.image ? {
+            id: entry.fields.image.sys?.id,
+            url: `https:${entry.fields.image.fields?.file?.url}`,
+            alt: entry.fields.image.fields?.title || entry.fields.title
+          } : undefined,
+          sections: (entry.fields.sections || []).map((section: any) => ({
+            id: section.sys?.id,
+            title: section.fields?.title,
+            description: section.fields?.description,
+            section_type: section.fields?.sectionType,
+            display_order: section.fields?.displayOrder || 0,
+            technology_id: entry.sys?.id,
+            features: (section.fields?.features || []).map((feature: any) => ({
+              id: feature.sys?.id,
+              section_id: section.sys?.id,
+              title: feature.fields?.title,
+              description: feature.fields?.description,
+              icon: feature.fields?.icon,
+              display_order: feature.fields?.displayOrder || 0,
+              items: feature.fields?.items ? feature.fields.items.map((item: string) => ({
+                text: item,
+                display_order: 0
+              })) : []
+            })) as CMSTechnologyFeature[]
+          })) as CMSTechnologySection[]
+        })) as CMSTechnology[];
         
-        console.log('[useContentfulTechnology] Final mapped entries:', mappedEntries);
+        console.log('[useContentfulTechnology] Mapped entries:', mappedEntries);
         
         return mappedEntries;
       } catch (error) {

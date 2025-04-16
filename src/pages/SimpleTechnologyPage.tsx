@@ -4,133 +4,105 @@ import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyHeroSimple from '@/components/technology/TechnologyHeroSimple';
 import TechnologySection from '@/components/technology/TechnologySection';
+import { useTechnologySections } from '@/hooks/useTechnologySections';
+import { useIsFetching } from '@tanstack/react-query';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import CTASection from '@/components/common/CTASection';
-import useTechnologySections from '@/hooks/useTechnologySections';
-import { CMSImage } from '@/types/cms';
+import { TechFeature } from '@/types/technology';
+
+// Helper function to transform CMSTechnology data to the format expected by TechnologySection
+const mapTechnologyData = (tech) => {
+  // Extract features from technology sections if available
+  const features: TechFeature[] = tech.sections?.[0]?.features?.map(feature => ({
+    icon: feature.icon || 'server',
+    title: feature.title || '',
+    description: feature.description || '',
+    items: feature.items?.map(item => item.text) || []
+  })) || [];
+
+  // Extract image URL from the technology or its sections
+  const imageUrl = tech.image_url || 
+    (tech.image && typeof tech.image === 'string' ? tech.image : 
+    tech.image?.url) || 
+    tech.sections?.[0]?.images?.[0]?.url || 
+    'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789';
+
+  return {
+    id: tech.id,
+    title: tech.title,
+    summary: tech.description, // Changed from description to summary
+    features: features,
+    image: imageUrl
+  };
+};
 
 const SimpleTechnologyPage = () => {
-  // Use the custom hook to fetch technology data
   const { technologies = [], isLoading, error } = useTechnologySections();
-  
-  // Use the first technology entry for the page
-  const mainTechnology = technologies[0];
-  
-  console.log('Technologies from hook:', technologies);
-  console.log('Main technology:', mainTechnology);
-  
-  // Helper function to safely get image URL
-  const getImageUrl = (image: any): string => {
-    if (!image) return '';
-    
-    if (typeof image === 'string') {
-      return image;
-    }
-    
-    // If it's an object with url property
-    if (image.url) {
-      return image.url;
-    }
-    
-    // If it's a CMSImage object
-    if (image.id && image.alt) {
-      return image.url || '';
-    }
-    
-    return '';
-  };
+  const isFetching = useIsFetching({ queryKey: ['technologies'] }) > 0;
 
-  if (isLoading) {
-    return (
-      <Layout>
-        <div className="container mx-auto py-12">
-          <Skeleton className="h-64 w-full mb-8" />
-          <Skeleton className="h-32 w-3/4 mb-4" />
-          <Skeleton className="h-24 w-full" />
-        </div>
-      </Layout>
-    );
-  }
+  // Transform technology data for rendering
+  const transformedTechnologies = technologies.map(mapTechnologyData);
 
-  if (error) {
-    return (
-      <Layout>
-        <div className="container mx-auto py-12">
-          <Alert variant="destructive">
-            <AlertDescription>
-              {error instanceof Error ? error.message : 'Failed to load technology information'}
-            </AlertDescription>
-          </Alert>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (!mainTechnology) {
-    return (
-      <Layout>
-        <div className="container mx-auto py-12">
-          <Alert>
-            <AlertDescription>
-              No technology information available.
-            </AlertDescription>
-          </Alert>
-        </div>
-      </Layout>
-    );
-  }
-
-  console.log('Sections available:', mainTechnology.sections);
-  
-  // Get hero image URL
-  const heroImageUrl = getImageUrl(mainTechnology.image);
-  const heroImageAlt = typeof mainTechnology.image === 'object' && 'alt' in mainTechnology.image 
-    ? mainTechnology.image.alt 
-    : 'Technology image';
-  
   return (
     <Layout>
-      <TechnologyHeroSimple
-        title={mainTechnology.title}
-        description={mainTechnology.description}
-        imageUrl={heroImageUrl}
-        imageAlt={heroImageAlt}
+      {/* Hero Section */}
+      <TechnologyHeroSimple 
+        title="Our Technology Platform"
+        description="Powerful, reliable, and secure technology solutions designed specifically for the vending industry"
+        imageUrl="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789"
+        imageAlt="Vending Technology Platform"
       />
-      
-      {mainTechnology.sections && mainTechnology.sections.length > 0 ? (
-        <div className="pb-12">
-          {mainTechnology.sections.map((section, index) => {
-            console.log('Rendering section:', section);
-            
-            // Get section image URL directly
-            const sectionImage = section.sectionImage || section.image;
-            const imageUrl = getImageUrl(sectionImage);
-            
-            return (
-              <TechnologySection
-                key={section.id || `section-${index}`}
-                id={section.id || `section-${index}`}
-                title={section.title || ''}
-                summary={section.summary || section.description || ''}
-                bulletPoints={section.bulletPoints || []}
-                image={imageUrl}
-                index={index}
-              />
-            );
-          })}
+
+      {/* Loading State */}
+      {isFetching && (
+        <div className="container max-w-7xl mx-auto px-4 py-12">
+          <div className="space-y-12">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="flex flex-col md:flex-row gap-8">
+                <Skeleton className="h-64 w-full md:w-1/2" />
+                <div className="w-full md:w-1/2 space-y-4">
+                  <Skeleton className="h-10 w-3/4" />
+                  <Skeleton className="h-24 w-full" />
+                  <div className="grid grid-cols-1 gap-4">
+                    <Skeleton className="h-20" />
+                    <Skeleton className="h-20" />
+                    <Skeleton className="h-20" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      ) : (
-        <div className="container mx-auto py-12 text-center">
-          <Alert>
+      )}
+
+      {/* Error State */}
+      {transformedTechnologies.length === 0 && !isFetching && (
+        <div className="container max-w-7xl mx-auto px-4 py-12">
+          <Alert variant="destructive">
             <AlertDescription>
-              No technology sections available.
+              We're having trouble loading technology information. Please try again later.
             </AlertDescription>
           </Alert>
         </div>
       )}
-      
-      <CTASection />
+
+      {/* Technology Sections */}
+      {!isFetching && transformedTechnologies.length > 0 && (
+        <>
+          {transformedTechnologies.map((tech, index) => (
+            <TechnologySection
+              key={tech.id}
+              id={tech.id}
+              title={tech.title}
+              summary={tech.summary} // Changed from description to summary
+              image={tech.image}
+              index={index}
+            />
+          ))}
+        </>
+      )}
+
+      {/* Contact Form */}
       <InquiryForm title="Technology Solutions" />
     </Layout>
   );

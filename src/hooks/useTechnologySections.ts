@@ -2,8 +2,7 @@
 import { CMSTechnology } from '@/types/cms';
 import { useCMSQuery } from './useCMSQuery';
 import { improvedTechnologyAdapter } from '@/services/cms/adapters/technologies/improvedTechnologyAdapter';
-import { useQuery } from '@tanstack/react-query';
-import { useContentfulTechnology } from './cms/useContentfulTechnology';
+import { useQuery } from '@tanstack/react-query'; // Add this import for useQuery
 
 type UseTechnologySectionsOptions = {
   slug?: string;
@@ -17,52 +16,59 @@ type UseTechnologySectionsOptions = {
 export function useTechnologySections(options: UseTechnologySectionsOptions = {}) {
   const { slug, enableToasts = false, refetchInterval = false } = options;
   
-  // Try to get data from Contentful first
-  const contentfulQuery = useContentfulTechnology();
+  // If slug is provided, fetch a single technology by slug
+  if (slug) {
+    const fetchTechnology = async () => {
+      console.log(`[useTechnologySections] Fetching technology by slug: ${slug}`);
+      const technology = await improvedTechnologyAdapter.getBySlug(slug);
+      
+      if (!technology) {
+        throw new Error(`Technology with slug "${slug}" not found`);
+      }
+      
+      return technology;
+    };
+    
+    const query = useCMSQuery<CMSTechnology>({
+      queryKey: ['technology', slug],
+      queryFn: fetchTechnology,
+      enableToasts,
+      refetchInterval
+    });
+    
+    return {
+      technology: query.data,
+      isLoading: query.isLoading,
+      error: query.error,
+      refetch: query.refetch
+    };
+  }
   
-  // Fall back to Supabase if needed
+  // Otherwise, fetch all technologies
   const fetchAllTechnologies = async () => {
     console.log('[useTechnologySections] Fetching all technologies');
     try {
       const technologies = await improvedTechnologyAdapter.getAll();
-      console.log('[useTechnologySections] Retrieved technologies from Supabase:', technologies);
       return technologies;
     } catch (error) {
-      console.error('[useTechnologySections] Error fetching technologies from Supabase:', error);
+      console.error('[useTechnologySections] Error fetching technologies:', error);
       throw error;
     }
   };
   
-  const supabaseQuery = useCMSQuery<CMSTechnology[]>({
-    queryKey: ['technologies-supabase'],
+  const query = useCMSQuery<CMSTechnology[]>({
+    queryKey: ['technologies'],
     queryFn: fetchAllTechnologies,
     enableToasts,
     refetchInterval,
     initialData: []
   });
   
-  // Combine results, preferring Contentful data if available
-  const data = contentfulQuery.data && contentfulQuery.data.length > 0 
-    ? contentfulQuery.data 
-    : supabaseQuery.data || [];
-  
-  const isLoading = contentfulQuery.isLoading || supabaseQuery.isLoading;
-  const error = contentfulQuery.error || supabaseQuery.error;
-  
-  console.log('[useTechnologySections] Combined data:', {
-    contentful: contentfulQuery.data,
-    supabase: supabaseQuery.data,
-    final: data
-  });
-  
   return {
-    technologies: data,
-    isLoading,
-    error,
-    refetch: () => {
-      contentfulQuery.refetch();
-      supabaseQuery.refetch();
-    }
+    technologies: query.data || [],
+    isLoading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch
   };
 }
 
@@ -74,7 +80,7 @@ export function useTechnologyBySlug(slug: string) {
     queryFn: async () => {
       if (!slug) return null;
       try {
-        const { fetchTechnologyBySlug } = await import('@/services/cms/contentTypes/technologies');
+        const { fetchTechnologyBySlug } = await import('@/services/cms/technology');
         const technology = await fetchTechnologyBySlug(slug);
         console.log(`[useTechnologyBySlug] Fetched technology with slug "${slug}":`, technology);
         return technology;

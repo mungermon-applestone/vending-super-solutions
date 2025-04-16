@@ -26,7 +26,6 @@ import BusinessGoalDetail from './pages/BusinessGoalDetail';
 import BusinessGoalsLanding from './pages/BusinessGoalsLanding';
 import ContentfulTechnologyPage from './pages/ContentfulTechnologyPage';
 import TechnologyDetailPage from './pages/TechnologyDetailPage';
-import TechnologyTestPage from './pages/TechnologyTestPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,10 +84,6 @@ const router = createBrowserRouter([
   {
     path: "/technology/:technologySlug",
     element: <TechnologyDetailPage />,
-  },
-  {
-    path: "/technology-test",
-    element: <TechnologyTestPage />,
   },
   {
     path: "/about",
