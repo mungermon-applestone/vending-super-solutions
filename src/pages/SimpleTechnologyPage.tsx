@@ -108,7 +108,7 @@ const SimpleTechnologyPage = () => {
                 title={section.title || ''}
                 summary={section.summary || section.description || ''}
                 bulletPoints={section.bulletPoints || []}
-                image={imageProps.url}
+                image={imageProps.url} // Just pass the URL string, not the object
                 index={index}
               />
             );

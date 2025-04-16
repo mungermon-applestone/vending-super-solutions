@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { ContentfulTechnology } from '@/types/contentful';
-import { CMSTechnology, CMSTechnologySection, CMSTechnologyFeature } from '@/types/cms';
+import { CMSTechnology, CMSTechnologySection, CMSTechnologyFeature, CMSImage } from '@/types/cms';
 
 export function useContentfulTechnology() {
   return useQuery({
@@ -44,7 +44,7 @@ export function useContentfulTechnology() {
               const bulletPoints = Array.isArray(sectionFields.bulletPoints) ? sectionFields.bulletPoints : [];
               
               // Process the section image
-              let sectionImage;
+              let sectionImage: CMSImage | undefined = undefined;
               if (sectionFields.sectionImage) {
                 // Check if this is a resolved asset or a link
                 if (sectionFields.sectionImage.fields && sectionFields.sectionImage.fields.file) {
@@ -57,7 +57,6 @@ export function useContentfulTechnology() {
                   };
                 } else if (sectionFields.sectionImage.sys && sectionFields.sectionImage.sys.type === 'Link') {
                   console.warn('[useContentfulTechnology] Section image is a Link reference but not resolved:', sectionFields.sectionImage);
-                  sectionImage = null;
                 }
               }
               
@@ -81,7 +80,7 @@ export function useContentfulTechnology() {
           console.log('[useContentfulTechnology] Mapped sections:', sections);
           
           // Process the main technology image
-          let mainImage;
+          let mainImage: CMSImage | undefined;
           if (entry.fields.image) {
             if (entry.fields.image.fields && entry.fields.image.fields.file) {
               mainImage = {
