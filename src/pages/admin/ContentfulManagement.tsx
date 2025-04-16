@@ -11,13 +11,13 @@ import { Link } from 'react-router-dom';
 const ContentfulManagement: React.FC = () => {
   return (
     <div className="flex min-h-screen">
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1">
         <div className="container mx-auto py-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">Contentful Content Management</h1>
-            <Link to="/admin/settings">
-              <Button variant="outline">Back to Settings</Button>
-            </Link>
+            <Button variant="outline" asChild>
+              <Link to="/admin/settings">Back to Settings</Link>
+            </Button>
           </div>
           
           <Tabs defaultValue="types">
