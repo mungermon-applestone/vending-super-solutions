@@ -175,6 +175,8 @@ export function useContentfulProduct(slug: string) {
         
         // If nothing found in Contentful, check fallback data
         console.warn(`[useContentfulProduct] No product found in Contentful for slug: ${slug}, checking fallbacks`);
+        
+        // Try direct match with fallback data first
         if (fallbackProductData[slug]) {
           console.log(`[useContentfulProduct] Using fallback data for: ${slug}`);
           return fallbackProductData[slug];
@@ -193,19 +195,29 @@ export function useContentfulProduct(slug: string) {
       } catch (error) {
         console.error(`[useContentfulProduct] Error fetching product:`, error);
         
-        // Check for fallback data if there's an error
+        // Always check for fallback data if there's an error with Contentful
         if (fallbackProductData[slug]) {
           console.log(`[useContentfulProduct] Using fallback data after error for: ${slug}`);
           return fallbackProductData[slug];
         }
         
-        throw error;
+        // Also try normalized slug for fallbacks
+        const normalizedSlug = normalizeSlug(slug);
+        if (fallbackProductData[normalizedSlug]) {
+          console.log(`[useContentfulProduct] Using fallback data with normalized slug after error: ${normalizedSlug}`);
+          return fallbackProductData[normalizedSlug];
+        }
+        
+        return null; // Return null instead of throwing to avoid breaking UI
       }
     },
     enabled: !!slug,
     meta: {
       onError: (error: Error) => {
-        toast.error(`Error loading product: ${error.message}`);
+        // Only show error toast for non-fallback errors
+        if (!(error.message.includes("No product found") || error.message.includes("Missing Contentful configuration"))) {
+          toast.error(`Error loading product: ${error.message}`);
+        }
       }
     }
   });

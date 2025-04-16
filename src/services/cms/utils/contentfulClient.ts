@@ -104,13 +104,8 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
     if (!client) {
       console.error('[fetchContentfulEntries] Failed to get Contentful client');
       
-      // In preview environments, we want to return an empty array instead of throwing
-      if (window.location.hostname.includes('lovable') || 
-          window.location.hostname.includes('preview')) {
-        console.log('[fetchContentfulEntries] Preview environment, returning empty array');
-        return [] as T[];
-      }
-      
+      // In preview environments or when client can't be created, return an empty array
+      console.log('[fetchContentfulEntries] Preview environment or client error, returning empty array');
       return [] as T[];
     }
     

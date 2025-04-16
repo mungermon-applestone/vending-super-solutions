@@ -1,6 +1,7 @@
 
 import { getContentfulConfig } from './cmsInfo';
 import { createClient } from 'contentful-management';
+import { resetContentfulClient } from './contentfulClient';
 
 export const testContentfulConnection = async () => {
   try {
@@ -41,6 +42,10 @@ export const testContentfulConnection = async () => {
       const space = await client.getSpace(config.space_id);
       
       console.log('[testContentfulConnection] Successfully connected to space:', space.sys.id);
+      
+      // Reset the client to force a fresh connection with the working credentials
+      resetContentfulClient();
+      
       return {
         success: true,
         message: 'Successfully connected to Contentful',

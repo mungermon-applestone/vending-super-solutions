@@ -94,16 +94,16 @@ const ProductTypesSection = () => {
   // Improved static fallback data - will be used if API fails
   const staticProductTypes = [
     {
-      title: "Grocery",
-      description: "Automate grocery sales with temperature-controlled vending for snacks, drinks, and everyday essentials.",
-      image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a",
-      path: "/products/grocery"
+      title: "Cannabis Vending",
+      description: "Secure solutions for cannabis products with age verification and compliance features.",
+      image: "https://images.unsplash.com/photo-1560913210-91e811632701",
+      path: "/products/cannabis-vending"
     },
     {
-      title: "Vape & Cannabis",
-      description: "Secure solutions for age-restricted products with ID verification and compliance features.",
-      image: "https://images.unsplash.com/photo-1560913210-91e811632701",
-      path: "/products/vape"
+      title: "Grocery Vending",
+      description: "Temperature-controlled vending solutions for grocery items, snacks, and beverages.",
+      image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a",
+      path: "/products/grocery-vending"
     },
     {
       title: "Fresh Food",

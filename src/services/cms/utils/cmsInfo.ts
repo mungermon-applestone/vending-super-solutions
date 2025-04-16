@@ -17,8 +17,26 @@ export const getContentfulConfig = async () => {
     
     console.log(`[getContentfulConfig] Found ${count} configurations in table`);
     
-    if (count === 0) {
+    if (!count || count === 0) {
       console.warn('[getContentfulConfig] No records found in contentful_config table');
+      
+      // Try environment variables as fallback
+      const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
+      const deliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
+      const managementToken = import.meta.env.VITE_CONTENTFUL_MANAGEMENT_TOKEN;
+      const environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || 'master';
+      
+      if (spaceId && (deliveryToken || managementToken)) {
+        console.log('[getContentfulConfig] Using environment variables for Contentful credentials');
+        return {
+          id: 'env-config',
+          space_id: spaceId,
+          delivery_token: deliveryToken,
+          management_token: managementToken,
+          environment_id: environmentId
+        };
+      }
+      
       return null;
     }
     
@@ -60,6 +78,24 @@ export const getContentfulConfig = async () => {
     return data;
   } catch (error) {
     console.error('[getContentfulConfig] Unexpected error:', error);
+    
+    // Try environment variables as fallback
+    const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
+    const deliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
+    const managementToken = import.meta.env.VITE_CONTENTFUL_MANAGEMENT_TOKEN;
+    const environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || 'master';
+    
+    if (spaceId && (deliveryToken || managementToken)) {
+      console.log('[getContentfulConfig] Using environment variables for Contentful credentials after error');
+      return {
+        id: 'env-config',
+        space_id: spaceId,
+        delivery_token: deliveryToken,
+        management_token: managementToken,
+        environment_id: environmentId
+      };
+    }
+    
     return null;
   }
 };
