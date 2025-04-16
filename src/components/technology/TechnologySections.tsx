@@ -13,16 +13,20 @@ const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => 
     (a, b) => a.display_order - b.display_order
   );
 
+  // Debug logging for incoming sections
+  console.log('[TechnologySections] Incoming sections:', sections);
+
   return (
     <div>
       {sortedSections.map((section, index) => {
-        // Debug logging for each section
-        console.log(`[TechnologySections] Rendering section "${section.title}"`, {
+        // Detailed logging for each section
+        console.log(`[TechnologySections] Processing section ${index}:`, {
           id: section.id,
+          title: section.title,
           summary: section.summary,
-          description: section.description,
-          usedText: section.summary || section.description || '',
-          imageUrl: section.sectionImage?.url || section.image?.url || ''
+          hasSummary: !!section.summary,
+          summaryLength: section.summary?.length,
+          image: section.sectionImage?.url || section.image?.url || ''
         });
         
         return (
@@ -30,7 +34,7 @@ const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => 
             key={section.id} 
             id={section.id}
             title={section.title}
-            summary={section.summary || section.description || ''}
+            summary={section.summary || ''}
             bulletPoints={section.bulletPoints || []}
             image={section.sectionImage?.url || section.image?.url || ''}
             index={index}

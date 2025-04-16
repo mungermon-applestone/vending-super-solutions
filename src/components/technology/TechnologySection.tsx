@@ -23,19 +23,17 @@ const TechnologySection = ({
 }: TechnologySectionProps) => {
   const isEven = index % 2 === 0;
   
-  // Ensure image is valid and includes proper fallback
-  const imageUrl = image || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
-
-  // Debug logging on component mount and whenever summary changes
+  // Debug logging on mount
   useEffect(() => {
-    console.log(`[TechnologySection] Rendering "${title}" with:`, {
-      summaryValue: summary,
-      summaryType: typeof summary,
-      summaryLength: summary?.length || 0,
-      hasSummary: Boolean(summary && summary.trim() !== ''),
-      summaryTrimmed: summary?.trim() || '(empty after trim)'
+    console.log(`[TechnologySection ${id}] Rendering with:`, {
+      title,
+      summary,
+      hasSummary: !!summary,
+      summaryLength: summary?.length,
+      image,
+      bulletPoints
     });
-  }, [title, summary]);
+  }, [id, title, summary, image, bulletPoints]);
 
   return (
     <section id={id} className={cn("py-16 bg-gradient-to-b from-white to-gray-50", className)}>
@@ -45,12 +43,12 @@ const TechnologySection = ({
           <div className="w-full md:w-1/2">
             <div className="relative aspect-[4/3] rounded-lg overflow-hidden shadow-xl">
               <img 
-                src={imageUrl} 
+                src={image} 
                 alt={title}
                 className="absolute inset-0 w-full h-full object-cover"
                 onError={(e) => {
+                  console.error(`[TechnologySection ${id}] Image failed to load:`, image);
                   e.currentTarget.src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
-                  console.log(`[TechnologySection] Image failed to load for "${title}", using fallback`);
                 }}
               />
             </div>
@@ -61,8 +59,7 @@ const TechnologySection = ({
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
               
-              {/* Only render the summary paragraph if there is actual content */}
-              {summary && summary.trim() !== '' && (
+              {summary && (
                 <p className="text-lg text-muted-foreground" data-testid="technology-summary">
                   {summary}
                 </p>
