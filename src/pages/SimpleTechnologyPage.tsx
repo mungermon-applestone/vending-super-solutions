@@ -30,6 +30,7 @@ const mapTechnologyData = (tech: CMSTechnology) => {
     techId: tech.id,
     summarySource: 'description',
     summaryValue: summary,
+    summaryType: typeof summary,
     summaryLength: summary?.length || 0,
     rawDescription: tech.description
   });
@@ -140,17 +141,27 @@ const SimpleTechnologyPage = () => {
       {/* Technology Sections */}
       {!isLoading && !error && transformedTechnologies.length > 0 && (
         <>
-          {transformedTechnologies.map((tech, index) => (
-            <TechnologySection
-              key={tech.id}
-              id={tech.id}
-              title={tech.title}
-              summary={tech.summary}
-              bulletPoints={tech.bulletPoints}
-              image={tech.image || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"}
-              index={index}
-            />
-          ))}
+          {transformedTechnologies.map((tech, index) => {
+            console.log(`[SimpleTechnologyPage] Rendering TechnologySection for '${tech.title}'`, {
+              id: tech.id,
+              summary: tech.summary,
+              summaryLength: tech.summary?.length || 0,
+              hasSummary: Boolean(tech.summary),
+              image: tech.image
+            });
+            
+            return (
+              <TechnologySection
+                key={tech.id}
+                id={tech.id}
+                title={tech.title}
+                summary={tech.summary || ""}
+                bulletPoints={tech.bulletPoints}
+                image={tech.image || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"}
+                index={index}
+              />
+            );
+          })}
         </>
       )}
 
