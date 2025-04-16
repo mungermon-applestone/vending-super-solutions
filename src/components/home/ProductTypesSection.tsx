@@ -3,9 +3,30 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { getProductTypes } from '@/services/cms';
-import { CMSProductType } from '@/types/cms';
+import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { normalizeSlug } from '@/services/cms/utils/slugMatching';
+
+interface ContentfulProductType {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title: string;
+    slug: string;
+    description: string;
+    image?: {
+      sys: {
+        id: string;
+      };
+      fields: {
+        file: {
+          url: string;
+        };
+        title?: string;
+      };
+    };
+  };
+}
 
 interface ProductCardProps {
   title: string;
@@ -36,18 +57,37 @@ const ProductCard = ({ title, description, image, path }: ProductCardProps) => {
 };
 
 const ProductTypesSection = () => {
-  // Fix the useQuery configuration by using the meta object for error handling
-  const { data: productTypes = [], isLoading, error } = useQuery({
-    queryKey: ['productTypes'],
-    queryFn: () => getProductTypes(),
-    // Remove the onError property and use a more compatible approach
-    retry: 2,
-    retryDelay: 1000,
+  const { data: contentfulProducts = [], isLoading, error } = useQuery({
+    queryKey: ['contentfulProductTypes'],
+    queryFn: async () => {
+      console.log('[ProductTypesSection] Fetching product types from Contentful');
+      try {
+        const entries = await fetchContentfulEntries<ContentfulProductType>('product');
+        
+        if (entries.length === 0) {
+          console.log('[ProductTypesSection] No product entries returned from Contentful');
+        } else {
+          console.log(`[ProductTypesSection] Received ${entries.length} products from Contentful`);
+        }
+        
+        return entries.map(entry => ({
+          id: entry.sys.id,
+          title: entry.fields.title,
+          slug: entry.fields.slug,
+          description: entry.fields.description,
+          image: entry.fields.image ? `https:${entry.fields.image.fields.file.url}` : null
+        }));
+      } catch (err) {
+        console.error('[ProductTypesSection] Error fetching from Contentful:', err);
+        return [];
+      }
+    },
     meta: {
       onError: (err: any) => {
-        console.error('Error fetching product types:', err);
+        console.error('[ProductTypesSection] Error fetching product types:', err);
       }
-    }
+    },
+    retry: 2
   });
 
   // Improved static fallback data - will be used if API fails
@@ -78,12 +118,12 @@ const ProductTypesSection = () => {
     }
   ];
 
-  // Always default to static data if API fails or returns empty
-  const displayProductTypes = (productTypes && productTypes.length > 0) 
-    ? productTypes.map((product: CMSProductType) => ({
+  // Always use Contentful data if available, otherwise fall back to static data
+  const displayProductTypes = (contentfulProducts && contentfulProducts.length > 0) 
+    ? contentfulProducts.map(product => ({
         title: product.title,
         description: product.description,
-        image: product.image?.url || "https://images.unsplash.com/photo-1606787366850-de6330128bfc",
+        image: product.image || "https://images.unsplash.com/photo-1606787366850-de6330128bfc",
         path: `/products/${normalizeSlug(product.slug)}`
       }))
     : staticProductTypes;

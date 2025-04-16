@@ -27,29 +27,12 @@ export const getContentfulClient = async () => {
       environmentId: config?.environment_id || 'master'
     });
     
-    // If we're in preview mode and don't have config, return null gracefully to enable fallbacks
-    const isPreviewEnvironment = window.location.hostname.includes('lovable') || 
-                                window.location.hostname.includes('preview');
-    
-    if (!config || !config.space_id) {
-      console.error('[getContentfulClient] Missing Space ID');
-      
-      if (isPreviewEnvironment) {
-        console.log('[getContentfulClient] Preview environment detected, allowing fallback content');
-        return null;
-      }
-      
-      return null;
-    }
-    
-    // Require at least the delivery token
-    if (!config.delivery_token) {
-      console.error('[getContentfulClient] Missing Delivery Token (CDA)');
-      
-      if (isPreviewEnvironment) {
-        console.log('[getContentfulClient] Preview environment detected, allowing fallback content');
-        return null;
-      }
+    // If we don't have needed credentials, return null to enable fallbacks
+    if (!config || !config.space_id || !config.delivery_token) {
+      console.error('[getContentfulClient] Missing required Contentful credentials');
+      if (!config) console.error('  - No configuration found');
+      if (config && !config.space_id) console.error('  - Missing Space ID');
+      if (config && !config.delivery_token) console.error('  - Missing Delivery Token');
       
       return null;
     }
@@ -60,19 +43,21 @@ export const getContentfulClient = async () => {
       environment: config.environment_id || 'master',
     });
     
+    // Test the client with a simple request
+    try {
+      const space = await contentfulClient.getSpace();
+      console.log(`[getContentfulClient] Successfully connected to Contentful space: ${space.name}`);
+    } catch (e) {
+      console.error('[getContentfulClient] Failed to verify Contentful connection:', e);
+      contentfulClient = null;
+      return null;
+    }
+    
     console.log('[getContentfulClient] Successfully created Contentful client');
     return contentfulClient;
   } catch (error) {
     console.error('[getContentfulClient] Comprehensive error creating Contentful client:', error);
-    
-    // Check if we're in preview environment
-    if (window.location.hostname.includes('lovable') || 
-        window.location.hostname.includes('preview')) {
-      console.log('[getContentfulClient] Preview environment detected, allowing fallback content');
-      return null;
-    }
-    
-    throw error;
+    return null;
   }
 };
 
@@ -87,7 +72,7 @@ export const resetContentfulClient = () => {
  */
 export const fetchContentfulEntries = async <T>(contentType: string, options: any = {}): Promise<T[]> => {
   try {
-    console.log(`[fetchContentfulEntries] Fetching entries for content type: ${contentType}`);
+    console.log(`[fetchContentfulEntries] Fetching entries for content type: ${contentType}`, options);
     const client = await getContentfulClient();
     
     if (!client) {
@@ -108,6 +93,8 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
       ...options
     };
     
+    console.log(`[fetchContentfulEntries] Executing query:`, query);
+    
     const response = await client.getEntries(query);
     console.log(`[fetchContentfulEntries] Fetched ${response.items.length} entries`);
     
@@ -115,12 +102,7 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
   } catch (error) {
     console.error(`[fetchContentfulEntries] Error fetching ${contentType}:`, error);
     
-    // In preview environments, we want to return an empty array instead of throwing
-    if (window.location.hostname.includes('lovable') || 
-        window.location.hostname.includes('preview')) {
-      return [] as T[];
-    }
-    
+    // Return empty array instead of throwing to avoid breaking UI
     return [] as T[];
   }
 };

@@ -7,6 +7,7 @@ import { PlusCircle, RefreshCw, ExternalLink } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface ContentfulProductType {
   sys: {
@@ -16,7 +17,17 @@ interface ContentfulProductType {
     title: string;
     slug: string;
     description: string;
-    image?: any;
+    image?: {
+      sys: {
+        id: string;
+      };
+      fields: {
+        file: {
+          url: string;
+        };
+        title?: string;
+      };
+    };
   };
 }
 
@@ -26,8 +37,16 @@ const ContentfulProductTypes: React.FC = () => {
   const { data: products = [], isLoading, refetch, error } = useQuery({
     queryKey: ['contentful', 'products'],
     queryFn: async () => {
+      console.log('[ContentfulProductTypes] Fetching products from Contentful');
       try {
         const entries = await fetchContentfulEntries<ContentfulProductType>('product');
+        
+        if (entries.length === 0) {
+          console.log('[ContentfulProductTypes] No entries returned from Contentful');
+        } else {
+          console.log(`[ContentfulProductTypes] Received ${entries.length} products from Contentful`);
+        }
+        
         return entries.map(entry => ({
           id: entry.sys.id,
           title: entry.fields.title,
@@ -39,16 +58,29 @@ const ContentfulProductTypes: React.FC = () => {
           } : null
         }));
       } catch (err) {
-        console.error('Error fetching products from Contentful:', err);
+        console.error('[ContentfulProductTypes] Error fetching products from Contentful:', err);
         return [];
+      }
+    },
+    meta: {
+      onError: (error: Error) => {
+        console.error('[ContentfulProductTypes] Query error:', error);
+        toast.error(`Error loading products: ${error.message}`);
       }
     }
   });
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
+    try {
+      await refetch();
+      toast.success('Products refreshed successfully');
+    } catch (err) {
+      toast.error('Error refreshing products');
+      console.error('[ContentfulProductTypes] Refresh error:', err);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   return (

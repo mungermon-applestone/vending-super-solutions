@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { ContentfulAsset } from '@/types/contentful';
@@ -134,7 +135,8 @@ export function useContentfulProduct(slug: string) {
     queryFn: async () => {
       console.log(`[useContentfulProduct] Fetching product with slug: ${slug}`);
       try {
-        // Explicitly fetch from Contentful using the product content type ID
+        // First check if we have a direct match on the slug
+        console.log(`[useContentfulProduct] Trying direct slug match for: "${slug}"`);
         const entries = await fetchContentfulEntries<ContentfulProduct>('product', {
           'fields.slug': slug,
           limit: 1
@@ -145,6 +147,25 @@ export function useContentfulProduct(slug: string) {
         if (entries.length > 0) {
           const transformedProduct = transformProduct(entries[0]);
           console.log('[useContentfulProduct] Successfully fetched Contentful product:', transformedProduct);
+          return transformedProduct;
+        }
+        
+        // If no direct match, try with alternate slug variations
+        console.log(`[useContentfulProduct] No direct match, trying alternate variations`);
+        // Try without a -vending suffix
+        const alternateSlug = slug.endsWith('-vending') ? 
+          slug.replace('-vending', '') : 
+          `${slug}-vending`;
+          
+        console.log(`[useContentfulProduct] Trying alternate slug: "${alternateSlug}"`);
+        const alternateEntries = await fetchContentfulEntries<ContentfulProduct>('product', {
+          'fields.slug': alternateSlug,
+          limit: 1
+        });
+        
+        if (alternateEntries.length > 0) {
+          const transformedProduct = transformProduct(alternateEntries[0]);
+          console.log('[useContentfulProduct] Found product with alternate slug:', transformedProduct);
           return transformedProduct;
         }
         
