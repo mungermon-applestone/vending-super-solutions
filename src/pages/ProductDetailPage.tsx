@@ -4,13 +4,14 @@ import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useContentfulProduct } from '@/hooks/cms/useContentfulProduct';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, RefreshCw, ExternalLink } from 'lucide-react';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { resetContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
-import { resetContentfulConfig } from '@/services/cms/utils/cmsInfo';
+import { isContentfulConfigured } from '@/config/cms';
 import { toast } from 'sonner';
+import { testContentfulConnection } from '@/services/cms/utils/connection';
 
 const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -23,6 +24,21 @@ const ProductDetailPage = () => {
     isFetching
   } = useContentfulProduct(slug || '');
   
+  const [connectionStatus, setConnectionStatus] = React.useState<{
+    isChecking: boolean;
+    checked: boolean;
+    isConnected: boolean;
+    message: string;
+    details?: any;
+  }>({
+    isChecking: false,
+    checked: false,
+    isConnected: false,
+    message: ''
+  });
+  
+  const contentfulConfigured = isContentfulConfigured();
+  
   useEffect(() => {
     console.log(`[ProductDetailPage] Rendering with slug: ${slug}`, { 
       hasProduct: !!product,
@@ -30,16 +46,16 @@ const ProductDetailPage = () => {
       isLoading, 
       isFetching,
       hasError: !!error,
-      errorMessage: error instanceof Error ? error.message : null 
+      errorMessage: error instanceof Error ? error.message : null,
+      contentfulConfigured
     });
-  }, [slug, product, isLoading, error, isFetching]);
+  }, [slug, product, isLoading, error, isFetching, contentfulConfigured]);
 
   const handleRetryFetch = async () => {
     console.log('[ProductDetailPage] Resetting client and retrying fetch');
     toast.info("Refreshing Contentful connection...");
     
     // Reset all caches
-    resetContentfulConfig();
     resetContentfulClient();
     
     try {
@@ -54,6 +70,45 @@ const ProductDetailPage = () => {
     // Refetch the data
     refetch();
   };
+
+  const checkContentfulConnection = async () => {
+    setConnectionStatus({
+      isChecking: true,
+      checked: false,
+      isConnected: false,
+      message: 'Checking connection to Contentful...'
+    });
+    
+    try {
+      const result = await testContentfulConnection();
+      
+      setConnectionStatus({
+        isChecking: false,
+        checked: true,
+        isConnected: result.success,
+        message: result.message,
+        details: result.errorData
+      });
+      
+      if (result.success) {
+        toast.success("Contentful connection successful");
+      } else {
+        toast.error("Contentful connection failed");
+      }
+    } catch (e) {
+      console.error("Error checking Contentful connection", e);
+      
+      setConnectionStatus({
+        isChecking: false,
+        checked: true,
+        isConnected: false,
+        message: e instanceof Error ? e.message : 'Unknown error checking connection',
+        details: e
+      });
+      
+      toast.error("Error checking Contentful connection");
+    }
+  };
   
   return (
     <Layout>
@@ -66,6 +121,15 @@ const ProductDetailPage = () => {
             </Link>
           </div>
         </div>
+
+        {/* Configuration Warning */}
+        {!contentfulConfigured && (
+          <div className="container py-4">
+            <div className="bg-amber-50 border border-amber-200 rounded-md p-4 text-amber-800 text-sm">
+              <strong>Warning:</strong> Contentful configuration is incomplete. Please check your environment variables.
+            </div>
+          </div>
+        )}
 
         {isLoading || isFetching ? (
           <div className="container py-12 text-center">
@@ -88,12 +152,44 @@ const ProductDetailPage = () => {
                     {error instanceof Error ? error.message : 'Failed to load product details from Contentful'}
                   </p>
                   
-                  <div className="mt-6">
-                    <Button onClick={handleRetryFetch} variant="outline" className="mr-3 flex items-center">
+                  {connectionStatus.checked && (
+                    <div className="mt-4 p-4 bg-white rounded border border-red-100">
+                      <h4 className="font-semibold mb-2">Connection Status</h4>
+                      <p className={connectionStatus.isConnected ? 'text-green-600' : 'text-red-600'}>
+                        {connectionStatus.message}
+                      </p>
+                      
+                      {connectionStatus.details && (
+                        <div className="mt-2 text-xs text-gray-700 p-2 bg-gray-50 rounded">
+                          <pre className="whitespace-pre-wrap">
+                            {JSON.stringify(connectionStatus.details, null, 2)}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <Button onClick={handleRetryFetch} variant="outline" className="flex items-center">
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Retry Connection
                     </Button>
-                    <Button asChild variant="secondary">
+                    
+                    {!connectionStatus.checked && !connectionStatus.isChecking && (
+                      <Button onClick={checkContentfulConnection} variant="secondary" className="flex items-center">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Test Contentful Connection
+                      </Button>
+                    )}
+                    
+                    {connectionStatus.isChecking && (
+                      <Button disabled variant="secondary" className="flex items-center">
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Testing Connection...
+                      </Button>
+                    )}
+                    
+                    <Button asChild variant="default">
                       <Link to="/products">Browse Products</Link>
                     </Button>
                   </div>

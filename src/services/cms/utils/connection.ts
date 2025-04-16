@@ -1,87 +1,102 @@
-import { getContentfulConfig } from './cmsInfo';
-import { createClient } from 'contentful-management';
 
+import { getContentfulClient, refreshContentfulClient } from './contentfulClient';
+
+/**
+ * Tests the connection to Contentful
+ * @returns Object with success status and message
+ */
 export const testContentfulConnection = async () => {
   try {
-    console.log('[testContentfulConnection] Starting connection test...');
-    const config = await getContentfulConfig();
+    console.log('[testContentfulConnection] Testing Contentful connection...');
     
-    console.log('[testContentfulConnection] Fetched configuration:', 
-      config ? { 
-        spaceId: config.space_id, 
-        environmentId: config.environment_id,
-        hasToken: !!config.management_token,
-        tokenLength: config.management_token?.length
-      } : 'No config found');
-    
-    if (!config) {
-      console.warn('[testContentfulConnection] No Contentful configuration found in the database');
-      return {
-        success: false,
-        message: 'No Contentful configuration found in the database'
-      };
-    }
-
-    if (!config.management_token?.startsWith('CFPAT-')) {
-      console.error('[testContentfulConnection] Invalid token type detected. Ensure you are using a Contentful Management API (CMA) token.');
-      return {
-        success: false,
-        message: 'Invalid token type. Please use a Contentful Management API (CMA) token that starts with CFPAT-'
-      };
-    }
-
-    console.log('[testContentfulConnection] Creating Contentful client with token...');
-    const client = createClient({
-      accessToken: config.management_token
-    });
-
+    // First try to get the client
+    let client;
     try {
-      console.log(`[testContentfulConnection] Attempting to get space with ID: ${config.space_id}`);
-      const space = await client.getSpace(config.space_id);
+      client = await getContentfulClient();
+    } catch (error) {
+      console.error('[testContentfulConnection] Error getting client:', error);
       
-      console.log('[testContentfulConnection] Successfully connected to space:', space.sys.id);
-      return {
-        success: true,
-        message: 'Successfully connected to Contentful',
-        spaceId: space.sys.id
-      };
-    } catch (apiError: any) {
-      console.error('[testContentfulConnection] API Error:', apiError);
-      
-      const errorDetails = apiError.details || {};
-      const requestDetails = apiError.request || {};
-      
-      let userMessage = apiError.message || 'Connection to Contentful failed';
-      
-      if (apiError.status === 403) {
-        userMessage = 'Authentication failed: The provided token is invalid or does not have sufficient permissions. Please check your Contentful Management Token.';
-      } else if (apiError.status === 404) {
-        userMessage = `Space not found: Could not find a Contentful space with ID "${config.space_id}". Please verify your Space ID.`;
-      } else if (apiError.status === 401) {
-        userMessage = 'Unauthorized: The provided Management Token is invalid or expired. Please generate a new token in Contentful.';
+      // Try refreshing the client
+      try {
+        console.log('[testContentfulConnection] Attempting to refresh client...');
+        client = await refreshContentfulClient();
+      } catch (refreshError) {
+        console.error('[testContentfulConnection] Failed to refresh client:', refreshError);
+        
+        // Detailed error data for debugging
+        const errorData = refreshError instanceof Error ? {
+          message: refreshError.message,
+          stack: refreshError.stack,
+          ...((refreshError as any).response?.data || {})
+        } : { message: 'Unknown error' };
+        
+        return {
+          success: false,
+          message: `Failed to initialize Contentful client: ${errorData.message}`,
+          errorData
+        };
       }
-      
+    }
+    
+    if (!client) {
       return {
         success: false,
-        message: userMessage,
-        errorData: {
-          status: apiError.status,
-          statusText: apiError.statusText,
-          details: errorDetails,
-          request: {
-            url: requestDetails.url,
-            method: requestDetails.method,
-          }
-        }
+        message: 'Failed to initialize Contentful client - client is null'
       };
     }
+    
+    // Test the connection by making a simple request
+    console.log('[testContentfulConnection] Making test request to Contentful API');
+    const { total } = await client.getEntries({
+      limit: 1
+    });
+    
+    console.log(`[testContentfulConnection] Connection successful. Found ${total} total entries`);
+    
+    return {
+      success: true,
+      message: `Successfully connected to Contentful. Found ${total} entries.`
+    };
   } catch (error) {
-    console.error('[testContentfulConnection] Connection error:', error);
+    console.error('[testContentfulConnection] Error testing connection:', error);
+    
+    // Extract useful error information
+    let errorMessage = 'Unknown error occurred';
+    let errorData = null;
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorData = {
+        message: error.message,
+        stack: error.stack
+      };
+      
+      // Extract more details from Contentful API errors if available
+      if ((error as any).response) {
+        const response = (error as any).response;
+        errorData = {
+          ...errorData,
+          status: response.status,
+          statusText: response.statusText,
+          data: response.data,
+          request: {
+            method: response.config?.method,
+            url: response.config?.url
+          }
+        };
+        
+        if (response.status === 401) {
+          errorMessage = 'Authentication failed. Check your Contentful delivery token.';
+        } else if (response.status === 404) {
+          errorMessage = 'Space not found. Check your Contentful Space ID.';
+        }
+      }
+    }
+    
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Unknown connection error'
+      message: `Contentful connection error: ${errorMessage}`,
+      errorData
     };
   }
 };
-
-export const testCMSConnection = testContentfulConnection;

@@ -2,15 +2,26 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useProductTypes } from '@/hooks/cms/useProductTypes';
+import { useContentfulProducts } from '@/hooks/cms/useContentfulProducts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, AlertTriangle, RefreshCw } from 'lucide-react';
 import PageHero from '@/components/common/PageHero';
+import { isContentfulConfigured } from '@/config/cms';
+import { toast } from 'sonner';
 
 const ProductsPage = () => {
-  const { data: productTypes, isLoading, error } = useProductTypes();
+  const { data: productTypes, isLoading, error, refetch } = useContentfulProducts();
   const navigate = useNavigate();
+  const contentfulConfigured = isContentfulConfigured();
+  
+  // Check if Contentful is configured
+  React.useEffect(() => {
+    if (!contentfulConfigured) {
+      console.warn('Contentful is not properly configured. Check your environment variables.');
+      toast.warning('Contentful configuration missing. Some content may not display correctly.');
+    }
+  }, [contentfulConfigured]);
   
   return (
     <Layout>
@@ -35,6 +46,20 @@ const ProductsPage = () => {
           </p>
         </div>
 
+        {!contentfulConfigured && (
+          <div className="bg-amber-50 border border-amber-200 rounded-md p-6 text-center mb-8">
+            <h3 className="text-lg font-semibold text-amber-800 mb-2">Contentful Configuration Missing</h3>
+            <p className="text-amber-700 mb-4">
+              Please set up your Contentful environment variables to display product data.
+            </p>
+            <div className="text-sm bg-white p-3 rounded border border-amber-100 mx-auto max-w-lg">
+              <p className="font-mono mb-1">CONTENTFUL_DELIVERY_TOKEN</p>
+              <p className="font-mono mb-1">VITE_CONTENTFUL_SPACE_ID</p>
+              <p className="font-mono">VITE_CONTENTFUL_ENVIRONMENT_ID</p>
+            </div>
+          </div>
+        )}
+
         {isLoading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
@@ -53,15 +78,23 @@ const ProductsPage = () => {
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-6 text-center">
-            <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Products</h3>
-            <p className="text-red-600">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
+            <div className="flex flex-col items-center">
+              <AlertTriangle className="h-8 w-8 text-red-500 mb-2" />
+              <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Products</h3>
+              <p className="text-red-600 mb-4">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
+              
+              <Button onClick={() => refetch()} variant="outline" className="flex items-center">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+            </div>
           </div>
         )}
 
         {productTypes && productTypes.length === 0 && !isLoading && !error && (
           <div className="bg-gray-50 border border-gray-200 rounded-md p-6 text-center">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">No Products Found</h3>
-            <p className="text-gray-600">Check back later for our product offerings.</p>
+            <p className="text-gray-600">No products are currently available in your Contentful space.</p>
           </div>
         )}
 
