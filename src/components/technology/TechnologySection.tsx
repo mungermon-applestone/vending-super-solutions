@@ -22,6 +22,16 @@ const TechnologySection = ({
   className 
 }: TechnologySectionProps) => {
   const isEven = index % 2 === 0;
+  
+  // Ensure image is valid and includes proper fallback
+  const imageUrl = image || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
+
+  // Log for debugging
+  console.log(`TechnologySection rendering: ${title}`, {
+    summary,
+    bulletPoints,
+    imageUrl
+  });
 
   return (
     <section id={id} className={cn("py-16 bg-gradient-to-b from-white to-gray-50", className)}>
@@ -31,9 +41,13 @@ const TechnologySection = ({
           <div className="w-full md:w-1/2">
             <div className="relative aspect-[4/3] rounded-lg overflow-hidden shadow-xl">
               <img 
-                src={image} 
+                src={imageUrl} 
                 alt={title}
                 className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
+                  console.log("Image failed to load, using fallback");
+                }}
               />
             </div>
           </div>
@@ -42,7 +56,7 @@ const TechnologySection = ({
           <div className="w-full md:w-1/2 space-y-6">
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
-              <p className="text-lg text-muted-foreground">{summary}</p>
+              {summary && <p className="text-lg text-muted-foreground">{summary}</p>}
               
               {bulletPoints && bulletPoints.length > 0 && (
                 <ul className="space-y-3 mt-6">

@@ -1,9 +1,7 @@
-
 import { CMSTechnology } from '@/types/cms';
 import { useCMSQuery } from './useCMSQuery';
 import { improvedTechnologyAdapter } from '@/services/cms/adapters/technologies/improvedTechnologyAdapter';
 import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
 
 type UseTechnologySectionsOptions = {
   slug?: string;
@@ -61,7 +59,7 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
       if (!technologies || technologies.length === 0) {
         console.warn('[useTechnologySections] No technologies found');
       } else {
-        console.log(`[useTechnologySections] Successfully fetched ${technologies.length} technologies`);
+        console.log(`[useTechnologySections] Successfully fetched ${technologies.length} technologies:`, technologies);
       }
       
       return technologies;

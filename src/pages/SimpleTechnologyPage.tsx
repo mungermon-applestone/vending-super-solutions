@@ -21,16 +21,31 @@ const mapTechnologyData = (tech) => {
     items: feature.items?.map(item => item.text) || []
   })) || [];
 
-  // Extract image URL from the technology or its sections
-  const imageUrl = tech.image_url || 
-    (tech.image && typeof tech.image === 'string' ? tech.image : 
-    tech.image?.url) || 
-    tech.sections?.[0]?.images?.[0]?.url;
+  // Extract summary from technology or its sections
+  const summary = tech.description || tech.sections?.[0]?.description || '';
+  
+  // Extract bullet points if available
+  const bulletPoints = tech.sections?.[0]?.bulletPoints || [];
+
+  // Extract image URL from the technology or its sections with proper fallbacks
+  const imageUrl = 
+    // Check for direct image_url
+    (tech.image_url) || 
+    // Check for image object with url property
+    (tech.image && typeof tech.image === 'object' && tech.image.url) ||
+    // Check for string image
+    (tech.image && typeof tech.image === 'string' ? tech.image : '') ||
+    // Check for section images
+    (tech.sections?.[0]?.sectionImage?.url) ||
+    (tech.sections?.[0]?.image?.url) ||
+    (tech.sections?.[0]?.images?.[0]?.url) ||
+    '';
 
   return {
     id: tech.id,
     title: tech.title,
-    summary: tech.description,
+    summary: summary,
+    bulletPoints: bulletPoints,
     features: features,
     image: imageUrl
   };
@@ -44,6 +59,8 @@ const SimpleTechnologyPage = () => {
 
   // Transform technology data for rendering
   const transformedTechnologies = technologies.map(mapTechnologyData);
+
+  console.log("Transformed Technologies:", transformedTechnologies);
 
   return (
     <Layout>
@@ -102,7 +119,7 @@ const SimpleTechnologyPage = () => {
       )}
 
       {/* Technology Sections */}
-      {!isFetching && !error && transformedTechnologies.length > 0 && (
+      {!isLoading && !error && transformedTechnologies.length > 0 && (
         <>
           {transformedTechnologies.map((tech, index) => (
             <TechnologySection
@@ -110,7 +127,8 @@ const SimpleTechnologyPage = () => {
               id={tech.id}
               title={tech.title}
               summary={tech.summary}
-              image={tech.image}
+              bulletPoints={tech.bulletPoints}
+              image={tech.image || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"}
               index={index}
             />
           ))}
