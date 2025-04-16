@@ -1,72 +1,45 @@
 
 import React from 'react';
-import Layout from '@/components/layout/Layout';
+import AdminLayout from '@/components/AdminLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import CMSConnectionTest from '@/components/admin/cms/CMSConnectionTest';
 import ContentfulTypeCreator from '@/components/admin/cms/ContentfulTypeCreator';
 import ContentfulHeroContent from '@/components/admin/cms/ContentfulHeroContent';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Info } from 'lucide-react';
+import ContentfulProductTypes from '@/components/admin/cms/ContentfulProductTypes';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const ContentfulManagement: React.FC = () => {
   return (
-    <Layout>
-      <div className="container py-10">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Contentful Management</h1>
-            <p className="text-muted-foreground">
-              Create and manage Contentful content types and entries
-            </p>
-          </div>
+    <AdminLayout>
+      <div className="container mx-auto py-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Contentful Content Management</h1>
+          <Button asChild variant="outline">
+            <Link to="/admin/settings">Back to Settings</Link>
+          </Button>
         </div>
         
-        <Alert className="mb-6">
-          <Info className="h-4 w-4" />
-          <AlertTitle>About Content Type Management</AlertTitle>
-          <AlertDescription>
-            <p className="mb-2">
-              This tool currently supports creating predefined content types in your Contentful space. 
-              To modify existing content types, you'll need to:
-            </p>
-            <ol className="list-decimal ml-5 space-y-1">
-              <li>Delete the existing content type from Contentful</li>
-              <li>Create a new content type with the updated definition</li>
-            </ol>
-            <p className="mt-2">
-              Note: Deleting a content type will also delete any entries of that type in Contentful.
-              Make sure to back up your content before deleting content types.
-            </p>
-          </AlertDescription>
-        </Alert>
-        
-        <Tabs defaultValue="connection">
-          <TabsList className="mb-8">
-            <TabsTrigger value="connection">Connection</TabsTrigger>
-            <TabsTrigger value="content-types">Content Types</TabsTrigger>
-            <TabsTrigger value="hero-content">Hero Content</TabsTrigger>
+        <Tabs defaultValue="types">
+          <TabsList className="mb-6">
+            <TabsTrigger value="types">Content Types</TabsTrigger>
+            <TabsTrigger value="hero">Hero Content</TabsTrigger>
+            <TabsTrigger value="products">Product Types</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="connection">
-            <div className="grid gap-6">
-              <CMSConnectionTest />
-            </div>
+          <TabsContent value="types">
+            <ContentfulTypeCreator />
           </TabsContent>
           
-          <TabsContent value="content-types">
-            <div className="grid gap-6">
-              <ContentfulTypeCreator />
-            </div>
+          <TabsContent value="hero">
+            <ContentfulHeroContent />
           </TabsContent>
           
-          <TabsContent value="hero-content">
-            <div className="grid gap-6">
-              <ContentfulHeroContent />
-            </div>
+          <TabsContent value="products">
+            <ContentfulProductTypes />
           </TabsContent>
         </Tabs>
       </div>
-    </Layout>
+    </AdminLayout>
   );
 };
 

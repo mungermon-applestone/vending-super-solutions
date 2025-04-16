@@ -1,8 +1,54 @@
-
 import { useQuery } from '@tanstack/react-query';
-import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
+import { ContentfulAsset } from '@/types/contentful';
 import { CMSProductType } from '@/types/cms';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
+
+// Define the structure of a product in Contentful
+interface ContentfulProduct {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title: string;
+    slug: string;
+    description: string;
+    image?: ContentfulAsset;
+    benefits?: string[];
+    features?: Array<{
+      sys: { id: string };
+      fields: {
+        title: string;
+        description: string;
+        icon?: string;
+      }
+    }>;
+    visible?: boolean;
+  };
+}
+
+// Transform Contentful product to our internal format
+const transformProduct = (entry: ContentfulProduct): CMSProductType => {
+  return {
+    id: entry.sys.id,
+    title: entry.fields.title,
+    slug: entry.fields.slug,
+    description: entry.fields.description,
+    benefits: entry.fields.benefits || [],
+    image: entry.fields.image ? {
+      id: entry.fields.image.sys.id,
+      url: `https:${entry.fields.image.fields.file.url}`,
+      alt: entry.fields.image.fields.title || entry.fields.title,
+    } : undefined,
+    features: entry.fields.features ? entry.fields.features.map(feature => ({
+      id: feature.sys.id,
+      title: feature.fields.title,
+      description: feature.fields.description,
+      icon: feature.fields.icon || 'check'
+    })) : [],
+    visible: entry.fields.visible !== false
+  };
+};
 
 // Define fallback product data for preview environment
 const fallbackProductData: Record<string, CMSProductType> = {
@@ -88,66 +134,30 @@ export function useContentfulProduct(slug: string) {
     queryFn: async () => {
       console.log(`[useContentfulProduct] Fetching product with slug: ${slug}`);
       try {
-        const client = await getContentfulClient();
-        
-        // If in preview environment and client fails, use fallback data
-        if (!client) {
-          console.warn('[useContentfulProduct] Failed to get Contentful client - checking for fallback data');
-          
-          // Check if we have fallback data for this slug
-          if (fallbackProductData[slug]) {
-            console.log(`[useContentfulProduct] Using fallback data for: ${slug}`);
-            return fallbackProductData[slug];
-          }
-          
-          throw new Error('Missing Contentful configuration. Please set up your Contentful credentials in Admin Settings.');
-        }
-        
-        // Log that we're making the query to help with debugging
-        console.log(`[useContentfulProduct] Querying Contentful for product with slug: ${slug}`);
-        
-        const entries = await client.getEntries({
-          content_type: 'productType',
+        // Explicitly fetch from Contentful using the product content type ID
+        const entries = await fetchContentfulEntries<ContentfulProduct>('product', {
           'fields.slug': slug,
           limit: 1
         });
         
-        if (!entries.items.length) {
-          console.log(`[useContentfulProduct] No product found with slug: ${slug}`);
-          
-          // Check fallback data before returning null
-          if (fallbackProductData[slug]) {
-            console.log(`[useContentfulProduct] Using fallback data for: ${slug}`);
-            return fallbackProductData[slug];
-          }
-          
-          return null;
+        console.log(`[useContentfulProduct] Found ${entries.length} entries for slug ${slug}`);
+        
+        if (entries.length > 0) {
+          const transformedProduct = transformProduct(entries[0]);
+          console.log('[useContentfulProduct] Successfully fetched Contentful product:', transformedProduct);
+          return transformedProduct;
         }
         
-        const entry = entries.items[0];
-        const fields = entry.fields;
+        // If nothing found in Contentful, check fallback data
+        console.warn(`[useContentfulProduct] No product found in Contentful for slug: ${slug}, checking fallbacks`);
+        if (fallbackProductData[slug]) {
+          console.log(`[useContentfulProduct] Using fallback data for: ${slug}`);
+          return fallbackProductData[slug];
+        }
         
-        const product: CMSProductType = {
-          id: entry.sys.id,
-          title: fields.title as string,
-          slug: fields.slug as string,
-          description: fields.description as string,
-          benefits: fields.benefits as string[] || [],
-          image: fields.image ? {
-            id: (fields.image as any).sys.id,
-            url: `https:${(fields.image as any).fields.file.url}`,
-            alt: (fields.image as any).fields.title || fields.title,
-          } : undefined,
-          features: fields.features ? (fields.features as any[]).map(feature => ({
-            id: feature.sys.id,
-            title: feature.fields.title,
-            description: feature.fields.description,
-            icon: feature.fields.icon || undefined
-          })) : []
-        };
-        
-        console.log(`[useContentfulProduct] Successfully transformed product:`, product);
-        return product;
+        // If no fallback found, return null
+        console.log(`[useContentfulProduct] No product found for slug: ${slug}`);
+        return null;
       } catch (error) {
         console.error(`[useContentfulProduct] Error fetching product:`, error);
         
@@ -157,28 +167,13 @@ export function useContentfulProduct(slug: string) {
           return fallbackProductData[slug];
         }
         
-        // Provide more specific error messages for common issues
-        if (error instanceof Error) {
-          if (error.message.includes('401')) {
-            throw new Error('Authentication failed. Please check your Contentful Delivery Token in Admin Settings.');
-          } else if (error.message.includes('404')) {
-            throw new Error(`Could not find product "${slug}". Please check if the product exists in Contentful.`);
-          } else if (error.message.includes('Network Error')) {
-            throw new Error('Network error. Please check your internet connection and try again.');
-          }
-        }
-        
         throw error;
       }
     },
     enabled: !!slug,
     meta: {
       onError: (error: Error) => {
-        toast({
-          title: "Error Loading Product",
-          description: error.message,
-          variant: "destructive"
-        });
+        toast.error(`Error loading product: ${error.message}`);
       }
     }
   });
