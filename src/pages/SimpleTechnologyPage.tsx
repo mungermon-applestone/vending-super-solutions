@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
@@ -33,15 +34,10 @@ const mapTechnologyData = (tech: CMSTechnology) => {
     summary = tech.sections[0].description;
     console.log(`[mapTechnologyData] Using tech.sections[0].description for ${tech.title}:`, tech.sections[0].description);
   }
-  else if (tech.summary && typeof tech.summary === 'string' && tech.summary.trim() !== '') {
-    summary = tech.summary;
-    console.log(`[mapTechnologyData] Using tech.summary for ${tech.title}:`, tech.summary);
-  }
   else {
     console.log(`[mapTechnologyData] No valid summary found for ${tech.title}. Checking all possible sources:`, {
       'tech.description': tech.description,
-      'tech.sections[0]?.description': tech.sections?.[0]?.description,
-      'tech.summary': tech.summary
+      'tech.sections[0]?.description': tech.sections?.[0]?.description
     });
     
     // As a last resort, use a default message
