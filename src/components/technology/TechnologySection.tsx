@@ -68,8 +68,11 @@ const TechnologySection = ({
                 </p>
               ) : (
                 <div className="hidden">
-                  {/* Fixed: Console log was directly in JSX which returns void */}
-                  <span>{console.log(`[TechnologySection] Summary not displayed for "${title}" - empty or undefined`) || ''}</span>
+                  {/* Fixed: Console log directly in JSX caused TypeScript error */}
+                  {(() => {
+                    console.log(`[TechnologySection] Summary not displayed for "${title}" - empty or undefined`);
+                    return null;
+                  })()}
                 </div>
               )}
               
