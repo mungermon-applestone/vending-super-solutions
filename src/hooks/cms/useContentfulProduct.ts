@@ -66,7 +66,7 @@ export function useContentfulProduct(slug: string) {
         // First check if we have a direct match on the slug
         console.log(`[useContentfulProduct] Trying direct slug match for: "${slug}"`);
         
-        // IMPORTANT: Use productType content type ID to match Contentful schema
+        // IMPORTANT: Using productType content type ID to match Contentful schema
         const entries = await fetchContentfulEntries<ContentfulProduct>('productType', {
           'fields.slug': slug,
           limit: 1
