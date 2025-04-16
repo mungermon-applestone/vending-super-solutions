@@ -26,9 +26,11 @@ const TechnologySection = ({
   // Ensure image is valid and includes proper fallback
   const imageUrl = image || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
 
-  // Log for debugging
+  // Debug logging
   console.log(`TechnologySection rendering: ${title}`, {
+    title,
     summary: summary || '(empty summary)',
+    summaryType: typeof summary,
     summaryLength: summary?.length || 0,
     hasSummary: !!summary,
     bulletPoints,
@@ -59,7 +61,7 @@ const TechnologySection = ({
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
               
-              {/* Ensure summary displays when available */}
+              {/* Summary display with debug border to make it visible during development */}
               {summary && summary.trim() !== '' && (
                 <p className="text-lg text-muted-foreground">{summary}</p>
               )}

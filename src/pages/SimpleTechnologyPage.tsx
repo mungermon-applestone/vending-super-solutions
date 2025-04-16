@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
@@ -21,15 +20,12 @@ const mapTechnologyData = (tech) => {
     items: feature.items?.map(item => item.text) || []
   })) || [];
 
-  // Make sure we get the summary text from all possible sources and with proper fallback
-  const summary = 
-    tech.summary || 
-    tech.description || 
-    (tech.sections?.[0]?.summary) || 
-    (tech.sections?.[0]?.description) || 
-    '';
+  // According to the Contentful schema, the main description is stored in the "description" field
+  // Make sure we extract this value and use it as the summary
+  const summary = tech.description || '';
   
-  console.log(`Processing tech '${tech.title}' with summary: '${summary}'`);
+  console.log(`Processing tech '${tech.title}' with title: '${tech.title}'`);
+  console.log(`Processing tech '${tech.title}' with description field: '${summary}'`);
   
   // Extract bullet points if available
   const bulletPoints = tech.sections?.[0]?.bulletPoints || [];
