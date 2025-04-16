@@ -1,8 +1,21 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
+// Cache the contentful config to avoid hitting the database on every request
+let cachedContentfulConfig: any = null;
+let lastConfigFetch = 0;
+const CONFIG_CACHE_TTL = 30 * 1000; // 30 second cache TTL
+
 export const getContentfulConfig = async () => {
   try {
+    const now = Date.now();
+    
+    // Return cached config if available and not expired
+    if (cachedContentfulConfig && (now - lastConfigFetch) < CONFIG_CACHE_TTL) {
+      console.log('[getContentfulConfig] Using cached Contentful config');
+      return cachedContentfulConfig;
+    }
+    
     console.log('[getContentfulConfig] Fetching Contentful config from Supabase...');
     
     // First, check if the table exists and has any rows
@@ -39,6 +52,10 @@ export const getContentfulConfig = async () => {
       console.error('[getContentfulConfig] No data returned');
       throw new Error('No Contentful configuration found. Please set up your Contentful credentials in Admin Settings.');
     }
+    
+    // Cache the config
+    cachedContentfulConfig = data;
+    lastConfigFetch = now;
 
     // Log configuration status but not the actual tokens
     console.log('[getContentfulConfig] Configuration retrieved successfully:', {
@@ -57,6 +74,13 @@ export const getContentfulConfig = async () => {
     console.error('[getContentfulConfig] Error:', error);
     throw error;
   }
+};
+
+// Add a function to reset the cached config - useful when config changes
+export const resetContentfulConfig = () => {
+  console.log('[getContentfulConfig] Resetting cached Contentful config');
+  cachedContentfulConfig = null;
+  lastConfigFetch = 0;
 };
 
 // Define types

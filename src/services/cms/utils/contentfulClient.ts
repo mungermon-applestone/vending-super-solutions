@@ -1,4 +1,3 @@
-
 import { createClient } from 'contentful';
 import { getContentfulConfig } from './cmsInfo';
 import { toast } from 'sonner';
@@ -6,7 +5,10 @@ import { toast } from 'sonner';
 // Cache the client to avoid creating a new one on every request
 let contentfulClient: ReturnType<typeof createClient> | null = null;
 let lastConfigCheck = 0;
-const CONFIG_CACHE_TTL = 60 * 1000; // 1 minute cache TTL
+const CONFIG_CACHE_TTL = 30 * 1000; // 30 second cache TTL (reduced for more frequent checks)
+let lastConfigError: Error | null = null;
+let configRetryCount = 0;
+const MAX_RETRIES = 3;
 
 /**
  * Gets or creates a Contentful delivery client for content fetching
@@ -14,8 +16,14 @@ const CONFIG_CACHE_TTL = 60 * 1000; // 1 minute cache TTL
 export const getContentfulClient = async () => {
   const now = Date.now();
   
+  // If we had an error recently, but have a client, use it
+  if (contentfulClient && lastConfigError && (now - lastConfigCheck) < CONFIG_CACHE_TTL) {
+    console.log('[getContentfulClient] Using cached client despite recent error');
+    return contentfulClient;
+  }
+  
   // Return cached client if available and not expired
-  if (contentfulClient && (now - lastConfigCheck) < CONFIG_CACHE_TTL) {
+  if (contentfulClient && !lastConfigError && (now - lastConfigCheck) < CONFIG_CACHE_TTL) {
     console.log('[getContentfulClient] Using cached Contentful client');
     return contentfulClient;
   }
@@ -24,13 +32,18 @@ export const getContentfulClient = async () => {
     console.log('[getContentfulClient] Creating new Contentful client');
     const config = await getContentfulConfig();
     lastConfigCheck = now;
+    lastConfigError = null;
+    configRetryCount = 0;
     
     // Add more detailed logging for configuration
     console.log('[getContentfulClient] Configuration received:', {
       hasConfig: !!config,
-      hasSpaceId: config?.space_id ? 'Yes' : 'No',
-      hasDeliveryToken: config?.delivery_token ? 'Yes' : 'No',
-      hasManagementToken: config?.management_token ? 'Yes' : 'No',
+      hasSpaceId: !!config?.space_id,
+      spaceIdLength: config?.space_id?.length || 0,
+      hasDeliveryToken: !!config?.delivery_token,
+      deliveryTokenLength: config?.delivery_token?.length || 0,
+      hasManagementToken: !!config?.management_token,
+      managementTokenLength: config?.management_token?.length || 0,
       environmentId: config?.environment_id || 'master'
     });
     
@@ -50,13 +63,33 @@ export const getContentfulClient = async () => {
       environment: config.environment_id || 'master',
     });
     
-    console.log('[getContentfulClient] Successfully created Contentful client');
+    // Verify the client works by making a test request
+    const testEntry = await contentfulClient.getEntries({
+      limit: 1
+    });
+    
+    console.log('[getContentfulClient] Successfully created and tested Contentful client');
+    console.log(`[getContentfulClient] Test query returned ${testEntry.total} total entries`);
+    
     return contentfulClient;
   } catch (error) {
     console.error('[getContentfulClient] Error creating Contentful client:', error);
     
-    // Clear the client on error to force recreation on next attempt
-    contentfulClient = null;
+    // Track the error
+    lastConfigError = error instanceof Error ? error : new Error(String(error));
+    configRetryCount++;
+    
+    // If we have a client and haven't exceeded retry count, keep using it
+    if (contentfulClient && configRetryCount < MAX_RETRIES) {
+      console.warn(`[getContentfulClient] Using existing client despite error (retry ${configRetryCount}/${MAX_RETRIES})`);
+      return contentfulClient;
+    }
+    
+    // Clear the client on critical error to force recreation on next attempt
+    if (configRetryCount >= MAX_RETRIES) {
+      console.error('[getContentfulClient] Max retries exceeded, clearing client');
+      contentfulClient = null;
+    }
     throw error;
   }
 };
@@ -65,7 +98,17 @@ export const getContentfulClient = async () => {
 export const resetContentfulClient = () => {
   console.log('[contentfulClient] Resetting Contentful client');
   contentfulClient = null;
+  lastConfigError = null;
+  configRetryCount = 0;
   lastConfigCheck = 0;
+};
+
+/**
+ * Force a refresh of the contentful client - useful for debugging
+ */
+export const refreshContentfulClient = async () => {
+  resetContentfulClient();
+  return await getContentfulClient();
 };
 
 /**

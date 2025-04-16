@@ -1,32 +1,57 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useContentfulProduct } from '@/hooks/cms/useContentfulProduct';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
-import { resetContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { resetContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { resetContentfulConfig } from '@/services/cms/utils/cmsInfo';
+import { toast } from 'sonner';
 
 const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: product, isLoading, error, refetch } = useContentfulProduct(slug || '');
-  
-  console.log(`[ProductDetailPage] Rendering with slug: ${slug}`, { 
-    hasProduct: !!product,
-    productTitle: product?.title || 'Not loaded',
+  const { 
+    data: product, 
     isLoading, 
-    hasError: !!error,
-    errorMessage: error instanceof Error ? error.message : null 
-  });
+    error, 
+    refetch,
+    isError,
+    isFetching
+  } = useContentfulProduct(slug || '');
+  
+  useEffect(() => {
+    console.log(`[ProductDetailPage] Rendering with slug: ${slug}`, { 
+      hasProduct: !!product,
+      productTitle: product?.title || 'Not loaded',
+      isLoading, 
+      isFetching,
+      hasError: !!error,
+      errorMessage: error instanceof Error ? error.message : null 
+    });
+  }, [slug, product, isLoading, error, isFetching]);
 
-  const handleRetryFetch = () => {
+  const handleRetryFetch = async () => {
     console.log('[ProductDetailPage] Resetting client and retrying fetch');
-    // Reset the contentful client to force a fresh connection
+    toast.info("Refreshing Contentful connection...");
+    
+    // Reset all caches
+    resetContentfulConfig();
     resetContentfulClient();
-    // Then refetch the data
+    
+    try {
+      // Force refresh the client
+      await refreshContentfulClient();
+      toast.success("Contentful connection refreshed");
+    } catch (e) {
+      console.error("Failed to refresh Contentful client", e);
+      toast.error("Failed to refresh Contentful connection");
+    }
+    
+    // Refetch the data
     refetch();
   };
   
@@ -42,21 +67,39 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        {isLoading ? (
+        {isLoading || isFetching ? (
           <div className="container py-12 text-center">
             <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
             <p className="text-gray-600">Loading product information from Contentful...</p>
+            {isFetching && !isLoading && (
+              <div className="mt-4 text-sm text-gray-500">
+                Refreshing content...
+              </div>
+            )}
           </div>
-        ) : error ? (
+        ) : isError || error ? (
           <div className="container py-12">
-            <ContentfulFallbackMessage
-              title="Error Loading Product"
-              message={error instanceof Error ? error.message : 'Failed to load product details from Contentful'}
-              contentType="Product"
-              showRefresh={true}
-              onAction={handleRetryFetch}
-              actionText="Try Again"
-            />
+            <div className="max-w-2xl mx-auto bg-red-50 border border-red-200 rounded-xl p-6">
+              <div className="flex items-start">
+                <AlertCircle className="h-6 w-6 text-red-500 mt-1 flex-shrink-0" />
+                <div className="ml-3">
+                  <h3 className="font-bold text-lg text-red-800">Error Loading Product</h3>
+                  <p className="text-red-700 mt-2">
+                    {error instanceof Error ? error.message : 'Failed to load product details from Contentful'}
+                  </p>
+                  
+                  <div className="mt-6">
+                    <Button onClick={handleRetryFetch} variant="outline" className="mr-3 flex items-center">
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Retry Connection
+                    </Button>
+                    <Button asChild variant="secondary">
+                      <Link to="/products">Browse Products</Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ) : !product ? (
           <div className="container py-12">

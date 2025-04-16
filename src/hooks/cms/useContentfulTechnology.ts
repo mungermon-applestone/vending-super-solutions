@@ -1,192 +1,125 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
-import { ContentfulTechnology } from '@/types/contentful';
-import { CMSTechnology, CMSTechnologySection, CMSTechnologyFeature } from '@/types/cms';
+import { getContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { CMSTechnology } from '@/types/cms';
+import { toast } from 'sonner';
 
 export function useContentfulTechnology() {
   return useQuery({
     queryKey: ['contentful', 'technology'],
     queryFn: async () => {
-      console.log('[useContentfulTechnology] Fetching technology data');
+      console.log('[useContentfulTechnology] Fetching technology data from Contentful');
+      
+      let client;
       try {
-        const entries = await fetchContentfulEntries<ContentfulTechnology>('technology');
-        
-        console.log('[useContentfulTechnology] Raw entries:', entries);
-        
-        if (!entries || entries.length === 0) {
-          console.log('[useContentfulTechnology] No entries found, returning empty array');
-          return [];
+        client = await getContentfulClient();
+      } catch (clientError) {
+        console.error('[useContentfulTechnology] Failed to initialize Contentful client, trying refresh', clientError);
+        // Try refreshing the client
+        try {
+          client = await refreshContentfulClient();
+        } catch (refreshError) {
+          console.error('[useContentfulTechnology] Failed to refresh Contentful client', refreshError);
+          throw new Error(`Failed to initialize Contentful client: ${refreshError instanceof Error ? refreshError.message : 'Unknown error'}`);
         }
+      }
+      
+      if (!client) {
+        console.error('[useContentfulTechnology] Failed to initialize Contentful client after retry');
+        throw new Error('Failed to initialize Contentful client');
+      }
+      
+      console.log('[useContentfulTechnology] Querying Contentful for technology content type');
+      
+      const entries = await client.getEntries({
+        content_type: 'technology',
+        include: 3 // Include more levels of nested entries
+      });
+      
+      if (!entries.items.length) {
+        console.warn('[useContentfulTechnology] No technology entries found in Contentful');
+        return [];
+      }
+      
+      console.log(`[useContentfulTechnology] Found ${entries.items.length} technology entries`);
+      
+      // Transform entries to our app format
+      const technologies = entries.items.map(entry => {
+        const fields = entry.fields;
         
-        const mappedEntries = entries.map(entry => {
-          console.log('[useContentfulTechnology] Processing entry:', entry.fields);
+        console.log(`[useContentfulTechnology] Processing technology entry:`, {
+          id: entry.sys.id,
+          title: fields.title,
+          hasSections: Array.isArray(fields.sections) ? fields.sections.length : 0
+        });
+        
+        // Process sections if they exist
+        const sections = fields.sections ? (fields.sections as any[]).map(section => {
+          const sectionFields = section.fields;
           
-          // Make sure we log the description field specifically to verify it exists
-          console.log(`[useContentfulTechnology] Entry '${entry.fields.title}' description:`, {
-            hasDescription: !!entry.fields.description,
-            descriptionValue: entry.fields.description,
-            descriptionType: typeof entry.fields.description,
-            descriptionLength: entry.fields.description?.length
-          });
-          
-          return {
-            id: entry.sys?.id,
-            title: entry.fields.title,
-            slug: entry.fields.slug,
-            description: entry.fields.description, // Ensure description is properly mapped
-            visible: entry.fields.visible ?? true,
-            image: entry.fields.image ? {
-              id: entry.fields.image.sys?.id,
-              url: `https:${entry.fields.image.fields?.file?.url}`,
-              alt: entry.fields.image.fields?.title || entry.fields.title
-            } : undefined,
-            sections: (entry.fields.sections || []).map((section: any) => {
-              // Log each section's summary and description fields
-              console.log(`[useContentfulTechnology] Section '${section.fields?.title}':`, {
-                hasSummary: !!section.fields?.summary,
-                summaryValue: section.fields?.summary,
-                summaryType: typeof section.fields?.summary,
-                summaryLength: section.fields?.summary?.length || 0,
-                hasDescription: !!section.fields?.description,
-                descriptionValue: section.fields?.description,
-              });
+          // Process features if they exist for this section
+          const features = sectionFields.features ? 
+            (sectionFields.features as any[]).map(feature => {
+              const featureFields = feature.fields;
               
               return {
-                id: section.sys?.id,
-                title: section.fields?.title,
-                summary: section.fields?.summary, // Make sure to map the summary field
-                description: section.fields?.description,
-                section_type: section.fields?.sectionType,
-                display_order: section.fields?.displayOrder || 0,
-                technology_id: entry.sys?.id,
-                bulletPoints: section.fields?.bulletPoints || [],
-                sectionImage: section.fields?.sectionImage ? {
-                  url: `https:${section.fields.sectionImage.fields?.file?.url}`,
-                  alt: section.fields.sectionImage.fields?.title || section.fields?.title || '',
-                } : undefined,
-                features: (section.fields?.features || []).map((feature: any) => ({
-                  id: feature.sys?.id,
-                  section_id: section.sys?.id,
-                  title: feature.fields?.title,
-                  description: feature.fields?.description,
-                  icon: feature.fields?.icon,
-                  display_order: feature.fields?.displayOrder || 0,
-                  items: feature.fields?.items ? feature.fields.items.map((item: string) => ({
-                    text: item,
-                    display_order: 0
-                  })) : []
-                })) as CMSTechnologyFeature[]
+                id: feature.sys.id,
+                title: featureFields.title,
+                description: featureFields.description,
+                icon: featureFields.icon || undefined,
+                image: featureFields.image ? {
+                  id: (featureFields.image as any).sys.id,
+                  url: `https:${(featureFields.image as any).fields.file.url}`,
+                  alt: featureFields.imageAlt || featureFields.title
+                } : undefined
               };
-            }) as CMSTechnologySection[]
+            }) : [];
+          
+          return {
+            id: section.sys.id,
+            title: sectionFields.title,
+            subtitle: sectionFields.subtitle || '',
+            description: sectionFields.description || '',
+            features: features,
+            image: sectionFields.image ? {
+              id: (sectionFields.image as any).sys.id,
+              url: `https:${(sectionFields.image as any).fields.file.url}`,
+              alt: sectionFields.imageAlt || sectionFields.title
+            } : undefined,
+            backgroundColor: sectionFields.backgroundColor || 'white',
+            displayOrder: sectionFields.displayOrder || 0
           };
-        }) as CMSTechnology[];
+        }) : [];
         
-        console.log('[useContentfulTechnology] Mapped entries with descriptions:', 
-          mappedEntries.map(entry => ({ 
-            title: entry.title, 
-            description: entry.description,
-            descriptionLength: entry.description?.length || 0,
-            hasSections: entry.sections && entry.sections.length > 0,
-            firstSectionSummary: entry.sections?.[0]?.summary,
-            firstSectionSummaryLength: entry.sections?.[0]?.summary?.length || 0
-          }))
-        );
-        
-        return mappedEntries;
-      } catch (error) {
-        console.error('[useContentfulTechnology] Error:', error);
-        if (window.location.hostname.includes('lovable')) {
-          // Return fallback data in preview environment
-          console.log('[useContentfulTechnology] Returning empty array for preview environment');
-          return [];
-        }
-        throw error;
-      }
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: false
-  });
-}
-
-export function useContentfulTechnologyBySlug(slug: string | undefined) {
-  return useQuery({
-    queryKey: ['contentful', 'technology', slug],
-    queryFn: async () => {
-      if (!slug) return null;
-      
-      console.log(`[useContentfulTechnologyBySlug] Fetching technology with slug: ${slug}`);
-      try {
-        const entries = await fetchContentfulEntries<ContentfulTechnology>('technology', {
-          'fields.slug': slug
-        });
-        
-        if (entries.length === 0) {
-          console.log(`[useContentfulTechnologyBySlug] No technology found with slug: ${slug}`);
-          return null;
-        }
-
-        const entry = entries[0];
-        console.log(`[useContentfulTechnologyBySlug] Found entry with title: ${entry.fields.title}`, {
-          description: entry.fields.description,
-          descriptionLength: entry.fields.description?.length || 0
-        });
-        
+        // Create the technology object based on our app's data structure
         return {
-          id: entry.sys?.id,
-          title: entry.fields.title,
-          slug: entry.fields.slug,
-          description: entry.fields.description, // Ensure description is mapped correctly
-          visible: entry.fields.visible ?? true,
-          image: entry.fields.image ? {
-            id: entry.fields.image.sys?.id,
-            url: `https:${entry.fields.image.fields?.file?.url}`,
-            alt: entry.fields.image.fields?.title || entry.fields.title
+          id: entry.sys.id,
+          title: fields.title as string,
+          subtitle: fields.subtitle as string || '',
+          description: fields.description as string || '',
+          image: fields.heroImage ? {
+            id: (fields.heroImage as any).sys.id,
+            url: `https:${(fields.heroImage as any).fields.file.url}`,
+            alt: (fields.heroImage as any).fields.title || fields.title,
           } : undefined,
-          sections: (entry.fields.sections || []).map((section: any) => {
-            // Log each section's summary and description fields
-            console.log(`[useContentfulTechnologyBySlug] Section '${section.fields?.title}':`, {
-              hasSummary: !!section.fields?.summary,
-              summaryValue: section.fields?.summary,
-              summaryType: typeof section.fields?.summary,
-              summaryLength: section.fields?.summary?.length || 0
-            });
-            
-            return {
-              id: section.sys?.id,
-              title: section.fields?.title,
-              summary: section.fields?.summary, // Make sure to map the summary field
-              description: section.fields?.description,
-              section_type: section.fields?.sectionType,
-              display_order: section.fields?.displayOrder || 0,
-              technology_id: entry.sys?.id,
-              bulletPoints: section.fields?.bulletPoints || [],
-              sectionImage: section.fields?.sectionImage ? {
-                url: `https:${section.fields.sectionImage.fields?.file?.url}`,
-                alt: section.fields.sectionImage.fields?.title || section.fields?.title || '',
-              } : undefined,
-              features: (section.fields?.features || []).map((feature: any) => ({
-                id: feature.sys?.id,
-                section_id: section.sys?.id,
-                title: feature.fields?.title,
-                description: feature.fields?.description,
-                icon: feature.fields?.icon,
-                display_order: feature.fields?.displayOrder || 0,
-                items: feature.fields?.items ? feature.fields.items.map((item: string) => ({
-                  text: item,
-                  display_order: 0
-                })) : []
-              })) as CMSTechnologyFeature[]
-            };
-          }) as CMSTechnologySection[]
+          sections: sections.sort((a, b) => a.displayOrder - b.displayOrder),
+          primaryButtonText: fields.primaryButtonText as string || 'Contact Us',
+          primaryButtonUrl: fields.primaryButtonUrl as string || '/contact',
+          secondaryButtonText: fields.secondaryButtonText as string || 'Learn More',
+          secondaryButtonUrl: fields.secondaryButtonUrl as string || '/technology/details',
         } as CMSTechnology;
-      } catch (error) {
-        console.error(`[useContentfulTechnologyBySlug] Error:`, error);
-        return null;
-      }
+      });
+      
+      console.log(`[useContentfulTechnology] Successfully processed ${technologies.length} technology entries`);
+      return technologies;
     },
-    enabled: !!slug,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: false
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    meta: {
+      onError: (error: Error) => {
+        toast.error(`Error loading technology data from Contentful: ${error.message}`);
+        console.error('[useContentfulTechnology] Error:', error);
+      }
+    }
   });
 }
