@@ -65,8 +65,7 @@ export const heroContentTemplate: ContentTypeTemplate = {
               'services'
             ]
           }
-        ],
-        helpText: 'Unique identifier for the page this hero belongs to'
+        ]
       },
       {
         id: 'image',
@@ -116,11 +115,7 @@ export const heroContentTemplate: ContentTypeTemplate = {
         name: 'Background Class',
         type: 'Symbol',
         required: false,
-        localized: false,
-        defaultValue: {
-          'en-US': 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light'
-        },
-        helpText: 'Tailwind CSS classes for the hero background'
+        localized: false
       }
     ]
   }
