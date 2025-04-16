@@ -1,11 +1,10 @@
+
 import { createClient } from 'contentful';
-import { getContentfulConfig } from './cmsInfo';
-import { toast } from 'sonner';
 
 // Cache the client to avoid creating a new one on every request
 let contentfulClient: ReturnType<typeof createClient> | null = null;
 let lastConfigCheck = 0;
-const CONFIG_CACHE_TTL = 30 * 1000; // 30 second cache TTL (reduced for more frequent checks)
+const CONFIG_CACHE_TTL = 30 * 1000; // 30 second cache TTL
 let lastConfigError: Error | null = null;
 let configRetryCount = 0;
 const MAX_RETRIES = 3;
@@ -30,37 +29,39 @@ export const getContentfulClient = async () => {
   
   try {
     console.log('[getContentfulClient] Creating new Contentful client');
-    const config = await getContentfulConfig();
+    
+    // Get credentials directly from environment variables
+    const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
+    const deliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
+    const environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+    
     lastConfigCheck = now;
     lastConfigError = null;
     configRetryCount = 0;
     
     // Add more detailed logging for configuration
-    console.log('[getContentfulClient] Configuration received:', {
-      hasConfig: !!config,
-      hasSpaceId: !!config?.space_id,
-      spaceIdLength: config?.space_id?.length || 0,
-      hasDeliveryToken: !!config?.delivery_token,
-      deliveryTokenLength: config?.delivery_token?.length || 0,
-      hasManagementToken: !!config?.management_token,
-      managementTokenLength: config?.management_token?.length || 0,
-      environmentId: config?.environment_id || 'master'
+    console.log('[getContentfulClient] Configuration:', {
+      hasSpaceId: !!spaceId,
+      spaceIdLength: spaceId?.length || 0,
+      hasDeliveryToken: !!deliveryToken,
+      deliveryTokenLength: deliveryToken?.length || 0,
+      environmentId: environmentId
     });
     
-    if (!config || !config.space_id) {
+    if (!spaceId) {
       console.error('[getContentfulClient] Missing Space ID');
       throw new Error('Missing required Contentful credentials - Space ID not found');
     }
     
-    if (!config.delivery_token) {
+    if (!deliveryToken) {
       console.error('[getContentfulClient] Missing Delivery Token (CDA)');
       throw new Error('Missing required Contentful credentials - Delivery Token not found');
     }
     
     contentfulClient = createClient({
-      space: config.space_id,
-      accessToken: config.delivery_token,
-      environment: config.environment_id || 'master',
+      space: spaceId,
+      accessToken: deliveryToken,
+      environment: environmentId,
     });
     
     // Verify the client works by making a test request

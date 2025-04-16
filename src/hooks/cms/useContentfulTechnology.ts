@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
-import { CMSTechnology } from '@/types/cms';
+import { CMSTechnology, CMSTechnologySection } from '@/types/cms';
 import { toast } from 'sonner';
 
 export function useContentfulTechnology() {
@@ -44,7 +44,7 @@ export function useContentfulTechnology() {
       console.log(`[useContentfulTechnology] Found ${entries.items.length} technology entries`);
       
       // Transform entries to our app format
-      const technologies = entries.items.map(entry => {
+      const technologies: CMSTechnology[] = entries.items.map(entry => {
         const fields = entry.fields;
         const technologyId = entry.sys.id;
         
@@ -55,7 +55,7 @@ export function useContentfulTechnology() {
         });
         
         // Process sections if they exist
-        const sections = fields.sections ? (fields.sections as any[]).map((section, index) => {
+        const sections: CMSTechnologySection[] = fields.sections ? (fields.sections as any[]).map((section, index) => {
           const sectionFields = section.fields;
           const sectionId = section.sys.id;
           
@@ -122,7 +122,7 @@ export function useContentfulTechnology() {
           primaryButtonUrl: fields.primaryButtonUrl as string || '/contact',
           secondaryButtonText: fields.secondaryButtonText as string || 'Learn More',
           secondaryButtonUrl: fields.secondaryButtonUrl as string || '/technology/details',
-        } as CMSTechnology;
+        };
       });
       
       console.log(`[useContentfulTechnology] Successfully processed ${technologies.length} technology entries`);

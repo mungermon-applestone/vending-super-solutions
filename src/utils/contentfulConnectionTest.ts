@@ -1,12 +1,11 @@
 
-import { getContentfulConfig, resetContentfulConfig } from '@/services/cms/utils/cmsInfo';
-import { resetContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { createClient } from 'contentful';
 
 export const checkContentfulConfig = () => {
   // Check if the required environment variables are set
   const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
   const deliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
+  const environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
   
   const missingValues: string[] = [];
   
@@ -15,7 +14,12 @@ export const checkContentfulConfig = () => {
   
   return {
     isConfigured: missingValues.length === 0,
-    missingValues
+    missingValues,
+    config: {
+      spaceId,
+      deliveryToken,
+      environmentId
+    }
   };
 };
 
@@ -23,28 +27,23 @@ export const testContentfulConnection = async () => {
   try {
     console.log('[testContentfulConnection] Testing Contentful connection...');
     
-    // Reset caches to ensure a fresh connection
-    resetContentfulConfig();
-    resetContentfulClient();
+    const configCheck = checkContentfulConfig();
     
-    // Get configuration from Supabase
-    const config = await getContentfulConfig();
-    
-    if (!config || !config.space_id || !config.delivery_token) {
+    if (!configCheck.isConfigured) {
       console.error('[testContentfulConnection] Missing Contentful configuration');
       return {
         success: false,
-        message: 'Contentful configuration is incomplete. Please check your settings.'
+        message: `Missing Contentful configuration: ${configCheck.missingValues.join(', ')}`
       };
     }
     
     console.log('[testContentfulConnection] Creating test Contentful client');
     
-    // Create a new client
+    // Create a new client directly using environment variables
     const client = createClient({
-      space: config.space_id,
-      accessToken: config.delivery_token,
-      environment: config.environment_id || 'master'
+      space: configCheck.config.spaceId,
+      accessToken: configCheck.config.deliveryToken,
+      environment: configCheck.config.environmentId
     });
     
     // Make a simple request to verify connection
@@ -54,9 +53,6 @@ export const testContentfulConnection = async () => {
     });
     
     console.log(`[testContentfulConnection] Connection successful. Found ${total} total entries`);
-    
-    // Also try to refresh our singleton client
-    await refreshContentfulClient();
     
     return {
       success: true,

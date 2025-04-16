@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { useContentfulTechnology } from '@/hooks/cms/useContentfulTechnology';
@@ -13,7 +12,7 @@ import { testContentfulConnection, checkContentfulConfig } from '@/utils/content
 import { Button } from '@/components/ui/button';
 
 const ContentfulTechnologyPage: React.FC = () => {
-  const { data: technologies, isLoading, error } = useContentfulTechnology();
+  const { data: technologies, isLoading, error, refetch } = useContentfulTechnology();
   const [connectionStatus, setConnectionStatus] = React.useState<{
     checked: boolean;
     isConnected: boolean;
@@ -43,6 +42,10 @@ const ContentfulTechnologyPage: React.FC = () => {
         isConnected: success,
         message: message
       });
+      
+      if (success) {
+        refetch();
+      }
     } catch (error) {
       setConnectionStatus({
         checked: true,
@@ -50,7 +53,7 @@ const ContentfulTechnologyPage: React.FC = () => {
         message: error instanceof Error ? error.message : 'Unknown error checking connection'
       });
     }
-  }, []);
+  }, [refetch]);
 
   // Check connection if we have an error
   React.useEffect(() => {
@@ -72,30 +75,27 @@ const ContentfulTechnologyPage: React.FC = () => {
               title="Contentful Configuration Missing"
               message={`Missing environment variables: ${configCheck.missingValues.join(', ')}`}
               contentType="Technology"
-              actionText="View Documentation"
-              actionHref="https://docs.contentful.com/developers/docs/javascript/tutorials/using-js-cda-sdk"
+              actionText="Set Environment Variables"
+              actionHref="#"
             />
           </div>
         )}
         
         {/* If data is loading, show skeleton */}
         {configCheck.isConfigured && isLoading && (
-          <>
-            <div className="py-16 bg-slate-50">
-              <div className="container">
-                <div className="max-w-3xl mx-auto text-center">
-                  <Skeleton className="h-12 w-2/3 mx-auto mb-4" />
-                  <Skeleton className="h-6 w-full mx-auto mb-2" />
-                  <Skeleton className="h-6 w-4/5 mx-auto mb-8" />
-                  <div className="flex justify-center gap-4">
-                    <Skeleton className="h-10 w-32" />
-                    <Skeleton className="h-10 w-40" />
-                  </div>
+          <div className="py-16 bg-slate-50">
+            <div className="container">
+              <div className="max-w-3xl mx-auto text-center">
+                <Skeleton className="h-12 w-2/3 mx-auto mb-4" />
+                <Skeleton className="h-6 w-full mx-auto mb-2" />
+                <Skeleton className="h-6 w-4/5 mx-auto mb-8" />
+                <div className="flex justify-center gap-4">
+                  <Skeleton className="h-10 w-32" />
+                  <Skeleton className="h-10 w-40" />
                 </div>
               </div>
             </div>
             
-            {/* Skeleton for sections */}
             {[1, 2].map((i) => (
               <div key={i} className={`py-16 ${i % 2 === 0 ? 'bg-slate-50' : 'bg-white'}`}>
                 <div className="container">
@@ -130,22 +130,13 @@ const ContentfulTechnologyPage: React.FC = () => {
                 )}
                 
                 <div className="flex flex-wrap gap-3">
-                  <Button onClick={() => window.location.reload()} variant="outline">
+                  <Button onClick={() => refetch()} variant="outline">
                     Retry Loading
                   </Button>
                   
                   {!connectionStatus.checked && (
                     <Button onClick={checkConnection} variant="secondary">
                       Check Contentful Connection
-                    </Button>
-                  )}
-                  
-                  {!connectionStatus.isConnected && (
-                    <Button 
-                      variant="default"
-                      onClick={() => window.open('/admin/contentful-settings', '_self')}
-                    >
-                      Check Contentful Settings
                     </Button>
                   )}
                 </div>
