@@ -22,32 +22,14 @@ const mapTechnologyData = (tech: CMSTechnology) => {
     items: feature.items?.map(item => item.text) || []
   })) || [];
 
-  // Get the description text from the most reliable source
-  let description = '';
+  // Get the summary from the description field
+  const summaryText = tech.description || tech.sections?.[0]?.description || '';
   
-  // Try all possible sources for the description text, in order of reliability
-  if (typeof tech.description === 'string' && tech.description.trim() !== '') {
-    description = tech.description;
-    console.log(`[mapTechnologyData] Using tech.description for ${tech.title}:`, tech.description);
-  } 
-  else if (tech.sections?.[0]?.description && typeof tech.sections[0].description === 'string' && tech.sections[0].description.trim() !== '') {
-    description = tech.sections[0].description;
-    console.log(`[mapTechnologyData] Using tech.sections[0].description for ${tech.title}:`, tech.sections[0].description);
-  }
-  else {
-    console.log(`[mapTechnologyData] No valid description found for ${tech.title}. Checking all possible sources:`, {
-      'tech.description': tech.description,
-      'tech.sections[0]?.description': tech.sections?.[0]?.description
-    });
-    
-    // Use empty string in case there's no description
-    description = '';
-  }
-  
-  console.log(`[mapTechnologyData] Final description for '${tech.title}':`, {
-    value: description,
-    length: description.length,
-    type: typeof description
+  console.log(`[mapTechnologyData] Technology summary for '${tech.title}':`, {
+    description: tech.description,
+    sectionDescription: tech.sections?.[0]?.description,
+    finalSummary: summaryText,
+    summaryLength: summaryText.length
   });
   
   // Extract bullet points if available
@@ -66,7 +48,7 @@ const mapTechnologyData = (tech: CMSTechnology) => {
   return {
     id: tech.id,
     title: tech.title,
-    summary: description,
+    summary: summaryText,
     bulletPoints: bulletPoints,
     features: features,
     image: imageUrl
@@ -172,7 +154,7 @@ const SimpleTechnologyPage = () => {
                 key={tech.id}
                 id={tech.id}
                 title={tech.title}
-                summary={tech.summary || ""}
+                summary={tech.summary}
                 bulletPoints={tech.bulletPoints}
                 image={tech.image || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"}
                 index={index}

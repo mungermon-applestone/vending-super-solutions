@@ -61,8 +61,8 @@ const TechnologySection = ({
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
               
-              {/* Always try to display the summary with proper error handling */}
-              {summary && (
+              {/* Only render the summary paragraph if there is actual content */}
+              {summary && summary.trim() !== '' && (
                 <p className="text-lg text-muted-foreground" data-testid="technology-summary">
                   {summary}
                 </p>
