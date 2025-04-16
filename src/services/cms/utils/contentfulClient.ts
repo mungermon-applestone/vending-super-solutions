@@ -30,9 +30,9 @@ export const getContentfulClient = async () => {
   try {
     console.log('[getContentfulClient] Creating new Contentful client');
     
-    // Get credentials directly from environment variables
+    // Get credentials from environment variables - IMPORTANT FIX: Access env vars correctly
     const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
-    const deliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
+    const deliveryToken = import.meta.env.CONTENTFUL_DELIVERY_TOKEN || import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN; // Try both formats
     const environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
     
     lastConfigCheck = now;
@@ -43,9 +43,13 @@ export const getContentfulClient = async () => {
     console.log('[getContentfulClient] Configuration:', {
       hasSpaceId: !!spaceId,
       spaceIdLength: spaceId?.length || 0,
-      hasDeliveryToken: !!deliveryToken,
+      hasDeliveryToken: !!deliveryToken, 
       deliveryTokenLength: deliveryToken?.length || 0,
-      environmentId: environmentId
+      environmentId: environmentId,
+      envVarFormat: {
+        spaceIdFormat: typeof import.meta.env.VITE_CONTENTFUL_SPACE_ID,
+        deliveryTokenFormat: typeof import.meta.env.CONTENTFUL_DELIVERY_TOKEN || typeof import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
+      }
     });
     
     if (!spaceId) {

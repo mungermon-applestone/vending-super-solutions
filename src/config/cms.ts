@@ -1,4 +1,3 @@
-import { STRAPI_API_URL, STRAPI_API_KEY, STRAPI_ENDPOINTS } from './strapiCms';
 
 /**
  * CMS Configuration
@@ -10,10 +9,10 @@ import { STRAPI_API_URL, STRAPI_API_KEY, STRAPI_ENDPOINTS } from './strapiCms';
 // Contentful configuration from environment variables
 export const CONTENTFUL_CONFIG = {
   // Use public environment variable for Space ID (can be client-side)
-  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'your_space_id_here',
+  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
   
-  // Use non-VITE prefix for sensitive tokens to keep them private
-  DELIVERY_TOKEN: import.meta.env.CONTENTFUL_DELIVERY_TOKEN || '',
+  // Try both formats for delivery token (with and without VITE prefix)
+  DELIVERY_TOKEN: import.meta.env.CONTENTFUL_DELIVERY_TOKEN || import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || '',
   
   // Optional: Environment ID (typically 'master')
   ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
@@ -22,7 +21,21 @@ export const CONTENTFUL_CONFIG = {
 // Add a utility to check if Contentful is properly configured
 export const isContentfulConfigured = () => {
   const { SPACE_ID, DELIVERY_TOKEN } = CONTENTFUL_CONFIG;
+  console.log('[isContentfulConfigured] Checking config:', {
+    hasSpaceId: !!SPACE_ID,
+    hasDeliveryToken: !!DELIVERY_TOKEN,
+    spaceIdType: typeof import.meta.env.VITE_CONTENTFUL_SPACE_ID
+  });
   return !!(SPACE_ID && DELIVERY_TOKEN);
+};
+
+// Strapi specific configuration
+import { STRAPI_API_URL, STRAPI_API_KEY, STRAPI_ENDPOINTS } from './strapiCms';
+
+export const STRAPI_CONFIG = {
+  API_URL: STRAPI_API_URL,
+  API_KEY: STRAPI_API_KEY,
+  ENDPOINTS: STRAPI_ENDPOINTS
 };
 
 // Base URL for your CMS API
@@ -56,10 +69,3 @@ export const IS_DEVELOPMENT = import.meta.env.DEV;
 
 // Fallback image if CMS image is missing
 export const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1481495278953-0a688f58e194';
-
-// Strapi specific configuration
-export const STRAPI_CONFIG = {
-  API_URL: STRAPI_API_URL,
-  API_KEY: STRAPI_API_KEY,
-  ENDPOINTS: STRAPI_ENDPOINTS
-};
