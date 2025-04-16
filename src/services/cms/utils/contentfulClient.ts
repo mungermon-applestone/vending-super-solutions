@@ -1,6 +1,7 @@
 
 import { createClient } from 'contentful';
 import { getContentfulConfig } from './cmsInfo';
+import { toast } from 'sonner';
 
 // Cache the client to avoid creating a new one on every request
 let contentfulClient: ReturnType<typeof createClient> | null = null;
@@ -27,31 +28,14 @@ export const getContentfulClient = async () => {
       environmentId: config?.environment_id || 'master'
     });
     
-    // If we're in preview mode and don't have config, return null gracefully to enable fallbacks
-    const isPreviewEnvironment = window.location.hostname.includes('lovable') || 
-                                window.location.hostname.includes('preview');
-    
     if (!config || !config.space_id) {
       console.error('[getContentfulClient] Missing Space ID');
-      
-      if (isPreviewEnvironment) {
-        console.log('[getContentfulClient] Preview environment detected, allowing fallback content');
-        return null;
-      }
-      
-      return null;
+      throw new Error('Missing required Contentful credentials - Space ID not found');
     }
     
-    // Require at least the delivery token
     if (!config.delivery_token) {
       console.error('[getContentfulClient] Missing Delivery Token (CDA)');
-      
-      if (isPreviewEnvironment) {
-        console.log('[getContentfulClient] Preview environment detected, allowing fallback content');
-        return null;
-      }
-      
-      return null;
+      throw new Error('Missing required Contentful credentials - Delivery Token not found');
     }
     
     contentfulClient = createClient({
@@ -63,15 +47,10 @@ export const getContentfulClient = async () => {
     console.log('[getContentfulClient] Successfully created Contentful client');
     return contentfulClient;
   } catch (error) {
-    console.error('[getContentfulClient] Comprehensive error creating Contentful client:', error);
+    console.error('[getContentfulClient] Error creating Contentful client:', error);
     
-    // Check if we're in preview environment
-    if (window.location.hostname.includes('lovable') || 
-        window.location.hostname.includes('preview')) {
-      console.log('[getContentfulClient] Preview environment detected, allowing fallback content');
-      return null;
-    }
-    
+    // Clear the client on error to force recreation on next attempt
+    contentfulClient = null;
     throw error;
   }
 };
@@ -92,15 +71,7 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
     
     if (!client) {
       console.error('[fetchContentfulEntries] Failed to get Contentful client');
-      
-      // In preview environments, we want to return an empty array instead of throwing
-      if (window.location.hostname.includes('lovable') || 
-          window.location.hostname.includes('preview')) {
-        console.log('[fetchContentfulEntries] Preview environment, returning empty array');
-        return [] as T[];
-      }
-      
-      return [] as T[];
+      throw new Error('Failed to initialize Contentful client');
     }
     
     const query = {
@@ -108,20 +79,14 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
       ...options
     };
     
+    console.log(`[fetchContentfulEntries] Query params:`, JSON.stringify(query));
     const response = await client.getEntries(query);
-    console.log(`[fetchContentfulEntries] Fetched ${response.items.length} entries`);
+    console.log(`[fetchContentfulEntries] Fetched ${response.items.length} entries for ${contentType}`);
     
     return response.items as T[];
   } catch (error) {
     console.error(`[fetchContentfulEntries] Error fetching ${contentType}:`, error);
-    
-    // In preview environments, we want to return an empty array instead of throwing
-    if (window.location.hostname.includes('lovable') || 
-        window.location.hostname.includes('preview')) {
-      return [] as T[];
-    }
-    
-    return [] as T[];
+    throw error;
   }
 };
 
@@ -135,7 +100,7 @@ export const fetchContentfulEntry = async <T>(entryId: string): Promise<T | null
     
     if (!client) {
       console.error('[fetchContentfulEntry] Failed to get Contentful client');
-      return null;
+      throw new Error('Failed to initialize Contentful client');
     }
     
     const entry = await client.getEntry(entryId);
@@ -146,6 +111,6 @@ export const fetchContentfulEntry = async <T>(entryId: string): Promise<T | null
     } as T;
   } catch (error) {
     console.error(`[fetchContentfulEntry] Error fetching entry ${entryId}:`, error);
-    return null;
+    throw error;
   }
 };

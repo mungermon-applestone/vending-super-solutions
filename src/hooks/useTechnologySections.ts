@@ -2,7 +2,8 @@
 import { CMSTechnology } from '@/types/cms';
 import { useCMSQuery } from './useCMSQuery';
 import { improvedTechnologyAdapter } from '@/services/cms/adapters/technologies/improvedTechnologyAdapter';
-import { useQuery } from '@tanstack/react-query'; // Add this import for useQuery
+import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 type UseTechnologySectionsOptions = {
   slug?: string;
@@ -20,13 +21,20 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
   if (slug) {
     const fetchTechnology = async () => {
       console.log(`[useTechnologySections] Fetching technology by slug: ${slug}`);
-      const technology = await improvedTechnologyAdapter.getBySlug(slug);
-      
-      if (!technology) {
-        throw new Error(`Technology with slug "${slug}" not found`);
+      try {
+        const technology = await improvedTechnologyAdapter.getBySlug(slug);
+        
+        if (!technology) {
+          console.error(`[useTechnologySections] Technology with slug "${slug}" not found`);
+          throw new Error(`Technology with slug "${slug}" not found`);
+        }
+        
+        console.log(`[useTechnologySections] Successfully fetched technology:`, technology);
+        return technology;
+      } catch (error) {
+        console.error(`[useTechnologySections] Error fetching technology with slug ${slug}:`, error);
+        throw error;
       }
-      
-      return technology;
     };
     
     const query = useCMSQuery<CMSTechnology>({
@@ -49,6 +57,13 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
     console.log('[useTechnologySections] Fetching all technologies');
     try {
       const technologies = await improvedTechnologyAdapter.getAll();
+      
+      if (!technologies || technologies.length === 0) {
+        console.warn('[useTechnologySections] No technologies found');
+      } else {
+        console.log(`[useTechnologySections] Successfully fetched ${technologies.length} technologies`);
+      }
+      
       return technologies;
     } catch (error) {
       console.error('[useTechnologySections] Error fetching technologies:', error);
@@ -86,7 +101,7 @@ export function useTechnologyBySlug(slug: string) {
         return technology;
       } catch (err) {
         console.error(`[useTechnologyBySlug] Error fetching technology with slug ${slug}:`, err);
-        return null;
+        throw new Error(`Error fetching technology with slug ${slug}: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     },
     enabled: !!slug

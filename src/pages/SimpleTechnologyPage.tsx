@@ -6,9 +6,10 @@ import TechnologyHeroSimple from '@/components/technology/TechnologyHeroSimple';
 import TechnologySection from '@/components/technology/TechnologySection';
 import { useTechnologySections } from '@/hooks/useTechnologySections';
 import { useIsFetching } from '@tanstack/react-query';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TechFeature } from '@/types/technology';
+import { AlertTriangle } from 'lucide-react';
 
 // Helper function to transform CMSTechnology data to the format expected by TechnologySection
 const mapTechnologyData = (tech) => {
@@ -24,20 +25,21 @@ const mapTechnologyData = (tech) => {
   const imageUrl = tech.image_url || 
     (tech.image && typeof tech.image === 'string' ? tech.image : 
     tech.image?.url) || 
-    tech.sections?.[0]?.images?.[0]?.url || 
-    'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789';
+    tech.sections?.[0]?.images?.[0]?.url;
 
   return {
     id: tech.id,
     title: tech.title,
-    summary: tech.description, // Changed from description to summary
+    summary: tech.description,
     features: features,
     image: imageUrl
   };
 };
 
 const SimpleTechnologyPage = () => {
-  const { technologies = [], isLoading, error } = useTechnologySections();
+  const { technologies = [], isLoading, error } = useTechnologySections({
+    enableToasts: true
+  });
   const isFetching = useIsFetching({ queryKey: ['technologies'] }) > 0;
 
   // Transform technology data for rendering
@@ -54,7 +56,7 @@ const SimpleTechnologyPage = () => {
       />
 
       {/* Loading State */}
-      {isFetching && (
+      {(isLoading || isFetching) && (
         <div className="container max-w-7xl mx-auto px-4 py-12">
           <div className="space-y-12">
             {[1, 2, 3].map(i => (
@@ -76,25 +78,38 @@ const SimpleTechnologyPage = () => {
       )}
 
       {/* Error State */}
-      {transformedTechnologies.length === 0 && !isFetching && (
+      {error && !isFetching && (
         <div className="container max-w-7xl mx-auto px-4 py-12">
           <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Error Loading Technologies</AlertTitle>
             <AlertDescription>
-              We're having trouble loading technology information. Please try again later.
+              {error instanceof Error ? error.message : 'Failed to load technology information. Please try again later.'}
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!isLoading && !isFetching && !error && transformedTechnologies.length === 0 && (
+        <div className="container max-w-7xl mx-auto px-4 py-12">
+          <Alert>
+            <AlertDescription>
+              No technology information is currently available.
             </AlertDescription>
           </Alert>
         </div>
       )}
 
       {/* Technology Sections */}
-      {!isFetching && transformedTechnologies.length > 0 && (
+      {!isFetching && !error && transformedTechnologies.length > 0 && (
         <>
           {transformedTechnologies.map((tech, index) => (
             <TechnologySection
               key={tech.id}
               id={tech.id}
               title={tech.title}
-              summary={tech.summary} // Changed from description to summary
+              summary={tech.summary}
               image={tech.image}
               index={index}
             />

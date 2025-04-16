@@ -12,14 +12,14 @@ export const getContentfulConfig = async () => {
     
     if (countError) {
       console.error('[getContentfulConfig] Error checking table:', countError);
-      return null;
+      throw new Error(`Failed to check contentful_config table: ${countError.message}`);
     }
     
     console.log(`[getContentfulConfig] Found ${count} configurations in table`);
     
     if (count === 0) {
-      console.warn('[getContentfulConfig] No records found in contentful_config table');
-      return null;
+      console.error('[getContentfulConfig] No records found in contentful_config table');
+      throw new Error('No Contentful configuration found. Please set up your Contentful credentials in Admin Settings.');
     }
     
     // Now fetch the actual data
@@ -31,36 +31,29 @@ export const getContentfulConfig = async () => {
 
     if (error) {
       console.error('[getContentfulConfig] Error fetching config:', error);
-      // Try alternative approach if maybeSingle() fails
-      const { data: fallbackData, error: fallbackError } = await supabase
-        .from('contentful_config')
-        .select('*')
-        .limit(1);
-        
-      if (fallbackError || !fallbackData || fallbackData.length === 0) {
-        console.error('[getContentfulConfig] Fallback also failed:', fallbackError);
-        return null;
-      }
-      
-      console.log('[getContentfulConfig] Fallback succeeded, using first row');
-      return fallbackData[0];
+      throw new Error(`Failed to fetch Contentful config: ${error.message}`);
+    }
+
+    if (!data) {
+      console.error('[getContentfulConfig] No data returned');
+      throw new Error('No Contentful configuration found. Please set up your Contentful credentials in Admin Settings.');
     }
 
     // Log configuration status but not the actual tokens
-    console.log('[getContentfulConfig] Configuration status:', {
-      configId: data?.id,
-      spaceId: data?.space_id,
-      envId: data?.environment_id,
-      hasDeliveryToken: !!data?.delivery_token,
-      hasManagementToken: !!data?.management_token,
-      deliveryTokenLength: data?.delivery_token?.length,
-      managementTokenLength: data?.management_token?.length
+    console.log('[getContentfulConfig] Configuration retrieved successfully:', {
+      configId: data.id,
+      spaceId: data.space_id,
+      envId: data.environment_id,
+      hasDeliveryToken: !!data.delivery_token,
+      hasManagementToken: !!data.management_token,
+      deliveryTokenLength: data.delivery_token?.length || 0,
+      managementTokenLength: data.management_token?.length || 0
     });
     
     return data;
   } catch (error) {
-    console.error('[getContentfulConfig] Unexpected error:', error);
-    return null;
+    console.error('[getContentfulConfig] Error:', error);
+    throw error;
   }
 };
 
@@ -88,36 +81,11 @@ export enum ContentProviderType {
  */
 export const getCMSInfo = (): CMSInfo => {
   // For now we're using Contentful as the primary CMS
-  // In the future this can be expanded to support multiple providers
-  
-  // Check if we're using Strapi by looking at environment variables
-  const strapiUrl = process.env.VITE_STRAPI_API_URL;
-  const strapiKey = process.env.VITE_STRAPI_API_KEY;
-  const cmsProvider = process.env.VITE_CMS_PROVIDER || 'supabase';
-  
-  if (cmsProvider === 'strapi' && strapiUrl) {
-    const isApiUrlConfigured = !!strapiUrl && strapiUrl.trim() !== '';
-    const isApiKeyConfigured = !!strapiKey && strapiKey.trim() !== '';
-    
-    const isConfigured = isApiUrlConfigured;
-    const strapiBaseUrl = strapiUrl.replace('/api', '');
-    
-    return {
-      provider: 'Strapi',
-      status: isConfigured ? 'configured' : 'not-configured',
-      isConfigured: isConfigured,
-      adminUrl: isApiUrlConfigured ? `${strapiBaseUrl}/admin` : undefined,
-      apiUrl: strapiUrl,
-      apiKeyConfigured: isApiKeyConfigured
-    };
-  }
-  
-  // Default to Contentful
   return {
     provider: 'Contentful',
-    status: 'configured', // Assuming Contentful is always configured via Supabase
+    status: 'configured', 
     isConfigured: true,
     adminUrl: 'https://app.contentful.com/',
-    contentfulConfigured: true // This will be determined dynamically in components that need it
+    contentfulConfigured: true
   };
 };
