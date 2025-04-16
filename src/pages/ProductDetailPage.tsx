@@ -4,14 +4,16 @@ import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useContentfulProduct } from '@/hooks/cms/useContentfulProduct';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 
 const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: product, isLoading, error } = useContentfulProduct(slug || '');
+  const { data: product, isLoading, error, refetch } = useContentfulProduct(slug || '');
+  
+  console.log(`[ProductDetailPage] Rendering with slug: ${slug}`, { product, isLoading, error });
   
   return (
     <Layout>
@@ -27,10 +29,8 @@ const ProductDetailPage = () => {
 
         {isLoading ? (
           <div className="container py-12 text-center">
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 w-1/3 bg-gray-200 rounded mx-auto"></div>
-              <div className="h-4 w-2/3 bg-gray-200 rounded mx-auto"></div>
-            </div>
+            <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Loading product information...</p>
           </div>
         ) : error ? (
           <div className="container py-12">
@@ -39,15 +39,15 @@ const ProductDetailPage = () => {
               message={error instanceof Error ? error.message : 'Failed to load product details'}
               contentType="Product"
               showRefresh={true}
-              actionText="Return to Products"
-              actionHref="/products"
+              onAction={() => refetch()}
+              actionText="Try Again"
             />
           </div>
         ) : !product ? (
           <div className="container py-12">
             <ContentfulFallbackMessage
               title="Product Not Found"
-              message="The product you're looking for doesn't exist or has been removed."
+              message={`The product "${slug}" doesn't exist or has been removed.`}
               contentType="Product"
               actionText="Browse Products"
               actionHref="/products"
@@ -58,7 +58,7 @@ const ProductDetailPage = () => {
             <ProductHeroSection
               productType={product.title}
               description={product.description}
-              image={product.image?.url}
+              image={product.image?.url || '/placeholder.svg'}
               benefits={product.benefits || []}
             />
 

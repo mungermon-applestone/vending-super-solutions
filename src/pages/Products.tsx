@@ -14,7 +14,10 @@ const Products = () => {
   const { data: products, isLoading, error, refetch } = useContentfulProducts();
   const queryClient = useQueryClient();
   
+  console.log('[Products] Rendering Products page', { products, isLoading, error });
+
   const handleRefresh = () => {
+    console.log('[Products] Refreshing products data');
     queryClient.invalidateQueries({ queryKey: ['contentful', 'products'] });
   };
   
@@ -43,16 +46,18 @@ const Products = () => {
           </div>
 
           {isLoading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-500 mb-3" />
+              <p className="text-gray-500">Loading products from Contentful...</p>
             </div>
           ) : error ? (
             <ContentfulFallbackMessage
               title="Error Loading Products"
-              message={error instanceof Error ? error.message : 'Failed to load products'}
+              message={error instanceof Error ? error.message : 'Failed to load products from Contentful'}
               contentType="Products"
               showRefresh={true}
-              onAction={handleRefresh}
+              onAction={refetch}
+              actionText="Try Again"
             />
           ) : products && products.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -76,7 +81,7 @@ const Products = () => {
           ) : (
             <ContentfulFallbackMessage
               title="No Products Found"
-              message="There are currently no products available in the catalog."
+              message="We couldn't find any products in Contentful. Please make sure you've added product types to your Contentful space."
               contentType="Products"
               showRefresh={true}
               onAction={handleRefresh}

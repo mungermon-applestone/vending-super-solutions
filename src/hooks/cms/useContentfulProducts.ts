@@ -12,6 +12,7 @@ export function useContentfulProducts() {
       const client = await getContentfulClient();
       
       if (!client) {
+        console.error('[useContentfulProducts] Failed to initialize Contentful client');
         throw new Error('Failed to initialize Contentful client');
       }
       
@@ -22,6 +23,19 @@ export function useContentfulProducts() {
       
       console.log(`[useContentfulProducts] Found ${entries.items.length} products`);
       
+      if (entries.items.length === 0) {
+        console.warn('[useContentfulProducts] No products found in Contentful');
+      }
+
+      // Log the raw data to help with debugging
+      console.log('[useContentfulProducts] Raw product data:', 
+        entries.items.map(item => ({
+          id: item.sys.id,
+          title: item.fields.title,
+          slug: item.fields.slug
+        }))
+      );
+      
       return entries.items.map(entry => {
         const fields = entry.fields;
         return {
@@ -29,7 +43,7 @@ export function useContentfulProducts() {
           title: fields.title as string,
           slug: fields.slug as string,
           description: fields.description as string,
-          benefits: (fields.benefits as string[]) || [],
+          benefits: Array.isArray(fields.benefits) ? fields.benefits as string[] : [],
           image: fields.image ? {
             id: (fields.image as any).sys.id,
             url: `https:${(fields.image as any).fields.file.url}`,
@@ -39,14 +53,16 @@ export function useContentfulProducts() {
             id: feature.sys.id,
             title: feature.fields.title,
             description: feature.fields.description,
-            icon: feature.fields.icon
+            icon: feature.fields.icon || undefined
           })) : []
         } as CMSProductType;
       });
     },
+    retry: 1,
     meta: {
       onError: (error: Error) => {
         toast.error(`Error loading products: ${error.message}`);
+        console.error('[useContentfulProducts] Error:', error);
       }
     }
   });
