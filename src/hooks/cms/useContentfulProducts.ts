@@ -20,6 +20,8 @@ export function useContentfulProducts() {
         include: 2
       });
       
+      console.log(`[useContentfulProducts] Found ${entries.items.length} products`);
+      
       return entries.items.map(entry => {
         const fields = entry.fields;
         return {
