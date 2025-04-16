@@ -73,7 +73,7 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
       console.log(`[useContentfulBusinessGoal] Fetching business goal with slug: ${slug}`);
       try {
         // Use direct slug lookup method for better debugging
-        const entry = await fetchContentfulEntryBySlug<ContentfulBusinessGoal>('businessGoal', slug);
+        let entry = await fetchContentfulEntryBySlug<ContentfulBusinessGoal>('businessGoal', slug);
         
         if (!entry) {
           console.log(`[useContentfulBusinessGoal] No business goal found with slug: ${slug}`);
