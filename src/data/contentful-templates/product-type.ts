@@ -2,13 +2,13 @@
 import { ContentTypeTemplate } from '@/types/contentful-admin';
 
 export const productTemplate: ContentTypeTemplate = {
-  id: 'product',
+  id: 'productType', // UPDATED: Changed from 'product' to 'productType' to match Contentful
   name: 'Product Type',
   description: 'Create a product type content type',
   contentType: {
-    id: 'product',
+    id: 'productType', // UPDATED: Changed from 'product' to 'productType' to match Contentful
     name: 'Product Type',
-    description: 'A product type',
+    description: 'A vending machine product type',
     displayField: 'title',
     publish: true,
     fields: [
@@ -38,7 +38,7 @@ export const productTemplate: ContentTypeTemplate = {
       },
       {
         id: 'image',
-        name: 'Image',
+        name: 'Main Image',
         type: 'Link',
         linkType: 'Asset',
         required: false,

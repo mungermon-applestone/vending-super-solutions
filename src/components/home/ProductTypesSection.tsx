@@ -62,7 +62,8 @@ const ProductTypesSection = () => {
     queryFn: async () => {
       console.log('[ProductTypesSection] Fetching product types from Contentful');
       try {
-        const entries = await fetchContentfulEntries<ContentfulProductType>('product');
+        // Use productType content type ID to match Contentful schema
+        const entries = await fetchContentfulEntries<ContentfulProductType>('productType');
         
         if (entries.length === 0) {
           console.log('[ProductTypesSection] No product entries returned from Contentful');

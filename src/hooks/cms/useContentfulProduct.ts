@@ -1,8 +1,9 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
+import { fetchContentfulEntries, fetchContentfulEntryBySlug } from '@/services/cms/utils/contentfulClient';
 import { ContentfulAsset } from '@/types/contentful';
 import { CMSProductType } from '@/types/cms';
+import { normalizeSlug, getSlugVariations } from '@/services/cms/utils/slugMatching';
 import { toast } from 'sonner';
 
 // Define the structure of a product in Contentful
@@ -137,7 +138,9 @@ export function useContentfulProduct(slug: string) {
       try {
         // First check if we have a direct match on the slug
         console.log(`[useContentfulProduct] Trying direct slug match for: "${slug}"`);
-        const entries = await fetchContentfulEntries<ContentfulProduct>('product', {
+        
+        // IMPORTANT: Use productType content type ID to match Contentful schema
+        const entries = await fetchContentfulEntries<ContentfulProduct>('productType', {
           'fields.slug': slug,
           limit: 1
         });
@@ -152,21 +155,22 @@ export function useContentfulProduct(slug: string) {
         
         // If no direct match, try with alternate slug variations
         console.log(`[useContentfulProduct] No direct match, trying alternate variations`);
-        // Try without a -vending suffix
-        const alternateSlug = slug.endsWith('-vending') ? 
-          slug.replace('-vending', '') : 
-          `${slug}-vending`;
-          
-        console.log(`[useContentfulProduct] Trying alternate slug: "${alternateSlug}"`);
-        const alternateEntries = await fetchContentfulEntries<ContentfulProduct>('product', {
-          'fields.slug': alternateSlug,
-          limit: 1
-        });
+        const slugVariations = getSlugVariations(slug);
         
-        if (alternateEntries.length > 0) {
-          const transformedProduct = transformProduct(alternateEntries[0]);
-          console.log('[useContentfulProduct] Found product with alternate slug:', transformedProduct);
-          return transformedProduct;
+        for (const variation of slugVariations) {
+          if (variation === slug) continue; // Skip the one we already tried
+          
+          console.log(`[useContentfulProduct] Trying variation: "${variation}"`);
+          const variationEntries = await fetchContentfulEntries<ContentfulProduct>('productType', {
+            'fields.slug': variation,
+            limit: 1
+          });
+          
+          if (variationEntries.length > 0) {
+            const transformedProduct = transformProduct(variationEntries[0]);
+            console.log(`[useContentfulProduct] Found product with variation "${variation}":`, transformedProduct);
+            return transformedProduct;
+          }
         }
         
         // If nothing found in Contentful, check fallback data
@@ -174,6 +178,13 @@ export function useContentfulProduct(slug: string) {
         if (fallbackProductData[slug]) {
           console.log(`[useContentfulProduct] Using fallback data for: ${slug}`);
           return fallbackProductData[slug];
+        }
+        
+        // Try with normalized slug for fallbacks
+        const normalizedSlug = normalizeSlug(slug);
+        if (fallbackProductData[normalizedSlug]) {
+          console.log(`[useContentfulProduct] Using fallback data with normalized slug: ${normalizedSlug}`);
+          return fallbackProductData[normalizedSlug];
         }
         
         // If no fallback found, return null
