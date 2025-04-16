@@ -92,11 +92,16 @@ export function useContentfulTechnology() {
         }) : [];
         
         // Create the technology object based on our app's data structure
+        // Adding the missing required fields: slug and visible
         return {
           id: entry.sys.id,
           title: fields.title as string,
           subtitle: fields.subtitle as string || '',
           description: fields.description as string || '',
+          // Add the missing slug field, use the slug from fields or generate one from title
+          slug: (fields.slug as string) || ((fields.title as string)?.toLowerCase().replace(/\s+/g, '-') || ''),
+          // Add the missing visible field with default value true
+          visible: typeof fields.visible === 'boolean' ? fields.visible : true,
           image: fields.heroImage ? {
             id: (fields.heroImage as any).sys.id,
             url: `https:${(fields.heroImage as any).fields.file.url}`,
