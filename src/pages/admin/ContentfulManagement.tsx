@@ -14,7 +14,7 @@ const ContentfulManagement: React.FC = () => {
       <div className="container mx-auto py-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Contentful Content Management</h1>
-          <Button asChild variant="outline">
+          <Button asChild>
             <Link to="/admin/settings">Back to Settings</Link>
           </Button>
         </div>
