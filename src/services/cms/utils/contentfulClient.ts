@@ -1,5 +1,6 @@
 
 import { createClient } from 'contentful';
+import { CONTENTFUL_CONFIG } from '@/config/cms';
 
 // Cache the client to avoid creating a new one on every request
 let contentfulClient: ReturnType<typeof createClient> | null = null;
@@ -30,10 +31,8 @@ export const getContentfulClient = async () => {
   try {
     console.log('[getContentfulClient] Creating new Contentful client');
     
-    // Get credentials from environment variables - IMPORTANT FIX: Access env vars correctly
-    const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
-    const deliveryToken = import.meta.env.CONTENTFUL_DELIVERY_TOKEN || import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN; // Try both formats
-    const environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+    // Use the centralized configuration from cms.ts
+    const { SPACE_ID, DELIVERY_TOKEN, ENVIRONMENT_ID } = CONTENTFUL_CONFIG;
     
     lastConfigCheck = now;
     lastConfigError = null;
@@ -41,31 +40,32 @@ export const getContentfulClient = async () => {
     
     // Add more detailed logging for configuration
     console.log('[getContentfulClient] Configuration:', {
-      hasSpaceId: !!spaceId,
-      spaceIdLength: spaceId?.length || 0,
-      hasDeliveryToken: !!deliveryToken, 
-      deliveryTokenLength: deliveryToken?.length || 0,
-      environmentId: environmentId,
+      hasSpaceId: !!SPACE_ID,
+      spaceIdLength: SPACE_ID?.length || 0,
+      hasDeliveryToken: !!DELIVERY_TOKEN, 
+      deliveryTokenLength: DELIVERY_TOKEN?.length || 0,
+      environmentId: ENVIRONMENT_ID,
       envVarFormat: {
-        spaceIdFormat: typeof import.meta.env.VITE_CONTENTFUL_SPACE_ID,
-        deliveryTokenFormat: typeof import.meta.env.CONTENTFUL_DELIVERY_TOKEN || typeof import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
+        spaceIdType: typeof import.meta.env.VITE_CONTENTFUL_SPACE_ID,
+        deliveryTokenType: typeof import.meta.env.CONTENTFUL_DELIVERY_TOKEN,
+        viteDeliveryTokenType: typeof import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
       }
     });
     
-    if (!spaceId) {
+    if (!SPACE_ID) {
       console.error('[getContentfulClient] Missing Space ID');
       throw new Error('Missing required Contentful credentials - Space ID not found');
     }
     
-    if (!deliveryToken) {
+    if (!DELIVERY_TOKEN) {
       console.error('[getContentfulClient] Missing Delivery Token (CDA)');
       throw new Error('Missing required Contentful credentials - Delivery Token not found');
     }
     
     contentfulClient = createClient({
-      space: spaceId,
-      accessToken: deliveryToken,
-      environment: environmentId,
+      space: SPACE_ID,
+      accessToken: DELIVERY_TOKEN,
+      environment: ENVIRONMENT_ID,
     });
     
     // Verify the client works by making a test request

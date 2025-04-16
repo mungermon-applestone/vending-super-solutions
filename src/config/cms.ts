@@ -11,8 +11,11 @@ export const CONTENTFUL_CONFIG = {
   // Use public environment variable for Space ID (can be client-side)
   SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
   
-  // Try both formats for delivery token (with and without VITE prefix)
-  DELIVERY_TOKEN: import.meta.env.CONTENTFUL_DELIVERY_TOKEN || import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || '',
+  // Try both formats for delivery token, prioritizing non-VITE version (for server-side)
+  // IMPORTANT: This token should ideally not be exposed client-side
+  DELIVERY_TOKEN: 
+    (typeof import.meta.env.CONTENTFUL_DELIVERY_TOKEN !== 'undefined' ? import.meta.env.CONTENTFUL_DELIVERY_TOKEN : 
+     typeof import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN !== 'undefined' ? import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN : ''),
   
   // Optional: Environment ID (typically 'master')
   ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
@@ -24,7 +27,9 @@ export const isContentfulConfigured = () => {
   console.log('[isContentfulConfigured] Checking config:', {
     hasSpaceId: !!SPACE_ID,
     hasDeliveryToken: !!DELIVERY_TOKEN,
-    spaceIdType: typeof import.meta.env.VITE_CONTENTFUL_SPACE_ID
+    spaceIdType: typeof import.meta.env.VITE_CONTENTFUL_SPACE_ID,
+    deliveryTokenType: typeof import.meta.env.CONTENTFUL_DELIVERY_TOKEN,
+    viteDeliveryTokenType: typeof import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
   });
   return !!(SPACE_ID && DELIVERY_TOKEN);
 };
