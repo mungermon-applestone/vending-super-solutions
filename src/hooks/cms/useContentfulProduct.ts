@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntryBySlug } from '@/services/cms/utils/contentfulClient';
 import { ContentfulAsset } from '@/types/contentful';

@@ -27,14 +27,40 @@ export const getContentfulClient = async () => {
       environmentId: config?.environment_id || 'master'
     });
     
-    // If we don't have needed credentials, return null to enable fallbacks
+    // For development/preview environments, try to use environment variables if config is missing
     if (!config || !config.space_id || !config.delivery_token) {
-      console.error('[getContentfulClient] Missing required Contentful credentials');
-      if (!config) console.error('  - No configuration found');
-      if (config && !config.space_id) console.error('  - Missing Space ID');
-      if (config && !config.delivery_token) console.error('  - Missing Delivery Token');
+      console.log('[getContentfulClient] Trying to use environment variables for Contentful credentials');
       
-      return null;
+      const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
+      const deliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
+      const environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || 'master';
+      
+      if (spaceId && deliveryToken) {
+        console.log('[getContentfulClient] Using environment variables for Contentful connection');
+        
+        contentfulClient = createClient({
+          space: spaceId,
+          accessToken: deliveryToken,
+          environment: environmentId,
+        });
+        
+        // Test the connection
+        try {
+          const space = await contentfulClient.getSpace();
+          console.log(`[getContentfulClient] Successfully connected to Contentful space: ${space.name} using env vars`);
+          return contentfulClient;
+        } catch (e) {
+          console.error('[getContentfulClient] Failed to verify Contentful connection with env vars:', e);
+          contentfulClient = null;
+        }
+      } else {
+        console.error('[getContentfulClient] Missing required Contentful credentials');
+        if (!config) console.error('  - No configuration found');
+        if (config && !config.space_id) console.error('  - Missing Space ID');
+        if (config && !config.delivery_token) console.error('  - Missing Delivery Token');
+        
+        return null;
+      }
     }
     
     contentfulClient = createClient({
