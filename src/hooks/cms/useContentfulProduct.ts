@@ -5,6 +5,7 @@ import { ContentfulAsset } from '@/types/contentful';
 import { CMSProductType } from '@/types/cms';
 import { normalizeSlug, getSlugVariations } from '@/services/cms/utils/slugMatching';
 import { toast } from 'sonner';
+import { fetchProductTypeBySlug } from '@/services/cms/contentTypes/productTypes/fetchProductTypeBySlug';
 
 // Define the structure of a product in Contentful
 interface ContentfulProduct {
@@ -63,41 +64,55 @@ export function useContentfulProduct(slug: string) {
       }
       
       try {
-        // First check if we have a direct match on the slug
-        console.log(`[useContentfulProduct] Trying direct slug match for: "${slug}"`);
-        
-        // IMPORTANT: Using productType content type ID to match Contentful schema
-        const entries = await fetchContentfulEntries<ContentfulProduct>('productType', {
-          'fields.slug': slug,
-          limit: 1
-        });
-        
-        console.log(`[useContentfulProduct] Found ${entries.length} entries for slug ${slug}`);
-        
-        if (entries.length > 0) {
-          const transformedProduct = transformProduct(entries[0]);
-          console.log('[useContentfulProduct] Successfully fetched Contentful product:', transformedProduct);
-          return transformedProduct;
-        }
-        
-        // If no direct match, try with alternate slug variations
-        console.log(`[useContentfulProduct] No direct match, trying alternate variations`);
-        const slugVariations = getSlugVariations(slug);
-        
-        for (const variation of slugVariations) {
-          if (variation === slug) continue; // Skip the one we already tried
+        // First try with Contentful
+        try {
+          console.log(`[useContentfulProduct] Trying direct slug match for: "${slug}"`);
           
-          console.log(`[useContentfulProduct] Trying variation: "${variation}"`);
-          const variationEntries = await fetchContentfulEntries<ContentfulProduct>('productType', {
-            'fields.slug': variation,
+          // IMPORTANT: Using productType content type ID to match Contentful schema
+          const entries = await fetchContentfulEntries<ContentfulProduct>('productType', {
+            'fields.slug': slug,
             limit: 1
           });
           
-          if (variationEntries.length > 0) {
-            const transformedProduct = transformProduct(variationEntries[0]);
-            console.log(`[useContentfulProduct] Found product with variation "${variation}":`, transformedProduct);
+          console.log(`[useContentfulProduct] Found ${entries.length} entries for slug ${slug}`);
+          
+          if (entries.length > 0) {
+            const transformedProduct = transformProduct(entries[0]);
+            console.log('[useContentfulProduct] Successfully fetched Contentful product:', transformedProduct);
             return transformedProduct;
           }
+          
+          // If no direct match, try with alternate slug variations
+          console.log(`[useContentfulProduct] No direct match, trying alternate variations`);
+          const slugVariations = getSlugVariations(slug);
+          
+          for (const variation of slugVariations) {
+            if (variation === slug) continue; // Skip the one we already tried
+            
+            console.log(`[useContentfulProduct] Trying variation: "${variation}"`);
+            const variationEntries = await fetchContentfulEntries<ContentfulProduct>('productType', {
+              'fields.slug': variation,
+              limit: 1
+            });
+            
+            if (variationEntries.length > 0) {
+              const transformedProduct = transformProduct(variationEntries[0]);
+              console.log(`[useContentfulProduct] Found product with variation "${variation}":`, transformedProduct);
+              return transformedProduct;
+            }
+          }
+        } catch (contentfulError) {
+          console.error(`[useContentfulProduct] Contentful error: ${contentfulError}. Trying database fallback...`);
+          // Continue to database fallback if Contentful fails
+        }
+        
+        // If Contentful fails or returns no results, try database fallback
+        console.log(`[useContentfulProduct] Trying database fallback for slug: ${slug}`);
+        const dbProduct = await fetchProductTypeBySlug<CMSProductType>(slug);
+        
+        if (dbProduct) {
+          console.log(`[useContentfulProduct] Successfully fetched product from database:`, dbProduct);
+          return dbProduct;
         }
         
         console.log(`[useContentfulProduct] No product found for slug: ${slug}`);

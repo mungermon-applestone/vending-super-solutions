@@ -12,7 +12,12 @@ const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: product, isLoading, error } = useContentfulProduct(slug || '');
   
+  React.useEffect(() => {
+    console.log("[ProductDetailPage] Initial render with slug:", slug);
+  }, [slug]);
+  
   if (isLoading) {
+    console.log("[ProductDetailPage] Loading product data...");
     return (
       <Layout>
         <div className="container mx-auto py-12">

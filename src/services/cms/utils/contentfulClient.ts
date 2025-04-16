@@ -33,6 +33,21 @@ export const getContentfulClient = async () => {
       if (config && !config.space_id) console.error('  - Missing Space ID');
       if (config && !config.delivery_token) console.error('  - Missing Delivery Token');
       
+      // Try environment variables as fallback
+      const envSpaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
+      const envDeliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
+      const envEnvironment = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || 'master';
+      
+      if (envSpaceId && envDeliveryToken) {
+        console.log('[getContentfulClient] Using environment variables for Contentful credentials');
+        contentfulClient = createClient({
+          space: envSpaceId,
+          accessToken: envDeliveryToken,
+          environment: envEnvironment
+        });
+        return contentfulClient;
+      }
+      
       throw new Error('Missing Contentful configuration. Please set up your Contentful credentials in Admin Settings.');
     }
     
@@ -72,11 +87,19 @@ export const resetContentfulClient = () => {
 export const fetchContentfulEntries = async <T>(contentType: string, options: any = {}): Promise<T[]> => {
   try {
     console.log(`[fetchContentfulEntries] Fetching entries for content type: ${contentType}`, options);
-    const client = await getContentfulClient();
+    
+    let client;
+    try {
+      client = await getContentfulClient();
+    } catch (clientError) {
+      console.error('[fetchContentfulEntries] Failed to get Contentful client:', clientError);
+      // Return empty array instead of throwing to allow fallback mechanisms to work
+      return [];
+    }
     
     if (!client) {
       console.error('[fetchContentfulEntries] Failed to get Contentful client');
-      throw new Error('Failed to initialize Contentful client');
+      return [];
     }
     
     const query = {
@@ -104,7 +127,8 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
     return response.items as T[];
   } catch (error) {
     console.error(`[fetchContentfulEntries] Error fetching ${contentType}:`, error);
-    throw error;
+    // Return empty array instead of throwing to allow fallback mechanisms to work
+    return [];
   }
 };
 
