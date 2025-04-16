@@ -4,11 +4,11 @@ import { ContentTypeTemplate } from '@/types/contentful-admin';
 export const businessGoalTemplate: ContentTypeTemplate = {
   id: 'businessGoal',
   name: 'Business Goal',
-  description: 'Content type for business goals',
+  description: 'Create a business goal content type',
   contentType: {
     id: 'businessGoal',
     name: 'Business Goal',
-    description: 'Business goal for vending solutions',
+    description: 'A business goal',
     displayField: 'title',
     publish: true,
     fields: [
@@ -17,7 +17,7 @@ export const businessGoalTemplate: ContentTypeTemplate = {
         name: 'Title',
         type: 'Symbol',
         required: true,
-        localized: false
+        localized: false,
       },
       {
         id: 'slug',
@@ -34,14 +34,7 @@ export const businessGoalTemplate: ContentTypeTemplate = {
         name: 'Description',
         type: 'Text',
         required: true,
-        localized: false
-      },
-      {
-        id: 'icon',
-        name: 'Icon',
-        type: 'Symbol',
-        required: false,
-        localized: false
+        localized: false,
       },
       {
         id: 'image',
@@ -49,7 +42,14 @@ export const businessGoalTemplate: ContentTypeTemplate = {
         type: 'Link',
         linkType: 'Asset',
         required: false,
-        localized: false
+        localized: false,
+      },
+      {
+        id: 'icon',
+        name: 'Icon',
+        type: 'Symbol',
+        required: false,
+        localized: false,
       },
       {
         id: 'benefits',
@@ -59,7 +59,7 @@ export const businessGoalTemplate: ContentTypeTemplate = {
           type: 'Symbol',
         },
         required: false,
-        localized: false
+        localized: false,
       },
       {
         id: 'features',
@@ -75,14 +75,14 @@ export const businessGoalTemplate: ContentTypeTemplate = {
           ]
         },
         required: false,
-        localized: false
+        localized: false,
       },
       {
         id: 'visible',
         name: 'Visible',
         type: 'Boolean',
         required: false,
-        localized: false
+        localized: false,
       }
     ]
   }

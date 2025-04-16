@@ -27,28 +27,31 @@ export const getContentfulClient = async () => {
       environmentId: config?.environment_id || 'master'
     });
     
-    if (!config || !config.space_id || !config.delivery_token) {
-      console.error('[getContentfulClient] Missing required Contentful credentials');
-      if (!config) console.error('  - No configuration found');
-      if (config && !config.space_id) console.error('  - Missing Space ID');
-      if (config && !config.delivery_token) console.error('  - Missing Delivery Token');
+    // If we're in preview mode and don't have config, return null gracefully to enable fallbacks
+    const isPreviewEnvironment = window.location.hostname.includes('lovable') || 
+                                window.location.hostname.includes('preview');
+    
+    if (!config || !config.space_id) {
+      console.error('[getContentfulClient] Missing Space ID');
       
-      // Try environment variables as fallback
-      const envSpaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
-      const envDeliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
-      const envEnvironment = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || 'master';
-      
-      if (envSpaceId && envDeliveryToken) {
-        console.log('[getContentfulClient] Using environment variables for Contentful credentials');
-        contentfulClient = createClient({
-          space: envSpaceId,
-          accessToken: envDeliveryToken,
-          environment: envEnvironment
-        });
-        return contentfulClient;
+      if (isPreviewEnvironment) {
+        console.log('[getContentfulClient] Preview environment detected, allowing fallback content');
+        return null;
       }
       
-      throw new Error('Missing Contentful configuration. Please set up your Contentful credentials in Admin Settings.');
+      return null;
+    }
+    
+    // Require at least the delivery token
+    if (!config.delivery_token) {
+      console.error('[getContentfulClient] Missing Delivery Token (CDA)');
+      
+      if (isPreviewEnvironment) {
+        console.log('[getContentfulClient] Preview environment detected, allowing fallback content');
+        return null;
+      }
+      
+      return null;
     }
     
     contentfulClient = createClient({
@@ -57,20 +60,18 @@ export const getContentfulClient = async () => {
       environment: config.environment_id || 'master',
     });
     
-    // Test the client with a simple request
-    try {
-      const space = await contentfulClient.getSpace();
-      console.log(`[getContentfulClient] Successfully connected to Contentful space: ${space.name}`);
-    } catch (e) {
-      console.error('[getContentfulClient] Failed to verify Contentful connection:', e);
-      contentfulClient = null;
-      throw new Error(`Failed to connect to Contentful: ${e instanceof Error ? e.message : 'Unknown error'}`);
-    }
-    
     console.log('[getContentfulClient] Successfully created Contentful client');
     return contentfulClient;
   } catch (error) {
-    console.error('[getContentfulClient] Error creating Contentful client:', error);
+    console.error('[getContentfulClient] Comprehensive error creating Contentful client:', error);
+    
+    // Check if we're in preview environment
+    if (window.location.hostname.includes('lovable') || 
+        window.location.hostname.includes('preview')) {
+      console.log('[getContentfulClient] Preview environment detected, allowing fallback content');
+      return null;
+    }
+    
     throw error;
   }
 };
@@ -86,20 +87,20 @@ export const resetContentfulClient = () => {
  */
 export const fetchContentfulEntries = async <T>(contentType: string, options: any = {}): Promise<T[]> => {
   try {
-    console.log(`[fetchContentfulEntries] Fetching entries for content type: ${contentType}`, options);
-    
-    let client;
-    try {
-      client = await getContentfulClient();
-    } catch (clientError) {
-      console.error('[fetchContentfulEntries] Failed to get Contentful client:', clientError);
-      // Return empty array instead of throwing to allow fallback mechanisms to work
-      return [];
-    }
+    console.log(`[fetchContentfulEntries] Fetching entries for content type: ${contentType}`);
+    const client = await getContentfulClient();
     
     if (!client) {
       console.error('[fetchContentfulEntries] Failed to get Contentful client');
-      return [];
+      
+      // In preview environments, we want to return an empty array instead of throwing
+      if (window.location.hostname.includes('lovable') || 
+          window.location.hostname.includes('preview')) {
+        console.log('[fetchContentfulEntries] Preview environment, returning empty array');
+        return [] as T[];
+      }
+      
+      return [] as T[];
     }
     
     const query = {
@@ -107,28 +108,20 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
       ...options
     };
     
-    console.log(`[fetchContentfulEntries] Executing query:`, query);
-    
     const response = await client.getEntries(query);
-    console.log(`[fetchContentfulEntries] Fetched ${response.items.length} entries for ${contentType}`);
-    
-    if (contentType === 'productType') {
-      // Special handling for product types to help debug
-      console.log(`[fetchContentfulEntries] Product types content details:`, {
-        count: response.items.length,
-        items: response.items.map(item => ({
-          id: item.sys?.id,
-          slug: item.fields?.slug,
-          title: item.fields?.title
-        }))
-      });
-    }
+    console.log(`[fetchContentfulEntries] Fetched ${response.items.length} entries`);
     
     return response.items as T[];
   } catch (error) {
     console.error(`[fetchContentfulEntries] Error fetching ${contentType}:`, error);
-    // Return empty array instead of throwing to allow fallback mechanisms to work
-    return [];
+    
+    // In preview environments, we want to return an empty array instead of throwing
+    if (window.location.hostname.includes('lovable') || 
+        window.location.hostname.includes('preview')) {
+      return [] as T[];
+    }
+    
+    return [] as T[];
   }
 };
 
@@ -153,52 +146,6 @@ export const fetchContentfulEntry = async <T>(entryId: string): Promise<T | null
     } as T;
   } catch (error) {
     console.error(`[fetchContentfulEntry] Error fetching entry ${entryId}:`, error);
-    return null;
-  }
-};
-
-/**
- * Fetches a single entry from Contentful by slug field value
- */
-export const fetchContentfulEntryBySlug = async <T>(contentType: string, slug: string): Promise<T | null> => {
-  try {
-    console.log(`[fetchContentfulEntryBySlug] Fetching ${contentType} with slug: "${slug}"`);
-    
-    if (!slug) {
-      console.warn(`[fetchContentfulEntryBySlug] No slug provided for ${contentType}`);
-      return null;
-    }
-    
-    const entries = await fetchContentfulEntries<T>(contentType, {
-      'fields.slug': slug,
-      limit: 1
-    });
-    
-    if (entries.length === 0) {
-      console.warn(`[fetchContentfulEntryBySlug] No ${contentType} found with slug: "${slug}"`);
-      
-      // Try with unencoded slug as a fallback
-      if (slug.includes('%20') || slug.includes('%')) {
-        const decodedSlug = decodeURIComponent(slug);
-        console.log(`[fetchContentfulEntryBySlug] Trying with decoded slug: "${decodedSlug}"`);
-        const entriesWithDecodedSlug = await fetchContentfulEntries<T>(contentType, {
-          'fields.slug': decodedSlug,
-          limit: 1
-        });
-        
-        if (entriesWithDecodedSlug.length > 0) {
-          console.log(`[fetchContentfulEntryBySlug] Found ${contentType} with decoded slug`);
-          return entriesWithDecodedSlug[0];
-        }
-      }
-      
-      return null;
-    }
-    
-    console.log(`[fetchContentfulEntryBySlug] Successfully retrieved ${contentType} with slug: "${slug}"`);
-    return entries[0];
-  } catch (error) {
-    console.error(`[fetchContentfulEntryBySlug] Error fetching ${contentType} with slug "${slug}":`, error);
     return null;
   }
 };

@@ -72,18 +72,20 @@ const MachinesLanding = () => {
 
   return (
     <Layout>
+      {/* Hero Section using PageHero component */}
       <PageHero 
         pageKey="machines"
         fallbackTitle="Our Machines"
-        fallbackSubtitle="Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs"
+        fallbackSubtitle="Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs."
         fallbackImage="https://images.unsplash.com/photo-1493723843671-1d655e66ac1c"
         fallbackImageAlt="Various vending machines"
-        fallbackPrimaryButtonText="View Machines"
+        fallbackPrimaryButtonText="Vending Machines"
         fallbackPrimaryButtonUrl="#vending-machines"
         fallbackSecondaryButtonText="Smart Lockers"
         fallbackSecondaryButtonUrl="#smart-lockers"
       />
 
+      {/* Vending Machines Section */}
       <section id="vending-machines" className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -118,6 +120,7 @@ const MachinesLanding = () => {
         </div>
       </section>
 
+      {/* Smart Lockers Section */}
       <section id="smart-lockers" className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">

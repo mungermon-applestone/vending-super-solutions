@@ -12,12 +12,7 @@ const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: product, isLoading, error } = useContentfulProduct(slug || '');
   
-  React.useEffect(() => {
-    console.log("[ProductDetailPage] Initial render with slug:", slug);
-  }, [slug]);
-  
   if (isLoading) {
-    console.log("[ProductDetailPage] Loading product data...");
     return (
       <Layout>
         <div className="container mx-auto py-12">
@@ -33,7 +28,6 @@ const ProductDetailPage = () => {
   }
   
   if (error) {
-    console.error("[ProductDetailPage] Error loading product:", error);
     return (
       <Layout>
         <div className="container mx-auto py-12">
@@ -52,7 +46,6 @@ const ProductDetailPage = () => {
   }
   
   if (!product) {
-    console.log("[ProductDetailPage] No product data available for slug:", slug);
     return (
       <Layout>
         <div className="container mx-auto py-12">
@@ -69,15 +62,6 @@ const ProductDetailPage = () => {
       </Layout>
     );
   }
-
-  console.log("[ProductDetailPage] Rendering product:", {
-    title: product.title,
-    slug: product.slug,
-    description: product.description?.substring(0, 50) + '...',
-    benefits: product.benefits?.length || 0,
-    features: product.features?.length || 0,
-    hasImage: !!product.image
-  });
 
   return (
     <Layout>

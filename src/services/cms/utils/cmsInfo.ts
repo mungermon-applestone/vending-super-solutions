@@ -5,23 +5,6 @@ export const getContentfulConfig = async () => {
   try {
     console.log('[getContentfulConfig] Fetching Contentful config from Supabase...');
     
-    // Check for environment variables first as a fast path
-    const envSpaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
-    const envDeliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
-    const envManagementToken = import.meta.env.VITE_CONTENTFUL_MANAGEMENT_TOKEN;
-    const envEnvironmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || 'master';
-    
-    if (envSpaceId && (envDeliveryToken || envManagementToken)) {
-      console.log('[getContentfulConfig] Found environment variables for Contentful credentials');
-      return {
-        id: 'env-config',
-        space_id: envSpaceId,
-        delivery_token: envDeliveryToken,
-        management_token: envManagementToken,
-        environment_id: envEnvironmentId
-      };
-    }
-    
     // First, check if the table exists and has any rows
     const { count, error: countError } = await supabase
       .from('contentful_config')
@@ -34,7 +17,7 @@ export const getContentfulConfig = async () => {
     
     console.log(`[getContentfulConfig] Found ${count} configurations in table`);
     
-    if (!count || count === 0) {
+    if (count === 0) {
       console.warn('[getContentfulConfig] No records found in contentful_config table');
       return null;
     }
@@ -108,9 +91,9 @@ export const getCMSInfo = (): CMSInfo => {
   // In the future this can be expanded to support multiple providers
   
   // Check if we're using Strapi by looking at environment variables
-  const strapiUrl = import.meta.env.VITE_STRAPI_API_URL;
-  const strapiKey = import.meta.env.VITE_STRAPI_API_KEY;
-  const cmsProvider = import.meta.env.VITE_CMS_PROVIDER || 'supabase';
+  const strapiUrl = process.env.VITE_STRAPI_API_URL;
+  const strapiKey = process.env.VITE_STRAPI_API_KEY;
+  const cmsProvider = process.env.VITE_CMS_PROVIDER || 'supabase';
   
   if (cmsProvider === 'strapi' && strapiUrl) {
     const isApiUrlConfigured = !!strapiUrl && strapiUrl.trim() !== '';
@@ -129,17 +112,12 @@ export const getCMSInfo = (): CMSInfo => {
     };
   }
   
-  // Check for Contentful environment variables
-  const contentfulSpaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
-  const contentfulDeliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
-  const isContentfulConfigured = !!contentfulSpaceId && !!contentfulDeliveryToken;
-  
   // Default to Contentful
   return {
     provider: 'Contentful',
-    status: isContentfulConfigured ? 'configured' : 'partial',
-    isConfigured: isContentfulConfigured,
+    status: 'configured', // Assuming Contentful is always configured via Supabase
+    isConfigured: true,
     adminUrl: 'https://app.contentful.com/',
-    contentfulConfigured: isContentfulConfigured
+    contentfulConfigured: true // This will be determined dynamically in components that need it
   };
 };

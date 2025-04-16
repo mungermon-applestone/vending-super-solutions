@@ -1,56 +1,85 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
-import { ContentfulAsset } from '@/types/contentful';
+import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { CMSProductType } from '@/types/cms';
-import { normalizeSlug, getSlugVariations } from '@/services/cms/utils/slugMatching';
-import { toast } from 'sonner';
-import { fetchProductTypeBySlug } from '@/services/cms/contentTypes/productTypes/fetchProductTypeBySlug';
+import { toast } from '@/components/ui/use-toast';
 
-// Define the structure of a product in Contentful
-interface ContentfulProduct {
-  sys: {
-    id: string;
-  };
-  fields: {
-    title: string;
-    slug: string;
-    description: string;
-    image?: ContentfulAsset;
-    benefits?: string[];
-    features?: Array<{
-      sys: { id: string };
-      fields: {
-        title: string;
-        description: string;
-        icon?: string;
+// Define fallback product data for preview environment
+const fallbackProductData: Record<string, CMSProductType> = {
+  'cannabis-vending': {
+    id: 'fallback-cannabis',
+    title: 'Cannabis Vending',
+    slug: 'cannabis-vending',
+    description: 'Secure solutions for cannabis products with age verification and compliance features.',
+    benefits: [
+      'Age verification and compliance',
+      'Secure product dispensing',
+      'Inventory tracking',
+      'Temperature control'
+    ],
+    image: {
+      id: 'fallback-image',
+      url: 'https://images.unsplash.com/photo-1560913210-91e811632701',
+      alt: 'Cannabis Vending Machine',
+    },
+    features: [
+      {
+        id: 'feature-1',
+        title: 'Age Verification',
+        description: 'Built-in ID scanning and verification to ensure legal compliance',
+        icon: 'shield'
+      },
+      {
+        id: 'feature-2',
+        title: 'Secure Storage',
+        description: 'Tamper-proof design keeps products secure until authorized purchase',
+        icon: 'lock'
+      },
+      {
+        id: 'feature-3',
+        title: 'Compliance Reporting',
+        description: 'Automated reporting for regulatory compliance',
+        icon: 'clipboard'
       }
-    }>;
-    visible?: boolean;
-  };
-}
-
-// Transform Contentful product to our internal format
-const transformProduct = (entry: ContentfulProduct): CMSProductType => {
-  return {
-    id: entry.sys.id,
-    title: entry.fields.title,
-    slug: entry.fields.slug,
-    description: entry.fields.description,
-    benefits: entry.fields.benefits || [],
-    image: entry.fields.image ? {
-      id: entry.fields.image.sys.id,
-      url: `https:${entry.fields.image.fields.file.url}`,
-      alt: entry.fields.image.fields.title || entry.fields.title,
-    } : undefined,
-    features: entry.fields.features ? entry.fields.features.map(feature => ({
-      id: feature.sys.id,
-      title: feature.fields.title,
-      description: feature.fields.description,
-      icon: feature.fields.icon || 'check'
-    })) : [],
-    visible: entry.fields.visible !== false
-  };
+    ]
+  },
+  'grocery-vending': {
+    id: 'fallback-grocery',
+    title: 'Grocery Vending',
+    slug: 'grocery-vending',
+    description: 'Temperature-controlled vending solutions for grocery items, snacks, and beverages.',
+    benefits: [
+      'Temperature control',
+      'Fresh food dispensing',
+      'Contactless shopping',
+      'Inventory management'
+    ],
+    image: {
+      id: 'fallback-image',
+      url: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a',
+      alt: 'Grocery Vending Machine',
+    },
+    features: [
+      {
+        id: 'feature-1',
+        title: 'Temperature Control',
+        description: 'Maintain optimal temperature for different food products',
+        icon: 'thermometer'
+      },
+      {
+        id: 'feature-2',
+        title: 'Freshness Monitoring',
+        description: 'Track product expiration and ensure freshness',
+        icon: 'calendar'
+      },
+      {
+        id: 'feature-3',
+        title: 'Contactless Purchasing',
+        description: 'Touchless interface for hygienic shopping experience',
+        icon: 'hand'
+      }
+    ]
+  }
 };
 
 export function useContentfulProduct(slug: string) {
@@ -58,76 +87,98 @@ export function useContentfulProduct(slug: string) {
     queryKey: ['contentful', 'product', slug],
     queryFn: async () => {
       console.log(`[useContentfulProduct] Fetching product with slug: ${slug}`);
-      
-      if (!slug) {
-        throw new Error('No slug provided');
-      }
-      
       try {
-        // First try with Contentful
-        try {
-          console.log(`[useContentfulProduct] Trying direct slug match for: "${slug}"`);
+        const client = await getContentfulClient();
+        
+        // If in preview environment and client fails, use fallback data
+        if (!client) {
+          console.warn('[useContentfulProduct] Failed to get Contentful client - checking for fallback data');
           
-          // IMPORTANT: Using productType content type ID to match Contentful schema
-          const entries = await fetchContentfulEntries<ContentfulProduct>('productType', {
-            'fields.slug': slug,
-            limit: 1
-          });
-          
-          console.log(`[useContentfulProduct] Found ${entries.length} entries for slug ${slug}`);
-          
-          if (entries.length > 0) {
-            const transformedProduct = transformProduct(entries[0]);
-            console.log('[useContentfulProduct] Successfully fetched Contentful product:', transformedProduct);
-            return transformedProduct;
+          // Check if we have fallback data for this slug
+          if (fallbackProductData[slug]) {
+            console.log(`[useContentfulProduct] Using fallback data for: ${slug}`);
+            return fallbackProductData[slug];
           }
           
-          // If no direct match, try with alternate slug variations
-          console.log(`[useContentfulProduct] No direct match, trying alternate variations`);
-          const slugVariations = getSlugVariations(slug);
+          throw new Error('Missing Contentful configuration. Please set up your Contentful credentials in Admin Settings.');
+        }
+        
+        // Log that we're making the query to help with debugging
+        console.log(`[useContentfulProduct] Querying Contentful for product with slug: ${slug}`);
+        
+        const entries = await client.getEntries({
+          content_type: 'productType',
+          'fields.slug': slug,
+          limit: 1
+        });
+        
+        if (!entries.items.length) {
+          console.log(`[useContentfulProduct] No product found with slug: ${slug}`);
           
-          for (const variation of slugVariations) {
-            if (variation === slug) continue; // Skip the one we already tried
-            
-            console.log(`[useContentfulProduct] Trying variation: "${variation}"`);
-            const variationEntries = await fetchContentfulEntries<ContentfulProduct>('productType', {
-              'fields.slug': variation,
-              limit: 1
-            });
-            
-            if (variationEntries.length > 0) {
-              const transformedProduct = transformProduct(variationEntries[0]);
-              console.log(`[useContentfulProduct] Found product with variation "${variation}":`, transformedProduct);
-              return transformedProduct;
-            }
+          // Check fallback data before returning null
+          if (fallbackProductData[slug]) {
+            console.log(`[useContentfulProduct] Using fallback data for: ${slug}`);
+            return fallbackProductData[slug];
           }
-        } catch (contentfulError) {
-          console.error(`[useContentfulProduct] Contentful error: ${contentfulError}. Trying database fallback...`);
-          // Continue to database fallback if Contentful fails
+          
+          return null;
         }
         
-        // If Contentful fails or returns no results, try database fallback
-        console.log(`[useContentfulProduct] Trying database fallback for slug: ${slug}`);
-        const dbProduct = await fetchProductTypeBySlug<CMSProductType>(slug);
+        const entry = entries.items[0];
+        const fields = entry.fields;
         
-        if (dbProduct) {
-          console.log(`[useContentfulProduct] Successfully fetched product from database:`, dbProduct);
-          return dbProduct;
-        }
+        const product: CMSProductType = {
+          id: entry.sys.id,
+          title: fields.title as string,
+          slug: fields.slug as string,
+          description: fields.description as string,
+          benefits: fields.benefits as string[] || [],
+          image: fields.image ? {
+            id: (fields.image as any).sys.id,
+            url: `https:${(fields.image as any).fields.file.url}`,
+            alt: (fields.image as any).fields.title || fields.title,
+          } : undefined,
+          features: fields.features ? (fields.features as any[]).map(feature => ({
+            id: feature.sys.id,
+            title: feature.fields.title,
+            description: feature.fields.description,
+            icon: feature.fields.icon || undefined
+          })) : []
+        };
         
-        console.log(`[useContentfulProduct] No product found for slug: ${slug}`);
-        throw new Error(`No product found with slug "${slug}"`);
+        console.log(`[useContentfulProduct] Successfully transformed product:`, product);
+        return product;
       } catch (error) {
         console.error(`[useContentfulProduct] Error fetching product:`, error);
+        
+        // Check for fallback data if there's an error
+        if (fallbackProductData[slug]) {
+          console.log(`[useContentfulProduct] Using fallback data after error for: ${slug}`);
+          return fallbackProductData[slug];
+        }
+        
+        // Provide more specific error messages for common issues
+        if (error instanceof Error) {
+          if (error.message.includes('401')) {
+            throw new Error('Authentication failed. Please check your Contentful Delivery Token in Admin Settings.');
+          } else if (error.message.includes('404')) {
+            throw new Error(`Could not find product "${slug}". Please check if the product exists in Contentful.`);
+          } else if (error.message.includes('Network Error')) {
+            throw new Error('Network error. Please check your internet connection and try again.');
+          }
+        }
+        
         throw error;
       }
     },
     enabled: !!slug,
     meta: {
       onError: (error: Error) => {
-        if (!error.message.includes("No product found")) {
-          toast.error(`Error loading product: ${error.message}`);
-        }
+        toast({
+          title: "Error Loading Product",
+          description: error.message,
+          variant: "destructive"
+        });
       }
     }
   });

@@ -1,9 +1,8 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchContentfulEntries, fetchContentfulEntryBySlug } from '@/services/cms/utils/contentfulClient';
+import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { CMSBusinessGoal } from '@/types/cms';
 import { ContentfulBusinessGoal } from '@/types/contentful';
-import { normalizeSlug } from '@/services/cms/utils/slugMatching';
 
 export function useContentfulBusinessGoals() {
   return useQuery({
@@ -72,32 +71,17 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
       
       console.log(`[useContentfulBusinessGoal] Fetching business goal with slug: ${slug}`);
       try {
-        // Use direct slug lookup method for better debugging
-        let entry = await fetchContentfulEntryBySlug<ContentfulBusinessGoal>('businessGoal', slug);
+        const entries = await fetchContentfulEntries<ContentfulBusinessGoal>('businessGoal', {
+          'fields.slug': slug
+        });
         
-        if (!entry) {
+        if (entries.length === 0) {
           console.log(`[useContentfulBusinessGoal] No business goal found with slug: ${slug}`);
-          
-          // Try with normalized slug
-          const normalizedSlug = normalizeSlug(slug);
-          if (normalizedSlug !== slug) {
-            console.log(`[useContentfulBusinessGoal] Trying with normalized slug: ${normalizedSlug}`);
-            const normalizedEntry = await fetchContentfulEntryBySlug<ContentfulBusinessGoal>('businessGoal', normalizedSlug);
-            
-            if (!normalizedEntry) {
-              console.log(`[useContentfulBusinessGoal] No business goal found with normalized slug: ${normalizedSlug}`);
-              return null;
-            }
-            
-            console.log(`[useContentfulBusinessGoal] Found business goal with normalized slug: ${normalizedSlug}`);
-            entry = normalizedEntry;
-          } else {
-            return null;
-          }
+          return null;
         }
 
-        // Map the Contentful entry to our CMS model
-        const mappedBusinessGoal = {
+        const entry = entries[0];
+        return {
           id: entry.sys?.id,
           title: entry.fields.title,
           slug: entry.fields.slug,
@@ -122,9 +106,6 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
             } : undefined
           }))
         } as CMSBusinessGoal;
-        
-        console.log(`[useContentfulBusinessGoal] Mapped business goal:`, mappedBusinessGoal);
-        return mappedBusinessGoal;
       } catch (error) {
         console.error(`[useContentfulBusinessGoal] Error:`, error);
         return null;

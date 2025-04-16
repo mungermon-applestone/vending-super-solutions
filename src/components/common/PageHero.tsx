@@ -1,11 +1,8 @@
-
 import React, { useEffect } from 'react';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
-import { useContentfulHeroByKey } from '@/hooks/cms/useContentfulHero';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { LandingPage } from '@/types/landingPage';
-import { toast } from 'sonner';
 
 interface PageHeroProps {
   pageKey: string;
@@ -30,38 +27,55 @@ const PageHero: React.FC<PageHeroProps> = ({
   fallbackSecondaryButtonText,
   fallbackSecondaryButtonUrl,
 }) => {
-  // Fetch hero content from both Supabase and Contentful
-  const { data: landingPage } = useLandingPageByKey(pageKey);
-  const { data: contentfulHero, isLoading: isContentfulLoading, error: contentfulError } = useContentfulHeroByKey(pageKey);
+  // Add refetchOnMount and refetchInterval options to ensure fresh data
+  const { data: landingPage, isLoading, error, refetch } = useLandingPageByKey(pageKey);
   
-  // Log data sources for debugging
+  // Enhanced debugging to track what's happening
   useEffect(() => {
+    console.log(`PageHero component for ${pageKey} - mounted/updated`);
     console.log(`PageHero component for ${pageKey}:`, {
-      supabaseData: landingPage,
-      contentfulData: contentfulHero,
-      usingContentful: !!contentfulHero
+      landingPage,
+      isLoading,
+      error,
+      hasCmsData: !!landingPage,
+      heroContent: landingPage ? (landingPage as LandingPage).hero_content : null,
     });
     
-    if (contentfulError) {
-      console.error(`PageHero component for ${pageKey} - Contentful Error:`, contentfulError);
+    if (error) {
+      console.error(`PageHero component for ${pageKey} - Error:`, error);
     }
-  }, [pageKey, landingPage, contentfulHero, contentfulError]);
+    
+    // Force refetch when component mounts to ensure we have the latest data
+    refetch().catch(err => {
+      console.error(`PageHero component for ${pageKey} - Refetch error:`, err);
+    });
+  }, [pageKey, refetch]);
   
-  // Prioritize Contentful data over Supabase data
-  // If no CMS data, fall back to props
+  // Use CMS data if available, otherwise fall back to props
+  // Explicitly cast landingPage to LandingPage type to access hero_content
   const typedLandingPage = landingPage as LandingPage | null;
-  const supabaseHeroContent = typedLandingPage?.hero_content || null;
+  const heroContent = typedLandingPage?.hero_content || null;
   
-  // Determine which content to use (Contentful > Supabase > Fallback)
-  const title = contentfulHero?.title || supabaseHeroContent?.title || fallbackTitle;
-  const subtitle = contentfulHero?.subtitle || supabaseHeroContent?.subtitle || fallbackSubtitle;
-  const imageUrl = contentfulHero?.image?.url || supabaseHeroContent?.image_url || fallbackImage;
-  const imageAlt = contentfulHero?.image?.alt || supabaseHeroContent?.image_alt || fallbackImageAlt;
-  const primaryButtonText = contentfulHero?.primaryButtonText || supabaseHeroContent?.cta_primary_text || fallbackPrimaryButtonText;
-  const primaryButtonUrl = contentfulHero?.primaryButtonUrl || supabaseHeroContent?.cta_primary_url || fallbackPrimaryButtonUrl;
-  const secondaryButtonText = contentfulHero?.secondaryButtonText || supabaseHeroContent?.cta_secondary_text || fallbackSecondaryButtonText;
-  const secondaryButtonUrl = contentfulHero?.secondaryButtonUrl || supabaseHeroContent?.cta_secondary_url || fallbackSecondaryButtonUrl;
-  const backgroundClass = contentfulHero?.backgroundClass || supabaseHeroContent?.background_class || 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light';
+  // Debug what content we're actually using
+  useEffect(() => {
+    console.log(`PageHero for ${pageKey} - Using content:`, {
+      usingCmsData: !!heroContent,
+      title: heroContent?.title || fallbackTitle,
+      subtitle: heroContent?.subtitle || fallbackSubtitle,
+      imageUrl: heroContent?.image_url || fallbackImage,
+      buttonText: heroContent?.cta_primary_text || fallbackPrimaryButtonText,
+    });
+  }, [heroContent, pageKey, fallbackTitle, fallbackSubtitle, fallbackImage, fallbackPrimaryButtonText]);
+  
+  const title = heroContent?.title || fallbackTitle;
+  const subtitle = heroContent?.subtitle || fallbackSubtitle;
+  const imageUrl = heroContent?.image_url || fallbackImage;
+  const imageAlt = heroContent?.image_alt || fallbackImageAlt;
+  const primaryButtonText = heroContent?.cta_primary_text || fallbackPrimaryButtonText;
+  const primaryButtonUrl = heroContent?.cta_primary_url || fallbackPrimaryButtonUrl;
+  const secondaryButtonText = heroContent?.cta_secondary_text || fallbackSecondaryButtonText;
+  const secondaryButtonUrl = heroContent?.cta_secondary_url || fallbackSecondaryButtonUrl;
+  const backgroundClass = heroContent?.background_class || 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light';
   
   return (
     <section className={`py-16 ${backgroundClass}`} data-testid={`page-hero-${pageKey}`}>
@@ -90,13 +104,6 @@ const PageHero: React.FC<PageHeroProps> = ({
                 </Link>
               )}
             </div>
-            
-            {/* Optional badge to show content source - can be removed in production */}
-            {contentfulHero && (
-              <div className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded inline-block">
-                ✓ Using Contentful hero
-              </div>
-            )}
           </div>
           <div className="mt-8 lg:mt-0">
             <img

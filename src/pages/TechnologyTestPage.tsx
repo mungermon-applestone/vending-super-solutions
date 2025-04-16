@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -179,7 +180,7 @@ const SingleSection = ({ section, index }: { section: CMSTechnologySection, inde
             ) : section.sectionImage.url ? (
               <Image 
                 src={section.sectionImage.url} 
-                alt={section.title || 'Section image'} 
+                alt={section.sectionImage.alt || section.title || 'Section image'} 
                 className="max-w-full h-auto" 
               />
             ) : (
@@ -195,7 +196,7 @@ const SingleSection = ({ section, index }: { section: CMSTechnologySection, inde
             ) : section.image.url ? (
               <Image 
                 src={section.image.url} 
-                alt={section.title || 'Section image'} 
+                alt={section.image.alt || section.title || 'Section image'} 
                 className="max-w-full h-auto" 
               />
             ) : (

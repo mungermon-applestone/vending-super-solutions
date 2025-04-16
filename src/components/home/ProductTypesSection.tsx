@@ -3,30 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
+import { getProductTypes } from '@/services/cms';
+import { CMSProductType } from '@/types/cms';
 import { normalizeSlug } from '@/services/cms/utils/slugMatching';
-
-interface ContentfulProductType {
-  sys: {
-    id: string;
-  };
-  fields: {
-    title: string;
-    slug: string;
-    description: string;
-    image?: {
-      sys: {
-        id: string;
-      };
-      fields: {
-        file: {
-          url: string;
-        };
-        title?: string;
-      };
-    };
-  };
-}
 
 interface ProductCardProps {
   title: string;
@@ -57,53 +36,33 @@ const ProductCard = ({ title, description, image, path }: ProductCardProps) => {
 };
 
 const ProductTypesSection = () => {
-  const { data: contentfulProducts = [], isLoading, error } = useQuery({
-    queryKey: ['contentfulProductTypes'],
-    queryFn: async () => {
-      console.log('[ProductTypesSection] Fetching product types from Contentful');
-      try {
-        // Use productType content type ID to match Contentful schema
-        const entries = await fetchContentfulEntries<ContentfulProductType>('productType');
-        
-        if (entries.length === 0) {
-          console.log('[ProductTypesSection] No product entries returned from Contentful');
-        } else {
-          console.log(`[ProductTypesSection] Received ${entries.length} products from Contentful`);
-        }
-        
-        return entries.map(entry => ({
-          id: entry.sys.id,
-          title: entry.fields.title,
-          slug: entry.fields.slug,
-          description: entry.fields.description,
-          image: entry.fields.image ? `https:${entry.fields.image.fields.file.url}` : null
-        }));
-      } catch (err) {
-        console.error('[ProductTypesSection] Error fetching from Contentful:', err);
-        throw err;
-      }
-    },
+  // Fix the useQuery configuration by using the meta object for error handling
+  const { data: productTypes = [], isLoading, error } = useQuery({
+    queryKey: ['productTypes'],
+    queryFn: () => getProductTypes(),
+    // Remove the onError property and use a more compatible approach
+    retry: 2,
+    retryDelay: 1000,
     meta: {
       onError: (err: any) => {
-        console.error('[ProductTypesSection] Error fetching product types:', err);
+        console.error('Error fetching product types:', err);
       }
-    },
-    retry: 2
+    }
   });
 
-  // Static data only for when API is loading
+  // Improved static fallback data - will be used if API fails
   const staticProductTypes = [
     {
-      title: "Cannabis Vending",
-      description: "Secure solutions for cannabis products with age verification and compliance features.",
-      image: "https://images.unsplash.com/photo-1560913210-91e811632701",
-      path: "/products/cannabis-vending"
+      title: "Grocery",
+      description: "Automate grocery sales with temperature-controlled vending for snacks, drinks, and everyday essentials.",
+      image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a",
+      path: "/products/grocery"
     },
     {
-      title: "Grocery Vending",
-      description: "Temperature-controlled vending solutions for grocery items, snacks, and beverages.",
-      image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a",
-      path: "/products/grocery-vending"
+      title: "Vape & Cannabis",
+      description: "Secure solutions for age-restricted products with ID verification and compliance features.",
+      image: "https://images.unsplash.com/photo-1560913210-91e811632701",
+      path: "/products/vape"
     },
     {
       title: "Fresh Food",
@@ -119,15 +78,15 @@ const ProductTypesSection = () => {
     }
   ];
 
-  // Use Contentful data only when it's successfully loaded
-  const displayProductTypes = (contentfulProducts && contentfulProducts.length > 0) 
-    ? contentfulProducts.map(product => ({
+  // Always default to static data if API fails or returns empty
+  const displayProductTypes = (productTypes && productTypes.length > 0) 
+    ? productTypes.map((product: CMSProductType) => ({
         title: product.title,
         description: product.description,
-        image: product.image || "https://images.unsplash.com/photo-1606787366850-de6330128bfc",
+        image: product.image?.url || "https://images.unsplash.com/photo-1606787366850-de6330128bfc",
         path: `/products/${normalizeSlug(product.slug)}`
       }))
-    : isLoading ? [] : staticProductTypes;
+    : staticProductTypes;
   
   const featuredProductTypes = displayProductTypes.slice(0, 4);
   

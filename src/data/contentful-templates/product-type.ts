@@ -1,12 +1,12 @@
 
 import { ContentTypeTemplate } from '@/types/contentful-admin';
 
-export const productTemplate: ContentTypeTemplate = {
-  id: 'productType', // UPDATED: Changed from 'product' to 'productType' to match Contentful
+export const productTypeTemplate: ContentTypeTemplate = {
+  id: 'productType',
   name: 'Product Type',
-  description: 'Create a product type content type',
+  description: 'Create a product type for vending machines',
   contentType: {
-    id: 'productType', // UPDATED: Changed from 'product' to 'productType' to match Contentful
+    id: 'productType',
     name: 'Product Type',
     description: 'A vending machine product type',
     displayField: 'title',
