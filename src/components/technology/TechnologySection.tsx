@@ -28,16 +28,16 @@ const TechnologySection = ({
 
   // Debug logging on component mount and whenever summary changes
   useEffect(() => {
-    console.log(`[TechnologySection] ${title} - Summary details:`, {
+    console.log(`[TechnologySection] Rendering "${title}" with:`, {
       summaryValue: summary,
       summaryType: typeof summary,
       summaryLength: summary?.length || 0,
-      hasSummaryContent: !!summary && summary.trim() !== '',
-      trimmedSummary: summary?.trim() || '(empty after trim)'
+      hasSummary: Boolean(summary && summary.trim() !== ''),
+      summaryTrimmed: summary?.trim() || '(empty after trim)'
     });
   }, [title, summary]);
 
-  // Ensure summary is a valid string
+  // Process summary for display - ensure it's a string and trim whitespace
   const displaySummary = typeof summary === 'string' ? summary.trim() : '';
   const showSummary = displaySummary !== '';
 
@@ -65,12 +65,14 @@ const TechnologySection = ({
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
               
-              {showSummary ? (
+              {showSummary && (
                 <p className="text-lg text-muted-foreground" data-testid="technology-summary">
                   {displaySummary}
                 </p>
-              ) : (
-                <div className="hidden">
+              )}
+              
+              {!showSummary && (
+                <div className="hidden" data-testid="missing-summary">
                   {(() => {
                     console.log(`[TechnologySection] Summary not displayed for "${title}" - empty or undefined`);
                     return null;

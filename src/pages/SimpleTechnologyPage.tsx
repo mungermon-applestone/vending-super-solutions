@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
@@ -22,26 +21,37 @@ const mapTechnologyData = (tech: CMSTechnology) => {
     items: feature.items?.map(item => item.text) || []
   })) || [];
 
-  // Ensure we have a valid summary from the description field
+  // Get the description/summary from the most reliable source
   let summary = '';
   
-  // First try to get it from the description field (most reliable source)
+  // Try all possible sources for the summary text, in order of reliability
   if (typeof tech.description === 'string' && tech.description.trim() !== '') {
     summary = tech.description;
-  }
-  // Fall back to section description if available
-  else if (tech.sections?.[0]?.description && typeof tech.sections[0].description === 'string') {
+    console.log(`[mapTechnologyData] Using tech.description for ${tech.title}:`, tech.description);
+  } 
+  else if (tech.sections?.[0]?.description && typeof tech.sections[0].description === 'string' && tech.sections[0].description.trim() !== '') {
     summary = tech.sections[0].description;
+    console.log(`[mapTechnologyData] Using tech.sections[0].description for ${tech.title}:`, tech.sections[0].description);
+  }
+  else if (tech.summary && typeof tech.summary === 'string' && tech.summary.trim() !== '') {
+    summary = tech.summary;
+    console.log(`[mapTechnologyData] Using tech.summary for ${tech.title}:`, tech.summary);
+  }
+  else {
+    console.log(`[mapTechnologyData] No valid summary found for ${tech.title}. Checking all possible sources:`, {
+      'tech.description': tech.description,
+      'tech.sections[0]?.description': tech.sections?.[0]?.description,
+      'tech.summary': tech.summary
+    });
+    
+    // As a last resort, use a default message
+    summary = `Learn more about our ${tech.title} technology solution.`;
   }
   
-  console.log(`[mapTechnologyData] Processed tech '${tech.title}'`, {
-    techId: tech.id,
-    summarySource: summary === tech.description ? 'description' : 'section description',
-    summaryValue: summary,
-    summaryType: typeof summary,
-    summaryLength: summary.length,
-    rawDescription: tech.description,
-    sectionDescription: tech.sections?.[0]?.description
+  console.log(`[mapTechnologyData] Final summary for '${tech.title}':`, {
+    value: summary,
+    length: summary.length,
+    type: typeof summary
   });
   
   // Extract bullet points if available
@@ -170,6 +180,7 @@ const SimpleTechnologyPage = () => {
                 bulletPoints={tech.bulletPoints}
                 image={tech.image || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"}
                 index={index}
+                className={index === 0 ? 'pt-0' : ''}
               />
             );
           })}
