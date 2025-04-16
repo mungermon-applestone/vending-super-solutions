@@ -6,16 +6,23 @@ import { Skeleton } from '@/components/ui/skeleton';
 import useTechnologySections from '@/hooks/useTechnologySections';
 import { CMSImage, CMSTechnologySection } from '@/types/cms';
 import Image from '@/components/common/Image';
+import { toast } from 'sonner';
 
 const TechnologyTestPage = () => {
   // Use the custom hook to fetch technology data
-  const { technologies = [], isLoading, error } = useTechnologySections();
+  const { technologies = [], isLoading, error, refetch } = useTechnologySections();
   
   // Use the first technology entry for the page
   const mainTechnology = technologies[0];
   
   console.log('Test page - Technologies from hook:', technologies);
   console.log('Test page - Main technology:', mainTechnology);
+  
+  // Function to manually trigger a refetch
+  const handleRefresh = () => {
+    toast.info('Refreshing technology data...');
+    refetch();
+  };
   
   if (isLoading) {
     return (
@@ -36,6 +43,12 @@ const TechnologyTestPage = () => {
               {error instanceof Error ? error.message : 'Failed to load technology information'}
             </AlertDescription>
           </Alert>
+          <button 
+            onClick={handleRefresh}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Retry Loading
+          </button>
         </div>
       </Layout>
     );
@@ -50,18 +63,43 @@ const TechnologyTestPage = () => {
               No technology information available.
             </AlertDescription>
           </Alert>
+          <button 
+            onClick={handleRefresh}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Retry Loading
+          </button>
         </div>
       </Layout>
     );
   }
   
-  console.log('Test page - Sections:', mainTechnology.sections);
+  // Check if sections exist and cast to array if needed
+  const sections = Array.isArray(mainTechnology.sections) ? mainTechnology.sections : [];
+  
+  console.log('Test page - Sections:', sections);
   
   return (
     <Layout>
       <div className="container mx-auto py-12">
-        <h1 className="text-3xl font-bold mb-6">{mainTechnology.title}</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">{mainTechnology.title}</h1>
+          <button 
+            onClick={handleRefresh}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Refresh Data
+          </button>
+        </div>
         <p className="text-lg mb-8">{mainTechnology.description}</p>
+        
+        {/* Display technical info */}
+        <div className="mb-8 p-4 bg-gray-100 rounded-md">
+          <h2 className="text-xl font-semibold mb-2">Technical Information:</h2>
+          <p><strong>Technology ID:</strong> {mainTechnology.id}</p>
+          <p><strong>Slug:</strong> {mainTechnology.slug}</p>
+          <p><strong>Sections Count:</strong> {sections.length}</p>
+        </div>
         
         {/* Display hero image if available */}
         {mainTechnology.image && (
@@ -85,15 +123,15 @@ const TechnologyTestPage = () => {
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-2">Sections Debug Info:</h2>
           <pre className="bg-gray-100 p-4 rounded-md overflow-auto">
-            {JSON.stringify(mainTechnology.sections, null, 2)}
+            {JSON.stringify(sections, null, 2)}
           </pre>
         </div>
         
         {/* Display each section */}
-        {mainTechnology.sections && mainTechnology.sections.length > 0 ? (
+        {sections && sections.length > 0 ? (
           <div className="space-y-8">
             <h2 className="text-2xl font-bold mb-4">Technology Sections</h2>
-            {mainTechnology.sections.map((section, index) => (
+            {sections.map((section, index) => (
               <SingleSection key={section.id || `section-${index}`} section={section} index={index} />
             ))}
           </div>
@@ -132,20 +170,40 @@ const SingleSection = ({ section, index }: { section: CMSTechnologySection, inde
       {(section.sectionImage || section.image) && (
         <div className="mt-4">
           <h4 className="font-medium mb-2">Section Image:</h4>
-          {section.sectionImage && typeof section.sectionImage === 'object' && 'url' in section.sectionImage ? (
-            <Image 
-              src={section.sectionImage.url} 
-              alt={section.title || 'Section image'} 
-              className="max-w-full h-auto" 
-            />
-          ) : section.image && typeof section.image === 'object' && 'url' in section.image ? (
-            <Image 
-              src={section.image.url} 
-              alt={section.title || 'Section image'} 
-              className="max-w-full h-auto" 
-            />
+          {section.sectionImage ? (
+            typeof section.sectionImage === 'string' ? (
+              <Image 
+                src={section.sectionImage} 
+                alt={section.title || 'Section image'} 
+                className="max-w-full h-auto" 
+              />
+            ) : section.sectionImage.url ? (
+              <Image 
+                src={section.sectionImage.url} 
+                alt={section.sectionImage.alt || section.title || 'Section image'} 
+                className="max-w-full h-auto" 
+              />
+            ) : (
+              <div className="text-gray-500">Image data found but URL is missing</div>
+            )
+          ) : section.image ? (
+            typeof section.image === 'string' ? (
+              <Image 
+                src={section.image} 
+                alt={section.title || 'Section image'} 
+                className="max-w-full h-auto" 
+              />
+            ) : section.image.url ? (
+              <Image 
+                src={section.image.url} 
+                alt={section.image.alt || section.title || 'Section image'} 
+                className="max-w-full h-auto" 
+              />
+            ) : (
+              <div className="text-gray-500">Image data found but URL is missing</div>
+            )
           ) : (
-            <div className="text-gray-500">Image data found but not in expected format</div>
+            <div className="text-gray-500">No image data available</div>
           )}
         </div>
       )}
