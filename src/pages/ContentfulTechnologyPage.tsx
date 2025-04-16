@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { useContentfulTechnology } from '@/hooks/cms/useContentfulTechnology';
@@ -107,7 +108,7 @@ const ContentfulTechnologyPage: React.FC = () => {
                 </div>
               </div>
             ))}
-          </>
+          </div>
         )}
         
         {/* If there was an error loading the data */}
