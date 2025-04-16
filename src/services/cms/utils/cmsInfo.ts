@@ -26,6 +26,7 @@ export const getContentfulConfig = async () => {
     const { data, error } = await supabase
       .from('contentful_config')
       .select('*')
+      .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
@@ -47,7 +48,8 @@ export const getContentfulConfig = async () => {
       hasDeliveryToken: !!data.delivery_token,
       hasManagementToken: !!data.management_token,
       deliveryTokenLength: data.delivery_token?.length || 0,
-      managementTokenLength: data.management_token?.length || 0
+      managementTokenLength: data.management_token?.length || 0,
+      created: data.created_at
     });
     
     return data;

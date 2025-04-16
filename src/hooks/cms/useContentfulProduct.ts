@@ -36,11 +36,20 @@ export function useContentfulProduct(slug: string) {
       
       if (!entries.items.length) {
         console.error(`[useContentfulProduct] No product found with slug: ${slug}`);
-        throw new Error(`Product not found: ${slug}`);
+        throw new Error(`Product not found in Contentful: ${slug}`);
       }
       
       const entry = entries.items[0];
-      console.log('[useContentfulProduct] Raw entry data:', JSON.stringify(entry, null, 2));
+      // Log the raw entry data to help with debugging
+      console.log(`[useContentfulProduct] Raw entry for slug "${slug}":`, {
+        id: entry.sys.id,
+        contentType: entry.sys.contentType?.sys?.id,
+        fields: Object.keys(entry.fields),
+        hasTitle: !!entry.fields.title,
+        hasDescription: !!entry.fields.description,
+        hasImage: !!entry.fields.image,
+        hasFeatures: Array.isArray(entry.fields.features) ? entry.fields.features.length : 0
+      });
       
       const fields = entry.fields;
       
@@ -64,14 +73,19 @@ export function useContentfulProduct(slug: string) {
         })) : []
       };
       
-      console.log(`[useContentfulProduct] Successfully processed product:`, product);
+      console.log(`[useContentfulProduct] Successfully processed product:`, {
+        title: product.title,
+        slug: product.slug,
+        hasBenefits: product.benefits.length,
+        hasFeatures: product.features.length
+      });
       return product;
     },
     enabled: !!slug,
-    retry: 1,
+    retry: 2,
     meta: {
       onError: (error: Error) => {
-        toast.error(`Error loading product: ${error.message}`);
+        toast.error(`Error loading product from Contentful: ${error.message}`);
         console.error('[useContentfulProduct] Error:', error);
       }
     }

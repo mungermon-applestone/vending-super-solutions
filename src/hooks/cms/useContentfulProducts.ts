@@ -32,7 +32,8 @@ export function useContentfulProducts() {
         entries.items.map(item => ({
           id: item.sys.id,
           title: item.fields.title,
-          slug: item.fields.slug
+          slug: item.fields.slug,
+          contentType: item.sys.contentType?.sys?.id
         }))
       );
       
@@ -58,10 +59,10 @@ export function useContentfulProducts() {
         } as CMSProductType;
       });
     },
-    retry: 1,
+    retry: 2,
     meta: {
       onError: (error: Error) => {
-        toast.error(`Error loading products: ${error.message}`);
+        toast.error(`Error loading products from Contentful: ${error.message}`);
         console.error('[useContentfulProducts] Error:', error);
       }
     }

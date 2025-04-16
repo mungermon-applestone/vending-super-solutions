@@ -14,7 +14,12 @@ const Products = () => {
   const { data: products, isLoading, error, refetch } = useContentfulProducts();
   const queryClient = useQueryClient();
   
-  console.log('[Products] Rendering Products page', { products, isLoading, error });
+  console.log('[Products] Rendering Products page', { 
+    productsCount: products?.length || 0, 
+    isLoading, 
+    hasError: !!error,
+    errorMessage: error instanceof Error ? error.message : null
+  });
 
   const handleRefresh = () => {
     console.log('[Products] Refreshing products data');

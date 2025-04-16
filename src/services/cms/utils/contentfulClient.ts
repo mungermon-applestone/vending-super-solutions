@@ -5,19 +5,25 @@ import { toast } from 'sonner';
 
 // Cache the client to avoid creating a new one on every request
 let contentfulClient: ReturnType<typeof createClient> | null = null;
+let lastConfigCheck = 0;
+const CONFIG_CACHE_TTL = 60 * 1000; // 1 minute cache TTL
 
 /**
  * Gets or creates a Contentful delivery client for content fetching
  */
 export const getContentfulClient = async () => {
-  // Return cached client if available
-  if (contentfulClient) {
+  const now = Date.now();
+  
+  // Return cached client if available and not expired
+  if (contentfulClient && (now - lastConfigCheck) < CONFIG_CACHE_TTL) {
+    console.log('[getContentfulClient] Using cached Contentful client');
     return contentfulClient;
   }
   
   try {
     console.log('[getContentfulClient] Creating new Contentful client');
     const config = await getContentfulConfig();
+    lastConfigCheck = now;
     
     // Add more detailed logging for configuration
     console.log('[getContentfulClient] Configuration received:', {
@@ -59,6 +65,7 @@ export const getContentfulClient = async () => {
 export const resetContentfulClient = () => {
   console.log('[contentfulClient] Resetting Contentful client');
   contentfulClient = null;
+  lastConfigCheck = 0;
 };
 
 /**

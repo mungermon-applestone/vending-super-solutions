@@ -1,5 +1,5 @@
-
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { getContentfulConfig } from '@/services/cms/utils/cmsInfo';
 
 interface ConnectionTestResult {
   success: boolean;
@@ -15,7 +15,26 @@ export async function testContentfulConnection(): Promise<ConnectionTestResult> 
   console.log('[contentfulConnectionTest] Starting Contentful connection test');
   
   try {
-    // First try to initialize the client
+    // First check if we can fetch credentials from Supabase
+    const config = await getContentfulConfig().catch(err => {
+      console.error('[contentfulConnectionTest] Failed to get Contentful config from Supabase:', err);
+      throw new Error(`Failed to retrieve Contentful credentials: ${err.message}`);
+    });
+    
+    if (!config || !config.space_id || !config.delivery_token) {
+      console.error('[contentfulConnectionTest] Missing required Contentful credentials');
+      return {
+        success: false,
+        message: 'Missing required Contentful credentials. Check your Supabase contentful_config table.',
+        details: {
+          hasSpaceId: !!config?.space_id,
+          hasDeliveryToken: !!config?.delivery_token,
+          hasConfig: !!config
+        }
+      };
+    }
+    
+    // Then try to initialize the client
     const client = await getContentfulClient();
     
     if (!client) {
@@ -53,7 +72,7 @@ export async function testContentfulConnection(): Promise<ConnectionTestResult> 
       // Delivery client might not support getSpace, use default values
       return { 
         name: 'Contentful Space',
-        sys: { id: 'space-id-not-available' }
+        sys: { id: config.space_id }
       };
     });
     
@@ -112,22 +131,11 @@ export function checkContentfulConfig(): {
   isConfigured: boolean;
   missingValues: string[];
 } {
-  const missingValues: string[] = [];
-  
-  // Check for Contentful environment variables
-  const requiredVars = [
-    'VITE_CONTENTFUL_SPACE_ID', 
-    'VITE_CONTENTFUL_DELIVERY_TOKEN'
-  ];
-  
-  for (const envVar of requiredVars) {
-    if (!import.meta.env[envVar]) {
-      missingValues.push(envVar);
-    }
-  }
-  
+  // For our implementation, we're using Supabase to store credentials
+  // So we don't need environment variables, but we'll keep this function 
+  // to maintain compatibility with components that expect it
   return {
-    isConfigured: missingValues.length === 0,
-    missingValues
+    isConfigured: true,
+    missingValues: []
   };
 }

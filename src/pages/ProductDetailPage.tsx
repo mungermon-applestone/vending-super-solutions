@@ -8,12 +8,27 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
+import { resetContentfulClient } from '@/services/cms/utils/contentfulClient';
 
 const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: product, isLoading, error, refetch } = useContentfulProduct(slug || '');
   
-  console.log(`[ProductDetailPage] Rendering with slug: ${slug}`, { product, isLoading, error });
+  console.log(`[ProductDetailPage] Rendering with slug: ${slug}`, { 
+    hasProduct: !!product,
+    productTitle: product?.title || 'Not loaded',
+    isLoading, 
+    hasError: !!error,
+    errorMessage: error instanceof Error ? error.message : null 
+  });
+
+  const handleRetryFetch = () => {
+    console.log('[ProductDetailPage] Resetting client and retrying fetch');
+    // Reset the contentful client to force a fresh connection
+    resetContentfulClient();
+    // Then refetch the data
+    refetch();
+  };
   
   return (
     <Layout>
@@ -30,16 +45,16 @@ const ProductDetailPage = () => {
         {isLoading ? (
           <div className="container py-12 text-center">
             <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Loading product information...</p>
+            <p className="text-gray-600">Loading product information from Contentful...</p>
           </div>
         ) : error ? (
           <div className="container py-12">
             <ContentfulFallbackMessage
               title="Error Loading Product"
-              message={error instanceof Error ? error.message : 'Failed to load product details'}
+              message={error instanceof Error ? error.message : 'Failed to load product details from Contentful'}
               contentType="Product"
               showRefresh={true}
-              onAction={() => refetch()}
+              onAction={handleRetryFetch}
               actionText="Try Again"
             />
           </div>
@@ -47,7 +62,7 @@ const ProductDetailPage = () => {
           <div className="container py-12">
             <ContentfulFallbackMessage
               title="Product Not Found"
-              message={`The product "${slug}" doesn't exist or has been removed.`}
+              message={`The product "${slug}" doesn't exist in Contentful or has been removed.`}
               contentType="Product"
               actionText="Browse Products"
               actionHref="/products"
