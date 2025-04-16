@@ -1,3 +1,4 @@
+
 import { getContentfulConfig } from './cmsInfo';
 import { createClient } from 'contentful-management';
 
