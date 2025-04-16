@@ -41,26 +41,44 @@ export function useContentfulTechnology() {
               url: `https:${entry.fields.image.fields?.file?.url}`,
               alt: entry.fields.image.fields?.title || entry.fields.title
             } : undefined,
-            sections: (entry.fields.sections || []).map((section: any) => ({
-              id: section.sys?.id,
-              title: section.fields?.title,
-              description: section.fields?.description,
-              section_type: section.fields?.sectionType,
-              display_order: section.fields?.displayOrder || 0,
-              technology_id: entry.sys?.id,
-              features: (section.fields?.features || []).map((feature: any) => ({
-                id: feature.sys?.id,
-                section_id: section.sys?.id,
-                title: feature.fields?.title,
-                description: feature.fields?.description,
-                icon: feature.fields?.icon,
-                display_order: feature.fields?.displayOrder || 0,
-                items: feature.fields?.items ? feature.fields.items.map((item: string) => ({
-                  text: item,
-                  display_order: 0
-                })) : []
-              })) as CMSTechnologyFeature[]
-            })) as CMSTechnologySection[]
+            sections: (entry.fields.sections || []).map((section: any) => {
+              // Log each section's summary and description fields
+              console.log(`[useContentfulTechnology] Section '${section.fields?.title}':`, {
+                hasSummary: !!section.fields?.summary,
+                summaryValue: section.fields?.summary,
+                summaryType: typeof section.fields?.summary,
+                summaryLength: section.fields?.summary?.length || 0,
+                hasDescription: !!section.fields?.description,
+                descriptionValue: section.fields?.description,
+              });
+              
+              return {
+                id: section.sys?.id,
+                title: section.fields?.title,
+                summary: section.fields?.summary, // Make sure to map the summary field
+                description: section.fields?.description,
+                section_type: section.fields?.sectionType,
+                display_order: section.fields?.displayOrder || 0,
+                technology_id: entry.sys?.id,
+                bulletPoints: section.fields?.bulletPoints || [],
+                sectionImage: section.fields?.sectionImage ? {
+                  url: `https:${section.fields.sectionImage.fields?.file?.url}`,
+                  alt: section.fields.sectionImage.fields?.title || section.fields?.title || '',
+                } : undefined,
+                features: (section.fields?.features || []).map((feature: any) => ({
+                  id: feature.sys?.id,
+                  section_id: section.sys?.id,
+                  title: feature.fields?.title,
+                  description: feature.fields?.description,
+                  icon: feature.fields?.icon,
+                  display_order: feature.fields?.displayOrder || 0,
+                  items: feature.fields?.items ? feature.fields.items.map((item: string) => ({
+                    text: item,
+                    display_order: 0
+                  })) : []
+                })) as CMSTechnologyFeature[]
+              };
+            }) as CMSTechnologySection[]
           };
         }) as CMSTechnology[];
         
@@ -68,7 +86,10 @@ export function useContentfulTechnology() {
           mappedEntries.map(entry => ({ 
             title: entry.title, 
             description: entry.description,
-            descriptionLength: entry.description?.length || 0
+            descriptionLength: entry.description?.length || 0,
+            hasSections: entry.sections && entry.sections.length > 0,
+            firstSectionSummary: entry.sections?.[0]?.summary,
+            firstSectionSummaryLength: entry.sections?.[0]?.summary?.length || 0
           }))
         );
         
@@ -122,26 +143,42 @@ export function useContentfulTechnologyBySlug(slug: string | undefined) {
             url: `https:${entry.fields.image.fields?.file?.url}`,
             alt: entry.fields.image.fields?.title || entry.fields.title
           } : undefined,
-          sections: (entry.fields.sections || []).map((section: any) => ({
-            id: section.sys?.id,
-            title: section.fields?.title,
-            description: section.fields?.description,
-            section_type: section.fields?.sectionType,
-            display_order: section.fields?.displayOrder || 0,
-            technology_id: entry.sys?.id,
-            features: (section.fields?.features || []).map((feature: any) => ({
-              id: feature.sys?.id,
-              section_id: section.sys?.id,
-              title: feature.fields?.title,
-              description: feature.fields?.description,
-              icon: feature.fields?.icon,
-              display_order: feature.fields?.displayOrder || 0,
-              items: feature.fields?.items ? feature.fields.items.map((item: string) => ({
-                text: item,
-                display_order: 0
-              })) : []
-            })) as CMSTechnologyFeature[]
-          })) as CMSTechnologySection[]
+          sections: (entry.fields.sections || []).map((section: any) => {
+            // Log each section's summary and description fields
+            console.log(`[useContentfulTechnologyBySlug] Section '${section.fields?.title}':`, {
+              hasSummary: !!section.fields?.summary,
+              summaryValue: section.fields?.summary,
+              summaryType: typeof section.fields?.summary,
+              summaryLength: section.fields?.summary?.length || 0
+            });
+            
+            return {
+              id: section.sys?.id,
+              title: section.fields?.title,
+              summary: section.fields?.summary, // Make sure to map the summary field
+              description: section.fields?.description,
+              section_type: section.fields?.sectionType,
+              display_order: section.fields?.displayOrder || 0,
+              technology_id: entry.sys?.id,
+              bulletPoints: section.fields?.bulletPoints || [],
+              sectionImage: section.fields?.sectionImage ? {
+                url: `https:${section.fields.sectionImage.fields?.file?.url}`,
+                alt: section.fields.sectionImage.fields?.title || section.fields?.title || '',
+              } : undefined,
+              features: (section.fields?.features || []).map((feature: any) => ({
+                id: feature.sys?.id,
+                section_id: section.sys?.id,
+                title: feature.fields?.title,
+                description: feature.fields?.description,
+                icon: feature.fields?.icon,
+                display_order: feature.fields?.displayOrder || 0,
+                items: feature.fields?.items ? feature.fields.items.map((item: string) => ({
+                  text: item,
+                  display_order: 0
+                })) : []
+              })) as CMSTechnologyFeature[]
+            };
+          }) as CMSTechnologySection[]
         } as CMSTechnology;
       } catch (error) {
         console.error(`[useContentfulTechnologyBySlug] Error:`, error);

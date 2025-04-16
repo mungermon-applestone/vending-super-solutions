@@ -15,18 +15,29 @@ const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => 
 
   return (
     <div>
-      {sortedSections.map((section, index) => (
-        <TechnologySection 
-          key={section.id} 
-          id={section.id}
-          title={section.title}
-          summary={section.summary || section.description}
-          bulletPoints={section.bulletPoints || []}
-          image={section.sectionImage?.url || section.image?.url || ''}
-          index={index}
-          className={index === 0 ? 'pt-0' : ''}
-        />
-      ))}
+      {sortedSections.map((section, index) => {
+        // Debug logging for each section
+        console.log(`[TechnologySections] Rendering section "${section.title}"`, {
+          id: section.id,
+          summary: section.summary,
+          description: section.description,
+          usedText: section.summary || section.description || '',
+          imageUrl: section.sectionImage?.url || section.image?.url || ''
+        });
+        
+        return (
+          <TechnologySection 
+            key={section.id} 
+            id={section.id}
+            title={section.title}
+            summary={section.summary || section.description || ''}
+            bulletPoints={section.bulletPoints || []}
+            image={section.sectionImage?.url || section.image?.url || ''}
+            index={index}
+            className={index === 0 ? 'pt-0' : ''}
+          />
+        );
+      })}
     </div>
   );
 };
