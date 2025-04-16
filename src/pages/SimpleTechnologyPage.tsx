@@ -21,8 +21,15 @@ const mapTechnologyData = (tech) => {
     items: feature.items?.map(item => item.text) || []
   })) || [];
 
-  // Extract summary from technology or its sections
-  const summary = tech.description || tech.sections?.[0]?.description || '';
+  // Make sure we get the summary text from all possible sources and with proper fallback
+  const summary = 
+    tech.summary || 
+    tech.description || 
+    (tech.sections?.[0]?.summary) || 
+    (tech.sections?.[0]?.description) || 
+    '';
+  
+  console.log(`Processing tech '${tech.title}' with summary: '${summary}'`);
   
   // Extract bullet points if available
   const bulletPoints = tech.sections?.[0]?.bulletPoints || [];

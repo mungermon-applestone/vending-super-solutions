@@ -28,7 +28,9 @@ const TechnologySection = ({
 
   // Log for debugging
   console.log(`TechnologySection rendering: ${title}`, {
-    summary,
+    summary: summary || '(empty summary)',
+    summaryLength: summary?.length || 0,
+    hasSummary: !!summary,
     bulletPoints,
     imageUrl
   });
@@ -56,7 +58,11 @@ const TechnologySection = ({
           <div className="w-full md:w-1/2 space-y-6">
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
-              {summary && <p className="text-lg text-muted-foreground">{summary}</p>}
+              
+              {/* Ensure summary displays when available */}
+              {summary && summary.trim() !== '' && (
+                <p className="text-lg text-muted-foreground">{summary}</p>
+              )}
               
               {bulletPoints && bulletPoints.length > 0 && (
                 <ul className="space-y-3 mt-6">
