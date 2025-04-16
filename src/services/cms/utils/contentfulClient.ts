@@ -96,7 +96,19 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
     console.log(`[fetchContentfulEntries] Executing query:`, query);
     
     const response = await client.getEntries(query);
-    console.log(`[fetchContentfulEntries] Fetched ${response.items.length} entries`);
+    console.log(`[fetchContentfulEntries] Fetched ${response.items.length} entries for ${contentType}`);
+    
+    if (contentType === 'businessGoal') {
+      // Special handling for business goals to help debug
+      console.log(`[fetchContentfulEntries] Business goals content details:`, {
+        count: response.items.length,
+        items: response.items.map(item => ({
+          id: item.sys?.id,
+          slug: item.fields?.slug,
+          title: item.fields?.title
+        }))
+      });
+    }
     
     return response.items as T[];
   } catch (error) {
@@ -128,6 +140,52 @@ export const fetchContentfulEntry = async <T>(entryId: string): Promise<T | null
     } as T;
   } catch (error) {
     console.error(`[fetchContentfulEntry] Error fetching entry ${entryId}:`, error);
+    return null;
+  }
+};
+
+/**
+ * Fetches a single entry from Contentful by slug field value
+ */
+export const fetchContentfulEntryBySlug = async <T>(contentType: string, slug: string): Promise<T | null> => {
+  try {
+    console.log(`[fetchContentfulEntryBySlug] Fetching ${contentType} with slug: "${slug}"`);
+    
+    if (!slug) {
+      console.warn(`[fetchContentfulEntryBySlug] No slug provided for ${contentType}`);
+      return null;
+    }
+    
+    const entries = await fetchContentfulEntries<T>(contentType, {
+      'fields.slug': slug,
+      limit: 1
+    });
+    
+    if (entries.length === 0) {
+      console.warn(`[fetchContentfulEntryBySlug] No ${contentType} found with slug: "${slug}"`);
+      
+      // Try with unencoded slug as a fallback
+      if (slug.includes('%20') || slug.includes('%')) {
+        const decodedSlug = decodeURIComponent(slug);
+        console.log(`[fetchContentfulEntryBySlug] Trying with decoded slug: "${decodedSlug}"`);
+        const entriesWithDecodedSlug = await fetchContentfulEntries<T>(contentType, {
+          'fields.slug': decodedSlug,
+          limit: 1
+        });
+        
+        if (entriesWithDecodedSlug.length > 0) {
+          console.log(`[fetchContentfulEntryBySlug] Found ${contentType} with decoded slug`);
+          return entriesWithDecodedSlug[0];
+        }
+      }
+      
+      return null;
+    }
+    
+    console.log(`[fetchContentfulEntryBySlug] Successfully retrieved ${contentType} with slug: "${slug}"`);
+    return entries[0];
+  } catch (error) {
+    console.error(`[fetchContentfulEntryBySlug] Error fetching ${contentType} with slug "${slug}":`, error);
     return null;
   }
 };

@@ -1,5 +1,5 @@
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Check, Shield, Server, Settings, Bell, Battery, ClipboardCheck, RefreshCcw, TrendingUp, PieChart, Map, UserCheck } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check as CheckIcon } from 'lucide-react';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
 import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
+import { toast } from 'sonner';
 
 // Function to get the icon component based on icon name from Contentful
 const getIconComponent = (iconName: string | undefined): ReactNode => {
@@ -46,9 +47,24 @@ const getIconComponent = (iconName: string | undefined): ReactNode => {
 
 const BusinessGoalDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: businessGoal, isLoading, error } = useContentfulBusinessGoal(slug || '');
+  const { data: businessGoal, isLoading, error, refetch } = useContentfulBusinessGoal(slug || '');
   
-  console.log('Business Goal Detail:', businessGoal);
+  useEffect(() => {
+    console.log('BusinessGoalDetailPage - Current slug:', slug);
+    console.log('BusinessGoalDetailPage - Business Goal Data:', businessGoal);
+    console.log('BusinessGoalDetailPage - Is Loading:', isLoading);
+    console.log('BusinessGoalDetailPage - Error:', error);
+    
+    if (error) {
+      toast.error('Error loading business goal data. Please try again.');
+    }
+  }, [slug, businessGoal, isLoading, error]);
+  
+  // Add a manual refresh option for debugging
+  const handleRefresh = () => {
+    refetch();
+    toast.info('Refreshing business goal data...');
+  };
   
   if (isLoading) {
     return (
@@ -76,9 +92,14 @@ const BusinessGoalDetailPage = () => {
             <div className="bg-red-50 border border-red-200 rounded-md p-6 text-center">
               <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Business Goal</h3>
               <p className="text-red-600">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
-              <Button asChild variant="outline" className="mt-4">
-                <Link to="/goals">Return to Business Goals</Link>
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+                <Button onClick={handleRefresh} variant="outline">
+                  Try Again
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/goals">Return to Business Goals</Link>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -93,10 +114,20 @@ const BusinessGoalDetailPage = () => {
           <div className="max-w-4xl mx-auto">
             <div className="bg-amber-50 border border-amber-200 rounded-md p-6 text-center">
               <h3 className="text-lg font-semibold text-amber-800 mb-2">Business Goal Not Found</h3>
-              <p className="text-amber-600">The business goal you're looking for doesn't exist or has been removed.</p>
-              <Button asChild variant="outline" className="mt-4">
-                <Link to="/goals">Return to Business Goals</Link>
-              </Button>
+              <p className="text-amber-600">
+                The business goal "{slug}" couldn't be found in Contentful.
+              </p>
+              <pre className="mt-4 text-xs text-left bg-amber-100 p-3 rounded overflow-x-auto">
+                Requested slug: {slug}
+              </pre>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+                <Button onClick={handleRefresh} variant="outline">
+                  Retry
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/goals">Return to Business Goals</Link>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
