@@ -31,7 +31,7 @@ export async function testContentfulConnection(): Promise<ConnectionTestResult> 
     const space = await client.getSpace();
     
     // Try to fetch environment information
-    const environment = await client.getEnvironments();
+    const environment = await client.getEnvironment('master'); // Using getEnvironment instead of getEnvironments
     
     // Try to fetch content types
     const contentTypes = await client.getContentTypes();
@@ -44,7 +44,9 @@ export async function testContentfulConnection(): Promise<ConnectionTestResult> 
           name: space.name,
           id: space.sys.id
         },
-        environmentCount: environment.total,
+        environment: {
+          id: environment.sys.id
+        },
         contentTypeCount: contentTypes.total,
         contentTypes: contentTypes.items.map(item => ({
           name: item.name,
