@@ -99,7 +99,7 @@ const SimpleTechnologyPage = () => {
             
             // Get section image properly
             const sectionImage = section.sectionImage || section.image;
-            const sectionImageProps = getImageProps(sectionImage);
+            const imageProps = getImageProps(sectionImage);
             
             return (
               <TechnologySection
@@ -108,7 +108,7 @@ const SimpleTechnologyPage = () => {
                 title={section.title || ''}
                 summary={section.summary || section.description || ''}
                 bulletPoints={section.bulletPoints || []}
-                image={sectionImageProps.url}
+                image={imageProps.url}
                 index={index}
               />
             );
