@@ -22,17 +22,26 @@ const mapTechnologyData = (tech: CMSTechnology) => {
     items: feature.items?.map(item => item.text) || []
   })) || [];
 
-  // Extract the main summary from the description field (most reliable source)
-  const summary = tech.description || '';
+  // Ensure we have a valid summary from the description field
+  let summary = '';
   
-  // Log detailed information about the extracted summary
-  console.log(`[mapTechnologyData] Processing tech '${tech.title}'`, {
+  // First try to get it from the description field (most reliable source)
+  if (typeof tech.description === 'string' && tech.description.trim() !== '') {
+    summary = tech.description;
+  }
+  // Fall back to section description if available
+  else if (tech.sections?.[0]?.description && typeof tech.sections[0].description === 'string') {
+    summary = tech.sections[0].description;
+  }
+  
+  console.log(`[mapTechnologyData] Processed tech '${tech.title}'`, {
     techId: tech.id,
-    summarySource: 'description',
+    summarySource: summary === tech.description ? 'description' : 'section description',
     summaryValue: summary,
     summaryType: typeof summary,
-    summaryLength: summary?.length || 0,
-    rawDescription: tech.description
+    summaryLength: summary.length,
+    rawDescription: tech.description,
+    sectionDescription: tech.sections?.[0]?.description
   });
   
   // Extract bullet points if available
@@ -79,6 +88,8 @@ const SimpleTechnologyPage = () => {
           hasSummaryContent: !!tech.summary && tech.summary.trim() !== ''
         });
       });
+    } else {
+      console.log("[SimpleTechnologyPage] No technologies to transform");
     }
   }, [transformedTechnologies]);
 

@@ -28,7 +28,7 @@ const TechnologySection = ({
 
   // Debug logging on component mount and whenever summary changes
   useEffect(() => {
-    console.log(`[TechnologySection] ${title} - Summary:`, {
+    console.log(`[TechnologySection] ${title} - Summary details:`, {
       summaryValue: summary,
       summaryType: typeof summary,
       summaryLength: summary?.length || 0,
@@ -36,6 +36,10 @@ const TechnologySection = ({
       trimmedSummary: summary?.trim() || '(empty after trim)'
     });
   }, [title, summary]);
+
+  // Ensure summary is a valid string
+  const displaySummary = typeof summary === 'string' ? summary.trim() : '';
+  const showSummary = displaySummary !== '';
 
   return (
     <section id={id} className={cn("py-16 bg-gradient-to-b from-white to-gray-50", className)}>
@@ -61,14 +65,12 @@ const TechnologySection = ({
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
               
-              {/* Summary display with better debug info */}
-              {summary && summary.trim() !== '' ? (
+              {showSummary ? (
                 <p className="text-lg text-muted-foreground" data-testid="technology-summary">
-                  {summary}
+                  {displaySummary}
                 </p>
               ) : (
                 <div className="hidden">
-                  {/* Fixed: Console log directly in JSX caused TypeScript error */}
                   {(() => {
                     console.log(`[TechnologySection] Summary not displayed for "${title}" - empty or undefined`);
                     return null;
