@@ -1,3 +1,4 @@
+
 import { STRAPI_API_URL, STRAPI_API_KEY, STRAPI_ENDPOINTS } from './strapiCms';
 
 /**
@@ -46,9 +47,9 @@ export const STRAPI_CONFIG = {
   ENDPOINTS: STRAPI_ENDPOINTS
 };
 
-// Hardcoded Contentful credentials for development (NOT recommended for production)
+// Contentful configuration from environment variables
 export const CONTENTFUL_CONFIG = {
-  SPACE_ID: 'your_space_id_here',
-  DELIVERY_TOKEN: 'your_delivery_token_here',
-  ENVIRONMENT_ID: 'master'
+  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'your_space_id_here',
+  DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'your_delivery_token_here',
+  ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
 };
