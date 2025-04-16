@@ -27,40 +27,13 @@ export const getContentfulClient = async () => {
       environmentId: config?.environment_id || 'master'
     });
     
-    // For development/preview environments, try to use environment variables if config is missing
     if (!config || !config.space_id || !config.delivery_token) {
-      console.log('[getContentfulClient] Trying to use environment variables for Contentful credentials');
+      console.error('[getContentfulClient] Missing required Contentful credentials');
+      if (!config) console.error('  - No configuration found');
+      if (config && !config.space_id) console.error('  - Missing Space ID');
+      if (config && !config.delivery_token) console.error('  - Missing Delivery Token');
       
-      const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
-      const deliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
-      const environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || 'master';
-      
-      if (spaceId && deliveryToken) {
-        console.log('[getContentfulClient] Using environment variables for Contentful connection');
-        
-        contentfulClient = createClient({
-          space: spaceId,
-          accessToken: deliveryToken,
-          environment: environmentId,
-        });
-        
-        // Test the connection
-        try {
-          const space = await contentfulClient.getSpace();
-          console.log(`[getContentfulClient] Successfully connected to Contentful space: ${space.name} using env vars`);
-          return contentfulClient;
-        } catch (e) {
-          console.error('[getContentfulClient] Failed to verify Contentful connection with env vars:', e);
-          contentfulClient = null;
-        }
-      } else {
-        console.error('[getContentfulClient] Missing required Contentful credentials');
-        if (!config) console.error('  - No configuration found');
-        if (config && !config.space_id) console.error('  - Missing Space ID');
-        if (config && !config.delivery_token) console.error('  - Missing Delivery Token');
-        
-        return null;
-      }
+      throw new Error('Missing Contentful configuration. Please set up your Contentful credentials in Admin Settings.');
     }
     
     contentfulClient = createClient({
@@ -76,14 +49,14 @@ export const getContentfulClient = async () => {
     } catch (e) {
       console.error('[getContentfulClient] Failed to verify Contentful connection:', e);
       contentfulClient = null;
-      return null;
+      throw new Error(`Failed to connect to Contentful: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
     
     console.log('[getContentfulClient] Successfully created Contentful client');
     return contentfulClient;
   } catch (error) {
-    console.error('[getContentfulClient] Comprehensive error creating Contentful client:', error);
-    return null;
+    console.error('[getContentfulClient] Error creating Contentful client:', error);
+    throw error;
   }
 };
 
@@ -103,10 +76,7 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
     
     if (!client) {
       console.error('[fetchContentfulEntries] Failed to get Contentful client');
-      
-      // In preview environments or when client can't be created, return an empty array
-      console.log('[fetchContentfulEntries] Preview environment or client error, returning empty array');
-      return [] as T[];
+      throw new Error('Failed to initialize Contentful client');
     }
     
     const query = {
@@ -134,9 +104,7 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
     return response.items as T[];
   } catch (error) {
     console.error(`[fetchContentfulEntries] Error fetching ${contentType}:`, error);
-    
-    // Return empty array instead of throwing to avoid breaking UI
-    return [] as T[];
+    throw error;
   }
 };
 

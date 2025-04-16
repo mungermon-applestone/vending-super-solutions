@@ -80,7 +80,7 @@ const ProductTypesSection = () => {
         }));
       } catch (err) {
         console.error('[ProductTypesSection] Error fetching from Contentful:', err);
-        return [];
+        throw err;
       }
     },
     meta: {
@@ -91,7 +91,7 @@ const ProductTypesSection = () => {
     retry: 2
   });
 
-  // Improved static fallback data - will be used if API fails
+  // Static data only for when API is loading
   const staticProductTypes = [
     {
       title: "Cannabis Vending",
@@ -119,7 +119,7 @@ const ProductTypesSection = () => {
     }
   ];
 
-  // Always use Contentful data if available, otherwise fall back to static data
+  // Use Contentful data only when it's successfully loaded
   const displayProductTypes = (contentfulProducts && contentfulProducts.length > 0) 
     ? contentfulProducts.map(product => ({
         title: product.title,
@@ -127,7 +127,7 @@ const ProductTypesSection = () => {
         image: product.image || "https://images.unsplash.com/photo-1606787366850-de6330128bfc",
         path: `/products/${normalizeSlug(product.slug)}`
       }))
-    : staticProductTypes;
+    : isLoading ? [] : staticProductTypes;
   
   const featuredProductTypes = displayProductTypes.slice(0, 4);
   
