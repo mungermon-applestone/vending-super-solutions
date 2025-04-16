@@ -33,8 +33,8 @@ const SimpleTechnologyPage = () => {
     
     // If it's a CMSImage object
     return {
-      url: typeof image === 'string' ? image : (image.url || ''),
-      alt: typeof image === 'string' ? 'Technology image' : (image.alt || 'Technology image')
+      url: image.url || '',
+      alt: image.alt || 'Technology image'
     };
   };
 
@@ -97,8 +97,9 @@ const SimpleTechnologyPage = () => {
           {mainTechnology.sections.map((section, index) => {
             console.log('Rendering section:', section);
             
-            // Get section image props
-            const sectionImageProps = getImageProps(section.sectionImage || section.image);
+            // Get section image properly
+            const sectionImage = section.sectionImage || section.image;
+            const sectionImageProps = getImageProps(sectionImage);
             
             return (
               <TechnologySection
