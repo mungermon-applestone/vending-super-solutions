@@ -1,4 +1,3 @@
-
 import { STRAPI_API_URL, STRAPI_API_KEY, STRAPI_ENDPOINTS } from './strapiCms';
 
 /**
@@ -7,6 +6,24 @@ import { STRAPI_API_URL, STRAPI_API_KEY, STRAPI_ENDPOINTS } from './strapiCms';
  * This file contains configuration settings for connecting to your CMS.
  * Update these values when integrating with your actual CMS provider.
  */
+
+// Contentful configuration from environment variables
+export const CONTENTFUL_CONFIG = {
+  // Use public environment variable for Space ID (can be client-side)
+  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'your_space_id_here',
+  
+  // Use non-VITE prefix for sensitive tokens to keep them private
+  DELIVERY_TOKEN: import.meta.env.CONTENTFUL_DELIVERY_TOKEN || '',
+  
+  // Optional: Environment ID (typically 'master')
+  ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
+};
+
+// Add a utility to check if Contentful is properly configured
+export const isContentfulConfigured = () => {
+  const { SPACE_ID, DELIVERY_TOKEN } = CONTENTFUL_CONFIG;
+  return !!(SPACE_ID && DELIVERY_TOKEN);
+};
 
 // Base URL for your CMS API
 export const CMS_API_URL = import.meta.env.VITE_CMS_API_URL || 'https://your-cms-api.example.com';
@@ -45,11 +62,4 @@ export const STRAPI_CONFIG = {
   API_URL: STRAPI_API_URL,
   API_KEY: STRAPI_API_KEY,
   ENDPOINTS: STRAPI_ENDPOINTS
-};
-
-// Contentful configuration from environment variables
-export const CONTENTFUL_CONFIG = {
-  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'your_space_id_here',
-  DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 'your_delivery_token_here',
-  ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
 };
