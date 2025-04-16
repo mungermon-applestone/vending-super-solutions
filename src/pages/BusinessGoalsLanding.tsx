@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -17,21 +16,18 @@ const BusinessGoalsLanding = () => {
   const navigate = useNavigate();
   const businessGoalCaseStudies = getBusinessGoalCaseStudies();
 
-  console.log('BusinessGoals data:', businessGoals);
-
   return (
     <Layout>
-      {/* Hero Section */}
       <PageHero 
         pageKey="business-goals"
         fallbackTitle="Business Goals"
-        fallbackSubtitle="Our comprehensive vending solutions help you achieve your business goals with powerful technology and customizable options."
+        fallbackSubtitle="Our comprehensive vending solutions help you achieve your business goals with powerful technology and customizable options"
         fallbackImage="https://images.unsplash.com/photo-1553877522-43269d4ea984"
         fallbackImageAlt="Business Goals"
         fallbackPrimaryButtonText="Request a Demo"
         fallbackPrimaryButtonUrl="/contact"
         fallbackSecondaryButtonText="Explore Solutions"
-        fallbackSecondaryButtonUrl="/products"
+        fallbackSecondaryButtonUrl="#solutions"
       />
 
       {/* Business Goals Grid */}
