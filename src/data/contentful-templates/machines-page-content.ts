@@ -1,0 +1,65 @@
+
+import { ContentTypeTemplate } from '@/types/contentful-admin';
+
+export const machinesPageContentTemplate: ContentTypeTemplate = {
+  id: 'machinesPageContent',
+  name: 'Machines Page Content',
+  description: 'Content for the Machines page: introductions, CTAs, and sections',
+  contentType: {
+    id: 'machinesPageContent',
+    name: 'Machines Page Content',
+    description: 'Sectional content for the Machines page',
+    displayField: 'introTitle',
+    publish: true,
+    fields: [
+      {
+        id: 'introTitle',
+        name: 'Intro Title',
+        type: 'Symbol',
+        required: true,
+      },
+      {
+        id: 'introDescription',
+        name: 'Intro Description',
+        type: 'Text',
+        required: false,
+      },
+      {
+        id: 'machineTypesTitle',
+        name: 'Machine Types Title',
+        type: 'Symbol',
+        required: false,
+      },
+      {
+        id: 'machineTypesDescription',
+        name: 'Machine Types Description',
+        type: 'Text',
+        required: false,
+      },
+      {
+        id: 'customMachineCtaTitle',
+        name: 'Custom Machine CTA Title',
+        type: 'Symbol',
+        required: false,
+      },
+      {
+        id: 'customMachineCtaDescription',
+        name: 'Custom Machine CTA Description',
+        type: 'Text',
+        required: false,
+      },
+      {
+        id: 'customMachineButtonText',
+        name: 'Custom Machine Button Text',
+        type: 'Symbol',
+        required: false,
+      },
+      {
+        id: 'customMachineButtonUrl',
+        name: 'Custom Machine Button URL',
+        type: 'Symbol',
+        required: false,
+      },
+    ],
+  },
+};
