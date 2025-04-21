@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
@@ -6,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getProductTypes } from '@/services/cms';
 import { CMSProductType } from '@/types/cms';
 import { normalizeSlug } from '@/services/cms/utils/slugMatching';
+import { useHomePageContent } from '@/hooks/useHomePageContent';
 
 interface ProductCardProps {
   title: string;
@@ -36,11 +36,11 @@ const ProductCard = ({ title, description, image, path }: ProductCardProps) => {
 };
 
 const ProductTypesSection = () => {
-  // Fix the useQuery configuration by using the meta object for error handling
+  const { data: homeContent } = useHomePageContent();
+
   const { data: productTypes = [], isLoading, error } = useQuery({
     queryKey: ['productTypes'],
     queryFn: () => getProductTypes(),
-    // Remove the onError property and use a more compatible approach
     retry: 2,
     retryDelay: 1000,
     meta: {
@@ -50,7 +50,6 @@ const ProductTypesSection = () => {
     }
   });
 
-  // Improved static fallback data - will be used if API fails
   const staticProductTypes = [
     {
       title: "Grocery",
@@ -78,7 +77,6 @@ const ProductTypesSection = () => {
     }
   ];
 
-  // Always default to static data if API fails or returns empty
   const displayProductTypes = (productTypes && productTypes.length > 0) 
     ? productTypes.map((product: CMSProductType) => ({
         title: product.title,
@@ -90,7 +88,6 @@ const ProductTypesSection = () => {
   
   const featuredProductTypes = displayProductTypes.slice(0, 4);
   
-  // If we're in an error state but have fallback data, don't show loading state
   const shouldShowLoading = isLoading && !error;
   
   return (
@@ -99,10 +96,10 @@ const ProductTypesSection = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-              Sell Any Product Type
+              {homeContent?.productCategoriesTitle}
             </h2>
             <p className="subtitle max-w-2xl">
-              Our versatile vending software adapts to various product categories, providing specialized features for each.
+              {homeContent?.productCategoriesDescription}
             </p>
           </div>
           <Button asChild className="mt-4 md:mt-0">

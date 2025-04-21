@@ -1,16 +1,13 @@
-
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { 
-  TrendingUp,
-  ShoppingBag,
-  Activity,
-  BarChart,
-  Truck,
-  Users
+  TrendingUp, ShoppingBag, Activity,
+  BarChart, Truck, Users 
 } from 'lucide-react';
+import { useHomePageContent } from '@/hooks/useHomePageContent';
 
 const BusinessGoalsSection = () => {
+  const { data: homeContent } = useHomePageContent();
   const businessGoals = [
     {
       icon: <TrendingUp className="h-10 w-10 text-vending-blue" />,
@@ -56,10 +53,10 @@ const BusinessGoalsSection = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-              Meet Your Business Goals
+              {homeContent?.businessGoalsTitle}
             </h2>
             <p className="subtitle max-w-2xl">
-              Whatever your business objectives, our vending software provides the tools and features to help you succeed.
+              {homeContent?.businessGoalsDescription}
             </p>
           </div>
           <Button asChild className="mt-4 md:mt-0">
