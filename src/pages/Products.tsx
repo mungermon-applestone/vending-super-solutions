@@ -2,16 +2,26 @@
 import { useQueryClient } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import { useContentfulProducts } from '@/hooks/cms/useContentfulProducts';
+import { useProductsPageContent } from '@/hooks/cms/useProductsPageContent';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ExternalLink } from 'lucide-react';
+import { Loader2, ExternalLink, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageHero from '@/components/common/PageHero';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
+import PurposeStatement from '@/components/products/sections/PurposeStatement';
+import KeyFeaturesSection from '@/components/products/sections/KeyFeaturesSection';
+import DemoRequest from '@/components/products/sections/DemoRequest';
 
 const Products = () => {
   const { data: products, isLoading, error, refetch } = useContentfulProducts();
+  const { 
+    data: pageContent, 
+    isLoading: isLoadingContent, 
+    error: contentError,
+    refetch: refetchContent
+  } = useProductsPageContent();
   const queryClient = useQueryClient();
   
   console.log('[Products] Rendering Products page', { 
@@ -20,40 +30,51 @@ const Products = () => {
     hasError: !!error,
     errorMessage: error instanceof Error ? error.message : null
   });
+  
+  console.log('[Products] Page content:', pageContent);
 
   const handleRefresh = () => {
     console.log('[Products] Refreshing products data');
     queryClient.invalidateQueries({ queryKey: ['contentful', 'products'] });
+    queryClient.invalidateQueries({ queryKey: ['contentful', 'productsPageContent'] });
   };
   
   return (
     <Layout>
       <ContentfulErrorBoundary contentType="Products">
-        <PageHero 
-          pageKey="products" 
-          fallbackTitle="Our Products" 
-          fallbackSubtitle="Explore our innovative vending solutions"
-          fallbackImage="https://images.unsplash.com/photo-1588430188257-eec60f814190"
-          fallbackImageAlt="Vending Products"
-        />
+        {/* Purpose Statement Section */}
+        {pageContent && (
+          <PurposeStatement 
+            title={pageContent.purposeStatementTitle || "Our Products"}
+            description={pageContent.purposeStatementDescription}
+          />
+        )}
 
         <div className="container py-10">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold">Products</h1>
               <p className="text-muted-foreground mt-1">
-                Explore our product catalog
+                {pageContent?.categoriesSectionTitle || "Explore our product catalog"}
               </p>
+              {pageContent?.categoriesSectionDescription && (
+                <p className="text-gray-600 mt-2 max-w-2xl">
+                  {pageContent.categoriesSectionDescription}
+                </p>
+              )}
             </div>
-            <Button onClick={handleRefresh} variant="outline" className="mt-4 md:mt-0">
-              Refresh Data
-            </Button>
+            <div className="flex gap-4 mt-4 md:mt-0">
+              <Button onClick={handleRefresh} variant="outline" className="flex items-center">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Refresh Content
+              </Button>
+            </div>
           </div>
 
-          {isLoading ? (
+          {isLoading || isLoadingContent ? (
             <div className="flex flex-col items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-gray-500 mb-3" />
-              <p className="text-gray-500">Loading products from Contentful...</p>
+              <p className="text-gray-500">Loading content from Contentful...</p>
             </div>
           ) : error ? (
             <ContentfulFallbackMessage
@@ -93,6 +114,44 @@ const Products = () => {
             />
           )}
         </div>
+        
+        {/* Key Features Section */}
+        {pageContent && (
+          <KeyFeaturesSection 
+            title={pageContent.keyFeaturesTitle}
+            description={pageContent.keyFeaturesDescription}
+            features={pageContent.keyFeatures}
+          />
+        )}
+
+        {/* Demo Request Section */}
+        {pageContent && (
+          <DemoRequest 
+            title={pageContent.demoRequestTitle || "Request a Demo"}
+            description={pageContent.demoRequestDescription}
+            bulletPoints={pageContent.demoRequestBulletPoints}
+          />
+        )}
+        
+        {/* Debug Information */}
+        {import.meta.env.DEV && (
+          <div className="container mx-auto py-8 px-4">
+            <details className="bg-gray-100 p-4 rounded-lg mb-4">
+              <summary className="font-semibold cursor-pointer">Debug Information</summary>
+              <div className="mt-4 text-sm">
+                <h4 className="font-bold">Products Data:</h4>
+                <pre className="bg-gray-200 p-3 rounded mt-2 overflow-auto max-h-48">
+                  {JSON.stringify(products, null, 2)}
+                </pre>
+                
+                <h4 className="font-bold mt-4">Page Content:</h4>
+                <pre className="bg-gray-200 p-3 rounded mt-2 overflow-auto max-h-48">
+                  {JSON.stringify(pageContent, null, 2)}
+                </pre>
+              </div>
+            </details>
+          </div>
+        )}
       </ContentfulErrorBoundary>
     </Layout>
   );
