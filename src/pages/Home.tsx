@@ -26,7 +26,7 @@ const Home = () => {
       <BusinessGoalsSection />
       <TestimonialsSection />
       <CTASection />
-      {import.meta.env.DEV && <ContentfulDebug />}
+      <ContentfulDebug />  {/* Always show during troubleshooting */}
     </Layout>
   );
 };

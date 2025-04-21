@@ -7,14 +7,13 @@
 
 // Contentful configuration from environment variables
 export const CONTENTFUL_CONFIG = {
-  // Use public environment variable for Space ID (can be client-side)
+  // Space ID (required)
   SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID,
   
-  // Try both formats for delivery token, prioritizing non-VITE version (for server-side)
-  // IMPORTANT: This token should ideally not be exposed client-side
+  // Delivery Token (required)
   DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
   
-  // Optional: Environment ID (typically 'master')
+  // Environment ID (optional, defaults to 'master')
   ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
 };
 
