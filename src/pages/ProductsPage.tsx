@@ -1,30 +1,32 @@
-
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useContentfulProducts } from '@/hooks/cms/useContentfulProducts';
+import { useProductsPageContent } from '@/hooks/cms/useProductsPageContent';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, AlertTriangle, RefreshCw, Info } from 'lucide-react';
-import PageHero from '@/components/common/PageHero';
 import { isContentfulConfigured } from '@/config/cms';
 import { toast } from 'sonner';
 import { refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 import ContentfulDebug from '@/components/debug/ContentfulDebug';
+import PurposeStatement from '@/components/products/sections/PurposeStatement';
+import DemoRequest from '@/components/products/sections/DemoRequest';
 
 const ProductsPage = () => {
-  const { data: productTypes, isLoading, error, refetch } = useContentfulProducts();
+  const { data: productTypes, isLoading: isLoadingProducts, error: productsError, refetch } = useContentfulProducts();
+  const { data: pageContent, isLoading: isLoadingContent } = useProductsPageContent();
   const navigate = useNavigate();
   const contentfulConfigured = isContentfulConfigured();
-  
+
   useEffect(() => {
     console.log('[ProductsPage] Rendering with Contentful data:', {
       productsCount: productTypes?.length || 0,
-      isLoading,
-      hasError: !!error,
-      errorMessage: error ? (error instanceof Error ? error.message : 'Unknown error') : null
+      isLoading: isLoadingProducts,
+      hasError: !!productsError,
+      errorMessage: productsError ? (productsError instanceof Error ? productsError.message : 'Unknown error') : null
     });
-  }, [productTypes, isLoading, error]);
+  }, [productTypes, isLoadingProducts, productsError]);
   
   // Debug information for Contentful configuration
   const [debugInfo, setDebugInfo] = React.useState<{
@@ -53,7 +55,7 @@ const ProductsPage = () => {
       toast.warning('Contentful configuration missing. Some content may not display correctly.');
     }
   }, [contentfulConfigured]);
-  
+
   const handleRefresh = async () => {
     toast.info("Refreshing Contentful connection...");
     try {
@@ -65,35 +67,29 @@ const ProductsPage = () => {
       console.error("Error refreshing Contentful client:", err);
     }
   };
-  
+
   return (
     <Layout>
-      {/* Hero Section using PageHero */}
-      <PageHero 
-        pageKey="products"
-        fallbackTitle="Our Products"
-        fallbackSubtitle="Explore our range of innovative vending and locker solutions for your business."
-        fallbackImage="https://images.unsplash.com/photo-1588430188257-eec60f814190?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-        fallbackImageAlt="Vending Products"
-        fallbackPrimaryButtonText="Request Information"
-        fallbackPrimaryButtonUrl="/contact"
-        fallbackSecondaryButtonText="Explore Solutions"
-        fallbackSecondaryButtonUrl="/business"
-      />
+      {pageContent && (
+        <PurposeStatement 
+          title={pageContent.purposeStatementTitle}
+          description={pageContent.purposeStatementDescription}
+        />
+      )}
 
       <div className="container mx-auto py-12">
-        <div className="flex justify-between items-center mb-8">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl font-bold text-vending-blue-dark mb-2">Our Product Line</h2>
-            <p className="text-xl text-gray-700">
-              From traditional vending machines to smart retail lockers, we have the solutions your business needs.
-            </p>
+        {pageContent?.categoriesSectionTitle && (
+          <div className="max-w-2xl mb-12">
+            <h2 className="text-3xl font-bold text-vending-blue-dark mb-2">
+              {pageContent.categoriesSectionTitle}
+            </h2>
+            {pageContent.categoriesSectionDescription && (
+              <p className="text-xl text-gray-700">
+                {pageContent.categoriesSectionDescription}
+              </p>
+            )}
           </div>
-          <Button onClick={handleRefresh} variant="outline" className="flex items-center gap-2">
-            <RefreshCw size={16} />
-            Refresh Data
-          </Button>
-        </div>
+        )}
 
         {!contentfulConfigured && (
           <div className="bg-amber-50 border border-amber-200 rounded-md p-6 text-center mb-8">
@@ -112,7 +108,7 @@ const ProductsPage = () => {
           </div>
         )}
 
-        {isLoading && (
+        {isLoadingProducts && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="border border-gray-200 rounded-lg overflow-hidden">
@@ -128,12 +124,12 @@ const ProductsPage = () => {
           </div>
         )}
 
-        {error && (
+        {productsError && (
           <div className="bg-red-50 border border-red-200 rounded-md p-6 text-center">
             <div className="flex flex-col items-center">
               <AlertTriangle className="h-8 w-8 text-red-500 mb-2" />
               <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Products</h3>
-              <p className="text-red-600 mb-4">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
+              <p className="text-red-600 mb-4">{productsError instanceof Error ? productsError.message : 'An unknown error occurred'}</p>
               
               <div className="bg-white p-4 rounded border border-red-100 max-w-2xl mb-6 text-left">
                 <p className="font-semibold mb-2 text-red-800">Contentful Environment Variables Status:</p>
@@ -155,7 +151,7 @@ const ProductsPage = () => {
           </div>
         )}
 
-        {productTypes && productTypes.length === 0 && !isLoading && !error && (
+        {productTypes && productTypes.length === 0 && !isLoadingProducts && !productsError && (
           <div className="bg-gray-50 border border-gray-200 rounded-md p-6 text-center">
             <div className="flex flex-col items-center">
               <Info className="h-8 w-8 text-gray-500 mb-2" />
@@ -212,8 +208,15 @@ const ProductsPage = () => {
           </div>
         )}
       </div>
+
+      {pageContent && (
+        <DemoRequest 
+          title={pageContent.demoRequestTitle || "Request a Demo"}
+          description={pageContent.demoRequestDescription}
+          bulletPoints={pageContent.demoRequestBulletPoints}
+        />
+      )}
       
-      {/* Add ContentfulDebug component at the bottom of the page for easy access to settings */}
       <ContentfulDebug />
     </Layout>
   );
