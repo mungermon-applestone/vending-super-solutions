@@ -1,6 +1,6 @@
-
 import { createClient } from 'contentful';
 import { CONTENTFUL_CONFIG } from '@/config/cms';
+import { toast } from 'sonner';
 
 // Cache the client to avoid creating a new one on every request
 let contentfulClient: ReturnType<typeof createClient> | null = null;
@@ -34,6 +34,14 @@ export const getContentfulClient = async () => {
     // Use the centralized configuration from cms.ts
     const { SPACE_ID, DELIVERY_TOKEN, ENVIRONMENT_ID } = CONTENTFUL_CONFIG;
     
+    // Output raw environment variable data for debugging
+    console.log('[getContentfulClient] Raw env vars:', {
+      VITE_CONTENTFUL_SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID,
+      VITE_CONTENTFUL_ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID,
+      VITE_CONTENTFUL_DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN ? '[PRESENT]' : '[NOT PRESENT]',
+      CONTENTFUL_DELIVERY_TOKEN: typeof import.meta.env.CONTENTFUL_DELIVERY_TOKEN !== 'undefined' ? '[PRESENT]' : '[NOT PRESENT]',
+    });
+    
     lastConfigCheck = now;
     lastConfigError = null;
     configRetryCount = 0;
@@ -54,11 +62,13 @@ export const getContentfulClient = async () => {
     
     if (!SPACE_ID) {
       console.error('[getContentfulClient] Missing Space ID');
+      toast.error('Missing Contentful Space ID. Please check your environment variables.');
       throw new Error('Missing required Contentful credentials - Space ID not found');
     }
     
     if (!DELIVERY_TOKEN) {
       console.error('[getContentfulClient] Missing Delivery Token (CDA)');
+      toast.error('Missing Contentful Delivery Token. Please check your environment variables.');
       throw new Error('Missing required Contentful credentials - Delivery Token not found');
     }
     
@@ -75,6 +85,7 @@ export const getContentfulClient = async () => {
     
     console.log('[getContentfulClient] Successfully created and tested Contentful client');
     console.log(`[getContentfulClient] Test query returned ${testEntry.total} total entries`);
+    toast.success('Successfully connected to Contentful');
     
     return contentfulClient;
   } catch (error) {
@@ -83,6 +94,9 @@ export const getContentfulClient = async () => {
     // Track the error
     lastConfigError = error instanceof Error ? error : new Error(String(error));
     configRetryCount++;
+    
+    // Show error toast
+    toast.error(`Contentful connection error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     
     // If we have a client and haven't exceeded retry count, keep using it
     if (contentfulClient && configRetryCount < MAX_RETRIES) {
@@ -138,6 +152,12 @@ export const fetchContentfulEntries = async <T>(contentType: string, options: an
     const response = await client.getEntries(query);
     console.log(`[fetchContentfulEntries] Fetched ${response.items.length} entries for ${contentType}`);
     
+    // Log first entry if available
+    if (response.items.length > 0) {
+      console.log(`[fetchContentfulEntries] First entry sys:`, response.items[0].sys);
+      console.log(`[fetchContentfulEntries] First entry fields:`, response.items[0].fields);
+    }
+    
     return response.items as T[];
   } catch (error) {
     console.error(`[fetchContentfulEntries] Error fetching ${contentType}:`, error);
@@ -167,5 +187,58 @@ export const fetchContentfulEntry = async <T>(entryId: string): Promise<T | null
   } catch (error) {
     console.error(`[fetchContentfulEntry] Error fetching entry ${entryId}:`, error);
     throw error;
+  }
+};
+
+// Add a function to test contentful connection and report detailed information
+export const testContentfulConnection = async (): Promise<{
+  success: boolean;
+  message: string;
+  details?: any;
+}> => {
+  try {
+    console.log('[testContentfulConnection] Testing Contentful connection');
+    
+    // Force fresh client
+    await refreshContentfulClient();
+    const client = await getContentfulClient();
+    
+    if (!client) {
+      return {
+        success: false,
+        message: 'Failed to initialize Contentful client'
+      };
+    }
+    
+    // Make a test query
+    const testQuery = await client.getEntries({
+      limit: 1
+    });
+    
+    // Get space information
+    const space = await client.getSpace();
+    
+    return {
+      success: true,
+      message: `Successfully connected to Contentful space: ${space.name}`,
+      details: {
+        space: {
+          name: space.name,
+          id: space.sys.id
+        },
+        totalEntries: testQuery.total,
+        environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID,
+        availableContentTypes: Array.isArray(testQuery.items) && testQuery.items.length > 0 
+          ? [...new Set(testQuery.items.map(item => item.sys.contentType?.sys.id).filter(Boolean))]
+          : []
+      }
+    };
+  } catch (error) {
+    console.error('[testContentfulConnection] Error testing connection:', error);
+    return {
+      success: false,
+      message: `Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      details: { error: String(error) }
+    };
   }
 };
