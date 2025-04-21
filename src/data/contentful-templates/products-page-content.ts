@@ -55,6 +55,14 @@ export const productsPageContentTemplate: ContentTypeTemplate = {
         localized: false,
       },
       {
+        id: 'keyFeatures',
+        name: 'Key Features List',
+        type: 'Array',
+        items: { type: 'Symbol' },
+        required: false,
+        localized: false,
+      },
+      {
         id: 'demoRequestTitle',
         name: 'Demo Request Title',
         type: 'Symbol',

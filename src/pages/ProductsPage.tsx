@@ -17,8 +17,20 @@ import ProductGrid from '@/components/products/sections/ProductGrid';
 import KeyFeaturesSection from '@/components/products/sections/KeyFeaturesSection';
 
 const ProductsPage = () => {
-  const { data: productTypes, isLoading: isLoadingProducts, error: productsError, refetch } = useContentfulProducts();
-  const { data: pageContent, isLoading: isLoadingContent } = useProductsPageContent();
+  const { 
+    data: productTypes, 
+    isLoading: isLoadingProducts, 
+    error: productsError, 
+    refetch: refetchProducts 
+  } = useContentfulProducts();
+  
+  const { 
+    data: pageContent, 
+    isLoading: isLoadingContent, 
+    error: contentError,
+    refetch: refetchContent
+  } = useProductsPageContent();
+  
   const contentfulConfigured = isContentfulConfigured();
   
   // Debug information for Contentful configuration
@@ -56,7 +68,8 @@ const ProductsPage = () => {
     toast.info("Refreshing Contentful connection...");
     try {
       await refreshContentfulClient();
-      refetch();
+      refetchProducts();
+      refetchContent();
       toast.success("Connection refreshed");
     } catch (err) {
       toast.error("Failed to refresh connection");
@@ -69,7 +82,7 @@ const ProductsPage = () => {
       {/* Hero/Purpose Statement Section */}
       {pageContent && (
         <PurposeStatement 
-          title={pageContent.purposeStatementTitle}
+          title={pageContent.purposeStatementTitle || "Our Vending Products"}
           description={pageContent.purposeStatementDescription}
         />
       )}
@@ -97,7 +110,7 @@ const ProductsPage = () => {
           <ProductsError 
             error={productsError} 
             debugInfo={debugInfo}
-            onRetry={() => refetch()}
+            onRetry={() => refetchProducts()}
           />
         )}
 
@@ -113,6 +126,7 @@ const ProductsPage = () => {
         <KeyFeaturesSection 
           title={pageContent.keyFeaturesTitle}
           description={pageContent.keyFeaturesDescription}
+          features={pageContent.keyFeatures}
         />
       )}
 
@@ -123,6 +137,40 @@ const ProductsPage = () => {
           description={pageContent.demoRequestDescription}
           bulletPoints={pageContent.demoRequestBulletPoints}
         />
+      )}
+      
+      {/* Debug section - conditionally render based on a query param or dev mode */}
+      {import.meta.env.DEV && (
+        <div className="container mx-auto py-8 px-4">
+          <details className="bg-gray-100 p-4 rounded-lg mb-4">
+            <summary className="font-semibold cursor-pointer">Debug Information</summary>
+            <div className="mt-4 text-sm">
+              <h4 className="font-bold">Products Data:</h4>
+              <pre className="bg-gray-200 p-3 rounded mt-2 overflow-auto max-h-48">
+                {JSON.stringify(productTypes, null, 2)}
+              </pre>
+              
+              <h4 className="font-bold mt-4">Page Content:</h4>
+              <pre className="bg-gray-200 p-3 rounded mt-2 overflow-auto max-h-48">
+                {JSON.stringify(pageContent, null, 2)}
+              </pre>
+              
+              <h4 className="font-bold mt-4">Contentful Config:</h4>
+              <pre className="bg-gray-200 p-3 rounded mt-2">
+                {JSON.stringify(debugInfo, null, 2)}
+              </pre>
+              
+              <div className="mt-4 flex gap-2">
+                <button 
+                  onClick={handleRefresh}
+                  className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Refresh Connection
+                </button>
+              </div>
+            </div>
+          </details>
+        </div>
       )}
       
       <ContentfulDebug />
