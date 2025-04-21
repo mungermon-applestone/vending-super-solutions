@@ -1,6 +1,7 @@
 
 import { useContentful } from './useContentful';
 import { HomePageContent } from '@/types/homePageContent';
+import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 
 export function useHomePageContent() {
   return useContentful<HomePageContent>({
