@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { 
@@ -7,7 +8,10 @@ import {
 import { useHomePageContent } from '@/hooks/useHomePageContent';
 
 const BusinessGoalsSection = () => {
-  const { data: homeContent } = useHomePageContent();
+  const { data: homeContent, isLoading } = useHomePageContent();
+  
+  console.log('[BusinessGoalsSection] Content:', homeContent);
+  
   const businessGoals = [
     {
       icon: <TrendingUp className="h-10 w-10 text-vending-blue" />,
@@ -53,10 +57,10 @@ const BusinessGoalsSection = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-              {homeContent?.businessGoalsTitle}
+              {homeContent?.businessGoalsTitle || "Business Goals We Help You Achieve"}
             </h2>
             <p className="subtitle max-w-2xl">
-              {homeContent?.businessGoalsDescription}
+              {homeContent?.businessGoalsDescription || "Tailored solutions to meet your specific business objectives."}
             </p>
           </div>
           <Button asChild className="mt-4 md:mt-0">

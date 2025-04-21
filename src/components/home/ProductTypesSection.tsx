@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
@@ -36,7 +37,9 @@ const ProductCard = ({ title, description, image, path }: ProductCardProps) => {
 };
 
 const ProductTypesSection = () => {
-  const { data: homeContent } = useHomePageContent();
+  const { data: homeContent, isLoading: contentLoading } = useHomePageContent();
+  
+  console.log('[ProductTypesSection] Content:', homeContent);
 
   const { data: productTypes = [], isLoading, error } = useQuery({
     queryKey: ['productTypes'],
@@ -96,10 +99,10 @@ const ProductTypesSection = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-              {homeContent?.productCategoriesTitle}
+              {homeContent?.productCategoriesTitle || "Featured Product Categories"}
             </h2>
             <p className="subtitle max-w-2xl">
-              {homeContent?.productCategoriesDescription}
+              {homeContent?.productCategoriesDescription || "Find the perfect vending solution for your product type."}
             </p>
           </div>
           <Button asChild className="mt-4 md:mt-0">

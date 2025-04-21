@@ -1,11 +1,11 @@
 
 export interface HomePageContent {
-  productCategoriesTitle?: string;
-  productCategoriesDescription?: string;
-  businessGoalsTitle?: string;
-  businessGoalsDescription?: string;
-  ctaSectionTitle?: string;
-  ctaSectionDescription?: string;
+  productCategoriesTitle: string;
+  productCategoriesDescription: string;
+  businessGoalsTitle: string;
+  businessGoalsDescription: string;
+  ctaSectionTitle: string;
+  ctaSectionDescription: string;
   ctaPrimaryButtonText?: string;
   ctaPrimaryButtonUrl?: string;
   ctaSecondaryButtonText?: string;

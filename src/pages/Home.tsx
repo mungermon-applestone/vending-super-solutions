@@ -10,6 +10,7 @@ import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CTASection from '@/components/common/CTASection';
 import { initCMS } from '@/services/cms/cmsInit';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
+import { useHomePageContent } from '@/hooks/useHomePageContent';
 
 // Initialize the CMS configuration
 initCMS();
@@ -18,14 +19,22 @@ const Home = () => {
   console.log('[Home] Rendering Home component');
   
   // Force refetch to ensure we get the latest data
-  const { refetch } = useLandingPageByKey('home');
+  const { refetch: refetchLandingPage } = useLandingPageByKey('home');
+  const { data: homePageContent, refetch: refetchHomeContent } = useHomePageContent();
   
   useEffect(() => {
     // Force refetch on component mount
-    refetch().catch(err => {
+    refetchLandingPage().catch(err => {
       console.error('Error refetching landing page data:', err);
     });
-  }, [refetch]);
+    
+    refetchHomeContent().catch(err => {
+      console.error('Error refetching home page content:', err);
+    });
+    
+    // Log Contentful space ID to verify configuration
+    console.log('Contentful Space ID:', import.meta.env.VITE_CONTENTFUL_SPACE_ID);
+  }, [refetchLandingPage, refetchHomeContent]);
   
   return (
     <Layout>
