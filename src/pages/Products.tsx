@@ -7,12 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Loader2, ExternalLink, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import PageHero from '@/components/common/PageHero';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import PurposeStatement from '@/components/products/sections/PurposeStatement';
 import KeyFeaturesSection from '@/components/products/sections/KeyFeaturesSection';
 import DemoRequest from '@/components/products/sections/DemoRequest';
+import ProductsHero from '@/components/products/sections/ProductsHero';
 
 const Products = () => {
   const { data: products, isLoading, error, refetch } = useContentfulProducts();
@@ -42,6 +42,8 @@ const Products = () => {
   return (
     <Layout>
       <ContentfulErrorBoundary contentType="Products">
+        <ProductsHero />
+
         {/* Purpose Statement Section */}
         {pageContent && (
           <PurposeStatement 
@@ -50,6 +52,7 @@ const Products = () => {
           />
         )}
 
+        {/* Products Grid Section */}
         <div className="container py-10">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8">
             <div>
