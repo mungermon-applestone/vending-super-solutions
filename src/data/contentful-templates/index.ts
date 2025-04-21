@@ -1,3 +1,4 @@
+
 import { ContentTypeTemplate } from '@/types/contentful-admin';
 import { technologyContentType, technologySectionContentType, technologyFeatureContentType } from './technology';
 import { homePageContentTemplate } from './home-page-content';
