@@ -14,6 +14,7 @@ import ProductsLoadingState from '@/components/products/sections/ProductsLoading
 import ProductsError from '@/components/products/sections/ProductsError';
 import EmptyProductsList from '@/components/products/sections/EmptyProductsList';
 import ProductGrid from '@/components/products/sections/ProductGrid';
+import KeyFeaturesSection from '@/components/products/sections/KeyFeaturesSection';
 
 const ProductsPage = () => {
   const { data: productTypes, isLoading: isLoadingProducts, error: productsError, refetch } = useContentfulProducts();
@@ -30,13 +31,8 @@ const ProductsPage = () => {
   });
   
   useEffect(() => {
-    console.log('[ProductsPage] Rendering with Contentful data:', {
-      productsCount: productTypes?.length || 0,
-      isLoading: isLoadingProducts,
-      hasError: !!productsError,
-      errorMessage: productsError ? (productsError instanceof Error ? productsError.message : 'Unknown error') : null
-    });
-  }, [productTypes, isLoadingProducts, productsError]);
+    console.log('[ProductsPage] Page Content:', pageContent);
+  }, [pageContent]);
   
   // Check if Contentful is configured
   useEffect(() => {
@@ -70,6 +66,7 @@ const ProductsPage = () => {
 
   return (
     <Layout>
+      {/* Hero/Purpose Statement Section */}
       {pageContent && (
         <PurposeStatement 
           title={pageContent.purposeStatementTitle}
@@ -77,14 +74,15 @@ const ProductsPage = () => {
         />
       )}
 
+      {/* Categories Section */}
       <div className="container mx-auto py-12">
         {pageContent?.categoriesSectionTitle && (
-          <div className="max-w-2xl mb-12">
-            <h2 className="text-3xl font-bold text-vending-blue-dark mb-2">
+          <div className="max-w-2xl mx-auto text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
               {pageContent.categoriesSectionTitle}
             </h2>
             {pageContent.categoriesSectionDescription && (
-              <p className="text-xl text-gray-700">
+              <p className="text-lg text-gray-600">
                 {pageContent.categoriesSectionDescription}
               </p>
             )}
@@ -110,6 +108,15 @@ const ProductsPage = () => {
         {productTypes && productTypes.length > 0 && <ProductGrid products={productTypes} />}
       </div>
 
+      {/* Key Features Section */}
+      {pageContent && (
+        <KeyFeaturesSection 
+          title={pageContent.keyFeaturesTitle}
+          description={pageContent.keyFeaturesDescription}
+        />
+      )}
+
+      {/* Demo Request Section */}
       {pageContent && (
         <DemoRequest 
           title={pageContent.demoRequestTitle || "Request a Demo"}
