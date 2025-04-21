@@ -14,6 +14,9 @@ const ContentfulDebug = () => {
     environmentId: 'master'
   });
   
+  const [codeSnippet, setCodeSnippet] = useState('');
+  const [showCodeSnippet, setShowCodeSnippet] = useState(false);
+  
   // Log all relevant environment variables
   const envVars = {
     VITE_CONTENTFUL_SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'NOT SET',
@@ -49,28 +52,36 @@ const ContentfulDebug = () => {
 
   const handleApplySettings = () => {
     try {
-      // Open the cms.ts file and explain how to add the values manually
-      toast.info(
-        'To use these credentials, open src/config/cms.ts and update the INLINE_CONTENTFUL_CONFIG object with these values.',
-        { duration: 10000 }
-      );
-      
-      // Show the values that need to be copied
-      const codeSnippet = `const INLINE_CONTENTFUL_CONFIG = {
+      // Generate code snippet for INLINE_CONTENTFUL_CONFIG
+      const snippet = `const INLINE_CONTENTFUL_CONFIG = {
   SPACE_ID: '${formInputs.spaceId}',
   DELIVERY_TOKEN: '${formInputs.deliveryToken}',
   ENVIRONMENT_ID: '${formInputs.environmentId}'
 };`;
       
-      console.log('[ContentfulDebug] Copy these settings to src/config/cms.ts:');
-      console.log(codeSnippet);
+      setCodeSnippet(snippet);
+      setShowCodeSnippet(true);
       
-      // Show in toast
-      toast.info('Settings logged to console. Copy them to your cms.ts file.', { duration: 5000 });
+      // Still log it to console as well
+      console.log('[ContentfulDebug] Copy these settings to src/config/cms.ts:');
+      console.log(snippet);
+      
+      toast.info('Code snippet generated! Copy it and update src/config/cms.ts file.', { duration: 5000 });
     } catch (error) {
-      toast.error('Failed to apply settings.');
+      toast.error('Failed to generate settings.');
       console.error('[ContentfulDebug] Error:', error);
     }
+  };
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(codeSnippet)
+      .then(() => {
+        toast.success('Code copied to clipboard!');
+      })
+      .catch((err) => {
+        console.error('Failed to copy: ', err);
+        toast.error('Failed to copy code. Please copy it manually.');
+      });
   };
 
   return (
@@ -133,18 +144,53 @@ const ContentfulDebug = () => {
             className="w-full h-7 text-xs mt-1"
             onClick={handleApplySettings}
           >
-            Get Configuration Code
+            Generate Configuration Code
           </Button>
         </div>
+        
+        {showCodeSnippet && (
+          <div className="mt-4 space-y-2">
+            <h4 className="text-sm font-semibold">Copy this code to src/config/cms.ts:</h4>
+            <div className="relative">
+              <pre className="bg-gray-900 p-2 rounded overflow-x-auto text-xs">
+                {codeSnippet}
+              </pre>
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="absolute top-2 right-2 h-6 text-xs py-0 px-2"
+                onClick={handleCopyCode}
+              >
+                Copy
+              </Button>
+            </div>
+            <div className="text-xs text-gray-400 mt-1">
+              <p>After copying the code:</p>
+              <ol className="list-decimal list-inside space-y-1 pl-2">
+                <li>Open src/config/cms.ts</li>
+                <li>Replace the existing INLINE_CONTENTFUL_CONFIG with this code</li>
+                <li>Refresh the page</li>
+              </ol>
+            </div>
+            <Button 
+              size="sm"
+              variant="outline" 
+              className="w-full h-7 text-xs mt-2"
+              onClick={() => setShowCodeSnippet(false)}
+            >
+              Hide Code
+            </Button>
+          </div>
+        )}
         
         <div className="text-xs text-gray-400 mt-2">
           <p className="mb-1">Since you can't create a .env file:</p>
           <ol className="list-decimal list-inside space-y-1">
             <li>Enter your credentials above</li>
-            <li>Click "Get Configuration Code"</li>
-            <li>Copy the code from the browser console</li>
+            <li>Click "Generate Configuration Code"</li>
+            <li>Copy the code from the panel above</li>
             <li>Open src/config/cms.ts and paste the values</li>
-            <li>Restart your development server</li>
+            <li>Refresh your application</li>
           </ol>
         </div>
       </div>
