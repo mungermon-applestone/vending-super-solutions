@@ -1,4 +1,3 @@
-
 /**
  * CMS Configuration
  * 
@@ -9,29 +8,29 @@
 // Contentful configuration from environment variables
 export const CONTENTFUL_CONFIG = {
   // Use public environment variable for Space ID (can be client-side)
-  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
+  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID,
   
   // Try both formats for delivery token, prioritizing non-VITE version (for server-side)
   // IMPORTANT: This token should ideally not be exposed client-side
-  DELIVERY_TOKEN: 
-    (typeof import.meta.env.CONTENTFUL_DELIVERY_TOKEN !== 'undefined' ? import.meta.env.CONTENTFUL_DELIVERY_TOKEN : 
-     typeof import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN !== 'undefined' ? import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN : ''),
+  DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
   
   // Optional: Environment ID (typically 'master')
   ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
 };
 
-// Add a utility to check if Contentful is properly configured
+// Simple check if Contentful is configured
 export const isContentfulConfigured = () => {
   const { SPACE_ID, DELIVERY_TOKEN } = CONTENTFUL_CONFIG;
-  console.log('[isContentfulConfigured] Checking config:', {
+  const configured = !!(SPACE_ID && DELIVERY_TOKEN);
+  
+  console.log('[CMS Config] Contentful configuration status:', {
+    configured,
     hasSpaceId: !!SPACE_ID,
     hasDeliveryToken: !!DELIVERY_TOKEN,
-    spaceIdType: typeof import.meta.env.VITE_CONTENTFUL_SPACE_ID,
-    deliveryTokenType: typeof import.meta.env.CONTENTFUL_DELIVERY_TOKEN,
-    viteDeliveryTokenType: typeof import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
+    environmentId: CONTENTFUL_CONFIG.ENVIRONMENT_ID
   });
-  return !!(SPACE_ID && DELIVERY_TOKEN);
+  
+  return configured;
 };
 
 // Strapi specific configuration
