@@ -1,16 +1,17 @@
 
 import { createClient } from 'contentful';
+import { CONTENTFUL_CONFIG } from '@/config/cms';
 
 export const checkContentfulConfig = () => {
-  // Check if the required environment variables are set
-  const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
-  const deliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
-  const environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+  // Check if the required configuration values are set
+  const spaceId = CONTENTFUL_CONFIG.SPACE_ID;
+  const deliveryToken = CONTENTFUL_CONFIG.DELIVERY_TOKEN;
+  const environmentId = CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master';
   
   const missingValues: string[] = [];
   
-  if (!spaceId) missingValues.push('VITE_CONTENTFUL_SPACE_ID');
-  if (!deliveryToken) missingValues.push('VITE_CONTENTFUL_DELIVERY_TOKEN');
+  if (!spaceId) missingValues.push('SPACE_ID');
+  if (!deliveryToken) missingValues.push('DELIVERY_TOKEN');
   
   return {
     isConfigured: missingValues.length === 0,
@@ -39,7 +40,7 @@ export const testContentfulConnection = async () => {
     
     console.log('[testContentfulConnection] Creating test Contentful client');
     
-    // Create a new client directly using environment variables
+    // Create a new client directly using the values from config
     const client = createClient({
       space: configCheck.config.spaceId,
       accessToken: configCheck.config.deliveryToken,

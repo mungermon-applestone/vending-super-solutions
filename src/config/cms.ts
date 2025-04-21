@@ -1,20 +1,28 @@
+
 /**
  * CMS Configuration
  * 
  * This file contains configuration settings for connecting to your CMS.
- * Update these values when integrating with your actual CMS provider.
  */
 
-// Contentful configuration from environment variables
+// You can set your Contentful credentials directly here for testing purposes
+// WARNING: In production, you should use environment variables instead
+const INLINE_CONTENTFUL_CONFIG = {
+  SPACE_ID: '',       // Set your Space ID here if not using environment variables
+  DELIVERY_TOKEN: '', // Set your Delivery Token here if not using environment variables
+  ENVIRONMENT_ID: 'master' // Default environment
+};
+
+// Contentful configuration (prioritizes environment variables, falls back to inline config)
 export const CONTENTFUL_CONFIG = {
   // Space ID (required)
-  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID,
+  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || INLINE_CONTENTFUL_CONFIG.SPACE_ID,
   
   // Delivery Token (required)
-  DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
+  DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || INLINE_CONTENTFUL_CONFIG.DELIVERY_TOKEN,
   
   // Environment ID (optional, defaults to 'master')
-  ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
+  ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || INLINE_CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master'
 };
 
 // Simple check if Contentful is configured
@@ -25,7 +33,9 @@ export const isContentfulConfigured = () => {
   console.log('[CMS Config] Contentful configuration status:', {
     configured,
     hasSpaceId: !!SPACE_ID,
-    hasDeliveryToken: !!DELIVERY_TOKEN,
+    spaceIdLength: SPACE_ID?.length || 0,
+    hasDeliveryToken: !!DELIVERY_TOKEN, 
+    deliveryTokenLength: DELIVERY_TOKEN?.length || 0,
     environmentId: CONTENTFUL_CONFIG.ENVIRONMENT_ID
   });
   

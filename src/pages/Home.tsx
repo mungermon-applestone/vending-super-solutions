@@ -9,12 +9,15 @@ import MachineTypesSection from '@/components/home/MachineTypesSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CTASection from '@/components/common/CTASection';
 import ContentfulDebug from '@/components/debug/ContentfulDebug';
+import { CONTENTFUL_CONFIG, isContentfulConfigured } from '@/config/cms';
 
 const Home = () => {
-  console.log('[Home] Environment variables:', {
-    VITE_CONTENTFUL_SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'NOT SET',
-    VITE_CONTENTFUL_ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'NOT SET',
-    hasDeliveryToken: !!import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
+  console.log('[Home] CMS Configuration status:', {
+    isConfigured: isContentfulConfigured(),
+    spaceId: CONTENTFUL_CONFIG.SPACE_ID || 'NOT SET',
+    hasToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
+    tokenLength: CONTENTFUL_CONFIG.DELIVERY_TOKEN?.length || 0,
+    environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID
   });
 
   return (
@@ -26,7 +29,7 @@ const Home = () => {
       <BusinessGoalsSection />
       <TestimonialsSection />
       <CTASection />
-      <ContentfulDebug />  {/* Always show during troubleshooting */}
+      <ContentfulDebug />
     </Layout>
   );
 };
