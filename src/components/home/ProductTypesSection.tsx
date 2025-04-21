@@ -37,7 +37,7 @@ const ProductCard = ({ title, description, image, path }: ProductCardProps) => {
 };
 
 const ProductTypesSection = () => {
-  const { data: homeContent, isLoading: contentLoading } = useHomePageContent();
+  const { data: homeContent } = useHomePageContent();
   
   console.log('[ProductTypesSection] Content:', homeContent);
 

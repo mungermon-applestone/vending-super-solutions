@@ -19,20 +19,16 @@ const CTASection: React.FC = () => {
           {homeContent?.ctaSectionDescription || "Get started with our platform today and see the difference in your operations."}
         </p>
         <div className="flex flex-col md:flex-row justify-center gap-4">
-          {(homeContent?.ctaPrimaryButtonText || true) && (
-            <Button asChild size="lg">
-              <Link to={homeContent?.ctaPrimaryButtonUrl || "/contact"}>
-                {homeContent?.ctaPrimaryButtonText || "Request a Demo"}
-              </Link>
-            </Button>
-          )}
-          {(homeContent?.ctaSecondaryButtonText || true) && (
-            <Button asChild variant="outline" size="lg">
-              <Link to={homeContent?.ctaSecondaryButtonUrl || "/products"}>
-                {homeContent?.ctaSecondaryButtonText || "Learn More"}
-              </Link>
-            </Button>
-          )}
+          <Button asChild size="lg">
+            <Link to={homeContent?.ctaPrimaryButtonUrl || "/contact"}>
+              {homeContent?.ctaPrimaryButtonText || "Request a Demo"}
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link to={homeContent?.ctaSecondaryButtonUrl || "/products"}>
+              {homeContent?.ctaSecondaryButtonText || "Learn More"}
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

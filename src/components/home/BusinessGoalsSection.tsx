@@ -8,7 +8,7 @@ import {
 import { useHomePageContent } from '@/hooks/useHomePageContent';
 
 const BusinessGoalsSection = () => {
-  const { data: homeContent, isLoading } = useHomePageContent();
+  const { data: homeContent } = useHomePageContent();
   
   console.log('[BusinessGoalsSection] Content:', homeContent);
   
