@@ -1,4 +1,3 @@
-
 import { useQueryClient } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import { useContentfulProducts } from '@/hooks/cms/useContentfulProducts';
@@ -13,6 +12,7 @@ import PurposeStatement from '@/components/products/sections/PurposeStatement';
 import KeyFeaturesSection from '@/components/products/sections/KeyFeaturesSection';
 import DemoRequest from '@/components/products/sections/DemoRequest';
 import ProductsHero from '@/components/products/sections/ProductsHero';
+import FeaturedBusinessGoals from '@/components/products/sections/FeaturedBusinessGoals';
 
 const Products = () => {
   const { data: products, isLoading, error, refetch } = useContentfulProducts();
@@ -118,6 +118,9 @@ const Products = () => {
           )}
         </div>
         
+        {/* Featured Business Goals Section */}
+        <FeaturedBusinessGoals entryId="2pS1t6cAI5cgijwX0mtWzx" />
+
         {/* Key Features Section */}
         {pageContent && (
           <KeyFeaturesSection 
