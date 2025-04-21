@@ -8,8 +8,8 @@
 // You can set your Contentful credentials directly here for testing purposes
 // WARNING: In production, you should use environment variables instead
 const INLINE_CONTENTFUL_CONFIG = {
-  SPACE_ID: '',       // Set your Space ID here if not using environment variables
-  DELIVERY_TOKEN: '', // Set your Delivery Token here if not using environment variables
+  SPACE_ID: 'al01e4yh2wq4',       // Set your Space ID here if not using environment variables
+  DELIVERY_TOKEN: 'fxpQth03vfdKzI4VNT_fYg8cD5BwoTiGaa6INIyYync', // Set your Delivery Token here if not using environment variables
   ENVIRONMENT_ID: 'master' // Default environment
 };
 
