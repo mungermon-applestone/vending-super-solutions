@@ -12,11 +12,11 @@ export const errorStatesContentTemplate: ContentTypeTemplate = {
     displayField: 'contentNotFoundTitle',
     publish: true,
     fields: [
-      { id: 'contentNotFoundTitle', name: 'Content Not Found Title', type: 'Symbol', required: false },
-      { id: 'contentNotFoundMessage', name: 'Content Not Found Message', type: 'Text', required: false },
-      { id: 'generalErrorTitle', name: 'General Error Title', type: 'Symbol', required: false },
-      { id: 'generalErrorMessage', name: 'General Error Message', type: 'Text', required: false },
-      { id: 'tryAgainButtonText', name: 'Try Again Button Text', type: 'Symbol', required: false },
+      { id: 'contentNotFoundTitle', name: 'Content Not Found Title', type: 'Symbol', required: false, localized: false },
+      { id: 'contentNotFoundMessage', name: 'Content Not Found Message', type: 'Text', required: false, localized: false },
+      { id: 'generalErrorTitle', name: 'General Error Title', type: 'Symbol', required: false, localized: false },
+      { id: 'generalErrorMessage', name: 'General Error Message', type: 'Text', required: false, localized: false },
+      { id: 'tryAgainButtonText', name: 'Try Again Button Text', type: 'Symbol', required: false, localized: false },
     ],
   },
 };

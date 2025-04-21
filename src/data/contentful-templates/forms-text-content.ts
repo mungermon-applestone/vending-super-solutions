@@ -12,21 +12,21 @@ export const formsTextContentTemplate: ContentTypeTemplate = {
     publish: true,
     fields: [
       // Demo Request
-      { id: 'demoRequestSuccessTitle', name: 'Demo Request Success Title', type: 'Symbol', required: false },
-      { id: 'demoRequestSuccessMessage', name: 'Demo Request Success Message', type: 'Text', required: false },
-      { id: 'demoRequestButtonText', name: 'Demo Request Button Text', type: 'Symbol', required: false },
+      { id: 'demoRequestSuccessTitle', name: 'Demo Request Success Title', type: 'Symbol', required: false, localized: false },
+      { id: 'demoRequestSuccessMessage', name: 'Demo Request Success Message', type: 'Text', required: false, localized: false },
+      { id: 'demoRequestButtonText', name: 'Demo Request Button Text', type: 'Symbol', required: false, localized: false },
       // Contact Form
-      { id: 'contactFormSuccessTitle', name: 'Contact Form Success Title', type: 'Symbol', required: false },
-      { id: 'contactFormSuccessMessage', name: 'Contact Form Success Message', type: 'Text', required: false },
-      { id: 'contactFormButtonText', name: 'Contact Form Button Text', type: 'Symbol', required: false },
+      { id: 'contactFormSuccessTitle', name: 'Contact Form Success Title', type: 'Symbol', required: false, localized: false },
+      { id: 'contactFormSuccessMessage', name: 'Contact Form Success Message', type: 'Text', required: false, localized: false },
+      { id: 'contactFormButtonText', name: 'Contact Form Button Text', type: 'Symbol', required: false, localized: false },
       // Machine Inquiry
-      { id: 'machineInquirySuccessTitle', name: 'Machine Inquiry Success Title', type: 'Symbol', required: false },
-      { id: 'machineInquirySuccessMessage', name: 'Machine Inquiry Success Message', type: 'Text', required: false },
-      { id: 'machineInquiryButtonText', name: 'Machine Inquiry Button Text', type: 'Symbol', required: false },
+      { id: 'machineInquirySuccessTitle', name: 'Machine Inquiry Success Title', type: 'Symbol', required: false, localized: false },
+      { id: 'machineInquirySuccessMessage', name: 'Machine Inquiry Success Message', type: 'Text', required: false, localized: false },
+      { id: 'machineInquiryButtonText', name: 'Machine Inquiry Button Text', type: 'Symbol', required: false, localized: false },
       // Other
-      { id: 'termsText', name: 'Terms and Conditions Text', type: 'Text', required: false },
-      { id: 'privacyText', name: 'Privacy Policy Text', type: 'Text', required: false },
-      { id: 'marketingConsentText', name: 'Marketing Consent Text', type: 'Text', required: false },
+      { id: 'termsText', name: 'Terms and Conditions Text', type: 'Text', required: false, localized: false },
+      { id: 'privacyText', name: 'Privacy Policy Text', type: 'Text', required: false, localized: false },
+      { id: 'marketingConsentText', name: 'Marketing Consent Text', type: 'Text', required: false, localized: false },
     ],
   },
 };

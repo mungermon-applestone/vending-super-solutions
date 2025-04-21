@@ -12,10 +12,10 @@ export const caseStudiesPageContentTemplate: ContentTypeTemplate = {
     displayField: 'introTitle',
     publish: true,
     fields: [
-      { id: 'introTitle', name: 'Intro Title', type: 'Symbol', required: true },
-      { id: 'introDescription', name: 'Intro Description', type: 'Text', required: false },
-      { id: 'featuredStoryTitle', name: 'Featured Story Title', type: 'Symbol', required: false },
-      { id: 'allCaseStudiesTitle', name: 'All Case Studies Title', type: 'Symbol', required: false },
+      { id: 'introTitle', name: 'Intro Title', type: 'Symbol', required: true, localized: false },
+      { id: 'introDescription', name: 'Intro Description', type: 'Text', required: false, localized: false },
+      { id: 'featuredStoryTitle', name: 'Featured Story Title', type: 'Symbol', required: false, localized: false },
+      { id: 'allCaseStudiesTitle', name: 'All Case Studies Title', type: 'Symbol', required: false, localized: false },
     ],
   },
 };
