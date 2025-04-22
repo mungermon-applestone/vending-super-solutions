@@ -5,7 +5,7 @@ import { CMSBusinessGoal } from '@/types/cms';
 
 interface FeaturedBusinessGoalsContent {
   title: string;
-  description: string;
+  description?: string;
   businessGoals: CMSBusinessGoal[];
 }
 
@@ -28,13 +28,18 @@ export function useFeaturedBusinessGoalsContent() {
       
       return {
         title: fields.title as string,
-        description: fields.description as string,
+        description: fields.description as string | undefined,
         businessGoals: (fields.businessGoals as any[]).map((goal: any) => ({
           id: goal.sys?.id,
           title: goal.fields.title,
           description: goal.fields.description,
           slug: goal.fields.slug,
           icon: goal.fields.icon,
+          image: goal.fields.image ? {
+            id: goal.fields.image.sys?.id,
+            url: goal.fields.image.fields?.file?.url,
+            alt: goal.fields.image.fields?.title || goal.fields.title
+          } : undefined,
           visible: goal.fields.visible !== false
         }))
       } as FeaturedBusinessGoalsContent;
