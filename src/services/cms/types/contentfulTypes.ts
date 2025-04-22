@@ -1,53 +1,85 @@
 
 /**
- * Contentful management API type definitions
+ * Contentful field types
  */
+export type ContentfulFieldType = 
+  | 'Symbol'        // Short text (< 256 characters)
+  | 'Text'          // Long text
+  | 'Integer'       // Integer number
+  | 'Number'        // Decimal number
+  | 'Date'          // Date
+  | 'Location'      // Location (latitude and longitude)
+  | 'Boolean'       // True/false
+  | 'Object'        // JSON object
+  | 'RichText'      // Rich text
+  | 'Link'          // Link to an entry or asset
+  | 'Array'         // Array of values
+  | 'Symbol[]'      // Array of short text values
+  | 'Link[]';       // Array of links
 
-export interface ContentFieldValidation {
-  unique?: boolean;
-  regexp?: {
-    pattern: string;
-    flags: string;
-  };
+/**
+ * Contentful link types
+ */
+export type ContentfulLinkType = 'Asset' | 'Entry';
+
+/**
+ * Options for validations on Contentful fields
+ */
+export interface ValidationOptions {
+  linkContentType?: string[];
+  in?: string[];
+  linkMimetypeGroup?: string[];
   message?: string;
   size?: {
     min?: number;
     max?: number;
   };
-  in?: string[];
-  linkContentType?: string[];
-  linkMimetypeGroup?: string[];
+  regexp?: {
+    pattern: string;
+    flags: string; // Changed from optional to required
+  };
+  unique?: boolean;
+  [key: string]: any;
 }
 
-export interface ContentFieldItem {
-  type: string;
-  validations?: ContentFieldValidation[];
-  linkType?: string;
-}
-
-export interface ContentFieldProps {
+/**
+ * Interface for defining a Contentful field
+ */
+export interface FieldProps {
   id: string;
   name: string;
-  type: string;
-  required: boolean;
-  localized: boolean;
-  validations?: ContentFieldValidation[];
-  items?: ContentFieldItem;
-  linkType?: string;
+  type: ContentfulFieldType;
+  required: boolean; // Changed from optional to required to match Contentful SDK
+  localized: boolean; // Changed from optional to required to match Contentful SDK
+  disabled?: boolean;
+  omitted?: boolean;
+  linkType?: ContentfulLinkType;
+  items?: {
+    type: 'Symbol' | 'Link';
+    linkType?: ContentfulLinkType;
+    validations?: ValidationOptions[];
+  };
+  validations?: ValidationOptions[];
 }
 
+/**
+ * Interface for defining a Contentful content type
+ */
 export interface ContentTypeProps {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   displayField: string;
-  fields: ContentFieldProps[];
-  publish?: boolean; // Make publish optional
+  fields: FieldProps[];
+  publish?: boolean;
 }
 
-export interface ContentTypeTemplate {
-  id: string;
-  name: string;
-  description: string;
-  contentType: ContentTypeProps;
+/**
+ * Response type for content type operations
+ */
+export interface ContentfulContentTypeResponse {
+  success: boolean;
+  message: string;
+  contentType?: any;
+  error?: any;
 }

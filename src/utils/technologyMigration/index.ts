@@ -1,6 +1,7 @@
 
-/**
- * Technology migration utility
- */
+import { migrateTechnologyData, checkIfTechnologyDataExists } from './migrateTechnologyData';
 
-export { migrateTechnologyData } from './migrateTechnologyData';
+export {
+  migrateTechnologyData,
+  checkIfTechnologyDataExists
+};

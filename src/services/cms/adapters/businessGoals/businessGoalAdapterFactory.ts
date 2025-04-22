@@ -1,22 +1,23 @@
 
-import { ContentProviderType } from '../../providerConfig';
+import { ContentProviderConfig, ContentProviderType } from '../types';
+import { BusinessGoalAdapter } from './types';
+import { strapiBusinessGoalAdapter } from './strapiBusinessGoalAdapter';
+import { supabaseBusinessGoalAdapter } from './supabaseBusinessGoalAdapter';
 
-export interface BusinessGoalAdapter {
-  fetchAll: () => Promise<any[]>;
-  fetchBySlug: (slug: string) => Promise<any | null>;
-  create: (data: any) => Promise<any>;
-  update: (id: string, data: any) => Promise<any>;
-  delete: (id: string) => Promise<boolean>;
-}
-
-export const createBusinessGoalAdapter = (providerType: ContentProviderType): BusinessGoalAdapter => {
-  console.log(`Creating business goal adapter for provider: ${providerType}`);
+/**
+ * Factory function to get the appropriate business goal adapter based on configuration
+ */
+export const getBusinessGoalAdapter = (config?: ContentProviderConfig): BusinessGoalAdapter => {
+  // Default to Supabase if no config provided
+  const providerType = config?.type || ContentProviderType.SUPABASE;
   
-  return {
-    fetchAll: () => Promise.resolve([]),
-    fetchBySlug: () => Promise.resolve(null),
-    create: (data) => Promise.resolve(data),
-    update: () => Promise.resolve(true),
-    delete: () => Promise.resolve(true)
-  };
+  switch (providerType) {
+    case ContentProviderType.SUPABASE:
+      return supabaseBusinessGoalAdapter;
+    case ContentProviderType.STRAPI:
+      return strapiBusinessGoalAdapter;
+    default:
+      console.warn(`[businessGoalAdapterFactory] Unknown provider type: ${providerType}, falling back to Supabase`);
+      return supabaseBusinessGoalAdapter;
+  }
 };

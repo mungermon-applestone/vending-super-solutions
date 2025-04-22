@@ -1,40 +1,116 @@
 
-/**
- * CMS Service
- * 
- * This is a simplified version that only exports essential operations
- * that are still used by the application after migrating to Contentful.
- */
+// This file is maintained for backward compatibility
+// New code should import from the specific modules directly
+
+// Import services from specialized modules
+import { 
+  getProductTypes, 
+  getProductTypeBySlug, 
+  getProductTypeByUUID, 
+  deleteProductType 
+} from './cms/productTypes';
+
+import { 
+  getBusinessGoals,
+  getBusinessGoalBySlug 
+} from './cms/businessGoals';
+
+import {
+  getMachines,
+  getMachineBySlug,
+  getMachineById,
+  createNewMachine,
+  updateExistingMachine,
+  removeExistingMachine
+} from './cms/machines';
+
+import {
+  getTechnologies,
+  getTechnologyBySlug,
+  deleteTechnology
+} from './cms/technologies';
+
+import { getTestimonials } from './cms/testimonials';
+
+// Import case studies service
+import {
+  fetchCaseStudies,
+  fetchCaseStudyBySlug,
+  createCaseStudy,
+  updateCaseStudy,
+  deleteCaseStudy
+} from './cms/contentTypes/caseStudies';
+
+// Import landing pages service
+import {
+  fetchLandingPages,
+  fetchLandingPageByKey,
+  createLandingPage,
+  updateLandingPage,
+  deleteLandingPage
+} from './cms/contentTypes/landingPages';
+
+// Import operations for direct access
+import { productTypeOperations } from './cms/contentTypes/productTypes';
+import { businessGoalOperations } from './cms/contentTypes/businessGoals';
+import { technologyOperations } from './cms/contentTypes/technologies';
+import { caseStudyOperations } from './cms/contentTypes/caseStudies/operations';
+import { landingPageOperations } from './cms/contentTypes/landingPages/operations';
+import { cloneProductType } from './cms/contentTypes/productTypes/cloneProductType';
+import { cloneBusinessGoal } from './cms/contentTypes/businessGoals/cloneBusinessGoal';
+import { cloneTechnology } from './cms/contentTypes/technologies/cloneTechnology';
+import { cloneMachine } from './cms/contentTypes/machines/cloneMachine';
 
 // Export standardized content type operations
-export const productTypes = {};
-export const businessGoals = {};
-export const technologies = {};
-export const caseStudies = {};
-export const landingPages = {};
+export const productTypes = productTypeOperations;
+export const businessGoals = businessGoalOperations;
+export const technologies = technologyOperations;
+export const caseStudies = caseStudyOperations;
+export const landingPages = landingPageOperations;
 
-// Basic stubs for backward compatibility
-export const getProductTypes = async () => [];
-export const getProductTypeBySlug = async () => null;
-export const getProductTypeByUUID = async () => null;
-export const deleteProductType = async () => false;
-export const cloneProductType = async () => null;
+// Export individual service functions for backward compatibility
+export {
+  // Product types
+  getProductTypes,
+  getProductTypeBySlug,
+  getProductTypeByUUID,
+  deleteProductType,
+  cloneProductType,
+  
+  // Business goals
+  getBusinessGoals,
+  getBusinessGoalBySlug,
+  cloneBusinessGoal,
+  
+  // Machines
+  getMachines,
+  getMachineBySlug,
+  getMachineById,
+  createNewMachine,
+  updateExistingMachine,
+  removeExistingMachine,
+  cloneMachine,
+  
+  // Technologies
+  getTechnologies,
+  getTechnologyBySlug,
+  deleteTechnology,
+  cloneTechnology,
+  
+  // Testimonials
+  getTestimonials,
+  
+  // Case Studies
+  fetchCaseStudies,
+  fetchCaseStudyBySlug,
+  createCaseStudy,
+  updateCaseStudy,
+  deleteCaseStudy,
 
-export const getBusinessGoals = async () => [];
-export const getBusinessGoalBySlug = async () => null;
-export const cloneBusinessGoal = async () => null;
-
-export const getMachines = async () => [];
-export const getMachineBySlug = async () => null;
-export const getMachineById = async () => null;
-export const createNewMachine = async () => null;
-export const updateExistingMachine = async () => false;
-export const removeExistingMachine = async () => false;
-export const cloneMachine = async () => null;
-
-export const getTechnologies = async () => [];
-export const getTechnologyBySlug = async () => null;
-export const deleteTechnology = async () => false;
-export const cloneTechnology = async () => null;
-
-export const getTestimonials = async () => [];
+  // Landing Pages
+  fetchLandingPages,
+  fetchLandingPageByKey,
+  createLandingPage,
+  updateLandingPage,
+  deleteLandingPage
+};

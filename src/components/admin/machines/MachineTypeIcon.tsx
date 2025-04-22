@@ -1,27 +1,21 @@
 
 import React from 'react';
-import { Coffee, ShoppingCart, Package, Box } from 'lucide-react';
+import { Server, Package } from 'lucide-react';
 
 interface MachineTypeIconProps {
-  type?: string;
+  type: string;
+  size?: number;
   className?: string;
 }
 
-/**
- * Component that renders an appropriate icon based on machine type
- */
-const MachineTypeIcon: React.FC<MachineTypeIconProps> = ({ type = 'default', className = '' }) => {
+const MachineTypeIcon: React.FC<MachineTypeIconProps> = ({ type, size = 4, className }) => {
   switch (type?.toLowerCase()) {
-    case 'coffee':
-    case 'coffee-machine':
-      return <Coffee className={className} />;
     case 'vending':
-    case 'vending-machine':
-      return <ShoppingCart className={className} />;
-    case 'micro-market':
-      return <Package className={className} />;
+      return <Server className={className || ""} size={size} />;
+    case 'locker':
+      return <Package className={className || ""} size={size} />;
     default:
-      return <Box className={className} />;
+      return <Server className={className || ""} size={size} />;
   }
 };
 

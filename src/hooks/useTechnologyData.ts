@@ -1,19 +1,24 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchTechnologyBySlug } from '@/services/cms/contentTypes/technologies';
+import { getTechnologyBySlug } from '@/services/cms/contentTypes/technologies';
+import { CMSTechnology } from '@/types/cms';
 
 export const useTechnologyData = (slug: string) => {
-  return useQuery({
+  const {
+    data: technology,
+    isLoading,
+    isError,
+    error
+  } = useQuery<CMSTechnology | null, Error>({
     queryKey: ['technology', slug],
-    queryFn: async () => {
-      try {
-        const technology = await fetchTechnologyBySlug(slug);
-        return technology;
-      } catch (error) {
-        console.error(`Error fetching technology data for slug: ${slug}`, error);
-        throw error;
-      }
-    },
-    enabled: !!slug,
+    queryFn: () => getTechnologyBySlug(slug),
+    enabled: !!slug && slug.trim() !== '',
   });
+
+  return {
+    technology,
+    isLoading: isLoading && !!slug && slug.trim() !== '',
+    isError,
+    error,
+  };
 };

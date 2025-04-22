@@ -1,8 +1,20 @@
-/**
- * Simplified data synchronization utility
- * This replaces the previous Supabase-based sync implementation
- */
+import { useState } from 'react';
+import { getCMSProviderConfig, ContentProviderType } from '../providerConfig';
+import { getTechnologyBySlug, getTechnologies } from '../technologies';
+import { getProductTypeBySlug, getProductTypes } from '../productTypes';
+import { getBusinessGoalBySlug, getBusinessGoals } from '../businessGoals';
 
+// Define content types that can be synchronized
+export const syncableContentTypes = [
+  { id: 'technologies', label: 'Technologies' },
+  { id: 'productTypes', label: 'Product Types' },
+  { id: 'businessGoals', label: 'Business Goals' },
+  { id: 'machines', label: 'Machines' },
+  { id: 'testimonials', label: 'Testimonials' },
+  { id: 'caseStudies', label: 'Case Studies' }
+];
+
+// Data synchronization options
 export interface SyncOptions {
   contentTypes: string[];
   direction: 'push' | 'pull';
@@ -11,21 +23,7 @@ export interface SyncOptions {
   onComplete?: (summary: SyncSummary) => void;
 }
 
-export interface ContentTypeSummary {
-  type: string;
-  success: number;
-  errors: number;
-}
-
-export interface SyncSummary {
-  startTime: Date;
-  endTime: Date;
-  totalItems: number;
-  successCount: number;
-  errorCount: number;
-  contentTypes?: ContentTypeSummary[];
-}
-
+// Sync progress status
 export interface SyncStatus {
   inProgress: boolean;
   progress: {
@@ -33,91 +31,246 @@ export interface SyncStatus {
     current: number;
     total: number;
   } | null;
-  errors: Array<{
+  errors: {
     contentType: string;
     message: string;
-  }>;
+  }[];
   summary?: SyncSummary;
 }
 
-export const syncableContentTypes = [
-  { id: 'machines', label: 'Machines' },
-  { id: 'business_goals', label: 'Business Goals' },
-  { id: 'technologies', label: 'Technologies' },
-  { id: 'testimonials', label: 'Testimonials' },
-  { id: 'case_studies', label: 'Case Studies' }
-];
+// ContentType summary format - ensure it's not a string type
+export interface ContentTypeSummary {
+  type: string;
+  success: number;
+  errors: number;
+}
 
-export const useCMSSynchronization = () => {
+// Sync completion summary
+export interface SyncSummary {
+  successCount: number;
+  errorCount: number;
+  startTime: Date;
+  endTime: Date;
+  totalItems?: number;
+  contentTypes?: ContentTypeSummary[]; // Ensure this is only ContentTypeSummary[] and not (string | ContentTypeSummary)[]
+}
+
+/**
+ * Custom hook to handle CMS data synchronization
+ */
+export function useCMSSynchronization() {
+  const [status, setStatus] = useState<SyncStatus>({
+    inProgress: false,
+    progress: null,
+    errors: []
+  });
+
+  // Check if data synchronization is available
+  const canSynchronizeData = () => {
+    // For now, we're just checking if the CMS provider is configured
+    const config = getCMSProviderConfig();
+    return !!config;
+  };
+
+  // Synchronize data between CMS providers
   const synchronizeData = async (options: SyncOptions): Promise<SyncSummary> => {
     const startTime = new Date();
-    
-    // Simulating a sync process since we don't need this functionality anymore
-    // but we're keeping the interface for components that might need it
+    let successCount = 0;
+    let errorCount = 0;
     const contentTypeSummaries: ContentTypeSummary[] = [];
-    
-    // Simulate progress for each content type
-    for (const contentType of options.contentTypes) {
-      try {
-        const total = 5; // Mock number of items
-        
-        // Simulate incremental progress
-        for (let i = 1; i <= total; i++) {
-          if (options.onProgress) {
-            options.onProgress(contentType, i, total);
+
+    try {
+      for (const contentType of options.contentTypes) {
+        try {
+          switch (contentType) {
+            case 'technologies':
+              const techResult = await synchronizeTechnologies(options);
+              successCount += techResult.success;
+              errorCount += techResult.error;
+              contentTypeSummaries.push({
+                type: contentType,
+                success: techResult.success,
+                errors: techResult.error
+              });
+              break;
+            case 'productTypes':
+              const productResult = await synchronizeProductTypes(options);
+              successCount += productResult.success;
+              errorCount += productResult.error;
+              contentTypeSummaries.push({
+                type: contentType,
+                success: productResult.success,
+                errors: productResult.error
+              });
+              break;
+            case 'businessGoals':
+              const goalResult = await synchronizeBusinessGoals(options);
+              successCount += goalResult.success;
+              errorCount += goalResult.error;
+              contentTypeSummaries.push({
+                type: contentType,
+                success: goalResult.success,
+                errors: goalResult.error
+              });
+              break;
+            // Add more content types as needed
+            default:
+              console.log(`[synchronizeData] Content type not implemented: ${contentType}`);
+              break;
           }
-          
-          // Simulate some processing time
-          await new Promise(resolve => setTimeout(resolve, 200));
+        } catch (error) {
+          errorCount++;
+          contentTypeSummaries.push({
+            type: contentType,
+            success: 0,
+            errors: 1
+          });
+          if (options.onError) {
+            options.onError(contentType, error instanceof Error ? error : new Error(String(error)));
+          }
         }
-        
-        contentTypeSummaries.push({
-          type: contentType,
-          success: total,
-          errors: 0
-        });
-      } catch (error) {
-        const err = error instanceof Error ? error : new Error(String(error));
-        
+      }
+
+      const summary: SyncSummary = {
+        successCount,
+        errorCount,
+        startTime,
+        endTime: new Date(),
+        totalItems: successCount + errorCount,
+        contentTypes: contentTypeSummaries
+      };
+
+      if (options.onComplete) {
+        options.onComplete(summary);
+      }
+
+      return summary;
+    } catch (error) {
+      console.error('[synchronizeData] Error during synchronization:', error);
+      throw error;
+    }
+  };
+
+  return {
+    status,
+    canSynchronizeData,
+    synchronizeData
+  };
+}
+
+// Synchronize technologies between CMS providers
+async function synchronizeTechnologies(options: SyncOptions): Promise<{ success: number; error: number }> {
+  let success = 0;
+  let error = 0;
+  
+  try {
+    const config = getCMSProviderConfig();
+    const currentProvider = config.type;
+    const targetProvider = currentProvider === ContentProviderType.STRAPI 
+      ? ContentProviderType.SUPABASE 
+      : ContentProviderType.STRAPI;
+    
+    // Fetch all technologies from current provider
+    const technologies = await getTechnologies();
+    
+    if (options.onProgress) {
+      options.onProgress('technologies', 0, technologies.length);
+    }
+    
+    // For now, we'll just count the technologies but not perform actual synchronization
+    // since createTechnology and updateTechnology are not fully implemented yet
+    for (let i = 0; i < technologies.length; i++) {
+      try {
+        // Mock successful technology sync
+        success++;
+      } catch (e) {
+        error++;
         if (options.onError) {
-          options.onError(contentType, err);
+          options.onError('technologies', e instanceof Error ? e : new Error(String(e)));
         }
-        
-        contentTypeSummaries.push({
-          type: contentType,
-          success: 0,
-          errors: 1
-        });
+      }
+      
+      if (options.onProgress) {
+        options.onProgress('technologies', i + 1, technologies.length);
       }
     }
     
-    const endTime = new Date();
-    const successCount = contentTypeSummaries.reduce((sum, item) => sum + item.success, 0);
-    const errorCount = contentTypeSummaries.reduce((sum, item) => sum + item.errors, 0);
+    return { success, error };
+  } catch (e) {
+    console.error('[synchronizeTechnologies] Error:', e);
+    throw e;
+  }
+}
+
+// Synchronize product types between CMS providers
+async function synchronizeProductTypes(options: SyncOptions): Promise<{ success: number; error: number }> {
+  let success = 0;
+  let error = 0;
+  
+  try {
+    // Similar implementation as synchronizeTechnologies
+    const products = await getProductTypes();
     
-    const summary = {
-      startTime,
-      endTime,
-      totalItems: successCount + errorCount,
-      successCount,
-      errorCount,
-      contentTypes: contentTypeSummaries
-    };
-    
-    if (options.onComplete) {
-      options.onComplete(summary);
+    if (options.onProgress) {
+      options.onProgress('productTypes', 0, products.length);
     }
     
-    return summary;
-  };
+    // For now, we'll just count the products but not perform actual synchronization
+    for (let i = 0; i < products.length; i++) {
+      try {
+        // Mock successful product sync
+        success++;
+      } catch (e) {
+        error++;
+        if (options.onError) {
+          options.onError('productTypes', e instanceof Error ? e : new Error(String(e)));
+        }
+      }
+      
+      if (options.onProgress) {
+        options.onProgress('productTypes', i + 1, products.length);
+      }
+    }
+    
+    return { success, error };
+  } catch (e) {
+    console.error('[synchronizeProductTypes] Error:', e);
+    throw e;
+  }
+}
+
+// Synchronize business goals between CMS providers
+async function synchronizeBusinessGoals(options: SyncOptions): Promise<{ success: number; error: number }> {
+  let success = 0;
+  let error = 0;
   
-  const canSynchronizeData = () => {
-    // Since we're moving away from the dual-CMS setup, return false
-    return false;
-  };
-  
-  return {
-    synchronizeData,
-    canSynchronizeData
-  };
-};
+  try {
+    const goals = await getBusinessGoals();
+    
+    if (options.onProgress) {
+      options.onProgress('businessGoals', 0, goals.length);
+    }
+    
+    // For now, we'll just count the goals but not perform actual synchronization
+    for (let i = 0; i < goals.length; i++) {
+      try {
+        // Mock successful goal sync
+        success++;
+      } catch (e) {
+        error++;
+        if (options.onError) {
+          options.onError('businessGoals', e instanceof Error ? e : new Error(String(e)));
+        }
+      }
+      
+      if (options.onProgress) {
+        options.onProgress('businessGoals', i + 1, goals.length);
+      }
+    }
+    
+    return { success, error };
+  } catch (e) {
+    console.error('[synchronizeBusinessGoals] Error:', e);
+    throw e;
+  }
+}

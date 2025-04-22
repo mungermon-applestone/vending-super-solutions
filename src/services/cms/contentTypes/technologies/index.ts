@@ -1,31 +1,67 @@
 
+import { ContentTypeOperations } from '../types';
 import { CMSTechnology } from '@/types/cms';
+import { fetchTechnologies } from './fetchTechnologies';
+import { fetchTechnologyBySlug } from './fetchTechnologyBySlug';
+import { createTechnology } from './createTechnology';
+import { updateTechnology } from './updateTechnology';
+import { deleteTechnology } from './deleteTechnology';
+import { cloneTechnology } from './cloneTechnology';
 
-export const fetchTechnologies = async (): Promise<CMSTechnology[]> => {
-  return [];
+// Create a technologyOperations object that implements ContentTypeOperations interface
+export const technologyOperations: ContentTypeOperations<CMSTechnology> = {
+  fetchAll: async (options = {}) => {
+    return await fetchTechnologies(options);
+  },
+  fetchBySlug: async (slug) => {
+    return await fetchTechnologyBySlug(slug);
+  },
+  fetchById: async (id) => {
+    // ID lookup by getting all technologies and filtering by ID
+    const allTechnologies = await fetchTechnologies();
+    return allTechnologies.find(tech => tech.id === id) || null;
+  },
+  create: async (data) => {
+    const id = await createTechnology(data);
+    
+    // Return the newly created technology by fetching it
+    const technologies = await fetchTechnologies();
+    const newTechnology = technologies.find(tech => String(tech.id) === String(id));
+    
+    if (!newTechnology) {
+      throw new Error('Failed to retrieve newly created technology');
+    }
+    
+    return newTechnology;
+  },
+  update: async (id, data) => {
+    const success = await updateTechnology(id, data);
+    
+    if (!success) {
+      throw new Error('Failed to update technology');
+    }
+    
+    // Return the updated technology
+    const updatedTechnology = await technologyOperations.fetchById(id);
+    
+    if (!updatedTechnology) {
+      throw new Error('Failed to retrieve updated technology');
+    }
+    
+    return updatedTechnology;
+  },
+  delete: async (id) => {
+    return await deleteTechnology(id);
+  },
+  clone: cloneTechnology
 };
 
-export const fetchTechnologyBySlug = async (slug: string): Promise<CMSTechnology | null> => {
-  console.log(`Fetching technology by slug: ${slug}`);
-  return null;
-};
-
-export const createTechnology = async (data: any): Promise<CMSTechnology> => {
-  console.log(`Creating technology: ${data.title}`);
-  return data as CMSTechnology;
-};
-
-export const updateTechnology = async (id: string, data: any): Promise<CMSTechnology> => {
-  console.log(`Updating technology: ${id}`);
-  return { id, ...data } as CMSTechnology;
-};
-
-export const deleteTechnology = async (id: string): Promise<boolean> => {
-  console.log(`Deleting technology: ${id}`);
-  return true;
-};
-
-export const cloneTechnology = async (id: string): Promise<CMSTechnology | null> => {
-  console.log(`Cloning technology: ${id}`);
-  return null;
+// Export individual operations for direct imports
+export {
+  fetchTechnologies,
+  fetchTechnologyBySlug,
+  createTechnology,
+  updateTechnology,
+  deleteTechnology,
+  cloneTechnology
 };
