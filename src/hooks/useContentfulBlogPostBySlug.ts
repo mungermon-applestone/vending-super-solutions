@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { Document } from "@contentful/rich-text-types";
-import { Asset, Entry } from "contentful";
+import { Asset, Entry, EntrySkeletonType } from "contentful";
 
 // Define the blog post content type for Contentful
 export interface ContentfulBlogPostFields {
@@ -11,12 +11,7 @@ export interface ContentfulBlogPostFields {
   content?: Document;
   excerpt?: string;
   publishDate?: string;
-  featuredImage?: {
-    fields: {
-      file: { url: string };
-      title: string;
-    }
-  };
+  featuredImage?: Asset;
   author?: string;
   tags?: string[];
 }

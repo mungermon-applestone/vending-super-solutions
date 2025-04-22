@@ -29,7 +29,7 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
   return (
     <article className="max-w-3xl mx-auto">
       <header className="mb-8">
-        {featuredImage?.fields?.file?.url && (
+        {featuredImage && (
           <Image
             src={featuredImage.fields.file.url}
             alt={featuredImage.fields.title || title}

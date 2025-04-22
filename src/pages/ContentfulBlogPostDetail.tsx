@@ -27,7 +27,7 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
       const response = await client.getEntries({
         content_type: "blogPost",
         order: ["fields.publishDate"], // Use array for order parameter
-        select: "fields.slug,fields.title,fields.publishDate",
+        select: ["fields.slug", "fields.title", "fields.publishDate"],
       });
       
       const posts = response.items.filter(item => {
