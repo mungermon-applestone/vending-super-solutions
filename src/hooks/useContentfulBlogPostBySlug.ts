@@ -2,20 +2,24 @@
 import { useQuery } from "@tanstack/react-query";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { Document } from "@contentful/rich-text-types";
+import { Entry, EntrySkeletonType } from "contentful";
 
-// Minimal Contentful blog post fields shape. Adjust as needed.
-export interface ContentfulBlogPost {
-  sys: { id: string };
-  fields: {
-    title: string;
-    slug: string;
-    content?: Document;
-    excerpt?: string;
-    publishDate?: string;
-    featuredImage?: { fields: { file: { url: string }; title: string } };
-    author?: string;
-    tags?: string[];
-  };
+// Define the blog post content type for Contentful
+export interface ContentfulBlogPostFields {
+  title: string;
+  slug: string;
+  content?: Document;
+  excerpt?: string;
+  publishDate?: string;
+  featuredImage?: { fields: { file: { url: string }; title: string } };
+  author?: string;
+  tags?: string[];
+}
+
+// Contentful requires a contentTypeId for EntrySkeletonType
+export interface ContentfulBlogPost extends EntrySkeletonType {
+  contentTypeId: "blogPost";
+  fields: ContentfulBlogPostFields;
 }
 
 interface UseContentfulBlogPostBySlugOptions {
@@ -30,14 +34,14 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
       if (!slug) throw new Error("No slug provided");
       const client = await getContentfulClient();
       // Query entries with content_type 'blogPost' and matching slug
-      const response = await client.getEntries<ContentfulBlogPost>({
+      const response = await client.getEntries({
         content_type: "blogPost",
         "fields.slug": slug,
         include: 2,
         limit: 1,
       });
       if (!response.items.length) throw new Error("Blog post not found");
-      return response.items[0];
+      return response.items[0] as Entry<ContentfulBlogPostFields>;
     }
   });
 }

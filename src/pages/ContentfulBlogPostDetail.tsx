@@ -3,8 +3,9 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import ContentfulBlogPostContent from "@/components/blog/ContentfulBlogPostContent";
-import { useContentfulBlogPostBySlug } from "@/hooks/useContentfulBlogPostBySlug";
+import { ContentfulBlogPostFields, useContentfulBlogPostBySlug } from "@/hooks/useContentfulBlogPostBySlug";
 import { Loader2 } from "lucide-react";
+import { Entry } from "contentful";
 
 /**
  * For adjacent post navigation (Previous/Next).
@@ -13,6 +14,12 @@ import { Loader2 } from "lucide-react";
  */
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { useQuery } from "@tanstack/react-query";
+
+// Interface for adjacent post navigation
+interface AdjacentBlogPost {
+  slug: string;
+  title: string;
+}
 
 // Hook for getting "previous" and "next" posts for navigation
 function useAdjacentContentfulPosts(currentSlug: string | undefined) {
@@ -23,23 +30,35 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
       if (!currentSlug) return { previous: null, next: null };
       const client = await getContentfulClient();
       // Fetch all published posts sorted by publishDate ascending
-      const response = await client.getEntries<any>({
+      const response = await client.getEntries<ContentfulBlogPostFields>({
         content_type: "blogPost",
-        order: "fields.publishDate",
+        order: ["fields.publishDate"], // Fix: Use array for order parameter
         select: "fields.slug,fields.title,fields.publishDate",
         // Optionally, limit if the blog is huge
       });
+      
       const posts = response.items.filter(
-        (item: any) => !!item.fields?.slug
+        (item) => !!item.fields?.slug
       );
-      const idx = posts.findIndex((p: any) => p.fields.slug === currentSlug);
+      
+      const idx = posts.findIndex((p) => p.fields.slug === currentSlug);
       if (idx === -1) return { previous: null, next: null };
+      
+      // Fix: Ensure we're creating objects with the right type
       const previous = idx > 0
-        ? { slug: posts[idx - 1].fields.slug, title: posts[idx - 1].fields.title }
+        ? { 
+            slug: posts[idx - 1].fields.slug as string, 
+            title: posts[idx - 1].fields.title as string 
+          }
         : null;
+        
       const next = idx < posts.length - 1
-        ? { slug: posts[idx + 1].fields.slug, title: posts[idx + 1].fields.title }
+        ? { 
+            slug: posts[idx + 1].fields.slug as string, 
+            title: posts[idx + 1].fields.title as string 
+          }
         : null;
+        
       return { previous, next };
     }
   });

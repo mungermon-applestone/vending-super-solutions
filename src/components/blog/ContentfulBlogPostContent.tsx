@@ -4,9 +4,10 @@ import { formatDistanceToNow } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ContentfulBlogPost } from "@/hooks/useContentfulBlogPostBySlug";
+import { ContentfulBlogPostFields } from "@/hooks/useContentfulBlogPostBySlug";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import Image from "@/components/common/Image";
+import { Entry } from "contentful";
 
 interface AdjacentBlogPost {
   slug: string;
@@ -14,7 +15,7 @@ interface AdjacentBlogPost {
 }
 
 interface ContentfulBlogPostContentProps {
-  post: ContentfulBlogPost;
+  post: Entry<ContentfulBlogPostFields>;
   previousPost?: AdjacentBlogPost | null;
   nextPost?: AdjacentBlogPost | null;
 }
