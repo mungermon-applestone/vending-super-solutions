@@ -3,7 +3,7 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import ContentfulBlogPostContent from "@/components/blog/ContentfulBlogPostContent";
-import { useContentfulBlogPostBySlug, ContentfulBlogPost } from "@/hooks/useContentfulBlogPostBySlug";
+import { useContentfulBlogPostBySlug, ContentfulBlogPost, ContentfulBlogPostFields } from "@/hooks/useContentfulBlogPostBySlug";
 import { Loader2 } from "lucide-react";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { useQuery } from "@tanstack/react-query";
@@ -24,7 +24,7 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
       const client = await getContentfulClient();
       
       // Fetch all published posts sorted by publishDate ascending
-      const response = await client.getEntries({
+      const response = await client.getEntries<ContentfulBlogPostFields>({
         content_type: "blogPost",
         order: ["fields.publishDate"],
         select: ["fields.slug", "fields.title", "fields.publishDate"],
