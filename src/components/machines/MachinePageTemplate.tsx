@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import CTASection from '@/components/common/CTASection';
@@ -7,7 +8,8 @@ import FeaturesList from './features/FeaturesList';
 import DeploymentExamplesSection from './examples/DeploymentExamplesSection';
 import AdditionalViews from './gallery/AdditionalViews';
 import InquiryForm from './contact/InquiryForm';
-import TestimonialsSection from './testimonials/TestimonialsSection';
+import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
+import { ContentfulTestimonialSection } from '@/types/contentful/testimonial';
 
 export interface MachineTemplateProps {
   machine: {
@@ -33,14 +35,7 @@ export interface MachineTemplateProps {
         alt: string;
       };
     }>;
-    testimonialSection: {
-      title: string;
-      description: string;
-      image: {
-        url: string;
-        alt: string;
-      };
-    };
+    testimonialSection?: ContentfulTestimonialSection;
   };
 }
 
@@ -84,7 +79,7 @@ const MachinePageTemplate: React.FC<MachineTemplateProps> = ({ machine }) => {
       />
       
       {/* Testimonials Section */}
-      <TestimonialsSection data={machine.testimonialSection} />
+      {machine.testimonialSection && <TestimonialsSection data={machine.testimonialSection} />}
       
       {/* Contact Section */}
       <InquiryForm title={machine.title} />

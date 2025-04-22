@@ -6,10 +6,12 @@ import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 
 const ContentfulMachineDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: machine, isLoading, error } = useContentfulMachine(slug);
+  const { data: testimonialSection } = useTestimonialSection('machines');
 
   const formattedMachine = useMemo(() => {
     if (!machine) return null;
@@ -42,9 +44,10 @@ const ContentfulMachineDetail: React.FC = () => {
       specs: machine.specs || {},
       // Ensure features is an array
       features: machine.features || [],
-      deploymentExamples
+      deploymentExamples,
+      testimonialSection
     };
-  }, [machine]);
+  }, [machine, testimonialSection]);
 
   if (isLoading) {
     return (
