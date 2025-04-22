@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
@@ -116,8 +115,8 @@ const About = () => {
 
   // Process the data so we have proper typing and avoid Type errors
   const processedData = React.useMemo(() => {
-    if (!data?.fields) return { bodyContent: null };
-    return data.fields;
+    if (!data?.fields) return { bodyContent: undefined };
+    return data.fields as AboutPageFields;
   }, [data]);
 
   return (

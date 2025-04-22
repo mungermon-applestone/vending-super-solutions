@@ -61,12 +61,15 @@ const ContactContentful = () => {
     // Extract linked FAQ entries if included
     const processedFaqItems: FAQItem[] = [];
     
+    // Type guard to ensure fields is the correct type
+    const typedFields = fields as ContentfulContactPageFields;
+    
     // Direct access to fields.faqItems if it exists
-    if (fields && fields.faqItems && Array.isArray(fields.faqItems)) {
-      console.log('Found FAQ items in fields:', fields.faqItems.length);
+    if (typedFields && typedFields.faqItems && Array.isArray(typedFields.faqItems)) {
+      console.log('Found FAQ items in fields:', typedFields.faqItems.length);
       
       // Process each FAQ item directly from the fields
-      fields.faqItems.forEach((item: any) => {
+      typedFields.faqItems.forEach((item: ContentfulFAQItem) => {
         console.log('Processing FAQ item:', item.sys?.id);
         if (item && item.fields && typeof item.fields.question === 'string' && typeof item.fields.answer === 'string') {
           processedFaqItems.push({
@@ -133,7 +136,7 @@ const ContactContentful = () => {
     
     // Return processed data with all fields and FAQ items
     return {
-      ...fields,
+      ...typedFields,
       faqItems: processedFaqItems
     } as ContactPageContent;
   }, [data]);
