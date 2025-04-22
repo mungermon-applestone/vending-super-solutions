@@ -30,8 +30,12 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
   }
 
   // Access fields directly from post.fields with proper type safety
-  const { title, content, excerpt, publishDate } = post.fields || {};
-  const featuredImage = post.fields.featuredImage;
+  const fields = post.fields;
+  const title = fields.title;
+  const content = fields.content;
+  const excerpt = fields.excerpt;
+  const publishDate = fields.publishDate;
+  const featuredImage = fields.featuredImage;
 
   return (
     <article className="max-w-3xl mx-auto">

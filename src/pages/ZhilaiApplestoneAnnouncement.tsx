@@ -10,27 +10,39 @@ const ZhilaiApplestoneAnnouncement: React.FC = () => {
   const { data: post, isLoading, error } = useContentfulBlogPostBySlug({ slug });
 
   if (isLoading) return (
-    <div className="flex justify-center py-16">
-      <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-    </div>
+    <Layout>
+      <div className="container mx-auto py-16 flex justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      </div>
+    </Layout>
   );
 
-  if (error) return <div className="p-4">Error: {error instanceof Error ? error.message : 'Unknown error'}</div>;
+  if (error) return (
+    <Layout>
+      <div className="container mx-auto p-4">
+        <div className="bg-red-50 border border-red-200 p-4 rounded-md mb-8">
+          <h2 className="text-lg font-semibold text-red-700 mb-2">Error loading blog post</h2>
+          <p className="text-red-600">{error instanceof Error ? error.message : 'Unknown error'}</p>
+        </div>
+      </div>
+    </Layout>
+  );
   
-  if (!post) return <div className="p-4">No post found for slug "{slug}"</div>;
+  if (!post) return (
+    <Layout>
+      <div className="container mx-auto p-4">
+        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
+          <h2 className="text-lg font-semibold mb-2">No post found</h2>
+          <p>No blog post found for slug "{slug}"</p>
+        </div>
+      </div>
+    </Layout>
+  );
 
   return (
     <Layout>
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto py-8">        
         <div className="mb-8">
-          <h1 className="text-2xl font-bold mb-4">Raw Content:</h1>
-          <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-[300px] mb-8">
-            {JSON.stringify(post, null, 2)}
-          </pre>
-        </div>
-        
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold mb-4">Formatted Content:</h1>
           <ContentfulBlogPostContent post={post} />
         </div>
       </div>
