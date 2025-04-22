@@ -40,11 +40,10 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
       const queryParams: Record<string, string> = {
         content_type: "blogPost",
         order: "-fields.publishDate",
-        // Explicitly convert numbers to strings
         limit: String(limit),
-        skip: String(skip)
+        skip: String(skip),
       };
-      
+
       // Only add tag filter if one is provided
       if (tag) {
         queryParams["metadata.tags.sys.id[in]"] = tag;
