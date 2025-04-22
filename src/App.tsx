@@ -7,7 +7,6 @@ import {
   Navigate
 } from 'react-router-dom';
 import Products from '@/pages/Products';
-import Machines from '@/pages/Machines';
 import Contact from '@/pages/Contact';
 import NotFound from '@/pages/NotFound';
 import Home from '@/pages/Home';
@@ -42,7 +41,7 @@ const App: React.FC = () => {
       path: '/machines',
       element: <MachinesPage />,
     },
-    // Explicit route for divi-wp must come BEFORE the generic :slug route
+    // Explicit route for divi-wp must come BEFORE the generic :slug route to ensure it takes priority
     {
       path: '/machines/divi-wp',
       element: <MachineDetailPage />,

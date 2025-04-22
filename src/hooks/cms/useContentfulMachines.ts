@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { CMSMachine } from '@/types/cms';
@@ -84,7 +85,66 @@ const fallbackMachineData: Record<string, CMSMachine> = {
       warranty: "3 years standard"
     }
   },
-  // ... keep existing fallback data for other machines
+  // Additional fallback machines can be added here
+  'option-2-wall-mount': {
+    id: 'option2wallmount',
+    title: 'Option 2 Wall Mount',
+    slug: 'option-2-wall-mount',
+    type: 'vending',
+    description: "Compact wall-mounted vending solution ideal for offices, break rooms, and small spaces.",
+    temperature: 'ambient',
+    features: [
+      "Space-efficient design",
+      "Easy wall mounting",
+      "Digital touch interface",
+      "Cashless payment system",
+      "Remote inventory management"
+    ],
+    images: [{
+      id: 'fallback-option2',
+      url: 'https://images.unsplash.com/photo-1525182008055-f88b95ff7980',
+      alt: 'Option 2 Wall Mount - Front View'
+    }],
+    specs: {
+      dimensions: "32\"H x 28\"W x 18\"D",
+      weight: "180 lbs (empty)",
+      capacity: "Up to 120 items",
+      powerRequirements: "110V, 5 amps",
+      connectivity: "WiFi, Ethernet",
+      paymentOptions: "Credit card, mobile payment, NFC",
+      manufacturer: "VendTech Solutions",
+      warranty: "2 years standard"
+    }
+  },
+  'locker-10-cell': {
+    id: 'locker10cell',
+    title: 'Locker 10-Cell',
+    slug: 'locker-10-cell',
+    type: 'locker',
+    description: "Modular smart locker system with 10 compartments for secure package delivery and pickup.",
+    temperature: 'ambient',
+    features: [
+      "10 secure compartments",
+      "Digital access control",
+      "Notification system",
+      "Administrative dashboard",
+      "Expandable design"
+    ],
+    images: [{
+      id: 'fallback-locker10',
+      url: 'https://images.unsplash.com/photo-1606161290795-aa2093b87798',
+      alt: 'Locker 10-Cell'
+    }],
+    specs: {
+      dimensions: "72\"H x 36\"W x 24\"D",
+      weight: "350 lbs (empty)",
+      capacity: "10 compartments of varying sizes",
+      powerRequirements: "110V, 3 amps",
+      connectivity: "WiFi, Ethernet, Cellular (optional)",
+      manufacturer: "VendTech Solutions",
+      warranty: "3 years standard"
+    }
+  }
 };
 
 // Helper function to transform Contentful entry to CMSMachine
@@ -126,13 +186,26 @@ export function useContentfulMachines() {
       console.log('[useContentfulMachines] Fetching all machines');
       try {
         const entries = await fetchContentfulEntries<ContentfulEntry>('machine');
+        console.log('[useContentfulMachines] Fetched entries:', entries);
         
-        return entries.map(transformContentfulEntry);
+        if (entries && entries.length > 0) {
+          return entries.map(transformContentfulEntry);
+        }
+        
+        // If in preview environment and no entries were found, return fallback data
+        if (window.location.hostname.includes('lovable')) {
+          console.log('[useContentfulMachines] Using fallback data in preview');
+          toast.info('Using fallback machine data in preview environment');
+          return Object.values(fallbackMachineData);
+        }
+        
+        return [];
       } catch (error) {
         console.error('[useContentfulMachines] Error:', error);
         // In preview environment, return fallback data
         if (window.location.hostname.includes('lovable')) {
-          console.log('[useContentfulMachines] Using fallback data in preview');
+          console.log('[useContentfulMachines] Using fallback data after error in preview');
+          toast.info('Using fallback machine data in preview environment');
           return Object.values(fallbackMachineData);
         }
         throw error;

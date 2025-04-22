@@ -8,29 +8,97 @@ import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Server, HardDrive } from 'lucide-react';
+import PageHero from '@/components/common/PageHero';
+import { useMachinesPageContent } from '@/hooks/cms/useMachinesPageContent';
+import InquiryForm from '@/components/machines/contact/InquiryForm';
 
 const MachinesPage: React.FC = () => {
   const { data: machines, isLoading, error } = useContentfulMachines();
+  const { data: pageContent } = useMachinesPageContent();
   
-  console.log('Machines data:', machines);
+  console.log('Machines data from Contentful:', machines);
+  console.log('Page content from Contentful:', pageContent);
+
+  // Separate machines by type
+  const vendingMachines = machines?.filter(machine => machine.type === 'vending') || [];
+  const lockers = machines?.filter(machine => machine.type === 'locker') || [];
+
+  const renderMachineCards = (machineList: any[], title: string) => {
+    if (!machineList?.length) return null;
+    
+    return (
+      <div className="mb-16">
+        <h3 className="text-2xl font-semibold mb-6">{title}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {machineList.map((machine) => (
+            <Card key={machine.id} className="overflow-hidden flex flex-col h-full">
+              <div className="relative h-48 bg-gray-50">
+                {machine.images && machine.images[0] ? (
+                  <img 
+                    src={machine.images[0].url} 
+                    alt={machine.images[0].alt || machine.title} 
+                    className="w-full h-full object-contain p-4"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    {machine.type === 'vending' ? (
+                      <Server className="h-16 w-16 text-gray-300" />
+                    ) : (
+                      <HardDrive className="h-16 w-16 text-gray-300" />
+                    )}
+                  </div>
+                )}
+                {machine.temperature && (
+                  <div className="absolute top-0 right-0 bg-vending-blue text-white px-3 py-1 m-2 rounded-md text-sm">
+                    {machine.temperature}
+                  </div>
+                )}
+              </div>
+              <CardHeader>
+                <CardTitle className="text-xl">{machine.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <p className="text-gray-600 line-clamp-3">{machine.description}</p>
+              </CardContent>
+              <CardFooter>
+                <Button asChild className="w-full">
+                  <Link to={`/machines/${machine.slug}`}>View Details</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <Layout>
-      <div className="bg-gradient-to-b from-vending-blue-light to-white py-16">
-        <div className="container mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-center mb-6 text-vending-blue-dark">
-            Our Machines
-          </h1>
-          <p className="text-lg text-center max-w-3xl mx-auto mb-12 text-gray-700">
-            Discover our range of innovative vending and locker solutions designed to meet diverse business needs.
+      {/* Hero Section */}
+      <PageHero 
+        pageKey="machines"
+        fallbackTitle="Our Machines"
+        fallbackSubtitle="Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs."
+        fallbackImage="https://images.unsplash.com/photo-1493723843671-1d655e66ac1c"
+        fallbackImageAlt="Various vending machines"
+        fallbackPrimaryButtonText="Learn More"
+        fallbackPrimaryButtonUrl="#machines-section"
+      />
+
+      {/* Machines Section */}
+      <div className="container py-12 md:py-16" id="machines-section">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            {pageContent?.machineTypesTitle || "Our Machine Range"}
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            {pageContent?.machineTypesDescription || "Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs."}
           </p>
         </div>
-      </div>
 
-      <div className="container mx-auto py-12">
-        {isLoading && (
+        {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map(i => (
               <Card key={i}>
                 <Skeleton className="h-48 w-full" />
                 <CardHeader>
@@ -47,57 +115,28 @@ const MachinesPage: React.FC = () => {
               </Card>
             ))}
           </div>
-        )}
-
-        {error && (
+        ) : error ? (
           <div className="bg-red-50 border border-red-200 rounded-md p-6 text-center">
             <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Machines</h3>
             <p className="text-red-600">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
           </div>
-        )}
-
-        {!isLoading && !error && machines && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {machines.map((machine) => (
-              <Card key={machine.id} className="overflow-hidden flex flex-col h-full">
-                <div className="relative h-48 bg-gray-50">
-                  {machine.images && machine.images[0] ? (
-                    <img 
-                      src={machine.images[0].url} 
-                      alt={machine.images[0].alt || machine.title} 
-                      className="w-full h-full object-contain p-4"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full">
-                      {machine.type === 'vending' ? (
-                        <Server className="h-16 w-16 text-gray-300" />
-                      ) : (
-                        <HardDrive className="h-16 w-16 text-gray-300" />
-                      )}
-                    </div>
-                  )}
-                  {machine.temperature && (
-                    <div className="absolute top-0 right-0 bg-vending-blue text-white px-3 py-1 m-2 rounded-md text-sm">
-                      {machine.temperature}
-                    </div>
-                  )}
-                </div>
-                <CardHeader>
-                  <CardTitle className="text-xl">{machine.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <p className="text-gray-600 line-clamp-3">{machine.description}</p>
-                </CardContent>
-                <CardFooter>
-                  <Button asChild className="w-full">
-                    <Link to={`/machines/${machine.slug}`}>View Details</Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+        ) : (
+          <>
+            {renderMachineCards(vendingMachines, "Vending Machines")}
+            {renderMachineCards(lockers, "Smart Lockers")}
+            
+            {vendingMachines.length === 0 && lockers.length === 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-md p-6 text-center">
+                <h3 className="text-lg font-semibold text-amber-800 mb-2">No Machines Found</h3>
+                <p className="text-amber-600">No machines are currently available from our content management system.</p>
+              </div>
+            )}
+          </>
         )}
       </div>
+      
+      {/* Inquiry Form */}
+      <InquiryForm title="Interested in our machines?" />
       
       <CTASection />
     </Layout>
