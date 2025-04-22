@@ -11,18 +11,22 @@ interface MachineDetailProps {
 }
 
 const MachineDetail: React.FC<MachineDetailProps> = ({ machine }) => {
-  // Convert specs to the expected Record<string, string> format
+  // Convert specs from individual properties to the expected Record<string, string> format
+  // Map all spec fields from the machine object
   const formattedSpecs: Record<string, string> = {
-    dimensions: machine.specs?.dimensions || '',
-    weight: machine.specs?.weight || '',
-    powerRequirements: machine.specs?.powerRequirements || '',
+    dimensions: machine.dimensions || machine.specs?.dimensions || '',
+    weight: machine.weight || machine.specs?.weight || '',
+    powerRequirements: machine.powerRequirements || machine.specs?.powerRequirements || '',
     temperature: machine.temperature || 'Ambient',
-    paymentOptions: machine.specs?.paymentOptions || '',
-    connectivity: machine.specs?.connectivity || '',
-    capacity: machine.specs?.capacity || '',
-    manufacturer: machine.specs?.manufacturer || '',
-    warranty: machine.specs?.warranty || ''
+    paymentOptions: machine.paymentOptions || machine.specs?.paymentOptions || '',
+    connectivity: machine.connectivity || machine.specs?.connectivity || '',
+    capacity: machine.capacity || machine.specs?.capacity || '',
+    manufacturer: machine.manufacturer || machine.specs?.manufacturer || '',
+    warranty: machine.warranty || machine.specs?.warranty || ''
   };
+
+  console.log("Machine data in MachineDetail component:", machine);
+  console.log("Formatted specs:", formattedSpecs);
 
   return (
     <>

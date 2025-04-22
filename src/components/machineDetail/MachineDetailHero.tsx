@@ -10,11 +10,11 @@ interface MachineDetailHeroProps {
 
 const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
   return (
-    <section className="py-12 md:py-16 bg-gradient-to-br from-blue-500 to-cyan-500">
+    <section className="py-12 md:py-16 bg-gradient-to-br from-blue-500 to-blue-600">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="flex items-center mb-6">
+            <div className="flex items-center mb-4">
               <div className="bg-white/10 p-2 rounded-full mr-3">
                 {machine.type === 'vending' ? (
                   <Server className="h-5 w-5 text-white" />
@@ -26,10 +26,10 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
                 {machine.type.charAt(0).toUpperCase()}{machine.type.slice(1)} | {machine.temperature}
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-white">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-5 text-white">
               {machine.title}
             </h1>
-            <p className="text-lg text-white/90 mb-8">
+            <p className="text-xl text-white/90 mb-8">
               {machine.description}
             </p>
             <div className="flex flex-wrap gap-4">
@@ -42,7 +42,7 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
             </div>
           </div>
           <div className="relative">
-            <div className="bg-white rounded-lg shadow-xl overflow-hidden p-8">
+            <div className="bg-white rounded-lg shadow-xl p-8 overflow-hidden">
               {machine.images && machine.images[0] ? (
                 <img 
                   src={machine.images[0].url} 

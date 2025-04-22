@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
@@ -15,18 +15,36 @@ const MachineDetailPage = () => {
   console.log('Machine detail page, slug:', slug);
   console.log('Machine data:', machine);
   
+  useEffect(() => {
+    // Scroll to top when the component mounts or slug changes
+    window.scrollTo(0, 0);
+  }, [slug]);
+  
   if (isLoading) {
     return (
       <Layout>
-        <div className="container mx-auto py-12">
-          <div className="max-w-4xl mx-auto">
-            <Skeleton className="h-12 w-3/4 mb-4" />
-            <Skeleton className="h-6 w-full mb-2" />
-            <Skeleton className="h-6 w-full mb-8" />
-            <Skeleton className="h-96 w-full rounded-lg mb-8" />
-            <Skeleton className="h-6 w-full mb-2" />
-            <Skeleton className="h-6 w-full mb-2" />
-            <Skeleton className="h-6 w-3/4" />
+        <div className="py-12 md:py-16 bg-gradient-to-br from-blue-500 to-blue-600">
+          <div className="container mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <div>
+                <Skeleton className="h-6 w-32 mb-4" />
+                <Skeleton className="h-16 w-3/4 mb-4" />
+                <Skeleton className="h-24 w-full mb-6" />
+                <div className="flex gap-4">
+                  <Skeleton className="h-10 w-40" />
+                  <Skeleton className="h-10 w-40" />
+                </div>
+              </div>
+              <Skeleton className="h-80 rounded-lg" />
+            </div>
+          </div>
+        </div>
+        <div className="container mx-auto py-16">
+          <Skeleton className="h-8 w-64 mx-auto mb-10" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <Skeleton key={i} className="h-32 rounded-lg" />
+            ))}
           </div>
         </div>
       </Layout>
@@ -36,13 +54,15 @@ const MachineDetailPage = () => {
   if (error) {
     return (
       <Layout>
-        <div className="container mx-auto py-12">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-red-50 border border-red-200 rounded-md p-6 text-center">
-              <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Machine</h3>
-              <p className="text-red-600">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
-              <Button asChild variant="outline" className="mt-4">
-                <Link to="/machines">Return to Machines</Link>
+        <div className="container mx-auto py-20">
+          <div className="max-w-lg mx-auto">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
+              <h3 className="text-xl font-semibold text-red-800 mb-3">Error Loading Machine</h3>
+              <p className="text-red-600 mb-6">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
+              <Button asChild variant="outline">
+                <Link to="/machines" className="flex items-center gap-2">
+                  <ArrowLeft size={16} /> Return to Machines
+                </Link>
               </Button>
             </div>
           </div>
@@ -54,13 +74,15 @@ const MachineDetailPage = () => {
   if (!machine) {
     return (
       <Layout>
-        <div className="container mx-auto py-12">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-amber-50 border border-amber-200 rounded-md p-6 text-center">
-              <h3 className="text-lg font-semibold text-amber-800 mb-2">Machine Not Found</h3>
-              <p className="text-amber-600">The machine you're looking for doesn't exist or has been removed.</p>
-              <Button asChild variant="outline" className="mt-4">
-                <Link to="/machines">Return to Machines</Link>
+        <div className="container mx-auto py-20">
+          <div className="max-w-lg mx-auto">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-8 text-center">
+              <h3 className="text-xl font-semibold text-amber-800 mb-3">Machine Not Found</h3>
+              <p className="text-amber-600 mb-6">The machine you're looking for doesn't exist or has been removed.</p>
+              <Button asChild variant="outline">
+                <Link to="/machines" className="flex items-center gap-2">
+                  <ArrowLeft size={16} /> Return to Machines
+                </Link>
               </Button>
             </div>
           </div>
