@@ -2,14 +2,14 @@
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { BLOCKS } from '@contentful/rich-text-types';
+import { BLOCKS, Document } from '@contentful/rich-text-types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import Image from '@/components/common/Image';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import useContentful from '@/hooks/useContentful';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { ContentfulAsset, ContentfulResponse, AboutPageFields } from '@/types/contentful';
+import { ContentfulAsset, ContentfulResponse, AboutPageFields, ContentfulRichTextDocument } from '@/types/contentful';
 
 const About = () => {
   const { data, isLoading, error, isContentReady } = useContentful<ContentfulResponse<AboutPageFields>>({
@@ -130,7 +130,7 @@ const About = () => {
           <ContentfulErrorBoundary contentType="About page">
             <div className="prose max-w-none">
               {isContentReady && processedData.bodyContent && (
-                <>{documentToReactComponents(processedData.bodyContent as any, richTextOptions)}</>
+                <>{documentToReactComponents(processedData.bodyContent as unknown as Document, richTextOptions)}</>
               )}
               {isContentReady && !processedData.bodyContent && (
                 <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-md">

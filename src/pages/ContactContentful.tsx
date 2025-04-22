@@ -3,7 +3,7 @@ import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import useContentful from '@/hooks/useContentful';
-import { ContentfulResponse, ContentfulContactPageFields, ContentfulFAQItem } from '@/types/contentful';
+import { ContentfulResponse, ContentfulContactPageFields, ContentfulFAQItem, ContentfulRichTextDocument } from '@/types/contentful';
 import ContactCards from '@/components/contact/ContactCards';
 import ContactForm from '@/components/contact/ContactForm';
 import FAQSection from '@/components/contact/FAQSection';
@@ -12,7 +12,7 @@ import { Document } from '@contentful/rich-text-types';
 interface FAQItem {
   id: string;
   question: string;
-  answer: string | Document;
+  answer: string | Document | ContentfulRichTextDocument;
 }
 
 interface ContactPageContent {

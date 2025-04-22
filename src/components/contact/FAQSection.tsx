@@ -1,11 +1,13 @@
+
 import React from 'react';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { Document } from '@contentful/rich-text-types';
+import { ContentfulRichTextDocument } from '@/types/contentful';
 
 interface FAQItem {
   id: string;
   question: string;
-  answer: string | Document;
+  answer: string | Document | ContentfulRichTextDocument;
 }
 
 interface FAQSectionProps {
@@ -18,11 +20,12 @@ const FAQSection = ({ faqSectionTitle, faqItems }: FAQSectionProps) => {
   console.log('FAQ Section received items:', faqItems?.length || 0);
   
   // Helper function to render the answer content properly
-  const renderAnswer = (answer: string | Document) => {
+  const renderAnswer = (answer: string | Document | ContentfulRichTextDocument) => {
     // Check if the answer is a rich text document
     if (typeof answer === 'object' && answer !== null && 'nodeType' in answer) {
       console.log('Rendering answer as rich text document');
       try {
+        // Cast to Document for the documentToReactComponents function
         return documentToReactComponents(answer as Document);
       } catch (error) {
         console.error('Error rendering rich text:', error);

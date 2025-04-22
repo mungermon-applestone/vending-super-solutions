@@ -1,5 +1,6 @@
-import { Asset, Entry, EntrySkeletonType } from 'contentful';
-import { Document } from '@contentful/rich-text-types';
+
+import { Asset, Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
+import { Document, BLOCKS } from '@contentful/rich-text-types';
 
 export interface ContentfulAsset {
   sys: {
@@ -91,7 +92,8 @@ export interface ContentfulTechnology {
 }
 
 // Contentful API response interfaces
-export interface ContentfulRichTextDocument extends Document {
+// Modified to better match actual Contentful rich text structure
+export interface ContentfulRichTextDocument {
   nodeType: string;
   data: object;
   content: any[];
@@ -110,7 +112,7 @@ export interface AboutPageFields {
   bodyContent?: ContentfulRichTextDocument;
 }
 
-// Define FAQ item interface
+// Define FAQ item interface - updated to handle both string and rich text answers
 export interface ContentfulFAQItem {
   sys: {
     id: string;
