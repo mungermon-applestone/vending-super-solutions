@@ -2,383 +2,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { CMSMachine } from '@/types/cms';
+import { ContentfulEntry } from '@/types/contentful/machine';
+import { transformContentfulEntry } from '@/utils/cms/transformers/machineTransformer';
+import { fallbackMachineData } from '@/data/fallbacks/machineFallbacks';
 import { toast } from 'sonner';
-
-/**
- * !!!!! MISSION CRITICAL: CONTENTFUL MACHINES HOOK !!!!!
- * 
- * WARNING: HIGH-IMPACT COMPONENT
- * 
- * THIS HOOK IS THE PRIMARY DATA SOURCE FOR MACHINE INFORMATION
- * 
- * MODIFICATION GUIDELINES:
- * ------------------------
- * 1. PRESERVE CORE BEHAVIORS:
- *    - Fallback mechanisms for ALL environments
- *    - Robust error handling
- *    - Consistent data transformation
- *    - Strict type safety
- * 
- * 2. NEVER REMOVE:
- *    - Fallback data mechanism
- *    - Core transformation logic
- *    - Detailed logging
- *    - Environment-specific handling
- * 
- * 3. TESTING REQUIREMENTS:
- *    - MANDATORY: Full regression testing after ANY changes
- *    - Verify data integrity across ALL machine types
- *    - Validate fallback mechanisms
- *    - Check performance and error scenarios
- * 
- * 4. DEBUGGING CONSIDERATIONS:
- *    - Extensive console logging is INTENTIONAL
- *    - Do NOT remove or significantly alter logging
- *    - Logs are crucial for tracking data flow and errors
- * 
- * 5. PERFORMANCE AND RELIABILITY:
- *    - Minimize unnecessary data transformations
- *    - Maintain quick response times
- *    - Ensure graceful degradation under poor network conditions
- * 
- * CONTACT: [INSERT TEAM LEAD/ARCHITECTURE CONTACT]
- * LAST REVIEW: 2024-04-22
- */
-
-// Define an interface for Contentful entry structure 
-interface ContentfulEntry {
-  sys?: {
-    id: string;
-  };
-  id?: string;
-  title?: string;
-  slug?: string;
-  type?: string;
-  description?: string;
-  temperature?: string;
-  features?: string[];
-  fields?: {
-    title?: string;
-    slug?: string;
-    type?: string;
-    description?: string;
-    temperature?: string;
-    features?: string[];
-    images?: Array<{
-      sys?: {
-        id: string;
-      };
-      fields?: {
-        file?: {
-          url?: string;
-        };
-        title?: string;
-      };
-    }>;
-    dimensions?: string;
-    weight?: string;
-    capacity?: string;
-    powerRequirements?: string;
-    paymentOptions?: string;
-    connectivity?: string;
-    manufacturer?: string;
-    warranty?: string;
-    specs?: {
-      dimensions?: string;
-      weight?: string;
-      capacity?: string;
-      powerRequirements?: string;
-      paymentOptions?: string;
-      connectivity?: string;
-      manufacturer?: string;
-      warranty?: string;
-      temperature?: string;
-      [key: string]: string | undefined;
-    };
-  };
-  images?: Array<{
-    sys?: {
-      id: string;
-    };
-    fields?: {
-      file?: {
-        url?: string;
-      };
-      title?: string;
-    };
-  }>;
-  dimensions?: string;
-  weight?: string;
-  capacity?: string;
-  powerRequirements?: string;
-  paymentOptions?: string;
-  connectivity?: string;
-  manufacturer?: string;
-  warranty?: string;
-  specs?: {
-    dimensions?: string;
-    weight?: string;
-    capacity?: string;
-    powerRequirements?: string;
-    paymentOptions?: string;
-    connectivity?: string;
-    manufacturer?: string;
-    warranty?: string;
-    temperature?: string;
-    [key: string]: string | undefined;
-  };
-}
-
-// Define fallback data for preview environment - particularly useful for divi-wp
-const fallbackMachineData: Record<string, CMSMachine> = {
-  'divi-wp': {
-    id: '1omUbnEhB6OeBFpwPFj1Ww',
-    title: 'DIVI-WP',
-    slug: 'divi-wp',
-    type: 'vending',
-    description: "Weather-protected vending system for outdoor installations with sealed compartments and climate resistance. Perfect for parks, transit stations, and other exposed locations.",
-    temperature: 'ambient',
-    features: [
-      "Weather-resistant construction",
-      "Anti-vandal reinforcements", 
-      "Internal climate control system",
-      "Sunlight-readable display",
-      "Remote monitoring and diagnostics",
-      "Solar power options available",
-      "Ruggedized payment systems",
-      "High-security locking system with tamper alerts"
-    ],
-    images: [{
-      id: 'fallback-image-divi-wp',
-      url: 'https://images.unsplash.com/photo-1557034362-4ec717153f8f',
-      alt: 'DIVI-WP - Front View'
-    }],
-    specs: {
-      dimensions: "76\"H x 42\"W x 36\"D",
-      weight: "750 lbs (empty)",
-      capacity: "Up to 350 items depending on configuration",
-      powerRequirements: "110V, 8 amps",
-      temperature: "Operating range: -10°F to 110°F with internal climate control",
-      connectivity: "WiFi, Ethernet, Cellular (included)",
-      paymentOptions: "Credit card, mobile payment, NFC",
-      manufacturer: "VendTech Solutions",
-      warranty: "3 years standard"
-    }
-  },
-  'option-2-wall-mount': {
-    id: 'option2wallmount',
-    title: 'Option 2 Wall Mount',
-    slug: 'option-2-wall-mount',
-    type: 'vending',
-    description: "Compact wall-mounted vending solution ideal for offices, break rooms, and small spaces.",
-    temperature: 'ambient',
-    features: [
-      "Space-efficient design",
-      "Easy wall mounting",
-      "Digital touch interface",
-      "Cashless payment system",
-      "Remote inventory management"
-    ],
-    images: [{
-      id: 'fallback-option2',
-      url: 'https://images.unsplash.com/photo-1525182008055-f88b95ff7980',
-      alt: 'Option 2 Wall Mount - Front View'
-    }],
-    specs: {
-      dimensions: "32\"H x 28\"W x 18\"D",
-      weight: "180 lbs (empty)",
-      capacity: "Up to 120 items",
-      powerRequirements: "110V, 5 amps",
-      connectivity: "WiFi, Ethernet",
-      paymentOptions: "Credit card, mobile payment, NFC",
-      manufacturer: "VendTech Solutions",
-      warranty: "2 years standard"
-    }
-  },
-  'locker-10-cell': {
-    id: 'locker10cell',
-    title: 'Locker 10-Cell',
-    slug: 'locker-10-cell',
-    type: 'locker',
-    description: "Modular smart locker system with 10 compartments for secure package delivery and pickup.",
-    temperature: 'ambient',
-    features: [
-      "10 secure compartments",
-      "Digital access control",
-      "Notification system",
-      "Administrative dashboard",
-      "Expandable design"
-    ],
-    images: [{
-      id: 'fallback-locker10',
-      url: 'https://images.unsplash.com/photo-1606161290795-aa2093b87798',
-      alt: 'Locker 10-Cell'
-    }],
-    specs: {
-      dimensions: "72\"H x 36\"W x 24\"D",
-      weight: "350 lbs (empty)",
-      capacity: "10 compartments of varying sizes",
-      powerRequirements: "110V, 3 amps",
-      connectivity: "WiFi, Ethernet, Cellular (optional)",
-      manufacturer: "VendTech Solutions",
-      warranty: "3 years standard"
-    }
-  }
-};
-
-/**
- * Validates machine data to ensure it conforms to the CMSMachine interface
- * 
- * @param machine - The machine data to validate
- * @returns The validated machine data with proper typing
- * @throws Error if validation fails
- * 
- * !!!!! VALIDATION RULES !!!!!
- * - Ensures required fields are present
- * - Ensures type is strictly "vending" or "locker"
- * - Sets default values for optional fields when missing
- */
-const validateMachineData = (machine: any): CMSMachine => {
-  console.log('Validating machine data:', machine);
-  
-  // Check required fields
-  if (!machine.id) {
-    throw new Error('Machine missing required field: id');
-  }
-  
-  if (!machine.title) {
-    throw new Error('Machine missing required field: title');
-  }
-  
-  if (!machine.slug) {
-    throw new Error('Machine missing required field: slug');
-    // We could auto-generate a slug here, but that should be a conscious decision
-  }
-  
-  // Ensure type is strictly "vending" or "locker"
-  const validType = machine.type === 'locker' ? 'locker' : 'vending';
-  
-  // Validate images array
-  const validatedImages = Array.isArray(machine.images) 
-    ? machine.images.map(img => ({
-        id: img.id || `img-${Math.random().toString(36).substring(2, 10)}`,
-        url: img.url || '',
-        alt: img.alt || machine.title || 'Machine image'
-      }))
-    : [];
-  
-  // Validate and sanitize specs
-  const validatedSpecs = machine.specs || {};
-  
-  // Return validated machine
-  const validatedMachine: CMSMachine = {
-    id: machine.id,
-    title: machine.title,
-    slug: machine.slug,
-    type: validType as 'vending' | 'locker',
-    description: machine.description || '',
-    temperature: machine.temperature || 'ambient',
-    features: Array.isArray(machine.features) ? machine.features : [],
-    images: validatedImages,
-    specs: validatedSpecs
-  };
-  
-  console.log('Validation successful:', validatedMachine);
-  return validatedMachine;
-};
-
-/**
- * Transforms a Contentful entry into a consistent CMSMachine format
- * 
- * @param entry - The raw Contentful entry to transform
- * @returns A standardized CMSMachine object
- * 
- * !!!!! TRANSFORMATION RULES !!!!!
- * - Always provide fallback values
- * - Ensure type safety
- * - Handle nested and flat entry structures
- * - Log any unexpected data structures
- */
-const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => {
-  console.log('Transforming entry:', entry);
-  
-  // Handle nested Contentful structure - fields may be at top level or in fields property
-  const fields = entry.fields || entry;
-  const title = fields.title || '';
-  const slug = fields.slug || '';
-  
-  // Ensure type is strictly "vending" or "locker"
-  const type = fields.type === 'locker' ? 'locker' : 'vending';
-  
-  const description = fields.description || '';
-  const temperature = fields.temperature || 'ambient';
-  const features = fields.features || [];
-  
-  // Handle images, which can be complex in Contentful
-  let images = [];
-  if (fields.images && Array.isArray(fields.images)) {
-    images = fields.images.map((image) => {
-      const imageFields = image.fields || {};
-      const url = imageFields.file?.url ? `https:${imageFields.file.url}` : '';
-      const alt = imageFields.title || title || '';
-      return {
-        id: image.sys?.id || '',
-        url: url,
-        alt: alt
-      };
-    });
-    
-    // Log first image for debugging
-    if (images.length > 0) {
-      console.log(`First image for ${title}:`, images[0]);
-    }
-  } else {
-    console.log(`No images found for ${title}`);
-  }
-  
-  // Safe access to specs with proper fallbacks
-  const specs = {
-    dimensions: fields.dimensions || (fields.specs?.dimensions) || '',
-    weight: fields.weight || (fields.specs?.weight) || '',
-    capacity: fields.capacity || (fields.specs?.capacity) || '',
-    powerRequirements: fields.powerRequirements || (fields.specs?.powerRequirements) || '',
-    paymentOptions: fields.paymentOptions || (fields.specs?.paymentOptions) || '',
-    connectivity: fields.connectivity || (fields.specs?.connectivity) || '',
-    manufacturer: fields.manufacturer || (fields.specs?.manufacturer) || '',
-    warranty: fields.warranty || (fields.specs?.warranty) || '',
-    temperature: fields.temperature || (fields.specs?.temperature) || ''
-  };
-  
-  // Construct the final object
-  const machineData: CMSMachine = {
-    id: entry.sys?.id || entry.id || '',
-    title: title,
-    slug: slug,
-    type: type, 
-    description: description,
-    temperature: temperature,
-    features: features,
-    images: images,
-    specs: specs
-  };
-  
-  console.log(`Transformed ${title} (${type}):`, machineData);
-  
-  // Add validation step before returning
-  try {
-    const safeMachine = validateMachineData(machineData);
-    return safeMachine;
-  } catch (validationError) {
-    console.error('[CRITICAL] Machine data validation failed', {
-      error: validationError,
-      entry,
-      timestamp: new Date().toISOString()
-    });
-    
-    // In case of validation failure, use a safe fallback
-    return validateMachineData(fallbackMachineData['divi-wp']);
-  }
-};
 
 /**
  * Hook for fetching Contentful machines
@@ -401,7 +28,6 @@ export function useContentfulMachines() {
         if (!entries || entries.length === 0) {
           console.log('[useContentfulMachines] No machines found in Contentful');
           
-          // If in preview environment and no entries were found, return fallback data
           if (window.location.hostname.includes('lovable')) {
             console.log('[useContentfulMachines] Using fallback data in preview');
             toast.info('Using fallback machine data in preview environment');
@@ -411,7 +37,6 @@ export function useContentfulMachines() {
           return [];
         }
         
-        // Transform entries
         const machines = entries.map(transformContentfulEntry);
         console.log('[useContentfulMachines] Transformed machines:', machines);
         return machines;
@@ -422,7 +47,6 @@ export function useContentfulMachines() {
           timestamp: new Date().toISOString()
         });
         
-        // In preview environment, return fallback data
         if (window.location.hostname.includes('lovable')) {
           console.log('[useContentfulMachines] Using fallback data after error in preview');
           toast.info('Using fallback machine data in preview environment');
@@ -459,7 +83,6 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         if (idOrSlug === 'divi-wp') {
           console.log('[useContentfulMachine] Special case: directly fetching divi-wp with ID: 1omUbnEhB6OeBFpwPFj1Ww');
           
-          // First try with the direct ID
           try {
             const entry = await fetchContentfulEntry<ContentfulEntry>('1omUbnEhB6OeBFpwPFj1Ww');
             if (entry) {
@@ -470,37 +93,14 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
             console.error('[useContentfulMachine] Error fetching divi-wp by ID:', diviError);
           }
           
-          // If direct ID fails or in preview environment, use fallback data
           if (window.location.hostname.includes('lovable')) {
             console.log('[useContentfulMachine] Using fallback data for divi-wp in preview');
             toast.info('Using fallback data for DIVI-WP in preview environment');
             return fallbackMachineData['divi-wp'];
           }
-          
-          // Try by slug as last resort
-          try {
-            const entriesBySlug = await fetchContentfulEntries<ContentfulEntry>('machine', {
-              'fields.slug': 'divi-wp'
-            });
-            
-            if (entriesBySlug.length > 0) {
-              console.log('[useContentfulMachine] Found divi-wp by slug query:', entriesBySlug[0]);
-              return transformContentfulEntry(entriesBySlug[0]);
-            }
-          } catch (slugError) {
-            console.error('[useContentfulMachine] Error fetching divi-wp by slug:', slugError);
-          }
-          
-          // If all fetching attempts fail but we're in preview, still use fallback
-          if (window.location.hostname.includes('lovable')) {
-            console.log('[useContentfulMachine] All fetching attempts failed, using fallback');
-            return fallbackMachineData['divi-wp'];
-          }
-          
-          return null;
         }
         
-        // For all other machines, try fetching by ID first if it looks like an ID 
+        // Try fetching by ID first if it looks like an ID
         if (idOrSlug.length > 10) {
           try {
             console.log('[useContentfulMachine] Trying direct ID fetch:', idOrSlug);
@@ -523,7 +123,6 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         if (entries.length === 0) {
           console.warn('[useContentfulMachine] No machine found with slug:', idOrSlug);
           
-          // If in preview environment and we have fallback data, use it
           if (window.location.hostname.includes('lovable') && fallbackMachineData[idOrSlug]) {
             console.log('[useContentfulMachine] Using fallback data for:', idOrSlug);
             return fallbackMachineData[idOrSlug];
@@ -532,14 +131,12 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
           return null;
         }
         
-        const entry = entries[0];
-        console.log('[useContentfulMachine] Found machine by slug:', entry);
+        console.log('[useContentfulMachine] Found machine by slug:', entries[0]);
+        return transformContentfulEntry(entries[0]);
         
-        return transformContentfulEntry(entry);
       } catch (error) {
         console.error(`[useContentfulMachine] Error:`, error);
         
-        // If in preview environment and we have fallback data, use it
         if (window.location.hostname.includes('lovable') && fallbackMachineData[idOrSlug]) {
           console.log('[useContentfulMachine] Using fallback data for:', idOrSlug);
           return fallbackMachineData[idOrSlug];
@@ -554,3 +151,4 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
 }
 
 export default { useContentfulMachines, useContentfulMachine };
+
