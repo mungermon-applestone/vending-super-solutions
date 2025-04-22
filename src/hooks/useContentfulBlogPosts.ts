@@ -37,14 +37,17 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
     queryFn: async () => {
       const client = await getContentfulClient();
 
-      // Explicitly define query parameters as strings to match Contentful API requirements
+      // Create query parameters with proper string conversion
       const queryParams: Record<string, string> = {
         content_type: "blogPost",
-        limit: String(limit),  // Convert number to string
-        skip: String(skip),    // Convert number to string
         order: "-fields.publishDate",
       };
-
+      
+      // Add limit and skip as strings to fix type issues
+      queryParams.limit = `${limit}`;
+      queryParams.skip = `${skip}`;
+      
+      // Add tag if present
       if (tag) {
         queryParams["metadata.tags.sys.id[in]"] = tag;
       }
