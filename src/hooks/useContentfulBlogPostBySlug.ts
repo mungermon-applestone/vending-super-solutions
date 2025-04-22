@@ -57,7 +57,8 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
           throw new Error(`Blog post not found for slug: ${slug}`);
         }
         
-        return response.items[0] as ContentfulBlogPost;
+        // Cast the response to our ContentfulBlogPost type
+        return response.items[0] as unknown as ContentfulBlogPost;
       } catch (error) {
         console.error('Error fetching blog post:', error);
         throw error;
