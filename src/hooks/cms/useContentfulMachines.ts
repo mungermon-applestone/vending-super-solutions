@@ -4,12 +4,12 @@ import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/uti
 import { CMSMachine } from '@/types/cms';
 import { toast } from 'sonner';
 
-// Define an interface for Contentful entry structure
+// Define an interface for Contentful entry structure 
 interface ContentfulEntry {
-  id: string;
   sys?: {
     id: string;
   };
+  id?: string;
   title?: string;
   slug?: string;
   type?: string;
@@ -60,7 +60,7 @@ const fallbackMachineData: Record<string, CMSMachine> = {
     temperature: 'ambient',
     features: [
       "Weather-resistant construction",
-      "Anti-vandal reinforcements",
+      "Anti-vandal reinforcements", 
       "Internal climate control system",
       "Sunlight-readable display",
       "Remote monitoring and diagnostics",
