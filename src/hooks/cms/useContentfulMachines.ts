@@ -1,7 +1,53 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { CMSMachine } from '@/types/cms';
 import { toast } from 'sonner';
+
+// Define an interface for Contentful entry structure
+interface ContentfulEntry {
+  id: string;
+  sys?: {
+    id: string;
+  };
+  title?: string;
+  slug?: string;
+  type?: string;
+  description?: string;
+  temperature?: string;
+  features?: string[];
+  images?: Array<{
+    sys?: {
+      id: string;
+    };
+    fields?: {
+      file?: {
+        url?: string;
+      };
+      title?: string;
+    };
+  }>;
+  dimensions?: string;
+  weight?: string;
+  capacity?: string;
+  powerRequirements?: string;
+  paymentOptions?: string;
+  connectivity?: string;
+  manufacturer?: string;
+  warranty?: string;
+  specs?: {
+    dimensions?: string;
+    weight?: string;
+    capacity?: string;
+    powerRequirements?: string;
+    paymentOptions?: string;
+    connectivity?: string;
+    manufacturer?: string;
+    warranty?: string;
+    temperature?: string;
+    [key: string]: string | undefined;
+  };
+}
 
 // Define fallback data for preview environment - particularly useful for divi-wp
 const fallbackMachineData: Record<string, CMSMachine> = {
@@ -48,37 +94,38 @@ export function useContentfulMachines() {
     queryFn: async () => {
       console.log('[useContentfulMachines] Fetching all machines');
       try {
-        const entries = await fetchContentfulEntries<any>('machine');
+        const entries = await fetchContentfulEntries<ContentfulEntry>('machine');
         
         return entries.map(entry => {
           // Ensure machine type is one of the allowed values
           const machineType = entry.type === 'locker' ? 'locker' : 'vending';
           
           return {
-            id: entry.id,
-            title: entry.title,
-            slug: entry.slug,
+            id: entry.sys?.id || entry.id || '',
+            title: entry.title || '',
+            slug: entry.slug || '',
             type: machineType,
-            description: entry.description,
+            description: entry.description || '',
             temperature: entry.temperature || 'ambient',
             features: entry.features || [],
-            images: entry.images ? entry.images.map((image: any) => ({
-              id: image.sys?.id,
-              url: `https:${image.fields?.file?.url}`,
-              alt: image.fields?.title || entry.title
+            images: entry.images ? entry.images.map((image) => ({
+              id: image.sys?.id || '',
+              url: image.fields?.file?.url ? `https:${image.fields.file.url}` : '',
+              alt: image.fields?.title || entry.title || ''
             })) : [],
             specs: {
-              dimensions: entry.dimensions,
-              weight: entry.weight,
-              capacity: entry.capacity,
-              powerRequirements: entry.powerRequirements,
-              paymentOptions: entry.paymentOptions,
-              connectivity: entry.connectivity,
-              manufacturer: entry.manufacturer,
-              warranty: entry.warranty
+              dimensions: entry.dimensions || entry.specs?.dimensions || '',
+              weight: entry.weight || entry.specs?.weight || '',
+              capacity: entry.capacity || entry.specs?.capacity || '',
+              powerRequirements: entry.powerRequirements || entry.specs?.powerRequirements || '',
+              paymentOptions: entry.paymentOptions || entry.specs?.paymentOptions || '',
+              connectivity: entry.connectivity || entry.specs?.connectivity || '',
+              manufacturer: entry.manufacturer || entry.specs?.manufacturer || '',
+              warranty: entry.warranty || entry.specs?.warranty || '',
+              temperature: entry.temperature || entry.specs?.temperature || ''
             }
-          };
-        }) as CMSMachine[];
+          } as CMSMachine;
+        });
       } catch (error) {
         console.error('[useContentfulMachines] Error:', error);
         // In preview environment, return fallback data
@@ -108,35 +155,35 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         if (idOrSlug === 'divi-wp') {
           console.log('[useContentfulMachine] Special case: directly fetching divi-wp with ID: 1omUbnEhB6OeBFpwPFj1Ww');
           try {
-            const entry = await fetchContentfulEntry('1omUbnEhB6OeBFpwPFj1Ww');
+            const entry = await fetchContentfulEntry<ContentfulEntry>('1omUbnEhB6OeBFpwPFj1Ww');
             if (entry) {
               console.log('[useContentfulMachine] Successfully fetched divi-wp entry by ID:', entry);
               // Transform the entry to our expected format
               const machineType = entry.type === 'locker' ? 'locker' : 'vending';
               
               return {
-                id: entry.sys?.id || '1omUbnEhB6OeBFpwPFj1Ww',
+                id: entry.sys?.id || entry.id || '1omUbnEhB6OeBFpwPFj1Ww',
                 title: entry.title || 'DIVI-WP',
                 slug: entry.slug || 'divi-wp',
                 type: machineType,
                 description: entry.description || '',
                 temperature: entry.temperature || 'ambient',
                 features: entry.features || [],
-                images: entry.images ? entry.images.map((image: any) => ({
-                  id: image.sys?.id,
-                  url: `https:${image.fields?.file?.url}`,
-                  alt: image.fields?.title || entry.title
+                images: entry.images ? entry.images.map((image) => ({
+                  id: image.sys?.id || '',
+                  url: image.fields?.file?.url ? `https:${image.fields.file.url}` : '',
+                  alt: image.fields?.title || entry.title || ''
                 })) : [],
                 specs: {
-                  dimensions: entry.dimensions || entry.specs?.dimensions,
-                  weight: entry.weight || entry.specs?.weight,
-                  capacity: entry.capacity || entry.specs?.capacity,
-                  powerRequirements: entry.powerRequirements || entry.specs?.powerRequirements,
-                  paymentOptions: entry.paymentOptions || entry.specs?.paymentOptions,
-                  connectivity: entry.connectivity || entry.specs?.connectivity,
-                  manufacturer: entry.manufacturer || entry.specs?.manufacturer,
-                  warranty: entry.warranty || entry.specs?.warranty,
-                  temperature: entry.temperature || entry.specs?.temperature
+                  dimensions: entry.dimensions || entry.specs?.dimensions || '',
+                  weight: entry.weight || entry.specs?.weight || '',
+                  capacity: entry.capacity || entry.specs?.capacity || '',
+                  powerRequirements: entry.powerRequirements || entry.specs?.powerRequirements || '',
+                  paymentOptions: entry.paymentOptions || entry.specs?.paymentOptions || '',
+                  connectivity: entry.connectivity || entry.specs?.connectivity || '',
+                  manufacturer: entry.manufacturer || entry.specs?.manufacturer || '',
+                  warranty: entry.warranty || entry.specs?.warranty || '',
+                  temperature: entry.temperature || entry.specs?.temperature || ''
                 }
               } as CMSMachine;
             }
@@ -149,34 +196,34 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         if (idOrSlug.length > 10) {
           try {
             console.log('[useContentfulMachine] Trying direct ID fetch:', idOrSlug);
-            const entry = await fetchContentfulEntry(idOrSlug);
+            const entry = await fetchContentfulEntry<ContentfulEntry>(idOrSlug);
             if (entry) {
               console.log('[useContentfulMachine] Successfully fetched by ID:', entry);
               const machineType = entry.type === 'locker' ? 'locker' : 'vending';
               
               return {
-                id: entry.sys?.id || idOrSlug,
+                id: entry.sys?.id || entry.id || idOrSlug,
                 title: entry.title || '',
                 slug: entry.slug || idOrSlug,
                 type: machineType,
                 description: entry.description || '',
                 temperature: entry.temperature || 'ambient',
                 features: entry.features || [],
-                images: entry.images ? entry.images.map((image: any) => ({
-                  id: image.sys?.id,
-                  url: `https:${image.fields?.file?.url}`,
-                  alt: image.fields?.title || entry.title
+                images: entry.images ? entry.images.map((image) => ({
+                  id: image.sys?.id || '',
+                  url: image.fields?.file?.url ? `https:${image.fields.file.url}` : '',
+                  alt: image.fields?.title || entry.title || ''
                 })) : [],
                 specs: {
-                  dimensions: entry.dimensions || entry.specs?.dimensions,
-                  weight: entry.weight || entry.specs?.weight,
-                  capacity: entry.capacity || entry.specs?.capacity,
-                  powerRequirements: entry.powerRequirements || entry.specs?.powerRequirements,
-                  paymentOptions: entry.paymentOptions || entry.specs?.paymentOptions,
-                  connectivity: entry.connectivity || entry.specs?.connectivity,
-                  manufacturer: entry.manufacturer || entry.specs?.manufacturer,
-                  warranty: entry.warranty || entry.specs?.warranty,
-                  temperature: entry.temperature || entry.specs?.temperature
+                  dimensions: entry.dimensions || entry.specs?.dimensions || '',
+                  weight: entry.weight || entry.specs?.weight || '',
+                  capacity: entry.capacity || entry.specs?.capacity || '',
+                  powerRequirements: entry.powerRequirements || entry.specs?.powerRequirements || '',
+                  paymentOptions: entry.paymentOptions || entry.specs?.paymentOptions || '',
+                  connectivity: entry.connectivity || entry.specs?.connectivity || '',
+                  manufacturer: entry.manufacturer || entry.specs?.manufacturer || '',
+                  warranty: entry.warranty || entry.specs?.warranty || '',
+                  temperature: entry.temperature || entry.specs?.temperature || ''
                 }
               } as CMSMachine;
             }
@@ -187,7 +234,7 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         
         // Then try by slug
         console.log('[useContentfulMachine] Fetching by slug field:', idOrSlug);
-        const entries = await fetchContentfulEntries('machine', {
+        const entries = await fetchContentfulEntries<ContentfulEntry>('machine', {
           'fields.slug': idOrSlug
         });
         
@@ -210,28 +257,28 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         const machineType = entry.type === 'locker' ? 'locker' : 'vending';
         
         return {
-          id: entry.sys?.id || '',
+          id: entry.sys?.id || entry.id || '',
           title: entry.title || '',
           slug: entry.slug || idOrSlug,
           type: machineType,
           description: entry.description || '',
           temperature: entry.temperature || 'ambient',
           features: entry.features || [],
-          images: entry.images ? entry.images.map((image: any) => ({
-            id: image.sys?.id,
-            url: `https:${image.fields?.file?.url}`,
-            alt: image.fields?.title || entry.title
+          images: entry.images ? entry.images.map((image) => ({
+            id: image.sys?.id || '',
+            url: image.fields?.file?.url ? `https:${image.fields.file.url}` : '',
+            alt: image.fields?.title || entry.title || ''
           })) : [],
           specs: {
-            dimensions: entry.dimensions || entry.specs?.dimensions,
-            weight: entry.weight || entry.specs?.weight,
-            capacity: entry.capacity || entry.specs?.capacity,
-            powerRequirements: entry.powerRequirements || entry.specs?.powerRequirements,
-            paymentOptions: entry.paymentOptions || entry.specs?.paymentOptions,
-            connectivity: entry.connectivity || entry.specs?.connectivity,
-            manufacturer: entry.manufacturer || entry.specs?.manufacturer,
-            warranty: entry.warranty || entry.specs?.warranty,
-            temperature: entry.temperature || entry.specs?.temperature
+            dimensions: entry.dimensions || entry.specs?.dimensions || '',
+            weight: entry.weight || entry.specs?.weight || '',
+            capacity: entry.capacity || entry.specs?.capacity || '',
+            powerRequirements: entry.powerRequirements || entry.specs?.powerRequirements || '',
+            paymentOptions: entry.paymentOptions || entry.specs?.paymentOptions || '',
+            connectivity: entry.connectivity || entry.specs?.connectivity || '',
+            manufacturer: entry.manufacturer || entry.specs?.manufacturer || '',
+            warranty: entry.warranty || entry.specs?.warranty || '',
+            temperature: entry.temperature || entry.specs?.temperature || ''
           }
         } as CMSMachine;
       } catch (error) {
