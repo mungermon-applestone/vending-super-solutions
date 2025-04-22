@@ -29,8 +29,8 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
     return <div>Error: Blog post data is missing</div>;
   }
 
-  // Access fields directly from post.fields
-  const { title, content, excerpt, publishDate } = post.fields;
+  // Access fields directly from post.fields with proper type safety
+  const { title, content, excerpt, publishDate } = post.fields || {};
   const featuredImage = post.fields.featuredImage;
 
   return (
@@ -39,7 +39,7 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
         {featuredImage && featuredImage.fields && featuredImage.fields.file && (
           <Image
             src={featuredImage.fields.file.url}
-            alt={featuredImage.fields.title || title}
+            alt={featuredImage.fields.title || title || 'Blog image'}
             className="mb-6 w-full max-h-[320px] rounded-xl object-cover"
           />
         )}
