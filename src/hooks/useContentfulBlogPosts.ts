@@ -1,7 +1,6 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { useContentful } from "@/hooks/useContentful";
+import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 
 export interface ContentfulBlogPost {
   id: string;
@@ -37,10 +36,11 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
     queryFn: async () => {
       const client = await getContentfulClient();
 
-      // Create query parameters with explicit string type casting
+      // Define query parameters object with proper string types
       const queryParams: Record<string, string> = {
         content_type: "blogPost",
         order: "-fields.publishDate",
+        // Explicitly convert numbers to strings
         limit: String(limit),
         skip: String(skip)
       };
@@ -50,7 +50,7 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
         queryParams["metadata.tags.sys.id[in]"] = tag;
       }
 
-      // Pass parameters to getEntries with proper string types
+      // Execute the query with properly typed parameters
       const response = await client.getEntries(queryParams);
 
       return response.items.map(item => {
