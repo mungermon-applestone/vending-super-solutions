@@ -3,14 +3,50 @@ import React from 'react';
 import { Loader2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useContentfulBlogPageContent } from '@/hooks/useContentfulBlogPageContent';
-import { useBlogPosts } from '@/hooks/useBlogData';
-import BlogPostCard from '@/components/blog/BlogPostCard';
+import { useContentfulBlogPosts, ContentfulBlogPost } from '@/hooks/useContentfulBlogPosts';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
+
+const BlogPostCard: React.FC<{ post: ContentfulBlogPost }> = ({ post }) => {
+  return (
+    <Card className="h-full flex flex-col">
+      <CardHeader>
+        <CardTitle className="text-xl">
+          <Link to={`/blog/${post.slug}`} className="hover:underline">
+            {post.title}
+          </Link>
+        </CardTitle>
+      </CardHeader>
+      
+      <CardContent className="flex-grow">
+        {post.excerpt ? (
+          <p className="text-gray-600">{post.excerpt}</p>
+        ) : (
+          <p className="text-gray-600">
+            {/* Render excerpt from content if available */}
+            {typeof post.content === 'string' 
+              ? post.content.substring(0, 120) + '...'
+              : 'No excerpt available'}
+          </p>
+        )}
+      </CardContent>
+      
+      <CardFooter className="text-sm text-gray-500">
+        {post.publishDate && (
+          <time dateTime={post.publishDate}>
+            {`Published ${format(new Date(post.publishDate), 'MMMM d, yyyy')}`}
+          </time>
+        )}
+      </CardFooter>
+    </Card>
+  );
+};
 
 const BlogPage: React.FC = () => {
   const { data: pageContent, isLoading: isLoadingContent, error: contentError } = useContentfulBlogPageContent();
-  const { data: blogPosts = [], isLoading: isLoadingPosts, error: postsError } = useBlogPosts({ 
-    status: 'published',
+  const { data: blogPosts = [], isLoading: isLoadingPosts, error: postsError } = useContentfulBlogPosts({
     limit: 9
   });
 
