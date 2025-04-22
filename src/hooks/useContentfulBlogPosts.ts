@@ -37,11 +37,11 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
     queryFn: async () => {
       const client = await getContentfulClient();
 
-      // Create query params with proper string conversion
-      const queryParams = {
+      // Explicitly type the queryParams as Record<string, string>
+      const queryParams: Record<string, string> = {
         content_type: "blogPost",
-        limit: `${limit}`, // Convert to string using template literal
-        skip: `${skip}`,   // Convert to string using template literal
+        limit: limit.toString(),   // Use .toString() for explicit conversion
+        skip: skip.toString(),     // Use .toString() for explicit conversion
         order: "-fields.publishDate",
       };
 
