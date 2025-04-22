@@ -4,25 +4,44 @@ import { CMSMachine } from '@/types/cms';
 import { toast } from 'sonner';
 
 /**
- * !!!!! CRITICAL DESIGN NOTES !!!!!
+ * !!!!! MISSION CRITICAL: CONTENTFUL MACHINES HOOK !!!!!
  * 
- * DO NOT MODIFY THIS FILE WITHOUT CAREFUL CONSIDERATION:
+ * WARNING: HIGH-IMPACT COMPONENT
  * 
- * This hook is MISSION CRITICAL for machine data retrieval from Contentful.
- * Any changes MUST preserve the following key behaviors:
+ * THIS HOOK IS THE PRIMARY DATA SOURCE FOR MACHINE INFORMATION
  * 
- * 1. Fallback mechanism for preview and production environments
- * 2. Graceful error handling
- * 3. Consistent data transformation 
- * 4. Type safety for CMSMachine interface
+ * MODIFICATION GUIDELINES:
+ * ------------------------
+ * 1. PRESERVE CORE BEHAVIORS:
+ *    - Fallback mechanisms for ALL environments
+ *    - Robust error handling
+ *    - Consistent data transformation
+ *    - Strict type safety
  * 
- * Potential breaking changes to avoid:
- * - Removing fallback data mechanism
- * - Altering the core data transformation logic
- * - Changing the core query structure
- * - Modifying the error handling strategy
+ * 2. NEVER REMOVE:
+ *    - Fallback data mechanism
+ *    - Core transformation logic
+ *    - Detailed logging
+ *    - Environment-specific handling
  * 
- * ALWAYS test thoroughly after any modifications!
+ * 3. TESTING REQUIREMENTS:
+ *    - MANDATORY: Full regression testing after ANY changes
+ *    - Verify data integrity across ALL machine types
+ *    - Validate fallback mechanisms
+ *    - Check performance and error scenarios
+ * 
+ * 4. DEBUGGING CONSIDERATIONS:
+ *    - Extensive console logging is INTENTIONAL
+ *    - Do NOT remove or significantly alter logging
+ *    - Logs are crucial for tracking data flow and errors
+ * 
+ * 5. PERFORMANCE AND RELIABILITY:
+ *    - Minimize unnecessary data transformations
+ *    - Maintain quick response times
+ *    - Ensure graceful degradation under poor network conditions
+ * 
+ * CONTACT: [INSERT TEAM LEAD/ARCHITECTURE CONTACT]
+ * LAST REVIEW: 2024-04-22
  */
 
 // Define an interface for Contentful entry structure 
@@ -282,7 +301,21 @@ const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => {
   };
   
   console.log(`Transformed ${title} (${type}):`, machineData);
-  return machineData;
+  
+  // Add validation step before returning
+  try {
+    const safeMachine = validateMachineData(machineData);
+    return safeMachine;
+  } catch (validationError) {
+    console.error('[CRITICAL] Machine data validation failed', {
+      error: validationError,
+      entry,
+      timestamp: new Date().toISOString()
+    });
+    
+    // In case of validation failure, use a safe fallback
+    return validateMachineData(fallbackMachineData['divi-wp']);
+  }
 };
 
 /**
