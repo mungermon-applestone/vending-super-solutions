@@ -7,13 +7,13 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Server, HardDrive } from 'lucide-react';
+import { Loader2, ExternalLink, Server, HardDrive } from 'lucide-react';
 import PageHero from '@/components/common/PageHero';
 import { useMachinesPageContent } from '@/hooks/cms/useMachinesPageContent';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 
 const MachinesPage: React.FC = () => {
-  const { data: machines, isLoading, error } = useContentfulMachines();
+  const { data: machines, isLoading, error, refetch } = useContentfulMachines();
   const { data: pageContent } = useMachinesPageContent();
   
   console.log('Machines data from Contentful:', machines);
@@ -62,7 +62,9 @@ const MachinesPage: React.FC = () => {
               </CardContent>
               <CardFooter>
                 <Button asChild className="w-full">
-                  <Link to={`/machines/${machine.slug}`}>View Details</Link>
+                  <Link to={`/machines/${machine.slug}`}>
+                    View Details <ExternalLink className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -85,6 +87,22 @@ const MachinesPage: React.FC = () => {
         fallbackPrimaryButtonUrl="#machines-section"
       />
 
+      {/* Intro Section */}
+      {pageContent && (
+        <section className="bg-white py-12 md:py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                {pageContent.introTitle || "Innovative Machine Solutions"}
+              </h2>
+              <p className="text-lg text-gray-600">
+                {pageContent.introDescription || "Our machines combine cutting-edge technology with reliable performance to deliver exceptional value."}
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Machines Section */}
       <div className="container py-12 md:py-16" id="machines-section">
         <div className="text-center mb-12">
@@ -94,6 +112,12 @@ const MachinesPage: React.FC = () => {
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             {pageContent?.machineTypesDescription || "Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs."}
           </p>
+        </div>
+
+        <div className="flex justify-end mb-8">
+          <Button onClick={() => refetch()} variant="outline" className="flex items-center gap-2">
+            Refresh Data <Loader2 className={`h-4 w-4 ${isLoading ? 'animate-spin' : 'hidden'}`} />
+          </Button>
         </div>
 
         {isLoading ? (
@@ -119,6 +143,9 @@ const MachinesPage: React.FC = () => {
           <div className="bg-red-50 border border-red-200 rounded-md p-6 text-center">
             <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Machines</h3>
             <p className="text-red-600">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
+            <Button onClick={() => refetch()} className="mt-4" variant="outline">
+              Try Again
+            </Button>
           </div>
         ) : (
           <>
