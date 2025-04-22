@@ -24,17 +24,18 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
   previousPost,
   nextPost,
 }) => {
-  // TypeScript safety check - ensure fields exists
-  if (!post.fields) {
+  // Make sure post.fields exists and has the expected structure
+  if (!post?.fields) {
     return <div>Error: Blog post data is missing</div>;
   }
 
+  // Extract fields with type safety
   const { title, content, excerpt, publishDate, featuredImage } = post.fields;
 
   return (
     <article className="max-w-3xl mx-auto">
       <header className="mb-8">
-        {featuredImage && (
+        {featuredImage?.fields?.file?.url && (
           <Image
             src={featuredImage.fields.file.url}
             alt={featuredImage.fields.title || title}
