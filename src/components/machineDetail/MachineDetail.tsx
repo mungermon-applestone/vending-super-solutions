@@ -14,15 +14,17 @@ const MachineDetail: React.FC<MachineDetailProps> = ({ machine }) => {
   // Convert specs from individual properties to the expected Record<string, string> format
   // Map all spec fields from the machine object
   const formattedSpecs: Record<string, string> = {
-    dimensions: machine.dimensions || machine.specs?.dimensions || '',
-    weight: machine.weight || machine.specs?.weight || '',
-    powerRequirements: machine.powerRequirements || machine.specs?.powerRequirements || '',
-    temperature: machine.temperature || 'Ambient',
-    paymentOptions: machine.paymentOptions || machine.specs?.paymentOptions || '',
-    connectivity: machine.connectivity || machine.specs?.connectivity || '',
-    capacity: machine.capacity || machine.specs?.capacity || '',
-    manufacturer: machine.manufacturer || machine.specs?.manufacturer || '',
-    warranty: machine.warranty || machine.specs?.warranty || ''
+    ...(machine.specs || {}), // First spread any existing specs
+    // Only add these fields if they don't already exist in the specs object
+    ...(machine.specs?.dimensions ? {} : { dimensions: machine.specs?.dimensions || '' }),
+    ...(machine.specs?.weight ? {} : { weight: machine.specs?.weight || '' }),
+    ...(machine.specs?.powerRequirements ? {} : { powerRequirements: machine.specs?.powerRequirements || '' }),
+    ...(machine.temperature ? { temperature: machine.temperature } : { temperature: 'Ambient' }),
+    ...(machine.specs?.paymentOptions ? {} : { paymentOptions: machine.specs?.paymentOptions || '' }),
+    ...(machine.specs?.connectivity ? {} : { connectivity: machine.specs?.connectivity || '' }),
+    ...(machine.specs?.capacity ? {} : { capacity: machine.specs?.capacity || '' }),
+    ...(machine.specs?.manufacturer ? {} : { manufacturer: machine.specs?.manufacturer || '' }),
+    ...(machine.specs?.warranty ? {} : { warranty: machine.specs?.warranty || '' })
   };
 
   console.log("Machine data in MachineDetail component:", machine);
