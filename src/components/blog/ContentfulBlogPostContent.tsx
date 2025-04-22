@@ -29,8 +29,8 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
     return <div>Error: Blog post data is missing</div>;
   }
 
-  // Safely access fields using optional chaining
-  const title = post.fields.title || "";
+  // Access fields directly from post.fields with proper type checking
+  const title = post.fields.title;
   const content = post.fields.content;
   const excerpt = post.fields.excerpt;
   const publishDate = post.fields.publishDate;
