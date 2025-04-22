@@ -7,36 +7,40 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import MachineDetail from '@/components/machineDetail/MachineDetail';
+import { toast } from 'sonner';
 
 const MachineDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
   
-  // Ensure slug is a string and not undefined
-  const machineSlug = slug || '';
+  // Determine the machine slug to query
+  const isDiviWP = location.pathname.endsWith('/divi-wp');
+  const machineSlug = isDiviWP ? 'divi-wp' : slug || '';
   
-  // Special case for direct URL access to /machines/divi-wp
-  const isDiviWP = machineSlug === 'divi-wp' || location.pathname.endsWith('/divi-wp');
-  
-  // If explicitly divi-wp, force that slug
-  const querySlug = isDiviWP ? 'divi-wp' : machineSlug;
-  
-  const { data: machine, isLoading, error } = useContentfulMachine(querySlug);
-
   console.log('MachineDetailPage render - URL path:', location.pathname);
-  console.log('MachineDetailPage render - slug param:', slug);
-  console.log('MachineDetailPage render - query slug:', querySlug);
-  console.log('Machine data from Contentful:', machine);
+  console.log('MachineDetailPage render - isDiviWP:', isDiviWP);
+  console.log('MachineDetailPage render - machineSlug:', machineSlug);
   
-  // Special case for divi-wp, force direct fetch by ID
+  // Query Contentful using the determined slug
+  const { data: machine, isLoading, error } = useContentfulMachine(machineSlug);
+  
   useEffect(() => {
-    if (isDiviWP) {
-      console.log('Special case for divi-wp detected, should fetch ID: 1omUbnEhB6OeBFpwPFj1Ww');
-    }
-    
     // Scroll to top when the component mounts or slug changes
     window.scrollTo(0, 0);
-  }, [isDiviWP]);
+    
+    // Add some debug notifications in development
+    if (process.env.NODE_ENV === 'development') {
+      if (isDiviWP) {
+        console.log('DIVI-WP route detected, special handling activated');
+      }
+      
+      if (!machineSlug) {
+        toast.warning('No machine slug provided in URL');
+      }
+    }
+  }, [machineSlug, isDiviWP]);
+  
+  console.log('Machine data from Contentful:', machine);
   
   if (isLoading) {
     console.log('Machine detail page is in loading state');
@@ -92,7 +96,7 @@ const MachineDetailPage = () => {
   }
   
   if (!machine) {
-    console.log('No machine data found for slug:', querySlug);
+    console.log('No machine data found:', { slug, machineSlug, isDiviWP });
     return (
       <Layout>
         <div className="container mx-auto py-20">
@@ -101,21 +105,22 @@ const MachineDetailPage = () => {
               <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-amber-800 mb-3">Machine Not Found</h3>
               <p className="text-amber-600 mb-6">
-                {querySlug ? (
-                  `The machine with slug "${querySlug}" couldn't be found in Contentful.`
+                {machineSlug ? (
+                  `The machine "${machineSlug}" couldn't be found in Contentful.`
                 ) : (
-                  "No machine slug was provided in the URL."
-                )}
-                {isDiviWP && (
-                  <div className="mt-4 p-3 bg-amber-100 rounded text-left">
-                    <p className="font-medium">Looking for Divi-WP?</p>
-                    <p>Trying to fetch entry with ID: 1omUbnEhB6OeBFpwPFj1Ww</p>
-                  </div>
+                  "No machine identifier was provided in the URL."
                 )}
               </p>
-              <Button asChild variant="outline">
+              {isDiviWP && (
+                <div className="mt-4 p-3 bg-amber-100 rounded text-left">
+                  <p className="font-medium">Debug Info for Divi-WP:</p>
+                  <p>Expected to fetch machine with slug: divi-wp</p>
+                  <p>Alternative ID to try: 1omUbnEhB6OeBFpwPFj1Ww</p>
+                </div>
+              )}
+              <Button asChild variant="outline" className="mt-4">
                 <Link to="/machines" className="flex items-center gap-2">
-                  <ArrowLeft size={16} /> Return to Machines
+                  <ArrowLeft size={16} /> View All Machines
                 </Link>
               </Button>
             </div>

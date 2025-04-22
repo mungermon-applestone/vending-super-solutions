@@ -42,8 +42,8 @@ const App: React.FC = () => {
       path: '/machines',
       element: <MachinesPage />,
     },
+    // Explicit route for divi-wp must come BEFORE the generic :slug route
     {
-      // Place the explicit route first so it takes precedence
       path: '/machines/divi-wp',
       element: <MachineDetailPage />,
     },

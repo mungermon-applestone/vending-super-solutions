@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { CMSMachine } from '@/types/cms';
@@ -88,6 +87,38 @@ const fallbackMachineData: Record<string, CMSMachine> = {
   // ... keep existing fallback data for other machines
 };
 
+// Helper function to transform Contentful entry to CMSMachine
+const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => {
+  // Ensure machine type is one of the allowed values
+  const machineType = entry.type === 'locker' ? 'locker' : 'vending';
+  
+  return {
+    id: entry.sys?.id || entry.id || '',
+    title: entry.title || '',
+    slug: entry.slug || '',
+    type: machineType,
+    description: entry.description || '',
+    temperature: entry.temperature || 'ambient',
+    features: entry.features || [],
+    images: entry.images ? entry.images.map((image) => ({
+      id: image.sys?.id || '',
+      url: image.fields?.file?.url ? `https:${image.fields.file.url}` : '',
+      alt: image.fields?.title || entry.title || ''
+    })) : [],
+    specs: {
+      dimensions: entry.dimensions || entry.specs?.dimensions || '',
+      weight: entry.weight || entry.specs?.weight || '',
+      capacity: entry.capacity || entry.specs?.capacity || '',
+      powerRequirements: entry.powerRequirements || entry.specs?.powerRequirements || '',
+      paymentOptions: entry.paymentOptions || entry.specs?.paymentOptions || '',
+      connectivity: entry.connectivity || entry.specs?.connectivity || '',
+      manufacturer: entry.manufacturer || entry.specs?.manufacturer || '',
+      warranty: entry.warranty || entry.specs?.warranty || '',
+      temperature: entry.temperature || entry.specs?.temperature || ''
+    }
+  };
+};
+
 export function useContentfulMachines() {
   return useQuery({
     queryKey: ['contentful', 'machines'],
@@ -96,36 +127,7 @@ export function useContentfulMachines() {
       try {
         const entries = await fetchContentfulEntries<ContentfulEntry>('machine');
         
-        return entries.map(entry => {
-          // Ensure machine type is one of the allowed values
-          const machineType = entry.type === 'locker' ? 'locker' : 'vending';
-          
-          return {
-            id: entry.sys?.id || entry.id || '',
-            title: entry.title || '',
-            slug: entry.slug || '',
-            type: machineType,
-            description: entry.description || '',
-            temperature: entry.temperature || 'ambient',
-            features: entry.features || [],
-            images: entry.images ? entry.images.map((image) => ({
-              id: image.sys?.id || '',
-              url: image.fields?.file?.url ? `https:${image.fields.file.url}` : '',
-              alt: image.fields?.title || entry.title || ''
-            })) : [],
-            specs: {
-              dimensions: entry.dimensions || entry.specs?.dimensions || '',
-              weight: entry.weight || entry.specs?.weight || '',
-              capacity: entry.capacity || entry.specs?.capacity || '',
-              powerRequirements: entry.powerRequirements || entry.specs?.powerRequirements || '',
-              paymentOptions: entry.paymentOptions || entry.specs?.paymentOptions || '',
-              connectivity: entry.connectivity || entry.specs?.connectivity || '',
-              manufacturer: entry.manufacturer || entry.specs?.manufacturer || '',
-              warranty: entry.warranty || entry.specs?.warranty || '',
-              temperature: entry.temperature || entry.specs?.temperature || ''
-            }
-          } as CMSMachine;
-        });
+        return entries.map(transformContentfulEntry);
       } catch (error) {
         console.error('[useContentfulMachines] Error:', error);
         // In preview environment, return fallback data
@@ -151,86 +153,59 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
       console.log('[useContentfulMachine] Fetching machine with idOrSlug:', idOrSlug);
       
       try {
-        // Special handling for divi-wp to directly fetch by known ID
+        // Special handling for divi-wp
         if (idOrSlug === 'divi-wp') {
           console.log('[useContentfulMachine] Special case: directly fetching divi-wp with ID: 1omUbnEhB6OeBFpwPFj1Ww');
+          
+          // First try with the direct ID
           try {
             const entry = await fetchContentfulEntry<ContentfulEntry>('1omUbnEhB6OeBFpwPFj1Ww');
             if (entry) {
               console.log('[useContentfulMachine] Successfully fetched divi-wp entry by ID:', entry);
-              // Transform the entry to our expected format
-              const machineType = entry.type === 'locker' ? 'locker' : 'vending';
-              
-              return {
-                id: entry.sys?.id || entry.id || '1omUbnEhB6OeBFpwPFj1Ww',
-                title: entry.title || 'DIVI-WP',
-                slug: entry.slug || 'divi-wp',
-                type: machineType,
-                description: entry.description || '',
-                temperature: entry.temperature || 'ambient',
-                features: entry.features || [],
-                images: entry.images ? entry.images.map((image) => ({
-                  id: image.sys?.id || '',
-                  url: image.fields?.file?.url ? `https:${image.fields.file.url}` : '',
-                  alt: image.fields?.title || entry.title || ''
-                })) : [],
-                specs: {
-                  dimensions: entry.dimensions || entry.specs?.dimensions || '',
-                  weight: entry.weight || entry.specs?.weight || '',
-                  capacity: entry.capacity || entry.specs?.capacity || '',
-                  powerRequirements: entry.powerRequirements || entry.specs?.powerRequirements || '',
-                  paymentOptions: entry.paymentOptions || entry.specs?.paymentOptions || '',
-                  connectivity: entry.connectivity || entry.specs?.connectivity || '',
-                  manufacturer: entry.manufacturer || entry.specs?.manufacturer || '',
-                  warranty: entry.warranty || entry.specs?.warranty || '',
-                  temperature: entry.temperature || entry.specs?.temperature || ''
-                }
-              } as CMSMachine;
+              return transformContentfulEntry(entry);
             }
           } catch (diviError) {
             console.error('[useContentfulMachine] Error fetching divi-wp by ID:', diviError);
-            // If in preview environment and fetch failed, return fallback
-            if (window.location.hostname.includes('lovable.app')) {
-              console.log('[useContentfulMachine] Using fallback data for divi-wp in preview environment');
-              return fallbackMachineData['divi-wp'];
-            }
           }
+          
+          // If direct ID fails or in preview environment, use fallback data
+          if (window.location.hostname.includes('lovable')) {
+            console.log('[useContentfulMachine] Using fallback data for divi-wp in preview');
+            toast.info('Using fallback data for DIVI-WP in preview environment');
+            return fallbackMachineData['divi-wp'];
+          }
+          
+          // Try by slug as last resort
+          try {
+            const entriesBySlug = await fetchContentfulEntries<ContentfulEntry>('machine', {
+              'fields.slug': 'divi-wp'
+            });
+            
+            if (entriesBySlug.length > 0) {
+              console.log('[useContentfulMachine] Found divi-wp by slug query:', entriesBySlug[0]);
+              return transformContentfulEntry(entriesBySlug[0]);
+            }
+          } catch (slugError) {
+            console.error('[useContentfulMachine] Error fetching divi-wp by slug:', slugError);
+          }
+          
+          // If all fetching attempts fail but we're in preview, still use fallback
+          if (window.location.hostname.includes('lovable')) {
+            console.log('[useContentfulMachine] All fetching attempts failed, using fallback');
+            return fallbackMachineData['divi-wp'];
+          }
+          
+          return null;
         }
         
-        // If not a special case or if special case failed, try fetching by ID first 
+        // For all other machines, try fetching by ID first if it looks like an ID 
         if (idOrSlug.length > 10) {
           try {
             console.log('[useContentfulMachine] Trying direct ID fetch:', idOrSlug);
             const entry = await fetchContentfulEntry<ContentfulEntry>(idOrSlug);
             if (entry) {
               console.log('[useContentfulMachine] Successfully fetched by ID:', entry);
-              const machineType = entry.type === 'locker' ? 'locker' : 'vending';
-              
-              return {
-                id: entry.sys?.id || entry.id || idOrSlug,
-                title: entry.title || '',
-                slug: entry.slug || idOrSlug,
-                type: machineType,
-                description: entry.description || '',
-                temperature: entry.temperature || 'ambient',
-                features: entry.features || [],
-                images: entry.images ? entry.images.map((image) => ({
-                  id: image.sys?.id || '',
-                  url: image.fields?.file?.url ? `https:${image.fields.file.url}` : '',
-                  alt: image.fields?.title || entry.title || ''
-                })) : [],
-                specs: {
-                  dimensions: entry.dimensions || entry.specs?.dimensions || '',
-                  weight: entry.weight || entry.specs?.weight || '',
-                  capacity: entry.capacity || entry.specs?.capacity || '',
-                  powerRequirements: entry.powerRequirements || entry.specs?.powerRequirements || '',
-                  paymentOptions: entry.paymentOptions || entry.specs?.paymentOptions || '',
-                  connectivity: entry.connectivity || entry.specs?.connectivity || '',
-                  manufacturer: entry.manufacturer || entry.specs?.manufacturer || '',
-                  warranty: entry.warranty || entry.specs?.warranty || '',
-                  temperature: entry.temperature || entry.specs?.temperature || ''
-                }
-              } as CMSMachine;
+              return transformContentfulEntry(entry);
             }
           } catch (idError) {
             console.log('[useContentfulMachine] Could not fetch by ID:', idError);
@@ -247,7 +222,7 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
           console.warn('[useContentfulMachine] No machine found with slug:', idOrSlug);
           
           // If in preview environment and we have fallback data, use it
-          if (window.location.hostname.includes('lovable.app') && fallbackMachineData[idOrSlug]) {
+          if (window.location.hostname.includes('lovable') && fallbackMachineData[idOrSlug]) {
             console.log('[useContentfulMachine] Using fallback data for:', idOrSlug);
             return fallbackMachineData[idOrSlug];
           }
@@ -258,39 +233,12 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         const entry = entries[0];
         console.log('[useContentfulMachine] Found machine by slug:', entry);
         
-        // Ensure machine type is one of the allowed values
-        const machineType = entry.type === 'locker' ? 'locker' : 'vending';
-        
-        return {
-          id: entry.sys?.id || entry.id || '',
-          title: entry.title || '',
-          slug: entry.slug || idOrSlug,
-          type: machineType,
-          description: entry.description || '',
-          temperature: entry.temperature || 'ambient',
-          features: entry.features || [],
-          images: entry.images ? entry.images.map((image) => ({
-            id: image.sys?.id || '',
-            url: image.fields?.file?.url ? `https:${image.fields.file.url}` : '',
-            alt: image.fields?.title || entry.title || ''
-          })) : [],
-          specs: {
-            dimensions: entry.dimensions || entry.specs?.dimensions || '',
-            weight: entry.weight || entry.specs?.weight || '',
-            capacity: entry.capacity || entry.specs?.capacity || '',
-            powerRequirements: entry.powerRequirements || entry.specs?.powerRequirements || '',
-            paymentOptions: entry.paymentOptions || entry.specs?.paymentOptions || '',
-            connectivity: entry.connectivity || entry.specs?.connectivity || '',
-            manufacturer: entry.manufacturer || entry.specs?.manufacturer || '',
-            warranty: entry.warranty || entry.specs?.warranty || '',
-            temperature: entry.temperature || entry.specs?.temperature || ''
-          }
-        } as CMSMachine;
+        return transformContentfulEntry(entry);
       } catch (error) {
         console.error(`[useContentfulMachine] Error:`, error);
         
         // If in preview environment and we have fallback data, use it
-        if (window.location.hostname.includes('lovable.app') && fallbackMachineData[idOrSlug]) {
+        if (window.location.hostname.includes('lovable') && fallbackMachineData[idOrSlug]) {
           console.log('[useContentfulMachine] Using fallback data for:', idOrSlug);
           return fallbackMachineData[idOrSlug];
         }
