@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 const Blog = () => {
   const { data: posts = [], isLoading, error } = useContentfulBlogPosts();
@@ -13,7 +14,8 @@ const Blog = () => {
   return (
     <Layout>
       <div className="container mx-auto py-10">
-        <h1 className="text-4xl font-bold mb-6">Our Blog</h1>
+        <h1 className="text-4xl font-bold mb-2">Our Blog</h1>
+        <p className="text-gray-600 mb-8 text-lg">Latest updates and insights from our team</p>
         
         {isLoading ? (
           <div className="flex justify-center py-16">
@@ -41,7 +43,7 @@ const Blog = () => {
 
 const BlogPostCard = ({ post }: { post: ContentfulBlogPost }) => {
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
       <CardHeader>
         <CardTitle className="text-xl">
           <Link to={`/blog/${post.slug}`} className="hover:underline">
@@ -53,11 +55,13 @@ const BlogPostCard = ({ post }: { post: ContentfulBlogPost }) => {
       <CardContent className="flex-grow">
         {post.featuredImage && (
           <div className="mb-4">
-            <img 
-              src={post.featuredImage.url} 
-              alt={post.featuredImage.title} 
-              className="w-full h-48 object-cover rounded-md"
-            />
+            <AspectRatio ratio={16/9} className="bg-gray-100 rounded-md overflow-hidden">
+              <img 
+                src={post.featuredImage.url} 
+                alt={post.featuredImage.title} 
+                className="w-full h-full object-cover"
+              />
+            </AspectRatio>
           </div>
         )}
         <p className="text-gray-600 line-clamp-3">{post.excerpt}</p>
