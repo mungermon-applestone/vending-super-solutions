@@ -34,8 +34,8 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
 
       const queryParams: any = {
         content_type: "blogPost",
-        limit: limit.toString(), // Convert number to string
-        skip: skip.toString(), // Convert number to string
+        limit: limit,
+        skip: skip,
         order: "-fields.publishDate",
       };
 
