@@ -21,6 +21,7 @@ import MachinesPage from '@/pages/MachinesPage';
 import About from '@/pages/About';
 import ContactContentful from '@/pages/ContactContentful';
 import BlogContentTest from './pages/BlogContentTest';
+import ZhilaiApplestoneAnnouncement from './pages/ZhilaiApplestoneAnnouncement';
 
 const ContentfulBlogPostDetail = lazy(() => import('./pages/ContentfulBlogPostDetail'));
 
@@ -105,6 +106,10 @@ const App: React.FC = () => {
           <BlogContentTest />
         </Suspense>
       ),
+    },
+    {
+      path: '/zhilai-applestone-announcement',
+      element: <ZhilaiApplestoneAnnouncement />,
     },
     {
       path: '*',
