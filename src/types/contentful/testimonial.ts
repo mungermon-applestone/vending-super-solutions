@@ -9,6 +9,10 @@ export interface ContentfulTestimonialSection {
     testimonials?: ContentfulTestimonial[];
     pageKey?: string;
   };
+  title?: string;
+  subtitle?: string;
+  testimonials?: ContentfulTestimonial[];
+  id?: string;
 }
 
 export interface ContentfulTestimonial {
@@ -34,5 +38,13 @@ export interface ContentfulTestimonial {
     };
     pageKey?: string;
     visible?: boolean;
+  };
+  id?: string;
+  quote?: string;
+  authorName?: string;
+  authorTitle?: string;
+  rating?: number;
+  authorImage?: {
+    url?: string;
   };
 }

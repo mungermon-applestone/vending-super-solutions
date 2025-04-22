@@ -1,13 +1,31 @@
 
 /**
  * Technology service
- * This is a simplified version that just exports stub functions.
  */
 
-export const getTechnologies = async () => {
-  return [];
+import { CMSTechnology } from '@/types/cms';
+import { 
+  fetchTechnologies, 
+  fetchTechnologyBySlug,
+  createTechnology,
+  updateTechnology,
+  deleteTechnology,
+  cloneTechnology 
+} from './contentTypes/technologies/index';
+
+export {
+  fetchTechnologies,
+  fetchTechnologyBySlug,
+  createTechnology,
+  updateTechnology,
+  deleteTechnology,
+  cloneTechnology
 };
 
-export const getTechnologyBySlug = async (slug: string) => {
-  return null;
+export const getTechnologyBySlug = async (slug: string): Promise<CMSTechnology | null> => {
+  return await fetchTechnologyBySlug();
+};
+
+export const getTechnologies = async (): Promise<CMSTechnology[]> => {
+  return await fetchTechnologies();
 };

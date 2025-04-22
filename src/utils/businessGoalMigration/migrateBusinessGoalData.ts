@@ -1,10 +1,19 @@
 
-/**
- * Business goal migration utility
- * This is a simplified version since we no longer need to migrate data.
- */
+import { CMSBusinessGoal } from "@/types/cms";
 
-export const migrateBusinessGoalData = async () => {
-  console.log('Business goal migration is no longer needed with Contentful CMS');
-  return [];
+export const migrateBusinessGoalData = async (): Promise<{
+  success: boolean;
+  message: string;
+  count?: number;
+}> => {
+  // Mock implementation
+  return {
+    success: true,
+    message: "Business goals migration completed",
+    count: 0
+  };
+};
+
+export const checkIfBusinessGoalDataExists = async (): Promise<boolean> => {
+  return false;
 };

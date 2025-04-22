@@ -1,20 +1,25 @@
 
+import { CMSBusinessGoal } from '@/types/cms';
+
+// Define BusinessGoalAdapter interface
+export interface BusinessGoalAdapter {
+  getAll: () => Promise<CMSBusinessGoal[]>;
+  getBySlug: (slug: string) => Promise<CMSBusinessGoal | null>;
+}
+
 /**
- * Business goal adapter factory
- * This is a simplified version since we're only using Contentful now.
+ * Factory function to create a business goal adapter
  */
-
-import { BusinessGoalAdapter } from '@/types/cms';
-
-export const getBusinessGoalAdapter = (): BusinessGoalAdapter => {
-  // Return a stub adapter since we're using only Contentful now
+export const createBusinessGoalAdapter = (): BusinessGoalAdapter => {
+  // Return a simple adapter with mock data
   return {
-    getAll: async () => [],
-    getBySlug: async () => null,
-    getById: async () => null,
-    create: async () => null,
-    update: async () => false,
-    delete: async () => false,
-    clone: async () => null
+    getAll: async () => {
+      console.log("Getting all business goals");
+      return [];
+    },
+    getBySlug: async (slug: string) => {
+      console.log(`Getting business goal by slug: ${slug}`);
+      return null;
+    }
   };
 };

@@ -8,6 +8,7 @@ interface ConnectionTestResult {
   success: boolean;
   message: string;
   details?: Record<string, any>;
+  errorData?: any;
 }
 
 export const testCMSConnection = async (): Promise<ConnectionTestResult> => {
@@ -20,4 +21,9 @@ export const testCMSConnection = async (): Promise<ConnectionTestResult> => {
       endpointTried: "content delivery API",
     }
   };
+};
+
+// Add testContentfulConnection for use in CMSConnectionTest and ProductDetailPage
+export const testContentfulConnection = async (): Promise<ConnectionTestResult> => {
+  return testCMSConnection();
 };

@@ -1,24 +1,14 @@
 
 /**
- * Basic CMS information utility
- * This simplified version replaces the previous Supabase-based implementation
+ * CMS information utility
  */
 
-interface CMSInfo {
-  provider: string;
-  status: 'configured' | 'partial' | 'not-configured';
-  isConfigured: boolean;
-  apiUrl?: string;
-  apiKeyConfigured: boolean;
-  adminUrl?: string;
-}
-
-export const getCMSInfo = (): CMSInfo => {
+export const getCMSInfo = () => {
   return {
     provider: 'Contentful',
     status: 'configured',
-    isConfigured: true,
-    apiKeyConfigured: true,
-    adminUrl: 'https://app.contentful.com'
+    apiUrl: 'https://cdn.contentful.com',
+    version: '1.0.0',
+    hasConfig: true
   };
 };

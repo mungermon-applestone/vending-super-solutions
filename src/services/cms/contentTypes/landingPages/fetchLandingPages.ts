@@ -4,7 +4,9 @@
  * This is a simplified version that returns an empty array.
  */
 
-export const fetchLandingPages = async () => {
+import { LandingPage } from '@/types/landingPage';
+
+export const fetchLandingPages = async (): Promise<LandingPage[]> => {
   return [];
 };
 
