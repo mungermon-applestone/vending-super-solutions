@@ -1,10 +1,11 @@
-
 import React from 'react';
+import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
+import { Document } from '@contentful/rich-text-types';
 
 interface FAQItem {
   id: string;
   question: string;
-  answer: string;
+  answer: string | Document;
 }
 
 interface FAQSectionProps {
@@ -15,6 +16,23 @@ interface FAQSectionProps {
 const FAQSection = ({ faqSectionTitle, faqItems }: FAQSectionProps) => {
   // Debug: Log what we received
   console.log('FAQ Section received items:', faqItems?.length || 0);
+  
+  // Helper function to render the answer content properly
+  const renderAnswer = (answer: string | Document) => {
+    // Check if the answer is a rich text document
+    if (typeof answer === 'object' && answer !== null && 'nodeType' in answer) {
+      console.log('Rendering answer as rich text document');
+      try {
+        return documentToReactComponents(answer as Document);
+      } catch (error) {
+        console.error('Error rendering rich text:', error);
+        return <p className="text-red-500">Error rendering content</p>;
+      }
+    }
+    
+    // Otherwise render as regular text
+    return <p className="text-gray-600 whitespace-pre-line">{answer as string}</p>;
+  };
   
   // Display the FAQ section only if we have a title or items
   return (
@@ -30,7 +48,7 @@ const FAQSection = ({ faqSectionTitle, faqItems }: FAQSectionProps) => {
             {faqItems.map((faq) => (
               <div key={faq.id} className="bg-white p-6 rounded-lg shadow-sm">
                 <h3 className="font-bold text-xl mb-2">{faq.question}</h3>
-                <p className="text-gray-600 whitespace-pre-line">{faq.answer}</p>
+                {renderAnswer(faq.answer)}
               </div>
             ))}
           </div>

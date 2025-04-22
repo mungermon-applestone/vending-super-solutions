@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
@@ -105,6 +106,7 @@ const About = () => {
     }
   };
 
+  // Process data after it's loaded
   const processedData = React.useMemo(() => {
     if (!data?.fields) return {} as AboutPageFields;
     return data.fields as AboutPageFields;
@@ -127,9 +129,9 @@ const About = () => {
         ) : (
           <ContentfulErrorBoundary contentType="About page">
             <div className="prose max-w-none">
-              {isContentReady && processedData.bodyContent && 
-                documentToReactComponents(processedData.bodyContent as any, richTextOptions)
-              }
+              {isContentReady && processedData.bodyContent && (
+                <>{documentToReactComponents(processedData.bodyContent as any, richTextOptions)}</>
+              )}
               {isContentReady && !processedData.bodyContent && (
                 <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-md">
                   <p>The About page content was loaded, but no body content was found.</p>

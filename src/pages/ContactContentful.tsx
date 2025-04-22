@@ -3,17 +3,16 @@ import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import useContentful from '@/hooks/useContentful';
-import { Mail, Phone, MapPin } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { ContentfulResponse, ContentfulContactPageFields, ContentfulFAQItem } from '@/types/contentful';
 import ContactCards from '@/components/contact/ContactCards';
 import ContactForm from '@/components/contact/ContactForm';
 import FAQSection from '@/components/contact/FAQSection';
+import { Document } from '@contentful/rich-text-types';
 
 interface FAQItem {
   id: string;
   question: string;
-  answer: string;
+  answer: string | Document;
 }
 
 interface ContactPageContent {
@@ -86,6 +85,11 @@ const ContactContentful = () => {
             question: item.fields.question,
             answer: item.fields.answer,
           });
+          console.log(`Processed FAQ item ${item.sys?.id}:`, {
+            question: item.fields.question,
+            answerType: typeof item.fields.answer,
+            isRichText: typeof item.fields.answer === 'object' && item.fields.answer !== null && 'nodeType' in item.fields.answer
+          });
         }
       });
     }
@@ -103,11 +107,16 @@ const ContactContentful = () => {
       
       if (linkedFAQs.length > 0) {
         linkedFAQs.forEach((faq) => {
-          if (faq.fields && typeof faq.fields.question === 'string' && typeof faq.fields.answer === 'string') {
+          if (faq.fields && typeof faq.fields.question === 'string') {
             processedFaqItems.push({
               id: faq.sys.id,
               question: faq.fields.question,
               answer: faq.fields.answer,
+            });
+            console.log(`Processed FAQ item ${faq.sys.id}:`, {
+              question: faq.fields.question,
+              answerType: typeof faq.fields.answer,
+              isRichText: typeof faq.fields.answer === 'object' && faq.fields.answer !== null && 'nodeType' in faq.fields.answer
             });
           }
         });
@@ -124,22 +133,20 @@ const ContactContentful = () => {
       
       if (knownFaqs.length > 0) {
         knownFaqs.forEach(faq => {
-          if (faq.fields && typeof faq.fields.question === 'string' && typeof faq.fields.answer === 'string') {
+          if (faq.fields && typeof faq.fields.question === 'string') {
             processedFaqItems.push({
               id: faq.sys.id,
               question: faq.fields.question,
               answer: faq.fields.answer,
             });
+            console.log(`Processed FAQ item ${faq.sys.id}:`, {
+              question: faq.fields.question,
+              answerType: typeof faq.fields.answer,
+              isRichText: typeof faq.fields.answer === 'object' && faq.fields.answer !== null && 'nodeType' in faq.fields.answer
+            });
           }
         });
       }
-    }
-    
-    // Fourth approach: Direct check for the specific entry IDs we know
-    if (processedFaqItems.length === 0) {
-      console.log('Attempting to fetch individual FAQ entries directly');
-      // This approach would require individual fetches for each ID, which we're not implementing here
-      // but could be a fallback approach if needed
     }
     
     console.log('Final processed FAQ items:', processedFaqItems);
@@ -156,10 +163,12 @@ const ContactContentful = () => {
     return (
       <Layout>
         <div className="container max-w-4xl mx-auto py-12">
-          <Skeleton className="h-10 w-1/2 mb-4" />
-          <Skeleton className="h-6 w-1/5 mb-2" />
-          <Skeleton className="h-24 w-full mb-4" />
-          <Skeleton className="h-6 w-1/2 mb-2" />
+          <div className="animate-pulse">
+            <div className="h-10 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="h-6 bg-gray-200 rounded w-1/5 mb-2"></div>
+            <div className="h-24 bg-gray-200 rounded w-full mb-4"></div>
+            <div className="h-6 bg-gray-200 rounded w-1/2 mb-2"></div>
+          </div>
         </div>
       </Layout>
     );
@@ -169,7 +178,11 @@ const ContactContentful = () => {
     return (
       <Layout>
         <div className="container max-w-4xl mx-auto py-12 text-red-500">
-          Error loading contact page: {error instanceof Error ? error.message : String(error)}
+          <h2 className="text-2xl font-bold mb-4">Error Loading Contact Information</h2>
+          <p>{error instanceof Error ? error.message : String(error)}</p>
+          <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded">
+            <p className="text-sm">Technical details: {JSON.stringify(error)}</p>
+          </div>
         </div>
       </Layout>
     );
@@ -206,6 +219,21 @@ const ContactContentful = () => {
         faqSectionTitle={processedData.faqSectionTitle} 
         faqItems={processedData.faqItems}
       />
+      
+      {/* Debug information */}
+      {processedData.faqItems?.length === 0 && (
+        <div className="container mx-auto my-8 p-4 bg-yellow-50 border border-yellow-100 rounded">
+          <h3 className="font-bold text-lg mb-2">FAQ Debug Information</h3>
+          <p>No FAQ items were processed. Check the console for more details.</p>
+          
+          {data?.includes?.Entry && (
+            <div className="mt-4">
+              <p>Found {data.includes.Entry.length} entries in includes.</p>
+              <p>Known FAQ IDs: {KNOWN_FAQ_IDS.join(', ')}</p>
+            </div>
+          )}
+        </div>
+      )}
     </Layout>
   );
 };

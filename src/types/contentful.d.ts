@@ -1,4 +1,3 @@
-
 import { Asset, Entry, EntrySkeletonType } from 'contentful';
 import { Document } from '@contentful/rich-text-types';
 
@@ -123,7 +122,7 @@ export interface ContentfulFAQItem {
   };
   fields: {
     question: string;
-    answer: string;
+    answer: string | ContentfulRichTextDocument;
   };
 }
 
