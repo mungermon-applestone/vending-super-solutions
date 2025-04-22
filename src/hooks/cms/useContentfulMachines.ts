@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { CMSMachine } from '@/types/cms';
@@ -65,6 +66,26 @@ interface ContentfulEntry {
       title?: string;
     };
   }>;
+  dimensions?: string;
+  weight?: string;
+  capacity?: string;
+  powerRequirements?: string;
+  paymentOptions?: string;
+  connectivity?: string;
+  manufacturer?: string;
+  warranty?: string;
+  specs?: {
+    dimensions?: string;
+    weight?: string;
+    capacity?: string;
+    powerRequirements?: string;
+    paymentOptions?: string;
+    connectivity?: string;
+    manufacturer?: string;
+    warranty?: string;
+    temperature?: string;
+    [key: string]: string | undefined;
+  };
 }
 
 // Define fallback data for preview environment - particularly useful for divi-wp
@@ -172,7 +193,10 @@ const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => {
   const fields = entry.fields || entry;
   const title = fields.title || '';
   const slug = fields.slug || '';
+  
+  // Ensure type is strictly "vending" or "locker"
   const type = fields.type === 'locker' ? 'locker' : 'vending';
+  
   const description = fields.description || '';
   const temperature = fields.temperature || 'ambient';
   const features = fields.features || [];
@@ -199,25 +223,25 @@ const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => {
     console.log(`No images found for ${title}`);
   }
   
-  // Build specs object
+  // Safe access to specs with proper fallbacks
   const specs = {
-    dimensions: fields.dimensions || fields.specs?.dimensions || '',
-    weight: fields.weight || fields.specs?.weight || '',
-    capacity: fields.capacity || fields.specs?.capacity || '',
-    powerRequirements: fields.powerRequirements || fields.specs?.powerRequirements || '',
-    paymentOptions: fields.paymentOptions || fields.specs?.paymentOptions || '',
-    connectivity: fields.connectivity || fields.specs?.connectivity || '',
-    manufacturer: fields.manufacturer || fields.specs?.manufacturer || '',
-    warranty: fields.warranty || fields.specs?.warranty || '',
-    temperature: fields.temperature || fields.specs?.temperature || ''
+    dimensions: fields.dimensions || (fields.specs?.dimensions) || '',
+    weight: fields.weight || (fields.specs?.weight) || '',
+    capacity: fields.capacity || (fields.specs?.capacity) || '',
+    powerRequirements: fields.powerRequirements || (fields.specs?.powerRequirements) || '',
+    paymentOptions: fields.paymentOptions || (fields.specs?.paymentOptions) || '',
+    connectivity: fields.connectivity || (fields.specs?.connectivity) || '',
+    manufacturer: fields.manufacturer || (fields.specs?.manufacturer) || '',
+    warranty: fields.warranty || (fields.specs?.warranty) || '',
+    temperature: fields.temperature || (fields.specs?.temperature) || ''
   };
   
   // Construct the final object
-  const machineData = {
+  const machineData: CMSMachine = {
     id: entry.sys?.id || entry.id || '',
     title: title,
     slug: slug,
-    type: type,
+    type: type, 
     description: description,
     temperature: temperature,
     features: features,
