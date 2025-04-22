@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { CMSMachine } from '@/types/cms';
@@ -16,6 +15,45 @@ interface ContentfulEntry {
   description?: string;
   temperature?: string;
   features?: string[];
+  fields?: {
+    title?: string;
+    slug?: string;
+    type?: string;
+    description?: string;
+    temperature?: string;
+    features?: string[];
+    images?: Array<{
+      sys?: {
+        id: string;
+      };
+      fields?: {
+        file?: {
+          url?: string;
+        };
+        title?: string;
+      };
+    }>;
+    dimensions?: string;
+    weight?: string;
+    capacity?: string;
+    powerRequirements?: string;
+    paymentOptions?: string;
+    connectivity?: string;
+    manufacturer?: string;
+    warranty?: string;
+    specs?: {
+      dimensions?: string;
+      weight?: string;
+      capacity?: string;
+      powerRequirements?: string;
+      paymentOptions?: string;
+      connectivity?: string;
+      manufacturer?: string;
+      warranty?: string;
+      temperature?: string;
+      [key: string]: string | undefined;
+    };
+  };
   images?: Array<{
     sys?: {
       id: string;
@@ -27,26 +65,6 @@ interface ContentfulEntry {
       title?: string;
     };
   }>;
-  dimensions?: string;
-  weight?: string;
-  capacity?: string;
-  powerRequirements?: string;
-  paymentOptions?: string;
-  connectivity?: string;
-  manufacturer?: string;
-  warranty?: string;
-  specs?: {
-    dimensions?: string;
-    weight?: string;
-    capacity?: string;
-    powerRequirements?: string;
-    paymentOptions?: string;
-    connectivity?: string;
-    manufacturer?: string;
-    warranty?: string;
-    temperature?: string;
-    [key: string]: string | undefined;
-  };
 }
 
 // Define fallback data for preview environment - particularly useful for divi-wp
@@ -85,7 +103,6 @@ const fallbackMachineData: Record<string, CMSMachine> = {
       warranty: "3 years standard"
     }
   },
-  // Additional fallback machines can be added here
   'option-2-wall-mount': {
     id: 'option2wallmount',
     title: 'Option 2 Wall Mount',
@@ -149,34 +166,67 @@ const fallbackMachineData: Record<string, CMSMachine> = {
 
 // Helper function to transform Contentful entry to CMSMachine
 const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => {
-  // Ensure machine type is one of the allowed values
-  const machineType = entry.type === 'locker' ? 'locker' : 'vending';
+  console.log('Transforming entry:', entry);
   
-  return {
-    id: entry.sys?.id || entry.id || '',
-    title: entry.title || '',
-    slug: entry.slug || '',
-    type: machineType,
-    description: entry.description || '',
-    temperature: entry.temperature || 'ambient',
-    features: entry.features || [],
-    images: entry.images ? entry.images.map((image) => ({
-      id: image.sys?.id || '',
-      url: image.fields?.file?.url ? `https:${image.fields.file.url}` : '',
-      alt: image.fields?.title || entry.title || ''
-    })) : [],
-    specs: {
-      dimensions: entry.dimensions || entry.specs?.dimensions || '',
-      weight: entry.weight || entry.specs?.weight || '',
-      capacity: entry.capacity || entry.specs?.capacity || '',
-      powerRequirements: entry.powerRequirements || entry.specs?.powerRequirements || '',
-      paymentOptions: entry.paymentOptions || entry.specs?.paymentOptions || '',
-      connectivity: entry.connectivity || entry.specs?.connectivity || '',
-      manufacturer: entry.manufacturer || entry.specs?.manufacturer || '',
-      warranty: entry.warranty || entry.specs?.warranty || '',
-      temperature: entry.temperature || entry.specs?.temperature || ''
+  // Handle nested Contentful structure - fields may be at top level or in fields property
+  const fields = entry.fields || entry;
+  const title = fields.title || '';
+  const slug = fields.slug || '';
+  const type = fields.type === 'locker' ? 'locker' : 'vending';
+  const description = fields.description || '';
+  const temperature = fields.temperature || 'ambient';
+  const features = fields.features || [];
+  
+  // Handle images, which can be complex in Contentful
+  let images = [];
+  if (fields.images && Array.isArray(fields.images)) {
+    images = fields.images.map((image) => {
+      const imageFields = image.fields || {};
+      const url = imageFields.file?.url ? `https:${imageFields.file.url}` : '';
+      const alt = imageFields.title || title || '';
+      return {
+        id: image.sys?.id || '',
+        url: url,
+        alt: alt
+      };
+    });
+    
+    // Log first image for debugging
+    if (images.length > 0) {
+      console.log(`First image for ${title}:`, images[0]);
     }
+  } else {
+    console.log(`No images found for ${title}`);
+  }
+  
+  // Build specs object
+  const specs = {
+    dimensions: fields.dimensions || fields.specs?.dimensions || '',
+    weight: fields.weight || fields.specs?.weight || '',
+    capacity: fields.capacity || fields.specs?.capacity || '',
+    powerRequirements: fields.powerRequirements || fields.specs?.powerRequirements || '',
+    paymentOptions: fields.paymentOptions || fields.specs?.paymentOptions || '',
+    connectivity: fields.connectivity || fields.specs?.connectivity || '',
+    manufacturer: fields.manufacturer || fields.specs?.manufacturer || '',
+    warranty: fields.warranty || fields.specs?.warranty || '',
+    temperature: fields.temperature || fields.specs?.temperature || ''
   };
+  
+  // Construct the final object
+  const machineData = {
+    id: entry.sys?.id || entry.id || '',
+    title: title,
+    slug: slug,
+    type: type,
+    description: description,
+    temperature: temperature,
+    features: features,
+    images: images,
+    specs: specs
+  };
+  
+  console.log(`Transformed ${title} (${type}):`, machineData);
+  return machineData;
 };
 
 export function useContentfulMachines() {
@@ -188,18 +238,24 @@ export function useContentfulMachines() {
         const entries = await fetchContentfulEntries<ContentfulEntry>('machine');
         console.log('[useContentfulMachines] Fetched entries:', entries);
         
-        if (entries && entries.length > 0) {
-          return entries.map(transformContentfulEntry);
+        if (!entries || entries.length === 0) {
+          console.log('[useContentfulMachines] No machines found in Contentful');
+          
+          // If in preview environment and no entries were found, return fallback data
+          if (window.location.hostname.includes('lovable')) {
+            console.log('[useContentfulMachines] Using fallback data in preview');
+            toast.info('Using fallback machine data in preview environment');
+            return Object.values(fallbackMachineData);
+          }
+          
+          return [];
         }
         
-        // If in preview environment and no entries were found, return fallback data
-        if (window.location.hostname.includes('lovable')) {
-          console.log('[useContentfulMachines] Using fallback data in preview');
-          toast.info('Using fallback machine data in preview environment');
-          return Object.values(fallbackMachineData);
-        }
+        // Transform entries
+        const machines = entries.map(transformContentfulEntry);
+        console.log('[useContentfulMachines] Transformed machines:', machines);
+        return machines;
         
-        return [];
       } catch (error) {
         console.error('[useContentfulMachines] Error:', error);
         // In preview environment, return fallback data

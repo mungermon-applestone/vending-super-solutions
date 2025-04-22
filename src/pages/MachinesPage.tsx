@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import CTASection from '@/components/common/CTASection';
@@ -11,11 +11,24 @@ import { Loader2, ExternalLink, Server, HardDrive } from 'lucide-react';
 import { useMachinesPageContent } from '@/hooks/cms/useMachinesPageContent';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
+import { toast } from 'sonner';
 
 const MachinesPage: React.FC = () => {
   const { data: machines, isLoading, error, refetch } = useContentfulMachines();
   const { data: pageContent } = useMachinesPageContent();
   
+  useEffect(() => {
+    // Display toast with the number of machines retrieved
+    if (machines) {
+      console.log(`Retrieved ${machines.length} machines from Contentful:`, machines);
+      if (machines.length === 0) {
+        toast.warning('No machines found in Contentful. Check console logs for more details.');
+      } else {
+        toast.success(`Found ${machines.length} machines (${machines.filter(m => m.type === 'vending').length} vending, ${machines.filter(m => m.type === 'locker').length} lockers)`);
+      }
+    }
+  }, [machines]);
+
   console.log('Machines data from Contentful:', machines);
   console.log('Page content from Contentful:', pageContent);
 
@@ -33,11 +46,15 @@ const MachinesPage: React.FC = () => {
           {machineList.map((machine) => (
             <Card key={machine.id} className="overflow-hidden flex flex-col h-full">
               <div className="relative h-48 bg-gray-50">
-                {machine.images && machine.images[0] ? (
+                {machine.images && machine.images.length > 0 ? (
                   <img 
                     src={machine.images[0].url} 
                     alt={machine.images[0].alt || machine.title} 
                     className="w-full h-full object-contain p-4"
+                    onError={(e) => {
+                      console.error(`Error loading image for ${machine.title}:`, e);
+                      (e.target as HTMLImageElement).src = '/placeholder.svg';
+                    }}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full">
@@ -55,10 +72,16 @@ const MachinesPage: React.FC = () => {
                 )}
               </div>
               <CardHeader>
-                <CardTitle className="text-xl">{machine.title}</CardTitle>
+                <CardTitle className="text-xl">{machine.title || 'Unnamed Machine'}</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow">
-                <p className="text-gray-600 line-clamp-3">{machine.description}</p>
+                <p className="text-gray-600 line-clamp-3">
+                  {machine.description || 'No description available'}
+                </p>
+                <div className="mt-2">
+                  <p className="text-xs text-gray-500">ID: {machine.id}</p>
+                  {machine.slug && <p className="text-xs text-gray-500">Slug: {machine.slug}</p>}
+                </div>
               </CardContent>
               <CardFooter>
                 <Button asChild className="w-full">
@@ -147,7 +170,16 @@ const MachinesPage: React.FC = () => {
             {vendingMachines.length === 0 && lockers.length === 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-md p-6 text-center">
                 <h3 className="text-lg font-semibold text-amber-800 mb-2">No Machines Found</h3>
-                <p className="text-amber-600">No machines are currently available from our content management system. Check the console for debugging information.</p>
+                <p className="text-amber-600">
+                  No machines are currently available from our content management system. 
+                  This could be due to:
+                </p>
+                <ul className="text-amber-600 mt-2 list-disc list-inside text-left max-w-lg mx-auto">
+                  <li>No machine entries in Contentful</li>
+                  <li>Connection issues with Contentful API</li>
+                  <li>Data transformation errors</li>
+                </ul>
+                <p className="text-amber-600 mt-4">Check the browser console for detailed debugging information.</p>
               </div>
             )}
           </>
