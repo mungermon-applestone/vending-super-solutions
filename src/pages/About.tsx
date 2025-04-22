@@ -1,16 +1,15 @@
 
 import React from 'react';
 import Layout from '@/components/layout/Layout';
-import { useQuery } from '@tanstack/react-query';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { Document, BLOCKS } from '@contentful/rich-text-types';
+import { BLOCKS } from '@contentful/rich-text-types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import Image from '@/components/common/Image';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
-import { Entry, EntryCollection } from 'contentful';
+import useContentful from '@/hooks/useContentful';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
-// Define proper types for Contentful assets
 interface ContentfulAsset {
   sys: {
     id: string;
@@ -20,77 +19,69 @@ interface ContentfulAsset {
     description?: string;
     file: {
       url: string;
+      details?: {
+        size?: number;
+        image?: {
+          width: number;
+          height: number;
+        };
+      };
       fileName?: string;
       contentType?: string;
     };
   };
 }
 
-// Define the structure for our About page entry
-interface AboutPageFields {
-  bodyContent: Document;
-}
-
-// Define the type for Contentful response with linked assets
-interface ContentfulResponse extends Entry<AboutPageFields> {
-  fields: AboutPageFields;
-  // Override the response to include the linked assets
-  includes?: {
-    Asset?: ContentfulAsset[];
-  };
-}
-
 const About = () => {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, isContentReady } = useContentful({
     queryKey: ['about', '3Dn6DWVQR0VzhcQL6gdU0H'],
     queryFn: async () => {
       const client = await getContentfulClient();
-      // Get the entry with its linked assets
-      const response = await client.getEntry<AboutPageFields>('3Dn6DWVQR0VzhcQL6gdU0H', {
+      return client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H', {
         include: 2 // Include linked assets (like images)
-      }) as unknown as ContentfulResponse;
-      
-      console.log('Contentful response:', JSON.stringify(response, null, 2));
-      return response;
+      });
     }
   });
 
   // Configure the rich text rendering options to handle embedded assets
   const richTextOptions = {
     renderNode: {
-      [BLOCKS.EMBEDDED_ASSET]: (node) => {
+      [BLOCKS.EMBEDDED_ASSET_BLOCK]: (node) => {
         try {
-          // Get the asset reference from the node
           const assetId = node.data?.target?.sys?.id;
           console.log('Rendering embedded asset with ID:', assetId);
           
+          // Early return if no asset ID
           if (!assetId) {
             console.error('Missing asset ID');
             return null;
           }
           
-          if (!data?.includes?.Asset) {
+          // Check if we have linked assets in the response
+          if (!data?.linked?.assets?.block) {
             console.error('No linked assets found in the response');
             return null;
           }
           
           // Find the asset in the linked entries/assets
-          const asset = data.includes.Asset.find(
-            asset => asset.sys.id === assetId
+          const asset = data.linked.assets.block.find(
+            (asset: any) => asset.sys.id === assetId
           );
           
-          if (asset && asset.fields && asset.fields.file) {
+          if (asset && asset.fields) {
             const { title, description, file } = asset.fields;
             const imageUrl = file.url;
             console.log('Found image asset:', { title, url: imageUrl });
             
             return (
               <div className="my-8">
-                <Image 
-                  src={`https:${imageUrl}`}
-                  alt={description || title || 'About image'}
-                  className="w-full h-auto rounded-md"
-                />
+                <AspectRatio ratio={16/9} className="overflow-hidden rounded-md border border-gray-200">
+                  <Image 
+                    src={`https:${imageUrl}`}
+                    alt={description || title || 'About image'}
+                    className="w-full h-full object-cover"
+                  />
+                </AspectRatio>
               </div>
             );
           } else {
@@ -122,11 +113,8 @@ const About = () => {
         ) : (
           <ContentfulErrorBoundary contentType="About page">
             <div className="prose max-w-none">
-              {data?.fields?.bodyContent && 
-                documentToReactComponents(
-                  data.fields.bodyContent as Document, 
-                  richTextOptions
-                )
+              {isContentReady && data?.fields?.bodyContent && 
+                documentToReactComponents(data.fields.bodyContent, richTextOptions)
               }
             </div>
           </ContentfulErrorBoundary>
