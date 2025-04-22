@@ -39,13 +39,29 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
   const publishDate = fields?.publishDate;
   const featuredImage = fields?.featuredImage;
 
+  // Function to safely get image URL from Contentful Asset
+  const getImageUrl = (image: any): string => {
+    if (!image || !image.fields || !image.fields.file || !image.fields.file.url) {
+      return '';
+    }
+    return image.fields.file.url as string;
+  };
+
+  // Function to safely get image title from Contentful Asset
+  const getImageTitle = (image: any): string => {
+    if (!image || !image.fields || !image.fields.title) {
+      return title || 'Blog image';
+    }
+    return image.fields.title as string;
+  };
+
   return (
     <article className="max-w-3xl mx-auto">
       <header className="mb-8">
-        {featuredImage && featuredImage.fields && featuredImage.fields.file && (
+        {featuredImage && (
           <Image
-            src={featuredImage.fields.file.url}
-            alt={featuredImage.fields.title || title || 'Blog image'}
+            src={getImageUrl(featuredImage)}
+            alt={getImageTitle(featuredImage)}
             className="mb-6 w-full max-h-[320px] rounded-xl object-cover"
           />
         )}
