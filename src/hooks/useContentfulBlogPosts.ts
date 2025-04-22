@@ -37,8 +37,7 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
     queryFn: async () => {
       const client = await getContentfulClient();
 
-      // Create query parameters with explicit string type casting for numeric values
-      // This is required by the Contentful SDK which expects string values
+      // Create query parameters with explicit string type casting
       const queryParams: Record<string, string> = {
         content_type: "blogPost",
         order: "-fields.publishDate",
