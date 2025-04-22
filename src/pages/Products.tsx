@@ -118,16 +118,18 @@ const Products = () => {
           )}
         </div>
         
-        {/* Featured Business Goals Section */}
-        <FeaturedBusinessGoals entryId="2pS1t6cAI5cgijwX0mtWzx" />
-
-        {/* Key Features Section */}
+        {/* Key Features Section with Business Goals */}
         {pageContent && (
-          <KeyFeaturesSection 
-            title={pageContent.keyFeaturesTitle}
-            description={pageContent.keyFeaturesDescription}
-            features={pageContent.keyFeatures}
-          />
+          <>
+            <KeyFeaturesSection 
+              title={pageContent.keyFeaturesTitle}
+              description={pageContent.keyFeaturesDescription}
+              features={pageContent.keyFeatures}
+            />
+            <div className="container py-12">
+              <FeaturedBusinessGoals entryId="2pS1t6cAI5cgijwX0mtWzx" />
+            </div>
+          </>
         )}
 
         {/* Demo Request Section */}
