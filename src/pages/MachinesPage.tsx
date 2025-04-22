@@ -147,7 +147,7 @@ const MachinesPage: React.FC = () => {
             {vendingMachines.length === 0 && lockers.length === 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-md p-6 text-center">
                 <h3 className="text-lg font-semibold text-amber-800 mb-2">No Machines Found</h3>
-                <p className="text-amber-600">No machines are currently available from our content management system.</p>
+                <p className="text-amber-600">No machines are currently available from our content management system. Check the console for debugging information.</p>
               </div>
             )}
           </>
