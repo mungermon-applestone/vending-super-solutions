@@ -1,12 +1,9 @@
 
 import React from "react";
-import { formatDistanceToNow } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import { ContentfulBlogPost } from "@/hooks/useContentfulBlogPostBySlug";
-import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
-import Image from "@/components/common/Image";
+import ContentfulBlogPostHeader from "./ContentfulBlogPostHeader";
+import ContentfulBlogPostBody from "./ContentfulBlogPostBody";
+import ContentfulBlogPostFooter from "./ContentfulBlogPostFooter";
 
 interface AdjacentBlogPost {
   slug: string;
@@ -24,87 +21,25 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
   previousPost,
   nextPost,
 }) => {
-  // Make sure post exists and has fields
   if (!post || !post.fields) {
     return <div>Error: Blog post data is missing</div>;
   }
 
-  // Access fields with proper type safety
-  const fields = post.fields;
-  
-  // Extract fields with optional chaining for safety
-  const title = fields?.title || "Untitled";
-  const content = fields?.content;
-  const excerpt = fields?.excerpt;
-  const publishDate = fields?.publishDate;
-  const featuredImage = fields?.featuredImage;
-
-  // Function to safely get image URL from Contentful Asset
-  const getImageUrl = (image: any): string => {
-    if (!image || !image.fields || !image.fields.file || !image.fields.file.url) {
-      return '';
-    }
-    return image.fields.file.url as string;
-  };
-
-  // Function to safely get image title from Contentful Asset
-  const getImageTitle = (image: any): string => {
-    if (!image || !image.fields || !image.fields.title) {
-      return title || 'Blog image';
-    }
-    return image.fields.title as string;
-  };
+  const { title = "Untitled", content, excerpt, publishDate, featuredImage } = post.fields;
 
   return (
     <article className="max-w-3xl mx-auto">
-      <header className="mb-8">
-        {featuredImage && (
-          <Image
-            src={getImageUrl(featuredImage)}
-            alt={getImageTitle(featuredImage)}
-            className="mb-6 w-full max-h-[320px] rounded-xl object-cover"
-          />
-        )}
-        <h1 className="text-3xl sm:text-4xl font-bold mb-4">{title}</h1>
-        <div className="flex items-center text-gray-500 mb-4">
-          {publishDate ? (
-            <time dateTime={publishDate}>
-              Published {formatDistanceToNow(new Date(publishDate), { addSuffix: true })}
-            </time>
-          ) : (
-            <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Draft</span>
-          )}
-        </div>
-        {excerpt && (
-          <p className="text-lg text-gray-600 italic">{excerpt}</p>
-        )}
-      </header>
-      <div className="prose max-w-none prose-slate mb-12">
-        {/* Contentful rich text to React */}
-        {content
-          ? documentToReactComponents(content)
-          : <p>No content available for this blog post.</p>}
-      </div>
-      <footer className="pt-8 border-t border-gray-200">
-        <div className="flex justify-between items-center">
-          {previousPost ? (
-            <Button variant="outline" asChild>
-              <Link to={`/blog/${previousPost.slug}`} className="flex items-center">
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                <span className="hidden md:inline">Previous:</span> {previousPost.title}
-              </Link>
-            </Button>
-          ) : <div></div>}
-          {nextPost ? (
-            <Button variant="outline" asChild>
-              <Link to={`/blog/${nextPost.slug}`} className="flex items-center">
-                <span className="hidden md:inline">Next:</span> {nextPost.title}
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </Link>
-            </Button>
-          ) : <div></div>}
-        </div>
-      </footer>
+      <ContentfulBlogPostHeader
+        title={title}
+        publishDate={publishDate}
+        featuredImage={featuredImage}
+        excerpt={excerpt}
+      />
+      <ContentfulBlogPostBody content={content} />
+      <ContentfulBlogPostFooter
+        previousPost={previousPost}
+        nextPost={nextPost}
+      />
     </article>
   );
 };
