@@ -11,15 +11,18 @@ interface MachineDetailProps {
 }
 
 const MachineDetail: React.FC<MachineDetailProps> = ({ machine }) => {
-  // Convert specs from individual properties to the expected Record<string, string> format
-  const formattedSpecs: Record<string, string> = {
-    ...(machine.specs || {}), // First spread any existing specs
-    // Add temperature which might be directly on the machine object
-    ...(machine.temperature ? { temperature: machine.temperature } : { temperature: 'Ambient' })
-  };
-
   console.log("Machine data in MachineDetail component:", machine);
-  console.log("Formatted specs:", formattedSpecs);
+  
+  // Create a consolidated specs object from all possible sources
+  const formattedSpecs: Record<string, string> = {
+    // First include any existing specs object
+    ...(machine.specs || {}),
+    
+    // Add temperature which might be directly on the machine object
+    ...(machine.temperature ? { temperature: machine.temperature } : {})
+  };
+  
+  console.log("Formatted specs for display:", formattedSpecs);
 
   return (
     <>

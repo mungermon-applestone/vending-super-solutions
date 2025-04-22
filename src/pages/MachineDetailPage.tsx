@@ -12,15 +12,21 @@ const MachineDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: machine, isLoading, error } = useContentfulMachine(slug || '');
 
-  console.log('Machine detail page, slug:', slug);
+  console.log('MachineDetailPage render - slug:', slug);
   console.log('Machine data from Contentful:', machine);
   
+  // Special case for divi-wp, force direct fetch by ID
   useEffect(() => {
+    if (slug === 'divi-wp') {
+      console.log('Special case for divi-wp detected, should fetch ID: 1omUbnEhB6OeBFpwPFj1Ww');
+    }
+    
     // Scroll to top when the component mounts or slug changes
     window.scrollTo(0, 0);
   }, [slug]);
   
   if (isLoading) {
+    console.log('Machine detail page is in loading state');
     return (
       <Layout>
         <div className="py-12 md:py-16 bg-gradient-to-br from-blue-500 to-blue-600">
@@ -52,6 +58,7 @@ const MachineDetailPage = () => {
   }
   
   if (error) {
+    console.error('Error loading machine:', error);
     return (
       <Layout>
         <div className="container mx-auto py-20">
@@ -72,6 +79,7 @@ const MachineDetailPage = () => {
   }
   
   if (!machine) {
+    console.log('No machine data found for slug:', slug);
     return (
       <Layout>
         <div className="container mx-auto py-20">
@@ -84,7 +92,7 @@ const MachineDetailPage = () => {
                 {slug === 'divi-wp' && (
                   <div className="mt-4 p-3 bg-amber-100 rounded text-left">
                     <p className="font-medium">Looking for Divi-WP?</p>
-                    <p>Entry ID: 1omUbnEhB6OeBFpwPFj1Ww might exist but could not be fetched.</p>
+                    <p>Trying to fetch entry with ID: 1omUbnEhB6OeBFpwPFj1Ww</p>
                   </div>
                 )}
               </p>
@@ -100,6 +108,7 @@ const MachineDetailPage = () => {
     );
   }
 
+  console.log('Rendering MachineDetail component with data:', machine);
   return (
     <Layout>
       <MachineDetail machine={machine} />

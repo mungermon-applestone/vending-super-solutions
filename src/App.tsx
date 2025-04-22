@@ -47,6 +47,11 @@ const App: React.FC = () => {
       element: <MachineDetailPage />,
     },
     {
+      // Special direct route for divi-wp since it's giving us trouble
+      path: '/machines/divi-wp',
+      element: <MachineDetailPage />,
+    },
+    {
       path: '/machine/:machineId',
       element: <MachineDetailPage />,
     },
