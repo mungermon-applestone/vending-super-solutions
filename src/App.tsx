@@ -87,6 +87,10 @@ const App: React.FC = () => {
       element: <About />,
     },
     {
+      path: '/blog/:slug',
+      element: <React.lazy(() => import('./pages/ContentfulBlogPostDetail')) />,
+    },
+    {
       path: '*',
       element: <NotFound />,
     },
