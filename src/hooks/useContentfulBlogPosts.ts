@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { useContentful } from "@/hooks/useContentful";
@@ -34,8 +33,8 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
 
       const queryParams: any = {
         content_type: "blogPost",
-        limit: limit,
-        skip: skip,
+        limit: limit.toString(),
+        skip: skip.toString(),
         order: "-fields.publishDate",
       };
 
