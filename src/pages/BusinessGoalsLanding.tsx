@@ -1,16 +1,17 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useBusinessGoals } from '@/hooks/cms/useBusinessGoals';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { useBusinessGoalsPageContent } from '@/hooks/cms/useBusinessGoalsPageContent';
+import { useFeaturedBusinessGoalsContent } from '@/hooks/cms/useFeaturedBusinessGoalsContent';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 
 const BusinessGoalsLanding = () => {
-  const { data: businessGoals, isLoading, error } = useBusinessGoals();
+  const { data: featuredContent, isLoading, error } = useFeaturedBusinessGoalsContent();
   const { data: pageContent } = useBusinessGoalsPageContent();
   const navigate = useNavigate();
 
@@ -33,32 +34,31 @@ const BusinessGoalsLanding = () => {
         </section>
       )}
 
-      {/* Business Goals Grid */}
+      {/* Featured Business Goals Grid */}
       <div className="container mx-auto py-12">
+        {featuredContent && (
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              {featuredContent.title}
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {featuredContent.description}
+            </p>
+          </div>
+        )}
+
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="relative overflow-hidden">
-                <CardHeader>
-                  <div className="h-12 w-12 bg-gray-200 rounded-full mb-4" />
-                  <div className="h-6 w-3/4 bg-gray-200 rounded mb-2" />
-                  <div className="h-4 w-full bg-gray-100 rounded" />
-                </CardHeader>
-                <CardContent>
-                  <div className="h-4 w-full bg-gray-100 rounded mb-2" />
-                  <div className="h-4 w-2/3 bg-gray-100 rounded" />
-                </CardContent>
-              </Card>
-            ))}
+          <div className="flex justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
           </div>
         ) : error ? (
           <div className="text-center py-12">
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Business Goals</h3>
             <p className="text-gray-600">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
           </div>
-        ) : businessGoals && businessGoals.length > 0 ? (
+        ) : featuredContent?.businessGoals && featuredContent.businessGoals.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {businessGoals.filter(goal => goal.visible !== false).map((goal) => (
+            {featuredContent.businessGoals.filter(goal => goal.visible !== false).map((goal) => (
               <Card key={goal.id} className="group hover:border-vending-blue transition-colors duration-300">
                 <CardHeader>
                   {goal.icon && (
@@ -84,7 +84,7 @@ const BusinessGoalsLanding = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Business Goals Found</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Featured Business Goals</h3>
             <p className="text-gray-600">Check back later for information about our business solutions.</p>
           </div>
         )}
