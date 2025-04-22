@@ -9,9 +9,12 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
+import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
+import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 
 const TechnologyPage = () => {
   const { data: sections, isLoading, error, refetch } = useTechnologySections();
+  const { data: testimonialSection } = useTestimonialSection('technology');
   
   return (
     <Layout>
@@ -88,6 +91,9 @@ const TechnologyPage = () => {
           </div>
         )}
       </div>
+      
+      {/* Testimonials Section */}
+      {testimonialSection && <TestimonialsSection data={testimonialSection} />}
       
       {/* Add Inquiry Form */}
       <InquiryForm title="Interested in our technology solutions?" />

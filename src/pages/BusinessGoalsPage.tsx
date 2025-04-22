@@ -1,16 +1,18 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useBusinessGoals } from '@/hooks/cms/useBusinessGoals';
+import { useContentfulBusinessGoals } from '@/hooks/cms/useContentfulBusinessGoals';
+import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
+import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import PageHero from '@/components/common/PageHero';
 import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
 
-const BusinessGoalsPage = () => {
-  const { data: businessGoals, isLoading, error } = useBusinessGoals();
+const BusinessGoalsPage: React.FC = () => {
+  const { data: businessGoals, isLoading, error } = useContentfulBusinessGoals();
+  const { data: testimonialSection } = useTestimonialSection('business-goals');
   const navigate = useNavigate();
   
   return (
@@ -98,6 +100,9 @@ const BusinessGoalsPage = () => {
             ))}
           </div>
         )}
+
+        {/* Testimonials Section */}
+        {testimonialSection && <TestimonialsSection data={testimonialSection} />}
       </div>
     </Layout>
   );

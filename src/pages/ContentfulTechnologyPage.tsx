@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { useContentfulTechnology } from '@/hooks/cms/useContentfulTechnology';
@@ -191,6 +190,7 @@ const ContentfulTechnologyPage: React.FC = () => {
           </>
         )}
         
+        {/* Testimonials Section */}
         {testimonialSection && <TestimonialsSection data={testimonialSection} />}
         
         <InquiryForm title="Ready to transform your vending operations?" />

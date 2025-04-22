@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -12,13 +11,15 @@ import { useMachinesPageContent } from '@/hooks/cms/useMachinesPageContent';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 import { toast } from 'sonner';
+import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
+import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 
 const MachinesPage: React.FC = () => {
   const { data: machines, isLoading, error, refetch } = useContentfulMachines();
   const { data: pageContent } = useMachinesPageContent();
+  const { data: testimonialSection } = useTestimonialSection('machines');
   
   useEffect(() => {
-    // Display toast with the number of machines retrieved
     if (machines) {
       console.log(`Retrieved ${machines.length} machines from Contentful:`, machines);
       if (machines.length === 0) {
@@ -32,7 +33,6 @@ const MachinesPage: React.FC = () => {
   console.log('Machines data from Contentful:', machines);
   console.log('Page content from Contentful:', pageContent);
 
-  // Separate machines by type
   const vendingMachines = machines?.filter(machine => machine.type === 'vending') || [];
   const lockers = machines?.filter(machine => machine.type === 'locker') || [];
 
@@ -99,10 +99,8 @@ const MachinesPage: React.FC = () => {
 
   return (
     <Layout>
-      {/* Hero Section - Using TechnologyPageHero with specific entry ID */}
       <TechnologyPageHero entryId="3bH4WrT0pLKDeG35mUekGq" />
 
-      {/* Intro Section */}
       {pageContent && (
         <section className="bg-white py-12 md:py-16">
           <div className="container mx-auto px-4">
@@ -118,7 +116,6 @@ const MachinesPage: React.FC = () => {
         </section>
       )}
 
-      {/* Machines Section */}
       <div className="container py-12 md:py-16" id="machines-section">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
@@ -186,7 +183,8 @@ const MachinesPage: React.FC = () => {
         )}
       </div>
       
-      {/* Inquiry Form */}
+      {testimonialSection && <TestimonialsSection data={testimonialSection} />}
+      
       <InquiryForm title="Interested in our machines?" />
       
       <CTASection />

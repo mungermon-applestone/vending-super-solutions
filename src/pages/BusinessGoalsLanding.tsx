@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -9,10 +8,13 @@ import { useBusinessGoalsPageContent } from '@/hooks/cms/useBusinessGoalsPageCon
 import { useFeaturedBusinessGoalsContent } from '@/hooks/cms/useFeaturedBusinessGoalsContent';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
+import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
+import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 
 const BusinessGoalsLanding = () => {
   const { data: featuredContent, isLoading, error } = useFeaturedBusinessGoalsContent();
   const { data: pageContent } = useBusinessGoalsPageContent();
+  const { data: testimonialSection } = useTestimonialSection('business-goals');
   const navigate = useNavigate();
 
   return (
@@ -92,6 +94,9 @@ const BusinessGoalsLanding = () => {
         )}
       </div>
 
+      {/* Testimonials Section */}
+      {testimonialSection && <TestimonialsSection data={testimonialSection} />}
+      
       {/* Custom Solution CTA Section */}
       {pageContent?.customSolutionTitle && (
         <section className="bg-vending-gray py-16">

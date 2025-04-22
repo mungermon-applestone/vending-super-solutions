@@ -9,11 +9,14 @@ import { useMachines } from '@/hooks/useMachinesData';
 import { Wifi } from '@/components/ui/Wifi';
 import { CMSMachine } from '@/types/cms';
 import PageHero from '@/components/common/PageHero';
+import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
+import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 
 const MachinesLanding = () => {
   const location = useLocation();
   const { data: machines = [], isLoading } = useMachines();
   const typedMachines = machines as CMSMachine[];
+  const { data: testimonialSection } = useTestimonialSection('machines');
   
   // Filter machines by type
   const vendingMachines = typedMachines.filter(machine => machine.type === 'vending');
@@ -154,6 +157,9 @@ const MachinesLanding = () => {
           )}
         </div>
       </section>
+
+      {/* Testimonials Section */}
+      {testimonialSection && <TestimonialsSection data={testimonialSection} />}
 
       <CTASection />
     </Layout>
