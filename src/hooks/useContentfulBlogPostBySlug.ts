@@ -2,18 +2,28 @@
 import { useQuery } from "@tanstack/react-query";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { Document } from "@contentful/rich-text-types";
-import { Asset, Entry } from "contentful";
+import { Asset, Entry, EntrySkeletonType } from "contentful";
 
 // Define the blog post content type for Contentful
 export interface ContentfulBlogPostFields {
-  title: string;
-  slug: string;
-  content?: Document;
-  excerpt?: string;
-  publishDate?: string;
-  featuredImage?: Asset;
-  author?: string;
-  tags?: string[];
+  sys: {
+    id: string;
+    contentType: {
+      sys: {
+        id: string;
+      };
+    };
+  };
+  fields: {
+    title: string;
+    slug: string;
+    content?: Document;
+    excerpt?: string;
+    publishDate?: string;
+    featuredImage?: Asset;
+    author?: string;
+    tags?: string[];
+  };
 }
 
 // Type for a complete blog post entry
@@ -31,16 +41,27 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
       if (!slug) throw new Error("No slug provided");
       const client = await getContentfulClient();
       
-      // Query entries with content_type 'blogPost' and matching slug
-      const response = await client.getEntries<ContentfulBlogPostFields>({
-        content_type: "blogPost",
-        "fields.slug": slug,
-        include: 2,
-        limit: 1,
-      });
-      
-      if (!response.items.length) throw new Error("Blog post not found");
-      return response.items[0] as ContentfulBlogPost;
+      try {
+        // Query entries with content_type 'blogPost' and matching slug
+        const response = await client.getEntries<ContentfulBlogPostFields>({
+          content_type: "blogPost",
+          "fields.slug": slug,
+          include: 2,
+          limit: 1,
+        });
+        
+        console.log('Contentful Response:', response);
+        
+        if (!response.items.length) {
+          console.error(`No blog post found with slug: ${slug}`);
+          throw new Error(`Blog post not found for slug: ${slug}`);
+        }
+        
+        return response.items[0];
+      } catch (error) {
+        console.error('Error fetching blog post:', error);
+        throw error;
+      }
     }
   });
 }

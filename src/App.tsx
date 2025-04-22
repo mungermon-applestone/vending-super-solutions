@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import {
   BrowserRouter as Router,
@@ -6,6 +5,7 @@ import {
   Routes,
   Navigate
 } from 'react-router-dom';
+
 import Products from '@/pages/Products';
 import Contact from '@/pages/Contact';
 import NotFound from '@/pages/NotFound';
@@ -20,8 +20,8 @@ import MachineDetailPage from '@/pages/MachineDetailPage';
 import MachinesPage from '@/pages/MachinesPage';
 import About from '@/pages/About';
 import ContactContentful from '@/pages/ContactContentful';
+import BlogContentTest from './pages/BlogContentTest';
 
-// Lazy load the blog post detail page
 const ContentfulBlogPostDetail = lazy(() => import('./pages/ContentfulBlogPostDetail'));
 
 const App: React.FC = () => {
@@ -95,6 +95,14 @@ const App: React.FC = () => {
       element: (
         <Suspense fallback={<div>Loading...</div>}>
           <ContentfulBlogPostDetail />
+        </Suspense>
+      ),
+    },
+    {
+      path: '/blog-content-test',
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <BlogContentTest />
         </Suspense>
       ),
     },
