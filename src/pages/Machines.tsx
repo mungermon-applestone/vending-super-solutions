@@ -1,5 +1,4 @@
 
-import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
 import { useMachines } from '@/hooks/cms/useMachines';
@@ -7,38 +6,53 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Loader2, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import PageHero from '@/components/common/PageHero';
+import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
+import { useMachinesPageContent } from '@/hooks/cms/useMachinesPageContent';
+import InquiryForm from '@/components/machines/contact/InquiryForm';
 
 const Machines = () => {
   const { data: machines, isLoading, error, refetch } = useMachines();
+  const { data: pageContent } = useMachinesPageContent();
   const queryClient = useQueryClient();
   
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['machines'] });
   };
   
-  console.log("Machines data:", machines);
-  
   return (
     <Layout>
-      {/* Hero Section from Database */}
-      <PageHero 
-        pageKey="machines" 
-        fallbackTitle="" 
-        fallbackSubtitle="" 
-        fallbackImage="" 
-        fallbackImageAlt="" 
-      />
-
-      <div className="container py-10">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Machines</h1>
-            <p className="text-muted-foreground mt-1">
-              View all available machines from our database
-            </p>
+      {/* Hero Section */}
+      <TechnologyPageHero entryId="3bH4WrT0pLKDeG35mUekGq" />
+      
+      {/* Intro Section */}
+      {pageContent && (
+        <section className="bg-white py-12 md:py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                {pageContent.introTitle}
+              </h2>
+              <p className="text-lg text-gray-600">
+                {pageContent.introDescription}
+              </p>
+            </div>
           </div>
-          <Button onClick={handleRefresh} variant="outline" className="mt-4 md:mt-0">
+        </section>
+      )}
+
+      {/* Machines Section */}
+      <div className="container py-12 md:py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            {pageContent?.machineTypesTitle}
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            {pageContent?.machineTypesDescription}
+          </p>
+        </div>
+
+        <div className="flex justify-end mb-8">
+          <Button onClick={handleRefresh} variant="outline">
             Refresh Data
           </Button>
         </div>
@@ -104,6 +118,9 @@ const Machines = () => {
           </Card>
         )}
       </div>
+
+      {/* Inquiry Form */}
+      <InquiryForm title="Interested in our machines?" />
     </Layout>
   );
 };
