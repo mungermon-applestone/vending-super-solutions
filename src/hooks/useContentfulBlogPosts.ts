@@ -37,21 +37,21 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
     queryFn: async () => {
       const client = await getContentfulClient();
 
-      // Explicitly create a type-safe query parameters object
+      // Create a query parameters object where all values are explicitly strings
       const queryParams: Record<string, string> = {
         content_type: "blogPost",
-        order: "-fields.publishDate"
+        order: "-fields.publishDate",
+        // Ensure numeric values are converted to strings
+        limit: String(limit),
+        skip: String(skip)
       };
-      
-      // Add limit and skip parameters as strings
-      queryParams.limit = String(limit);
-      queryParams.skip = String(skip);
       
       // Only add tag filter if one is provided
       if (tag) {
         queryParams["metadata.tags.sys.id[in]"] = tag;
       }
 
+      // Now pass the properly typed queryParams to getEntries
       const response = await client.getEntries(queryParams);
 
       return response.items.map(item => {
