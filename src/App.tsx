@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -7,17 +8,9 @@ import {
 } from 'react-router-dom';
 import Products from '@/pages/Products';
 import Machines from '@/pages/Machines';
-import MachineDetails from '@/pages/MachineDetails';
 import Contact from '@/pages/Contact';
-import About from '@/pages/About';
 import NotFound from '@/pages/NotFound';
 import Home from '@/pages/Home';
-import Terms from '@/pages/Terms';
-import Privacy from '@/pages/Privacy';
-import Services from '@/pages/Services';
-import Solutions from '@/pages/Solutions';
-import LegacyMachines from '@/pages/LegacyMachines';
-import LegacyMachineDetails from '@/pages/LegacyMachineDetails';
 import TechnologyLanding from '@/pages/TechnologyLanding';
 import ContentfulTechnologyPage from '@/pages/ContentfulTechnologyPage';
 
@@ -44,40 +37,8 @@ const App: React.FC = () => {
       element: <Machines />,
     },
     {
-      path: '/machines/:machineId',
-      element: <MachineDetails />,
-    },
-    {
       path: '/contact',
       element: <Contact />,
-    },
-    {
-      path: '/about',
-      element: <About />,
-    },
-    {
-      path: '/terms',
-      element: <Terms />,
-    },
-    {
-      path: '/privacy',
-      element: <Privacy />,
-    },
-    {
-      path: '/services',
-      element: <Services />,
-    },
-    {
-      path: '/solutions',
-      element: <Solutions />,
-    },
-    {
-      path: '/legacy-machines',
-      element: <LegacyMachines />,
-    },
-    {
-      path: '/legacy-machines/:machineId',
-      element: <LegacyMachineDetails />,
     },
     {
       path: '/technology-landing',
@@ -85,7 +46,7 @@ const App: React.FC = () => {
     },
     {
       path: '/technology',
-      element: <ContentfulTechnologyPage />,
+      element: <TechnologyPage />,
     },
     {
       path: '/technology/detailed',
@@ -94,10 +55,6 @@ const App: React.FC = () => {
     {
       path: '*',
       element: <NotFound />,
-    },
-    {
-      path: '/technology',
-      element: <TechnologyPage />,
     },
   ]
 
