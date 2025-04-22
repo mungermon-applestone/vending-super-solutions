@@ -1,4 +1,3 @@
-
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useBusinessGoal } from '@/hooks/cms/useBusinessGoals';
@@ -6,10 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
+import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
+import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 
 const BusinessGoalDetail = () => {
   const { goalSlug } = useParams<{ goalSlug: string }>();
   const { data: goal, isLoading, error } = useBusinessGoal(goalSlug || '');
+  const { data: testimonialSection } = useTestimonialSection('business-goals');
 
   console.log("Fetching goal with slug:", goalSlug);
   console.log("Goal data:", goal);
@@ -69,7 +71,7 @@ const BusinessGoalDetail = () => {
         <BusinessGoalHero
           title={goal.title}
           description={goal.description}
-          icon={<span className="text-white text-2xl">🎯</span>} // Placeholder icon
+          icon={<span className="text-white text-2xl">🎯</span>}
           image={goal.image_url || 'https://placehold.co/800x400?text=No+Image'}
         />
       </div>
@@ -111,6 +113,9 @@ const BusinessGoalDetail = () => {
             </div>
           </div>
         )}
+
+        {testimonialSection && <TestimonialsSection data={testimonialSection} />}
+
       </div>
     </Layout>
   );

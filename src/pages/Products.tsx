@@ -145,6 +145,9 @@ const Products = () => {
             bulletPoints={pageContent.demoRequestBulletPoints}
           />
         )}
+        
+        {/* Testimonials Section */}
+        {testimonialSection && <TestimonialsSection data={testimonialSection} />}
 
         {/* Inquiry Form */}
         <InquiryForm title="Ready to transform your vending operations?" />
@@ -168,8 +171,6 @@ const Products = () => {
             </details>
           </div>
         )}
-        
-        {testimonialSection && <TestimonialsSection data={testimonialSection} />}
       </ContentfulErrorBoundary>
     </Layout>
   );

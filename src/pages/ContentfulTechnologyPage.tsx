@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { useContentfulTechnology } from '@/hooks/cms/useContentfulTechnology';
@@ -11,9 +10,12 @@ import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { testContentfulConnection, checkContentfulConfig } from '@/utils/contentfulConnectionTest';
 import { Button } from '@/components/ui/button';
+import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
+import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 
 const ContentfulTechnologyPage: React.FC = () => {
   const { data: technologies, isLoading, error, refetch } = useContentfulTechnology();
+  const { data: testimonialSection } = useTestimonialSection('technology');
   const [connectionStatus, setConnectionStatus] = React.useState<{
     checked: boolean;
     isConnected: boolean;
@@ -24,10 +26,8 @@ const ContentfulTechnologyPage: React.FC = () => {
     message: ''
   });
   
-  // Use the first technology (main technology page)
   const technology = technologies && technologies.length > 0 ? technologies[0] : null;
   
-  // Function to test the Contentful connection if an error occurs
   const checkConnection = React.useCallback(async () => {
     setConnectionStatus({
       checked: true,
@@ -56,20 +56,17 @@ const ContentfulTechnologyPage: React.FC = () => {
     }
   }, [refetch]);
 
-  // Check connection if we have an error
   React.useEffect(() => {
     if (error && !connectionStatus.checked) {
       checkConnection();
     }
   }, [error, connectionStatus.checked, checkConnection]);
 
-  // Check if Contentful config is set up properly
   const configCheck = React.useMemo(() => checkContentfulConfig(), []);
   
   return (
     <Layout>
       <ContentfulErrorBoundary contentType="Technology Page">
-        {/* If environment variables are missing */}
         {!configCheck.isConfigured && (
           <div className="py-8 px-4">
             <ContentfulFallbackMessage
@@ -82,7 +79,6 @@ const ContentfulTechnologyPage: React.FC = () => {
           </div>
         )}
         
-        {/* If data is loading, show skeleton */}
         {configCheck.isConfigured && isLoading && (
           <div className="py-16 bg-slate-50">
             <div className="container">
@@ -111,7 +107,6 @@ const ContentfulTechnologyPage: React.FC = () => {
           </div>
         )}
         
-        {/* If there was an error loading the data */}
         {configCheck.isConfigured && error && !isLoading && (
           <div className="py-16">
             <div className="container max-w-4xl mx-auto px-4">
@@ -146,7 +141,6 @@ const ContentfulTechnologyPage: React.FC = () => {
           </div>
         )}
         
-        {/* If no technology data was found */}
         {configCheck.isConfigured && !isLoading && !error && !technology && (
           <>
             <PageHero
@@ -175,7 +169,6 @@ const ContentfulTechnologyPage: React.FC = () => {
           </>
         )}
         
-        {/* If technology data was found */}
         {configCheck.isConfigured && !isLoading && !error && technology && (
           <>
             <TechnologyHero technology={technology} />
@@ -197,8 +190,9 @@ const ContentfulTechnologyPage: React.FC = () => {
           </>
         )}
         
-        {/* Contact Form */}
-        <InquiryForm title="Technology Solutions" />
+        {testimonialSection && <TestimonialsSection data={testimonialSection} />}
+        
+        <InquiryForm />
       </ContentfulErrorBoundary>
     </Layout>
   );

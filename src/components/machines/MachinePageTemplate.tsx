@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import CTASection from '@/components/common/CTASection';
@@ -8,6 +7,7 @@ import FeaturesList from './features/FeaturesList';
 import DeploymentExamplesSection from './examples/DeploymentExamplesSection';
 import AdditionalViews from './gallery/AdditionalViews';
 import InquiryForm from './contact/InquiryForm';
+import TestimonialsSection from './testimonials/TestimonialsSection';
 
 export interface MachineTemplateProps {
   machine: {
@@ -33,6 +33,14 @@ export interface MachineTemplateProps {
         alt: string;
       };
     }>;
+    testimonialSection: {
+      title: string;
+      description: string;
+      image: {
+        url: string;
+        alt: string;
+      };
+    };
   };
 }
 
@@ -74,6 +82,9 @@ const MachinePageTemplate: React.FC<MachineTemplateProps> = ({ machine }) => {
         title={machine.title} 
         images={machine.images} 
       />
+      
+      {/* Testimonials Section */}
+      <TestimonialsSection data={machine.testimonialSection} />
       
       {/* Contact Section */}
       <InquiryForm title={machine.title} />
