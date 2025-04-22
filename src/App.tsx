@@ -22,6 +22,7 @@ import About from '@/pages/About';
 import ContactContentful from '@/pages/ContactContentful';
 import BlogContentTest from './pages/BlogContentTest';
 import ZhilaiApplestoneAnnouncement from './pages/ZhilaiApplestoneAnnouncement';
+import BlogPage from './pages/BlogPage';
 
 const ContentfulBlogPostDetail = lazy(() => import('./pages/ContentfulBlogPostDetail'));
 
@@ -90,6 +91,10 @@ const App: React.FC = () => {
     {
       path: '/about',
       element: <About />,
+    },
+    {
+      path: '/blog',
+      element: <BlogPage />,
     },
     {
       path: '/blog/:slug',
