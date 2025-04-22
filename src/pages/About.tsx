@@ -9,6 +9,19 @@ import Image from '@/components/common/Image';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import useContentful from '@/hooks/useContentful';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Entry, Asset } from 'contentful';
+
+// Define a custom interface that represents our expected Contentful response structure
+interface ContentfulAboutEntry extends Entry<any> {
+  fields: {
+    bodyContent: any; // Rich text document
+  };
+  linked?: {
+    assets?: {
+      block?: ContentfulAsset[];
+    };
+  };
+}
 
 interface ContentfulAsset {
   sys: {
@@ -37,16 +50,17 @@ const About = () => {
     queryKey: ['about', '3Dn6DWVQR0VzhcQL6gdU0H'],
     queryFn: async () => {
       const client = await getContentfulClient();
-      return client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H', {
+      const response = await client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H', {
         include: 2 // Include linked assets (like images)
       });
+      return response as ContentfulAboutEntry;
     }
   });
 
   // Configure the rich text rendering options to handle embedded assets
   const richTextOptions = {
     renderNode: {
-      [BLOCKS.EMBEDDED_ASSET_BLOCK]: (node) => {
+      [BLOCKS.EMBEDDED_ASSET]: (node) => {
         try {
           const assetId = node.data?.target?.sys?.id;
           console.log('Rendering embedded asset with ID:', assetId);
@@ -65,7 +79,7 @@ const About = () => {
           
           // Find the asset in the linked entries/assets
           const asset = data.linked.assets.block.find(
-            (asset: any) => asset.sys.id === assetId
+            (asset: ContentfulAsset) => asset.sys.id === assetId
           );
           
           if (asset && asset.fields) {
@@ -114,7 +128,7 @@ const About = () => {
           <ContentfulErrorBoundary contentType="About page">
             <div className="prose max-w-none">
               {isContentReady && data?.fields?.bodyContent && 
-                documentToReactComponents(data.fields.bodyContent, richTextOptions)
+                documentToReactComponents(data.fields.bodyContent as any, richTextOptions)
               }
             </div>
           </ContentfulErrorBoundary>
