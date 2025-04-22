@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { useContentful } from "@/hooks/useContentful";
@@ -37,7 +36,6 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
     queryFn: async () => {
       const client = await getContentfulClient();
 
-      // Explicitly convert numeric values to strings as required by Contentful API
       const queryParams: Record<string, string> = {
         content_type: "blogPost",
         limit: String(limit),
