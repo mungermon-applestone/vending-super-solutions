@@ -80,11 +80,27 @@ const ContactContentful = () => {
       
       typedFields.faqItems.forEach((item) => {
         if (item && item.fields && item.fields.question && item.fields.answer) {
+          // Fix: Use proper type checking and conversion for FAQ answer field
+          let processedAnswer: string | Document | ContentfulRichTextDocument = '';
+          
+          // Check what kind of answer we have and handle accordingly
+          if (typeof item.fields.answer === 'string') {
+            processedAnswer = item.fields.answer;
+          } else if (
+            typeof item.fields.answer === 'object' && 
+            item.fields.answer !== null && 
+            'nodeType' in item.fields.answer
+          ) {
+            // It's a rich text document
+            processedAnswer = item.fields.answer as ContentfulRichTextDocument;
+          }
+          
           processedFaqItems.push({
             id: item.sys?.id || `faq-${processedFaqItems.length}`,
             question: item.fields.question,
-            answer: item.fields.answer,
+            answer: processedAnswer
           });
+          
           console.log(`Processed FAQ item ${item.sys?.id}:`, {
             question: item.fields.question,
             answerType: typeof item.fields.answer,
@@ -108,11 +124,27 @@ const ContactContentful = () => {
       if (linkedFAQs.length > 0) {
         linkedFAQs.forEach((faq) => {
           if (faq.fields && typeof faq.fields.question === 'string') {
+            // Fix: Use proper type checking for FAQ answer field
+            let processedAnswer: string | Document | ContentfulRichTextDocument = '';
+            
+            // Check what kind of answer we have and handle accordingly
+            if (typeof faq.fields.answer === 'string') {
+              processedAnswer = faq.fields.answer;
+            } else if (
+              typeof faq.fields.answer === 'object' && 
+              faq.fields.answer !== null && 
+              'nodeType' in faq.fields.answer
+            ) {
+              // It's a rich text document
+              processedAnswer = faq.fields.answer as ContentfulRichTextDocument;
+            }
+            
             processedFaqItems.push({
               id: faq.sys.id,
               question: faq.fields.question,
-              answer: faq.fields.answer,
+              answer: processedAnswer
             });
+            
             console.log(`Processed FAQ item ${faq.sys.id}:`, {
               question: faq.fields.question,
               answerType: typeof faq.fields.answer,
@@ -134,11 +166,27 @@ const ContactContentful = () => {
       if (knownFaqs.length > 0) {
         knownFaqs.forEach(faq => {
           if (faq.fields && typeof faq.fields.question === 'string') {
+            // Fix: Use proper type checking for FAQ answer field
+            let processedAnswer: string | Document | ContentfulRichTextDocument = '';
+            
+            // Check what kind of answer we have and handle accordingly
+            if (typeof faq.fields.answer === 'string') {
+              processedAnswer = faq.fields.answer;
+            } else if (
+              typeof faq.fields.answer === 'object' && 
+              faq.fields.answer !== null && 
+              'nodeType' in faq.fields.answer
+            ) {
+              // It's a rich text document
+              processedAnswer = faq.fields.answer as ContentfulRichTextDocument;
+            }
+            
             processedFaqItems.push({
               id: faq.sys.id,
               question: faq.fields.question,
-              answer: faq.fields.answer,
+              answer: processedAnswer
             });
+            
             console.log(`Processed FAQ item ${faq.sys.id}:`, {
               question: faq.fields.question,
               answerType: typeof faq.fields.answer,
