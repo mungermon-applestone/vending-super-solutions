@@ -40,8 +40,8 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
       // Type-safe query parameters object
       const queryParams: Record<string, string> = {
         content_type: "blogPost",
-        limit: `${limit}`,
-        skip: `${skip}`,
+        limit: String(limit),  // Explicitly convert number to string
+        skip: String(skip),    // Explicitly convert number to string
         order: "-fields.publishDate",
       };
 
