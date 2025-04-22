@@ -1,8 +1,29 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { CMSMachine } from '@/types/cms';
 import { toast } from 'sonner';
+
+/**
+ * !!!!! CRITICAL DESIGN NOTES !!!!!
+ * 
+ * DO NOT MODIFY THIS FILE WITHOUT CAREFUL CONSIDERATION:
+ * 
+ * This hook is MISSION CRITICAL for machine data retrieval from Contentful.
+ * Any changes MUST preserve the following key behaviors:
+ * 
+ * 1. Fallback mechanism for preview and production environments
+ * 2. Graceful error handling
+ * 3. Consistent data transformation 
+ * 4. Type safety for CMSMachine interface
+ * 
+ * Potential breaking changes to avoid:
+ * - Removing fallback data mechanism
+ * - Altering the core data transformation logic
+ * - Changing the core query structure
+ * - Modifying the error handling strategy
+ * 
+ * ALWAYS test thoroughly after any modifications!
+ */
 
 // Define an interface for Contentful entry structure 
 interface ContentfulEntry {
@@ -185,7 +206,18 @@ const fallbackMachineData: Record<string, CMSMachine> = {
   }
 };
 
-// Helper function to transform Contentful entry to CMSMachine
+/**
+ * Transforms a Contentful entry into a consistent CMSMachine format
+ * 
+ * @param entry - The raw Contentful entry to transform
+ * @returns A standardized CMSMachine object
+ * 
+ * !!!!! TRANSFORMATION RULES !!!!!
+ * - Always provide fallback values
+ * - Ensure type safety
+ * - Handle nested and flat entry structures
+ * - Log any unexpected data structures
+ */
 const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => {
   console.log('Transforming entry:', entry);
   
@@ -253,6 +285,15 @@ const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => {
   return machineData;
 };
 
+/**
+ * Hook for fetching Contentful machines
+ * 
+ * !!!!! DO NOT REMOVE OR FUNDAMENTALLY ALTER !!!!
+ * Core requirements:
+ * - Fetch all machines
+ * - Provide fallback in preview/error scenarios
+ * - Consistent error logging
+ */
 export function useContentfulMachines() {
   return useQuery({
     queryKey: ['contentful', 'machines'],
@@ -281,7 +322,11 @@ export function useContentfulMachines() {
         return machines;
         
       } catch (error) {
-        console.error('[useContentfulMachines] Error:', error);
+        console.error('[CRITICAL] Machine fetch failed', {
+          error,
+          timestamp: new Date().toISOString()
+        });
+        
         // In preview environment, return fallback data
         if (window.location.hostname.includes('lovable')) {
           console.log('[useContentfulMachines] Using fallback data after error in preview');
@@ -294,6 +339,15 @@ export function useContentfulMachines() {
   });
 }
 
+/**
+ * Hook for fetching a single Contentful machine
+ * 
+ * !!!!! DO NOT REMOVE OR FUNDAMENTALLY ALTER !!!!
+ * Core requirements:
+ * - Fetch machine by ID or slug
+ * - Handle special cases (e.g., divi-wp)
+ * - Provide fallback in preview/error scenarios
+ */
 export function useContentfulMachine(idOrSlug: string | undefined) {
   return useQuery({
     queryKey: ['contentful', 'machine', idOrSlug],
@@ -403,3 +457,5 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
     enabled: !!idOrSlug
   });
 }
+
+export default { useContentfulMachines, useContentfulMachine };
