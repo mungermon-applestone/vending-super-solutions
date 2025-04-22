@@ -3,39 +3,17 @@ import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { useQuery } from '@tanstack/react-query';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { Document } from '@contentful/rich-text-types';
+import { Document, BLOCKS } from '@contentful/rich-text-types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 
 const About = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['about', '3Dn6DWVQR0VzhcQL6gdU0H'],
     queryFn: async () => {
-      // TODO: Implement proper Contentful fetch
-      // For now returning mock data with correct Document structure
-      const mockDocument: Document = {
-        nodeType: 'document',
-        data: {},
-        content: [
-          {
-            nodeType: 'paragraph',
-            data: {},
-            content: [
-              {
-                nodeType: 'text',
-                value: 'Welcome to our About page. Content coming soon from Contentful.',
-                marks: [],
-                data: {}
-              }
-            ]
-          }
-        ]
-      };
-      
-      return {
-        fields: {
-          bodyContent: mockDocument
-        }
-      };
+      const client = await getContentfulClient();
+      const entry = await client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H');
+      return entry;
     }
   });
 
