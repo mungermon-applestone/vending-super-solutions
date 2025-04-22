@@ -116,7 +116,7 @@ const About = () => {
 
   // Process the data so we have proper typing and avoid Type errors
   const processedData = React.useMemo(() => {
-    if (!data?.fields) return null;
+    if (!data?.fields) return { bodyContent: null };
     return data.fields;
   }, [data]);
 

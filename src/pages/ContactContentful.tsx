@@ -40,6 +40,7 @@ const ContactContentful = () => {
     queryKey: ['contact-page-content', CONTACT_ID],
     queryFn: async () => {
       const client = await getContentfulClient();
+      console.log('Fetching contact page with ID:', CONTACT_ID);
       // Include 2 to get linked FAQ entries
       const entry = await client.getEntry(CONTACT_ID, { include: 2 });
       
@@ -52,21 +53,39 @@ const ContactContentful = () => {
   const processedData = React.useMemo(() => {
     if (!data) return null;
     
+    console.log('Processing contact page data:', data);
+    
     // Extract main fields
     const fields = data.fields || {};
     
     // Extract linked FAQ entries if included
     const processedFaqItems: FAQItem[] = [];
     
-    if (data.includes?.Entry?.length) {
-      console.log('Found linked entries:', data.includes.Entry.length);
+    // Check if faqItems exists and is an array in the fields
+    if (fields.faqItems && Array.isArray(fields.faqItems)) {
+      console.log('Found FAQ items in fields:', fields.faqItems.length);
+      
+      // Process each FAQ item directly from the fields
+      fields.faqItems.forEach((item: any) => {
+        if (item.fields && typeof item.fields.question === 'string' && typeof item.fields.answer === 'string') {
+          processedFaqItems.push({
+            id: item.sys.id,
+            question: item.fields.question,
+            answer: item.fields.answer,
+          });
+        }
+      });
+    }
+    // If no direct faqItems in fields, try to get them from includes
+    else if (data.includes?.Entry?.length) {
+      console.log('Looking for FAQ items in includes:', data.includes.Entry.length);
       
       // Find entries that are FAQ items
       const linkedFAQs = data.includes.Entry.filter(
         (e) => e.sys.contentType?.sys.id === 'faqItem'
       );
       
-      console.log('Found FAQ items:', linkedFAQs.length);
+      console.log('Found FAQ items in includes:', linkedFAQs.length);
       
       // Map linked FAQ entries to FAQItem shape
       linkedFAQs.forEach((faq) => {
@@ -78,9 +97,9 @@ const ContactContentful = () => {
           });
         }
       });
-      
-      console.log('Processed FAQ items:', processedFaqItems);
     }
+    
+    console.log('Final processed FAQ items:', processedFaqItems);
     
     // Return processed data
     return {
@@ -116,6 +135,9 @@ const ContactContentful = () => {
 
   // Use the processed data
   const f = processedData || {} as ContactPageContent;
+
+  // Debug output to see the FAQ items
+  console.log('FAQ items in render:', f.faqItems);
 
   return (
     <Layout>
@@ -216,7 +238,7 @@ const ContactContentful = () => {
         {f.faqSectionTitle && (
           <h2 className="text-3xl font-bold text-center mb-12">{f.faqSectionTitle}</h2>
         )}
-        {/* Render dynamic FAQ items if present */}
+        {/* Render dynamic FAQ items if present with debug info */}
         {f.faqItems && f.faqItems.length > 0 ? (
           <div className="grid md:grid-cols-2 gap-8">
             {f.faqItems.map((faq) => (

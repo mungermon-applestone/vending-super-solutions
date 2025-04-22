@@ -107,14 +107,14 @@ export interface ContentfulResponse<T = any> extends Entry<T> {
 
 // Define the AboutPageFields interface for the About page
 export interface AboutPageFields {
-  bodyContent: ContentfulRichTextDocument;
+  bodyContent?: ContentfulRichTextDocument;
 }
 
 // Define FAQ item interface
 export interface ContentfulFAQItem {
   sys: {
     id: string;
-    contentType: {
+    contentType?: {
       sys: {
         id: string;
       };
