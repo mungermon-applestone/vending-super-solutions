@@ -3,7 +3,7 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import ContentfulBlogPostContent from "@/components/blog/ContentfulBlogPostContent";
-import { ContentfulBlogPostFields, useContentfulBlogPostBySlug } from "@/hooks/useContentfulBlogPostBySlug";
+import { useContentfulBlogPostBySlug, ContentfulBlogPostFields } from "@/hooks/useContentfulBlogPostBySlug";
 import { Loader2 } from "lucide-react";
 import { Entry } from "contentful";
 
@@ -29,33 +29,34 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
     queryFn: async () => {
       if (!currentSlug) return { previous: null, next: null };
       const client = await getContentfulClient();
+      
       // Fetch all published posts sorted by publishDate ascending
       const response = await client.getEntries<ContentfulBlogPostFields>({
         content_type: "blogPost",
-        order: ["fields.publishDate"], // Fix: Use array for order parameter
+        order: ["fields.publishDate"], // Use array for order parameter
         select: "fields.slug,fields.title,fields.publishDate",
         // Optionally, limit if the blog is huge
       });
       
-      const posts = response.items.filter(
-        (item) => !!item.fields?.slug
+      const posts = response.items.filter(item => 
+        item.fields && typeof item.fields.slug === 'string'
       );
       
-      const idx = posts.findIndex((p) => p.fields.slug === currentSlug);
+      const idx = posts.findIndex(p => p.fields.slug === currentSlug);
       if (idx === -1) return { previous: null, next: null };
       
-      // Fix: Ensure we're creating objects with the right type
+      // Ensure we're creating objects with the right type
       const previous = idx > 0
         ? { 
-            slug: posts[idx - 1].fields.slug as string, 
-            title: posts[idx - 1].fields.title as string 
+            slug: posts[idx - 1].fields.slug, 
+            title: posts[idx - 1].fields.title
           }
         : null;
         
       const next = idx < posts.length - 1
         ? { 
-            slug: posts[idx + 1].fields.slug as string, 
-            title: posts[idx + 1].fields.title as string 
+            slug: posts[idx + 1].fields.slug, 
+            title: posts[idx + 1].fields.title
           }
         : null;
         
