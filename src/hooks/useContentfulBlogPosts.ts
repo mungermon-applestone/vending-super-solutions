@@ -34,8 +34,8 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
 
       const queryParams: any = {
         content_type: "blogPost",
-        limit: limit.toString(),
-        skip: skip.toString(),
+        limit: limit.toString(), // Convert number to string
+        skip: skip.toString(), // Convert number to string
         order: "-fields.publishDate",
       };
 
@@ -73,4 +73,3 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
     enableToasts: false
   });
 }
-
