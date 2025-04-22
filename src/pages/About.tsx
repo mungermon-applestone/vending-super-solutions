@@ -7,6 +7,22 @@ import { Document, BLOCKS } from '@contentful/rich-text-types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import Image from '@/components/common/Image';
+import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
+
+interface ContentfulAsset {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title: string;
+    description?: string;
+    file: {
+      url: string;
+      fileName?: string;
+      contentType?: string;
+    };
+  };
+}
 
 interface ContentfulEntry {
   sys: {
@@ -16,32 +32,22 @@ interface ContentfulEntry {
     bodyContent: Document;
   };
   includes?: {
-    Asset?: Array<{
-      sys: {
-        id: string;
-      };
-      fields: {
-        title: string;
-        description?: string;
-        file: {
-          url: string;
-          fileName?: string;
-          contentType?: string;
-        };
-      };
-    }>;
+    Asset?: ContentfulAsset[];
   };
 }
 
 const About = () => {
-  const { data, isLoading } = useQuery<ContentfulEntry>({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['about', '3Dn6DWVQR0VzhcQL6gdU0H'],
     queryFn: async () => {
       const client = await getContentfulClient();
-      const entry = await client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H', {
+      // Get the entry with its linked assets
+      const response = await client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H', {
         include: 2 // Include linked assets (like images)
       });
-      return entry as ContentfulEntry;
+      
+      console.log('Contentful response:', JSON.stringify(response, null, 2));
+      return response;
     }
   });
 
@@ -51,16 +57,23 @@ const About = () => {
       [BLOCKS.EMBEDDED_ASSET]: (node) => {
         try {
           // Get the asset reference from the node
-          const { data: { target: { sys: { id } } } } = node;
+          const assetId = node.data?.target?.sys?.id;
+          console.log('Rendering embedded asset with ID:', assetId);
+          
+          if (!assetId || !data?.includes?.Asset) {
+            console.error('Missing asset ID or includes data');
+            return null;
+          }
           
           // Find the asset in the linked entries/assets
-          const asset = data?.includes?.Asset?.find(
-            (asset) => asset.sys.id === id
+          const asset = data.includes.Asset.find(
+            asset => asset.sys.id === assetId
           );
           
-          if (asset) {
+          if (asset && asset.fields && asset.fields.file) {
             const { title, description, file } = asset.fields;
             const imageUrl = file.url;
+            console.log('Found image asset:', { title, url: imageUrl });
             
             return (
               <div className="my-8">
@@ -71,6 +84,8 @@ const About = () => {
                 />
               </div>
             );
+          } else {
+            console.error('Asset found but missing required fields:', asset);
           }
         } catch (error) {
           console.error('Error rendering embedded asset:', error);
@@ -91,10 +106,16 @@ const About = () => {
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-2/3" />
           </div>
-        ) : (
-          <div className="prose max-w-none">
-            {data?.fields?.bodyContent && documentToReactComponents(data.fields.bodyContent as Document, richTextOptions)}
+        ) : error ? (
+          <div className="text-red-500">
+            Error loading content: {error instanceof Error ? error.message : 'Unknown error'}
           </div>
+        ) : (
+          <ContentfulErrorBoundary contentType="About page">
+            <div className="prose max-w-none">
+              {data?.fields?.bodyContent && documentToReactComponents(data.fields.bodyContent, richTextOptions)}
+            </div>
+          </ContentfulErrorBoundary>
         )}
       </div>
     </Layout>
