@@ -18,6 +18,7 @@ import BusinessGoalDetailPage from '@/pages/BusinessGoalDetailPage';
 import MachineDetailPage from '@/pages/MachineDetailPage';
 import MachinesPage from '@/pages/MachinesPage';
 import About from '@/pages/About';
+import ContactContentful from '@/pages/ContactContentful';
 
 const App: React.FC = () => {
   const routes = [
@@ -55,7 +56,7 @@ const App: React.FC = () => {
     },
     {
       path: '/contact',
-      element: <Contact />,
+      element: <ContactContentful />,
     },
     {
       path: '/business-goals',

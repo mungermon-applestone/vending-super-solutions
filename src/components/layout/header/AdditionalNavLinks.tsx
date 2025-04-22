@@ -28,6 +28,12 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
       >
         <Link to="/about">About</Link>
       </Button>
+      <Button 
+        asChild
+        variant="ghost"
+      >
+        <Link to="/contact">Contact</Link>
+      </Button>
     </div>
   );
 };
