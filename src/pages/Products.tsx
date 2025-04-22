@@ -13,6 +13,7 @@ import KeyFeaturesSection from '@/components/products/sections/KeyFeaturesSectio
 import DemoRequest from '@/components/products/sections/DemoRequest';
 import ProductsHero from '@/components/products/sections/ProductsHero';
 import FeaturedBusinessGoals from '@/components/products/sections/FeaturedBusinessGoals';
+import InquiryForm from '@/components/machines/contact/InquiryForm';
 
 const Products = () => {
   const { data: products, isLoading, error, refetch } = useContentfulProducts();
@@ -140,6 +141,9 @@ const Products = () => {
             bulletPoints={pageContent.demoRequestBulletPoints}
           />
         )}
+
+        {/* Inquiry Form */}
+        <InquiryForm title="Ready to transform your vending operations?" />
         
         {/* Debug Information */}
         {import.meta.env.DEV && (
