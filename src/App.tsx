@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -14,6 +13,7 @@ import Home from '@/pages/Home';
 import TechnologyLanding from '@/pages/TechnologyLanding';
 import ContentfulTechnologyPage from '@/pages/ContentfulTechnologyPage';
 import TechnologyPage from './pages/TechnologyPage';
+import BusinessGoalsLanding from '@/pages/BusinessGoalsLanding';
 
 const App: React.FC = () => {
   // Define routes
@@ -37,6 +37,10 @@ const App: React.FC = () => {
     {
       path: '/contact',
       element: <Contact />,
+    },
+    {
+      path: '/business-goals',
+      element: <BusinessGoalsLanding />,
     },
     {
       path: '/technology-landing',
