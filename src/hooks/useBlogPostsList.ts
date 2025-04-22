@@ -25,6 +25,59 @@ interface BlogPostsQueryOptions {
 }
 
 /**
+ * Creates properly typed query parameters for Contentful
+ * Ensures all values are strings as required by the API
+ */
+const createQueryParams = (options: BlogPostsQueryOptions): Record<string, string> => {
+  const { limit = 10, skip = 0, tag } = options;
+  
+  // Build base params with explicit string conversions
+  const params: Record<string, string> = {
+    content_type: "blogPost",
+    order: "-fields.publishDate",
+    limit: String(limit),
+    skip: String(skip)
+  };
+  
+  // Add optional tag filter
+  if (tag) {
+    params["metadata.tags.sys.id[in]"] = tag;
+  }
+  
+  return params;
+};
+
+/**
+ * Formats a Contentful entry into our BlogPostItem interface
+ */
+const formatBlogPost = (item: any): BlogPostItem => {
+  const fields = item.fields as any;
+  
+  // Process featured image if it exists
+  const featuredImage = fields.featuredImage
+    ? {
+        url: fields.featuredImage.fields?.file?.url
+          ? `https:${fields.featuredImage.fields.file.url}`
+          : undefined,
+        title: fields.featuredImage.fields?.title || ""
+      }
+    : undefined;
+  
+  // Return formatted blog post
+  return {
+    id: item.sys.id,
+    title: fields.title || "Untitled",
+    slug: fields.slug || "",
+    content: fields.content || {},
+    excerpt: fields.excerpt || "",
+    publishDate: fields.publishDate || null,
+    featuredImage,
+    author: fields.author || "",
+    tags: fields.tags || []
+  };
+};
+
+/**
  * Hook specifically designed for the Blog page to fetch posts from Contentful
  */
 export const useBlogPostsList = (options: BlogPostsQueryOptions = {}) => {
@@ -36,48 +89,14 @@ export const useBlogPostsList = (options: BlogPostsQueryOptions = {}) => {
       try {
         const client = await getContentfulClient();
         
-        // Build query parameters manually as an object with string values
-        const queryParams: Record<string, string> = {
-          content_type: "blogPost",
-          order: "-fields.publishDate"
-        };
+        // Use our adapter to get properly typed query params
+        const queryParams = createQueryParams(options);
         
-        // Convert number values to strings explicitly
-        queryParams.limit = String(limit);
-        queryParams.skip = String(skip);
-        
-        if (tag) {
-          queryParams["metadata.tags.sys.id[in]"] = tag;
-        }
-        
+        // Execute the query with our typed params
         const response = await client.getEntries(queryParams);
         
-        return response.items.map(item => {
-          const fields = item.fields as any;
-          
-          // Process featured image if it exists
-          const featuredImage = fields.featuredImage
-            ? {
-                url: fields.featuredImage.fields?.file?.url
-                  ? `https:${fields.featuredImage.fields.file.url}`
-                  : undefined,
-                title: fields.featuredImage.fields?.title || ""
-              }
-            : undefined;
-          
-          // Map Contentful entry to our BlogPostItem interface
-          return {
-            id: item.sys.id,
-            title: fields.title || "Untitled",
-            slug: fields.slug || "",
-            content: fields.content || {},
-            excerpt: fields.excerpt || "",
-            publishDate: fields.publishDate || null,
-            featuredImage,
-            author: fields.author || "",
-            tags: fields.tags || []
-          };
-        });
+        // Map the response to our interface
+        return response.items.map(formatBlogPost);
       } catch (error) {
         console.error("Error fetching blog posts:", error);
         toast.error("Failed to load blog posts. Please try again later.");
