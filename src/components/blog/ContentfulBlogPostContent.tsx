@@ -29,17 +29,14 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
     return <div>Error: Blog post data is missing</div>;
   }
 
-  // Access fields directly from post.fields with proper type checking
-  const title = post.fields.title;
-  const content = post.fields.content;
-  const excerpt = post.fields.excerpt;
-  const publishDate = post.fields.publishDate;
+  // Access fields directly from post.fields
+  const { title, content, excerpt, publishDate } = post.fields;
   const featuredImage = post.fields.featuredImage;
 
   return (
     <article className="max-w-3xl mx-auto">
       <header className="mb-8">
-        {featuredImage?.fields?.file?.url && (
+        {featuredImage && featuredImage.fields && featuredImage.fields.file && (
           <Image
             src={featuredImage.fields.file.url}
             alt={featuredImage.fields.title || title}
