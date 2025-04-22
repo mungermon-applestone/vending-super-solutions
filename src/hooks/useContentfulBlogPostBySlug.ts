@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { Document } from "@contentful/rich-text-types";
-import { Asset, Entry, EntrySkeletonType } from "contentful";
+import { Asset, Entry } from "contentful";
 
 // Define the blog post content type for Contentful
 export interface ContentfulBlogPostFields {

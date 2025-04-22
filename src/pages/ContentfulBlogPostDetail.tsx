@@ -26,7 +26,7 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
       // Fetch all published posts sorted by publishDate ascending
       const response = await client.getEntries({
         content_type: "blogPost",
-        order: ["fields.publishDate"], // Use array for order parameter
+        order: ["fields.publishDate"],
         select: ["fields.slug", "fields.title", "fields.publishDate"],
       });
       
@@ -43,16 +43,18 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
       let next: AdjacentBlogPost | null = null;
       
       if (idx > 0 && posts[idx - 1].fields) {
+        const prevFields = posts[idx - 1].fields;
         previous = {
-          slug: String(posts[idx - 1].fields.slug),
-          title: String(posts[idx - 1].fields.title)
+          slug: String(prevFields.slug),
+          title: String(prevFields.title)
         };
       }
       
       if (idx < posts.length - 1 && posts[idx + 1].fields) {
+        const nextFields = posts[idx + 1].fields;
         next = {
-          slug: String(posts[idx + 1].fields.slug),
-          title: String(posts[idx + 1].fields.title)
+          slug: String(nextFields.slug),
+          title: String(nextFields.title)
         };
       }
         
