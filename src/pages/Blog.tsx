@@ -1,7 +1,7 @@
 
 import React from 'react';
 import Layout from '@/components/layout/Layout';
-import { useContentfulBlogPosts, ContentfulBlogPost } from '@/hooks/useContentfulBlogPosts';
+import { useBlogPostsList, BlogPostItem } from '@/hooks/useBlogPostsList';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
@@ -9,7 +9,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 const Blog = () => {
-  const { data: posts = [], isLoading, error } = useContentfulBlogPosts();
+  const { data: posts = [], isLoading, error } = useBlogPostsList();
 
   return (
     <Layout>
@@ -41,7 +41,7 @@ const Blog = () => {
   );
 };
 
-const BlogPostCard = ({ post }: { post: ContentfulBlogPost }) => {
+const BlogPostCard = ({ post }: { post: BlogPostItem }) => {
   return (
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
       <CardHeader>
