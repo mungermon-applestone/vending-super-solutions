@@ -7,7 +7,7 @@ export interface ContentfulBlogPost {
   id: string;
   title: string;
   slug: string;
-  content: any; // Rich text content
+  content: any;
   excerpt?: string;
   publishDate?: string;
   featuredImage?: {
@@ -26,33 +26,36 @@ interface UseBlogPostsOptions {
 
 export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
   const { limit = 10, skip = 0, tag } = options;
-  
+
   return useContentful<ContentfulBlogPost[]>({
     queryKey: ["contentful-blog-posts", limit, skip, tag],
     queryFn: async () => {
       const client = await getContentfulClient();
-      
+
       const queryParams: any = {
         content_type: "blogPost",
-        limit,
-        skip,
+        limit: limit.toString(),
+        skip: skip.toString(),
         order: "-fields.publishDate",
       };
-      
-      // Add tag filter if provided
+
       if (tag) {
         queryParams["metadata.tags.sys.id[in]"] = tag;
       }
-      
+
       const response = await client.getEntries(queryParams);
-      
+
       return response.items.map(item => {
         const fields = item.fields as any;
-        const featuredImage = fields.featuredImage ? {
-          url: fields.featuredImage.fields?.file?.url ? `https:${fields.featuredImage.fields.file.url}` : undefined,
-          title: fields.featuredImage.fields?.title || ''
-        } : undefined;
-        
+        const featuredImage = fields.featuredImage
+          ? {
+              url: fields.featuredImage.fields?.file?.url
+                ? `https:${fields.featuredImage.fields.file.url}`
+                : undefined,
+              title: fields.featuredImage.fields?.title || ""
+            }
+          : undefined;
+
         return {
           id: item.sys.id,
           title: fields.title || "Untitled",
@@ -70,3 +73,4 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
     enableToasts: false
   });
 }
+
