@@ -13,8 +13,6 @@ import NotFound from '@/pages/NotFound';
 import Home from '@/pages/Home';
 import TechnologyLanding from '@/pages/TechnologyLanding';
 import ContentfulTechnologyPage from '@/pages/ContentfulTechnologyPage';
-
-// Import the new TechnologyPage component
 import TechnologyPage from './pages/TechnologyPage';
 
 const App: React.FC = () => {

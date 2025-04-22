@@ -24,7 +24,7 @@ export function useTechnologySections() {
         const client = await getContentfulClient();
         const entries = await client.getEntries({
           content_type: 'technologySection',
-          order: ['fields.displayOrder']
+          order: ['fields.displayOrder'] // This is the correct format for ordering
         });
         
         return entries.items.map(entry => {
