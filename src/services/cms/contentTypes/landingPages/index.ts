@@ -1,31 +1,21 @@
 
-import { LandingPage, LandingPageFormData } from '@/types/landingPage';
+/**
+ * Landing page operations
+ * This provides simple stub functions for landing page operations.
+ */
 
-// Import refactored operations
-import { fetchLandingPages } from './fetchLandingPages';
-import { fetchLandingPageByKey } from './fetchLandingPageByKey';
-import { createLandingPage } from './createLandingPage';
-import { updateLandingPage } from './updateLandingPage';
-import { deleteLandingPage } from './deleteLandingPage';
-import { getMockLandingPages } from './mock';
+// Re-export functions
+export const fetchLandingPages = async () => [];
+export const fetchLandingPageByKey = async () => null;
+export const createLandingPage = async () => null;
+export const updateLandingPage = async () => false;
+export const deleteLandingPage = async () => false;
 
-// Re-export operations
-export {
-  fetchLandingPages,
-  fetchLandingPageByKey,
-  createLandingPage,
-  updateLandingPage,
-  deleteLandingPage,
+// Export operations object
+export const landingPageOperations = {
+  getAll: fetchLandingPages,
+  getByKey: fetchLandingPageByKey,
+  create: createLandingPage,
+  update: updateLandingPage,
+  delete: deleteLandingPage
 };
-
-// Export mock data helper for internal use
-export const _getMockLandingPages = getMockLandingPages;
-
-// Define window.__MOCK_DATA type to avoid TypeScript errors
-declare global {
-  interface Window {
-    __MOCK_DATA: {
-      [key: string]: any[];
-    };
-  }
-}

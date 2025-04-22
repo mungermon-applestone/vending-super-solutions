@@ -1,7 +1,6 @@
 
-import { migrateTechnologyData, checkIfTechnologyDataExists } from './migrateTechnologyData';
+/**
+ * Technology migration utility
+ */
 
-export {
-  migrateTechnologyData,
-  checkIfTechnologyDataExists
-};
+export { migrateTechnologyData } from './migrateTechnologyData';

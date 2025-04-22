@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -8,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import PageHero from '@/components/common/PageHero';
-import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
+import InquiryForm from '@/components/machines/contact/InquiryForm';
 
 const BusinessGoalsPage: React.FC = () => {
   const { data: businessGoals, isLoading, error } = useContentfulBusinessGoals();
@@ -78,7 +79,7 @@ const BusinessGoalsPage: React.FC = () => {
                 <div className="mb-4">
                   {goal.icon ? (
                     <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full w-12 h-12 flex items-center justify-center text-vending-blue">
-                      <MachineTypeIcon type={goal.icon} />
+                      <ArrowRight className="h-6 w-6" />
                     </div>
                   ) : (
                     <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full w-12 h-12 flex items-center justify-center text-vending-blue">
@@ -103,6 +104,9 @@ const BusinessGoalsPage: React.FC = () => {
 
         {/* Testimonials Section */}
         {testimonialSection && <TestimonialsSection data={testimonialSection} />}
+        
+        {/* Inquiry Form */}
+        <InquiryForm title="Ready to achieve your business goals?" />
       </div>
     </Layout>
   );

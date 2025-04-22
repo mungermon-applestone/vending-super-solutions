@@ -1,27 +1,13 @@
 
-// Re-export technology services for easier imports
-export { deleteTechnology } from './contentTypes/technologies/deleteTechnology';
-export { cloneTechnology } from './contentTypes/technologies/cloneTechnology';
-export { fetchTechnologies, fetchTechnologiesSafe } from './contentTypes/technologies/fetchTechnologies';
-export { fetchTechnologyBySlug, getTechnologyBySlug } from './contentTypes/technologies/fetchTechnologyBySlug';
+/**
+ * Technology service
+ * This is a simplified version that just exports stub functions.
+ */
 
-// Import fetchTechnologies function for use in the connection test
-import { fetchTechnologies } from './contentTypes/technologies/fetchTechnologies';
+export const getTechnologies = async () => {
+  return [];
+};
 
-// Export a simple function to test the connection
-export async function testStrapiConnection() {
-  try {
-    const technologies = await fetchTechnologies();
-    return {
-      success: true,
-      message: `Successfully connected to Strapi and found ${technologies.length} technologies`,
-      data: technologies
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: `Failed to connect to Strapi: ${error instanceof Error ? error.message : String(error)}`,
-      error
-    };
-  }
-}
+export const getTechnologyBySlug = async (slug: string) => {
+  return null;
+};

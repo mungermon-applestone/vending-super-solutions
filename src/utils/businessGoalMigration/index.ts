@@ -1,7 +1,6 @@
 
-import { migrateBusinessGoalData, checkIfBusinessGoalDataExists } from './migrateBusinessGoalData';
+/**
+ * Business goal migration utility
+ */
 
-export {
-  migrateBusinessGoalData,
-  checkIfBusinessGoalDataExists
-};
+export { migrateBusinessGoalData } from './migrateBusinessGoalData';

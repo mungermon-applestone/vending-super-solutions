@@ -1,23 +1,20 @@
 
-import { ContentProviderConfig, ContentProviderType } from '../types';
-import { BusinessGoalAdapter } from './types';
-import { strapiBusinessGoalAdapter } from './strapiBusinessGoalAdapter';
-import { supabaseBusinessGoalAdapter } from './supabaseBusinessGoalAdapter';
-
 /**
- * Factory function to get the appropriate business goal adapter based on configuration
+ * Business goal adapter factory
+ * This is a simplified version since we're only using Contentful now.
  */
-export const getBusinessGoalAdapter = (config?: ContentProviderConfig): BusinessGoalAdapter => {
-  // Default to Supabase if no config provided
-  const providerType = config?.type || ContentProviderType.SUPABASE;
-  
-  switch (providerType) {
-    case ContentProviderType.SUPABASE:
-      return supabaseBusinessGoalAdapter;
-    case ContentProviderType.STRAPI:
-      return strapiBusinessGoalAdapter;
-    default:
-      console.warn(`[businessGoalAdapterFactory] Unknown provider type: ${providerType}, falling back to Supabase`);
-      return supabaseBusinessGoalAdapter;
-  }
+
+import { BusinessGoalAdapter } from '@/types/cms';
+
+export const getBusinessGoalAdapter = (): BusinessGoalAdapter => {
+  // Return a stub adapter since we're using only Contentful now
+  return {
+    getAll: async () => [],
+    getBySlug: async () => null,
+    getById: async () => null,
+    create: async () => null,
+    update: async () => false,
+    delete: async () => false,
+    clone: async () => null
+  };
 };
