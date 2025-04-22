@@ -6,6 +6,12 @@ import useContentful from '@/hooks/useContentful';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
 interface ContactPageContent {
   introTitle?: string;
   introDescription?: string;
@@ -23,6 +29,7 @@ interface ContactPageContent {
   immediateAssistanceTitle?: string;
   immediateAssistanceDescription?: string;
   immediateAssistanceButtonText?: string;
+  faqItems?: FAQItem[];
 }
 
 const CONTACT_ID = '1iQrxg7rN4Dk17ZdxPxfhj';
@@ -32,8 +39,29 @@ const ContactContentful = () => {
     queryKey: ['contact-page-content', CONTACT_ID],
     queryFn: async () => {
       const client = await getContentfulClient();
+      // Include 2 to get linked FAQ entries
       const entry = await client.getEntry(CONTACT_ID, { include: 2 });
-      return entry.fields;
+      // Extract main fields
+      const fields = entry.fields;
+
+      // Extract linked FAQ entries if included
+      const linkedFAQs = entry.includes?.Entry?.filter(
+        (e) => e.sys.contentType.sys.id === 'faqItem'
+      );
+
+      // Map linked FAQ entries to FAQItem shape with safe checks
+      const faqItems: FAQItem[] = linkedFAQs
+        ? linkedFAQs.map((faq) => ({
+            id: faq.sys.id,
+            question: faq.fields.question || '',
+            answer: faq.fields.answer || '',
+          }))
+        : [];
+
+      return {
+        ...fields,
+        faqItems,
+      };
     },
   });
 
@@ -75,7 +103,7 @@ const ContactContentful = () => {
                 {f.introDescription ||
                   'Have questions about our vending solutions? Ready to transform your retail operations? Contact our team today.'}
               </p>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start">
                   <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full h-12 w-12 mr-4 flex items-center justify-center text-vending-blue">
@@ -161,28 +189,41 @@ const ContactContentful = () => {
         {f.faqSectionTitle && (
           <h2 className="text-3xl font-bold text-center mb-12">{f.faqSectionTitle}</h2>
         )}
-        {/* Fallback static FAQ if none from CMS */}
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="font-bold text-xl mb-2">What types of businesses use your vending solutions?</h3>
-            <p className="text-gray-600">Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.</p>
+        {/* Render dynamic FAQ items if present */}
+        {f.faqItems && f.faqItems.length > 0 ? (
+          <div className="grid md:grid-cols-2 gap-8">
+            {f.faqItems.map((faq) => (
+              <div key={faq.id} className="bg-white p-6 rounded-lg shadow-sm">
+                <h3 className="font-bold text-xl mb-2">{faq.question}</h3>
+                <p className="text-gray-600 whitespace-pre-line">{faq.answer}</p>
+              </div>
+            ))}
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="font-bold text-xl mb-2">How quickly can your solutions be deployed?</h3>
-            <p className="text-gray-600">Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.</p>
+        ) : (
+          /* Fallback static FAQ if none from CMS */
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h3 className="font-bold text-xl mb-2">What types of businesses use your vending solutions?</h3>
+              <p className="text-gray-600">Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h3 className="font-bold text-xl mb-2">How quickly can your solutions be deployed?</h3>
+              <p className="text-gray-600">Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h3 className="font-bold text-xl mb-2">Do you offer installation and maintenance services?</h3>
+              <p className="text-gray-600">Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <h3 className="font-bold text-xl mb-2">Can your vending machines be customized?</h3>
+              <p className="text-gray-600">Absolutely! We offer customization options for branding, product selection, payment methods, and technology integration based on your business needs.</p>
+            </div>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="font-bold text-xl mb-2">Do you offer installation and maintenance services?</h3>
-            <p className="text-gray-600">Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="font-bold text-xl mb-2">Can your vending machines be customized?</h3>
-            <p className="text-gray-600">Absolutely! We offer customization options for branding, product selection, payment methods, and technology integration based on your business needs.</p>
-          </div>
-        </div>
+        )}
       </div>
     </Layout>
   );
 };
 
 export default ContactContentful;
+
