@@ -8,9 +8,9 @@ import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, ExternalLink, Server, HardDrive } from 'lucide-react';
-import PageHero from '@/components/common/PageHero';
 import { useMachinesPageContent } from '@/hooks/cms/useMachinesPageContent';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
+import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 
 const MachinesPage: React.FC = () => {
   const { data: machines, isLoading, error, refetch } = useContentfulMachines();
@@ -76,16 +76,8 @@ const MachinesPage: React.FC = () => {
 
   return (
     <Layout>
-      {/* Hero Section */}
-      <PageHero 
-        pageKey="machines"
-        fallbackTitle="Our Machines"
-        fallbackSubtitle="Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs."
-        fallbackImage="https://images.unsplash.com/photo-1493723843671-1d655e66ac1c"
-        fallbackImageAlt="Various vending machines"
-        fallbackPrimaryButtonText="Learn More"
-        fallbackPrimaryButtonUrl="#machines-section"
-      />
+      {/* Hero Section - Using TechnologyPageHero with specific entry ID */}
+      <TechnologyPageHero entryId="3bH4WrT0pLKDeG35mUekGq" />
 
       {/* Intro Section */}
       {pageContent && (
