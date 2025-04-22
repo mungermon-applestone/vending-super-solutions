@@ -11,6 +11,8 @@ import { Server, HardDrive } from 'lucide-react';
 
 const MachinesPage: React.FC = () => {
   const { data: machines, isLoading, error } = useContentfulMachines();
+  
+  console.log('Machines data:', machines);
 
   return (
     <Layout>
@@ -74,9 +76,11 @@ const MachinesPage: React.FC = () => {
                       )}
                     </div>
                   )}
-                  <div className="absolute top-0 right-0 bg-vending-blue text-white px-3 py-1 m-2 rounded-md text-sm">
-                    {machine.temperature}
-                  </div>
+                  {machine.temperature && (
+                    <div className="absolute top-0 right-0 bg-vending-blue text-white px-3 py-1 m-2 rounded-md text-sm">
+                      {machine.temperature}
+                    </div>
+                  )}
                 </div>
                 <CardHeader>
                   <CardTitle className="text-xl">{machine.title}</CardTitle>
