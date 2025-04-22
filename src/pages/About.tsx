@@ -8,15 +8,40 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import Image from '@/components/common/Image';
 
+interface ContentfulEntry {
+  sys: {
+    id: string;
+  };
+  fields: {
+    bodyContent: Document;
+  };
+  includes?: {
+    Asset?: Array<{
+      sys: {
+        id: string;
+      };
+      fields: {
+        title: string;
+        description?: string;
+        file: {
+          url: string;
+          fileName?: string;
+          contentType?: string;
+        };
+      };
+    }>;
+  };
+}
+
 const About = () => {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<ContentfulEntry>({
     queryKey: ['about', '3Dn6DWVQR0VzhcQL6gdU0H'],
     queryFn: async () => {
       const client = await getContentfulClient();
       const entry = await client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H', {
         include: 2 // Include linked assets (like images)
       });
-      return entry;
+      return entry as ContentfulEntry;
     }
   });
 
@@ -24,27 +49,31 @@ const About = () => {
   const richTextOptions = {
     renderNode: {
       [BLOCKS.EMBEDDED_ASSET]: (node) => {
-        // Get the asset reference from the node
-        const { data: { target: { sys: { id } } } } = node;
-        
-        // Find the asset in the linked entries/assets
-        const asset = data?.includes?.Asset?.find(
-          (asset) => asset.sys.id === id
-        );
-        
-        if (asset) {
-          const { title, description, file } = asset.fields;
-          const imageUrl = file.url;
+        try {
+          // Get the asset reference from the node
+          const { data: { target: { sys: { id } } } } = node;
           
-          return (
-            <div className="my-8">
-              <Image 
-                src={`https:${imageUrl}`}
-                alt={description || title || 'About image'}
-                className="w-full h-auto rounded-md"
-              />
-            </div>
+          // Find the asset in the linked entries/assets
+          const asset = data?.includes?.Asset?.find(
+            (asset) => asset.sys.id === id
           );
+          
+          if (asset) {
+            const { title, description, file } = asset.fields;
+            const imageUrl = file.url;
+            
+            return (
+              <div className="my-8">
+                <Image 
+                  src={`https:${imageUrl}`}
+                  alt={description || title || 'About image'}
+                  className="w-full h-auto rounded-md"
+                />
+              </div>
+            );
+          }
+        } catch (error) {
+          console.error('Error rendering embedded asset:', error);
         }
         
         return null;
