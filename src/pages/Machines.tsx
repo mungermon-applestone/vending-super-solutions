@@ -18,6 +18,49 @@ const Machines = () => {
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['machines'] });
   };
+
+  // Separate machines by type
+  const vendingMachines = machines?.filter(machine => machine.type === 'vending') || [];
+  const lockers = machines?.filter(machine => machine.type === 'locker') || [];
+  
+  const renderMachineGrid = (machineList: typeof machines, title: string) => {
+    if (!machineList?.length) return null;
+    
+    return (
+      <div className="mb-16">
+        <h3 className="text-2xl font-semibold mb-6">{title}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {machineList.map((machine) => (
+            <Card key={machine.id} className="overflow-hidden">
+              <CardHeader>
+                <CardTitle>{machine.title}</CardTitle>
+                <CardDescription className="flex gap-2">
+                  <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                    {machine.type}
+                  </span>
+                  {machine.temperature && (
+                    <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                      {machine.temperature}
+                    </span>
+                  )}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 line-clamp-3 mb-4">{machine.description}</p>
+              </CardContent>
+              <CardFooter>
+                <Button asChild variant="outline" size="sm">
+                  <Link to={`/machines/${machine.type}/${machine.slug}`}>
+                    View Details <ExternalLink className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  };
   
   return (
     <Layout>
@@ -76,34 +119,9 @@ const Machines = () => {
             </CardContent>
           </Card>
         ) : machines && machines.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {machines.map((machine) => (
-              <Card key={machine.id} className="overflow-hidden">
-                <CardHeader>
-                  <CardTitle>{machine.title}</CardTitle>
-                  <CardDescription className="flex gap-2">
-                    <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                      {machine.type}
-                    </span>
-                    {machine.temperature && (
-                      <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                        {machine.temperature}
-                      </span>
-                    )}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 line-clamp-3 mb-4">{machine.description}</p>
-                </CardContent>
-                <CardFooter>
-                  <Button asChild variant="outline" size="sm">
-                    <Link to={`/machines/${machine.type}/${machine.slug}`}>
-                      View Details <ExternalLink className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+          <div>
+            {renderMachineGrid(vendingMachines, "Vending Machines")}
+            {renderMachineGrid(lockers, "Smart Lockers")}
           </div>
         ) : (
           <Card>
