@@ -6,69 +6,58 @@ import { CMSMachine } from '@/types/cms';
 
 interface MachineDetailHeroProps {
   machine: CMSMachine;
-  primaryAction?: React.ReactNode;
-  secondaryAction?: React.ReactNode;
 }
 
-const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ 
-  machine,
-  primaryAction,
-  secondaryAction
-}) => {
-  // Default actions if none are provided
-  const defaultPrimaryAction = (
-    <Button className="btn-primary">
-      Request Pricing
-    </Button>
-  );
-  
-  const defaultSecondaryAction = (
-    <Button variant="outline">
-      Download Spec Sheet
-    </Button>
-  );
-
+const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
   return (
-    <section className="py-12 md:py-16 bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
-      <div className="container-wide">
+    <section className="py-12 md:py-16 bg-gradient-to-br from-blue-500 to-cyan-500">
+      <div className="container mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <div className="flex items-center mb-6">
-              <div className="bg-vending-blue p-2 rounded-full mr-3">
+              <div className="bg-white/10 p-2 rounded-full mr-3">
                 {machine.type === 'vending' ? (
                   <Server className="h-5 w-5 text-white" />
                 ) : (
                   <HardDrive className="h-5 w-5 text-white" />
                 )}
               </div>
-              <span className="text-vending-blue font-medium">
-                {machine.type.charAt(0).toUpperCase()}{machine.type.slice(1)} 
-                {machine.temperature && (
-                  <>
-                    {' | '}
-                    {machine.temperature.charAt(0).toUpperCase()}{machine.temperature.slice(1)}
-                  </>
-                )}
+              <span className="text-white font-medium">
+                {machine.type.charAt(0).toUpperCase()}{machine.type.slice(1)} | {machine.temperature}
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-vending-blue-dark">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-white">
               {machine.title}
             </h1>
-            <p className="text-lg text-gray-700 mb-8">
+            <p className="text-lg text-white/90 mb-8">
               {machine.description}
             </p>
             <div className="flex flex-wrap gap-4">
-              {primaryAction || defaultPrimaryAction}
-              {secondaryAction || defaultSecondaryAction}
+              <Button className="bg-white text-blue-600 hover:bg-blue-50">
+                Request Information
+              </Button>
+              <Button variant="outline" className="text-white border-white hover:bg-white/10">
+                Download Spec Sheet
+              </Button>
             </div>
           </div>
           <div className="relative">
-            <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-              <img 
-                src={machine.images?.[0]?.url} 
-                alt={machine.images?.[0]?.alt || machine.title} 
-                className="w-full h-auto object-cover"
-              />
+            <div className="bg-white rounded-lg shadow-xl overflow-hidden p-8">
+              {machine.images && machine.images[0] ? (
+                <img 
+                  src={machine.images[0].url} 
+                  alt={machine.images[0].alt || machine.title} 
+                  className="w-full h-auto object-contain"
+                />
+              ) : (
+                <div className="aspect-square bg-gray-100 flex items-center justify-center">
+                  {machine.type === 'vending' ? (
+                    <Server className="h-20 w-20 text-gray-400" />
+                  ) : (
+                    <HardDrive className="h-20 w-20 text-gray-400" />
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

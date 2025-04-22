@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -78,7 +77,7 @@ const App: React.FC = () => {
       path: '*',
       element: <NotFound />,
     },
-  ]
+  ];
 
   return (
     <Router>
