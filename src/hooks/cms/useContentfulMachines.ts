@@ -189,6 +189,11 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
             }
           } catch (diviError) {
             console.error('[useContentfulMachine] Error fetching divi-wp by ID:', diviError);
+            // If in preview environment and fetch failed, return fallback
+            if (window.location.hostname.includes('lovable.app')) {
+              console.log('[useContentfulMachine] Using fallback data for divi-wp in preview environment');
+              return fallbackMachineData['divi-wp'];
+            }
           }
         }
         

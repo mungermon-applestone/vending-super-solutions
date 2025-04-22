@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,20 +10,33 @@ import MachineDetail from '@/components/machineDetail/MachineDetail';
 
 const MachineDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: machine, isLoading, error } = useContentfulMachine(slug || '');
+  const location = useLocation();
+  
+  // Ensure slug is a string and not undefined
+  const machineSlug = slug || '';
+  
+  // Special case for direct URL access to /machines/divi-wp
+  const isDiviWP = machineSlug === 'divi-wp' || location.pathname.endsWith('/divi-wp');
+  
+  // If explicitly divi-wp, force that slug
+  const querySlug = isDiviWP ? 'divi-wp' : machineSlug;
+  
+  const { data: machine, isLoading, error } = useContentfulMachine(querySlug);
 
-  console.log('MachineDetailPage render - slug:', slug);
+  console.log('MachineDetailPage render - URL path:', location.pathname);
+  console.log('MachineDetailPage render - slug param:', slug);
+  console.log('MachineDetailPage render - query slug:', querySlug);
   console.log('Machine data from Contentful:', machine);
   
   // Special case for divi-wp, force direct fetch by ID
   useEffect(() => {
-    if (slug === 'divi-wp') {
+    if (isDiviWP) {
       console.log('Special case for divi-wp detected, should fetch ID: 1omUbnEhB6OeBFpwPFj1Ww');
     }
     
     // Scroll to top when the component mounts or slug changes
     window.scrollTo(0, 0);
-  }, [slug]);
+  }, [isDiviWP]);
   
   if (isLoading) {
     console.log('Machine detail page is in loading state');
@@ -79,7 +92,7 @@ const MachineDetailPage = () => {
   }
   
   if (!machine) {
-    console.log('No machine data found for slug:', slug);
+    console.log('No machine data found for slug:', querySlug);
     return (
       <Layout>
         <div className="container mx-auto py-20">
@@ -88,8 +101,12 @@ const MachineDetailPage = () => {
               <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-amber-800 mb-3">Machine Not Found</h3>
               <p className="text-amber-600 mb-6">
-                The machine with slug "{slug}" couldn't be found in Contentful.
-                {slug === 'divi-wp' && (
+                {querySlug ? (
+                  `The machine with slug "${querySlug}" couldn't be found in Contentful.`
+                ) : (
+                  "No machine slug was provided in the URL."
+                )}
+                {isDiviWP && (
                   <div className="mt-4 p-3 bg-amber-100 rounded text-left">
                     <p className="font-medium">Looking for Divi-WP?</p>
                     <p>Trying to fetch entry with ID: 1omUbnEhB6OeBFpwPFj1Ww</p>

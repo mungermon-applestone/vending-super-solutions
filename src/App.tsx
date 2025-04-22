@@ -43,12 +43,12 @@ const App: React.FC = () => {
       element: <MachinesPage />,
     },
     {
-      path: '/machines/:slug',
+      // Place the explicit route first so it takes precedence
+      path: '/machines/divi-wp',
       element: <MachineDetailPage />,
     },
     {
-      // Special direct route for divi-wp since it's giving us trouble
-      path: '/machines/divi-wp',
+      path: '/machines/:slug',
       element: <MachineDetailPage />,
     },
     {
