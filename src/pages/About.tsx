@@ -9,12 +9,8 @@ import Image from '@/components/common/Image';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import useContentful from '@/hooks/useContentful';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { ContentfulAsset, ContentfulResponse } from '@/types/contentful';
+import { ContentfulAsset, ContentfulResponse, AboutPageFields } from '@/types/contentful';
 import { Document } from '@contentful/rich-text-types';
-
-interface AboutPageFields {
-  bodyContent: Document; 
-}
 
 const About = () => {
   const { data, isLoading, error, isContentReady } = useContentful<ContentfulResponse<AboutPageFields>>({

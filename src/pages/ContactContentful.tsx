@@ -5,6 +5,7 @@ import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import useContentful from '@/hooks/useContentful';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ContentfulResponse } from '@/types/contentful';
 
 interface FAQItem {
   id: string;
@@ -35,35 +36,52 @@ interface ContactPageContent {
 const CONTACT_ID = '1iQrxg7rN4Dk17ZdxPxfhj';
 
 const ContactContentful = () => {
-  const { data, isLoading, error, isContentReady } = useContentful<any>({
+  const { data, isLoading, error, isContentReady } = useContentful<ContentfulResponse>({
     queryKey: ['contact-page-content', CONTACT_ID],
     queryFn: async () => {
       const client = await getContentfulClient();
       // Include 2 to get linked FAQ entries
       const entry = await client.getEntry(CONTACT_ID, { include: 2 });
+      
+      console.log('Raw contact entry:', JSON.stringify(entry, null, 2));
+      
       // Extract main fields
       const fields = entry.fields;
 
-      // Extract linked FAQ entries if included
-      const linkedFAQs = entry.includes?.Entry?.filter(
-        (e) => e.sys.contentType.sys.id === 'faqItem'
-      );
-
-      // Map linked FAQ entries to FAQItem shape with safe checks
-      const faqItems: FAQItem[] = linkedFAQs
-        ? linkedFAQs.map((faq) => ({
-            id: faq.sys.id,
-            question: faq.fields.question || '',
-            answer: faq.fields.answer || '',
-          }))
-        : [];
-
-      return {
-        ...fields,
-        faqItems,
-      };
+      // Check for linked entries in the includes section
+      if (entry.includes && entry.includes.Entry) {
+        console.log('Found linked entries:', entry.includes.Entry.length);
+        
+        // Extract linked FAQ entries if included
+        const linkedFAQs = entry.includes.Entry.filter(
+          (e) => e.sys.contentType?.sys.id === 'faqItem'
+        );
+        
+        console.log('Found FAQ items:', linkedFAQs.length);
+        
+        // Map linked FAQ entries to FAQItem shape with safe checks
+        const faqItems = linkedFAQs.map((faq) => ({
+          id: faq.sys.id,
+          question: faq.fields.question || '',
+          answer: faq.fields.answer || '',
+        }));
+        
+        // Add the mapped FAQ items to the fields
+        return {
+          ...entry,
+          fields: {
+            ...fields,
+            faqItems,
+          }
+        };
+      }
+      
+      return entry;
     },
   });
+
+  console.log('Contact page data:', data);
+  console.log('FAQ items:', data?.fields?.faqItems);
 
   if (isLoading) {
     return (
@@ -88,7 +106,7 @@ const ContactContentful = () => {
     );
   }
 
-  const f = (data || {}) as ContactPageContent;
+  const f = (data?.fields || {}) as ContactPageContent;
 
   return (
     <Layout>
@@ -226,4 +244,3 @@ const ContactContentful = () => {
 };
 
 export default ContactContentful;
-

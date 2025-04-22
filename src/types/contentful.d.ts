@@ -100,6 +100,12 @@ export interface ContentfulRichTextDocument {
 export interface ContentfulResponse<T = any> extends Entry<T> {
   includes?: {
     Asset?: ContentfulAsset[];
-    Entry?: Entry<any>[];
+    Entry?: Array<Entry<any>>;
   };
 }
+
+// Define the AboutPageFields interface for the About page
+export interface AboutPageFields {
+  bodyContent: ContentfulRichTextDocument;
+}
+
