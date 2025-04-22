@@ -1,81 +1,48 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
+import CTASection from '@/components/common/CTASection';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowRight } from 'lucide-react';
-import PageHero from '@/components/common/PageHero';
+import { Server, HardDrive } from 'lucide-react';
 
-const MachinesPage = () => {
+const MachinesPage: React.FC = () => {
   const { data: machines, isLoading, error } = useContentfulMachines();
-  const navigate = useNavigate();
 
   return (
     <Layout>
-      {/* Hero Section using PageHero */}
-      <PageHero 
-        pageKey="machines"
-        fallbackTitle="Our Machines"
-        fallbackSubtitle="Discover our range of cutting-edge vending machines and smart lockers designed for modern businesses."
-        fallbackImage="https://images.unsplash.com/photo-1584680226833-0d680d0a0794?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-        fallbackImageAlt="Vending Machines"
-        fallbackPrimaryButtonText="Request Information"
-        fallbackPrimaryButtonUrl="/contact"
-        fallbackSecondaryButtonText="How It Works"
-        fallbackSecondaryButtonUrl="/technology"
-      />
-
-      {/* Filters Section */}
-      <section className="py-8 bg-gray-50">
+      <div className="bg-gradient-to-b from-vending-blue-light to-white py-16">
         <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center justify-center">
-              <Button
-                variant="outline"
-                className="w-full md:w-auto"
-                onClick={() => navigate('/machines?type=all')}
-              >
-                All Machines
-              </Button>
-            </div>
-            <div className="flex items-center justify-center">
-              <Button
-                variant="outline"
-                className="w-full md:w-auto"
-                onClick={() => navigate('/machines?type=vending')}
-              >
-                Vending Machines
-              </Button>
-            </div>
-            <div className="flex items-center justify-center">
-              <Button
-                variant="outline"
-                className="w-full md:w-auto"
-                onClick={() => navigate('/machines?type=locker')}
-              >
-                Smart Lockers
-              </Button>
-            </div>
-          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-center mb-6 text-vending-blue-dark">
+            Our Machines
+          </h1>
+          <p className="text-lg text-center max-w-3xl mx-auto mb-12 text-gray-700">
+            Discover our range of innovative vending and locker solutions designed to meet diverse business needs.
+          </p>
         </div>
-      </section>
+      </div>
 
       <div className="container mx-auto py-12">
         {isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="border border-gray-200 rounded-lg overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i}>
                 <Skeleton className="h-48 w-full" />
-                <div className="p-6">
-                  <Skeleton className="h-6 w-3/4 mb-2" />
+                <CardHeader>
+                  <Skeleton className="h-8 w-3/4" />
+                </CardHeader>
+                <CardContent>
                   <Skeleton className="h-4 w-full mb-2" />
                   <Skeleton className="h-4 w-full mb-2" />
-                  <Skeleton className="h-4 w-2/3" />
-                </div>
-              </div>
+                  <Skeleton className="h-4 w-3/4" />
+                </CardContent>
+                <CardFooter>
+                  <Skeleton className="h-10 w-full" />
+                </CardFooter>
+              </Card>
             ))}
           </div>
         )}
@@ -87,51 +54,39 @@ const MachinesPage = () => {
           </div>
         )}
 
-        {machines && machines.length === 0 && !isLoading && !error && (
-          <div className="bg-gray-50 border border-gray-200 rounded-md p-6 text-center">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">No Machines Found</h3>
-            <p className="text-gray-600">Check back later for our machine offerings.</p>
-          </div>
-        )}
-
-        {machines && machines.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {!isLoading && !error && machines && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {machines.map((machine) => (
-              <Card key={machine.id} className="overflow-hidden transition-all hover:shadow-lg">
-                {machine.images && machine.images.length > 0 && (
-                  <img 
-                    src={machine.images[0].url} 
-                    alt={machine.images[0].alt || machine.title} 
-                    className="w-full h-48 object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = "https://via.placeholder.com/400x200?text=Machine+Image";
-                    }}
-                  />
-                )}
-                <CardHeader>
-                  <CardTitle>{machine.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-700">
-                      {machine.type === 'vending' ? 'Vending' : 'Locker'}
-                    </span>
-                    {machine.temperature && (
-                      <span className="text-xs px-2 py-1 bg-blue-100 rounded-full text-blue-700">
-                        {machine.temperature}
-                      </span>
-                    )}
+              <Card key={machine.id} className="overflow-hidden flex flex-col h-full">
+                <div className="relative h-48 bg-gray-50">
+                  {machine.images && machine.images[0] ? (
+                    <img 
+                      src={machine.images[0].url} 
+                      alt={machine.images[0].alt || machine.title} 
+                      className="w-full h-full object-contain p-4"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      {machine.type === 'vending' ? (
+                        <Server className="h-16 w-16 text-gray-300" />
+                      ) : (
+                        <HardDrive className="h-16 w-16 text-gray-300" />
+                      )}
+                    </div>
+                  )}
+                  <div className="absolute top-0 right-0 bg-vending-blue text-white px-3 py-1 m-2 rounded-md text-sm">
+                    {machine.temperature}
                   </div>
-                  <p className="text-gray-600 mb-4 line-clamp-3">{machine.description}</p>
+                </div>
+                <CardHeader>
+                  <CardTitle className="text-xl">{machine.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <p className="text-gray-600 line-clamp-3">{machine.description}</p>
                 </CardContent>
                 <CardFooter>
-                  <Button 
-                    variant="ghost" 
-                    className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
-                    onClick={() => navigate(`/machines/${machine.slug}`)}
-                  >
-                    Learn more
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button asChild className="w-full">
+                    <Link to={`/machines/${machine.slug}`}>View Details</Link>
                   </Button>
                 </CardFooter>
               </Card>
@@ -139,6 +94,8 @@ const MachinesPage = () => {
           </div>
         )}
       </div>
+      
+      <CTASection />
     </Layout>
   );
 };

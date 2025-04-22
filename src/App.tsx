@@ -17,6 +17,7 @@ import TechnologyPage from './pages/TechnologyPage';
 import BusinessGoalsLanding from '@/pages/BusinessGoalsLanding';
 import ProductDetail from '@/pages/ProductDetail';
 import BusinessGoalDetailPage from '@/pages/BusinessGoalDetailPage';
+import MachineDetailPage from '@/pages/MachineDetailPage';
 import MachinesPage from '@/pages/MachinesPage';
 
 const App: React.FC = () => {
@@ -42,8 +43,8 @@ const App: React.FC = () => {
       element: <MachinesPage />,
     },
     {
-      path: '/machines/:machineSlug',
-      element: <Machines />,
+      path: '/machines/:slug',
+      element: <MachineDetailPage />,
     },
     {
       path: '/contact',

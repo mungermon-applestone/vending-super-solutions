@@ -6,11 +6,14 @@ import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
+import MachineDetail from '@/components/machineDetail/MachineDetail';
 
 const MachineDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: machine, isLoading, error } = useContentfulMachine(slug || '');
+
+  console.log('Machine detail page, slug:', slug);
+  console.log('Machine data:', machine);
   
   if (isLoading) {
     return (
@@ -65,31 +68,12 @@ const MachineDetailPage = () => {
       </Layout>
     );
   }
-  
-  // Format machine data to match MachinePageTemplate requirements
-  const formattedMachine = {
-    id: machine.id,
-    slug: machine.slug,
-    title: machine.title,
-    // Ensure type is strictly "vending" or "locker"
-    type: machine.type === 'locker' ? 'locker' : 'vending' as 'vending' | 'locker',
-    // Ensure temperature is always set
-    temperature: machine.temperature || 'ambient',
-    description: machine.description,
-    // Ensure images is always an array with the required format
-    images: Array.isArray(machine.images) ? machine.images.map(img => ({
-      url: img.url,
-      alt: img.alt
-    })) : [],
-    // Ensure specs is an object
-    specs: machine.specs || {},
-    // Ensure features is an array
-    features: machine.features || [],
-    // Ensure deploymentExamples is an array
-    deploymentExamples: machine.deploymentExamples || []
-  };
-  
-  return <MachinePageTemplate machine={formattedMachine} />;
+
+  return (
+    <Layout>
+      <MachineDetail machine={machine} />
+    </Layout>
+  );
 };
 
 export default MachineDetailPage;
