@@ -61,13 +61,14 @@ const ContactContentful = () => {
     // Extract linked FAQ entries if included
     const processedFaqItems: FAQItem[] = [];
     
-    // Check if faqItems exists and is an array in the fields
-    if (fields.faqItems && Array.isArray(fields.faqItems)) {
+    // Direct access to fields.faqItems if it exists
+    if (fields && fields.faqItems && Array.isArray(fields.faqItems)) {
       console.log('Found FAQ items in fields:', fields.faqItems.length);
       
       // Process each FAQ item directly from the fields
       fields.faqItems.forEach((item: any) => {
-        if (item.fields && typeof item.fields.question === 'string' && typeof item.fields.answer === 'string') {
+        console.log('Processing FAQ item:', item.sys?.id);
+        if (item && item.fields && typeof item.fields.question === 'string' && typeof item.fields.answer === 'string') {
           processedFaqItems.push({
             id: item.sys.id,
             question: item.fields.question,
@@ -99,9 +100,38 @@ const ContactContentful = () => {
       });
     }
     
+    // Check for specific FAQ IDs mentioned by the user
+    const knownFaqIds = [
+      '1G2bj8dVx40vjJKK4d9fIc',
+      '7If3Y7Mw2Gw1nPtCKLTrnN',
+      '4JdSdjNDiPvmxVJPSCCYs5',
+      '7mgtPwOLEiLSmmQ84jaYaB'
+    ];
+    
+    console.log('Checking for known FAQ IDs in data...');
+    
+    // Check if the known FAQ IDs exist in the includes
+    if (data.includes?.Entry) {
+      const knownFaqs = data.includes.Entry.filter(e => knownFaqIds.includes(e.sys.id));
+      console.log('Found known FAQs in includes:', knownFaqs.length);
+      
+      if (knownFaqs.length > 0 && processedFaqItems.length === 0) {
+        knownFaqs.forEach(faq => {
+          if (faq.fields && typeof faq.fields.question === 'string' && typeof faq.fields.answer === 'string') {
+            processedFaqItems.push({
+              id: faq.sys.id,
+              question: faq.fields.question,
+              answer: faq.fields.answer,
+            });
+          }
+        });
+        console.log('Added known FAQs from includes:', processedFaqItems.length);
+      }
+    }
+    
     console.log('Final processed FAQ items:', processedFaqItems);
     
-    // Return processed data
+    // Return processed data with all fields and FAQ items
     return {
       ...fields,
       faqItems: processedFaqItems
@@ -238,7 +268,8 @@ const ContactContentful = () => {
         {f.faqSectionTitle && (
           <h2 className="text-3xl font-bold text-center mb-12">{f.faqSectionTitle}</h2>
         )}
-        {/* Render dynamic FAQ items if present with debug info */}
+        
+        {/* Render dynamic FAQ items if present with enhanced debugging */}
         {f.faqItems && f.faqItems.length > 0 ? (
           <div className="grid md:grid-cols-2 gap-8">
             {f.faqItems.map((faq) => (
