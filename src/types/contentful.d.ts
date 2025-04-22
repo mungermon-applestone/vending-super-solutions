@@ -1,5 +1,6 @@
 
 import { Asset, Entry, EntrySkeletonType } from 'contentful';
+import { Document } from '@contentful/rich-text-types';
 
 export interface ContentfulAsset {
   sys: {
@@ -91,7 +92,7 @@ export interface ContentfulTechnology {
 }
 
 // Contentful API response interfaces
-export interface ContentfulRichTextDocument {
+export interface ContentfulRichTextDocument extends Document {
   nodeType: string;
   data: object;
   content: any[];

@@ -6,6 +6,9 @@ import useContentful from '@/hooks/useContentful';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ContentfulResponse, ContentfulContactPageFields, ContentfulFAQItem } from '@/types/contentful';
+import ContactCards from '@/components/contact/ContactCards';
+import ContactForm from '@/components/contact/ContactForm';
+import FAQSection from '@/components/contact/FAQSection';
 
 interface FAQItem {
   id: string;
@@ -35,14 +38,22 @@ interface ContactPageContent {
 
 const CONTACT_ID = '1iQrxg7rN4Dk17ZdxPxfhj';
 
+// Known FAQ item IDs to look for
+const KNOWN_FAQ_IDS = [
+  '1G2bj8dVx40vjJKK4d9fIc',
+  '7If3Y7Mw2Gw1nPtCKLTrnN',
+  '4JdSdjNDiPvmxVJPSCCYs5',
+  '7mgtPwOLEiLSmmQ84jaYaB'
+];
+
 const ContactContentful = () => {
-  const { data, isLoading, error, isContentReady } = useContentful<ContentfulResponse<ContentfulContactPageFields>>({
+  const { data, isLoading, error } = useContentful<ContentfulResponse<ContentfulContactPageFields>>({
     queryKey: ['contact-page-content', CONTACT_ID],
     queryFn: async () => {
       const client = await getContentfulClient();
       console.log('Fetching contact page with ID:', CONTACT_ID);
-      // Include 2 to get linked FAQ entries
-      const entry = await client.getEntry(CONTACT_ID, { include: 2 });
+      // Include 3 to get deeply linked FAQ entries
+      const entry = await client.getEntry(CONTACT_ID, { include: 3 });
       
       console.log('Raw contact entry:', JSON.stringify(entry, null, 2));
       return entry as unknown as ContentfulResponse<ContentfulContactPageFields>;
@@ -51,74 +62,67 @@ const ContactContentful = () => {
 
   // Process FAQ items separately after data is loaded
   const processedData = React.useMemo(() => {
-    if (!data) return null;
+    if (!data) return {} as ContactPageContent;
     
     console.log('Processing contact page data:', data);
     
     // Extract main fields
     const fields = data.fields || {};
     
+    // Cast to ensure TypeScript knows the structure
+    const typedFields = fields as ContentfulContactPageFields;
+    
     // Extract linked FAQ entries if included
     const processedFaqItems: FAQItem[] = [];
     
-    // Type guard to ensure fields is the correct type
-    const typedFields = fields as ContentfulContactPageFields;
-    
-    // Direct access to fields.faqItems if it exists
-    if (typedFields && typedFields.faqItems && Array.isArray(typedFields.faqItems)) {
-      console.log('Found FAQ items in fields:', typedFields.faqItems.length);
+    // First approach: Check for direct faqItems in the fields
+    if (typedFields.faqItems && Array.isArray(typedFields.faqItems)) {
+      console.log('Found FAQ items directly in fields:', typedFields.faqItems.length);
       
-      // Process each FAQ item directly from the fields
-      typedFields.faqItems.forEach((item: ContentfulFAQItem) => {
-        console.log('Processing FAQ item:', item.sys?.id);
-        if (item && item.fields && typeof item.fields.question === 'string' && typeof item.fields.answer === 'string') {
+      typedFields.faqItems.forEach((item) => {
+        if (item && item.fields && item.fields.question && item.fields.answer) {
           processedFaqItems.push({
-            id: item.sys.id,
+            id: item.sys?.id || `faq-${processedFaqItems.length}`,
             question: item.fields.question,
             answer: item.fields.answer,
           });
         }
       });
     }
-    // If no direct faqItems in fields, try to get them from includes
-    else if (data.includes?.Entry?.length) {
+    
+    // Second approach: Look in includes.Entry if available
+    if (processedFaqItems.length === 0 && data.includes?.Entry?.length) {
       console.log('Looking for FAQ items in includes:', data.includes.Entry.length);
       
-      // Find entries that are FAQ items
+      // Filter entries that are FAQ items by content type
       const linkedFAQs = data.includes.Entry.filter(
         (e) => e.sys.contentType?.sys.id === 'faqItem'
       );
       
-      console.log('Found FAQ items in includes:', linkedFAQs.length);
+      console.log('Found FAQ items by content type in includes:', linkedFAQs.length);
       
-      // Map linked FAQ entries to FAQItem shape
-      linkedFAQs.forEach((faq) => {
-        if (faq.fields && typeof faq.fields.question === 'string' && typeof faq.fields.answer === 'string') {
-          processedFaqItems.push({
-            id: faq.sys.id,
-            question: faq.fields.question,
-            answer: faq.fields.answer,
-          });
-        }
-      });
+      if (linkedFAQs.length > 0) {
+        linkedFAQs.forEach((faq) => {
+          if (faq.fields && typeof faq.fields.question === 'string' && typeof faq.fields.answer === 'string') {
+            processedFaqItems.push({
+              id: faq.sys.id,
+              question: faq.fields.question,
+              answer: faq.fields.answer,
+            });
+          }
+        });
+      }
     }
     
-    // Check for specific FAQ IDs mentioned by the user
-    const knownFaqIds = [
-      '1G2bj8dVx40vjJKK4d9fIc',
-      '7If3Y7Mw2Gw1nPtCKLTrnN',
-      '4JdSdjNDiPvmxVJPSCCYs5',
-      '7mgtPwOLEiLSmmQ84jaYaB'
-    ];
-    
-    console.log('Checking for known FAQ IDs in data...');
-    
-    // Check if the known FAQ IDs exist in the includes
-    if (data.includes?.Entry) {
-      const knownFaqs = data.includes.Entry.filter(e => knownFaqIds.includes(e.sys.id));
-      console.log('Found known FAQs in includes:', knownFaqs.length);
+    // Third approach: Look specifically for the known FAQ IDs
+    if (processedFaqItems.length === 0 && data.includes?.Entry?.length) {
+      console.log('Searching for known FAQ IDs in includes');
       
-      if (knownFaqs.length > 0 && processedFaqItems.length === 0) {
+      // Look for entries matching our known IDs
+      const knownFaqs = data.includes.Entry.filter(e => KNOWN_FAQ_IDS.includes(e.sys.id));
+      console.log('Found known FAQs by ID:', knownFaqs.length);
+      
+      if (knownFaqs.length > 0) {
         knownFaqs.forEach(faq => {
           if (faq.fields && typeof faq.fields.question === 'string' && typeof faq.fields.answer === 'string') {
             processedFaqItems.push({
@@ -128,17 +132,22 @@ const ContactContentful = () => {
             });
           }
         });
-        console.log('Added known FAQs from includes:', processedFaqItems.length);
       }
+    }
+    
+    // Fourth approach: Direct check for the specific entry IDs we know
+    if (processedFaqItems.length === 0) {
+      console.log('Attempting to fetch individual FAQ entries directly');
+      // This approach would require individual fetches for each ID, which we're not implementing here
+      // but could be a fallback approach if needed
     }
     
     console.log('Final processed FAQ items:', processedFaqItems);
     
-    // Return processed data with all fields and FAQ items
     return {
       ...typedFields,
       faqItems: processedFaqItems
-    } as ContactPageContent;
+    };
   }, [data]);
   
   console.log('Contact page processed data:', processedData);
@@ -166,144 +175,37 @@ const ContactContentful = () => {
     );
   }
 
-  // Use the processed data
-  const f = processedData || {} as ContactPageContent;
-
-  // Debug output to see the FAQ items
-  console.log('FAQ items in render:', f.faqItems);
-
   return (
     <Layout>
       <div className="bg-gradient-to-r from-slate-50 to-slate-100 py-16">
         <div className="container max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row gap-12">
+            {/* Info section */}
             <div className="flex-1">
               <h1 className="text-4xl md:text-5xl font-bold text-vending-blue-dark mb-6">
-                {f.introTitle || 'Get in Touch'}
+                {processedData.introTitle || 'Get in Touch'}
               </h1>
               <p className="text-lg text-gray-700 mb-8 max-w-lg">
-                {f.introDescription ||
+                {processedData.introDescription ||
                   'Have questions about our vending solutions? Ready to transform your retail operations? Contact our team today.'}
               </p>
 
-              <div className="space-y-6">
-                <div className="flex items-start">
-                  <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full h-12 w-12 mr-4 flex items-center justify-center text-vending-blue">
-                    <Mail className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium mb-1">{f.emailCardTitle || 'Email Us'}</h3>
-                    <p className="text-gray-600">{f.emailAddress || 'support@applestonesolutions.com'}</p>
-                    {f.emailResponseTime && (
-                      <p className="text-gray-400 text-sm">{f.emailResponseTime}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full h-12 w-12 mr-4 flex items-center justify-center text-vending-blue">
-                    <Phone className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium mb-1">{f.phoneCardTitle || 'Call Us'}</h3>
-                    <p className="text-gray-600">{f.phoneNumber || '(555) 123-4567'}</p>
-                    {f.phoneAvailability && (
-                      <p className="text-gray-400 text-sm">{f.phoneAvailability}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full h-12 w-12 mr-4 flex items-center justify-center text-vending-blue">
-                    <MapPin className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium mb-1">{f.addressCardTitle || 'Visit Us'}</h3>
-                    <p className="text-gray-600 whitespace-pre-line">{f.address || '123 Business Avenue\nSuite 200\nSan Francisco, CA 94107'}</p>
-                    {f.addressType && (
-                      <p className="text-gray-400 text-sm">{f.addressType}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <ContactCards data={processedData} />
             </div>
+            
             {/* Form */}
-            <div className="flex-1">
-              <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
-                <h2 className="text-2xl font-bold mb-6">{f.formSectionTitle || 'Send Us a Message'}</h2>
-                {/* Simple form, non-functional */}
-                <form className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                        Your Name
-                      </label>
-                      <input id="name" type="text" className="w-full border border-gray-300 rounded p-2" placeholder="John Doe" required />
-                    </div>
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                        Email Address
-                      </label>
-                      <input id="email" type="email" className="w-full border border-gray-300 rounded p-2" placeholder="john@example.com" required />
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                      Subject
-                    </label>
-                    <input id="subject" type="text" className="w-full border border-gray-300 rounded p-2" placeholder="How can we help?" required />
-                  </div>
-                  <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                      Message
-                    </label>
-                    <textarea id="message" rows={5} className="w-full border border-gray-300 rounded p-2" placeholder="Tell us about your project or inquiry..." required />
-                  </div>
-                  <button type="submit" className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white font-semibold rounded py-3">
-                    Send Message
-                  </button>
-                </form>
-              </div>
-            </div>
+            <ContactForm 
+              formSectionTitle={processedData.formSectionTitle} 
+            />
           </div>
         </div>
       </div>
+      
       {/* FAQ Section */}
-      <div className="py-16 container max-w-7xl mx-auto">
-        {f.faqSectionTitle && (
-          <h2 className="text-3xl font-bold text-center mb-12">{f.faqSectionTitle}</h2>
-        )}
-        
-        {/* Render dynamic FAQ items if present with enhanced debugging */}
-        {f.faqItems && f.faqItems.length > 0 ? (
-          <div className="grid md:grid-cols-2 gap-8">
-            {f.faqItems.map((faq) => (
-              <div key={faq.id} className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="font-bold text-xl mb-2">{faq.question}</h3>
-                <p className="text-gray-600 whitespace-pre-line">{faq.answer}</p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          /* Fallback static FAQ if none from CMS */
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="font-bold text-xl mb-2">What types of businesses use your vending solutions?</h3>
-              <p className="text-gray-600">Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="font-bold text-xl mb-2">How quickly can your solutions be deployed?</h3>
-              <p className="text-gray-600">Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="font-bold text-xl mb-2">Do you offer installation and maintenance services?</h3>
-              <p className="text-gray-600">Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.</p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="font-bold text-xl mb-2">Can your vending machines be customized?</h3>
-              <p className="text-gray-600">Absolutely! We offer customization options for branding, product selection, payment methods, and technology integration based on your business needs.</p>
-            </div>
-          </div>
-        )}
-      </div>
+      <FAQSection 
+        faqSectionTitle={processedData.faqSectionTitle} 
+        faqItems={processedData.faqItems}
+      />
     </Layout>
   );
 };

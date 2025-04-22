@@ -16,14 +16,12 @@ const About = () => {
     queryFn: async () => {
       const client = await getContentfulClient();
       
-      // Get the entry with linked assets
       const response = await client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H', {
-        include: 2, // Include linked assets (like images)
+        include: 2,
       });
       
       console.log('Raw Contentful response:', JSON.stringify(response, null, 2));
       
-      // Return the response with the correct type
       return response as unknown as ContentfulResponse<AboutPageFields>;
     }
   });
@@ -32,7 +30,6 @@ const About = () => {
     if (data) {
       console.log('About page data structure:', JSON.stringify(data, null, 2));
       
-      // Log the includes structure to help debug asset rendering
       if (data.includes?.Asset) {
         console.log('Found assets in includes:', data.includes.Asset.length);
         data.includes.Asset.forEach(asset => {
@@ -48,7 +45,6 @@ const About = () => {
     renderNode: {
       [BLOCKS.EMBEDDED_ASSET]: (node) => {
         try {
-          // Get the asset ID from the node
           const assetId = node.data?.target?.sys?.id;
           console.log('Rendering embedded asset with ID:', assetId);
           
@@ -57,7 +53,6 @@ const About = () => {
             return null;
           }
           
-          // Look for the asset in the includes.Asset array
           if (data?.includes?.Asset && Array.isArray(data.includes.Asset)) {
             console.log('Looking through assets array with length:', data.includes.Asset.length);
             const asset = data.includes.Asset.find(a => a.sys.id === assetId);
@@ -75,7 +70,6 @@ const About = () => {
           console.error('Asset not found for ID:', assetId);
           console.log('Available asset IDs:', data?.includes?.Asset?.map(a => a.sys.id).join(', ') || 'none');
           return <div className="text-red-500">Image not found (ID: {assetId})</div>;
-          
         } catch (error) {
           console.error('Error rendering embedded asset:', error);
           return <div className="text-red-500">Error rendering image</div>;
@@ -84,14 +78,12 @@ const About = () => {
     }
   };
   
-  // Helper function to render the asset once we've found it
   const renderAsset = (asset: ContentfulAsset) => {
     try {
       const { title, file } = asset.fields;
       const imageUrl = file.url;
       console.log('Rendering image with URL:', imageUrl);
       
-      // Make sure URL starts with https:
       const fullUrl = imageUrl.startsWith('//') ? 
         `https:${imageUrl}` : 
         imageUrl.startsWith('http') ? imageUrl : `https:${imageUrl}`;
@@ -113,9 +105,8 @@ const About = () => {
     }
   };
 
-  // Process the data so we have proper typing and avoid Type errors
   const processedData = React.useMemo(() => {
-    if (!data?.fields) return { bodyContent: undefined };
+    if (!data?.fields) return {} as AboutPageFields;
     return data.fields as AboutPageFields;
   }, [data]);
 
@@ -136,10 +127,10 @@ const About = () => {
         ) : (
           <ContentfulErrorBoundary contentType="About page">
             <div className="prose max-w-none">
-              {isContentReady && processedData?.bodyContent && 
-                documentToReactComponents(processedData.bodyContent, richTextOptions)
+              {isContentReady && processedData.bodyContent && 
+                documentToReactComponents(processedData.bodyContent as any, richTextOptions)
               }
-              {isContentReady && !processedData?.bodyContent && (
+              {isContentReady && !processedData.bodyContent && (
                 <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-md">
                   <p>The About page content was loaded, but no body content was found.</p>
                 </div>
