@@ -3,15 +3,8 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import ContentfulBlogPostContent from "@/components/blog/ContentfulBlogPostContent";
-import { useContentfulBlogPostBySlug, ContentfulBlogPostFields } from "@/hooks/useContentfulBlogPostBySlug";
+import { useContentfulBlogPostBySlug, ContentfulBlogPost } from "@/hooks/useContentfulBlogPostBySlug";
 import { Loader2 } from "lucide-react";
-import { Entry } from "contentful";
-
-/**
- * For adjacent post navigation (Previous/Next).
- * This simple implementation fetches 3 posts (ordered by publishDate)
- * and finds previous/next relative to current post.
- */
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { useQuery } from "@tanstack/react-query";
 
@@ -31,34 +24,37 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
       const client = await getContentfulClient();
       
       // Fetch all published posts sorted by publishDate ascending
-      const response = await client.getEntries<ContentfulBlogPostFields>({
+      const response = await client.getEntries({
         content_type: "blogPost",
         order: ["fields.publishDate"], // Use array for order parameter
         select: "fields.slug,fields.title,fields.publishDate",
-        // Optionally, limit if the blog is huge
       });
       
-      const posts = response.items.filter(item => 
-        item.fields && typeof item.fields.slug === 'string'
-      );
+      const posts = response.items.filter(item => {
+        if (!item.fields) return false;
+        return typeof item.fields.slug === 'string';
+      });
       
-      const idx = posts.findIndex(p => p.fields.slug === currentSlug);
+      const idx = posts.findIndex(p => p.fields && p.fields.slug === currentSlug);
       if (idx === -1) return { previous: null, next: null };
       
-      // Ensure we're creating objects with the right type
-      const previous = idx > 0
-        ? { 
-            slug: posts[idx - 1].fields.slug, 
-            title: posts[idx - 1].fields.title
-          }
-        : null;
-        
-      const next = idx < posts.length - 1
-        ? { 
-            slug: posts[idx + 1].fields.slug, 
-            title: posts[idx + 1].fields.title
-          }
-        : null;
+      // Create strongly typed objects for adjacent posts
+      let previous: AdjacentBlogPost | null = null;
+      let next: AdjacentBlogPost | null = null;
+      
+      if (idx > 0 && posts[idx - 1].fields) {
+        previous = {
+          slug: String(posts[idx - 1].fields.slug),
+          title: String(posts[idx - 1].fields.title)
+        };
+      }
+      
+      if (idx < posts.length - 1 && posts[idx + 1].fields) {
+        next = {
+          slug: String(posts[idx + 1].fields.slug),
+          title: String(posts[idx + 1].fields.title)
+        };
+      }
         
       return { previous, next };
     }

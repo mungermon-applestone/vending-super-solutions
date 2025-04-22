@@ -4,10 +4,9 @@ import { formatDistanceToNow } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ContentfulBlogPostFields, ContentfulBlogPost } from "@/hooks/useContentfulBlogPostBySlug";
+import { ContentfulBlogPost } from "@/hooks/useContentfulBlogPostBySlug";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import Image from "@/components/common/Image";
-import { Entry } from "contentful";
 
 interface AdjacentBlogPost {
   slug: string;
@@ -15,7 +14,7 @@ interface AdjacentBlogPost {
 }
 
 interface ContentfulBlogPostContentProps {
-  post: Entry<ContentfulBlogPostFields>;
+  post: ContentfulBlogPost;
   previousPost?: AdjacentBlogPost | null;
   nextPost?: AdjacentBlogPost | null;
 }
@@ -54,7 +53,7 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
       <div className="prose max-w-none prose-slate mb-12">
         {/* Contentful rich text to React */}
         {content
-          ? documentToReactComponents(content as any)
+          ? documentToReactComponents(content)
           : <p>No content available for this blog post.</p>}
       </div>
       <footer className="pt-8 border-t border-gray-200">

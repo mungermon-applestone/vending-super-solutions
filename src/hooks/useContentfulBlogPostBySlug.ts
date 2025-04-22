@@ -37,7 +37,7 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
       const client = await getContentfulClient();
       
       // Query entries with content_type 'blogPost' and matching slug
-      const response = await client.getEntries<ContentfulBlogPostFields>({
+      const response = await client.getEntries({
         content_type: "blogPost",
         "fields.slug": slug,
         include: 2,
@@ -45,7 +45,7 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
       });
       
       if (!response.items.length) throw new Error("Blog post not found");
-      return response.items[0] as Entry<ContentfulBlogPostFields>;
+      return response.items[0] as ContentfulBlogPost;
     }
   });
 }
