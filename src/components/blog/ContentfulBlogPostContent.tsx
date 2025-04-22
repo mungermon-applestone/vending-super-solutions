@@ -24,6 +24,7 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
   previousPost,
   nextPost,
 }) => {
+  // Access fields property correctly
   const { title, content, excerpt, publishDate, featuredImage } = post.fields;
 
   return (

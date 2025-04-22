@@ -24,15 +24,14 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
       const client = await getContentfulClient();
       
       // Fetch all published posts sorted by publishDate ascending
-      const response = await client.getEntries<ContentfulBlogPostFields>({
+      const response = await client.getEntries({
         content_type: "blogPost",
         order: ["fields.publishDate"],
         select: ["fields.slug", "fields.title", "fields.publishDate"],
       });
       
       const posts = response.items.filter(item => {
-        if (!item.fields) return false;
-        return typeof item.fields.slug === 'string';
+        return item.fields && typeof item.fields.slug === 'string';
       });
       
       const idx = posts.findIndex(p => p.fields && p.fields.slug === currentSlug);
@@ -43,19 +42,23 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
       let next: AdjacentBlogPost | null = null;
       
       if (idx > 0 && posts[idx - 1].fields) {
-        const prevFields = posts[idx - 1].fields;
-        previous = {
-          slug: String(prevFields.slug),
-          title: String(prevFields.title)
-        };
+        const prevFields = posts[idx - 1].fields as any;
+        if (prevFields.slug && prevFields.title) {
+          previous = {
+            slug: String(prevFields.slug),
+            title: String(prevFields.title)
+          };
+        }
       }
       
       if (idx < posts.length - 1 && posts[idx + 1].fields) {
-        const nextFields = posts[idx + 1].fields;
-        next = {
-          slug: String(nextFields.slug),
-          title: String(nextFields.title)
-        };
+        const nextFields = posts[idx + 1].fields as any;
+        if (nextFields.slug && nextFields.title) {
+          next = {
+            slug: String(nextFields.slug),
+            title: String(nextFields.title)
+          };
+        }
       }
         
       return { previous, next };

@@ -32,7 +32,7 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
       const client = await getContentfulClient();
       
       // Query entries with content_type 'blogPost' and matching slug
-      const response = await client.getEntries<ContentfulBlogPostFields>({
+      const response = await client.getEntries({
         content_type: "blogPost",
         "fields.slug": slug,
         include: 2,
