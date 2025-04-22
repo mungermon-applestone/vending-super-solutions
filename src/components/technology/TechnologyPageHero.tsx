@@ -23,38 +23,46 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({ entryId }) => {
   if (!hero) {
     return null;
   }
-  
-  const backgroundImageStyle = hero.image?.url 
-    ? { backgroundImage: `url(https:${hero.image.url})` }
-    : {};
-    
+
   return (
-    <section 
-      className="relative py-20 bg-cover bg-center"
-      style={backgroundImageStyle}
-    >
-      <div className="absolute inset-0 bg-black/50"></div>
-      <div className="container relative z-10 mx-auto px-4">
-        <div className="max-w-3xl text-center mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{hero.title}</h1>
-          <p className="text-xl text-white/90 mb-8">{hero.subtitle}</p>
-          
-          <div className="flex flex-wrap justify-center gap-4">
-            {hero.primaryButtonText && (
-              <Button asChild size="lg">
-                <Link to={hero.primaryButtonUrl || '#'}>
-                  {hero.primaryButtonText}
-                </Link>
-              </Button>
-            )}
-            
-            {hero.secondaryButtonText && (
-              <Button asChild variant="outline" size="lg" className="bg-white/10 text-white hover:bg-white/20">
-                <Link to={hero.secondaryButtonUrl || '#'}>
-                  {hero.secondaryButtonText}
-                </Link>
-              </Button>
-            )}
+    <section className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
+      <div className="container-wide py-16 md:py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-vending-blue-dark">
+              {hero.title}
+            </h1>
+            <p className="text-xl text-gray-700">
+              {hero.subtitle}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 pt-2">
+              {hero.primaryButtonText && (
+                <Button asChild size="lg">
+                  <Link to={hero.primaryButtonUrl || '#'}>
+                    {hero.primaryButtonText}
+                  </Link>
+                </Button>
+              )}
+              
+              {hero.secondaryButtonText && (
+                <Button asChild variant="outline" size="lg">
+                  <Link to={hero.secondaryButtonUrl || '#'}>
+                    {hero.secondaryButtonText}
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </div>
+          <div className="relative">
+            <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+              {hero.image?.url && (
+                <img 
+                  src={`https:${hero.image.url}`}
+                  alt={hero.image.alt || hero.title}
+                  className="w-full h-auto object-cover"
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
