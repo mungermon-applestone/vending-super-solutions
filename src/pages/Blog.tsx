@@ -1,15 +1,90 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
-import { useBlogPostsList, BlogPostItem } from '@/hooks/useBlogPostsList';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { toast } from 'sonner';
+
+interface BlogPostItem {
+  id: string;
+  title: string;
+  slug: string;
+  content: any;
+  excerpt?: string;
+  publishDate?: string;
+  featuredImage?: {
+    url: string;
+    title: string;
+  };
+  author?: string;
+  tags?: string[];
+}
 
 const Blog = () => {
-  const { data: posts = [], isLoading, error } = useBlogPostsList();
+  const [posts, setPosts] = useState<BlogPostItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      setIsLoading(true);
+      try {
+        const client = await getContentfulClient();
+        
+        // Build query parameters as an object with explicitly typed string values
+        const queryParams = {
+          content_type: "blogPost",
+          order: "-fields.publishDate",
+          limit: "10",
+          skip: "0"
+        };
+        
+        const response = await client.getEntries(queryParams);
+        
+        const processedPosts = response.items.map(item => {
+          const fields = item.fields as any;
+          
+          // Process featured image if it exists
+          const featuredImage = fields.featuredImage
+            ? {
+                url: fields.featuredImage.fields?.file?.url
+                  ? `https:${fields.featuredImage.fields.file.url}`
+                  : undefined,
+                title: fields.featuredImage.fields?.title || ""
+              }
+            : undefined;
+          
+          // Map Contentful entry to our BlogPostItem interface
+          return {
+            id: item.sys.id,
+            title: fields.title || "Untitled",
+            slug: fields.slug || "",
+            content: fields.content || {},
+            excerpt: fields.excerpt || "",
+            publishDate: fields.publishDate || null,
+            featuredImage,
+            author: fields.author || "",
+            tags: fields.tags || []
+          };
+        });
+        
+        setPosts(processedPosts);
+        setError(null);
+      } catch (error) {
+        console.error("Error fetching blog posts:", error);
+        setError(error instanceof Error ? error : new Error('Unknown error occurred'));
+        toast.error("Failed to load blog posts. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   return (
     <Layout>
