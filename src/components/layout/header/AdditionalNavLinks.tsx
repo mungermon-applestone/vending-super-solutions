@@ -9,7 +9,7 @@ const AdditionalNavLinks = () => {
   
   // Determine which nav item is active
   const isMachinesActive = location.pathname.startsWith('/machines');
-  const isBusinessGoalsActive = location.pathname.startsWith('/business-goals');
+  const isBusinessGoalsActive = location.pathname.startsWith('/business-goals') || location.pathname.startsWith('/business/');
 
   return (
     <div className="flex items-center space-x-2">

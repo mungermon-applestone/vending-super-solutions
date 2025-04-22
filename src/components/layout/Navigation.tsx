@@ -33,7 +33,7 @@ const Navigation = () => {
           <NavLink to="/machines" active={isActive('/machines')}>
             Machines
           </NavLink>
-          <NavLink to="/goals" active={isActive('/goals')}>
+          <NavLink to="/business-goals" active={isActive('/business-goals')}>
             Business Goals
           </NavLink>
           <NavLink to="/admin/products" active={isActive('/admin')}>

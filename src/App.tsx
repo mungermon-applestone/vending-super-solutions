@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -14,6 +15,9 @@ import TechnologyLanding from '@/pages/TechnologyLanding';
 import ContentfulTechnologyPage from '@/pages/ContentfulTechnologyPage';
 import TechnologyPage from './pages/TechnologyPage';
 import BusinessGoalsLanding from '@/pages/BusinessGoalsLanding';
+import ProductDetail from '@/pages/ProductDetail';
+import BusinessGoalDetailPage from '@/pages/BusinessGoalDetailPage';
+import MachinesPage from '@/pages/MachinesPage';
 
 const App: React.FC = () => {
   const routes = [
@@ -30,7 +34,15 @@ const App: React.FC = () => {
       element: <Products />,
     },
     {
+      path: '/products/:productSlug',
+      element: <ProductDetail />,
+    },
+    {
       path: '/machines',
+      element: <MachinesPage />,
+    },
+    {
+      path: '/machines/:machineSlug',
       element: <Machines />,
     },
     {
@@ -40,6 +52,14 @@ const App: React.FC = () => {
     {
       path: '/business-goals',
       element: <BusinessGoalsLanding />,
+    },
+    {
+      path: '/business/:slug',
+      element: <BusinessGoalDetailPage />,
+    },
+    {
+      path: '/goals',
+      element: <Navigate to="/business-goals" />,
     },
     {
       path: '/technology-landing',
