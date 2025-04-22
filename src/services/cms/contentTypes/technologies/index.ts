@@ -5,41 +5,27 @@ export const fetchTechnologies = async (): Promise<CMSTechnology[]> => {
   return [];
 };
 
-export const fetchTechnologyBySlug = async (): Promise<CMSTechnology | null> => {
+export const fetchTechnologyBySlug = async (slug: string): Promise<CMSTechnology | null> => {
+  console.log(`Fetching technology by slug: ${slug}`);
   return null;
 };
 
 export const createTechnology = async (data: any): Promise<CMSTechnology> => {
-  return {
-    id: 'mock-id',
-    title: data.title || 'New Technology',
-    slug: data.slug || 'new-technology',
-    description: data.description || '',
-    visible: true
-  };
+  console.log(`Creating technology: ${data.title}`);
+  return data as CMSTechnology;
 };
 
-export const updateTechnology = async (slug: string, data: any): Promise<CMSTechnology> => {
-  return {
-    id: 'mock-id',
-    title: data.title || 'Updated Technology',
-    slug: data.slug || slug,
-    description: data.description || '',
-    visible: true
-  };
+export const updateTechnology = async (id: string, data: any): Promise<CMSTechnology> => {
+  console.log(`Updating technology: ${id}`);
+  return { id, ...data } as CMSTechnology;
 };
 
-export const deleteTechnology = async (slug: string): Promise<boolean> => {
-  console.log(`Deleting technology with slug: ${slug}`);
+export const deleteTechnology = async (id: string): Promise<boolean> => {
+  console.log(`Deleting technology: ${id}`);
   return true;
 };
 
-export const cloneTechnology = async (slug: string): Promise<CMSTechnology> => {
-  return {
-    id: 'cloned-id',
-    title: 'Cloned Technology',
-    slug: `${slug}-clone`,
-    description: 'This is a cloned technology',
-    visible: true
-  };
+export const cloneTechnology = async (id: string): Promise<CMSTechnology | null> => {
+  console.log(`Cloning technology: ${id}`);
+  return null;
 };

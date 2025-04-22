@@ -1,25 +1,21 @@
 
 /**
- * Update landing page
- * This is a simplified version that returns null.
+ * Update a landing page
+ * This is a simplified version that returns true.
  */
 
-import { LandingPage, LandingPageFormData } from '@/types/landingPage';
+import { LandingPage } from '@/types/landingPage';
 
-export const updateLandingPage = async (): Promise<LandingPage> => {
-  // Mock landing page data
-  const mockLandingPage: LandingPage = {
-    id: "mock-id",
-    page_key: "mock-key",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    hero_content: {
-      title: "Mock Title",
-      subtitle: "Mock Subtitle"
-    }
-  };
+export const updateLandingPage = async (id: string, data: any): Promise<LandingPage> => {
+  console.log(`Updating landing page with ID: ${id}`);
+  console.log('Update data:', data);
   
-  return mockLandingPage;
+  return {
+    id: id,
+    key: data.key || 'mock-key',
+    title: data.title || 'Updated Landing Page',
+    sections: []
+  };
 };
 
 export default updateLandingPage;

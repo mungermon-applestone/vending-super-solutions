@@ -1,21 +1,15 @@
 
-/**
- * Landing page operations
- * This provides simple stub functions for landing page operations.
- */
+import { LandingPage } from '@/types/landingPage';
+import { fetchLandingPages } from './fetchLandingPages';
+import { fetchLandingPageByKey } from './fetchLandingPageByKey';
+import { createLandingPage } from './createLandingPage';
+import { updateLandingPage } from './updateLandingPage';
+import { deleteLandingPage } from './deleteLandingPage';
 
-// Re-export functions
-export const fetchLandingPages = async () => [];
-export const fetchLandingPageByKey = async () => null;
-export const createLandingPage = async () => null;
-export const updateLandingPage = async () => false;
-export const deleteLandingPage = async () => false;
-
-// Export operations object
-export const landingPageOperations = {
-  getAll: fetchLandingPages,
-  getByKey: fetchLandingPageByKey,
-  create: createLandingPage,
-  update: updateLandingPage,
-  delete: deleteLandingPage
+export {
+  fetchLandingPages,
+  fetchLandingPageByKey,
+  createLandingPage,
+  updateLandingPage,
+  deleteLandingPage
 };

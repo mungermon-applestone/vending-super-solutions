@@ -1,31 +1,15 @@
 
-/**
- * Technology service
- */
-
 import { CMSTechnology } from '@/types/cms';
-import { 
-  fetchTechnologies, 
-  fetchTechnologyBySlug,
-  createTechnology,
-  updateTechnology,
-  deleteTechnology,
-  cloneTechnology 
-} from './contentTypes/technologies/index';
+import { fetchTechnologyBySlug } from './contentTypes/technologies/fetchTechnologyBySlug';
 
-export {
-  fetchTechnologies,
-  fetchTechnologyBySlug,
-  createTechnology,
-  updateTechnology,
-  deleteTechnology,
-  cloneTechnology
+export const cloneTechnology = async (id: string): Promise<CMSTechnology | null> => {
+  console.log('Cloning technology:', id);
+  return null;
 };
 
-export const getTechnologyBySlug = async (slug: string): Promise<CMSTechnology | null> => {
-  return await fetchTechnologyBySlug();
+export const deleteTechnology = async (id: string): Promise<boolean> => {
+  console.log('Deleting technology:', id);
+  return true;
 };
 
-export const getTechnologies = async (): Promise<CMSTechnology[]> => {
-  return await fetchTechnologies();
-};
+export { fetchTechnologyBySlug };

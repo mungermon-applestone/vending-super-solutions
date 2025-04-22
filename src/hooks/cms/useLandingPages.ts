@@ -1,110 +1,109 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { LandingPage, LandingPageFormData } from '@/types/landingPage';
+import { toast } from 'sonner';
 import { fetchLandingPages, fetchLandingPageByKey, createLandingPage, updateLandingPage, deleteLandingPage } from '@/services/cms/contentTypes/landingPages';
-import { createQueryOptions } from './useQueryDefaults';
-import { initMockLandingPagesData } from '@/services/cms/initMockData';
+import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 
-export function useLandingPages() {
-  return useQuery<LandingPage[]>({
+/**
+ * Hook for fetching all landing pages
+ */
+export const useLandingPages = () => {
+  return useQuery({
     queryKey: ['landing-pages'],
     queryFn: async () => {
-      console.log('useLandingPages hook fetching data...');
       try {
-        const pages = await fetchLandingPages();
-        console.log('useLandingPages hook fetched data:', pages);
-        
-        if (!pages || !Array.isArray(pages)) {
-          console.warn('useLandingPages: fetchLandingPages returned unexpected data type:', typeof pages);
-          return [];
-        }
-        
-        return pages;
+        return await fetchLandingPages();
       } catch (error) {
-        console.error('Error in useLandingPages:', error);
-        return []; 
+        console.error('Error fetching landing pages:', error);
+        throw error;
       }
     },
-    ...createQueryOptions(),
-    retry: 3,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
   });
-}
+};
 
-export function useLandingPageByKey(key: string) {
-  return useQuery<LandingPage | null>({
+/**
+ * Hook for fetching a single landing page by key
+ */
+export const useLandingPageByKey = (key: string) => {
+  return useQuery({
     queryKey: ['landing-pages', key],
     queryFn: async () => {
-      console.log(`useLandingPageByKey hook fetching data for key: ${key}`);
       try {
-        // Force a fresh fetch from the database
-        const page = await fetchLandingPageByKey(key);
-        console.log(`useLandingPageByKey hook (${key}) fetched data:`, page);
-        return page;
+        return await fetchLandingPageByKey(key);
       } catch (error) {
-        console.error(`Error fetching landing page by key (${key}):`, error);
-        return null;
+        console.error(`Error fetching landing page (${key}):`, error);
+        throw error;
       }
     },
     enabled: !!key,
-    ...createQueryOptions(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: true, // Refetch when window gets focus
-    refetchInterval: 60 * 1000, // Refetch every minute
-    refetchOnMount: 'always', // Always refetch when component mounts
   });
-}
+};
 
-export function useCreateLandingPage() {
+/**
+ * Hook for creating a new landing page
+ */
+export const useCreateLandingPage = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (data: LandingPageFormData) => {
-      console.log('Creating landing page with data:', data);
-      return createLandingPage(data);
-    },
-    onSuccess: (data) => {
-      console.log('Landing page created successfully:', data);
-      queryClient.invalidateQueries({ queryKey: ['landing-pages'] });
-    },
-    onError: (error) => {
-      console.error('Error creating landing page:', error);
-    }
-  });
-}
-
-export function useUpdateLandingPage() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string, data: Partial<LandingPageFormData> }) => {
-      console.log(`Updating landing page ${id} with data:`, data);
-      return updateLandingPage(id, data);
-    },
-    onSuccess: (data: LandingPage) => {
-      console.log('Landing page updated successfully:', data);
-      // Invalidate all landing pages queries
-      queryClient.invalidateQueries({ queryKey: ['landing-pages'] });
-      // Also invalidate this specific page
-      if (data.page_key) {
-        queryClient.invalidateQueries({ queryKey: ['landing-pages', data.page_key] });
+    mutationFn: async (data: LandingPageFormData) => {
+      try {
+        const result = await createLandingPage(data);
+        return result as LandingPage;
+      } catch (error) {
+        console.error('Error creating landing page:', error);
+        throw error;
       }
     },
-    onError: (error) => {
-      console.error('Error updating landing page:', error);
-    }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['landing-pages'] });
+      toast.success('Landing page created successfully');
+    },
   });
-}
+};
 
-export function useDeleteLandingPage() {
+/**
+ * Hook for updating an existing landing page
+ */
+export const useUpdateLandingPage = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => deleteLandingPage(id),
-    onSuccess: () => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<LandingPageFormData> }) => {
+      try {
+        const result = await updateLandingPage(id, data);
+        return result as unknown as LandingPage; // Convert return type
+      } catch (error) {
+        console.error(`Error updating landing page (${id}):`, error);
+        throw error;
+      }
+    },
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['landing-pages'] });
+      queryClient.invalidateQueries({ queryKey: ['landing-pages', variables.id] });
+      toast.success('Landing page updated successfully');
     },
   });
-}
+};
+
+/**
+ * Hook for deleting a landing page
+ */
+export const useDeleteLandingPage = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (id: string) => {
+      try {
+        return await deleteLandingPage(id);
+      } catch (error) {
+        console.error(`Error deleting landing page (${id}):`, error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['landing-pages'] });
+      toast.success('Landing page deleted successfully');
+    },
+  });
+};

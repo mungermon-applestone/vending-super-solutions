@@ -1,11 +1,19 @@
 
 /**
- * Create landing page
- * This is a simplified version that returns null.
+ * Create a landing page
+ * This is a simplified version that returns an empty object.
  */
 
-export const createLandingPage = async (data: any) => {
-  return null;
+import { LandingPage } from '@/types/landingPage';
+
+export const createLandingPage = async (data: any): Promise<LandingPage> => {
+  console.log('Creating landing page with data:', data);
+  return {
+    id: 'mock-landing-page-id',
+    key: data.key || 'mock-key',
+    title: data.title || 'Mock Landing Page',
+    sections: []
+  };
 };
 
 export default createLandingPage;

@@ -1,68 +1,40 @@
 
-import { useQuery } from '@tanstack/react-query';
-import * as cmsService from '@/services/cms';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { fetchBusinessGoals, fetchBusinessGoalBySlug } from '@/services/cms/contentTypes/businessGoals';
 import { CMSBusinessGoal } from '@/types/cms';
-import { normalizeSlug, getSlugVariations } from '@/services/cms/utils/slugMatching';
-import { createQueryOptions } from './useQueryDefaults';
 
 /**
- * Hook to fetch all business goals
+ * Hook for fetching all business goals
  */
-export function useBusinessGoals() {
+export const useBusinessGoals = () => {
   return useQuery({
-    queryKey: ['businessGoals'],
-    queryFn: cmsService.getBusinessGoals,
-    ...createQueryOptions<CMSBusinessGoal[]>()
-  });
-}
-
-/**
- * Hook to fetch a specific business goal by slug
- */
-export function useBusinessGoal(slug: string | undefined) {
-  return useQuery({
-    queryKey: ['businessGoal', slug],
+    queryKey: ['business-goals'],
     queryFn: async () => {
-      if (!slug) {
-        console.warn('[useBusinessGoal] Called with empty slug');
-        return null;
-      }
-      
-      const normalizedSlug = normalizeSlug(slug);
-      console.log(`[useBusinessGoal] Looking up business goal with slug: "${normalizedSlug}"`);
-      
       try {
-        // Try direct lookup first
-        const result = await cmsService.getBusinessGoalBySlug(normalizedSlug);
-        
-        if (result) {
-          return result;
-        }
-        
-        // If direct lookup fails, try slug variations
-        console.log(`[useBusinessGoal] Direct lookup failed, trying slug variations for: "${normalizedSlug}"`);
-        const variations = getSlugVariations(normalizedSlug);
-        
-        for (const variation of variations) {
-          if (variation === normalizedSlug) continue; // Skip the one we already tried
-          
-          console.log(`[useBusinessGoal] Trying variation: "${variation}"`);
-          const resultFromVariation = await cmsService.getBusinessGoalBySlug(variation);
-          
-          if (resultFromVariation) {
-            console.log(`[useBusinessGoal] Found business goal with variation: "${variation}"`);
-            return resultFromVariation;
-          }
-        }
-        
-        console.warn(`[useBusinessGoal] No business goal found for slug "${normalizedSlug}" or variations`);
-        return null;
+        return await fetchBusinessGoals();
       } catch (error) {
-        console.error(`[useBusinessGoal] Error fetching business goal "${normalizedSlug}":`, error);
-        return null;
+        console.error('Error fetching business goals:', error);
+        throw error;
       }
     },
-    enabled: !!slug && slug.trim() !== '',
-    ...createQueryOptions<CMSBusinessGoal | null>()
   });
-}
+};
+
+/**
+ * Hook for fetching a single business goal by slug
+ */
+export const useBusinessGoalBySlug = (slug: string) => {
+  return useQuery({
+    queryKey: ['business-goals', slug],
+    queryFn: async () => {
+      try {
+        return await fetchBusinessGoalBySlug(slug);
+      } catch (error) {
+        console.error(`Error fetching business goal (${slug}):`, error);
+        throw error;
+      }
+    },
+    enabled: !!slug,
+  });
+};

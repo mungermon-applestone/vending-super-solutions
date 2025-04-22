@@ -9,6 +9,9 @@ export const getCMSInfo = () => {
     status: 'configured',
     apiUrl: 'https://cdn.contentful.com',
     version: '1.0.0',
-    hasConfig: true
+    hasConfig: true,
+    isConfigured: true,
+    adminUrl: 'https://app.contentful.com',
+    apiKeyConfigured: true
   };
 };

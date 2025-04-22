@@ -1,25 +1,22 @@
 
-import { CMSBusinessGoal } from '@/types/cms';
+import { ContentProviderType } from '../../providerConfig';
 
-// Define BusinessGoalAdapter interface
 export interface BusinessGoalAdapter {
-  getAll: () => Promise<CMSBusinessGoal[]>;
-  getBySlug: (slug: string) => Promise<CMSBusinessGoal | null>;
+  fetchAll: () => Promise<any[]>;
+  fetchBySlug: (slug: string) => Promise<any | null>;
+  create: (data: any) => Promise<any>;
+  update: (id: string, data: any) => Promise<any>;
+  delete: (id: string) => Promise<boolean>;
 }
 
-/**
- * Factory function to create a business goal adapter
- */
-export const createBusinessGoalAdapter = (): BusinessGoalAdapter => {
-  // Return a simple adapter with mock data
+export const createBusinessGoalAdapter = (providerType: ContentProviderType): BusinessGoalAdapter => {
+  console.log(`Creating business goal adapter for provider: ${providerType}`);
+  
   return {
-    getAll: async () => {
-      console.log("Getting all business goals");
-      return [];
-    },
-    getBySlug: async (slug: string) => {
-      console.log(`Getting business goal by slug: ${slug}`);
-      return null;
-    }
+    fetchAll: () => Promise.resolve([]),
+    fetchBySlug: () => Promise.resolve(null),
+    create: (data) => Promise.resolve(data),
+    update: () => Promise.resolve(true),
+    delete: () => Promise.resolve(true)
   };
 };
