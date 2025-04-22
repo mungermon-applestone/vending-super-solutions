@@ -2,28 +2,31 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useLocation } from 'react-router-dom';
 
-const AdditionalNavLinks = () => {
-  const location = useLocation();
-  
-  // Determine which nav item is active
-  const isMachinesActive = location.pathname.startsWith('/machines');
-  const isBusinessGoalsActive = location.pathname.startsWith('/business-goals') || location.pathname.startsWith('/business/');
+interface AdditionalNavLinksProps {
+  isAboutActive?: boolean;
+}
 
+const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
   return (
     <div className="flex items-center space-x-2">
       <Button 
         asChild 
-        variant={isMachinesActive ? "default" : "ghost"}
+        variant="ghost"
       >
         <Link to="/machines">Machines</Link>
       </Button>
       <Button 
         asChild 
-        variant={isBusinessGoalsActive ? "default" : "ghost"}
+        variant="ghost"
       >
         <Link to="/business-goals">Business Goals</Link>
+      </Button>
+      <Button 
+        asChild 
+        variant={isAboutActive ? "default" : "ghost"}
+      >
+        <Link to="/about">About</Link>
       </Button>
     </div>
   );

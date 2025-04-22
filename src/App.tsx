@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -18,6 +17,7 @@ import ProductDetail from '@/pages/ProductDetail';
 import BusinessGoalDetailPage from '@/pages/BusinessGoalDetailPage';
 import MachineDetailPage from '@/pages/MachineDetailPage';
 import MachinesPage from '@/pages/MachinesPage';
+import About from '@/pages/About';
 
 const App: React.FC = () => {
   const routes = [
@@ -41,7 +41,6 @@ const App: React.FC = () => {
       path: '/machines',
       element: <MachinesPage />,
     },
-    // Explicit route for divi-wp must come BEFORE the generic :slug route to ensure it takes priority
     {
       path: '/machines/divi-wp',
       element: <MachineDetailPage />,
@@ -81,6 +80,10 @@ const App: React.FC = () => {
     {
       path: '/technology/detailed',
       element: <TechnologyLanding />,
+    },
+    {
+      path: '/about',
+      element: <About />,
     },
     {
       path: '*',

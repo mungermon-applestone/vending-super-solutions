@@ -15,6 +15,7 @@ const DesktopNavigation = () => {
   // Determine which nav item is active
   const isTechnologyActive = location.pathname.startsWith('/technology');
   const isProductsActive = location.pathname.startsWith('/products');
+  const isAboutActive = location.pathname === '/about';
   
   return (
     <div className="hidden md:flex items-center space-x-2">
@@ -26,7 +27,7 @@ const DesktopNavigation = () => {
       </NavigationMenu>
       
       {/* Additional navigation links */}
-      <AdditionalNavLinks />
+      <AdditionalNavLinks isAboutActive={isAboutActive} />
     </div>
   );
 };

@@ -22,10 +22,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
           <MobileNavItem title="Machines" path="/machines" onClick={onClose} />
           <MobileNavItem title="Business Goals" path="/goals" onClick={onClose} />
           <MobileNavItem title="Technology" path="/technology" onClick={onClose} />
+          <MobileNavItem title="About" path="/about" onClick={onClose} />
           <MobileNavItem title="Contact Us" path="/contact" onClick={onClose} />
-          <MobileNavItem title="About Us" path="/about" onClick={onClose} />
-          <MobileNavItem title="Blog" path="/blog" onClick={onClose} />
-          <MobileNavItem title="Become a Partner" path="/partner" onClick={onClose} />
           
           {/* Admin links */}
           <div className="border-t border-gray-200 my-2 pt-2">
