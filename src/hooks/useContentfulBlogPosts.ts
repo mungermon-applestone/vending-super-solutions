@@ -37,11 +37,11 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
     queryFn: async () => {
       const client = await getContentfulClient();
 
-      // Type-safe query parameters object
+      // Explicitly define query parameters as strings to match Contentful API requirements
       const queryParams: Record<string, string> = {
         content_type: "blogPost",
-        limit: String(limit),  // Explicitly convert number to string
-        skip: String(skip),    // Explicitly convert number to string
+        limit: String(limit),  // Convert number to string
+        skip: String(skip),    // Convert number to string
         order: "-fields.publishDate",
       };
 
