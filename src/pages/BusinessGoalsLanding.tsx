@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -6,29 +5,19 @@ import { useBusinessGoals } from '@/hooks/cms/useBusinessGoals';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import PageHero from '@/components/common/PageHero';
 import { useBusinessGoalsPageContent } from '@/hooks/cms/useBusinessGoalsPageContent';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
+import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 
 const BusinessGoalsLanding = () => {
   const { data: businessGoals, isLoading, error } = useBusinessGoals();
   const { data: pageContent } = useBusinessGoalsPageContent();
   const navigate = useNavigate();
-  
+
   return (
     <Layout>
       {/* Hero Section */}
-      <PageHero 
-        pageKey="business-goals"
-        fallbackTitle="Business Goals"
-        fallbackSubtitle="Our comprehensive vending solutions help you achieve your business goals with powerful technology and customizable options."
-        fallbackImage="https://images.unsplash.com/photo-1553877522-43269d4ea984"
-        fallbackImageAlt="Business Goals"
-        fallbackPrimaryButtonText="Request a Demo"
-        fallbackPrimaryButtonUrl="/contact"
-        fallbackSecondaryButtonText="Explore Solutions"
-        fallbackSecondaryButtonUrl="/products"
-      />
+      <TechnologyPageHero entryId="4b40Npa9Hgp8jO0jDX98F6" />
 
       {/* Intro Section */}
       {pageContent && (

@@ -16,7 +16,6 @@ import TechnologyPage from './pages/TechnologyPage';
 import BusinessGoalsLanding from '@/pages/BusinessGoalsLanding';
 
 const App: React.FC = () => {
-  // Define routes
   const routes = [
     {
       path: '/',
