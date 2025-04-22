@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { useContentful } from "@/hooks/useContentful";
@@ -23,6 +24,11 @@ interface UseBlogPostsOptions {
   tag?: string;
 }
 
+/**
+ * Hook to fetch blog posts from Contentful CMS
+ * @param options Configuration options for the query
+ * @returns Query object with blog posts data and loading state
+ */
 export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
   const { limit = 10, skip = 0, tag } = options;
 
@@ -31,10 +37,11 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
     queryFn: async () => {
       const client = await getContentfulClient();
 
-      const queryParams: any = {
+      // Explicitly convert numeric values to strings as required by Contentful API
+      const queryParams: Record<string, string> = {
         content_type: "blogPost",
-        limit: limit.toString(),
-        skip: skip.toString(),
+        limit: String(limit),
+        skip: String(skip),
         order: "-fields.publishDate",
       };
 
