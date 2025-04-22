@@ -8,7 +8,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import Image from '@/components/common/Image';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
+import { Entry, EntryCollection } from 'contentful';
 
+// Define proper types for Contentful assets
 interface ContentfulAsset {
   sys: {
     id: string;
@@ -24,13 +26,15 @@ interface ContentfulAsset {
   };
 }
 
-interface ContentfulEntry {
-  sys: {
-    id: string;
-  };
-  fields: {
-    bodyContent: Document;
-  };
+// Define the structure for our About page entry
+interface AboutPageFields {
+  bodyContent: Document;
+}
+
+// Define the type for Contentful response with linked assets
+interface ContentfulResponse extends Entry<AboutPageFields> {
+  fields: AboutPageFields;
+  // Override the response to include the linked assets
   includes?: {
     Asset?: ContentfulAsset[];
   };
@@ -42,9 +46,9 @@ const About = () => {
     queryFn: async () => {
       const client = await getContentfulClient();
       // Get the entry with its linked assets
-      const response = await client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H', {
+      const response = await client.getEntry<AboutPageFields>('3Dn6DWVQR0VzhcQL6gdU0H', {
         include: 2 // Include linked assets (like images)
-      });
+      }) as unknown as ContentfulResponse;
       
       console.log('Contentful response:', JSON.stringify(response, null, 2));
       return response;
@@ -60,8 +64,13 @@ const About = () => {
           const assetId = node.data?.target?.sys?.id;
           console.log('Rendering embedded asset with ID:', assetId);
           
-          if (!assetId || !data?.includes?.Asset) {
-            console.error('Missing asset ID or includes data');
+          if (!assetId) {
+            console.error('Missing asset ID');
+            return null;
+          }
+          
+          if (!data?.includes?.Asset) {
+            console.error('No linked assets found in the response');
             return null;
           }
           
@@ -113,7 +122,12 @@ const About = () => {
         ) : (
           <ContentfulErrorBoundary contentType="About page">
             <div className="prose max-w-none">
-              {data?.fields?.bodyContent && documentToReactComponents(data.fields.bodyContent, richTextOptions)}
+              {data?.fields?.bodyContent && 
+                documentToReactComponents(
+                  data.fields.bodyContent as Document, 
+                  richTextOptions
+                )
+              }
             </div>
           </ContentfulErrorBoundary>
         )}
