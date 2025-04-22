@@ -1,5 +1,8 @@
-import { useQueryClient } from '@tanstack/react-query';
+import React from 'react';
 import Layout from '@/components/layout/Layout';
+import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
+import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
+import { useQueryClient } from '@tanstack/react-query';
 import { useContentfulProducts } from '@/hooks/cms/useContentfulProducts';
 import { useProductsPageContent } from '@/hooks/cms/useProductsPageContent';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +26,7 @@ const Products = () => {
     error: contentError,
     refetch: refetchContent
   } = useProductsPageContent();
+  const { data: testimonialSection } = useTestimonialSection('products');
   const queryClient = useQueryClient();
   
   console.log('[Products] Rendering Products page', { 
@@ -164,6 +168,8 @@ const Products = () => {
             </details>
           </div>
         )}
+        
+        {testimonialSection && <TestimonialsSection data={testimonialSection} />}
       </ContentfulErrorBoundary>
     </Layout>
   );
