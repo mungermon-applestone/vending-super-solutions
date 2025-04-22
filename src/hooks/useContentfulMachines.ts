@@ -1,6 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '../services/cms/utils/contentfulClient';
+import { toast } from 'sonner';
 
 // Define types for machine content from Contentful
 export interface ContentfulMachine {
@@ -72,26 +73,76 @@ export function useContentfulMachines() {
   return useQuery({
     queryKey: ['contentful', 'machines'],
     queryFn: async () => {
-      const machines = await fetchContentfulEntries<ContentfulMachine>('machine');
-      return machines.map(mapContentfulMachine);
+      try {
+        const machines = await fetchContentfulEntries<ContentfulMachine>('machine');
+        console.log('Fetched machines from Contentful:', machines);
+        return machines.map(mapContentfulMachine);
+      } catch (error) {
+        console.error('Error fetching machines from Contentful:', error);
+        toast.error('Failed to fetch machines');
+        throw error;
+      }
     }
   });
 }
 
-// Hook to fetch a single machine by slug
-export function useContentfulMachineBySlug(slug: string | undefined) {
+// Hook to fetch a single machine by ID or slug
+export function useContentfulMachine(idOrSlug: string | undefined) {
   return useQuery({
-    queryKey: ['contentful', 'machine', slug],
+    queryKey: ['contentful', 'machine', idOrSlug],
     queryFn: async () => {
-      if (!slug) return null;
+      if (!idOrSlug) return null;
       
-      const machines = await fetchContentfulEntries<ContentfulMachine>('machine', {
-        'fields.slug': slug
-      });
+      console.log('Fetching Contentful machine with idOrSlug:', idOrSlug);
       
-      if (machines.length === 0) return null;
-      return mapContentfulMachine(machines[0]);
+      try {
+        // First try as direct ID (for entry IDs like 1omUbnEhB6OeBFpwPFj1Ww)
+        if (idOrSlug.length > 10) {
+          try {
+            console.log('Trying to fetch by direct ID:', idOrSlug);
+            const machine = await fetchContentfulEntry<ContentfulMachine>(idOrSlug);
+            if (machine) {
+              console.log('Found machine by ID:', machine);
+              return mapContentfulMachine(machine);
+            }
+          } catch (idError) {
+            console.log('Could not fetch by direct ID, will try by slug next');
+          }
+        }
+        
+        // Then try by slug
+        console.log('Trying to fetch by slug field:', idOrSlug);
+        const machines = await fetchContentfulEntries<ContentfulMachine>('machine', {
+          'fields.slug': idOrSlug
+        });
+        
+        if (machines.length === 0) {
+          // Special case for divi-wp with known ID
+          if (idOrSlug === 'divi-wp') {
+            try {
+              console.log('Special case: Trying to fetch divi-wp with known ID');
+              const diviWpMachine = await fetchContentfulEntry<ContentfulMachine>('1omUbnEhB6OeBFpwPFj1Ww');
+              if (diviWpMachine) {
+                console.log('Found divi-wp with known ID:', diviWpMachine);
+                return mapContentfulMachine(diviWpMachine);
+              }
+            } catch (knownIdError) {
+              console.error('Could not fetch divi-wp with known ID:', knownIdError);
+            }
+          }
+          
+          console.warn('No machine found with slug:', idOrSlug);
+          return null;
+        }
+        
+        console.log('Found machine by slug:', machines[0]);
+        return mapContentfulMachine(machines[0]);
+      } catch (error) {
+        console.error(`Error fetching machine with slug or ID ${idOrSlug}:`, error);
+        toast.error(`Failed to load machine data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        throw error;
+      }
     },
-    enabled: !!slug
+    enabled: !!idOrSlug
   });
 }

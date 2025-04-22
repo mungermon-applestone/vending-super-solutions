@@ -5,7 +5,7 @@ import Layout from '@/components/layout/Layout';
 import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import MachineDetail from '@/components/machineDetail/MachineDetail';
 
 const MachineDetailPage = () => {
@@ -13,7 +13,7 @@ const MachineDetailPage = () => {
   const { data: machine, isLoading, error } = useContentfulMachine(slug || '');
 
   console.log('Machine detail page, slug:', slug);
-  console.log('Machine data:', machine);
+  console.log('Machine data from Contentful:', machine);
   
   useEffect(() => {
     // Scroll to top when the component mounts or slug changes
@@ -77,8 +77,17 @@ const MachineDetailPage = () => {
         <div className="container mx-auto py-20">
           <div className="max-w-lg mx-auto">
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-8 text-center">
+              <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-amber-800 mb-3">Machine Not Found</h3>
-              <p className="text-amber-600 mb-6">The machine you're looking for doesn't exist or has been removed.</p>
+              <p className="text-amber-600 mb-6">
+                The machine with slug "{slug}" couldn't be found in Contentful.
+                {slug === 'divi-wp' && (
+                  <div className="mt-4 p-3 bg-amber-100 rounded text-left">
+                    <p className="font-medium">Looking for Divi-WP?</p>
+                    <p>Entry ID: 1omUbnEhB6OeBFpwPFj1Ww might exist but could not be fetched.</p>
+                  </div>
+                )}
+              </p>
               <Button asChild variant="outline">
                 <Link to="/machines" className="flex items-center gap-2">
                   <ArrowLeft size={16} /> Return to Machines

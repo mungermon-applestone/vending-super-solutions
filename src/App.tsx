@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -43,6 +44,10 @@ const App: React.FC = () => {
     },
     {
       path: '/machines/:slug',
+      element: <MachineDetailPage />,
+    },
+    {
+      path: '/machine/:machineId',
       element: <MachineDetailPage />,
     },
     {
