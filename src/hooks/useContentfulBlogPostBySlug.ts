@@ -16,8 +16,18 @@ export interface BlogPostFields {
   tags?: string[];
 }
 
-// Type for a complete blog post entry
-export type ContentfulBlogPost = Entry<BlogPostFields>;
+// Type for a complete blog post entry - no longer extends EntrySkeletonType
+export interface ContentfulBlogPost {
+  sys: {
+    id: string;
+    contentType: {
+      sys: {
+        id: string;
+      }
+    }
+  };
+  fields: BlogPostFields;
+}
 
 interface UseContentfulBlogPostBySlugOptions {
   slug: string | undefined;

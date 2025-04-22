@@ -25,17 +25,19 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
   nextPost,
 }) => {
   // Make sure post exists and has fields
-  if (!post?.fields) {
+  if (!post || !post.fields) {
     return <div>Error: Blog post data is missing</div>;
   }
 
-  // Access fields directly from post.fields with proper type safety
+  // Access fields with proper type safety
   const fields = post.fields;
-  const title = fields.title;
-  const content = fields.content;
-  const excerpt = fields.excerpt;
-  const publishDate = fields.publishDate;
-  const featuredImage = fields.featuredImage;
+  
+  // Extract fields with optional chaining for safety
+  const title = fields?.title || "Untitled";
+  const content = fields?.content;
+  const excerpt = fields?.excerpt;
+  const publishDate = fields?.publishDate;
+  const featuredImage = fields?.featuredImage;
 
   return (
     <article className="max-w-3xl mx-auto">
