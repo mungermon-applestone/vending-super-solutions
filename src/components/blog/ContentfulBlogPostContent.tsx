@@ -24,7 +24,11 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
   previousPost,
   nextPost,
 }) => {
-  // Access fields property correctly
+  // TypeScript safety check - ensure fields exists
+  if (!post.fields) {
+    return <div>Error: Blog post data is missing</div>;
+  }
+
   const { title, content, excerpt, publishDate, featuredImage } = post.fields;
 
   return (

@@ -3,16 +3,22 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import ContentfulBlogPostContent from "@/components/blog/ContentfulBlogPostContent";
-import { useContentfulBlogPostBySlug, ContentfulBlogPost, ContentfulBlogPostFields } from "@/hooks/useContentfulBlogPostBySlug";
+import { useContentfulBlogPostBySlug } from "@/hooks/useContentfulBlogPostBySlug";
 import { Loader2 } from "lucide-react";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { useQuery } from "@tanstack/react-query";
+import { Entry } from "contentful";
 
 // Interface for adjacent post navigation
 interface AdjacentBlogPost {
   slug: string;
   title: string;
 }
+
+// Type safety check helper for Contentful fields
+const hasValidFields = (item: Entry<any>): boolean => {
+  return !!(item.fields && typeof item.fields.slug === 'string' && typeof item.fields.title === 'string');
+};
 
 // Hook for getting "previous" and "next" posts for navigation
 function useAdjacentContentfulPosts(currentSlug: string | undefined) {
@@ -30,35 +36,30 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
         select: ["fields.slug", "fields.title", "fields.publishDate"],
       });
       
-      const posts = response.items.filter(item => {
-        return item.fields && typeof item.fields.slug === 'string';
-      });
+      // Filter out entries without valid fields
+      const posts = response.items.filter(hasValidFields);
       
-      const idx = posts.findIndex(p => p.fields && p.fields.slug === currentSlug);
+      const idx = posts.findIndex(p => p.fields.slug === currentSlug);
       if (idx === -1) return { previous: null, next: null };
       
       // Create strongly typed objects for adjacent posts
       let previous: AdjacentBlogPost | null = null;
       let next: AdjacentBlogPost | null = null;
       
-      if (idx > 0 && posts[idx - 1].fields) {
-        const prevFields = posts[idx - 1].fields as any;
-        if (prevFields.slug && prevFields.title) {
-          previous = {
-            slug: String(prevFields.slug),
-            title: String(prevFields.title)
-          };
-        }
+      if (idx > 0 && hasValidFields(posts[idx - 1])) {
+        const prevFields = posts[idx - 1].fields;
+        previous = {
+          slug: String(prevFields.slug),
+          title: String(prevFields.title)
+        };
       }
       
-      if (idx < posts.length - 1 && posts[idx + 1].fields) {
-        const nextFields = posts[idx + 1].fields as any;
-        if (nextFields.slug && nextFields.title) {
-          next = {
-            slug: String(nextFields.slug),
-            title: String(nextFields.title)
-          };
-        }
+      if (idx < posts.length - 1 && hasValidFields(posts[idx + 1])) {
+        const nextFields = posts[idx + 1].fields;
+        next = {
+          slug: String(nextFields.slug),
+          title: String(nextFields.title)
+        };
       }
         
       return { previous, next };
