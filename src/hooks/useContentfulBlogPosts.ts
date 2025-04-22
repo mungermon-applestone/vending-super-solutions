@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { useContentful } from "@/hooks/useContentful";
@@ -36,10 +37,11 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
     queryFn: async () => {
       const client = await getContentfulClient();
 
-      const queryParams: Record<string, string> = {
+      // Create query params with proper string conversion
+      const queryParams = {
         content_type: "blogPost",
-        limit: String(limit),
-        skip: String(skip),
+        limit: `${limit}`, // Convert to string using template literal
+        skip: `${skip}`,   // Convert to string using template literal
         order: "-fields.publishDate",
       };
 
