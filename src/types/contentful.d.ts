@@ -97,6 +97,7 @@ export interface ContentfulRichTextDocument {
   content: any[];
 }
 
+// Enhanced ContentfulResponse with explicit includes for Entry and Asset
 export interface ContentfulResponse<T = any> extends Entry<T> {
   includes?: {
     Asset?: ContentfulAsset[];
@@ -109,3 +110,39 @@ export interface AboutPageFields {
   bodyContent: ContentfulRichTextDocument;
 }
 
+// Define FAQ item interface
+export interface ContentfulFAQItem {
+  sys: {
+    id: string;
+    contentType: {
+      sys: {
+        id: string;
+      };
+    };
+  };
+  fields: {
+    question: string;
+    answer: string;
+  };
+}
+
+// Define Contact Page Content interface
+export interface ContentfulContactPageFields {
+  introTitle?: string;
+  introDescription?: string;
+  phoneCardTitle?: string;
+  phoneNumber?: string;
+  phoneAvailability?: string;
+  emailCardTitle?: string;
+  emailAddress?: string;
+  emailResponseTime?: string;
+  addressCardTitle?: string;
+  address?: string;
+  addressType?: string;
+  formSectionTitle?: string;
+  faqSectionTitle?: string;
+  faqItems?: ContentfulFAQItem[];
+  immediateAssistanceTitle?: string;
+  immediateAssistanceDescription?: string;
+  immediateAssistanceButtonText?: string;
+}

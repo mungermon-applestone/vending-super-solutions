@@ -5,7 +5,7 @@ import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import useContentful from '@/hooks/useContentful';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ContentfulResponse } from '@/types/contentful';
+import { ContentfulResponse, ContentfulContactPageFields, ContentfulFAQItem } from '@/types/contentful';
 
 interface FAQItem {
   id: string;
@@ -36,7 +36,7 @@ interface ContactPageContent {
 const CONTACT_ID = '1iQrxg7rN4Dk17ZdxPxfhj';
 
 const ContactContentful = () => {
-  const { data, isLoading, error, isContentReady } = useContentful<ContentfulResponse>({
+  const { data, isLoading, error, isContentReady } = useContentful<ContentfulResponse<ContentfulContactPageFields>>({
     queryKey: ['contact-page-content', CONTACT_ID],
     queryFn: async () => {
       const client = await getContentfulClient();
@@ -44,44 +44,52 @@ const ContactContentful = () => {
       const entry = await client.getEntry(CONTACT_ID, { include: 2 });
       
       console.log('Raw contact entry:', JSON.stringify(entry, null, 2));
-      
-      // Extract main fields
-      const fields = entry.fields;
-
-      // Check for linked entries in the includes section
-      if (entry.includes && entry.includes.Entry) {
-        console.log('Found linked entries:', entry.includes.Entry.length);
-        
-        // Extract linked FAQ entries if included
-        const linkedFAQs = entry.includes.Entry.filter(
-          (e) => e.sys.contentType?.sys.id === 'faqItem'
-        );
-        
-        console.log('Found FAQ items:', linkedFAQs.length);
-        
-        // Map linked FAQ entries to FAQItem shape with safe checks
-        const faqItems = linkedFAQs.map((faq) => ({
-          id: faq.sys.id,
-          question: faq.fields.question || '',
-          answer: faq.fields.answer || '',
-        }));
-        
-        // Add the mapped FAQ items to the fields
-        return {
-          ...entry,
-          fields: {
-            ...fields,
-            faqItems,
-          }
-        };
-      }
-      
-      return entry;
+      return entry as unknown as ContentfulResponse<ContentfulContactPageFields>;
     },
   });
 
-  console.log('Contact page data:', data);
-  console.log('FAQ items:', data?.fields?.faqItems);
+  // Process FAQ items separately after data is loaded
+  const processedData = React.useMemo(() => {
+    if (!data) return null;
+    
+    // Extract main fields
+    const fields = data.fields || {};
+    
+    // Extract linked FAQ entries if included
+    const processedFaqItems: FAQItem[] = [];
+    
+    if (data.includes?.Entry?.length) {
+      console.log('Found linked entries:', data.includes.Entry.length);
+      
+      // Find entries that are FAQ items
+      const linkedFAQs = data.includes.Entry.filter(
+        (e) => e.sys.contentType?.sys.id === 'faqItem'
+      );
+      
+      console.log('Found FAQ items:', linkedFAQs.length);
+      
+      // Map linked FAQ entries to FAQItem shape
+      linkedFAQs.forEach((faq) => {
+        if (faq.fields && typeof faq.fields.question === 'string' && typeof faq.fields.answer === 'string') {
+          processedFaqItems.push({
+            id: faq.sys.id,
+            question: faq.fields.question,
+            answer: faq.fields.answer,
+          });
+        }
+      });
+      
+      console.log('Processed FAQ items:', processedFaqItems);
+    }
+    
+    // Return processed data
+    return {
+      ...fields,
+      faqItems: processedFaqItems
+    } as ContactPageContent;
+  }, [data]);
+  
+  console.log('Contact page processed data:', processedData);
 
   if (isLoading) {
     return (
@@ -106,7 +114,8 @@ const ContactContentful = () => {
     );
   }
 
-  const f = (data?.fields || {}) as ContactPageContent;
+  // Use the processed data
+  const f = processedData || {} as ContactPageContent;
 
   return (
     <Layout>

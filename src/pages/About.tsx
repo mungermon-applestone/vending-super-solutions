@@ -10,7 +10,6 @@ import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary
 import useContentful from '@/hooks/useContentful';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { ContentfulAsset, ContentfulResponse, AboutPageFields } from '@/types/contentful';
-import { Document } from '@contentful/rich-text-types';
 
 const About = () => {
   const { data, isLoading, error, isContentReady } = useContentful<ContentfulResponse<AboutPageFields>>({
@@ -115,6 +114,12 @@ const About = () => {
     }
   };
 
+  // Process the data so we have proper typing and avoid Type errors
+  const processedData = React.useMemo(() => {
+    if (!data?.fields) return null;
+    return data.fields;
+  }, [data]);
+
   return (
     <Layout>
       <div className="container max-w-4xl mx-auto py-12">
@@ -132,10 +137,10 @@ const About = () => {
         ) : (
           <ContentfulErrorBoundary contentType="About page">
             <div className="prose max-w-none">
-              {isContentReady && data?.fields?.bodyContent && 
-                documentToReactComponents(data.fields.bodyContent, richTextOptions)
+              {isContentReady && processedData?.bodyContent && 
+                documentToReactComponents(processedData.bodyContent, richTextOptions)
               }
-              {isContentReady && !data?.fields?.bodyContent && (
+              {isContentReady && !processedData?.bodyContent && (
                 <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-md">
                   <p>The About page content was loaded, but no body content was found.</p>
                 </div>
