@@ -1,4 +1,6 @@
 
+import { Asset, Entry, EntrySkeletonType } from 'contentful';
+
 export interface ContentfulAsset {
   sys: {
     id: string;
@@ -85,5 +87,19 @@ export interface ContentfulTechnology {
     visible?: boolean;
     image?: ContentfulAsset;
     sections?: ContentfulTechnologySection[];
+  };
+}
+
+// Contentful API response interfaces
+export interface ContentfulRichTextDocument {
+  nodeType: string;
+  data: object;
+  content: any[];
+}
+
+export interface ContentfulResponse<T = any> extends Entry<T> {
+  includes?: {
+    Asset?: ContentfulAsset[];
+    Entry?: Entry<any>[];
   };
 }

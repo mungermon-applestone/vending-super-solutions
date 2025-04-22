@@ -9,6 +9,7 @@ import Image from '@/components/common/Image';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import useContentful from '@/hooks/useContentful';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Entry, Asset } from 'contentful';
 
 // Define types for our Contentful response
 interface ContentfulAsset {
@@ -37,12 +38,8 @@ interface AboutPageFields {
   bodyContent: any; // Rich text document
 }
 
-interface ContentfulResponse {
-  sys: {
-    id: string;
-  };
-  fields: AboutPageFields;
-  // Define properties we know exist based on the console logs
+// Extend the Entry type from contentful to match our expected structure
+interface ContentfulResponse extends Entry<AboutPageFields> {
   includes?: {
     Asset?: ContentfulAsset[];
   };
@@ -53,9 +50,10 @@ const About = () => {
     queryKey: ['about', '3Dn6DWVQR0VzhcQL6gdU0H'],
     queryFn: async () => {
       const client = await getContentfulClient();
+      // Cast the result to unknown first, then to our expected type
       return client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H', {
         include: 2, // Include linked assets (like images)
-      }) as Promise<ContentfulResponse>;
+      }) as unknown as ContentfulResponse;
     }
   });
 
@@ -83,14 +81,17 @@ const About = () => {
           // Look for the asset in the includes.Asset array, which is how Contentful
           // delivers linked assets in the API response
           if (data?.includes?.Asset && Array.isArray(data.includes.Asset)) {
+            console.log('Looking through includes.Asset array with length:', data.includes.Asset.length);
             const asset = data.includes.Asset.find((a) => a.sys.id === assetId);
             
             if (asset) {
+              console.log('Found asset in includes.Asset:', asset.sys.id);
               return renderAsset(asset);
             }
           }
           
-          console.error('Asset not found:', { assetId });
+          console.error('Asset not found for ID:', assetId);
+          console.log('Available asset IDs:', data?.includes?.Asset?.map(a => a.sys.id) || 'none');
           return <div className="text-red-500">Image not found (ID: {assetId})</div>;
           
         } catch (error) {
@@ -103,21 +104,26 @@ const About = () => {
   
   // Helper function to render the asset once we've found it
   const renderAsset = (asset: ContentfulAsset) => {
-    const { title, file } = asset.fields;
-    const imageUrl = file.url;
-    console.log('Rendering image with URL:', imageUrl);
-    
-    return (
-      <div className="my-8">
-        <AspectRatio ratio={16/9} className="overflow-hidden rounded-md border border-gray-200">
-          <Image 
-            src={`https:${imageUrl}`}
-            alt={title || 'About image'}
-            className="w-full h-full object-cover"
-          />
-        </AspectRatio>
-      </div>
-    );
+    try {
+      const { title, file } = asset.fields;
+      const imageUrl = file.url;
+      console.log('Rendering image with URL:', imageUrl);
+      
+      return (
+        <div className="my-8">
+          <AspectRatio ratio={16/9} className="overflow-hidden rounded-md border border-gray-200">
+            <Image 
+              src={`https:${imageUrl}`}
+              alt={title || 'About image'}
+              className="w-full h-full object-cover"
+            />
+          </AspectRatio>
+        </div>
+      );
+    } catch (err) {
+      console.error('Error in renderAsset:', err);
+      return <div className="text-red-500">Error rendering asset</div>;
+    }
   };
 
   return (
