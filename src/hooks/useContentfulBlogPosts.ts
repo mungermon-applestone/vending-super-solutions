@@ -37,11 +37,10 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
     queryFn: async () => {
       const client = await getContentfulClient();
 
-      // Create a query parameters object where all values are explicitly strings
+      // Create query parameters object with explicit string type conversion
       const queryParams: Record<string, string> = {
         content_type: "blogPost",
         order: "-fields.publishDate",
-        // Ensure numeric values are converted to strings
         limit: String(limit),
         skip: String(skip)
       };
