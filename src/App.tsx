@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { lazy, Suspense } from 'react';
 import {
   BrowserRouter as Router,
   Route,
@@ -19,6 +20,9 @@ import MachineDetailPage from '@/pages/MachineDetailPage';
 import MachinesPage from '@/pages/MachinesPage';
 import About from '@/pages/About';
 import ContactContentful from '@/pages/ContactContentful';
+
+// Lazy load the blog post detail page
+const ContentfulBlogPostDetail = lazy(() => import('./pages/ContentfulBlogPostDetail'));
 
 const App: React.FC = () => {
   const routes = [
@@ -88,7 +92,11 @@ const App: React.FC = () => {
     },
     {
       path: '/blog/:slug',
-      element: <React.lazy(() => import('./pages/ContentfulBlogPostDetail')) />,
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <ContentfulBlogPostDetail />
+        </Suspense>
+      ),
     },
     {
       path: '*',
