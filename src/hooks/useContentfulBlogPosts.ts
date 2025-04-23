@@ -1,15 +1,18 @@
 
 import { useContentful } from "@/hooks/useContentful";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
-import { EntryCollection } from "contentful";
 
+/**
+ * Type for a single Contentful blog post.
+ * All fields are optional where possible to allow for incomplete data.
+ */
 export interface ContentfulBlogPost {
   id: string;
   title: string;
   slug: string;
   content: any;
   excerpt?: string;
-  publishDate?: string;
+  publishDate?: string | null;
   featuredImage?: {
     url: string;
     title: string;
@@ -24,90 +27,66 @@ interface UseBlogPostsOptions {
   tag?: string;
 }
 
-// Define a strongly typed interface for Contentful API params
-interface ContentfulQueryParams {
-  content_type: string;
-  order: string;
-  limit: string;
-  skip: string;
-  [key: string]: string; // Allow for dynamic fields like tag filters
+/**
+ * Prepare Contentful API query params, always as strings.
+ */
+function createBlogQueryParams(options: UseBlogPostsOptions): Record<string, string> {
+  const params: Record<string, string> = {
+    content_type: "blogPost",
+    order: "-fields.publishDate",
+    limit: String(options.limit ?? 10),
+    skip: String(options.skip ?? 0),
+  };
+  if (options.tag) {
+    params["metadata.tags.sys.id[in]"] = options.tag;
+  }
+  return params;
 }
 
 /**
- * Creates properly formatted Contentful query parameters
- * This adapter ensures all params are strings as required by Contentful
+ * Map raw Contentful entry to a strongly typed JS object for UI consumption.
  */
-const createBlogQueryParams = (options: UseBlogPostsOptions): ContentfulQueryParams => {
-  const { limit = 10, skip = 0, tag } = options;
-  
-  // Create base params with explicit string conversions
-  const params: ContentfulQueryParams = {
-    content_type: "blogPost",
-    order: "-fields.publishDate",
-    limit: `${limit}`, // Template literal conversion to string
-    skip: `${skip}`,   // Template literal conversion to string
-  };
-  
-  // Add tag filter if provided
-  if (tag) {
-    params["metadata.tags.sys.id[in]"] = tag;
-  }
-  
-  return params;
-};
-
-/**
- * Maps Contentful entry data to our ContentfulBlogPost interface
- */
-const mapContentfulEntryToBlogPost = (item: any): ContentfulBlogPost => {
-  const fields = item.fields as any;
-  
-  // Process featured image if it exists
-  const featuredImage = fields.featuredImage
-    ? {
-        url: fields.featuredImage.fields?.file?.url
-          ? `https:${fields.featuredImage.fields.file.url}`
-          : undefined,
-        title: fields.featuredImage.fields?.title || ""
-      }
-    : undefined;
-  
+function toContentfulBlogPost(item: any): ContentfulBlogPost {
+  const fields = item.fields || {};
+  const imageField = fields.featuredImage?.fields?.file?.url;
   return {
-    id: item.sys.id,
+    id: item.sys?.id || "",
     title: fields.title || "Untitled",
     slug: fields.slug || "",
-    content: fields.content || {},
+    content: fields.content ?? {},
     excerpt: fields.excerpt || "",
-    publishDate: fields.publishDate || null,
-    featuredImage,
+    publishDate: fields.publishDate ?? null,
+    featuredImage: imageField
+      ? {
+          url: `https:${fields.featuredImage.fields.file.url}`,
+          title: fields.featuredImage.fields.title || "",
+        }
+      : undefined,
     author: fields.author || "",
-    tags: fields.tags || []
+    tags: fields.tags || [],
   };
-};
+}
 
 /**
- * Hook to fetch blog posts from Contentful CMS
- * @param options Configuration options for the query
- * @returns Query object with blog posts data and loading state
+ * Hook to fetch Contentful blog posts.
+ * Keeps the API and returned data shape the same for drop-in UI compatibility.
  */
 export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
-  const { limit = 10, skip = 0, tag } = options;
-
   return useContentful<ContentfulBlogPost[]>({
-    queryKey: ["contentful-blog-posts", limit, skip, tag],
+    queryKey: [
+      "contentful-blog-posts",
+      options.limit ?? 10,
+      options.skip ?? 0,
+      options.tag ?? "",
+    ],
     queryFn: async () => {
       const client = await getContentfulClient();
-      
-      // Use our adapter to create properly typed query params
-      const queryParams = createBlogQueryParams(options);
-      
-      // Execute the query with our typed params
-      const response = await client.getEntries(queryParams);
-      
-      // Map the response to our interface
-      return response.items.map(mapContentfulEntryToBlogPost);
+      const params = createBlogQueryParams(options);
+      const response = await client.getEntries(params);
+      if (!Array.isArray(response.items)) return [];
+      return response.items.map(toContentfulBlogPost);
     },
     fallbackData: [],
-    enableToasts: false
+    enableToasts: false,
   });
 }
