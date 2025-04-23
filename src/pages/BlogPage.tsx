@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Loader2 } from "lucide-react";
 import Layout from "@/components/layout/Layout";
@@ -88,7 +89,7 @@ const BlogPage: React.FC = () => {
         )}
 
         {/* Blog Posts Section */}
-        <div>
+        <div className="mb-20">  {/* Added mb-20 to create space before the contact form */}
           <h2 className="text-2xl font-bold mb-8">{pageContent?.latestArticlesTitle || "Latest Articles"}</h2>
           {isLoading ? (
             <div className="flex justify-center py-16">
@@ -120,3 +121,4 @@ const BlogPage: React.FC = () => {
 };
 
 export default BlogPage;
+
