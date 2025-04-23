@@ -12,9 +12,7 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import BlogHeroCard from "@/components/blog/BlogHeroCard";
 import Image from "@/components/common/Image";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import InquiryForm from "@/components/machines/contact/InquiryForm";
 
 const placeholderImages = [
   "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
@@ -64,7 +62,6 @@ const BlogCard: React.FC<{ post: ContentfulBlogPost; idx: number }> = ({ post, i
 };
 
 const BlogPage: React.FC = () => {
-  const { toast } = useToast();
   const { data: pageContent, isLoading: isLoadingContent, error: contentError } = useContentfulBlogPageContent();
   const { data: blogPosts = [], isLoading: isLoadingPosts, error: postsError } = useContentfulBlogPosts({ limit: 9 });
 
@@ -74,17 +71,6 @@ const BlogPage: React.FC = () => {
 
   // Get the latest post for the hero, and the rest for the grid
   const [latestPost, ...olderPosts] = hasPosts ? blogPosts : [];
-
-  const handleContactSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
-    toast({
-      title: "Message Sent",
-      description: "We've received your message and will get back to you soon.",
-    });
-    
-    e.currentTarget.reset();
-  };
 
   return (
     <Layout>
@@ -127,70 +113,7 @@ const BlogPage: React.FC = () => {
         </div>
 
         {/* Contact Section */}
-        <div className="mt-20 bg-gray-50 rounded-lg py-16 px-6">
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-8">
-              Get In Touch
-            </h2>
-            <p className="text-center text-gray-600 mb-10">
-              Have questions about our blog content or want to discuss an article? 
-              Reach out to us directly.
-            </p>
-            
-            <form onSubmit={handleContactSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Your Name
-                  </label>
-                  <Input 
-                    id="name" 
-                    placeholder="John Doe" 
-                    required 
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address
-                  </label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="john@example.com" 
-                    required 
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                  Subject
-                </label>
-                <Input 
-                  id="subject" 
-                  placeholder="Blog Inquiry" 
-                  required 
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                  Message
-                </label>
-                <Textarea 
-                  id="message" 
-                  rows={5} 
-                  placeholder="Tell us about your thoughts on our latest articles or any questions you have." 
-                  required 
-                />
-              </div>
-              
-              <Button type="submit" className="w-full">
-                Send Message
-              </Button>
-            </form>
-          </div>
-        </div>
+        <InquiryForm title="Ready to transform your vending operations?" />
       </div>
     </Layout>
   );
