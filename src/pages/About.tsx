@@ -32,8 +32,10 @@ const About = () => {
     if (data) {
       console.log('About page data structure:', data);
       
-      if (data.fields?.bodyContent) {
+      if (data.fields && data.fields.bodyContent) {
         console.log('About page bodyContent structure:', data.fields.bodyContent);
+      } else {
+        console.log('No bodyContent found in data.fields:', data.fields);
       }
       
       if (data.includes?.Asset) {
@@ -133,7 +135,7 @@ const About = () => {
   // Process data after it's loaded
   const processedData = React.useMemo(() => {
     if (!data?.fields) return {} as AboutPageFields;
-    return data.fields as AboutPageFields;
+    return data.fields;
   }, [data]);
 
   return (

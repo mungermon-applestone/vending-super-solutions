@@ -1,4 +1,3 @@
-
 import { Asset, Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 import { Document, BLOCKS } from '@contentful/rich-text-types';
 
@@ -109,7 +108,7 @@ export interface ContentfulResponse<T = any> extends Entry<T> {
 
 // Define the AboutPageFields interface for the About page
 export interface AboutPageFields {
-  bodyContent?: ContentfulRichTextDocument;
+  bodyContent?: Document | ContentfulRichTextDocument;
 }
 
 // Define FAQ item interface - updated to handle both string and rich text answers
