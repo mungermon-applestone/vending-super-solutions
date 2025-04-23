@@ -17,7 +17,7 @@ const About = () => {
       const client = await getContentfulClient();
       
       const response = await client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H', {
-        include: 10, // Increase to a higher level to ensure ALL nested references are resolved
+        include: 10, // Ensure deep inclusion of all assets
       });
       
       console.log('Raw Contentful About page response:', JSON.stringify(response, null, 2));
@@ -48,6 +48,7 @@ const About = () => {
         const targetImage = data.includes.Asset.find(asset => asset.sys.id === '5G5dFI3gxzO5NPxjnyGzNG');
         if (targetImage) {
           console.log('Found target image with full details:', targetImage);
+          console.log('Target image URL:', targetImage.fields.file?.url);
         } else {
           console.log('Target image 5G5dFI3gxzO5NPxjnyGzNG not found in includes');
         }
@@ -59,7 +60,27 @@ const About = () => {
 
   // Extract all included assets from the response to match the blog implementation
   const includedAssets = React.useMemo(() => {
-    return data?.includes?.Asset || [];
+    if (!data?.includes?.Asset) return [];
+    
+    // Map assets to a more consistent format for easier access
+    return data.includes.Asset.map(asset => {
+      // Ensure URL is properly formatted
+      const fileUrl = asset.fields.file?.url || '';
+      const fullUrl = fileUrl.startsWith('//') 
+        ? `https:${fileUrl}` 
+        : fileUrl.startsWith('http') ? fileUrl : `https:${fileUrl}`;
+      
+      return {
+        ...asset,
+        fields: {
+          ...asset.fields,
+          file: {
+            ...asset.fields.file,
+            url: fullUrl
+          }
+        }
+      };
+    });
   }, [data?.includes?.Asset]);
 
   const richTextOptions = {
@@ -80,6 +101,7 @@ const About = () => {
       [BLOCKS.HR]: () => <hr className="my-6 border-t border-gray-300" />,
       [BLOCKS.EMBEDDED_ASSET]: (node) => {
         try {
+          // Get asset ID from node data
           const assetId = node.data?.target?.sys?.id;
           console.log('Embedded asset node:', node);
           console.log('Attempting to render embedded asset with ID:', assetId);
@@ -89,6 +111,8 @@ const About = () => {
             return <div className="text-red-500">Image reference error (no ID)</div>;
           }
           
+          // KEY CHANGE: Get the resolved asset directly from Contentful's response structure
+          // This mirrors how the blog component successfully finds images
           const asset = includedAssets.find(asset => asset.sys.id === assetId);
           
           if (!asset) {
@@ -97,6 +121,7 @@ const About = () => {
             return <div className="text-red-500">Image not found (ID: {assetId})</div>;
           }
           
+          // Extract image data from the asset
           const { title, file } = asset.fields;
           
           if (!file || !file.url) {
@@ -104,10 +129,7 @@ const About = () => {
             return <div className="text-red-500">Image file data missing</div>;
           }
           
-          let imageUrl = file.url;
-          const fullUrl = imageUrl.startsWith('//') 
-            ? `https:${imageUrl}` 
-            : imageUrl.startsWith('http') ? imageUrl : `https:${imageUrl}`;
+          const fullUrl = file.url;
           
           console.log(`Successfully found image ${assetId} with URL:`, fullUrl);
           
