@@ -2,6 +2,17 @@
 import { useContentful } from "@/hooks/useContentful";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 
+// === Helper utility for safe query key stringification ===
+/**
+ * Ensures React Query keys are always strings (avoid TS2322 errors!)
+ * Allows numbers, undefined, null, etc to safely be used.
+ * Always use when passing variables into queryKey arrays!
+ */
+function toStringParam(value: unknown): string {
+  if (value === undefined || value === null) return '';
+  return String(value);
+}
+
 /**
  * Type for a single Contentful blog post.
  * All fields are optional where possible to allow for incomplete data.
@@ -70,6 +81,9 @@ function toContentfulBlogPost(item: any): ContentfulBlogPost {
 /**
  * Hook to fetch Contentful blog posts.
  * Keeps the API and returned data shape the same for drop-in UI compatibility.
+ * 
+ * Always ensure ALL dynamic queryKey params are strings by using `toStringParam`.
+ * This will avoid type errors if options are left as numbers or undefined.
  */
 export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
   const limit = options.limit ?? 10;
@@ -79,9 +93,9 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
   return useContentful<ContentfulBlogPost[]>({
     queryKey: [
       "contentful-blog-posts",
-      String(limit),
-      String(skip),
-      tag,
+      toStringParam(limit),
+      toStringParam(skip),
+      toStringParam(tag),
     ],
     queryFn: async () => {
       const client = await getContentfulClient();
@@ -94,3 +108,4 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
     enableToasts: false,
   });
 }
+
