@@ -32,8 +32,8 @@ const About = () => {
     if (data) {
       console.log('About page data structure:', data);
       
-      if (data.fields && data.fields.bodyContent) {
-        console.log('About page bodyContent structure:', data.fields.bodyContent);
+      if (data.fields && "bodyContent" in data.fields) {
+        console.log('About page bodyContent structure:', (data.fields as AboutPageFields).bodyContent);
       } else {
         console.log('No bodyContent found in data.fields:', data.fields);
       }
@@ -133,9 +133,8 @@ const About = () => {
   };
 
   // Process data after it's loaded
-  const processedData = React.useMemo(() => {
-    if (!data?.fields) return {} as AboutPageFields;
-    return data.fields;
+  const processedData: AboutPageFields = React.useMemo(() => {
+    return data?.fields ? (data.fields as AboutPageFields) : {};
   }, [data]);
 
   return (
@@ -156,7 +155,7 @@ const About = () => {
           <ContentfulErrorBoundary contentType="About page">
             <div className="prose max-w-none">
               {isContentReady && processedData.bodyContent && (
-                <>{documentToReactComponents(processedData.bodyContent as unknown as Document, richTextOptions)}</>
+                <>{documentToReactComponents(processedData.bodyContent as Document, richTextOptions)}</>
               )}
               {isContentReady && !processedData.bodyContent && (
                 <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-md">
