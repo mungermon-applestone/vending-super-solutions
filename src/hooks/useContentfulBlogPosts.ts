@@ -72,12 +72,16 @@ function toContentfulBlogPost(item: any): ContentfulBlogPost {
  * Keeps the API and returned data shape the same for drop-in UI compatibility.
  */
 export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
+  const limit = options.limit ?? 10;
+  const skip = options.skip ?? 0;
+  const tag = options.tag ?? "";
+  
   return useContentful<ContentfulBlogPost[]>({
     queryKey: [
       "contentful-blog-posts",
-      options.limit ?? 10,
-      options.skip ?? 0,
-      options.tag ?? "",
+      String(limit),
+      String(skip),
+      tag,
     ],
     queryFn: async () => {
       const client = await getContentfulClient();
