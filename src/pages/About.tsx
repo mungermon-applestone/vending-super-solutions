@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
@@ -18,7 +17,7 @@ const About = () => {
       const client = await getContentfulClient();
       
       const response = await client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H', {
-        include: 3, // Increase to level 3 to ensure deeply nested references are resolved
+        include: 10, // Increase to a higher level to ensure ALL nested references are resolved
       });
       
       console.log('Raw Contentful About page response:', JSON.stringify(response, null, 2));
@@ -38,25 +37,30 @@ const About = () => {
         console.log('No bodyContent found in data.fields:', data.fields);
       }
       
-      // Additional specific logging for the image with ID 5G5dFI3gxzO5NPxjnyGzNG
+      // Log all assets in the includes section
       if (data.includes?.Asset) {
         console.log('Found assets in includes:', data.includes.Asset.length);
+        data.includes.Asset.forEach(asset => {
+          console.log(`Asset ${asset.sys.id}: ${asset.fields.title || 'No title'} - URL: ${asset.fields.file?.url || 'No URL'}`);
+        });
+        
+        // Specific check for target image
         const targetImage = data.includes.Asset.find(asset => asset.sys.id === '5G5dFI3gxzO5NPxjnyGzNG');
         if (targetImage) {
-          console.log('Found the specific image (5G5dFI3gxzO5NPxjnyGzNG):', targetImage);
-          console.log('Image URL:', targetImage.fields.file?.url);
-          console.log('Image title:', targetImage.fields.title);
+          console.log('Found target image with full details:', targetImage);
         } else {
-          console.log('Image with ID 5G5dFI3gxzO5NPxjnyGzNG NOT found in includes. Available asset IDs:');
-          data.includes.Asset.forEach(asset => {
-            console.log(`- ${asset.sys.id}: ${asset.fields.title || 'No title'}`);
-          });
+          console.log('Target image 5G5dFI3gxzO5NPxjnyGzNG not found in includes');
         }
       } else {
         console.log('No assets found in includes');
       }
     }
   }, [data]);
+
+  // Extract all included assets from the response to match the blog implementation
+  const includedAssets = React.useMemo(() => {
+    return data?.includes?.Asset || [];
+  }, [data?.includes?.Asset]);
 
   const richTextOptions = {
     renderNode: {
@@ -77,52 +81,35 @@ const About = () => {
       [BLOCKS.EMBEDDED_ASSET]: (node) => {
         try {
           const assetId = node.data?.target?.sys?.id;
-          console.log('Rendering embedded asset with ID:', assetId);
+          console.log('Embedded asset node:', node);
+          console.log('Attempting to render embedded asset with ID:', assetId);
           
-          // Special case for the specific asset ID
-          if (assetId === '5G5dFI3gxzO5NPxjnyGzNG') {
-            console.log('Found our target image ID in the rich text content!');
+          if (!assetId) {
+            console.error('Missing asset ID in embedded asset node');
+            return <div className="text-red-500">Image reference error (no ID)</div>;
           }
           
-          if (!assetId || !data?.includes?.Asset) {
-            console.error('Missing asset ID or includes.Asset array');
-            return <div className="text-red-500">Image reference error</div>;
-          }
-          
-          const asset = data.includes.Asset.find(a => a.sys.id === assetId);
+          const asset = includedAssets.find(asset => asset.sys.id === assetId);
           
           if (!asset) {
-            console.error('Asset not found for ID:', assetId);
-            
-            // Check if this is our target asset and log more details
-            if (assetId === '5G5dFI3gxzO5NPxjnyGzNG') {
-              console.error('The specific image we are looking for was not found in includes!');
-              
-              // Log available assets
-              if (data.includes?.Asset?.length) {
-                console.log('Available assets:', data.includes.Asset.map(a => ({
-                  id: a.sys.id,
-                  title: a.fields.title
-                })));
-              }
-            }
-            
+            console.error(`Asset not found for ID: ${assetId}`);
+            console.log('Available asset IDs:', includedAssets.map(a => a.sys.id).join(', '));
             return <div className="text-red-500">Image not found (ID: {assetId})</div>;
           }
           
           const { title, file } = asset.fields;
+          
           if (!file || !file.url) {
             console.error('Asset file or URL missing:', asset);
             return <div className="text-red-500">Image file data missing</div>;
           }
           
-          const imageUrl = file.url;
-          console.log(`Rendering image ${assetId} with URL:`, imageUrl);
+          let imageUrl = file.url;
+          const fullUrl = imageUrl.startsWith('//') 
+            ? `https:${imageUrl}` 
+            : imageUrl.startsWith('http') ? imageUrl : `https:${imageUrl}`;
           
-          // Ensure URL has protocol
-          const fullUrl = imageUrl.startsWith('//') ? 
-            `https:${imageUrl}` : 
-            imageUrl.startsWith('http') ? imageUrl : `https:${imageUrl}`;
+          console.log(`Successfully found image ${assetId} with URL:`, fullUrl);
           
           return (
             <div className="my-8">
