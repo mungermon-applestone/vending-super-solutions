@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import CTASection from '@/components/common/CTASection';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
 import { Button } from '@/components/ui/button';
@@ -186,8 +185,6 @@ const MachinesPage: React.FC = () => {
       {testimonialSection && <TestimonialsSection data={testimonialSection} />}
       
       <InquiryForm title="Interested in our machines?" />
-      
-      <CTASection />
     </Layout>
   );
 };
