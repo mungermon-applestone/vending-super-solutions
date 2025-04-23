@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Loader2 } from "lucide-react";
 import Layout from "@/components/layout/Layout";
@@ -28,6 +27,32 @@ const BlogCard: React.FC<{ post: ContentfulBlogPost; idx: number }> = ({ post, i
     post.featuredImage?.url ||
     placeholderImages[idx % placeholderImages.length];
 
+  const getPlainTextExcerpt = (content: any): string => {
+    if (!content) return "";
+    if (typeof content === 'string') return content.slice(0, 85) + "...";
+    
+    try {
+      if (content.content && Array.isArray(content.content)) {
+        const paragraphs = content.content
+          .filter(node => node.nodeType === 'paragraph')
+          .map(node => 
+            node.content
+              .filter(contentNode => contentNode.nodeType === 'text')
+              .map(textNode => textNode.value)
+              .join('')
+          );
+          
+        if (paragraphs.length > 0) {
+          return paragraphs[0].slice(0, 85) + "...";
+        }
+      }
+    } catch (e) {
+      console.error("Error extracting plain text from rich text:", e);
+    }
+    
+    return "No excerpt available";
+  };
+
   return (
     <Card className="flex flex-col h-full shadow-md hover:shadow-lg transition-shadow group card-hover">
       <div className="relative w-full h-48 rounded-t-lg overflow-hidden">
@@ -44,10 +69,7 @@ const BlogCard: React.FC<{ post: ContentfulBlogPost; idx: number }> = ({ post, i
       </CardHeader>
       <CardContent className="flex-grow px-4 py-1">
         <p className="text-gray-600 text-sm line-clamp-3">
-          {post.excerpt ||
-            (typeof post.content === "string"
-              ? post.content.slice(0, 85) + "..."
-              : "No excerpt available")}
+          {post.excerpt || getPlainTextExcerpt(post.content)}
         </p>
       </CardContent>
       <CardFooter className="px-4 pb-3 pt-0 flex items-center gap-2 text-xs text-gray-500">
@@ -70,26 +92,36 @@ const BlogPage: React.FC = () => {
   const error = contentError || postsError;
   const hasPosts = blogPosts.length > 0;
 
-  // Get the latest post for the hero, and the rest for the grid
   const [latestPost, ...olderPosts] = hasPosts ? blogPosts : [];
+
+  React.useEffect(() => {
+    if (blogPosts.length > 0) {
+      console.log("Blog posts loaded:", blogPosts.length);
+      console.log("First blog post:", blogPosts[0]);
+      
+      if (blogPosts[0].content) {
+        console.log("First post content type:", typeof blogPosts[0].content);
+        if (typeof blogPosts[0].content === 'object') {
+          console.log("Rich text structure sample:", blogPosts[0].content);
+        }
+      }
+    }
+  }, [blogPosts]);
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-12">
-        {/* Hero Section */}
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-4xl font-bold mb-5">{pageContent?.introTitle || "Our Blog"}</h1>
           <p className="text-lg text-gray-600">{pageContent?.introDescription || "Insights, news, and updates from our team."}</p>
         </div>
-        {/* Featured/Hero Blog Post Section */}
         {!isLoading && latestPost && (
           <div className="mb-12">
             <BlogHeroCard post={latestPost} />
           </div>
         )}
 
-        {/* Blog Posts Section */}
-        <div className="mb-20">  {/* Added mb-20 to create space before the contact form */}
+        <div className="mb-20">
           <h2 className="text-2xl font-bold mb-8">{pageContent?.latestArticlesTitle || "Latest Articles"}</h2>
           {isLoading ? (
             <div className="flex justify-center py-16">
@@ -113,7 +145,6 @@ const BlogPage: React.FC = () => {
           )}
         </div>
 
-        {/* Contact Section */}
         <InquiryForm title="Ready to transform your vending operations?" />
       </div>
     </Layout>
@@ -121,4 +152,3 @@ const BlogPage: React.FC = () => {
 };
 
 export default BlogPage;
-

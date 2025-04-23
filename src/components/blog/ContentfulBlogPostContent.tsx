@@ -26,6 +26,20 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
   }
 
   const { title = "Untitled", content, excerpt, publishDate, featuredImage } = post.fields;
+  
+  // Extract included assets from the response if available
+  const includedAssets = post.includes?.Asset || [];
+  
+  // For debugging
+  React.useEffect(() => {
+    console.log("Post data:", post);
+    console.log("Included assets:", includedAssets);
+    if (includedAssets?.length) {
+      includedAssets.forEach(asset => {
+        console.log(`Asset ${asset.sys.id}:`, asset.fields);
+      });
+    }
+  }, [post, includedAssets]);
 
   return (
     <article className="max-w-3xl mx-auto">
@@ -35,7 +49,10 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
         featuredImage={featuredImage}
         excerpt={excerpt}
       />
-      <ContentfulBlogPostBody content={content} />
+      <ContentfulBlogPostBody 
+        content={content} 
+        includedAssets={includedAssets}
+      />
       <ContentfulBlogPostFooter
         previousPost={previousPost}
         nextPost={nextPost}

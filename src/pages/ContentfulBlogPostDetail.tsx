@@ -69,6 +69,23 @@ const ContentfulBlogPostDetail = () => {
   // Fetch prev/next posts based on publish date order (for navigation)
   const { data: adjacentPosts, isLoading: isLoadingAdjacent } = useAdjacentContentfulPosts(slug);
 
+  // Debug output
+  React.useEffect(() => {
+    console.log("ContentfulBlogPostDetail - Current slug:", slug);
+    console.log("ContentfulBlogPostDetail - Post data:", post);
+    
+    if (post?.includes) {
+      console.log("ContentfulBlogPostDetail - Includes:", post.includes);
+      
+      if (post.includes.Asset) {
+        console.log("ContentfulBlogPostDetail - Assets:", post.includes.Asset.length);
+        post.includes.Asset.forEach(asset => {
+          console.log(`Asset ${asset.sys.id}:`, asset.fields?.file?.url);
+        });
+      }
+    }
+  }, [post, slug]);
+
   React.useEffect(() => {
     if (!isLoadingPost && !post && slug) {
       navigate("/not-found", { replace: true });
