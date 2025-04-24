@@ -43,7 +43,7 @@ const About = () => {
         ) : (
           <ContentfulErrorBoundary contentType="About page">
             <div className="prose max-w-none">
-              {isContentReady && data?.fields?.bodyContent && (
+              {isContentReady && data?.fields && 'bodyContent' in data.fields && data.fields.bodyContent && (
                 <>
                   {renderRichText(data.fields.bodyContent as Document, {
                     includedAssets,
