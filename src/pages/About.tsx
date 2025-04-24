@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
@@ -47,10 +48,15 @@ const About = () => {
         // Specific check for target image
         const targetImage = data.includes.Asset.find(asset => asset.sys.id === '5G5dFI3gxzO5NPxjnyGzNG');
         if (targetImage) {
-          console.log('Found target image with full details:', targetImage);
+          console.log('Found target image with full details:', JSON.stringify(targetImage, null, 2));
           console.log('Target image URL:', targetImage.fields.file?.url);
         } else {
           console.log('Target image 5G5dFI3gxzO5NPxjnyGzNG not found in includes');
+          
+          // Try to find any image that might be useful
+          if (data.includes.Asset.length > 0) {
+            console.log('Available image IDs:', data.includes.Asset.map(a => a.sys.id).join(', '));
+          }
         }
       } else {
         console.log('No assets found in includes');
@@ -103,7 +109,7 @@ const About = () => {
         try {
           // Get asset ID from node data
           const assetId = node.data?.target?.sys?.id;
-          console.log('Embedded asset node:', node);
+          console.log('Embedded asset node:', JSON.stringify(node, null, 2));
           console.log('Attempting to render embedded asset with ID:', assetId);
           
           if (!assetId) {
@@ -111,14 +117,46 @@ const About = () => {
             return <div className="text-red-500">Image reference error (no ID)</div>;
           }
           
-          // KEY CHANGE: Get the resolved asset directly from Contentful's response structure
-          // This mirrors how the blog component successfully finds images
-          const asset = includedAssets.find(asset => asset.sys.id === assetId);
+          // NEW APPROACH: Try all possible ways to find the asset
+          let asset = null;
+          
+          // First approach: Direct lookup by ID
+          asset = includedAssets.find(a => a.sys.id === assetId);
+          
+          // Second approach: Look through any links in the node data
+          if (!asset && node.data?.target?.fields?.file) {
+            console.log('Found file data directly in the node:', node.data.target.fields.file);
+            asset = {
+              sys: { id: assetId },
+              fields: node.data.target.fields
+            };
+          }
+          
+          // Third approach: If we have a link in the content, try to resolve it
+          if (!asset && data?.includes?.Asset) {
+            // Sometimes the ID structure may be different
+            asset = data.includes.Asset.find(a => 
+              a.sys.id === assetId || 
+              a.fields.file?.url?.includes(assetId)
+            );
+          }
           
           if (!asset) {
             console.error(`Asset not found for ID: ${assetId}`);
             console.log('Available asset IDs:', includedAssets.map(a => a.sys.id).join(', '));
-            return <div className="text-red-500">Image not found (ID: {assetId})</div>;
+            
+            // Get first available asset as fallback (just for testing)
+            if (includedAssets.length > 0) {
+              console.log('Trying first available asset as fallback');
+              asset = includedAssets[0];
+              console.log('Fallback asset:', asset);
+            } else {
+              return <div className="text-red-500">Image not found (ID: {assetId}). No assets available.</div>;
+            }
+          }
+          
+          if (!asset) {
+            return <div className="text-red-500">Image not found after all lookup attempts (ID: {assetId})</div>;
           }
           
           // Extract image data from the asset
@@ -129,7 +167,11 @@ const About = () => {
             return <div className="text-red-500">Image file data missing</div>;
           }
           
-          const fullUrl = file.url;
+          // Make sure the URL is properly formatted
+          const fileUrl = file.url;
+          const fullUrl = fileUrl.startsWith('//') 
+            ? `https:${fileUrl}` 
+            : fileUrl.startsWith('http') ? fileUrl : `https:${fileUrl}`;
           
           console.log(`Successfully found image ${assetId} with URL:`, fullUrl);
           
@@ -147,7 +189,14 @@ const About = () => {
           );
         } catch (err) {
           console.error('Error in renderAsset:', err);
-          return <div className="text-red-500">Error rendering asset: {String(err)}</div>;
+          return (
+            <div className="text-red-500 p-4 border border-red-300 rounded">
+              Error rendering asset: {String(err)}
+              <pre className="text-xs mt-2 bg-gray-100 p-2 overflow-auto">
+                {JSON.stringify(node, null, 2)}
+              </pre>
+            </div>
+          );
         }
       },
       [INLINES.HYPERLINK]: (node, children) => (
