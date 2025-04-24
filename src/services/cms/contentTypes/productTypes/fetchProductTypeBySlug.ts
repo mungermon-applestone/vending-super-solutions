@@ -3,9 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { transformProductTypeData } from '../../utils/transformers';
 import { getSlugVariations } from '../../utils/slugMatching';
 
-/**
- * Direct fetch a single product type by slug - optimized for reliability
- */
 export async function fetchProductTypeBySlug<T = any>(slug: string): Promise<T | null> {
   try {
     console.log(`[fetchProductTypeBySlug] Directly fetching product type with slug: "${slug}"`);
@@ -15,26 +12,16 @@ export async function fetchProductTypeBySlug<T = any>(slug: string): Promise<T |
       return null;
     }
     
-    // Try all slug variations using our central utility
-    const slugVariations = getSlugVariations(slug);
+    // Create more comprehensive slug variations
+    const slugVariations = [
+      ...getSlugVariations(slug),
+      slug.replace('-vending', ''),
+      `${slug.replace('-vending', '')}-vending`,
+      slug.replace('vending', '').replace(/-$/, ''),
+      `${slug.replace('vending', '').replace(/-$/, '')}-vending`
+    ];
     
-    // DEBUG: For debugging purposes, let's get all products to see what's available
-    try {
-      const { data: allProducts, error: debugError } = await supabase
-        .from('product_types')
-        .select('id, title, slug, visible')
-        .eq('visible', true);
-        
-      if (debugError) {
-        console.error('[fetchProductTypeBySlug] DEBUG: Error getting all products:', debugError);
-      } else {
-        console.log('[fetchProductTypeBySlug] DEBUG: All available products in database:', 
-          allProducts.map(p => ({ id: p.id, title: p.title, slug: p.slug, visible: p.visible }))
-        );
-      }
-    } catch (err) {
-      console.error('[fetchProductTypeBySlug] DEBUG: Exception getting all products:', err);
-    }
+    console.log(`[fetchProductTypeBySlug] Trying these slug variations:`, slugVariations);
     
     for (const variation of slugVariations) {
       console.log(`[fetchProductTypeBySlug] Trying variation: "${variation}"`);
@@ -80,14 +67,12 @@ export async function fetchProductTypeBySlug<T = any>(slug: string): Promise<T |
       
       if (error) {
         console.error(`[fetchProductTypeBySlug] Error fetching product type with slug "${variation}": ${error.message}`);
-        // Try next variation instead of throwing
         continue;
       }
       
       if (data) {
         console.log(`[fetchProductTypeBySlug] Successfully found product type: "${data.title}" with slug variation "${variation}"`);
         
-        // Transform the single product type
         const transformed = transformProductTypeData([data]);
         return transformed.length > 0 ? transformed[0] as T : null;
       }
