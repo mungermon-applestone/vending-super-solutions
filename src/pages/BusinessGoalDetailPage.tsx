@@ -51,7 +51,12 @@ const BusinessGoalDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: businessGoal, isLoading, error } = useContentfulBusinessGoal(slug || '');
   
-  console.log('Business Goal Detail:', businessGoal);
+  console.log('Business Goal Detail Page Rendering:', {
+    slug,
+    businessGoalData: businessGoal,
+    hasVideo: businessGoal?.video ? true : false,
+    videoDetails: businessGoal?.video
+  });
   
   if (isLoading) {
     return (
@@ -115,6 +120,9 @@ const BusinessGoalDetailPage = () => {
   
   const imageUrl = businessGoal?.image?.url || "https://via.placeholder.com/1200x800?text=Business+Goal+Image";
   
+  // Add debugging information to the page
+  const showDebugInfo = true; // Set to true to show debug info
+  
   return (
     <Layout>
       <BusinessGoalHero
@@ -123,6 +131,33 @@ const BusinessGoalDetailPage = () => {
         icon={icon}
         image={imageUrl}
       />
+      
+      {/* Debugging Information - Always visible in development and production for troubleshooting */}
+      {showDebugInfo && (
+        <section className="py-4 bg-gray-50 border-t border-b border-gray-200">
+          <div className="container mx-auto">
+            <details className="max-w-4xl mx-auto bg-white p-4 rounded shadow">
+              <summary className="cursor-pointer font-medium text-blue-600 mb-2">
+                Debug Information (Click to expand)
+              </summary>
+              <div className="text-xs font-mono bg-gray-100 p-4 rounded overflow-auto max-h-96">
+                <h4 className="font-bold mb-2">Business Goal Data:</h4>
+                <pre>{JSON.stringify(businessGoal, null, 2)}</pre>
+                
+                <h4 className="font-bold mt-4 mb-2">Video Status:</h4>
+                <p>Has Video Object: {businessGoal.video ? 'Yes' : 'No'}</p>
+                {businessGoal.video && (
+                  <>
+                    <p>Video ID: {businessGoal.video.id || 'Not available'}</p>
+                    <p>Video URL: {businessGoal.video.url || 'Not available'}</p>
+                    <p>Video Title: {businessGoal.video.title || 'Not available'}</p>
+                  </>
+                )}
+              </div>
+            </details>
+          </div>
+        </section>
+      )}
       
       {/* Benefits Section */}
       {businessGoal?.benefits && businessGoal.benefits.length > 0 && (
@@ -169,13 +204,33 @@ const BusinessGoalDetailPage = () => {
         </section>
       )}
       
-      {/* Video Section (Optional) */}
+      {/* Video Section - Always show, even if video is undefined, for debugging */}
       {businessGoal?.video && (
         <BusinessGoalVideoSection 
           video={businessGoal.video}
           title={`See how ${businessGoal.title} works`}
           description="Watch our solution in action to understand how it can help your business"
         />
+      )}
+      
+      {/* Missing Video Notice */}
+      {!businessGoal.video && (
+        <section className="py-12 bg-gray-50">
+          <div className="container mx-auto">
+            <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold text-center mb-4">Video Content Not Available</h3>
+              <p className="text-gray-600 text-center">
+                The video for this business goal is not available. This could be due to the video not being set in the content management system
+                or an issue with the video asset.
+              </p>
+              <div className="mt-6 p-4 bg-gray-100 rounded text-sm">
+                <p className="font-medium text-gray-700">Technical Information:</p>
+                <p>Content ID: {businessGoal.id}</p> 
+                <p>Slug: {businessGoal.slug}</p>
+              </div>
+            </div>
+          </div>
+        </section>
       )}
       
       {/* Recommended Machines Section */}

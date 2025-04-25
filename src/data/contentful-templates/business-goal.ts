@@ -78,9 +78,38 @@ export const businessGoalTemplate: ContentTypeTemplate = {
         localized: false,
       },
       {
+        id: 'video',
+        name: 'Video',
+        type: 'Link',
+        linkType: 'Asset',
+        required: false,
+        localized: false,
+        validations: [
+          {
+            linkMimetypeGroup: ['video']
+          }
+        ]
+      },
+      {
         id: 'visible',
         name: 'Visible',
         type: 'Boolean',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'recommendedMachines',
+        name: 'Recommended Machines',
+        type: 'Array',
+        items: {
+          type: 'Link',
+          linkType: 'Entry',
+          validations: [
+            {
+              linkContentType: ['machine']
+            }
+          ]
+        },
         required: false,
         localized: false,
       }

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 interface BusinessGoalVideoProps {
   video: {
-    url: string;
+    url: string | null;
     title?: string;
     id?: string;
   };
@@ -22,7 +22,7 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
   
   useEffect(() => {
     // Log when video component mounts or updates
-    console.log('[BusinessGoalVideoSection] Rendering with video:', video);
+    console.log('[BusinessGoalVideoSection] Component mounted/updated with video:', video);
     
     // Reset error state when video prop changes
     setVideoError(false);
@@ -30,20 +30,28 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
     
     // Validate the video URL format
     if (video && video.url) {
-      // Check if URL is properly formatted
-      if (!video.url.startsWith('http')) {
-        console.error('[BusinessGoalVideoSection] Invalid video URL format:', video.url);
-      }
+      console.log('[BusinessGoalVideoSection] Raw video URL:', video.url);
+    } else {
+      console.error('[BusinessGoalVideoSection] Video URL is missing or null:', video);
     }
   }, [video]);
 
+  // Early return if no video or URL
   if (!video || !video.url) {
-    console.log('[BusinessGoalVideoSection] No video URL provided');
+    console.log('[BusinessGoalVideoSection] No valid video URL provided, not rendering video section');
     return null;
   }
   
   const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     console.error('[BusinessGoalVideoSection] Error loading video:', e);
+    // Log more details about the error
+    const videoElement = e.currentTarget;
+    console.error('[BusinessGoalVideoSection] Video error details:', {
+      error: videoElement.error,
+      networkState: videoElement.networkState,
+      readyState: videoElement.readyState,
+      src: videoElement.src
+    });
     setVideoError(true);
     setVideoLoading(false);
   };
@@ -60,7 +68,7 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
       ? `https://${video.url}`
       : video.url;
   
-  console.log('[BusinessGoalVideoSection] Final video URL:', videoUrl);
+  console.log('[BusinessGoalVideoSection] Final processed video URL:', videoUrl);
 
   return (
     <section className="py-16 bg-white">
@@ -116,17 +124,16 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
           </div>
         )}
         
-        {/* Debug info in development */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-4 p-4 border border-gray-200 rounded bg-gray-50 max-w-4xl mx-auto text-xs">
-            <p>Video ID: {video.id || 'Not provided'}</p>
-            <p>Original Video URL: {video.url}</p>
-            <p>Processed Video URL: {videoUrl}</p>
-            <p>Video Title: {video.title || 'Not provided'}</p>
-            <p>Error State: {videoError ? 'Yes' : 'No'}</p>
-            <p>Loading State: {videoLoading ? 'Yes' : 'No'}</p>
-          </div>
-        )}
+        {/* Debug info - always show in development AND production for troubleshooting */}
+        <div className="mt-4 p-4 border border-gray-200 rounded bg-gray-50 max-w-4xl mx-auto text-xs">
+          <p><strong>Video Diagnostics:</strong></p>
+          <p>Video ID: {video.id || 'Not provided'}</p>
+          <p>Original Video URL: {video.url}</p>
+          <p>Processed Video URL: {videoUrl}</p>
+          <p>Video Title: {video.title || 'Not provided'}</p>
+          <p>Error State: {videoError ? 'Yes' : 'No'}</p>
+          <p>Loading State: {videoLoading ? 'Yes' : 'No'}</p>
+        </div>
       </div>
     </section>
   );

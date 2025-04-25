@@ -29,7 +29,9 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
         visible,
         created_at,
         updated_at,
-        icon
+        icon,
+        video_url,
+        video_title
       `)
       .eq('slug', slug)
       .single();
@@ -42,6 +44,16 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
     if (!goalData) {
       console.log("[fetchBusinessGoalBySlug] Business goal not found.");
       return null;
+    }
+
+    // Log video data if it exists
+    if (goalData.video_url) {
+      console.log("[fetchBusinessGoalBySlug] Found video data:", {
+        url: goalData.video_url,
+        title: goalData.video_title
+      });
+    } else {
+      console.log("[fetchBusinessGoalBySlug] No video data found in business goal.");
     }
 
     // Then query the features separately to avoid relation errors
@@ -87,9 +99,17 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
         icon: feature.icon,
         display_order: feature.display_order
       })) : [],
+      // Add video if available
+      video: goalData.video_url ? {
+        id: `video-${Math.random().toString(36).substr(2, 9)}`,
+        url: goalData.video_url,
+        title: goalData.video_title || 'Business Goal Video'
+      } : undefined
     };
 
     console.log(`[fetchBusinessGoalBySlug] Successfully fetched business goal: ${businessGoal.title}`);
+    console.log(`[fetchBusinessGoalBySlug] Video object:`, businessGoal.video);
+    
     return businessGoal as T;
   } catch (error) {
     console.error("[fetchBusinessGoalBySlug] Unexpected error:", error);
