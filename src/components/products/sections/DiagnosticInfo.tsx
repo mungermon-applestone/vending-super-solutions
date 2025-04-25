@@ -128,8 +128,8 @@ const DiagnosticInfo = ({ slug, compact = false }: DiagnosticInfoProps) => {
                 <pre className="bg-red-50 p-2 rounded text-xs overflow-auto max-h-64">
                   {diagnosticInfo?.errorDetails || 'No detailed error information available'}
                 </pre>
-              </div>
-            </AccordionContent>
+              </AccordionContent>
+            </AccordionItem>
           )}
         </Accordion>
       )}
