@@ -12,7 +12,7 @@ import BusinessGoalKeyBenefits from '@/components/businessGoals/BusinessGoalKeyB
 import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry';
 import BusinessGoalsDebugSection from '@/components/businessGoals/BusinessGoalsDebugSection';
 import { Loader2 } from 'lucide-react';
-import { TechnologyPageHero } from '@/components/technology/TechnologyPageHero';
+import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 
 const BUSINESS_GOALS_CONTENT_ID = "3z7Q1mcHEnk6S4YVCyaklz";
 const HERO_CONTENT_ID = "4b40Npa9Hgp8jO0jDX98F6";
