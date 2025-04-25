@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { toast } from 'sonner';
 import { CONTENTFUL_CONFIG } from '@/config/cms';
+import { forceContentfulProvider } from '@/services/cms/cmsInit';
 
 interface DiagnosticInfo {
   contentfulConfig?: {
@@ -16,9 +17,13 @@ interface DiagnosticInfo {
   errorDetails?: string;
   responseData?: any;
   slugVariations?: string[];
+  fetchedOn?: string;
 }
 
 export function useContentfulProductType(slug: string) {
+  // Ensure we're using Contentful as the provider
+  forceContentfulProvider();
+  
   return useQuery({
     queryKey: ['contentful', 'productType', slug],
     queryFn: async () => {
@@ -29,6 +34,7 @@ export function useContentfulProductType(slug: string) {
           hasToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN
         },
         contentType: 'productType',
+        fetchedOn: new Date().toISOString()
       };
 
       if (!slug) {
@@ -131,7 +137,7 @@ export function useContentfulProductType(slug: string) {
           slug: entry.fields.slug
         });
         
-        return {
+        const productType = {
           id: entry.sys.id,
           title: entry.fields.title as string,
           slug: entry.fields.slug as string,
@@ -148,6 +154,11 @@ export function useContentfulProductType(slug: string) {
             description: feature.fields.description,
             icon: feature.fields.icon || undefined
           })) : []
+        };
+        
+        return {
+          ...productType,
+          diagnosticInfo
         };
       } catch (error) {
         console.error('[useContentfulProductType] Error:', error);
@@ -173,21 +184,6 @@ export function useContentfulProductType(slug: string) {
           console.error('[useContentfulProductType] Diagnostic info:', error.diagnosticInfo);
         }
       }
-    },
-    select: (data) => {
-      // Return both the data and diagnostic info
-      return {
-        ...data,
-        diagnosticInfo: {
-          contentfulConfig: {
-            spaceId: CONTENTFUL_CONFIG.SPACE_ID,
-            environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID,
-            hasToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN
-          },
-          contentType: 'productType',
-          fetchedOn: new Date().toISOString()
-        }
-      };
     }
   });
 }

@@ -8,7 +8,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { useContentfulProductType } from '@/hooks/cms/useContentfulProductType';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { CONTENTFUL_CONFIG } from '@/config/cms';
@@ -16,11 +15,25 @@ import { CONTENTFUL_CONFIG } from '@/config/cms';
 interface DiagnosticInfoProps {
   slug: string;
   compact?: boolean;
+  error?: Error | null;
+  diagnosticInfo?: {
+    contentfulConfig?: {
+      spaceId?: string;
+      environment?: string;
+      hasToken: boolean;
+    };
+    contentType?: string;
+    endpoint?: string;
+    query?: any;
+    errorDetails?: string;
+    responseData?: any;
+    slugVariations?: string[];
+    fetchedOn?: string;
+  };
 }
 
-const DiagnosticInfo = ({ slug, compact = false }: DiagnosticInfoProps) => {
+const DiagnosticInfo = ({ slug, compact = false, error, diagnosticInfo }: DiagnosticInfoProps) => {
   const [showFullDiagnostics, setShowFullDiagnostics] = React.useState(false);
-  const { isLoading, error, diagnosticInfo } = useContentfulProductType(slug);
   
   const testContentfulConnection = async () => {
     try {
@@ -71,7 +84,7 @@ const DiagnosticInfo = ({ slug, compact = false }: DiagnosticInfoProps) => {
         )}
       </div>
       
-      {isLoading ? (
+      {!diagnosticInfo ? (
         <p className="text-blue-600 text-sm animate-pulse">Loading diagnostics...</p>
       ) : (
         <Accordion type="single" collapsible className="w-full">
