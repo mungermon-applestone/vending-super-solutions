@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { toast } from 'sonner';
@@ -21,7 +20,6 @@ interface DiagnosticInfo {
 }
 
 export function useContentfulProductType(slug: string) {
-  // Ensure we're using Contentful as the provider
   forceContentfulProvider();
   
   return useQuery({
@@ -68,7 +66,6 @@ export function useContentfulProductType(slug: string) {
         }
       }
 
-      // Prepare query for logging
       const queryParams = {
         content_type: 'productType',
         'fields.slug': slug,
@@ -153,7 +150,18 @@ export function useContentfulProductType(slug: string) {
             title: feature.fields.title,
             description: feature.fields.description,
             icon: feature.fields.icon || undefined
-          })) : []
+          })) : [],
+          recommendedMachines: entry.fields.recommendedMachines ? 
+            (entry.fields.recommendedMachines as any[]).map(machine => ({
+              id: machine.sys.id,
+              slug: machine.fields.slug,
+              title: machine.fields.title,
+              description: machine.fields.description,
+              image: machine.fields.mainImage ? {
+                url: `https:${machine.fields.mainImage.fields.file.url}`,
+                alt: machine.fields.mainImage.fields.title || machine.fields.title
+              } : undefined
+            })) : []
         };
         
         return {
