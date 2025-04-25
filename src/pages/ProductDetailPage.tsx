@@ -2,114 +2,16 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useContentfulProduct } from '@/hooks/cms/useContentfulProduct';
+import { useContentfulProductType } from '@/hooks/cms/useContentfulProductType';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2, AlertCircle, RefreshCw, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
-import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
-import { resetContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
-import { isContentfulConfigured } from '@/config/cms';
-import { toast } from 'sonner';
-import { testContentfulConnection } from '@/services/cms/utils/connection';
 
 const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { 
-    data: product, 
-    isLoading, 
-    error, 
-    refetch,
-    isError,
-    isFetching
-  } = useContentfulProduct(slug || '');
-  
-  const [connectionStatus, setConnectionStatus] = React.useState<{
-    isChecking: boolean;
-    checked: boolean;
-    isConnected: boolean;
-    message: string;
-    details?: any;
-  }>({
-    isChecking: false,
-    checked: false,
-    isConnected: false,
-    message: ''
-  });
-  
-  const contentfulConfigured = isContentfulConfigured();
-  
-  useEffect(() => {
-    console.log(`[ProductDetailPage] Rendering with slug: ${slug}`, { 
-      hasProduct: !!product,
-      productTitle: product?.title || 'Not loaded',
-      isLoading, 
-      isFetching,
-      hasError: !!error,
-      errorMessage: error instanceof Error ? error.message : null,
-      contentfulConfigured
-    });
-  }, [slug, product, isLoading, error, isFetching, contentfulConfigured]);
+  const { data: product, isLoading, error } = useContentfulProductType(slug || '');
 
-  const handleRetryFetch = async () => {
-    console.log('[ProductDetailPage] Resetting client and retrying fetch');
-    toast.info("Refreshing Contentful connection...");
-    
-    // Reset all caches
-    resetContentfulClient();
-    
-    try {
-      // Force refresh the client
-      await refreshContentfulClient();
-      toast.success("Contentful connection refreshed");
-    } catch (e) {
-      console.error("Failed to refresh Contentful client", e);
-      toast.error("Failed to refresh Contentful connection");
-    }
-    
-    // Refetch the data
-    refetch();
-  };
-
-  const checkContentfulConnection = async () => {
-    setConnectionStatus({
-      isChecking: true,
-      checked: false,
-      isConnected: false,
-      message: 'Checking connection to Contentful...'
-    });
-    
-    try {
-      const result = await testContentfulConnection();
-      
-      setConnectionStatus({
-        isChecking: false,
-        checked: true,
-        isConnected: result.success,
-        message: result.message,
-        details: result.errorData
-      });
-      
-      if (result.success) {
-        toast.success("Contentful connection successful");
-      } else {
-        toast.error("Contentful connection failed");
-      }
-    } catch (e) {
-      console.error("Error checking Contentful connection", e);
-      
-      setConnectionStatus({
-        isChecking: false,
-        checked: true,
-        isConnected: false,
-        message: e instanceof Error ? e.message : 'Unknown error checking connection',
-        details: e
-      });
-      
-      toast.error("Error checking Contentful connection");
-    }
-  };
-  
   return (
     <Layout>
       <ContentfulErrorBoundary contentType="Product Details">
@@ -122,26 +24,12 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        {/* Configuration Warning */}
-        {!contentfulConfigured && (
-          <div className="container py-4">
-            <div className="bg-amber-50 border border-amber-200 rounded-md p-4 text-amber-800 text-sm">
-              <strong>Warning:</strong> Contentful configuration is incomplete. Please check your environment variables.
-            </div>
-          </div>
-        )}
-
-        {isLoading || isFetching ? (
+        {isLoading ? (
           <div className="container py-12 text-center">
             <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Loading product information from Contentful...</p>
-            {isFetching && !isLoading && (
-              <div className="mt-4 text-sm text-gray-500">
-                Refreshing content...
-              </div>
-            )}
+            <p className="text-gray-600">Loading product information...</p>
           </div>
-        ) : isError || error ? (
+        ) : error ? (
           <div className="container py-12">
             <div className="max-w-2xl mx-auto bg-red-50 border border-red-200 rounded-xl p-6">
               <div className="flex items-start">
@@ -149,46 +37,9 @@ const ProductDetailPage = () => {
                 <div className="ml-3">
                   <h3 className="font-bold text-lg text-red-800">Error Loading Product</h3>
                   <p className="text-red-700 mt-2">
-                    {error instanceof Error ? error.message : 'Failed to load product details from Contentful'}
+                    {error instanceof Error ? error.message : 'Failed to load product details'}
                   </p>
-                  
-                  {connectionStatus.checked && (
-                    <div className="mt-4 p-4 bg-white rounded border border-red-100">
-                      <h4 className="font-semibold mb-2">Connection Status</h4>
-                      <p className={connectionStatus.isConnected ? 'text-green-600' : 'text-red-600'}>
-                        {connectionStatus.message}
-                      </p>
-                      
-                      {connectionStatus.details && (
-                        <div className="mt-2 text-xs text-gray-700 p-2 bg-gray-50 rounded">
-                          <pre className="whitespace-pre-wrap">
-                            {JSON.stringify(connectionStatus.details, null, 2)}
-                          </pre>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    <Button onClick={handleRetryFetch} variant="outline" className="flex items-center">
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Retry Connection
-                    </Button>
-                    
-                    {!connectionStatus.checked && !connectionStatus.isChecking && (
-                      <Button onClick={checkContentfulConnection} variant="secondary" className="flex items-center">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Test Contentful Connection
-                      </Button>
-                    )}
-                    
-                    {connectionStatus.isChecking && (
-                      <Button disabled variant="secondary" className="flex items-center">
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Testing Connection...
-                      </Button>
-                    )}
-                    
+                  <div className="mt-6">
                     <Button asChild variant="default">
                       <Link to="/products">Browse Products</Link>
                     </Button>
@@ -198,14 +49,12 @@ const ProductDetailPage = () => {
             </div>
           </div>
         ) : !product ? (
-          <div className="container py-12">
-            <ContentfulFallbackMessage
-              title="Product Not Found"
-              message={`The product "${slug}" doesn't exist in Contentful or has been removed.`}
-              contentType="Product"
-              actionText="Browse Products"
-              actionHref="/products"
-            />
+          <div className="container py-12 text-center">
+            <h2 className="text-2xl font-bold mb-4">Product Not Found</h2>
+            <p>We couldn't find the product you're looking for.</p>
+            <Button asChild variant="default" className="mt-6">
+              <Link to="/products">Browse Products</Link>
+            </Button>
           </div>
         ) : (
           <>
