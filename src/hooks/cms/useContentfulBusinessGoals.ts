@@ -97,7 +97,20 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
 
         const entry = entries[0];
         console.log('[useContentfulBusinessGoal] Raw entry data:', entry);
-        console.log('[useContentfulBusinessGoal] Video data:', entry.fields.video);
+        
+        // Specific logging for video field
+        if (entry.fields.video) {
+          console.log('[useContentfulBusinessGoal] Video data:', entry.fields.video);
+          console.log('[useContentfulBusinessGoal] Video ID:', entry.fields.video.sys?.id);
+          console.log('[useContentfulBusinessGoal] Video URL:', `https:${entry.fields.video.fields?.file?.url}`);
+        } else {
+          console.log('[useContentfulBusinessGoal] No video found for this business goal');
+        }
+        
+        // Check for the specific asset ID
+        if (entry.fields.video && entry.fields.video.sys.id === '5QMucQcFhlGAhMWGt67Js8') {
+          console.log('[useContentfulBusinessGoal] Found the target video with ID 5QMucQcFhlGAhMWGt67Js8');
+        }
         
         const mappedEntry: CMSBusinessGoal = {
           id: entry.sys?.id,
@@ -141,6 +154,10 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
         };
 
         console.log('[useContentfulBusinessGoal] Mapped entry:', mappedEntry);
+        if (mappedEntry.video) {
+          console.log('[useContentfulBusinessGoal] Final mapped video:', mappedEntry.video);
+        }
+        
         return mappedEntry;
       } catch (error) {
         console.error(`[useContentfulBusinessGoal] Error:`, error);
