@@ -8,6 +8,7 @@ import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import DiagnosticInfo from '@/components/products/sections/DiagnosticInfo';
 import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
+import InquiryForm from '@/components/machines/contact/InquiryForm';
 
 const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -128,21 +129,7 @@ const ProductDetailPage = () => {
               <RecommendedMachines machines={product.recommendedMachines} />
             )}
 
-            <section className="py-16 bg-vending-blue-dark text-white">
-              <div className="container mx-auto text-center">
-                <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
-                <p className="text-xl mb-8 max-w-2xl mx-auto">
-                  Contact our team today to learn more about {product.title} and how it can benefit your business.
-                </p>
-                <Button 
-                  asChild
-                  size="lg" 
-                  className="bg-vending-teal hover:bg-vending-teal-dark"
-                >
-                  <Link to="/contact">Contact Us</Link>
-                </Button>
-              </div>
-            </section>
+            <InquiryForm title={`Ready to learn more about ${product.title}?`} />
           </>
         )}
       </ContentfulErrorBoundary>
