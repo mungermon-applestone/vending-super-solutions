@@ -17,6 +17,11 @@ const BusinessGoalKeyBenefits: React.FC<BusinessGoalKeyBenefitsProps> = ({
     return null;
   }
 
+  // Calculate the midpoint to split the benefits into two columns
+  const midPoint = Math.ceil(benefits.length / 2);
+  const firstColumn = benefits.slice(0, midPoint);
+  const secondColumn = benefits.slice(midPoint);
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto">
@@ -27,19 +32,40 @@ const BusinessGoalKeyBenefits: React.FC<BusinessGoalKeyBenefitsProps> = ({
           )}
         </div>
 
-        <div className="max-w-3xl mx-auto">
-          <ul className="space-y-4">
-            {benefits.map((benefit, index) => (
-              <li key={index} className="flex items-start">
-                <div className="flex-shrink-0 mt-1">
-                  <div className="bg-vending-blue rounded-full p-1">
-                    <Check className="h-4 w-4 text-white" />
-                  </div>
-                </div>
-                <p className="ml-3 text-lg text-gray-700">{benefit}</p>
-              </li>
-            ))}
-          </ul>
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* First Column */}
+            <div>
+              <ul className="space-y-4">
+                {firstColumn.map((benefit, index) => (
+                  <li key={`first-${index}`} className="flex items-start">
+                    <div className="flex-shrink-0 mt-1">
+                      <div className="bg-vending-blue rounded-full p-1">
+                        <Check className="h-4 w-4 text-white" />
+                      </div>
+                    </div>
+                    <p className="ml-3 text-lg text-gray-700">{benefit}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            {/* Second Column */}
+            <div>
+              <ul className="space-y-4">
+                {secondColumn.map((benefit, index) => (
+                  <li key={`second-${index}`} className="flex items-start">
+                    <div className="flex-shrink-0 mt-1">
+                      <div className="bg-vending-blue rounded-full p-1">
+                        <Check className="h-4 w-4 text-white" />
+                      </div>
+                    </div>
+                    <p className="ml-3 text-lg text-gray-700">{benefit}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </section>
