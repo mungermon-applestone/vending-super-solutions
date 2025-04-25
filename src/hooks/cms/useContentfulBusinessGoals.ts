@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { CMSBusinessGoal } from '@/types/cms';
@@ -66,7 +65,6 @@ export function useContentfulBusinessGoals() {
       } catch (error) {
         console.error('[useContentfulBusinessGoals] Error:', error);
         if (window.location.hostname.includes('lovable')) {
-          // Return fallback data in preview environment
           console.log('[useContentfulBusinessGoals] Returning empty array for preview environment');
           return [];
         }
@@ -98,18 +96,13 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
         const entry = entries[0];
         console.log('[useContentfulBusinessGoal] Raw entry data:', entry);
         
-        // Specific logging for video field
         if (entry.fields.video) {
-          console.log('[useContentfulBusinessGoal] Video data:', entry.fields.video);
-          console.log('[useContentfulBusinessGoal] Video ID:', entry.fields.video.sys?.id);
-          console.log('[useContentfulBusinessGoal] Video URL:', `https:${entry.fields.video.fields?.file?.url}`);
-        } else {
-          console.log('[useContentfulBusinessGoal] No video found for this business goal');
-        }
-        
-        // Check for the specific asset ID
-        if (entry.fields.video && entry.fields.video.sys.id === '5QMucQcFhlGAhMWGt67Js8') {
-          console.log('[useContentfulBusinessGoal] Found the target video with ID 5QMucQcFhlGAhMWGt67Js8');
+          const videoAsset = entry.fields.video;
+          console.log('[useContentfulBusinessGoal] Video asset:', {
+            id: videoAsset.sys?.id,
+            url: videoAsset.fields?.file?.url,
+            title: videoAsset.fields?.title
+          });
         }
         
         const mappedEntry: CMSBusinessGoal = {
@@ -141,7 +134,7 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
             url: `https:${entry.fields.video.fields?.file?.url}`,
             title: entry.fields.video.fields?.title
           } : undefined,
-          recommendedMachines: (entry.fields.recommendedMachines || []).map(machine => ({
+          recommendedMachines: entry.fields.recommendedMachines?.map(machine => ({
             id: machine.sys.id,
             slug: machine.fields.slug,
             title: machine.fields.title,
@@ -150,13 +143,10 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
               url: `https:${machine.fields.images[0].fields.file.url}`,
               alt: machine.fields.images[0].fields.title || machine.fields.title
             } : undefined
-          }))
+          })) || []
         };
 
-        console.log('[useContentfulBusinessGoal] Mapped entry:', mappedEntry);
-        if (mappedEntry.video) {
-          console.log('[useContentfulBusinessGoal] Final mapped video:', mappedEntry.video);
-        }
+        console.log('[useContentfulBusinessGoal] Mapped entry video:', mappedEntry.video);
         
         return mappedEntry;
       } catch (error) {

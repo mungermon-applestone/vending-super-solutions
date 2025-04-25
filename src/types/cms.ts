@@ -60,16 +60,26 @@ export interface CMSBusinessGoal {
   title: string;
   slug: string;
   description: string;
-  image_url?: string;
-  image_alt?: string;
-  visible: boolean;
-  created_at?: string;
-  updated_at?: string;
-  icon?: string;
   image?: CMSImage;
+  icon?: string;
   benefits?: string[];
   features?: CMSFeature[];
-  caseStudies?: CMSExample[];
+  visible?: boolean;
+  video?: {
+    id: string;
+    url: string;
+    title?: string;
+  };
+  recommendedMachines?: {
+    id: string;
+    slug: string;
+    title: string;
+    description: string;
+    image?: {
+      url: string;
+      alt?: string;
+    };
+  }[];
 }
 
 export interface CMSTechnology {
