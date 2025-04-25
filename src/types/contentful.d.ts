@@ -50,6 +50,7 @@ export interface ContentfulBusinessGoal {
     video?: {
       sys: {
         id: string;
+        type: string;
       };
       fields: {
         title?: string;

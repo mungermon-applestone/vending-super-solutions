@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 
 interface BusinessGoalVideoProps {
@@ -26,11 +27,20 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
     
     if (video && video.url) {
       console.log('[BusinessGoalVideoSection] Raw video URL:', video.url);
+      // Validate URL format
+      try {
+        new URL(video.url.startsWith('//') ? `https:${video.url}` : video.url);
+        console.log('[BusinessGoalVideoSection] Valid URL format');
+      } catch (e) {
+        console.error('[BusinessGoalVideoSection] Invalid URL format:', e);
+        setVideoError(true);
+      }
     } else {
       console.error('[BusinessGoalVideoSection] Video URL is missing or null:', video);
     }
   }, [video]);
 
+  // Early return if no video data
   if (!video || !video.url) {
     console.log('[BusinessGoalVideoSection] No valid video URL provided, not rendering video section');
     return null;
@@ -54,6 +64,7 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
     setVideoLoading(false);
   };
   
+  // Clean and validate URL
   const videoUrl = video.url.startsWith('//') 
     ? `https:${video.url}` 
     : !video.url.startsWith('http') && !video.url.startsWith('//')

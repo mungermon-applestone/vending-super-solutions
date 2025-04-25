@@ -111,19 +111,13 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
         const entry = entries[0];
         console.log('[useContentfulBusinessGoal] Raw entry data:', JSON.stringify(entry, null, 2));
         
-        // Enhanced detailed logging for video asset
+        // Log raw video data before transformation
         if (entry.fields.video) {
-          const videoAsset = entry.fields.video;
-          console.log('[useContentfulBusinessGoal] Video asset details:', {
-            id: videoAsset.sys?.id,
-            url: videoAsset.fields?.file?.url,
-            title: videoAsset.fields?.title,
-            fileName: videoAsset.fields?.file?.fileName,
-            fileType: videoAsset.fields?.file?.contentType,
-            details: videoAsset.fields?.file?.details
+          console.log('[useContentfulBusinessGoal] Raw video data:', {
+            videoSys: entry.fields.video.sys,
+            videoFields: entry.fields.video.fields,
+            videoUrl: entry.fields.video.fields?.file?.url
           });
-        } else {
-          console.log('[useContentfulBusinessGoal] No video asset found for this business goal');
         }
         
         const mappedEntry: CMSBusinessGoal = {
@@ -150,6 +144,7 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
               alt: feature.fields.screenshot.fields?.title
             } : undefined
           })) || [],
+          // Updated video mapping with more detailed logging
           video: entry.fields.video ? {
             id: entry.fields.video.sys?.id,
             url: entry.fields.video.fields?.file?.url ? `https:${entry.fields.video.fields.file.url}` : null,
@@ -168,7 +163,9 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
         };
 
         console.log('[useContentfulBusinessGoal] Mapped entry:', mappedEntry);
-        console.log('[useContentfulBusinessGoal] Mapped video data:', mappedEntry.video);
+        if (mappedEntry.video) {
+          console.log('[useContentfulBusinessGoal] Final mapped video data:', mappedEntry.video);
+        }
         
         return mappedEntry;
       } catch (error) {
