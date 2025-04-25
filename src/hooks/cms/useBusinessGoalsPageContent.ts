@@ -1,6 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { Entry, EntryCollection } from 'contentful';
 
 interface BusinessGoalsPageContent {
   introTitle: string;
@@ -27,23 +28,23 @@ export function useBusinessGoalsPageContent(contentId?: string) {
         console.log('[useBusinessGoalsPageContent] Fetching content');
         const client = await getContentfulClient();
         
-        // If contentId is provided, fetch that specific entry, otherwise get the first one
-        const entries = contentId 
-          ? await client.getEntry(contentId)
-          : await client.getEntries({
-              content_type: 'businessGoalsPageContent',
-              limit: 1
-            });
+        let entry;
+        if (contentId) {
+          entry = await client.getEntry(contentId);
+        } else {
+          const response = await client.getEntries({
+            content_type: 'businessGoalsPageContent',
+            limit: 1
+          });
+          entry = response.items[0];
+        }
         
-        // Handle the response format based on whether we're getting a single entry or collection
-        const item = contentId ? entries : entries.items[0];
-        
-        if (!item) {
+        if (!entry) {
           console.warn('[useBusinessGoalsPageContent] No content found');
           return null;
         }
 
-        const fields = contentId ? item.fields : item.fields;
+        const fields = entry.fields;
         
         console.log('[useBusinessGoalsPageContent] Content retrieved:', fields);
         
