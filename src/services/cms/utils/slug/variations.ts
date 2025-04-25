@@ -66,6 +66,23 @@ export function getSlugVariations(slug: string): string[] {
   } else if (slug.includes('pharmaceutical')) {
     variations.push(slug.replace('pharmaceutical', 'pharma'));
   }
+
+  // Handle vape and cannabis specific variations
+  if (slug.includes('vape')) {
+    variations.push(slug.replace('vape', 'cannabis'));
+    variations.push(slug.replace('vape', 'marijuana'));
+    variations.push(slug.replace('vape', 'vaping'));
+  } else if (slug.includes('cannabis')) {
+    variations.push(slug.replace('cannabis', 'vape'));
+    variations.push(slug.replace('cannabis', 'marijuana'));
+  }
+  
+  // Handle "-and-" vs "&" variations
+  if (slug.includes('-and-')) {
+    variations.push(slug.replace(/-and-/g, '-&-'));
+  } else if (slug.includes('-&-')) {
+    variations.push(slug.replace(/-&-/g, '-and-'));
+  }
   
   // Handle copy suffix pattern (for our upcoming clone feature)
   if (slug.endsWith('-copy')) {
@@ -80,6 +97,29 @@ export function getSlugVariations(slug: string): string[] {
     variations.push(slug.replace(/-copy-\d+$/, '')); // Base without number
     variations.push(slug.replace(/-copy-\d+$/, '-copy')); // Just copy without number
   }
+  
+  // Handle additional compound variations (toys-cards-collectibles)
+  if (slug.includes('-')) {
+    const parts = slug.split('-');
+    if (parts.length > 2) {
+      // Try with just first part
+      variations.push(parts[0]);
+      // Try with just last part
+      variations.push(parts[parts.length - 1]);
+      // Try with first and last parts
+      variations.push(`${parts[0]}-${parts[parts.length - 1]}`);
+    }
+  }
+
+  // Try with and without trailing -s on each variation (for items like "sample" vs "samples")
+  const currentVariations = [...variations];
+  currentVariations.forEach(variant => {
+    if (variant.endsWith('s')) {
+      variations.push(variant.slice(0, -1));
+    } else {
+      variations.push(`${variant}s`);
+    }
+  });
   
   return [...new Set(variations)]; // Remove duplicates
 }
