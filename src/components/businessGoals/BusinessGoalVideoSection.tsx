@@ -25,18 +25,31 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
     setVideoError(false);
     setVideoLoading(true);
     
-    if (video && video.url) {
-      console.log('[BusinessGoalVideoSection] Raw video URL:', video.url);
-      // Validate URL format
-      try {
-        new URL(video.url.startsWith('//') ? `https:${video.url}` : video.url);
-        console.log('[BusinessGoalVideoSection] Valid URL format');
-      } catch (e) {
-        console.error('[BusinessGoalVideoSection] Invalid URL format:', e);
-        setVideoError(true);
-      }
-    } else {
-      console.error('[BusinessGoalVideoSection] Video URL is missing or null:', video);
+    if (!video) {
+      console.error('[BusinessGoalVideoSection] Video object is missing');
+      setVideoError(true);
+      setVideoLoading(false);
+      return;
+    }
+    
+    if (!video.url) {
+      console.error('[BusinessGoalVideoSection] Video URL is missing:', video);
+      setVideoError(true);
+      setVideoLoading(false);
+      return;
+    }
+
+    console.log('[BusinessGoalVideoSection] Processing video URL:', video.url);
+    
+    // Validate URL format
+    try {
+      const urlToCheck = video.url.startsWith('//') ? `https:${video.url}` : video.url;
+      new URL(urlToCheck);
+      console.log('[BusinessGoalVideoSection] Valid URL format:', urlToCheck);
+    } catch (e) {
+      console.error('[BusinessGoalVideoSection] Invalid URL format:', e);
+      setVideoError(true);
+      setVideoLoading(false);
     }
   }, [video]);
 
@@ -65,11 +78,17 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
   };
   
   // Clean and validate URL
-  const videoUrl = video.url.startsWith('//') 
-    ? `https:${video.url}` 
-    : !video.url.startsWith('http') && !video.url.startsWith('//')
-      ? `https://${video.url}`
-      : video.url;
+  let videoUrl = '';
+  
+  if (video.url) {
+    if (video.url.startsWith('//')) {
+      videoUrl = `https:${video.url}`;
+    } else if (!video.url.startsWith('http') && !video.url.startsWith('//')) {
+      videoUrl = `https://${video.url}`;
+    } else {
+      videoUrl = video.url;
+    }
+  }
   
   console.log('[BusinessGoalVideoSection] Final processed video URL:', videoUrl);
 

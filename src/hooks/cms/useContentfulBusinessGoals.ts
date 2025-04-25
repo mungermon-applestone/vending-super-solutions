@@ -1,7 +1,8 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { CMSBusinessGoal } from '@/types/cms';
-import { ContentfulBusinessGoal } from '@/types/contentful';
+import { ContentfulBusinessGoal, ContentfulVideo } from '@/types/contentful';
 
 export function useContentfulBusinessGoals() {
   return useQuery({
@@ -19,19 +20,22 @@ export function useContentfulBusinessGoals() {
         }
         
         const mappedEntries = entries.map(entry => {
-          // Log the video field from Contentful if it exists
+          // Detailed logging for video asset
           if (entry.fields.video) {
-            console.log(`[useContentfulBusinessGoals] Business goal ${entry.fields.title} has video:`, {
-              id: entry.fields.video.sys?.id,
-              contentType: entry.fields.video.sys?.contentType,
-              url: entry.fields.video.fields?.file?.url,
-              title: entry.fields.video.fields?.title,
-              mimeType: entry.fields.video.fields?.file?.contentType
+            const videoAsset = entry.fields.video;
+            console.log(`[useContentfulBusinessGoals] Business goal ${entry.fields.title} video details:`, {
+              id: videoAsset.sys?.id,
+              type: videoAsset.sys?.type,
+              hasFields: !!videoAsset.fields,
+              hasFile: videoAsset.fields && !!videoAsset.fields.file,
+              url: videoAsset.fields?.file?.url,
+              fileContentType: videoAsset.fields?.file?.contentType
             });
           } else {
             console.log(`[useContentfulBusinessGoals] Business goal ${entry.fields.title} has no video`);
           }
           
+          // Map the entry to our CMS model
           return {
             id: entry.sys?.id,
             title: entry.fields.title,
@@ -56,10 +60,13 @@ export function useContentfulBusinessGoals() {
                 alt: feature.fields.screenshot.fields?.title
               } : undefined
             })),
+            // Enhanced video mapping
             video: entry.fields.video ? {
               id: entry.fields.video.sys?.id,
-              url: entry.fields.video.fields?.file?.url ? `https:${entry.fields.video.fields.file.url}` : null,
-              title: entry.fields.video.fields?.title || 'Business Goal Video'
+              url: entry.fields.video.fields?.file?.url 
+                ? `https:${entry.fields.video.fields.file.url}` 
+                : null,
+              title: entry.fields.video.fields?.title || entry.fields.title || 'Business Goal Video'
             } : undefined,
             recommendedMachines: (entry.fields.recommendedMachines || []).map((machine: any) => ({
               id: machine.sys.id,
@@ -74,7 +81,15 @@ export function useContentfulBusinessGoals() {
           };
         }) as CMSBusinessGoal[];
         
-        console.log('[useContentfulBusinessGoals] Mapped entries:', mappedEntries);
+        // Log the result of mapping
+        console.log('[useContentfulBusinessGoals] Mapped entries:', 
+          mappedEntries.map(entry => ({
+            id: entry.id,
+            title: entry.title,
+            hasVideo: !!entry.video,
+            videoUrl: entry.video?.url
+          }))
+        );
         
         return mappedEntries;
       } catch (error) {
@@ -111,15 +126,23 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
         const entry = entries[0];
         console.log('[useContentfulBusinessGoal] Raw entry data:', JSON.stringify(entry, null, 2));
         
-        // Log raw video data before transformation
+        // Detailed logging for video asset
         if (entry.fields.video) {
+          const videoAsset = entry.fields.video;
           console.log('[useContentfulBusinessGoal] Raw video data:', {
-            videoSys: entry.fields.video.sys,
-            videoFields: entry.fields.video.fields,
-            videoUrl: entry.fields.video.fields?.file?.url
+            videoSysId: videoAsset.sys?.id,
+            videoSysType: videoAsset.sys?.type,
+            hasFields: !!videoAsset.fields,
+            hasFileField: videoAsset.fields && !!videoAsset.fields.file,
+            fileUrl: videoAsset.fields?.file?.url,
+            fileContentType: videoAsset.fields?.file?.contentType,
+            fileDetails: videoAsset.fields?.file?.details
           });
+        } else {
+          console.log('[useContentfulBusinessGoal] No video data found in entry');
         }
         
+        // Map the entry to our CMS model
         const mappedEntry: CMSBusinessGoal = {
           id: entry.sys?.id,
           title: entry.fields.title,
@@ -144,12 +167,16 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
               alt: feature.fields.screenshot.fields?.title
             } : undefined
           })) || [],
-          // Updated video mapping with more detailed logging
-          video: entry.fields.video ? {
-            id: entry.fields.video.sys?.id,
-            url: entry.fields.video.fields?.file?.url ? `https:${entry.fields.video.fields.file.url}` : null,
-            title: entry.fields.video.fields?.title || 'Business Goal Video'
+          
+          // Enhanced video extraction with thorough null checking
+          video: entry.fields.video && entry.fields.video.fields && entry.fields.video.fields.file ? {
+            id: entry.fields.video.sys?.id || '',
+            url: entry.fields.video.fields.file.url 
+              ? `https:${entry.fields.video.fields.file.url}` 
+              : null,
+            title: entry.fields.video.fields.title || entry.fields.title || 'Business Goal Video'
           } : undefined,
+          
           recommendedMachines: entry.fields.recommendedMachines?.map(machine => ({
             id: machine.sys.id,
             slug: machine.fields.slug,
@@ -162,10 +189,14 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
           })) || []
         };
 
-        console.log('[useContentfulBusinessGoal] Mapped entry:', mappedEntry);
-        if (mappedEntry.video) {
-          console.log('[useContentfulBusinessGoal] Final mapped video data:', mappedEntry.video);
-        }
+        // Log the mapped entry for debugging
+        console.log('[useContentfulBusinessGoal] Mapped entry:', {
+          id: mappedEntry.id,
+          title: mappedEntry.title,
+          slug: mappedEntry.slug, 
+          hasVideo: !!mappedEntry.video,
+          videoDetails: mappedEntry.video
+        });
         
         return mappedEntry;
       } catch (error) {

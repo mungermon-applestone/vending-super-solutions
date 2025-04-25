@@ -47,24 +47,7 @@ export interface ContentfulBusinessGoal {
     benefits?: string[];
     features?: ContentfulFeature[];
     visible?: boolean;
-    video?: {
-      sys: {
-        id: string;
-        type: string;
-      };
-      fields: {
-        title?: string;
-        description?: string;
-        file: {
-          url: string;
-          contentType: string;
-          fileName: string;
-          details?: {
-            size: number;
-          };
-        };
-      };
-    };
+    video?: ContentfulVideo;
     recommendedMachines?: any[];
   };
 }
@@ -159,4 +142,23 @@ export interface ContentfulContactPageFields {
   immediateAssistanceTitle?: string;
   immediateAssistanceDescription?: string;
   immediateAssistanceButtonText?: string;
+}
+
+export interface ContentfulVideo {
+  sys: {
+    id: string;
+    type: string;
+  };
+  fields: {
+    title?: string;
+    description?: string;
+    file: {
+      url: string;
+      contentType: string;
+      fileName: string;
+      details?: {
+        size: number;
+      };
+    };
+  };
 }
