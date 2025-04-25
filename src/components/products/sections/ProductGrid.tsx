@@ -16,8 +16,8 @@ const ProductGrid = ({ products }: ProductGridProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       {products.map((product) => (
-        <div key={product.id} className="border border-gray-200 rounded-lg overflow-hidden transition-all hover:shadow-lg">
-          <div className="aspect-video w-full h-48 overflow-hidden bg-gray-100">
+        <div key={product.id} className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow">
+          <div className="w-full h-48 overflow-hidden bg-gray-100">
             {product.image ? (
               <Image 
                 src={product.image.url} 
@@ -31,7 +31,7 @@ const ProductGrid = ({ products }: ProductGridProps) => {
             )}
           </div>
           <div className="p-6">
-            <h3 className="text-xl font-bold mb-3">{product.title}</h3>
+            <h3 className="text-xl font-semibold mb-3">{product.title}</h3>
             <p className="text-gray-600 mb-4 line-clamp-3">{product.description}</p>
             <Button 
               variant="ghost" 
