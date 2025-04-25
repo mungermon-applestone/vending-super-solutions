@@ -1,5 +1,5 @@
 
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Check, Shield, Server, Settings, Bell, Battery, ClipboardCheck, RefreshCcw, TrendingUp, PieChart, Map, UserCheck } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
@@ -9,9 +9,12 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check as CheckIcon } from 'lucide-react';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
 import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
+import BusinessGoalVideoSection from '@/components/businessGoals/BusinessGoalVideoSection';
+import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
+import InquiryForm from '@/components/machines/contact/InquiryForm';
 
 // Function to get the icon component based on icon name from Contentful
-const getIconComponent = (iconName: string | undefined): ReactNode => {
+const getIconComponent = (iconName: string | undefined): React.ReactNode => {
   if (!iconName) return <Star className="h-6 w-6" />;
   
   switch (iconName.toLowerCase()) {
@@ -121,6 +124,28 @@ const BusinessGoalDetailPage = () => {
         image={imageUrl}
       />
       
+      {/* Benefits Section */}
+      {businessGoal?.benefits && businessGoal.benefits.length > 0 && (
+        <section className="py-16 bg-gray-50">
+          <div className="container mx-auto">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-3xl font-bold text-center mb-12">Benefits</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {businessGoal.benefits.map((benefit, index) => (
+                  <div key={index} className="bg-white rounded-lg p-6 shadow-sm flex items-start">
+                    <div className="bg-vending-teal rounded-full p-2 mr-4 text-white flex-shrink-0">
+                      <CheckIcon className="h-4 w-4" />
+                    </div>
+                    <p className="text-gray-800">{String(benefit)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+      
+      {/* Features Section */}
       {businessGoal?.features && businessGoal.features.length > 0 && (
         <section className="py-16 bg-white">
           <div className="container mx-auto">
@@ -144,35 +169,22 @@ const BusinessGoalDetailPage = () => {
         </section>
       )}
       
-      {businessGoal?.benefits && businessGoal.benefits.length > 0 && (
-        <section className="py-16 bg-gray-50">
-          <div className="container mx-auto">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-12">Benefits</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {businessGoal.benefits.map((benefit, index) => (
-                  <div key={index} className="bg-white rounded-lg p-6 shadow-sm flex items-start">
-                    <div className="bg-vending-teal rounded-full p-2 mr-4 text-white flex-shrink-0">
-                      <CheckIcon className="h-4 w-4" />
-                    </div>
-                    <p className="text-gray-800">{String(benefit)}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+      {/* Video Section (Optional) */}
+      {businessGoal?.video && (
+        <BusinessGoalVideoSection 
+          video={businessGoal.video}
+          title={`See how ${businessGoal.title} works`}
+          description="Watch our solution in action to understand how it can help your business"
+        />
       )}
       
-      <section className="py-16 bg-vending-blue-dark text-white">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Achieve Your Business Goals?</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Contact our team today to learn more about how we can help you with {businessGoal?.title || 'your business goals'}.
-          </p>
-          <Button size="lg" className="bg-vending-teal hover:bg-vending-teal-dark">Contact Us</Button>
-        </div>
-      </section>
+      {/* Recommended Machines Section */}
+      {businessGoal?.recommendedMachines && businessGoal.recommendedMachines.length > 0 && (
+        <RecommendedMachines machines={businessGoal.recommendedMachines} />
+      )}
+      
+      {/* Inquiry Form */}
+      <InquiryForm title={`Ready to learn more about ${businessGoal?.title || 'achieving your business goals'}?`} />
     </Layout>
   );
 };

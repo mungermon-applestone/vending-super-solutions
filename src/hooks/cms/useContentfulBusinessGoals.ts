@@ -42,6 +42,21 @@ export function useContentfulBusinessGoals() {
               url: `https:${feature.fields.screenshot.fields?.file?.url}`,
               alt: feature.fields.screenshot.fields?.title
             } : undefined
+          })),
+          video: entry.fields.video ? {
+            id: entry.fields.video.sys?.id,
+            url: `https:${entry.fields.video.fields?.file?.url}`,
+            title: entry.fields.video.fields?.title
+          } : undefined,
+          recommendedMachines: (entry.fields.recommendedMachines || []).map((machine: any) => ({
+            id: machine.sys.id,
+            slug: machine.fields.slug,
+            title: machine.fields.title,
+            description: machine.fields.description,
+            image: machine.fields.images?.[0] ? {
+              url: `https:${machine.fields.images[0].fields.file.url}`,
+              alt: machine.fields.images[0].fields.title || machine.fields.title
+            } : undefined
           }))
         })) as CMSBusinessGoal[];
         
@@ -103,6 +118,21 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
               id: feature.fields.screenshot.sys?.id,
               url: `https:${feature.fields.screenshot.fields?.file?.url}`,
               alt: feature.fields.screenshot.fields?.title
+            } : undefined
+          })),
+          video: entry.fields.video ? {
+            id: entry.fields.video.sys?.id,
+            url: `https:${entry.fields.video.fields?.file?.url}`,
+            title: entry.fields.video.fields?.title
+          } : undefined,
+          recommendedMachines: (entry.fields.recommendedMachines || []).map((machine: any) => ({
+            id: machine.sys.id,
+            slug: machine.fields.slug,
+            title: machine.fields.title,
+            description: machine.fields.description,
+            image: machine.fields.images?.[0] ? {
+              url: `https:${machine.fields.images[0].fields.file.url}`,
+              alt: machine.fields.images[0].fields.title || machine.fields.title
             } : undefined
           }))
         } as CMSBusinessGoal;

@@ -1,3 +1,4 @@
+
 export interface CMSImage {
   id: string;
   url: string;
@@ -11,6 +12,25 @@ export interface CMSBusinessGoal {
   description: string;
   image?: CMSImage;
   content?: string;
+  icon?: string;
+  benefits?: string[];
+  features?: CMSFeature[];
+  visible?: boolean;
+  video?: {
+    id: string;
+    url: string;
+    title?: string;
+  };
+  recommendedMachines?: {
+    id: string;
+    slug: string;
+    title: string;
+    description: string;
+    image?: {
+      url: string;
+      alt?: string;
+    };
+  }[];
 }
 
 export interface CMSTechnology {

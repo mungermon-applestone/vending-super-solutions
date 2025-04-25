@@ -47,6 +47,8 @@ export interface ContentfulBusinessGoal {
     benefits?: string[];
     features?: ContentfulFeature[];
     visible?: boolean;
+    video?: ContentfulAsset;
+    recommendedMachines?: any[];
   };
 }
 
@@ -90,15 +92,12 @@ export interface ContentfulTechnology {
   };
 }
 
-// Contentful API response interfaces
-// Modified to better match actual Contentful rich text structure
 export interface ContentfulRichTextDocument {
   nodeType: string;
   data: object;
   content: any[];
 }
 
-// Enhanced ContentfulResponse with explicit includes for Entry and Asset
 export interface ContentfulResponse<T = any> extends Entry<T> {
   includes?: {
     Asset?: ContentfulAsset[];
@@ -106,12 +105,10 @@ export interface ContentfulResponse<T = any> extends Entry<T> {
   };
 }
 
-// Define the AboutPageFields interface for the About page
 export interface AboutPageFields {
   bodyContent?: Document | ContentfulRichTextDocument;
 }
 
-// Define FAQ item interface - updated to handle both string and rich text answers
 export interface ContentfulFAQItem {
   sys: {
     id: string;
@@ -127,7 +124,6 @@ export interface ContentfulFAQItem {
   };
 }
 
-// Define Contact Page Content interface
 export interface ContentfulContactPageFields {
   introTitle?: string;
   introDescription?: string;
