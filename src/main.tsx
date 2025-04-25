@@ -4,11 +4,11 @@ import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import './index.css';
-import { initCMS } from './services/cms/cmsInit';
+import { forceContentfulProvider } from './services/cms/cmsInit';
 import { AuthProvider } from './context/AuthContext';
 
-// Initialize CMS with Strapi configuration
-initCMS();
+// Initialize CMS with Contentful configuration
+forceContentfulProvider();
 
 // Create a client for React Query
 const queryClient = new QueryClient({

@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import {
   BrowserRouter as Router,
@@ -14,7 +15,7 @@ import TechnologyLanding from '@/pages/TechnologyLanding';
 import ContentfulTechnologyPage from '@/pages/ContentfulTechnologyPage';
 import TechnologyPage from './pages/TechnologyPage';
 import BusinessGoalsLanding from '@/pages/BusinessGoalsLanding';
-import ProductDetail from '@/pages/ProductDetail';
+import ProductDetailPage from '@/pages/ProductDetailPage';
 import BusinessGoalDetailPage from '@/pages/BusinessGoalDetailPage';
 import MachineDetailPage from '@/pages/MachineDetailPage';
 import MachinesPage from '@/pages/MachinesPage';
@@ -41,8 +42,8 @@ const App: React.FC = () => {
       element: <Products />,
     },
     {
-      path: '/products/:productSlug',
-      element: <ProductDetail />,
+      path: '/products/:slug',
+      element: <ProductDetailPage />,
     },
     {
       path: '/machines',

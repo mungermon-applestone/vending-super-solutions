@@ -9,7 +9,7 @@ import { isContentfulConfigured } from '@/config/cms';
 export function initCMS() {
   console.log('[initCMS] Initializing CMS configuration...');
   
-  // Check if Contentful is configured - ALWAYS prioritize Contentful
+  // Always use Contentful if it's configured
   if (isContentfulConfigured()) {
     console.log('[initCMS] Using Contentful CMS provider');
     setCMSProviderConfig({
@@ -35,3 +35,4 @@ export function forceContentfulProvider() {
   });
   return true;
 }
+

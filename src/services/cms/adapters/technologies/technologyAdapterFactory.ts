@@ -1,7 +1,6 @@
 
 import { ContentProviderConfig, ContentProviderType } from '../types';
 import { TechnologyAdapter } from './types';
-import { strapiTechnologyAdapter } from './strapi';
 import { supabaseTechnologyAdapter } from './supabase';
 import { handleCMSError } from '@/services/cms/utils/errorHandling';
 
@@ -13,10 +12,6 @@ import { handleCMSError } from '@/services/cms/utils/errorHandling';
 export function getTechnologyAdapter(config: ContentProviderConfig): TechnologyAdapter {
   try {
     switch (config.type) {
-      case ContentProviderType.STRAPI:
-        console.log('[technologyAdapterFactory] Using Strapi technology adapter');
-        return strapiTechnologyAdapter;
-      
       case ContentProviderType.SUPABASE:
       default:
         console.log('[technologyAdapterFactory] Using Supabase technology adapter');
@@ -46,4 +41,3 @@ export async function validateTechnologyAdapter(config: ContentProviderConfig): 
     return false;
   }
 }
-
