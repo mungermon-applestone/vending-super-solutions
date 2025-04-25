@@ -6,6 +6,7 @@ import './index.css'
 import { forceContentfulProvider } from './services/cms/cmsInit'
 import { toast } from 'sonner'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { AuthProvider } from './context/AuthContext'
 
 // Create a client
 const queryClient = new QueryClient({
@@ -28,7 +29,9 @@ const initApp = async () => {
   ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </QueryClientProvider>
     </React.StrictMode>,
   )
