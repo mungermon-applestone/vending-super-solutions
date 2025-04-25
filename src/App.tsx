@@ -14,7 +14,7 @@ import Home from '@/pages/Home';
 import TechnologyLanding from '@/pages/TechnologyLanding';
 import ContentfulTechnologyPage from '@/pages/ContentfulTechnologyPage';
 import TechnologyPage from './pages/TechnologyPage';
-import BusinessGoalsLanding from '@/pages/BusinessGoalsLanding';
+import BusinessGoalsPage from '@/pages/BusinessGoalsPage';
 import ProductDetailPage from '@/pages/ProductDetailPage';
 import BusinessGoalDetailPage from '@/pages/BusinessGoalDetailPage';
 import MachineDetailPage from '@/pages/MachineDetailPage';
@@ -67,7 +67,7 @@ const App: React.FC = () => {
     },
     {
       path: '/business-goals',
-      element: <BusinessGoalsLanding />,
+      element: <BusinessGoalsPage />,
     },
     {
       path: '/business/:slug',

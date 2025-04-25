@@ -54,7 +54,7 @@ const RootLayout = () => {
               </li>
               <li>
                 <NavLink 
-                  to="/goals" 
+                  to="/business-goals" 
                   className={({ isActive }) => 
                     isActive ? "text-blue-600 font-medium" : "text-gray-800 hover:text-blue-600"
                   }

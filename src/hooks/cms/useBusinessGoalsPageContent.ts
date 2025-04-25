@@ -9,32 +9,67 @@ interface BusinessGoalsPageContent {
   customSolutionDescription?: string;
   customSolutionButtonText?: string;
   customSolutionButtonUrl?: string;
+  goalsSectionTitle?: string;
+  goalsSectionDescription?: string;
+  keyBenefitsTitle?: string;
+  keyBenefitsDescription?: string;
+  keyBenefits?: string[];
+  testimonialsSectionTitle?: string;
+  testimonialsSectionDescription?: string;
+  inquiryBulletPoints?: string[];
 }
 
-export function useBusinessGoalsPageContent() {
+export function useBusinessGoalsPageContent(contentId?: string) {
   return useQuery({
-    queryKey: ['contentful', 'businessGoalsPageContent'],
+    queryKey: ['contentful', 'businessGoalsPageContent', contentId],
     queryFn: async () => {
-      const client = await getContentfulClient();
-      const entries = await client.getEntries({
-        content_type: 'businessGoalsPageContent',
-        limit: 1
-      });
-      
-      if (!entries.items[0]) {
+      try {
+        console.log('[useBusinessGoalsPageContent] Fetching content');
+        const client = await getContentfulClient();
+        
+        // If contentId is provided, fetch that specific entry, otherwise get the first one
+        const entries = contentId 
+          ? await client.getEntry(contentId)
+          : await client.getEntries({
+              content_type: 'businessGoalsPageContent',
+              limit: 1
+            });
+        
+        // Handle the response format based on whether we're getting a single entry or collection
+        const item = contentId ? entries : entries.items[0];
+        
+        if (!item) {
+          console.warn('[useBusinessGoalsPageContent] No content found');
+          return null;
+        }
+
+        const fields = contentId ? item.fields : item.fields;
+        
+        console.log('[useBusinessGoalsPageContent] Content retrieved:', fields);
+        
+        return {
+          introTitle: fields.introTitle as string,
+          introDescription: fields.introDescription as string,
+          customSolutionTitle: fields.customSolutionTitle as string,
+          customSolutionDescription: fields.customSolutionDescription as string,
+          customSolutionButtonText: fields.customSolutionButtonText as string,
+          customSolutionButtonUrl: fields.customSolutionButtonUrl as string,
+          goalsSectionTitle: fields.goalsSectionTitle as string,
+          goalsSectionDescription: fields.goalsSectionDescription as string,
+          keyBenefitsTitle: fields.keyBenefitsTitle as string,
+          keyBenefitsDescription: fields.keyBenefitsDescription as string,
+          keyBenefits: fields.keyBenefits as string[],
+          testimonialsSectionTitle: fields.testimonialsSectionTitle as string,
+          testimonialsSectionDescription: fields.testimonialsSectionDescription as string,
+          inquiryBulletPoints: fields.inquiryBulletPoints as string[]
+        } as BusinessGoalsPageContent;
+      } catch (error) {
+        console.error('[useBusinessGoalsPageContent] Error:', error);
         return null;
       }
-
-      const fields = entries.items[0].fields;
-      
-      return {
-        introTitle: fields.introTitle as string,
-        introDescription: fields.introDescription as string,
-        customSolutionTitle: fields.customSolutionTitle as string,
-        customSolutionDescription: fields.customSolutionDescription as string,
-        customSolutionButtonText: fields.customSolutionButtonText as string,
-        customSolutionButtonUrl: fields.customSolutionButtonUrl as string,
-      } as BusinessGoalsPageContent;
-    }
+    },
+    enabled: true
   });
 }
+
+export type { BusinessGoalsPageContent };
