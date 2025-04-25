@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import {
   BrowserRouter as Router,
@@ -50,6 +49,10 @@ const App: React.FC = () => {
       element: <MachinesPage />,
     },
     {
+      path: '/machines/:slug',
+      element: <MachineDetailPage />,
+    },
+    {
       path: '/machines/divi-wp',
       element: <MachineDetailPage />,
     },
@@ -59,7 +62,7 @@ const App: React.FC = () => {
     },
     {
       path: '/machine/:machineId',
-      element: <MachineDetailPage />,
+      element: <Navigate to="/machines/:machineId" replace />,
     },
     {
       path: '/contact',

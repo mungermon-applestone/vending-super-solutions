@@ -84,7 +84,7 @@ const MachinesPage: React.FC = () => {
               </CardContent>
               <CardFooter>
                 <Button asChild className="w-full">
-                  <Link to={`/machine/${machine.id}`}>
+                  <Link to={`/machines/${machine.slug}`}>
                     View Details <ExternalLink className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
