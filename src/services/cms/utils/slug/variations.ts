@@ -42,6 +42,31 @@ export function getSlugVariations(slug: string): string[] {
     variations.push(`${second}-${first}`);
   }
   
+  // Handle common category-specific variations
+  if (slug.includes('food')) {
+    variations.push(slug.replace('food', 'foods'));
+  } else if (slug.includes('foods')) {
+    variations.push(slug.replace('foods', 'food'));
+  }
+  
+  if (slug.includes('toy')) {
+    variations.push(slug.replace('toy', 'toys'));
+  } else if (slug.includes('toys')) {
+    variations.push(slug.replace('toys', 'toy'));
+  }
+  
+  if (slug.includes('cosmetic')) {
+    variations.push(slug.replace('cosmetic', 'cosmetics'));
+  } else if (slug.includes('cosmetics')) {
+    variations.push(slug.replace('cosmetics', 'cosmetic'));
+  }
+  
+  if (slug.includes('pharma')) {
+    variations.push(slug.replace('pharma', 'pharmaceutical'));
+  } else if (slug.includes('pharmaceutical')) {
+    variations.push(slug.replace('pharmaceutical', 'pharma'));
+  }
+  
   // Handle copy suffix pattern (for our upcoming clone feature)
   if (slug.endsWith('-copy')) {
     variations.push(slug.replace(/-copy$/, '')); // Without copy
