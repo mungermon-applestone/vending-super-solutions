@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { toast } from 'sonner';
@@ -157,9 +158,9 @@ export function useContentfulProductType(slug: string) {
               slug: machine.fields.slug,
               title: machine.fields.title,
               description: machine.fields.description,
-              image: machine.fields.mainImage ? {
-                url: `https:${machine.fields.mainImage.fields.file.url}`,
-                alt: machine.fields.mainImage.fields.title || machine.fields.title
+              image: machine.fields.images?.[0] ? {
+                url: `https:${machine.fields.images[0].fields.file.url}`,
+                alt: machine.fields.images[0].fields.title || machine.fields.title
               } : undefined
             })) : []
         };
