@@ -1,40 +1,11 @@
-
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getProductTypes } from '@/services/cms';
 import { CMSProductType } from '@/types/cms';
 import { normalizeSlug } from '@/services/cms/utils/slugMatching';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
-
-interface ProductCardProps {
-  title: string;
-  description: string;
-  image: string;
-  path: string;
-}
-
-const ProductCard = ({ title, description, image, path }: ProductCardProps) => {
-  return (
-    <div className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow">
-      <img 
-        src={image} 
-        alt={title} 
-        className="w-full h-48 object-cover"
-      />
-      <div className="p-5">
-        <h3 className="text-xl font-semibold mb-2">{title}</h3>
-        <p className="text-gray-600 mb-4 line-clamp-2">{description}</p>
-        <Button asChild variant="outline" className="w-full">
-          <Link to={path} className="flex items-center justify-center">
-            Learn more <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-      </div>
-    </div>
-  );
-};
+import ProductCard from '@/components/products/ProductCard';
 
 const ProductTypesSection = () => {
   const { data: homeContent } = useHomePageContent();
@@ -82,12 +53,22 @@ const ProductTypesSection = () => {
 
   const displayProductTypes = (productTypes && productTypes.length > 0) 
     ? productTypes.map((product: CMSProductType) => ({
+        ...product,
+        image: product.image || {
+          url: "https://images.unsplash.com/photo-1606787366850-de6330128bfc",
+          alt: product.title
+        }
+      }))
+    : staticProductTypes.map(product => ({
+        id: product.path,
         title: product.title,
         description: product.description,
-        image: product.image?.url || "https://images.unsplash.com/photo-1606787366850-de6330128bfc",
-        path: `/products/${normalizeSlug(product.slug)}`
-      }))
-    : staticProductTypes;
+        slug: product.path.replace('/products/', ''),
+        image: {
+          url: product.image,
+          alt: product.title
+        }
+      } as CMSProductType));
   
   const featuredProductTypes = displayProductTypes.slice(0, 4);
   
@@ -125,14 +106,8 @@ const ProductTypesSection = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProductTypes.map((product, index) => (
-              <ProductCard 
-                key={index}
-                title={product.title}
-                description={product.description}
-                image={product.image}
-                path={product.path}
-              />
+            {featuredProductTypes.map((product) => (
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         )}
