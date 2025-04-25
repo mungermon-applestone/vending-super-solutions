@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 
 interface BusinessGoalVideoProps {
@@ -21,14 +20,10 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   
   useEffect(() => {
-    // Log when video component mounts or updates
     console.log('[BusinessGoalVideoSection] Component mounted/updated with video:', video);
-    
-    // Reset error state when video prop changes
     setVideoError(false);
     setVideoLoading(true);
     
-    // Validate the video URL format
     if (video && video.url) {
       console.log('[BusinessGoalVideoSection] Raw video URL:', video.url);
     } else {
@@ -36,7 +31,6 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
     }
   }, [video]);
 
-  // Early return if no video or URL
   if (!video || !video.url) {
     console.log('[BusinessGoalVideoSection] No valid video URL provided, not rendering video section');
     return null;
@@ -44,7 +38,6 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
   
   const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     console.error('[BusinessGoalVideoSection] Error loading video:', e);
-    // Log more details about the error
     const videoElement = e.currentTarget;
     console.error('[BusinessGoalVideoSection] Video error details:', {
       error: videoElement.error,
@@ -61,7 +54,6 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
     setVideoLoading(false);
   };
   
-  // Clean URL if needed
   const videoUrl = video.url.startsWith('//') 
     ? `https:${video.url}` 
     : !video.url.startsWith('http') && !video.url.startsWith('//')
@@ -124,7 +116,6 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
           </div>
         )}
         
-        {/* Debug info - always show in development AND production for troubleshooting */}
         <div className="mt-4 p-4 border border-gray-200 rounded bg-gray-50 max-w-4xl mx-auto text-xs">
           <p><strong>Video Diagnostics:</strong></p>
           <p>Video ID: {video.id || 'Not provided'}</p>

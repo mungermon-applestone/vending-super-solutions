@@ -69,7 +69,7 @@ export interface CMSBusinessGoal {
   updated_at?: string;
   video?: {
     id: string;
-    url: string;
+    url: string | null;
     title?: string;
   };
   recommendedMachines?: {

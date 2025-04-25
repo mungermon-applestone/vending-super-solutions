@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { CMSBusinessGoal } from '@/types/cms';
@@ -117,11 +116,10 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
           const videoAsset = entry.fields.video;
           console.log('[useContentfulBusinessGoal] Video asset details:', {
             id: videoAsset.sys?.id,
-            contentType: videoAsset.sys?.contentType?.sys?.id,
             url: videoAsset.fields?.file?.url,
             title: videoAsset.fields?.title,
             fileName: videoAsset.fields?.file?.fileName,
-            contentType: videoAsset.fields?.file?.contentType,
+            fileType: videoAsset.fields?.file?.contentType,
             details: videoAsset.fields?.file?.details
           });
         } else {
@@ -170,7 +168,7 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
         };
 
         console.log('[useContentfulBusinessGoal] Mapped entry:', mappedEntry);
-        console.log('[useContentfulBusinessGoal] Mapped entry video:', mappedEntry.video);
+        console.log('[useContentfulBusinessGoal] Mapped video data:', mappedEntry.video);
         
         return mappedEntry;
       } catch (error) {

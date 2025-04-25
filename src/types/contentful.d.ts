@@ -47,7 +47,23 @@ export interface ContentfulBusinessGoal {
     benefits?: string[];
     features?: ContentfulFeature[];
     visible?: boolean;
-    video?: ContentfulAsset;
+    video?: {
+      sys: {
+        id: string;
+      };
+      fields: {
+        title?: string;
+        description?: string;
+        file: {
+          url: string;
+          contentType: string;
+          fileName: string;
+          details?: {
+            size: number;
+          };
+        };
+      };
+    };
     recommendedMachines?: any[];
   };
 }
