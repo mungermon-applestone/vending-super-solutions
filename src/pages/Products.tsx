@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
@@ -5,10 +6,8 @@ import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import { useQueryClient } from '@tanstack/react-query';
 import { useContentfulProducts } from '@/hooks/cms/useContentfulProducts';
 import { useProductsPageContent } from '@/hooks/cms/useProductsPageContent';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ExternalLink, RefreshCw } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Loader2, RefreshCw } from 'lucide-react';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import PurposeStatement from '@/components/products/sections/PurposeStatement';
@@ -17,6 +16,7 @@ import DemoRequest from '@/components/products/sections/DemoRequest';
 import ProductsHero from '@/components/products/sections/ProductsHero';
 import FeaturedBusinessGoals from '@/components/products/sections/FeaturedBusinessGoals';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
+import ProductGrid from '@/components/products/sections/ProductGrid';
 
 const Products = () => {
   const { data: products, isLoading, error, refetch } = useContentfulProducts();
@@ -94,24 +94,7 @@ const Products = () => {
               actionText="Try Again"
             />
           ) : products && products.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <Card key={product.id} className="overflow-hidden">
-                  <CardHeader>
-                    <CardTitle>{product.title}</CardTitle>
-                    <CardDescription>{product.slug}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 line-clamp-2 mb-4">{product.description}</p>
-                    <Button asChild variant="outline" size="sm">
-                      <Link to={`/products/${product.slug}`}>
-                        View Details <ExternalLink className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <ProductGrid products={products} />
           ) : (
             <ContentfulFallbackMessage
               title="No Products Found"
