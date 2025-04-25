@@ -1,33 +1,14 @@
 
-import { supabase } from '@/integrations/supabase/client';
 import { CMSProductType } from '@/types/cms';
+import { toast } from 'sonner';
 
 /**
- * Create a new product type
- * @param data Product type data
- * @returns The created product type
+ * Creates a new product type in Contentful (stub)
+ * @param data The product type data to create
+ * @returns The created product type or null if creation failed
  */
-export async function createProductType(data: any): Promise<CMSProductType> {
-  try {
-    console.log('[CMS:Product Type] createProductType: Creating new product type:', data.title);
-    
-    const { data: productType, error } = await supabase
-      .from('product_types')
-      .insert(data)
-      .select('*')
-      .single();
-      
-    if (error) {
-      console.error('[CMS:Product Type] Error in createProductType:', error);
-      throw error;
-    }
-    
-    console.log('[CMS:Product Type] createProductType: Successfully created product type with ID:', productType.id);
-    return productType as CMSProductType;
-  } catch (error) {
-    console.error('[CMS:Product Type] Error in createProductType:', error);
-    throw error;
-  }
+export async function createProductType(data: any): Promise<CMSProductType | null> {
+  console.log('[createProductType] This feature is not implemented yet');
+  toast.error('Creating product types is not supported with Contentful in this version');
+  return null;
 }
-
-export default createProductType;

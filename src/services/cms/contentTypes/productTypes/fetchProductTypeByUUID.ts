@@ -2,11 +2,17 @@
 import { CMSProductType } from '@/types/cms';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { toast } from 'sonner';
+import { CONTENTFUL_CONFIG, isContentfulConfigured } from '@/config/cms';
 
 interface DiagnosticData {
   uuidAttempted: string;
   entryFound: boolean;
   contentType?: string;
+  configValues?: {
+    spaceId?: string;
+    environment?: string;
+    hasToken: boolean;
+  };
   error?: any;
 }
 
@@ -18,7 +24,12 @@ interface DiagnosticData {
 export async function fetchProductTypeByUUID(uuid: string): Promise<CMSProductType | null> {
   const diagnosticData: DiagnosticData = {
     uuidAttempted: uuid,
-    entryFound: false
+    entryFound: false,
+    configValues: {
+      spaceId: CONTENTFUL_CONFIG.SPACE_ID,
+      environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID,
+      hasToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN
+    }
   };
   
   try {
@@ -27,7 +38,18 @@ export async function fetchProductTypeByUUID(uuid: string): Promise<CMSProductTy
       return null;
     }
     
+    if (!isContentfulConfigured()) {
+      console.error('[fetchProductTypeByUUID] Contentful is not configured properly');
+      toast.error('Contentful configuration is missing or incomplete');
+      throw new Error('Contentful is not properly configured');
+    }
+    
     console.log(`[fetchProductTypeByUUID] Fetching product type with UUID: "${uuid}"`);
+    console.log(`[fetchProductTypeByUUID] Using Contentful config:`, {
+      spaceId: CONTENTFUL_CONFIG.SPACE_ID?.substring(0, 5) + '...',
+      environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID,
+      hasToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN
+    });
     
     const client = await getContentfulClient();
     

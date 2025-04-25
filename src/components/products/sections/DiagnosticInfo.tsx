@@ -130,7 +130,6 @@ const DiagnosticInfo = ({ slug, compact = false }: DiagnosticInfoProps) => {
                 </pre>
               </div>
             </AccordionContent>
-          </AccordionItem>
           )}
         </Accordion>
       )}

@@ -1,52 +1,49 @@
 
-import { CMSProductType, QueryOptions } from '@/types/cms';
+import { CMSProductType } from '@/types/cms';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { toast } from 'sonner';
+import { isContentfulConfigured } from '@/config/cms';
 
 /**
  * Fetches all product types from Contentful
- * @param filters Optional filters to apply to the query
+ * @param filters Optional filters
  * @returns Array of product types
  */
-export async function fetchProductTypes(filters?: Record<string, any>): Promise<CMSProductType[]> {
+export async function fetchProductTypes(filters?: any): Promise<CMSProductType[]> {
   try {
-    console.log('[fetchProductTypes] Fetching all product types', filters ? `with filters: ${JSON.stringify(filters)}` : '');
+    if (!isContentfulConfigured()) {
+      console.error('[fetchProductTypes] Contentful is not configured properly');
+      toast.error('Contentful configuration is missing or incomplete');
+      throw new Error('Contentful is not properly configured');
+    }
+    
+    console.log('[fetchProductTypes] Fetching all product types');
     
     const client = await getContentfulClient();
     
-    // Base query parameters
-    const queryParams: any = {
+    const query: any = {
       content_type: 'productType',
       include: 2,
-      limit: 100,
+      limit: 100
     };
     
     // Apply filters if provided
     if (filters) {
-      // Handle slug filter with exact/fuzzy matching
       if (filters.slug) {
-        if (filters.exactMatch !== false) {
-          queryParams['fields.slug'] = filters.slug;
-        } else {
-          // For fuzzy matching we'll filter results after fetching
-          console.log('[fetchProductTypes] Using fuzzy slug matching for:', filters.slug);
-        }
+        query['fields.slug'] = filters.slug;
       }
-      
-      // Add other filters as needed
       if (filters.visible !== undefined) {
-        queryParams['fields.visible'] = filters.visible;
+        query['fields.visible'] = filters.visible;
       }
     }
     
-    const entries = await client.getEntries(queryParams);
+    console.log('[fetchProductTypes] Query:', query);
     
-    if (!entries || !entries.items) {
-      console.warn('[fetchProductTypes] No entries returned from Contentful');
-      return [];
-    }
+    const entries = await client.getEntries(query);
     
-    const productTypes = entries.items.map(entry => ({
+    console.log(`[fetchProductTypes] Found ${entries.items.length} product types`);
+    
+    return entries.items.map(entry => ({
       id: entry.sys.id,
       title: entry.fields.title as string,
       slug: entry.fields.slug as string,
@@ -65,12 +62,9 @@ export async function fetchProductTypes(filters?: Record<string, any>): Promise<
       })) : [],
       visible: !!entry.fields.visible,
     }));
-    
-    console.log(`[fetchProductTypes] Successfully fetched ${productTypes.length} product types`);
-    return productTypes;
   } catch (error) {
     console.error('[fetchProductTypes] Error fetching product types:', error);
-    toast.error('Failed to load product types');
+    toast.error(`Error loading products: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return [];
   }
 }

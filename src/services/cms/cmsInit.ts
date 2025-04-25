@@ -1,7 +1,7 @@
 
 import { ContentProviderType } from './adapters/types';
 import { setCMSProviderConfig } from './providerConfig';
-import { supabaseConfig } from './adapters/contentConfig';
+import { isContentfulConfigured } from '@/config/cms';
 
 /**
  * Initialize the CMS configuration
@@ -9,19 +9,37 @@ import { supabaseConfig } from './adapters/contentConfig';
 export function initCMS() {
   console.log('[initCMS] Initializing CMS configuration...');
   
-  // We're only using Supabase as the CMS provider
-  console.log('[initCMS] Using Supabase CMS provider');
-  setCMSProviderConfig(supabaseConfig());
+  // Check if Contentful is configured
+  if (isContentfulConfigured()) {
+    console.log('[initCMS] Using Contentful CMS provider');
+    setCMSProviderConfig({
+      type: ContentProviderType.CONTENTFUL
+    });
+  } else {
+    console.log('[initCMS] Contentful not configured, falling back to Supabase CMS provider');
+    setCMSProviderConfig({
+      type: ContentProviderType.SUPABASE
+    });
+  }
   
   console.log('[initCMS] CMS initialization complete');
   return true;
 }
 
 /**
- * This function is kept for backward compatibility but now only supports Supabase
+ * This function is kept for backward compatibility but now prioritizes Contentful
  */
 export function switchCMSProvider(_options?: any) {
-  console.log('[switchCMSProvider] Using Supabase provider');
-  setCMSProviderConfig(supabaseConfig());
+  if (isContentfulConfigured()) {
+    console.log('[switchCMSProvider] Using Contentful provider');
+    setCMSProviderConfig({
+      type: ContentProviderType.CONTENTFUL
+    });
+  } else {
+    console.log('[switchCMSProvider] Contentful not configured, using Supabase provider');
+    setCMSProviderConfig({
+      type: ContentProviderType.SUPABASE
+    });
+  }
   return true;
 }

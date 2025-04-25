@@ -1,6 +1,7 @@
 
 import { CMSProductType } from '@/types/cms';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { isContentfulConfigured, CONTENTFUL_CONFIG } from '@/config/cms';
 import { getSlugVariations } from '@/services/cms/utils/slug/variations';
 import { toast } from 'sonner';
 
@@ -9,6 +10,11 @@ interface DiagnosticData {
   slugVariations: string[];
   entriesFound: number;
   contentfulResponse?: any;
+  configValues?: {
+    spaceId?: string;
+    environment?: string;
+    hasToken: boolean;
+  };
   error?: any;
 }
 
@@ -21,7 +27,12 @@ export async function fetchProductTypeBySlug(slug: string): Promise<CMSProductTy
   const diagnosticData: DiagnosticData = {
     slugAttempted: slug,
     slugVariations: [],
-    entriesFound: 0
+    entriesFound: 0,
+    configValues: {
+      spaceId: CONTENTFUL_CONFIG.SPACE_ID,
+      environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID,
+      hasToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN
+    }
   };
   
   try {
@@ -30,7 +41,18 @@ export async function fetchProductTypeBySlug(slug: string): Promise<CMSProductTy
       return null;
     }
     
+    if (!isContentfulConfigured()) {
+      console.error('[fetchProductTypeBySlug] Contentful is not configured properly');
+      toast.error('Contentful configuration is missing or incomplete');
+      throw new Error('Contentful is not properly configured');
+    }
+    
     console.log(`[fetchProductTypeBySlug] Fetching product type with slug: "${slug}"`);
+    console.log(`[fetchProductTypeBySlug] Using Contentful config:`, {
+      spaceId: CONTENTFUL_CONFIG.SPACE_ID?.substring(0, 5) + '...',
+      environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID,
+      hasToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN
+    });
     
     const client = await getContentfulClient();
     
