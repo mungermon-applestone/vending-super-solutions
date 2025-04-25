@@ -3,12 +3,24 @@ import { CMSProductType } from '@/types/cms';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { toast } from 'sonner';
 
+interface DiagnosticData {
+  uuidAttempted: string;
+  entryFound: boolean;
+  contentType?: string;
+  error?: any;
+}
+
 /**
  * Fetches a product type by its UUID (Contentful entry ID)
  * @param uuid The UUID of the product type to fetch
  * @returns The product type or null if not found
  */
 export async function fetchProductTypeByUUID(uuid: string): Promise<CMSProductType | null> {
+  const diagnosticData: DiagnosticData = {
+    uuidAttempted: uuid,
+    entryFound: false
+  };
+  
   try {
     if (!uuid) {
       console.error('[fetchProductTypeByUUID] No UUID provided');
@@ -21,6 +33,9 @@ export async function fetchProductTypeByUUID(uuid: string): Promise<CMSProductTy
     
     // Direct lookup by entry ID
     const entry = await client.getEntry(uuid, { include: 2 });
+    
+    diagnosticData.entryFound = !!entry;
+    diagnosticData.contentType = entry?.sys?.contentType?.sys?.id;
     
     if (!entry) {
       console.log(`[fetchProductTypeByUUID] No product type found with UUID "${uuid}"`);
@@ -55,6 +70,8 @@ export async function fetchProductTypeByUUID(uuid: string): Promise<CMSProductTy
       visible: !!entry.fields.visible,
     };
   } catch (error) {
+    diagnosticData.error = error instanceof Error ? error.message : String(error);
+    
     if ((error as any).sys?.id === 'NotFound') {
       console.log(`[fetchProductTypeByUUID] Product type with UUID "${uuid}" not found`);
       return null;
@@ -63,5 +80,7 @@ export async function fetchProductTypeByUUID(uuid: string): Promise<CMSProductTy
     console.error(`[fetchProductTypeByUUID] Error fetching product type with UUID "${uuid}":`, error);
     toast.error(`Error loading product: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return null;
+  } finally {
+    console.log('[fetchProductTypeByUUID] Diagnostic data:', diagnosticData);
   }
 }
