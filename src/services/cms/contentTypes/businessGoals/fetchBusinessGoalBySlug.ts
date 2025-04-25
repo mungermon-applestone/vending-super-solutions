@@ -76,8 +76,10 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
       created_at: goalData.created_at,
       updated_at: goalData.updated_at,
       icon: goalData.icon,
+      // Legacy field support
+      image_url: goalData.image_url,
+      image_alt: goalData.image_alt,
       benefits: [], // Assuming benefits are not directly fetched here
-      caseStudies: [], // Assuming caseStudies are not directly fetched here
       features: featuresData ? featuresData.map(feature => ({
         id: feature.id || `feature-${Math.random().toString(36).substr(2, 9)}`,
         title: feature.title,

@@ -66,10 +66,10 @@ const BusinessGoals = () => {
             {businessGoals.map((goal) => (
               <Card key={goal.id} className="overflow-hidden">
                 <div className="relative h-40 overflow-hidden">
-                  {goal.image_url ? (
+                  {goal.image?.url || goal.image_url ? (
                     <img 
-                      src={goal.image_url} 
-                      alt={goal.image_alt || goal.title} 
+                      src={goal.image?.url || goal.image_url} 
+                      alt={goal.image?.alt || goal.image_alt || goal.title} 
                       className="w-full h-full object-cover"
                     />
                   ) : (

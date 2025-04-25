@@ -25,21 +25,11 @@ export function transformStrapiDataToBusinessGoal(strapiData: any): CMSBusinessG
     created_at: attributes.createdAt,
     updated_at: attributes.updatedAt,
     features: [],
-    benefits: []
+    benefits: [],
+    // Legacy field support
+    image_url: attributes.image?.data ? attributes.image.data.attributes.url : attributes.image_url,
+    image_alt: attributes.image?.data ? (attributes.image.data.attributes.alternativeText || attributes.image.data.attributes.alt) : attributes.image_alt
   };
-  
-  // Handle Strapi media field format which might be different
-  if (attributes.image_url) {
-    businessGoal.image_url = attributes.image_url;
-  } else if (businessGoal.image) {
-    businessGoal.image_url = businessGoal.image.url;
-  }
-  
-  if (attributes.image_alt) {
-    businessGoal.image_alt = attributes.image_alt;
-  } else if (businessGoal.image) {
-    businessGoal.image_alt = businessGoal.image.alt;
-  }
   
   // Process features if they exist
   if (attributes.features && attributes.features.data) {

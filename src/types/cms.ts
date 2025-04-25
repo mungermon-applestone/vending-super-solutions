@@ -65,6 +65,8 @@ export interface CMSBusinessGoal {
   benefits?: string[];
   features?: CMSFeature[];
   visible?: boolean;
+  created_at?: string;
+  updated_at?: string;
   video?: {
     id: string;
     url: string;
@@ -80,6 +82,9 @@ export interface CMSBusinessGoal {
       alt?: string;
     };
   }[];
+  image_url?: string;
+  image_alt?: string;
+  caseStudies?: CMSExample[];
 }
 
 export interface CMSTechnology {
