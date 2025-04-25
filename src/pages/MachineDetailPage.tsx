@@ -2,20 +2,26 @@
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useMachineBySlug } from '@/hooks/useMachinesData';
+import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import MachineDetail from '@/components/machineDetail/MachineDetail';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { forceContentfulProvider } from '@/services/cms/cmsInit';
 
 const MachineDetailPage = () => {
   const { slug, machineId } = useParams<{ slug?: string; machineId?: string }>();
   const navigate = useNavigate();
   const identifier = slug || machineId;
 
+  // Force use of Contentful provider for this page
+  useEffect(() => {
+    forceContentfulProvider();
+  }, []);
+
   console.log('MachineDetailPage - Route params:', { slug, machineId, identifier });
 
-  const { data: machine, isLoading, error } = useMachineBySlug('vending', identifier);
+  const { data: machine, isLoading, error } = useContentfulMachine(identifier);
 
   useEffect(() => {
     // If we loaded a machine and we're on the old /machine/:id route,
@@ -31,14 +37,14 @@ const MachineDetailPage = () => {
       <Layout>
         <div className="py-24 text-center">
           <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
-          <p>Loading machine information...</p>
+          <p>Loading machine information from Contentful...</p>
         </div>
       </Layout>
     );
   }
 
   if (error) {
-    console.error('Error loading machine:', error);
+    console.error('Error loading machine from Contentful:', error);
     return (
       <Layout>
         <div className="container mx-auto py-20">
@@ -67,7 +73,7 @@ const MachineDetailPage = () => {
               <h3 className="text-xl font-semibold text-amber-800 mb-3">Machine Not Found</h3>
               <p className="text-amber-600 mb-6">
                 {identifier ? (
-                  `The machine "${identifier}" couldn't be found.`
+                  `The machine "${identifier}" couldn't be found in Contentful.`
                 ) : (
                   "No machine identifier was provided."
                 )}

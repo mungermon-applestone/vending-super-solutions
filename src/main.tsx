@@ -1,31 +1,24 @@
 
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import App from './App';
-import './index.css';
-import { forceContentfulProvider } from './services/cms/cmsInit';
-import { AuthProvider } from './context/AuthContext';
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App'
+import './index.css'
+import { forceContentfulProvider } from './services/cms/cmsInit'
+import { toast } from 'sonner'
 
-// Initialize CMS with Contentful configuration
-forceContentfulProvider();
+// Initialize application
+const initApp = async () => {
+  // Force use of Contentful provider
+  forceContentfulProvider();
+  toast.success('Using Contentful as CMS provider');
+  
+  // Render application
+  ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  )
+};
 
-// Create a client for React Query
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
-});
+initApp();
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </QueryClientProvider>
-  </React.StrictMode>
-);

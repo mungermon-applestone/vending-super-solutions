@@ -39,11 +39,16 @@ const MachineDetail: React.FC<MachineDetailProps> = ({ machine }) => {
   // Ensure features is always an array
   const features = Array.isArray(machine.features) ? machine.features : [];
   
+  // Log the formatted data for debugging
   console.log("Formatted specs for display:", formattedSpecs);
   console.log("Features for display:", features);
+  console.log("Machine source:", machine.id, "with slug:", machine.slug);
 
   return (
     <>
+      <div className="bg-blue-50 border-b border-blue-100 py-2 px-4 text-sm text-blue-600">
+        Viewing machine from Contentful: ID: {machine.id} | Slug: {machine.slug} | Type: {machine.type}
+      </div>
       <MachineDetailHero machine={machine} />
       <MachineDetailSpecifications specs={formattedSpecs} />
       <MachineDetailFeatures features={features} />

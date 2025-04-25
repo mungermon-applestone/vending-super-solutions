@@ -1,8 +1,8 @@
+
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, ExternalLink, Server, HardDrive } from 'lucide-react';
@@ -12,8 +12,15 @@ import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 import { toast } from 'sonner';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
+import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
+import { forceContentfulProvider } from '@/services/cms/cmsInit';
 
 const MachinesPage: React.FC = () => {
+  // Force the use of Contentful provider
+  useEffect(() => {
+    forceContentfulProvider();
+  }, []);
+
   const { data: machines, isLoading, error, refetch } = useContentfulMachines();
   const { data: pageContent } = useMachinesPageContent();
   const { data: testimonialSection } = useTestimonialSection('machines');
@@ -127,7 +134,7 @@ const MachinesPage: React.FC = () => {
 
         <div className="flex justify-end mb-8">
           <Button onClick={() => refetch()} variant="outline" className="flex items-center gap-2">
-            Refresh Data <Loader2 className={`h-4 w-4 ${isLoading ? 'animate-spin' : 'hidden'}`} />
+            Refresh Contentful Data <Loader2 className={`h-4 w-4 ${isLoading ? 'animate-spin' : 'hidden'}`} />
           </Button>
         </div>
 
@@ -152,7 +159,7 @@ const MachinesPage: React.FC = () => {
           </div>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 rounded-md p-6 text-center">
-            <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Machines</h3>
+            <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Machines from Contentful</h3>
             <p className="text-red-600">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
             <Button onClick={() => refetch()} className="mt-4" variant="outline">
               Try Again
@@ -165,9 +172,9 @@ const MachinesPage: React.FC = () => {
             
             {vendingMachines.length === 0 && lockers.length === 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-md p-6 text-center">
-                <h3 className="text-lg font-semibold text-amber-800 mb-2">No Machines Found</h3>
+                <h3 className="text-lg font-semibold text-amber-800 mb-2">No Machines Found in Contentful</h3>
                 <p className="text-amber-600">
-                  No machines are currently available from our content management system. 
+                  No machines are currently available from Contentful. 
                   This could be due to:
                 </p>
                 <ul className="text-amber-600 mt-2 list-disc list-inside text-left max-w-lg mx-auto">

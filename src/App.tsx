@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import {
   BrowserRouter as Router,
@@ -26,6 +27,10 @@ import BlogPage from './pages/BlogPage';
 
 const ContentfulBlogPostDetail = lazy(() => import('./pages/ContentfulBlogPostDetail'));
 
+// Force Contentful provider at application startup
+import { forceContentfulProvider } from '@/services/cms/cmsInit';
+forceContentfulProvider();
+
 const App: React.FC = () => {
   const routes = [
     {
@@ -52,17 +57,10 @@ const App: React.FC = () => {
       path: '/machines/:slug',
       element: <MachineDetailPage />,
     },
-    {
-      path: '/machines/divi-wp',
-      element: <MachineDetailPage />,
-    },
-    {
-      path: '/machines/:slug',
-      element: <MachineDetailPage />,
-    },
+    // Legacy route - will redirect to /machines/:slug 
     {
       path: '/machine/:machineId',
-      element: <Navigate to="/machines/:machineId" replace />,
+      element: <MachineDetailPage />,
     },
     {
       path: '/contact',
