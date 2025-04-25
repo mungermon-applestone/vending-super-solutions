@@ -1,17 +1,18 @@
+
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useBusinessGoal } from '@/hooks/cms/useBusinessGoals';
+import { useContentfulBusinessGoal } from '@/hooks/cms/useContentfulBusinessGoals';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
-import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
-import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
+import BusinessGoalVideoSection from '@/components/businessGoals/BusinessGoalVideoSection';
+import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
+import InquiryForm from '@/components/machines/contact/InquiryForm';
 
 const BusinessGoalDetail = () => {
   const { goalSlug } = useParams<{ goalSlug: string }>();
-  const { data: goal, isLoading, error } = useBusinessGoal(goalSlug || '');
-  const { data: testimonialSection } = useTestimonialSection('business-goals');
+  const { data: goal, isLoading, error } = useContentfulBusinessGoal(goalSlug || '');
 
   console.log("Fetching goal with slug:", goalSlug);
   console.log("Goal data:", goal);
@@ -72,7 +73,7 @@ const BusinessGoalDetail = () => {
           title={goal.title}
           description={goal.description}
           icon={<span className="text-white text-2xl">🎯</span>}
-          image={goal.image_url || 'https://placehold.co/800x400?text=No+Image'}
+          image={goal.image?.url || 'https://placehold.co/800x400?text=No+Image'}
         />
       </div>
 
@@ -114,8 +115,21 @@ const BusinessGoalDetail = () => {
           </div>
         )}
 
-        {testimonialSection && <TestimonialsSection data={testimonialSection} />}
+        {goal.video && (
+          <BusinessGoalVideoSection 
+            video={goal.video} 
+            title={`See how to ${goal.title}`}
+            description="Watch our solution in action"
+          />
+        )}
 
+        {goal.recommendedMachines && goal.recommendedMachines.length > 0 && (
+          <RecommendedMachines machines={goal.recommendedMachines} />
+        )}
+
+        <InquiryForm 
+          title={`Ready to learn more about ${goal.title}?`}
+        />
       </div>
     </Layout>
   );

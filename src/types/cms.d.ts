@@ -1,8 +1,15 @@
-
 export interface CMSImage {
   id: string;
   url: string;
   alt: string;
+}
+
+export interface CMSFeature {
+  id: string;
+  title: string;
+  description: string;
+  icon?: string;
+  screenshot?: CMSImage;
 }
 
 export interface CMSBusinessGoal {
@@ -11,7 +18,6 @@ export interface CMSBusinessGoal {
   slug: string;
   description: string;
   image?: CMSImage;
-  content?: string;
   icon?: string;
   benefits?: string[];
   features?: CMSFeature[];

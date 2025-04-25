@@ -96,7 +96,10 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
         }
 
         const entry = entries[0];
-        return {
+        console.log('[useContentfulBusinessGoal] Raw entry data:', entry);
+        console.log('[useContentfulBusinessGoal] Video data:', entry.fields.video);
+        
+        const mappedEntry: CMSBusinessGoal = {
           id: entry.sys?.id,
           title: entry.fields.title,
           slug: entry.fields.slug,
@@ -108,8 +111,8 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
             url: `https:${entry.fields.image.fields?.file?.url}`,
             alt: entry.fields.image.fields?.title || entry.fields.title
           } : undefined,
-          benefits: (entry.fields.benefits || []).map(benefit => String(benefit)),
-          features: (entry.fields.features || []).map((feature: any) => ({
+          benefits: entry.fields.benefits?.map(benefit => String(benefit)) || [],
+          features: entry.fields.features?.map(feature => ({
             id: feature.sys?.id,
             title: feature.fields?.title,
             description: feature.fields?.description,
@@ -119,13 +122,13 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
               url: `https:${feature.fields.screenshot.fields?.file?.url}`,
               alt: feature.fields.screenshot.fields?.title
             } : undefined
-          })),
+          })) || [],
           video: entry.fields.video ? {
             id: entry.fields.video.sys?.id,
             url: `https:${entry.fields.video.fields?.file?.url}`,
             title: entry.fields.video.fields?.title
           } : undefined,
-          recommendedMachines: (entry.fields.recommendedMachines || []).map((machine: any) => ({
+          recommendedMachines: (entry.fields.recommendedMachines || []).map(machine => ({
             id: machine.sys.id,
             slug: machine.fields.slug,
             title: machine.fields.title,
@@ -135,7 +138,10 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
               alt: machine.fields.images[0].fields.title || machine.fields.title
             } : undefined
           }))
-        } as CMSBusinessGoal;
+        };
+
+        console.log('[useContentfulBusinessGoal] Mapped entry:', mappedEntry);
+        return mappedEntry;
       } catch (error) {
         console.error(`[useContentfulBusinessGoal] Error:`, error);
         return null;
