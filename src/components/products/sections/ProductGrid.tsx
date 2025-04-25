@@ -17,7 +17,7 @@ const ProductGrid = ({ products }: ProductGridProps) => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       {products.map((product) => (
         <div key={product.id} className="border border-gray-200 rounded-lg overflow-hidden transition-all hover:shadow-lg">
-          <div className="aspect-video w-full overflow-hidden bg-gray-100">
+          <div className="aspect-video w-full h-48 overflow-hidden bg-gray-100">
             {product.image ? (
               <Image 
                 src={product.image.url} 

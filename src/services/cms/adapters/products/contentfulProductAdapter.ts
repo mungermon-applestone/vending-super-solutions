@@ -1,4 +1,3 @@
-
 import { CMSProductType } from "@/types/cms";
 import { ProductAdapter, ProductCreateInput, ProductUpdateInput } from "./types";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
@@ -50,6 +49,16 @@ export const contentfulProductAdapter: ProductAdapter = {
             title: feature.fields.title,
             description: feature.fields.description,
             icon: feature.fields.icon || undefined
+          })) : [],
+          recommendedMachines: fields.recommendedMachines ? (fields.recommendedMachines as any[]).map(machine => ({
+            id: machine.sys.id,
+            title: machine.fields.title,
+            slug: machine.fields.slug,
+            description: machine.fields.description,
+            image: machine.fields.image ? {
+              url: `https:${machine.fields.image.fields.file.url}`,
+              alt: machine.fields.image.fields.title || machine.fields.title
+            } : undefined
           })) : []
         } as CMSProductType;
       });
@@ -110,6 +119,16 @@ export const contentfulProductAdapter: ProductAdapter = {
           title: feature.fields.title,
           description: feature.fields.description,
           icon: feature.fields.icon || undefined
+        })) : [],
+        recommendedMachines: fields.recommendedMachines ? (fields.recommendedMachines as any[]).map(machine => ({
+          id: machine.sys.id,
+          title: machine.fields.title,
+          slug: machine.fields.slug,
+          description: machine.fields.description,
+          image: machine.fields.image ? {
+            url: `https:${machine.fields.image.fields.file.url}`,
+            alt: machine.fields.image.fields.title || machine.fields.title
+          } : undefined
         })) : []
       } as CMSProductType;
     } catch (error) {

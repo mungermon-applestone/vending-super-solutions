@@ -31,7 +31,7 @@ const ProductDetailPage = () => {
     benefits: data.benefits,
     image: data.image,
     features: data.features,
-    recommendedMachines: data.recommendedMachines
+    recommendedMachines: data.recommendedMachines || []
   } : null;
   
   const diagnosticInfo = data?.diagnosticInfo;
@@ -124,7 +124,7 @@ const ProductDetailPage = () => {
               </section>
             )}
 
-            {product && product.recommendedMachines && (
+            {product && product.recommendedMachines && product.recommendedMachines.length > 0 && (
               <RecommendedMachines machines={product.recommendedMachines} />
             )}
 
