@@ -1,16 +1,10 @@
 
-/**
- * Type of content provider
- */
 export enum ContentProviderType {
   CONTENTFUL = 'contentful',
-  SUPABASE = 'supabase',
+  SUPABASE = 'supabase'
 }
 
-/**
- * Configuration for the content provider
- */
 export interface ContentProviderConfig {
   type: ContentProviderType;
-  options?: any;
+  options?: Record<string, unknown>;
 }

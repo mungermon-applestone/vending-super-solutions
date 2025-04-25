@@ -3,9 +3,6 @@ import { ContentProviderType } from './adapters/types';
 import { setCMSProviderConfig } from './providerConfig';
 import { isContentfulConfigured } from '@/config/cms';
 
-/**
- * Initialize the CMS configuration
- */
 export function initCMS() {
   console.log('[initCMS] Initializing CMS configuration...');
   
@@ -25,9 +22,6 @@ export function initCMS() {
   }
 }
 
-/**
- * This function forces the use of Contentful, ignoring Supabase
- */
 export function forceContentfulProvider() {
   console.log('[forceContentfulProvider] Forcing use of Contentful provider');
   setCMSProviderConfig({
@@ -35,4 +29,3 @@ export function forceContentfulProvider() {
   });
   return true;
 }
-

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -8,6 +7,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import DiagnosticInfo from '@/components/products/sections/DiagnosticInfo';
+import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
 
 const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -30,7 +30,8 @@ const ProductDetailPage = () => {
     description: data.description,
     benefits: data.benefits,
     image: data.image,
-    features: data.features
+    features: data.features,
+    recommendedMachines: data.recommendedMachines
   } : null;
   
   const diagnosticInfo = data?.diagnosticInfo;
@@ -121,6 +122,10 @@ const ProductDetailPage = () => {
                   </div>
                 </div>
               </section>
+            )}
+
+            {product && product.recommendedMachines && (
+              <RecommendedMachines machines={product.recommendedMachines} />
             )}
 
             <section className="py-16 bg-vending-blue-dark text-white">
