@@ -1,6 +1,6 @@
-
 import { useContentful } from "@/hooks/useContentful";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
+import { CMS_MODELS } from "@/config/cms";
 
 function toStringParam(value: unknown): string {
   if (value === undefined || value === null) return '';
@@ -33,7 +33,7 @@ function createBlogQueryParams(options: UseBlogPostsOptions): Record<string, str
   console.log("[createBlogQueryParams] Creating query with options:", options);
   
   const params: Record<string, string> = {
-    content_type: "blogPost",
+    content_type: CMS_MODELS.BLOG_POST,
     order: options.order || "-sys.createdAt",
     limit: String(options.limit ?? 10),
     skip: String(options.skip ?? 0),
@@ -100,6 +100,7 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
           total: response.total,
           items: response.items?.length,
           includes: response.includes,
+          contentType: params.content_type
         });
         
         if (!Array.isArray(response.items)) {

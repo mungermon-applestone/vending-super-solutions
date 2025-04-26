@@ -1,10 +1,9 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { Document } from "@contentful/rich-text-types";
 import { Asset, Entry } from "contentful";
+import { CMS_MODELS } from "@/config/cms";
 
-// Define the blog post content type for Contentful
 export interface BlogPostFields {
   title: string;
   slug: string;
@@ -16,7 +15,6 @@ export interface BlogPostFields {
   tags?: string[];
 }
 
-// Type for a complete blog post entry with includes
 export interface ContentfulBlogPost {
   sys: {
     id: string;
@@ -46,12 +44,10 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
       const client = await getContentfulClient();
       
       try {
-        // Query entries with content_type 'blogPost' and matching slug
-        // Include 2 levels of references to get embedded assets
         const response = await client.getEntries({
-          content_type: "blogPost",
+          content_type: CMS_MODELS.BLOG_POST,
           "fields.slug": slug,
-          include: 3,  // Increased to level 3 to ensure deeply nested references are resolved
+          include: 3,
           limit: 1,
         });
         
@@ -62,7 +58,6 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
           throw new Error(`Blog post not found for slug: ${slug}`);
         }
         
-        // Get the first item and add the includes to it for easy access to referenced assets
         const post = response.items[0];
         const enhancedPost = {
           ...post,
@@ -71,7 +66,6 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
         
         console.log('Enhanced post with includes:', enhancedPost);
         
-        // Cast the response to our ContentfulBlogPost type
         return enhancedPost as unknown as ContentfulBlogPost;
       } catch (error) {
         console.error('Error fetching blog post:', error);
