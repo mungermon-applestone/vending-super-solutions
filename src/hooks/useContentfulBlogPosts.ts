@@ -2,21 +2,11 @@
 import { useContentful } from "@/hooks/useContentful";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 
-// === Helper utility for safe query key stringification ===
-/**
- * Ensures React Query keys are always strings (avoid TS2322 errors!)
- * Allows numbers, undefined, null, etc to safely be used.
- * Always use when passing variables into queryKey arrays!
- */
 function toStringParam(value: unknown): string {
   if (value === undefined || value === null) return '';
   return String(value);
 }
 
-/**
- * Type for a single Contentful blog post.
- * All fields are optional where possible to allow for incomplete data.
- */
 export interface ContentfulBlogPost {
   id: string;
   title: string;
@@ -36,31 +26,34 @@ interface UseBlogPostsOptions {
   limit?: number;
   skip?: number;
   tag?: string;
+  order?: string;
 }
 
-/**
- * Prepare Contentful API query params, always as strings.
- */
 function createBlogQueryParams(options: UseBlogPostsOptions): Record<string, string> {
+  console.log("Creating blog query params with options:", options);
+  
   const params: Record<string, string> = {
     content_type: "blogPost",
-    order: "-fields.publishDate",
+    order: options.order || "-fields.publishDate",
     limit: String(options.limit ?? 10),
     skip: String(options.skip ?? 0),
   };
+  
   if (options.tag) {
     params["metadata.tags.sys.id[in]"] = options.tag;
   }
+  
+  console.log("Final query params:", params);
   return params;
 }
 
-/**
- * Map raw Contentful entry to a strongly typed JS object for UI consumption.
- */
 function toContentfulBlogPost(item: any): ContentfulBlogPost {
+  console.log("Processing blog post item:", item);
+  
   const fields = item.fields || {};
   const imageField = fields.featuredImage?.fields?.file?.url;
-  return {
+  
+  const post = {
     id: item.sys?.id || "",
     title: fields.title || "Untitled",
     slug: fields.slug || "",
@@ -76,36 +69,49 @@ function toContentfulBlogPost(item: any): ContentfulBlogPost {
     author: fields.author || "",
     tags: fields.tags || [],
   };
+  
+  console.log("Transformed blog post:", post);
+  return post;
 }
 
-/**
- * Hook to fetch Contentful blog posts.
- * Keeps the API and returned data shape the same for drop-in UI compatibility.
- * 
- * Always ensure ALL dynamic queryKey params are strings by using `toStringParam`.
- * This will avoid type errors if options are left as numbers or undefined.
- */
 export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
-  const limit = options.limit ?? 10;
-  const skip = options.skip ?? 0;
-  const tag = options.tag ?? "";
-  
   return useContentful<ContentfulBlogPost[]>({
     queryKey: [
       "contentful-blog-posts",
-      toStringParam(limit),
-      toStringParam(skip),
-      toStringParam(tag),
+      toStringParam(options.limit),
+      toStringParam(options.skip),
+      toStringParam(options.tag),
+      toStringParam(options.order),
     ],
     queryFn: async () => {
-      const client = await getContentfulClient();
-      const params = createBlogQueryParams(options);
-      const response = await client.getEntries(params);
-      if (!Array.isArray(response.items)) return [];
-      return response.items.map(toContentfulBlogPost);
+      console.log("Fetching blog posts with options:", options);
+      
+      try {
+        const client = await getContentfulClient();
+        const params = createBlogQueryParams(options);
+        const response = await client.getEntries(params);
+        
+        console.log("Contentful response:", {
+          total: response.total,
+          itemCount: response.items.length,
+          skip: response.skip,
+          limit: response.limit,
+        });
+        
+        if (!Array.isArray(response.items)) {
+          console.error("Invalid response format - items is not an array:", response);
+          return [];
+        }
+        
+        const posts = response.items.map(toContentfulBlogPost);
+        console.log(`Successfully processed ${posts.length} blog posts`);
+        return posts;
+      } catch (error) {
+        console.error("Error fetching blog posts:", error);
+        throw error;
+      }
     },
     fallbackData: [],
-    enableToasts: false,
+    enableToasts: true,
   });
 }
-
