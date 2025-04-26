@@ -3,6 +3,15 @@ import { useContentful } from '@/hooks/useContentful';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { CMS_MODELS } from '@/config/cms';
 
+// Define interfaces for type safety
+interface ContentfulQueryParams {
+  content_type: string;
+  order: string;
+  limit: string;
+  skip: string;
+  'metadata.tags.sys.id[in]'?: string;
+}
+
 export interface ContentfulBlogPost {
   id: string;
   title: string;
@@ -62,11 +71,11 @@ export function useContentfulBlogPosts(options: BlogPostsQueryOptions = {}) {
       
       const client = await getContentfulClient();
       
-      const queryParams = {
+      const queryParams: ContentfulQueryParams = {
         content_type: CMS_MODELS.BLOG_POST,
         order,
-        limit: String(limit),  // Convert number to string
-        skip: String(skip),    // Convert number to string
+        limit: String(limit),
+        skip: String(skip),
         ...(tag && { 'metadata.tags.sys.id[in]': tag })
       };
 
