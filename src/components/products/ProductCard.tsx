@@ -14,13 +14,18 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const navigate = useNavigate();
   
   return (
-    <div className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow">
+    <article 
+      className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow"
+      itemScope 
+      itemType="https://schema.org/Product"
+    >
       <div className="w-full h-48 overflow-hidden bg-gray-100">
         {product.image ? (
           <Image 
             src={product.image.url} 
             alt={product.image.alt || product.title} 
             className="w-full h-full object-cover"
+            itemProp="image"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-50">
@@ -29,18 +34,19 @@ const ProductCard = ({ product }: ProductCardProps) => {
         )}
       </div>
       <div className="p-6">
-        <h3 className="text-xl font-semibold mb-3">{product.title}</h3>
-        <p className="text-gray-600 mb-4 line-clamp-3">{product.description}</p>
+        <h3 className="text-xl font-semibold mb-3" itemProp="name">{product.title}</h3>
+        <p className="text-gray-600 mb-4 line-clamp-3" itemProp="description">{product.description}</p>
         <Button 
           variant="ghost" 
           className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
           onClick={() => navigate(`/products/${product.slug}`)}
+          aria-label={`Learn more about ${product.title}`}
         >
           Learn more
-          <ArrowRight className="ml-2 h-4 w-4" />
+          <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
-    </div>
+    </article>
   );
 };
 

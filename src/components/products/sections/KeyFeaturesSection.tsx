@@ -17,25 +17,25 @@ const KeyFeaturesSection = ({ title, description, features }: KeyFeaturesSection
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           {title && (
-            <h2 className="text-3xl font-bold mb-8 text-center text-gray-900">{title}</h2>
+            <h2 id="key-features-title" className="text-3xl font-bold mb-8 text-center text-gray-900">{title}</h2>
           )}
           
           {description && (
             <div className="flex items-start justify-center gap-3 mb-10">
-              <FileText className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+              <FileText className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" aria-hidden="true" />
               <p className="text-lg text-gray-700 text-left">{description}</p>
             </div>
           )}
 
           {features && features.length > 0 && (
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ul className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6" aria-label="Product features">
               {features.map((feature, index) => (
-                <div key={index} className="flex items-start gap-3 p-4 bg-white rounded-lg shadow-sm">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" />
+                <li key={index} className="flex items-start gap-3 p-4 bg-white rounded-lg shadow-sm">
+                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-1" aria-hidden="true" />
                   <p className="text-gray-700">{feature}</p>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
       </div>

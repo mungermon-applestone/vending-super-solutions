@@ -7,8 +7,8 @@ import { CMS_MODELS } from '@/config/cms';
 interface ContentfulQueryParams {
   content_type: string;
   order: string;
-  limit: string;
-  skip: string;
+  limit: number;
+  skip: number;
   'metadata.tags.sys.id[in]'?: string;
 }
 
@@ -74,8 +74,8 @@ export function useContentfulBlogPosts(options: BlogPostsQueryOptions = {}) {
       const queryParams: ContentfulQueryParams = {
         content_type: CMS_MODELS.BLOG_POST,
         order,
-        limit: String(limit),
-        skip: String(skip),
+        limit: limit,
+        skip: skip,
         ...(tag && { 'metadata.tags.sys.id[in]': tag })
       };
 
