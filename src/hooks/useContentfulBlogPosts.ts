@@ -30,11 +30,11 @@ interface UseBlogPostsOptions {
 }
 
 function createBlogQueryParams(options: UseBlogPostsOptions): Record<string, string> {
-  console.log("Creating blog query params with options:", options);
+  console.log("[createBlogQueryParams] Creating query with options:", options);
   
   const params: Record<string, string> = {
     content_type: "blogPost",
-    order: options.order || "-fields.publishDate",
+    order: options.order || "-sys.createdAt",
     limit: String(options.limit ?? 10),
     skip: String(options.skip ?? 0),
   };
@@ -43,15 +43,19 @@ function createBlogQueryParams(options: UseBlogPostsOptions): Record<string, str
     params["metadata.tags.sys.id[in]"] = options.tag;
   }
   
-  console.log("Final query params:", params);
+  console.log("[createBlogQueryParams] Final query params:", params);
   return params;
 }
 
 function toContentfulBlogPost(item: any): ContentfulBlogPost {
-  console.log("Processing blog post item:", item);
+  console.log("[toContentfulBlogPost] Processing blog post item:", {
+    id: item.sys?.id,
+    title: item.fields?.title,
+    slug: item.fields?.slug
+  });
   
   const fields = item.fields || {};
-  const imageField = fields.featuredImage?.fields?.file?.url;
+  const imageField = fields.featuredImage?.fields?.file;
   
   const post = {
     id: item.sys?.id || "",
@@ -62,7 +66,7 @@ function toContentfulBlogPost(item: any): ContentfulBlogPost {
     publishDate: fields.publishDate ?? null,
     featuredImage: imageField
       ? {
-          url: `https:${fields.featuredImage.fields.file.url}`,
+          url: `https:${imageField.url}`,
           title: fields.featuredImage.fields.title || "",
         }
       : undefined,
@@ -70,7 +74,7 @@ function toContentfulBlogPost(item: any): ContentfulBlogPost {
     tags: fields.tags || [],
   };
   
-  console.log("Transformed blog post:", post);
+  console.log("[toContentfulBlogPost] Transformed post:", post);
   return post;
 }
 
@@ -84,30 +88,30 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
       toStringParam(options.order),
     ],
     queryFn: async () => {
-      console.log("Fetching blog posts with options:", options);
+      console.log("[useContentfulBlogPosts] Fetching blog posts with options:", options);
       
       try {
         const client = await getContentfulClient();
         const params = createBlogQueryParams(options);
-        const response = await client.getEntries(params);
+        console.log("[useContentfulBlogPosts] Fetching with params:", params);
         
-        console.log("Contentful response:", {
+        const response = await client.getEntries(params);
+        console.log("[useContentfulBlogPosts] Raw response:", {
           total: response.total,
-          itemCount: response.items.length,
-          skip: response.skip,
-          limit: response.limit,
+          items: response.items?.length,
+          includes: response.includes,
         });
         
         if (!Array.isArray(response.items)) {
-          console.error("Invalid response format - items is not an array:", response);
+          console.error("[useContentfulBlogPosts] Invalid response - items is not an array:", response);
           return [];
         }
         
         const posts = response.items.map(toContentfulBlogPost);
-        console.log(`Successfully processed ${posts.length} blog posts`);
+        console.log(`[useContentfulBlogPosts] Successfully processed ${posts.length} blog posts`);
         return posts;
       } catch (error) {
-        console.error("Error fetching blog posts:", error);
+        console.error("[useContentfulBlogPosts] Error fetching blog posts:", error);
         throw error;
       }
     },

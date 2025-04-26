@@ -12,21 +12,22 @@ import BlogHeroCard from "@/components/blog/BlogHeroCard";
 import Image from "@/components/common/Image";
 import InquiryForm from "@/components/machines/contact/InquiryForm";
 import ContentfulErrorBoundary from "@/components/common/ContentfulErrorBoundary";
+import ContentfulFallbackMessage from "@/components/common/ContentfulFallbackMessage";
 
 const BlogPage: React.FC = () => {
   const { 
     data: pageContent, 
-    isLoading: isLoadingContent, 
+    isLoading: isLoadingContent,
     error: contentError 
   } = useContentfulBlogPageContent();
   
   const { 
     data: blogPosts = [], 
-    isLoading: isLoadingPosts, 
+    isLoading: isLoadingPosts,
     error: postsError 
   } = useContentfulBlogPosts({ 
     limit: 9,
-    order: "-fields.publishDate" 
+    order: "-sys.createdAt" 
   });
 
   const isLoading = isLoadingContent || isLoadingPosts;
@@ -34,17 +35,15 @@ const BlogPage: React.FC = () => {
 
   // Enhanced logging for debugging
   React.useEffect(() => {
-    console.log("Blog posts data state:", {
+    console.log("[BlogPage] Current state:", {
       blogPosts,
       pageContent,
       isLoading,
-      contentError,
-      postsError,
+      error,
       totalPosts: blogPosts?.length || 0
     });
-  }, [blogPosts, pageContent, isLoading, contentError, postsError]);
+  }, [blogPosts, pageContent, isLoading, error]);
 
-  // Handle loading state
   if (isLoading) {
     return (
       <Layout>
@@ -55,20 +54,20 @@ const BlogPage: React.FC = () => {
     );
   }
 
-  // Handle error state with more detail
   if (error) {
     return (
       <Layout>
         <div className="container mx-auto p-4">
-          <div className="bg-red-50 border border-red-200 p-4 rounded-md mb-8">
-            <h2 className="text-lg font-semibold text-red-700 mb-2">Error loading blog content</h2>
-            <p className="text-red-600">{error instanceof Error ? error.message : 'An error occurred loading the blog'}</p>
-            {process.env.NODE_ENV === 'development' && (
-              <pre className="mt-4 p-2 bg-red-100 rounded text-xs overflow-auto">
-                {JSON.stringify({ contentError, postsError }, null, 2)}
-              </pre>
-            )}
-          </div>
+          <ContentfulFallbackMessage
+            message="We're having trouble loading the blog content. Please try again later."
+            contentType="blog"
+            showRefresh={true}
+          />
+          {process.env.NODE_ENV === 'development' && (
+            <pre className="mt-4 p-2 bg-red-100 rounded text-xs overflow-auto">
+              {JSON.stringify({ contentError, postsError }, null, 2)}
+            </pre>
+          )}
         </div>
       </Layout>
     );
