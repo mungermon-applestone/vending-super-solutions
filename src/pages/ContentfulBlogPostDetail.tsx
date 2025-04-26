@@ -7,7 +7,6 @@ import { useContentfulBlogPostBySlug, ContentfulBlogPost } from "@/hooks/useCont
 import { Loader2 } from "lucide-react";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { useQuery } from "@tanstack/react-query";
-import { EntryCollection } from "contentful";
 
 // Interface for adjacent post navigation
 interface AdjacentBlogPost {
@@ -33,6 +32,8 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
     queryKey: ["contentful-adjacent-posts", currentSlug],
     enabled: !!currentSlug,
     queryFn: async () => {
+      console.log('[useAdjacentContentfulPosts] Current slug:', currentSlug);
+      
       if (!currentSlug) return { previous: null, next: null };
       const client = await getContentfulClient();
       
@@ -44,13 +45,18 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
       });
       
       const posts = response.items || [];
+      console.log('[useAdjacentContentfulPosts] Total posts:', posts.length);
       
       const idx = posts.findIndex(p => p.fields && p.fields.slug === currentSlug);
+      console.log('[useAdjacentContentfulPosts] Current post index:', idx);
+      
       if (idx === -1) return { previous: null, next: null };
       
-      // Create strongly typed objects for adjacent posts
       const previous = idx > 0 ? extractSafeBlogInfo(posts[idx - 1]) : null;
       const next = idx < posts.length - 1 ? extractSafeBlogInfo(posts[idx + 1]) : null;
+      
+      console.log('[useAdjacentContentfulPosts] Previous post:', previous);
+      console.log('[useAdjacentContentfulPosts] Next post:', next);
       
       return { previous, next };
     }
@@ -66,51 +72,53 @@ const ContentfulBlogPostDetail = () => {
     error,
   } = useContentfulBlogPostBySlug({ slug });
 
-  // Fetch prev/next posts based on publish date order (for navigation)
   const { data: adjacentPosts, isLoading: isLoadingAdjacent } = useAdjacentContentfulPosts(slug);
 
-  // Debug output
   React.useEffect(() => {
-    console.log("ContentfulBlogPostDetail - Current slug:", slug);
-    console.log("ContentfulBlogPostDetail - Post data:", post);
+    console.log('ContentfulBlogPostDetail - Current slug:', slug);
+    console.log('ContentfulBlogPostDetail - Post data:', post);
     
-    if (post?.includes) {
-      console.log("ContentfulBlogPostDetail - Includes:", post.includes);
-      
-      if (post.includes.Asset) {
-        console.log("ContentfulBlogPostDetail - Assets:", post.includes.Asset.length);
-        post.includes.Asset.forEach(asset => {
-          console.log(`Asset ${asset.sys.id}:`, asset.fields?.file?.url);
-        });
-      }
-    }
-  }, [post, slug]);
-
-  React.useEffect(() => {
-    if (!isLoadingPost && !post && slug) {
+    if (!isLoadingPost && !post) {
+      console.error('No post found, navigating to not found');
       navigate("/not-found", { replace: true });
     }
-  }, [slug, post, isLoadingPost, navigate]);
+  }, [post, slug, isLoadingPost, navigate]);
+
+  const isLoading = isLoadingPost || isLoadingAdjacent;
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-16 flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="container mx-auto p-4">
+          <div className="bg-red-50 border border-red-200 p-4 rounded-md mb-8">
+            <h2 className="text-lg font-semibold text-red-700 mb-2">Error loading blog post</h2>
+            <p className="text-red-600">{error instanceof Error ? error.message : 'Unknown error'}</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+  
+  if (!post) return null;
 
   return (
     <Layout>
-      <div className="container mx-auto py-12">
-        {(isLoadingPost || isLoadingAdjacent) ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-          </div>
-        ) : error ? (
-          <div className="text-center py-16">
-            <p className="text-red-500">Something went wrong. Please try again later.</p>
-            <div className="text-xs mt-4">{String(error)}</div>
-          </div>
-        ) : post ? (
-          <ContentfulBlogPostContent
-            post={post}
-            previousPost={adjacentPosts?.previous}
-            nextPost={adjacentPosts?.next}
-          />
-        ) : null}
+      <div className="container mx-auto py-12">        
+        <ContentfulBlogPostContent 
+          post={post} 
+          previousPost={adjacentPosts?.previous}
+          nextPost={adjacentPosts?.next}
+        />
       </div>
     </Layout>
   );

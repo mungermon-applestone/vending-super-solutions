@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { Document } from "@contentful/rich-text-types";
@@ -40,6 +41,8 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
     queryKey: ["contentful-blog-post", slug],
     enabled: !!slug,
     queryFn: async () => {
+      console.log('[useContentfulBlogPostBySlug] Fetching post with slug:', slug);
+      
       if (!slug) throw new Error("No slug provided");
       const client = await getContentfulClient();
       
@@ -51,10 +54,11 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
           limit: 1,
         });
         
-        console.log('Contentful Response for slug ' + slug + ':', response);
+        console.log('[useContentfulBlogPostBySlug] Raw response:', response);
+        console.log('[useContentfulBlogPostBySlug] Response items:', response.items);
         
         if (!response.items.length) {
-          console.error(`No blog post found with slug: ${slug}`);
+          console.error(`[useContentfulBlogPostBySlug] No blog post found with slug: ${slug}`);
           throw new Error(`Blog post not found for slug: ${slug}`);
         }
         
@@ -64,11 +68,11 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
           includes: response.includes
         };
         
-        console.log('Enhanced post with includes:', enhancedPost);
+        console.log('[useContentfulBlogPostBySlug] Enhanced post:', enhancedPost);
         
         return enhancedPost as unknown as ContentfulBlogPost;
       } catch (error) {
-        console.error('Error fetching blog post:', error);
+        console.error('[useContentfulBlogPostBySlug] Error fetching blog post:', error);
         throw error;
       }
     }
