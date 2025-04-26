@@ -6,11 +6,47 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { useContentfulBlogPosts, ContentfulBlogPost } from '@/hooks/useContentfulBlogPosts';
+import { useContentfulBlogPosts } from '@/hooks/useContentfulBlogPosts';
+import { useContentfulInit } from '@/hooks/useContentfulInit';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 
 const Blog = () => {
-  // Use our refactored hook with type safety
-  const { data: posts = [], isLoading, error } = useContentfulBlogPosts();
+  const { isInitialized, error: initError } = useContentfulInit();
+  const { data: posts = [], isLoading, error: postsError, refetch } = useContentfulBlogPosts();
+
+  console.log('[Blog] Contentful initialization status:', { isInitialized, error: initError?.message });
+  console.log('[Blog] Posts fetch status:', { isLoading, postsCount: posts.length });
+
+  if (initError || postsError) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-10">
+          <Alert variant="destructive" className="mb-6">
+            <AlertTitle>Error Loading Blog Posts</AlertTitle>
+            <AlertDescription>
+              {initError?.message || postsError?.message || 'An unknown error occurred'}
+            </AlertDescription>
+          </Alert>
+          <Button onClick={() => refetch()} className="mt-4">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Retry
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!isInitialized || isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-16 flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -18,15 +54,7 @@ const Blog = () => {
         <h1 className="text-4xl font-bold mb-2">Our Blog</h1>
         <p className="text-gray-600 mb-8 text-lg">Latest updates and insights from our team</p>
         
-        {isLoading ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-          </div>
-        ) : error ? (
-          <div className="bg-red-50 border border-red-200 p-4 rounded-md mb-8">
-            <p className="text-red-600">Error loading blog posts. Please try again later.</p>
-          </div>
-        ) : posts.length > 0 ? (
+        {posts.length > 0 ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => (
               <BlogPostCard key={post.id} post={post} />
