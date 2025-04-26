@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { useContentfulBlogPosts } from '@/hooks/useContentfulBlogPosts';
+import { useContentfulBlogPosts, ContentfulBlogPost } from '@/hooks/useContentfulBlogPosts';
 import { useContentfulInit } from '@/hooks/useContentfulInit';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';

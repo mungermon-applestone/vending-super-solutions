@@ -65,8 +65,8 @@ export function useContentfulBlogPosts(options: BlogPostsQueryOptions = {}) {
       const queryParams = {
         content_type: CMS_MODELS.BLOG_POST,
         order,
-        limit: String(limit),
-        skip: String(skip),
+        limit: String(limit),  // Convert number to string
+        skip: String(skip),    // Convert number to string
         ...(tag && { 'metadata.tags.sys.id[in]': tag })
       };
 
