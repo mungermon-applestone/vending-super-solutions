@@ -1,9 +1,9 @@
-
 import React from "react";
 import { ContentfulBlogPost } from "@/hooks/useContentfulBlogPostBySlug";
 import ContentfulBlogPostHeader from "./ContentfulBlogPostHeader";
 import ContentfulBlogPostBody from "./ContentfulBlogPostBody";
 import ContentfulBlogPostFooter from "./ContentfulBlogPostFooter";
+import ContentfulErrorBoundary from "@/components/common/ContentfulErrorBoundary";
 
 interface AdjacentBlogPost {
   slug: string;
@@ -22,7 +22,12 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
   nextPost,
 }) => {
   if (!post || !post.fields) {
-    return <div>Error: Blog post data is missing</div>;
+    console.error("[ContentfulBlogPostContent] Missing or invalid post data:", post);
+    return (
+      <ContentfulErrorBoundary contentType="blog post">
+        <div>Error: Blog post data is missing or invalid</div>
+      </ContentfulErrorBoundary>
+    );
   }
 
   const { title = "Untitled", content, excerpt, publishDate, featuredImage } = post.fields;
@@ -30,34 +35,41 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
   // Extract included assets from the response if available
   const includedAssets = post.includes?.Asset || [];
   
-  // For debugging
+  // Enhanced debugging
   React.useEffect(() => {
-    console.log("Post data:", post);
-    console.log("Included assets:", includedAssets);
+    console.log("[ContentfulBlogPostContent] Rendering post:", {
+      title,
+      hasContent: !!content,
+      assetCount: includedAssets.length,
+      publishDate,
+    });
+    
     if (includedAssets?.length) {
       includedAssets.forEach(asset => {
-        console.log(`Asset ${asset.sys.id}:`, asset.fields);
+        console.log(`[ContentfulBlogPostContent] Asset ${asset.sys.id}:`, asset.fields);
       });
     }
-  }, [post, includedAssets]);
+  }, [post, includedAssets, title, content, publishDate]);
 
   return (
-    <article className="max-w-3xl mx-auto">
-      <ContentfulBlogPostHeader
-        title={title}
-        publishDate={publishDate}
-        featuredImage={featuredImage}
-        excerpt={excerpt}
-      />
-      <ContentfulBlogPostBody 
-        content={content} 
-        includedAssets={includedAssets}
-      />
-      <ContentfulBlogPostFooter
-        previousPost={previousPost}
-        nextPost={nextPost}
-      />
-    </article>
+    <ContentfulErrorBoundary contentType="blog post">
+      <article className="max-w-3xl mx-auto">
+        <ContentfulBlogPostHeader
+          title={title}
+          publishDate={publishDate}
+          featuredImage={featuredImage}
+          excerpt={excerpt}
+        />
+        <ContentfulBlogPostBody 
+          content={content} 
+          includedAssets={includedAssets}
+        />
+        <ContentfulBlogPostFooter
+          previousPost={previousPost}
+          nextPost={nextPost}
+        />
+      </article>
+    </ContentfulErrorBoundary>
   );
 };
 

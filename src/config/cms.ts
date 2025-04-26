@@ -1,4 +1,3 @@
-
 /**
  * CMS Configuration
  * 
@@ -67,7 +66,8 @@ export const CMS_MODELS = {
   BUSINESS_GOAL: 'business-goal',
   TESTIMONIAL: 'testimonial',
   CASE_STUDY: 'case-study',
-  BLOG_POST: 'blog-post',
+  BLOG_POST: 'blogPost',
+  BLOG_PAGE_CONTENT: 'blogPageContent',
 };
 
 // Image transformations

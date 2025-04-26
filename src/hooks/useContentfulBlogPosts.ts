@@ -88,7 +88,7 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
       toStringParam(options.order),
     ],
     queryFn: async () => {
-      console.log("[useContentfulBlogPosts] Fetching blog posts with options:", options);
+      console.log("[useContentfulBlogPosts] Starting blog posts fetch with options:", options);
       
       try {
         const client = await getContentfulClient();
@@ -100,7 +100,7 @@ export function useContentfulBlogPosts(options: UseBlogPostsOptions = {}) {
           total: response.total,
           items: response.items?.length,
           includes: response.includes,
-          contentType: params.content_type
+          firstPost: response.items?.[0]?.fields,
         });
         
         if (!Array.isArray(response.items)) {
