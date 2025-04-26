@@ -1,6 +1,6 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
+import SEO from '@/components/seo/SEO';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import { useQueryClient } from '@tanstack/react-query';
@@ -46,6 +46,12 @@ const Products = () => {
   
   return (
     <Layout>
+      <SEO 
+        title="Products"
+        description={pageContent?.categoriesSectionDescription || "Explore our comprehensive range of vending solutions designed for modern businesses. Find the perfect product type for your needs."}
+        type="website"
+        canonicalUrl={window.location.href}
+      />
       <ContentfulErrorBoundary contentType="Products">
         <ProductsHero />
 

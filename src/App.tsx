@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import {
   BrowserRouter as Router,
@@ -6,6 +5,7 @@ import {
   Routes,
   Navigate
 } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 
 import Products from '@/pages/Products';
 import Contact from '@/pages/Contact';
@@ -125,17 +125,19 @@ const App: React.FC = () => {
   ];
 
   return (
-    <Router>
-      <Routes>
-        {routes.map((route, index) => (
-          <Route
-            key={index}
-            path={route.path}
-            element={route.element}
-          />
-        ))}
-      </Routes>
-    </Router>
+    <HelmetProvider>
+      <Router>
+        <Routes>
+          {routes.map((route, index) => (
+            <Route
+              key={index}
+              path={route.path}
+              element={route.element}
+            />
+          ))}
+        </Routes>
+      </Router>
+    </HelmetProvider>
   );
 };
 
