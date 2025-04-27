@@ -7,73 +7,8 @@ import { useTechnologySections } from '@/hooks/useTechnologySections';
 import { useIsFetching } from '@tanstack/react-query';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TechFeature } from '@/types/technology';
 import { AlertTriangle } from 'lucide-react';
 import { CMSTechnology } from '@/types/cms';
-
-// Helper function to transform CMSTechnology data to the format expected by TechnologySection
-const mapTechnologyData = (tech: CMSTechnology) => {
-  // Extract features from technology sections if available
-  const features: TechFeature[] = tech.sections?.[0]?.features?.map(feature => ({
-    icon: feature.icon || 'server',
-    title: feature.title || '',
-    description: feature.description || '',
-    items: feature.items?.map(item => item.text) || []
-  })) || [];
-
-  // Get the summary from the appropriate fields
-  // First check if sections exist and have summary field directly
-  let summaryText = '';
-  
-  if (tech.sections && tech.sections.length > 0) {
-    // Look for summary field first (as per Contentful schema)
-    if (tech.sections[0].summary) {
-      summaryText = tech.sections[0].summary;
-      console.log(`[mapTechnologyData] Found summary in tech.sections[0].summary: "${summaryText.substring(0, 50)}..."`);
-    } 
-    // Fall back to description if no summary found
-    else if (tech.sections[0].description) {
-      summaryText = tech.sections[0].description;
-      console.log(`[mapTechnologyData] Using description as fallback: "${summaryText.substring(0, 50)}..."`);
-    }
-  } 
-  // If no sections or no summary/description in sections, try technology-level description
-  else if (tech.description) {
-    summaryText = tech.description;
-    console.log(`[mapTechnologyData] Using tech.description: "${summaryText.substring(0, 50)}..."`);
-  }
-  
-  console.log(`[mapTechnologyData] Technology '${tech.title}' summary data:`, {
-    hasSections: !!tech.sections && tech.sections.length > 0,
-    sectionSummary: tech.sections?.[0]?.summary,
-    sectionDescription: tech.sections?.[0]?.description,
-    techDescription: tech.description,
-    finalSummary: summaryText,
-    summaryLength: summaryText.length
-  });
-  
-  // Extract bullet points if available
-  const bulletPoints = tech.sections?.[0]?.bulletPoints || [];
-
-  // Extract image URL from the technology or its sections with proper fallbacks
-  const imageUrl = 
-    (tech.image_url) || 
-    (tech.image && typeof tech.image === 'object' && tech.image.url) ||
-    (tech.image && typeof tech.image === 'string' ? tech.image : '') ||
-    (tech.sections?.[0]?.sectionImage?.url) ||
-    (tech.sections?.[0]?.image?.url) ||
-    (tech.sections?.[0]?.images?.[0]?.url) ||
-    '';
-
-  return {
-    id: tech.id,
-    title: tech.title,
-    summary: summaryText,
-    bulletPoints: bulletPoints,
-    features: features,
-    image: imageUrl
-  };
-};
 
 const SimpleTechnologyPage = () => {
   const { technologies = [], isLoading, error } = useTechnologySections({
@@ -85,17 +20,34 @@ const SimpleTechnologyPage = () => {
   const transformedTechnologies = technologies.map(tech => {
     console.log(`[SimpleTechnologyPage] Transforming tech '${tech.title}'`, {
       techData: tech,
+      sections: tech.sections,
       hasImage: !!tech.image
     });
+
+    let summary = '';
+    let bulletPoints: string[] = [];
+    
+    // Get summary from first section if available, otherwise use tech description
+    if (tech.sections && tech.sections.length > 0) {
+      summary = tech.sections[0].summary || tech.sections[0].description || '';
+      bulletPoints = tech.sections[0].bulletPoints || [];
+    }
+    
+    // Fallback to technology description if no section summary
+    if (!summary && tech.description) {
+      summary = tech.description;
+    }
 
     return {
       id: tech.id,
       title: tech.title,
-      summary: tech.summary,
-      bulletPoints: tech.bulletPoints,
-      features: tech.features,
+      summary,
+      bulletPoints,
       image: {
-        url: tech.image?.url || '',
+        url: tech.sections?.[0]?.image?.url || 
+             tech.sections?.[0]?.sectionImage?.url || 
+             (tech.image && typeof tech.image === 'object' ? tech.image.url : '') || 
+             '',
         alt: tech.title || 'Technology section'
       }
     };

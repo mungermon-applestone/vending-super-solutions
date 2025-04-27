@@ -29,16 +29,20 @@ const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => 
           return null;
         }
         
+        const imageUrl = section.image?.url || 
+                        section.sectionImage?.url || 
+                        '';
+        
         return (
           <TechnologySection 
             key={section.id || `section-${index}`} 
             id={section.id || `section-${index}`}
             title={section.title}
-            summary={section.description || ''}
+            summary={section.summary || section.description || ''}
             bulletPoints={section.bulletPoints || []}
             image={{
-              url: section.image?.url || '',
-              alt: section.image?.alt || section.title
+              url: imageUrl,
+              alt: section.title || 'Technology section'
             }}
             index={index}
             className={index === 0 ? 'pt-0' : ''}
