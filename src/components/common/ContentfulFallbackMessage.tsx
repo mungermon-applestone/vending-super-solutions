@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Info } from 'lucide-react';
+import { Info, RefreshCw } from 'lucide-react';
 
 interface ContentfulFallbackMessageProps {
   title?: string;
@@ -43,8 +43,9 @@ const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
           <Button
             variant="outline"
             onClick={() => window.location.reload()}
+            className="flex items-center gap-2"
           >
-            Refresh Page
+            <RefreshCw className="h-4 w-4" /> Refresh Page
           </Button>
         )}
         
@@ -62,6 +63,15 @@ const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
       <p className="text-xs text-gray-500 mt-6">
         Content type: {contentType}
       </p>
+      
+      <div className="mt-4 p-4 bg-gray-100 rounded text-xs text-left">
+        <p className="font-semibold mb-1">Troubleshooting:</p>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Check that Contentful Space ID and Delivery Token are correctly set</li>
+          <li>Verify that the content model exists in your Contentful space</li>
+          <li>Make sure content entries have been published</li>
+        </ul>
+      </div>
     </div>
   );
 };

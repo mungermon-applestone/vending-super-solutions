@@ -6,19 +6,12 @@ import { isContentfulConfigured } from '@/config/cms';
 export function initCMS() {
   console.log('[initCMS] Initializing CMS configuration...');
   
-  if (isContentfulConfigured()) {
-    console.log('[initCMS] Using Contentful CMS provider');
-    setCMSProviderConfig({
-      type: ContentProviderType.CONTENTFUL
-    });
-    return true;
-  } else {
-    console.warn('[initCMS] Contentful not configured, falling back to Supabase CMS provider');
-    setCMSProviderConfig({
-      type: ContentProviderType.SUPABASE
-    });
-    return false;
-  }
+  // Always use Contentful as the CMS provider since we're no longer using Supabase
+  console.log('[initCMS] Using Contentful CMS provider');
+  setCMSProviderConfig({
+    type: ContentProviderType.CONTENTFUL
+  });
+  return true;
 }
 
 export function forceContentfulProvider() {

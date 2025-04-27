@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import {
   BrowserRouter as Router,
@@ -27,9 +28,8 @@ import BlogPage from './pages/BlogPage';
 
 const ContentfulBlogPostDetail = lazy(() => import('./pages/ContentfulBlogPostDetail'));
 
-// Force Contentful provider at application startup
-import { forceContentfulProvider } from '@/services/cms/cmsInit';
-forceContentfulProvider();
+// CMS initialization is now handled in main.tsx
+// No need to force Contentful provider here
 
 const App: React.FC = () => {
   const routes = [

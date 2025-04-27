@@ -2,20 +2,14 @@
 import { ContentProviderConfig, ContentProviderType } from '../types';
 import { TechnologyAdapter } from './types';
 import { contentfulTechnologyAdapter } from './contentfulTechnologyAdapter';
-import { supabaseTechnologyAdapter } from './supabase';
 import { handleCMSError } from '@/services/cms/utils/errorHandling';
 
 export function getTechnologyAdapter(config: ContentProviderConfig): TechnologyAdapter {
   try {
     switch (config.type) {
       case ContentProviderType.CONTENTFUL:
-        console.log('[technologyAdapterFactory] Using Contentful technology adapter');
-        return contentfulTechnologyAdapter;
-      case ContentProviderType.SUPABASE:
-        console.warn('[technologyAdapterFactory] Using Supabase technology adapter (deprecated)');
-        return supabaseTechnologyAdapter;
       default:
-        console.log('[technologyAdapterFactory] No specific adapter found, using Contentful as default');
+        console.log('[technologyAdapterFactory] Using Contentful technology adapter');
         return contentfulTechnologyAdapter;
     }
   } catch (error) {
@@ -24,4 +18,4 @@ export function getTechnologyAdapter(config: ContentProviderConfig): TechnologyA
   }
 }
 
-export { contentfulTechnologyAdapter, supabaseTechnologyAdapter };
+export { contentfulTechnologyAdapter };

@@ -34,41 +34,28 @@ export const getContentfulClient = async () => {
     // Use the centralized configuration from cms.ts
     const { SPACE_ID, DELIVERY_TOKEN, ENVIRONMENT_ID } = CONTENTFUL_CONFIG;
     
-    // Output raw environment variable data for debugging
-    console.log('[getContentfulClient] Raw env vars:', {
-      VITE_CONTENTFUL_SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID,
-      VITE_CONTENTFUL_ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID,
-      VITE_CONTENTFUL_DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN ? '[PRESENT]' : '[NOT PRESENT]',
-      CONTENTFUL_DELIVERY_TOKEN: typeof import.meta.env.CONTENTFUL_DELIVERY_TOKEN !== 'undefined' ? '[PRESENT]' : '[NOT PRESENT]',
+    // Output configuration for debugging
+    console.log('[getContentfulClient] Configuration:', {
+      hasSpaceId: !!SPACE_ID,
+      spaceIdLength: SPACE_ID?.length || 0,
+      hasDeliveryToken: !!DELIVERY_TOKEN, 
+      deliveryTokenLength: DELIVERY_TOKEN?.length || 0,
+      environmentId: ENVIRONMENT_ID
     });
     
     lastConfigCheck = now;
     lastConfigError = null;
     configRetryCount = 0;
     
-    // Add more detailed logging for configuration
-    console.log('[getContentfulClient] Configuration:', {
-      hasSpaceId: !!SPACE_ID,
-      spaceIdLength: SPACE_ID?.length || 0,
-      hasDeliveryToken: !!DELIVERY_TOKEN, 
-      deliveryTokenLength: DELIVERY_TOKEN?.length || 0,
-      environmentId: ENVIRONMENT_ID,
-      envVarFormat: {
-        spaceIdType: typeof import.meta.env.VITE_CONTENTFUL_SPACE_ID,
-        deliveryTokenType: typeof import.meta.env.CONTENTFUL_DELIVERY_TOKEN,
-        viteDeliveryTokenType: typeof import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
-      }
-    });
-    
     if (!SPACE_ID) {
       console.error('[getContentfulClient] Missing Space ID');
-      toast.error('Missing Contentful Space ID. Please check your environment variables.');
+      toast.error('Missing Contentful Space ID. Using hardcoded development values.');
       throw new Error('Missing required Contentful credentials - Space ID not found');
     }
     
     if (!DELIVERY_TOKEN) {
       console.error('[getContentfulClient] Missing Delivery Token (CDA)');
-      toast.error('Missing Contentful Delivery Token. Please check your environment variables.');
+      toast.error('Missing Contentful Delivery Token. Using hardcoded development values.');
       throw new Error('Missing required Contentful credentials - Delivery Token not found');
     }
     
@@ -85,7 +72,6 @@ export const getContentfulClient = async () => {
     
     console.log('[getContentfulClient] Successfully created and tested Contentful client');
     console.log(`[getContentfulClient] Test query returned ${testEntry.total} total entries`);
-    toast.success('Successfully connected to Contentful');
     
     return contentfulClient;
   } catch (error) {
@@ -94,9 +80,6 @@ export const getContentfulClient = async () => {
     // Track the error
     lastConfigError = error instanceof Error ? error : new Error(String(error));
     configRetryCount++;
-    
-    // Show error toast
-    toast.error(`Contentful connection error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     
     // If we have a client and haven't exceeded retry count, keep using it
     if (contentfulClient && configRetryCount < MAX_RETRIES) {

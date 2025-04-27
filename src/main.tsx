@@ -3,7 +3,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
-import { forceContentfulProvider } from './services/cms/cmsInit'
+import { initCMS } from './services/cms/cmsInit'
 import { toast } from 'sonner'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './context/AuthContext'
@@ -22,8 +22,8 @@ const queryClient = new QueryClient({
 
 // Initialize application
 const initApp = async () => {
-  // Force use of Contentful provider
-  forceContentfulProvider();
+  // Initialize CMS with Contentful
+  initCMS();
   toast.success('Using Contentful as CMS provider');
   
   // Render application

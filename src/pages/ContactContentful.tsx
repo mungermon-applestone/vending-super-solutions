@@ -12,6 +12,7 @@ import ContactForm from '@/components/contact/ContactForm';
 import FAQSection from '@/components/contact/FAQSection';
 import ContactLoadingState from "@/components/contact/ContactLoadingState";
 import ContactErrorState from "@/components/contact/ContactErrorState";
+import ContactFallback from "@/components/contact/ContactFallback";
 import { useContactFAQ } from "@/hooks/useContactFAQ";
 import SEO from '@/components/seo/SEO';
 
@@ -27,12 +28,10 @@ const ContactContentful = () => {
   }, [setBreadcrumbs]);
 
   if (isLoading) return <ContactLoadingState />;
-  if (error) return <ContactErrorState error={error} includesEntryCount={rawData?.includes?.Entry?.length} knownFAQIds={[
-    '1G2bj8dVx40vjJKK4d9fIc',
-    '7If3Y7Mw2Gw1nPtCKLTrnN',
-    '4JdSdjNDiPvmxVJPSCCYs5',
-    '7mgtPwOLEiLSmmQ84jaYaB'
-  ]} />;
+  if (error) {
+    // For serious errors, show the error state
+    return <ContactFallback />;
+  }
 
   return (
     <Layout>
@@ -88,23 +87,9 @@ const ContactContentful = () => {
       
       {/* FAQ Section */}
       <FAQSection 
-        faqSectionTitle={processedData.faqSectionTitle} 
-        faqItems={processedData.faqItems}
+        faqSectionTitle={processedData.faqSectionTitle || 'Frequently Asked Questions'} 
+        faqItems={processedData.faqItems || []}
       />
-      
-      {/* Debug information */}
-      {processedData.faqItems?.length === 0 && (
-        <div className="container mx-auto my-8 p-4 bg-yellow-50 border border-yellow-100 rounded">
-          <h3 className="font-bold text-lg mb-2">FAQ Debug Information</h3>
-          <p>No FAQ items were processed. Check the console for more details.</p>
-          {rawData?.includes?.Entry && (
-            <div className="mt-4">
-              <p>Found {rawData.includes.Entry.length} entries in includes.</p>
-              <p>Known FAQ IDs: {'1G2bj8dVx40vjJKK4d9fIc, 7If3Y7Mw2Gw1nPtCKLTrnN, 4JdSdjNDiPvmxVJPSCCYs5, 7mgtPwOLEiLSmmQ84jaYaB'}</p>
-            </div>
-          )}
-        </div>
-      )}
     </Layout>
   );
 };

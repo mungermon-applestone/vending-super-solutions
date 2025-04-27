@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { ContentfulResponse, ContentfulContactPageFields, ContentfulRichTextDocument } from '@/types/contentful';
@@ -38,19 +37,70 @@ const KNOWN_FAQ_IDS = [
   '7mgtPwOLEiLSmmQ84jaYaB'
 ];
 
-const CONTACT_ID = '1iQrxg7rN4Dk17ZdxPxfhj';
+const CONTACT_IDS = ['1iQrxg7rN4Dk17ZdxPxfhj', '7oWuWtuTxELkkxsAh3Ns6E'];
 
 export function useContactFAQ() {
   const { data, isLoading, error } = useContentful<ContentfulResponse<ContentfulContactPageFields>>({
-    queryKey: ['contact-page-content', CONTACT_ID],
+    queryKey: ['contact-page-content'],
     queryFn: async () => {
       const client = await getContentfulClient();
-      return (await client.getEntry(CONTACT_ID, { include: 3 })) as unknown as ContentfulResponse<ContentfulContactPageFields>;
+      
+      let contentfulError = null;
+      
+      for (const contactId of CONTACT_IDS) {
+        try {
+          console.log(`[useContactFAQ] Trying to fetch contact page content with ID: ${contactId}`);
+          const result = await client.getEntry(contactId, { include: 3 });
+          console.log(`[useContactFAQ] Successfully fetched content with ID: ${contactId}`);
+          return result as unknown as ContentfulResponse<ContentfulContactPageFields>;
+        } catch (err) {
+          console.warn(`[useContactFAQ] Failed to fetch with ID ${contactId}:`, err);
+          contentfulError = err;
+        }
+      }
+      
+      console.error(`[useContactFAQ] All contact ID attempts failed, using fallback data`);
+      
+      return {
+        sys: { id: 'fallback-contact' },
+        fields: {
+          introTitle: 'Get in Touch',
+          introDescription: 'Have questions about our vending solutions? Contact our team today.',
+          phoneCardTitle: 'Call Us',
+          phoneNumber: '(555) 123-4567',
+          phoneAvailability: 'Monday-Friday, 9am-5pm EST',
+          emailCardTitle: 'Email Us',
+          emailAddress: 'contact@example.com',
+          formSectionTitle: 'Send Us a Message',
+          faqSectionTitle: 'Frequently Asked Questions',
+          faqItems: [
+            {
+              sys: { id: 'fallback-faq-1' },
+              fields: {
+                question: 'What types of vending machines do you offer?',
+                answer: 'We offer a wide range of vending machines including snack, beverage, combo, and custom solutions.'
+              }
+            },
+            {
+              sys: { id: 'fallback-faq-2' },
+              fields: {
+                question: 'How do I request maintenance for my machine?',
+                answer: 'You can contact our support team through the form on this page or call our customer service number.'
+              }
+            }
+          ]
+        }
+      } as unknown as ContentfulResponse<ContentfulContactPageFields>;
     },
   });
 
   const processedData = React.useMemo(() => {
-    if (!data) return {} as ContactPageContent;
+    if (!data) return {
+      introTitle: 'Get in Touch',
+      introDescription: 'Have questions about our vending solutions? Contact our team today.',
+      faqItems: []
+    } as ContactPageContent;
+    
     const fields = data.fields || {};
     const typedFields = fields as ContentfulContactPageFields;
     const processedFaqItems: FAQItem[] = [];
