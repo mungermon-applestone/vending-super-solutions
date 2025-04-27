@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -36,75 +35,50 @@ export const EnvironmentVariableManager = () => {
         setDeliveryToken(parsedVars.deliveryToken || '');
         setEnvironmentId(parsedVars.environmentId || 'master');
         
-        // Also load the key names if available
-        if (parsedVars.keyNames) {
-          setSpaceIdKeyName(parsedVars.keyNames.spaceId || 'VITE_CONTENTFUL_SPACE_ID');
-          setDeliveryTokenKeyName(parsedVars.keyNames.deliveryToken || 'VITE_CONTENTFUL_DELIVERY_TOKEN');
-          setEnvironmentIdKeyName(parsedVars.keyNames.environmentId || 'VITE_CONTENTFUL_ENVIRONMENT_ID');
-        }
-        
-        // Initialize window.env on load
-        initializeWindowEnv(parsedVars);
+        // Set key names with VITE_ prefix
+        setSpaceIdKeyName('VITE_CONTENTFUL_SPACE_ID');
+        setDeliveryTokenKeyName('VITE_CONTENTFUL_DELIVERY_TOKEN');
+        setEnvironmentIdKeyName('VITE_CONTENTFUL_ENVIRONMENT_ID');
       }
       setInitialLoad(false);
     } catch (error) {
-      console.error('Failed to load environment variables from storage', error);
+      console.error('[EnvironmentVariableManager] Failed to load variables:', error);
       setInitialLoad(false);
     }
   }, []);
 
-  // Initialize window.env object with stored values
-  const initializeWindowEnv = (vars: any) => {
-    if (!window.env) {
-      window.env = {};
-    }
-    
-    // Use the key names from storage if available
-    const keyNames = vars.keyNames || {
-      spaceId: 'VITE_CONTENTFUL_SPACE_ID',
-      deliveryToken: 'VITE_CONTENTFUL_DELIVERY_TOKEN',
-      environmentId: 'VITE_CONTENTFUL_ENVIRONMENT_ID'
-    };
-    
-    // Set values in window.env using the appropriate keys
-    window.env[keyNames.spaceId] = vars.spaceId;
-    window.env[keyNames.deliveryToken] = vars.deliveryToken;
-    window.env[keyNames.environmentId] = vars.environmentId || 'master';
-    
-    // Also set direct values for backwards compatibility
-    window.env.spaceId = vars.spaceId;
-    window.env.deliveryToken = vars.deliveryToken;
-    window.env.environmentId = vars.environmentId || 'master';
-    
-    console.log('Initialized window.env with values:', window.env);
-  };
-
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Store in local storage with both values and key names
-      const envVars = { 
-        spaceId, 
-        deliveryToken, 
+      const envVars = {
+        spaceId,
+        deliveryToken,
         environmentId,
         keyNames: {
-          spaceId: spaceIdKeyName,
-          deliveryToken: deliveryTokenKeyName,
-          environmentId: environmentIdKeyName
+          spaceId: 'VITE_CONTENTFUL_SPACE_ID',
+          deliveryToken: 'VITE_CONTENTFUL_DELIVERY_TOKEN',
+          environmentId: 'VITE_CONTENTFUL_ENVIRONMENT_ID'
         }
       };
       
       localStorage.setItem(ENV_STORAGE_KEY, JSON.stringify(envVars));
       
       // Initialize window.env with the saved values
-      initializeWindowEnv(envVars);
+      if (!window.env) window.env = {};
+      window.env.VITE_CONTENTFUL_SPACE_ID = spaceId;
+      window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = deliveryToken;
+      window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = environmentId;
       
-      // Force reload to apply the environment variables
+      // Also set legacy values
+      window.env.spaceId = spaceId;
+      window.env.deliveryToken = deliveryToken;
+      window.env.environmentId = environmentId;
+      
       await refreshContentful();
       
       toast.success('Environment variables saved successfully!');
     } catch (error) {
-      console.error('Failed to save environment variables', error);
+      console.error('[EnvironmentVariableManager] Failed to save variables:', error);
       toast.error('Failed to save environment variables');
     } finally {
       setIsSaving(false);
