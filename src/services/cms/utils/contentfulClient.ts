@@ -11,11 +11,59 @@ let lastConfigError: Error | null = null;
 let configRetryCount = 0;
 const MAX_RETRIES = 3;
 
+// Helper function to check if environment variables are available in window.env
+const checkWindowEnv = () => {
+  if (typeof window === 'undefined' || !window.env) {
+    return false;
+  }
+  
+  // Get stored environment variables
+  try {
+    const ENV_STORAGE_KEY = 'vending-cms-env-variables';
+    const storedVars = localStorage.getItem(ENV_STORAGE_KEY);
+    
+    if (storedVars) {
+      const parsedVars = JSON.parse(storedVars);
+      
+      // Initialize window.env if needed
+      if (!window.env) {
+        window.env = {};
+      }
+      
+      // Set the values in window.env
+      const keyNames = parsedVars.keyNames || {
+        spaceId: 'VITE_CONTENTFUL_SPACE_ID',
+        deliveryToken: 'VITE_CONTENTFUL_DELIVERY_TOKEN',
+        environmentId: 'VITE_CONTENTFUL_ENVIRONMENT_ID'
+      };
+      
+      window.env[keyNames.spaceId] = parsedVars.spaceId;
+      window.env[keyNames.deliveryToken] = parsedVars.deliveryToken;
+      window.env[keyNames.environmentId] = parsedVars.environmentId || 'master';
+      
+      // Also set direct values for backwards compatibility
+      window.env.spaceId = parsedVars.spaceId;
+      window.env.deliveryToken = parsedVars.deliveryToken;
+      window.env.environmentId = parsedVars.environmentId || 'master';
+      
+      console.log('[checkWindowEnv] Initialized window.env with values from localStorage');
+      return true;
+    }
+  } catch (e) {
+    console.error('[checkWindowEnv] Error parsing environment variables from localStorage:', e);
+  }
+  
+  return false;
+}
+
 /**
  * Gets or creates a Contentful delivery client for content fetching
  */
 export const getContentfulClient = async () => {
   const now = Date.now();
+  
+  // Check if window.env needs to be initialized
+  checkWindowEnv();
   
   // If we had an error recently, but have a client, use it
   if (contentfulClient && lastConfigError && (now - lastConfigCheck) < CONFIG_CACHE_TTL) {
@@ -41,6 +89,8 @@ export const getContentfulClient = async () => {
       CONTENTFUL_SPACE_ID_EXISTS: !!import.meta.env.CONTENTFUL_SPACE_ID,
       VITE_CONTENTFUL_DELIVERY_TOKEN_EXISTS: !!import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
       CONTENTFUL_DELIVERY_TOKEN_EXISTS: !!import.meta.env.CONTENTFUL_DELIVERY_TOKEN,
+      WINDOW_ENV_EXISTS: typeof window !== 'undefined' && !!window.env,
+      LOCAL_STORAGE_VARS_EXIST: typeof window !== 'undefined' && !!localStorage.getItem('vending-cms-env-variables'),
     });
     
     if (!SPACE_ID || SPACE_ID.trim() === '') {

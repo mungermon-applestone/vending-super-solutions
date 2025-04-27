@@ -8,6 +8,35 @@ function getEnvVariable(key: string): string {
     return window.env[key];
   }
   
+  // Check localStorage using env storage key
+  const ENV_STORAGE_KEY = 'vending-cms-env-variables';
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const storedVars = window.localStorage.getItem(ENV_STORAGE_KEY);
+      if (storedVars) {
+        const parsedVars = JSON.parse(storedVars);
+        
+        // First check if the exact key exists
+        if (parsedVars[key]) {
+          return parsedVars[key];
+        }
+        
+        // Then try to map common keys to their values
+        if (key === 'VITE_CONTENTFUL_SPACE_ID' && parsedVars.spaceId) {
+          return parsedVars.spaceId;
+        }
+        if (key === 'VITE_CONTENTFUL_DELIVERY_TOKEN' && parsedVars.deliveryToken) {
+          return parsedVars.deliveryToken;
+        }
+        if (key === 'VITE_CONTENTFUL_ENVIRONMENT_ID' && parsedVars.environmentId) {
+          return parsedVars.environmentId;
+        }
+      }
+    } catch (e) {
+      console.error('Error parsing environment variables from localStorage:', e);
+    }
+  }
+  
   // Then check import.meta.env
   if (import.meta.env[key]) {
     return import.meta.env[key];
@@ -51,6 +80,7 @@ export function checkContentfulConfig() {
     deliveryTokenPreview: DELIVERY_TOKEN ? `${DELIVERY_TOKEN.substring(0, 4)}...` : 'not set',
     environmentId: ENVIRONMENT_ID,
     windowEnvExists: typeof window !== 'undefined' && !!window.env,
+    localStorageVarsExist: typeof window !== 'undefined' && !!window.localStorage.getItem('vending-cms-env-variables'),
   });
   
   return {

@@ -43,21 +43,8 @@ export const EnvironmentVariableManager = () => {
           setEnvironmentIdKeyName(parsedVars.keyNames.environmentId || 'VITE_CONTENTFUL_ENVIRONMENT_ID');
         }
         
-        // Set these values to window.env for access throughout the app
-        if (parsedVars.spaceId) {
-          if (!window.env) {
-            window.env = {};
-            window.env[parsedVars.keyNames?.spaceId || 'VITE_CONTENTFUL_SPACE_ID'] = parsedVars.spaceId;
-            window.env[parsedVars.keyNames?.deliveryToken || 'VITE_CONTENTFUL_DELIVERY_TOKEN'] = parsedVars.deliveryToken;
-            window.env[parsedVars.keyNames?.environmentId || 'VITE_CONTENTFUL_ENVIRONMENT_ID'] = parsedVars.environmentId || 'master';
-          } else {
-            window.env[parsedVars.keyNames?.spaceId || 'VITE_CONTENTFUL_SPACE_ID'] = parsedVars.spaceId;
-            window.env[parsedVars.keyNames?.deliveryToken || 'VITE_CONTENTFUL_DELIVERY_TOKEN'] = parsedVars.deliveryToken;
-            window.env[parsedVars.keyNames?.environmentId || 'VITE_CONTENTFUL_ENVIRONMENT_ID'] = parsedVars.environmentId || 'master';
-          }
-          
-          console.log('Loaded environment variables from local storage', window.env);
-        }
+        // Initialize window.env on load
+        initializeWindowEnv(parsedVars);
       }
       setInitialLoad(false);
     } catch (error) {
@@ -65,6 +52,32 @@ export const EnvironmentVariableManager = () => {
       setInitialLoad(false);
     }
   }, []);
+
+  // Initialize window.env object with stored values
+  const initializeWindowEnv = (vars: any) => {
+    if (!window.env) {
+      window.env = {};
+    }
+    
+    // Use the key names from storage if available, otherwise use defaults
+    const keyNames = vars.keyNames || {
+      spaceId: 'VITE_CONTENTFUL_SPACE_ID',
+      deliveryToken: 'VITE_CONTENTFUL_DELIVERY_TOKEN',
+      environmentId: 'VITE_CONTENTFUL_ENVIRONMENT_ID'
+    };
+    
+    // Set values in window.env using the appropriate keys
+    window.env[keyNames.spaceId] = vars.spaceId;
+    window.env[keyNames.deliveryToken] = vars.deliveryToken;
+    window.env[keyNames.environmentId] = vars.environmentId || 'master';
+    
+    // Also set direct values for backwards compatibility
+    window.env.spaceId = vars.spaceId;
+    window.env.deliveryToken = vars.deliveryToken;
+    window.env.environmentId = vars.environmentId || 'master';
+    
+    console.log('Initialized window.env with values:', window.env);
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -82,17 +95,8 @@ export const EnvironmentVariableManager = () => {
       };
       localStorage.setItem(ENV_STORAGE_KEY, JSON.stringify(envVars));
       
-      // Make variables available to the app
-      if (!window.env) {
-        window.env = {};
-        window.env[spaceIdKeyName] = spaceId;
-        window.env[deliveryTokenKeyName] = deliveryToken;
-        window.env[environmentIdKeyName] = environmentId;
-      } else {
-        window.env[spaceIdKeyName] = spaceId;
-        window.env[deliveryTokenKeyName] = deliveryToken;
-        window.env[environmentIdKeyName] = environmentId;
-      }
+      // Initialize window.env with the saved values
+      initializeWindowEnv(envVars);
       
       // Force reload to apply the environment variables
       await refreshContentful();
