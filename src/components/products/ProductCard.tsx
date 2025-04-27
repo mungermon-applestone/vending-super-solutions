@@ -18,6 +18,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow"
       itemScope 
       itemType="https://schema.org/Product"
+      aria-labelledby={`product-title-${product.id}`}
     >
       <div className="w-full h-48 overflow-hidden bg-gray-100">
         {product.image ? (
@@ -34,8 +35,21 @@ const ProductCard = ({ product }: ProductCardProps) => {
         )}
       </div>
       <div className="p-6">
-        <h3 className="text-xl font-semibold mb-3" itemProp="name">{product.title}</h3>
-        <p className="text-gray-600 mb-4 line-clamp-3" itemProp="description">{product.description}</p>
+        <h3 
+          id={`product-title-${product.id}`}
+          className="text-xl font-semibold mb-3" 
+          itemProp="name"
+        >
+          {product.title}
+        </h3>
+        <p 
+          className="text-gray-600 mb-4 line-clamp-3" 
+          itemProp="description"
+        >
+          {product.description}
+        </p>
+        <meta itemProp="brand" content="Vending Solutions" />
+        <meta itemProp="category" content="Vending Machine Products" />
         <Button 
           variant="ghost" 
           className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"

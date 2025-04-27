@@ -65,7 +65,7 @@ export function useContentfulBlogPosts(options: BlogPostsQueryOptions = {}) {
   const { limit = 10, skip = 0, tag, order = '-sys.createdAt' } = options;
 
   return useContentful<ContentfulBlogPost[]>({
-    queryKey: ['contentful-blog-posts', limit, skip, tag, order],
+    queryKey: ['contentful-blog-posts', String(limit), String(skip), tag, order],
     queryFn: async () => {
       console.log('[useContentfulBlogPosts] Fetching posts with options:', options);
       
