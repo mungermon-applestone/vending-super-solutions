@@ -4,14 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { RefreshCw, AlertTriangle, CheckCircle, Bug, ShieldAlert } from 'lucide-react';
+import { RefreshCw, AlertTriangle, CheckCircle, Bug, ShieldAlert, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 import { CONTENTFUL_CONFIG, isContentfulConfigured, logContentfulConfig } from '@/config/cms';
 import { refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { useNavigate } from 'react-router-dom';
 
 const ContentfulConfigVerifier = () => {
   const [isChecking, setIsChecking] = useState(false);
   const [activeTab, setActiveTab] = useState('config');
+  const navigate = useNavigate();
   
   const isConfigured = isContentfulConfigured();
   
@@ -29,7 +31,8 @@ const ContentfulConfigVerifier = () => {
         CONTENTFUL_DELIVERY_TOKEN_EXISTS: !!import.meta.env.CONTENTFUL_DELIVERY_TOKEN,
         SPACE_ID: CONTENTFUL_CONFIG.SPACE_ID,
         ENVIRONMENT_ID: CONTENTFUL_CONFIG.ENVIRONMENT_ID,
-        HAS_DELIVERY_TOKEN: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN
+        HAS_DELIVERY_TOKEN: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
+        WINDOW_ENV: typeof window !== 'undefined' ? window.env : undefined
       });
       
       toast.info('Contentful config check complete. Check browser console for details.');
@@ -97,9 +100,12 @@ const ContentfulConfigVerifier = () => {
                 <div>SPACE_ID: {CONTENTFUL_CONFIG.SPACE_ID || '❌ Not set'}</div>
                 <div>ENVIRONMENT_ID: {CONTENTFUL_CONFIG.ENVIRONMENT_ID || '❌ Not set'}</div>
                 <div>DELIVERY_TOKEN: {CONTENTFUL_CONFIG.DELIVERY_TOKEN ? '✅ Set' : '❌ Not set'}</div>
+                <div className="mt-2 pt-2 border-t border-gray-300">
+                  <div>window.env: {typeof window !== 'undefined' && window.env ? '✅ Available' : '❌ Not set'}</div>
+                </div>
               </div>
               
-              <div className="flex gap-2 mt-4">
+              <div className="flex flex-col sm:flex-row gap-2 mt-4">
                 <Button 
                   variant="secondary" 
                   onClick={handleCheckConfig}
@@ -121,23 +127,55 @@ const ContentfulConfigVerifier = () => {
                   <RefreshCw className={`mr-2 h-4 w-4 ${isChecking ? 'animate-spin' : ''}`} />
                   Refresh Client
                 </Button>
+                
+                <Button 
+                  variant="default"
+                  onClick={() => navigate('/admin/environment-variables')}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Manage Environment Variables
+                </Button>
               </div>
+              
+              {!isConfigured && (
+                <Alert variant="warning" className="mt-4">
+                  <AlertDescription>
+                    <p className="mb-2">Contentful is not properly configured. Please set up your environment variables.</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigate('/admin/environment-variables')}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Go to Environment Variables Manager
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           </TabsContent>
           
           <TabsContent value="debug">
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                For Lovable preview environments, environment variables need to be set directly in the Lovable environment.
-                They will not be automatically read from Vercel or other hosting platforms.
+                For Lovable preview environments, environment variables need to be set directly using the Environment Variables Manager.
               </p>
               
               <Alert variant="warning" className="mt-3">
                 <ShieldAlert className="h-4 w-4" />
                 <AlertTitle>Important for Lovable Previews</AlertTitle>
                 <AlertDescription>
-                  You must add your environment variables in the Lovable project settings for previews to work.
-                  Variables should be named exactly as: VITE_CONTENTFUL_SPACE_ID, VITE_CONTENTFUL_ENVIRONMENT_ID, and VITE_CONTENTFUL_DELIVERY_TOKEN.
+                  You must add your environment variables using the Environment Variables Manager for previews to work.
+                  <div className="mt-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigate('/admin/environment-variables')}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Open Environment Variables Manager
+                    </Button>
+                  </div>
                 </AlertDescription>
               </Alert>
             </div>
@@ -149,7 +187,7 @@ const ContentfulConfigVerifier = () => {
               <ul className="list-disc pl-5 space-y-2">
                 <li>
                   <strong>Missing Delivery Token:</strong> Make sure your 
-                  VITE_CONTENTFUL_DELIVERY_TOKEN is set in the environment variables.
+                  VITE_CONTENTFUL_DELIVERY_TOKEN is set in the Environment Variables Manager.
                 </li>
                 <li>
                   <strong>Invalid Space ID:</strong> Verify that your Space ID is correct 
@@ -157,9 +195,19 @@ const ContentfulConfigVerifier = () => {
                 </li>
                 <li>
                   <strong>Environment Variables Not Loading:</strong> For Lovable previews,
-                  environment variables must be set directly in the Lovable project settings.
+                  environment variables must be set using the Environment Variables Manager.
                 </li>
               </ul>
+              
+              <div className="mt-4">
+                <Button 
+                  variant="outline"
+                  onClick={() => navigate('/admin/environment-variables')}
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Go to Environment Variables Manager
+                </Button>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

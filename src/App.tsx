@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import {
   BrowserRouter as Router,
@@ -25,6 +24,7 @@ import ContactContentful from '@/pages/ContactContentful';
 import BlogContentTest from './pages/BlogContentTest';
 import ZhilaiApplestoneAnnouncement from './pages/ZhilaiApplestoneAnnouncement';
 import BlogPage from './pages/BlogPage';
+import EnvironmentVariables from './pages/admin/EnvironmentVariables';
 
 const ContentfulBlogPostDetail = lazy(() => import('./pages/ContentfulBlogPostDetail'));
 
@@ -117,6 +117,10 @@ const App: React.FC = () => {
     {
       path: '/zhilai-applestone-announcement',
       element: <ZhilaiApplestoneAnnouncement />,
+    },
+    {
+      path: '/admin/environment-variables',
+      element: <EnvironmentVariables />
     },
     {
       path: '*',

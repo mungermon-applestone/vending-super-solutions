@@ -1,21 +1,36 @@
 
 // CMS Configuration
 
+// Helper to get environment variables from different sources
+function getEnvVariable(key: string): string {
+  // Check window.env first (set by our environment variable manager)
+  if (typeof window !== 'undefined' && window.env && window.env[key]) {
+    return window.env[key];
+  }
+  
+  // Then check import.meta.env
+  if (import.meta.env[key]) {
+    return import.meta.env[key];
+  }
+  
+  return '';
+}
+
 // Contentful Configuration
 export const CONTENTFUL_CONFIG = {
   // Space ID can come from environment variable or use the hardcoded fallback
-  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || 'al01e4yh2wq4',
+  SPACE_ID: getEnvVariable('VITE_CONTENTFUL_SPACE_ID') || 'al01e4yh2wq4',
   // Delivery token can come from different environment variable formats
-  DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 
-                  import.meta.env.CONTENTFUL_DELIVERY_TOKEN || 
+  DELIVERY_TOKEN: getEnvVariable('VITE_CONTENTFUL_DELIVERY_TOKEN') || 
+                  getEnvVariable('CONTENTFUL_DELIVERY_TOKEN') || 
                   '',
-  PREVIEW_TOKEN: import.meta.env.VITE_CONTENTFUL_PREVIEW_TOKEN || 
-                import.meta.env.CONTENTFUL_PREVIEW_TOKEN || 
+  PREVIEW_TOKEN: getEnvVariable('VITE_CONTENTFUL_PREVIEW_TOKEN') || 
+                getEnvVariable('CONTENTFUL_PREVIEW_TOKEN') || 
                 '',
-  MANAGEMENT_TOKEN: import.meta.env.VITE_CONTENTFUL_MANAGEMENT_TOKEN || 
-                    import.meta.env.CONTENTFUL_MANAGEMENT_TOKEN || 
+  MANAGEMENT_TOKEN: getEnvVariable('VITE_CONTENTFUL_MANAGEMENT_TOKEN') || 
+                    getEnvVariable('CONTENTFUL_MANAGEMENT_TOKEN') || 
                     '',
-  ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master',
+  ENVIRONMENT_ID: getEnvVariable('VITE_CONTENTFUL_ENVIRONMENT_ID') || 'master',
 };
 
 export const IS_DEVELOPMENT = import.meta.env.DEV || false;
@@ -34,7 +49,8 @@ export function checkContentfulConfig() {
     hasDeliveryToken: !!DELIVERY_TOKEN,
     // Show first few characters of token for debugging, but not the full token
     deliveryTokenPreview: DELIVERY_TOKEN ? `${DELIVERY_TOKEN.substring(0, 4)}...` : 'not set',
-    environmentId: ENVIRONMENT_ID
+    environmentId: ENVIRONMENT_ID,
+    windowEnvExists: typeof window !== 'undefined' && !!window.env,
   });
   
   return {
@@ -58,7 +74,8 @@ export function logContentfulConfig() {
     deliveryTokenPreview: CONTENTFUL_CONFIG.DELIVERY_TOKEN ? `${CONTENTFUL_CONFIG.DELIVERY_TOKEN.substring(0, 4)}...` : 'not set',
     environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID,
     isConfigured: config.isConfigured,
-    missingValues: config.missingValues
+    missingValues: config.missingValues,
+    windowEnv: typeof window !== 'undefined' ? window.env : undefined
   });
 }
 
