@@ -23,6 +23,9 @@ const TechnologyPage = () => {
     ]);
   }, [setBreadcrumbs]);
 
+  // Extract sections from all technologies to create a flattened array of sections
+  const allSections = technologies?.flatMap(tech => tech.sections || []) || [];
+
   return (
     <Layout>
       <SEO 
@@ -52,7 +55,7 @@ const TechnologyPage = () => {
       </div>
 
       <TechnologyPageHero entryId={HERO_CONTENT_ID} />
-      <TechnologySections sections={technologies} />
+      <TechnologySections sections={allSections} />
     </Layout>
   );
 };
