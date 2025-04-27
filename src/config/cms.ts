@@ -24,3 +24,17 @@ export function checkContentfulConfig() {
     missingValues
   };
 }
+
+// Add the isContentfulConfigured function that was missing
+export function isContentfulConfigured() {
+  return checkContentfulConfig().isConfigured;
+}
+
+// Define CMS models constants for blog-related functionality
+export const CMS_MODELS = {
+  BLOG_POST: 'blogPost',
+  BLOG_CATEGORY: 'blogCategory',
+  BLOG_TAG: 'blogTag',
+  BLOG_AUTHOR: 'blogAuthor',
+  BLOG_PAGE_CONTENT: 'blogPageContent'
+};
