@@ -10,21 +10,50 @@ import { useBreadcrumbs } from '@/context/BreadcrumbContext';
 import TechnologySchemaData from '@/components/technology/TechnologySchemaData';
 import SEO from '@/components/seo/SEO';
 
-const HERO_CONTENT_ID = "4b40Npa9Hgp8jO0jDX98F6";
+// Update hero content ID to use the correct technology hero
+const HERO_CONTENT_ID = "66FG7FxpIy3YkSXj2mu846";
 
 const TechnologyPage = () => {
   const { technologies, isLoading, error } = useTechnologySections();
   const { setBreadcrumbs, getSchemaFormattedBreadcrumbs } = useBreadcrumbs();
   
   useEffect(() => {
+    console.log('[TechnologyPage] Technologies data:', technologies);
     setBreadcrumbs([
       { name: "Home", url: "/", position: 1 },
       { name: "Technology", url: "/technology", position: 2 }
     ]);
-  }, [setBreadcrumbs]);
+  }, [setBreadcrumbs, technologies]);
+
+  // Add error handling
+  if (error) {
+    console.error('[TechnologyPage] Error loading technology data:', error);
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          <p className="text-red-600">Error loading technology data. Please try again later.</p>
+        </div>
+      </Layout>
+    );
+  }
 
   // Extract sections from all technologies to create a flattened array of sections
-  const allSections = technologies?.flatMap(tech => tech.sections || []) || [];
+  const allSections = technologies?.flatMap(tech => {
+    if (!tech.sections) {
+      console.warn(`[TechnologyPage] Technology ${tech.id} has no sections`);
+      return [];
+    }
+    return tech.sections.map(section => ({
+      ...section,
+      id: section.id || `section-${Math.random()}`,
+      title: section.title || '',
+      summary: section.description || '',
+      bulletPoints: Array.isArray(section.bulletPoints) ? section.bulletPoints : [],
+      image: section.sectionImage?.url || section.image?.url || '',
+    }));
+  }) || [];
+
+  console.log('[TechnologyPage] Processed sections:', allSections);
 
   return (
     <Layout>
@@ -55,7 +84,14 @@ const TechnologyPage = () => {
       </div>
 
       <TechnologyPageHero entryId={HERO_CONTENT_ID} />
-      <TechnologySections sections={allSections} />
+      
+      {isLoading ? (
+        <div className="container mx-auto px-4 py-8">
+          <p>Loading technology sections...</p>
+        </div>
+      ) : (
+        <TechnologySections sections={allSections} />
+      )}
     </Layout>
   );
 };
