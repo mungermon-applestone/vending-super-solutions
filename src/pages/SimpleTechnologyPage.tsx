@@ -7,7 +7,7 @@ import TechnologySections from '@/components/technology/TechnologySections';
 import { useTechnologySections } from '@/hooks/useTechnologySections';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 import type { CMSTechnologySection } from '@/types/cms';
 
 const SimpleTechnologyPage = () => {
@@ -48,6 +48,10 @@ const SimpleTechnologyPage = () => {
       {/* Loading State */}
       {isLoading && (
         <div className="container max-w-7xl mx-auto px-4 py-12">
+          <div className="flex justify-center items-center mb-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+            <span className="text-lg">Loading technologies...</span>
+          </div>
           <div className="space-y-12">
             {[1, 2, 3].map(i => (
               <div key={i} className="flex flex-col md:flex-row gap-8">
@@ -83,7 +87,16 @@ const SimpleTechnologyPage = () => {
       {/* Technology Sections */}
       {!isLoading && !error && (
         <div className="container max-w-7xl mx-auto px-4 py-12">
-          <TechnologySections sections={allSections} />
+          {allSections.length > 0 ? (
+            <TechnologySections sections={allSections} />
+          ) : (
+            <div className="text-center py-12">
+              <h3 className="text-xl font-medium mb-2">No Technology Sections Available</h3>
+              <p className="text-muted-foreground">
+                Technology information is currently being updated. Please check back later.
+              </p>
+            </div>
+          )}
         </div>
       )}
 

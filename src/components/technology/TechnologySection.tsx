@@ -1,6 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TechnologySectionProps {
   id: string;
@@ -25,8 +26,15 @@ const TechnologySection = ({
   className 
 }: TechnologySectionProps) => {
   const isEven = index % 2 === 0;
+  const [imageLoaded, setImageLoaded] = React.useState(false);
+  const [imageError, setImageError] = React.useState(false);
+  const fallbackImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
   
   useEffect(() => {
+    // Reset state when image changes
+    setImageLoaded(false);
+    setImageError(false);
+    
     // Enhanced logging to help debug image rendering issues
     console.log(`[TechnologySection ${id}] Rendering section with image:`, {
       title,
@@ -50,6 +58,19 @@ const TechnologySection = ({
     }
   }, [id, title, summary, image, bulletPoints]);
 
+  // Preload image
+  React.useEffect(() => {
+    if (image?.url) {
+      const img = new Image();
+      img.onload = () => setImageLoaded(true);
+      img.onerror = () => {
+        console.error(`[TechnologySection ${id}] Failed to load image:`, image.url);
+        setImageError(true);
+      };
+      img.src = image.url;
+    }
+  }, [id, image]);
+
   return (
     <section id={id} className={cn("py-16 bg-gradient-to-b from-white to-gray-50", className)}>
       <div className="container max-w-7xl mx-auto px-4">
@@ -57,13 +78,22 @@ const TechnologySection = ({
           {/* Image Section */}
           <div className="w-full md:w-1/2">
             <div className="relative aspect-[4/3] rounded-lg overflow-hidden shadow-xl">
+              {!imageLoaded && !imageError && (
+                <Skeleton className="absolute inset-0 w-full h-full" />
+              )}
+              
               <img 
-                src={image?.url || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"} 
+                src={imageError ? fallbackImage : (image?.url || fallbackImage)} 
                 alt={image?.alt || title || "Technology section"}
-                className="absolute inset-0 w-full h-full object-cover"
+                className={cn(
+                  "absolute inset-0 w-full h-full object-cover",
+                  !imageLoaded && !imageError && "opacity-0"
+                )}
+                onLoad={() => setImageLoaded(true)}
                 onError={(e) => {
                   console.error(`[TechnologySection ${id}] Image failed to load:`, image?.url);
-                  e.currentTarget.src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
+                  setImageError(true);
+                  e.currentTarget.src = fallbackImage;
                 }}
               />
             </div>
