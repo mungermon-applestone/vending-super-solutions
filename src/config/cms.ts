@@ -4,8 +4,8 @@
 // Contentful Configuration
 export const CONTENTFUL_CONFIG = {
   // Use hardcoded values for development when environment variables aren't available
-  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || import.meta.env.CONTENTFUL_SPACE_ID || '1d7ffucelthb',
-  DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || import.meta.env.CONTENTFUL_DELIVERY_TOKEN || 'EdZL3tVlk6l7XVphnhPtxfbeS7h_vljh3TPVNZ5W8QM',
+  SPACE_ID: '1d7ffucelthb',
+  DELIVERY_TOKEN: 'EdZL3tVlk6l7XVphnhPtxfbeS7h_vljh3TPVNZ5W8QM',
   PREVIEW_TOKEN: import.meta.env.VITE_CONTENTFUL_PREVIEW_TOKEN || import.meta.env.CONTENTFUL_PREVIEW_TOKEN,
   MANAGEMENT_TOKEN: import.meta.env.VITE_CONTENTFUL_MANAGEMENT_TOKEN || import.meta.env.CONTENTFUL_MANAGEMENT_TOKEN,
   ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master',

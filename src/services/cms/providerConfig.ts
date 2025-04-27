@@ -1,11 +1,10 @@
-
 import { ContentProviderConfig, ContentProviderType } from './adapters/types';
 
 /**
- * Default content provider configuration
+ * Default content provider configuration - always use Contentful now
  */
 let currentProviderConfig: ContentProviderConfig = {
-  type: ContentProviderType.SUPABASE
+  type: ContentProviderType.CONTENTFUL
 };
 
 /**

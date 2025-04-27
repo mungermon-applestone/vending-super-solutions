@@ -1,17 +1,28 @@
 
 import { ContentProviderType } from './adapters/types';
 import { setCMSProviderConfig } from './providerConfig';
-import { isContentfulConfigured } from '@/config/cms';
+import { testContentfulConnection } from './utils/contentfulClient';
 
-export function initCMS() {
+export async function initCMS() {
   console.log('[initCMS] Initializing CMS configuration...');
   
-  // Always use Contentful as the CMS provider since we're no longer using Supabase
-  console.log('[initCMS] Using Contentful CMS provider');
-  setCMSProviderConfig({
-    type: ContentProviderType.CONTENTFUL
-  });
-  return true;
+  try {
+    // Test Contentful connection
+    const testResult = await testContentfulConnection();
+    if (!testResult.success) {
+      console.error('[initCMS] Contentful connection test failed:', testResult.message);
+      throw new Error(testResult.message);
+    }
+    
+    console.log('[initCMS] Using Contentful CMS provider');
+    setCMSProviderConfig({
+      type: ContentProviderType.CONTENTFUL
+    });
+    return true;
+  } catch (error) {
+    console.error('[initCMS] Error initializing CMS:', error);
+    throw error;
+  }
 }
 
 export function forceContentfulProvider() {

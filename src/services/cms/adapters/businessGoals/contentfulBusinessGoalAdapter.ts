@@ -1,12 +1,8 @@
-
 import { BusinessGoalAdapter } from './types';
 import { CMSBusinessGoal } from '@/types/cms';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { handleCMSError } from '@/services/cms/utils/errorHandling';
 
-/**
- * Adapter for Contentful business goal content type
- */
 export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
   async getAll(options = {}) {
     try {
@@ -50,7 +46,6 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
       });
 
       if (!entries.items.length) {
-        console.warn(`[contentfulBusinessGoalAdapter] No business goal found with slug: "${slug}"`);
         return null;
       }
 
@@ -75,7 +70,32 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
     }
   },
 
-  // These methods are stubs since we're only using the Delivery API that doesn't support write operations
+  async getById(id: string) {
+    try {
+      console.log(`[contentfulBusinessGoalAdapter] Fetching business goal with ID: "${id}"`);
+      const client = await getContentfulClient();
+      const entry = await client.getEntry(id, { include: 2 });
+
+      return {
+        id: entry.sys.id,
+        title: entry.fields.title as string,
+        slug: entry.fields.slug as string,
+        description: entry.fields.description as string,
+        visible: entry.fields.visible as boolean ?? true,
+        icon: entry.fields.icon as string,
+        benefits: entry.fields.benefits as string[] || [],
+        image: entry.fields.image ? {
+          id: (entry.fields.image as any).sys.id,
+          url: `https:${(entry.fields.image as any).fields.file.url}`,
+          alt: (entry.fields.image as any).fields.title
+        } : undefined
+      };
+    } catch (error) {
+      console.error(`[contentfulBusinessGoalAdapter] Error fetching business goal by ID "${id}":`, error);
+      throw handleCMSError(error, 'fetch', 'business goal', id);
+    }
+  },
+
   async create(data) {
     console.error('[contentfulBusinessGoalAdapter] Create operation not supported with Delivery API');
     throw new Error('Creating business goals is not supported with the current Contentful setup.');
