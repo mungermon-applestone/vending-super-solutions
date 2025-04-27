@@ -19,6 +19,14 @@ const SimpleTechnologyPage = () => {
 
   // Extract all sections from all technologies
   const allSections: CMSTechnologySection[] = React.useMemo(() => {
+    console.log('[SimpleTechnologyPage] Processing technologies for sections:', {
+      technologiesCount: technologies?.length || 0,
+      technologiesProvided: !!technologies && technologies.length > 0,
+      firstTechnology: technologies?.[0] ? 
+        { id: technologies[0].id, title: technologies[0].title, hasSections: !!technologies[0].sections } : 
+        'None'
+    });
+    
     if (!technologies || technologies.length === 0) {
       console.log('[SimpleTechnologyPage] No technologies found for sections');
       return [];
@@ -33,7 +41,7 @@ const SimpleTechnologyPage = () => {
         sectionsCount: tech.sections?.length || 0
       });
       
-      if (tech.sections && Array.isArray(tech.sections)) {
+      if (tech.sections && Array.isArray(tech.sections) && tech.sections.length > 0) {
         tech.sections.forEach(section => {
           // Ensure section has needed properties
           const processedSection: CMSTechnologySection = {
@@ -52,6 +60,10 @@ const SimpleTechnologyPage = () => {
             section_type: section.section_type || 'general',
             display_order: section.display_order || 0
           };
+          
+          console.log(`[SimpleTechnologyPage] Adding section: ${processedSection.title}`, {
+            imageUrl: processedSection.image?.url || processedSection.sectionImage?.url || 'No image'
+          });
           
           sections.push(processedSection);
         });
@@ -74,6 +86,10 @@ const SimpleTechnologyPage = () => {
           features: [],
           bulletPoints: []
         });
+        
+        console.log(`[SimpleTechnologyPage] Created default section with image:`, {
+          imageUrl: imageObject.url || 'No image URL'
+        });
       }
     });
     
@@ -84,7 +100,48 @@ const SimpleTechnologyPage = () => {
   // Log detailed information about the sections we've extracted
   useEffect(() => {
     console.log('[SimpleTechnologyPage] Processed sections:', allSections);
-  }, [allSections]);
+    
+    if (allSections.length === 0) {
+      // Check if we have technologies but no sections
+      if (technologies && technologies.length > 0) {
+        console.warn('[SimpleTechnologyPage] Technologies found but no sections were created');
+        console.log('[SimpleTechnologyPage] First technology data:', technologies[0]);
+      }
+    } else {
+      // Log image URLs for all sections to help debug
+      allSections.forEach(section => {
+        console.log(`[SimpleTechnologyPage] Section "${section.title}" image:`, {
+          directImageUrl: section.image?.url || 'No direct image',
+          sectionImageUrl: section.sectionImage?.url || 'No section image',
+          hasBulletPoints: (section.bulletPoints?.length || 0) > 0
+        });
+      });
+    }
+  }, [allSections, technologies]);
+
+  // Create a fallback section if we have technologies but no sections
+  const sectionsToRender = React.useMemo(() => {
+    if (allSections.length === 0 && technologies && technologies.length > 0) {
+      console.log('[SimpleTechnologyPage] Creating fallback sections from technologies');
+      
+      return technologies.map((tech, index) => ({
+        id: `fallback-section-${tech.id || index}`,
+        title: tech.title || 'Technology',
+        summary: tech.description || '',
+        description: tech.description || '',
+        image: tech.image && typeof tech.image === 'object' ? 
+          tech.image : 
+          { url: typeof tech.image === 'string' ? tech.image : '', alt: tech.title || 'Technology' },
+        technology_id: tech.id || `tech-${index}`,
+        section_type: 'fallback',
+        display_order: index,
+        features: [],
+        bulletPoints: []
+      }));
+    }
+    
+    return allSections;
+  }, [allSections, technologies]);
 
   return (
     <Layout>
@@ -143,9 +200,9 @@ const SimpleTechnologyPage = () => {
       )}
 
       {/* Technology Sections */}
-      {!isLoading && !error && allSections.length > 0 ? (
+      {!isLoading && !error && sectionsToRender.length > 0 ? (
         <div className="container max-w-7xl mx-auto px-4 py-12">
-          <TechnologySections sections={allSections} />
+          <TechnologySections sections={sectionsToRender} />
         </div>
       ) : !isLoading && !isFetching && !error && technologies.length > 0 ? (
         <div className="container max-w-7xl mx-auto px-4 py-12">

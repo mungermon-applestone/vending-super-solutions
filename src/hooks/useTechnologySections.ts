@@ -1,3 +1,4 @@
+
 import { CMSTechnology } from '@/types/cms';
 import { useCMSQuery } from './useCMSQuery';
 import { improvedTechnologyAdapter } from '@/services/cms/adapters/technologies/improvedTechnologyAdapter';
@@ -28,6 +29,36 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
         }
         
         console.log(`[useTechnologySections] Successfully fetched technology:`, technology);
+        
+        // Validate sections
+        if (technology.sections) {
+          console.log(`[useTechnologySections] Technology has ${technology.sections.length} sections`);
+          
+          technology.sections.forEach((section, index) => {
+            // Ensure required fields are present
+            console.log(`[useTechnologySections] Section ${index + 1}: ${section.title || 'Untitled'}`, {
+              hasImage: !!section.image || !!section.sectionImage,
+              imageUrl: section.image?.url || section.sectionImage?.url || 'No image',
+              hasSummary: !!section.summary || !!section.description
+            });
+            
+            // Log any issues
+            if (!section.title) {
+              console.warn(`[useTechnologySections] Section ${index + 1} missing title`);
+            }
+            
+            if (!section.summary && !section.description) {
+              console.warn(`[useTechnologySections] Section ${index + 1} missing summary/description`);
+            }
+            
+            if (!section.image?.url && !section.sectionImage?.url) {
+              console.warn(`[useTechnologySections] Section ${index + 1} missing image`);
+            }
+          });
+        } else {
+          console.log(`[useTechnologySections] Technology has no sections array`);
+        }
+        
         return technology;
       } catch (error) {
         console.error(`[useTechnologySections] Error fetching technology with slug ${slug}:`, error);
@@ -59,7 +90,17 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
       if (!technologies || technologies.length === 0) {
         console.warn('[useTechnologySections] No technologies found');
       } else {
-        console.log(`[useTechnologySections] Successfully fetched ${technologies.length} technologies:`, technologies);
+        console.log(`[useTechnologySections] Successfully fetched ${technologies.length} technologies`);
+        
+        // Log summary of each technology's sections
+        technologies.forEach((tech, index) => {
+          console.log(`[useTechnologySections] Tech #${index + 1}: ${tech.title}`, {
+            hasSections: !!tech.sections && Array.isArray(tech.sections),
+            sectionCount: tech.sections?.length || 0,
+            sectionsWithImages: tech.sections?.filter(s => s.image?.url || s.sectionImage?.url).length || 0,
+            sectionsWithSummary: tech.sections?.filter(s => s.summary || s.description).length || 0
+          });
+        });
       }
       
       return technologies;

@@ -13,8 +13,14 @@ const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => 
     console.log('[TechnologySections] Received sections data:', {
       sectionsProvided: !!sections,
       sectionsLength: sections?.length || 0,
-      sectionsData: sections
+      sectionsData: JSON.stringify(sections).substring(0, 200) + '...' // Log a preview of the data
     });
+    
+    if (!sections || sections.length === 0) {
+      console.warn('[TechnologySections] No sections provided or empty array');
+    } else {
+      console.log(`[TechnologySections] Found ${sections.length} sections to render`);
+    }
   }, [sections]);
 
   if (!sections || sections.length === 0) {
