@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
 const TechnologyLanding = () => {
-  const { technologies, isLoading, error, refetch } = useTechnologySections();
+  const { technologies = [], isLoading, error, refetch } = useTechnologySections();
   const hasTechnologies = technologies && technologies.length > 0;
   console.log('TechnologyLanding rendering with technologies:', technologies);
   
@@ -231,11 +231,11 @@ const TechnologyLanding = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {technologies.map((tech) => (
               <Card key={tech.id} className="overflow-hidden h-full flex flex-col">
-                {tech.image_url && (
+                {tech.image && (
                   <div className="aspect-video w-full overflow-hidden">
                     <img 
-                      src={tech.image_url} 
-                      alt={tech.image_alt || tech.title}
+                      src={typeof tech.image === 'string' ? tech.image : tech.image.url} 
+                      alt={typeof tech.image === 'string' ? tech.title : tech.image.alt || tech.title}
                       className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
                     />
                   </div>

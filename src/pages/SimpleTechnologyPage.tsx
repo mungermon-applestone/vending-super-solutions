@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
@@ -10,7 +11,7 @@ import { AlertTriangle } from 'lucide-react';
 import type { CMSTechnologySection } from '@/types/cms';
 
 const SimpleTechnologyPage = () => {
-  const { data: technologies = [], isLoading, error } = useTechnologySections({
+  const { technologies = [], isLoading, error } = useTechnologySections({
     enableToasts: true
   });
 

@@ -12,7 +12,7 @@ type UseTechnologySectionsOptions = {
 export function useTechnologySections(options: UseTechnologySectionsOptions = {}) {
   const { slug, enableToasts = false, refetchInterval = false } = options;
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['contentful', 'technology', slug].filter(Boolean),
     queryFn: async () => {
       console.log('[useTechnologySections] Fetching technology content from Contentful');
@@ -56,6 +56,16 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
 
         console.log(`[useTechnologySections] Processed ${sections.length} sections for technology "${fields.title}"`);
 
+        // Create a proper CMSImage object or use string for image
+        let technologyImage;
+        if (fields.image) {
+          technologyImage = {
+            id: fields.image.sys.id,
+            url: `https:${fields.image.fields.file.url}`,
+            alt: fields.title || 'Technology image'
+          };
+        }
+
         return {
           id: entry.sys.id,
           title: fields.title,
@@ -63,10 +73,7 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
           description: fields.description,
           sections: sections,
           visible: fields.visible !== false,
-          image: fields.image ? {
-            url: `https:${fields.image.fields.file.url}`,
-            alt: fields.title
-          } : undefined
+          image: technologyImage
         };
       });
 
@@ -78,8 +85,17 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
 
       console.log(`[useTechnologySections] Returning ${technologies.length} technologies`);
       return technologies;
-    }
+    },
+    refetchInterval
   });
+  
+  return {
+    data: query.data,
+    isLoading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch,
+    technologies: Array.isArray(query.data) ? query.data : query.data ? [query.data] : []
+  };
 }
 
 export default useTechnologySections;

@@ -13,7 +13,7 @@ import SEO from '@/components/seo/SEO';
 const HERO_CONTENT_ID = "66FG7FxpIy3YkSXj2mu846";
 
 const TechnologyPage = () => {
-  const { technologies, isLoading, error } = useTechnologySections();
+  const { technologies = [], isLoading, error } = useTechnologySections();
   const { setBreadcrumbs, getSchemaFormattedBreadcrumbs } = useBreadcrumbs();
   
   useEffect(() => {
