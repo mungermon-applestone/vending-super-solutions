@@ -7,6 +7,7 @@ import { forceContentfulProvider } from './services/cms/cmsInit'
 import { toast } from 'sonner'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './context/AuthContext'
+import { BreadcrumbProvider } from './context/BreadcrumbContext'
 
 // Create a client
 const queryClient = new QueryClient({
@@ -30,7 +31,9 @@ const initApp = async () => {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <App />
+          <BreadcrumbProvider>
+            <App />
+          </BreadcrumbProvider>
         </AuthProvider>
       </QueryClientProvider>
     </React.StrictMode>,
