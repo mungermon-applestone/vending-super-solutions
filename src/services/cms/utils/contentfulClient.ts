@@ -1,5 +1,5 @@
 import { createClient } from 'contentful';
-import { CONTENTFUL_CONFIG } from '@/config/cms';
+import { CONTENTFUL_CONFIG, logContentfulConfig } from '@/config/cms';
 import { toast } from 'sonner';
 
 // Cache the client to avoid creating a new one on every request
@@ -30,68 +30,52 @@ export const getContentfulClient = async () => {
   
   try {
     console.log('[getContentfulClient] Creating new Contentful client');
+    logContentfulConfig(); // Log current configuration
     
-    // Use the centralized configuration from cms.ts
     const { SPACE_ID, DELIVERY_TOKEN, ENVIRONMENT_ID } = CONTENTFUL_CONFIG;
     
-    // Output configuration for debugging
-    console.log('[getContentfulClient] Configuration:', {
-      hasSpaceId: !!SPACE_ID,
-      spaceIdLength: SPACE_ID?.length || 0,
-      hasDeliveryToken: !!DELIVERY_TOKEN, 
-      deliveryTokenLength: DELIVERY_TOKEN?.length || 0,
-      environmentId: ENVIRONMENT_ID
-    });
-    
-    lastConfigCheck = now;
-    lastConfigError = null;
-    configRetryCount = 0;
-    
-    if (!SPACE_ID) {
-      console.error('[getContentfulClient] Missing Space ID');
-      toast.error('Missing Contentful Space ID. Using hardcoded development values.');
-      throw new Error('Missing required Contentful credentials - Space ID not found');
+    if (!SPACE_ID || SPACE_ID.trim() === '') {
+      console.error('[getContentfulClient] Invalid Space ID:', SPACE_ID);
+      throw new Error('Invalid Contentful Space ID configuration');
     }
     
-    if (!DELIVERY_TOKEN) {
-      console.error('[getContentfulClient] Missing Delivery Token (CDA)');
-      toast.error('Missing Contentful Delivery Token. Using hardcoded development values.');
-      throw new Error('Missing required Contentful credentials - Delivery Token not found');
+    if (!DELIVERY_TOKEN || DELIVERY_TOKEN.trim() === '') {
+      console.error('[getContentfulClient] Missing Delivery Token');
+      throw new Error('Missing Contentful Delivery Token');
     }
-    
+
     contentfulClient = createClient({
       space: SPACE_ID,
       accessToken: DELIVERY_TOKEN,
       environment: ENVIRONMENT_ID,
     });
-    
-    // Verify the client works by making a test request
+
+    // Verify the client works with a test request
+    console.log('[getContentfulClient] Testing connection with Space ID:', SPACE_ID);
     const testEntry = await contentfulClient.getEntries({
       limit: 1
     });
     
-    console.log('[getContentfulClient] Successfully created and tested Contentful client');
+    console.log('[getContentfulClient] Successfully connected to Contentful space');
     console.log(`[getContentfulClient] Test query returned ${testEntry.total} total entries`);
     
     return contentfulClient;
   } catch (error) {
     console.error('[getContentfulClient] Error creating Contentful client:', error);
     
-    // Track the error
-    lastConfigError = error instanceof Error ? error : new Error(String(error));
-    configRetryCount++;
+    // Clear the client on critical error
+    contentfulClient = null;
     
-    // If we have a client and haven't exceeded retry count, keep using it
-    if (contentfulClient && configRetryCount < MAX_RETRIES) {
-      console.warn(`[getContentfulClient] Using existing client despite error (retry ${configRetryCount}/${MAX_RETRIES})`);
-      return contentfulClient;
+    // Add specific error handling for common cases
+    if (error instanceof Error) {
+      if (error.message.includes('access token')) {
+        throw new Error('Invalid Contentful access token for space. Please check your delivery token.');
+      }
+      if (error.message.includes('space')) {
+        throw new Error('Invalid Contentful space configuration. Please check your Space ID.');
+      }
     }
     
-    // Clear the client on critical error to force recreation on next attempt
-    if (configRetryCount >= MAX_RETRIES) {
-      console.error('[getContentfulClient] Max retries exceeded, clearing client');
-      contentfulClient = null;
-    }
     throw error;
   }
 };

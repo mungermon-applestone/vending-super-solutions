@@ -1,11 +1,11 @@
-
 // CMS Configuration
 
 // Contentful Configuration
 export const CONTENTFUL_CONFIG = {
-  // Use hardcoded values for development when environment variables aren't available
-  SPACE_ID: '1d7ffucelthb',
-  DELIVERY_TOKEN: 'EdZL3tVlk6l7XVphnhPtxfbeS7h_vljh3TPVNZ5W8QM',
+  // Use correct Space ID from the content model
+  SPACE_ID: 'al01e4yh2wq4',
+  // Update delivery token for the correct space
+  DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || import.meta.env.CONTENTFUL_DELIVERY_TOKEN,
   PREVIEW_TOKEN: import.meta.env.VITE_CONTENTFUL_PREVIEW_TOKEN || import.meta.env.CONTENTFUL_PREVIEW_TOKEN,
   MANAGEMENT_TOKEN: import.meta.env.VITE_CONTENTFUL_MANAGEMENT_TOKEN || import.meta.env.CONTENTFUL_MANAGEMENT_TOKEN,
   ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master',
@@ -29,6 +29,16 @@ export function checkContentfulConfig() {
 // Add the isContentfulConfigured function that was missing
 export function isContentfulConfigured() {
   return checkContentfulConfig().isConfigured;
+}
+
+// Add logging function for debugging configuration
+export function logContentfulConfig() {
+  console.log('[cms.ts] Current Contentful configuration:', {
+    hasSpaceId: !!CONTENTFUL_CONFIG.SPACE_ID,
+    spaceId: CONTENTFUL_CONFIG.SPACE_ID,
+    hasDeliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
+    environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID
+  });
 }
 
 // Define CMS models constants for blog-related functionality
