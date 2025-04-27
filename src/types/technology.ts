@@ -3,7 +3,12 @@ export interface TechFeature {
   icon: string;
   title: string;
   description: string;
-  items?: string[]; // Add support for bullet point items
+  items?: string[];
+}
+
+export interface CMSTechnologyImage {
+  url: string;
+  alt?: string;
 }
 
 export interface TechnologySection {
@@ -11,5 +16,9 @@ export interface TechnologySection {
   title: string;
   description: string;
   features: TechFeature[];
-  image: string;
+  image: CMSTechnologyImage;
+  technology_id: string;
+  section_type: string;
+  display_order: number;
+  bulletPoints?: string[];
 }

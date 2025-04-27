@@ -7,7 +7,10 @@ interface TechnologySectionProps {
   title: string;
   summary: string;
   bulletPoints?: string[];
-  image: string;
+  image: {
+    url: string;
+    alt?: string;
+  };
   index: number;
   className?: string;
 }
@@ -23,7 +26,6 @@ const TechnologySection = ({
 }: TechnologySectionProps) => {
   const isEven = index % 2 === 0;
   
-  // Validate data on mount
   useEffect(() => {
     if (!title) {
       console.warn(`[TechnologySection ${id}] Missing title for section`);
@@ -33,8 +35,8 @@ const TechnologySection = ({
       console.warn(`[TechnologySection ${id}] Missing summary for section "${title}"`);
     }
 
-    if (!image) {
-      console.warn(`[TechnologySection ${id}] Missing image for section "${title}"`);
+    if (!image?.url) {
+      console.warn(`[TechnologySection ${id}] Missing image URL for section "${title}"`);
     }
   }, [id, title, summary, image]);
 
@@ -46,11 +48,11 @@ const TechnologySection = ({
           <div className="w-full md:w-1/2">
             <div className="relative aspect-[4/3] rounded-lg overflow-hidden shadow-xl">
               <img 
-                src={image || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"} 
-                alt={title || "Technology section"}
+                src={image.url || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"} 
+                alt={image.alt || title || "Technology section"}
                 className="absolute inset-0 w-full h-full object-cover"
                 onError={(e) => {
-                  console.error(`[TechnologySection ${id}] Image failed to load:`, image);
+                  console.error(`[TechnologySection ${id}] Image failed to load:`, image.url);
                   e.currentTarget.src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
                 }}
               />

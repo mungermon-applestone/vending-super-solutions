@@ -10,7 +10,6 @@ import { useBreadcrumbs } from '@/context/BreadcrumbContext';
 import TechnologySchemaData from '@/components/technology/TechnologySchemaData';
 import SEO from '@/components/seo/SEO';
 
-// Update hero content ID to use the correct technology hero
 const HERO_CONTENT_ID = "66FG7FxpIy3YkSXj2mu846";
 
 const TechnologyPage = () => {
@@ -25,7 +24,6 @@ const TechnologyPage = () => {
     ]);
   }, [setBreadcrumbs, technologies]);
 
-  // Add error handling
   if (error) {
     console.error('[TechnologyPage] Error loading technology data:', error);
     return (
@@ -49,7 +47,13 @@ const TechnologyPage = () => {
       title: section.title || '',
       summary: section.description || '',
       bulletPoints: Array.isArray(section.bulletPoints) ? section.bulletPoints : [],
-      image: section.sectionImage?.url || section.image?.url || '',
+      image: {
+        url: section.sectionImage?.url || section.image?.url || '',
+        alt: section.title || 'Technology section'
+      },
+      technology_id: tech.id,
+      section_type: section.section_type || 'default',
+      display_order: section.display_order || 0
     }));
   }) || [];
 
