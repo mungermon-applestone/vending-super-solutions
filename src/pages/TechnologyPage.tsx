@@ -13,7 +13,7 @@ import SEO from '@/components/seo/SEO';
 const HERO_CONTENT_ID = "4b40Npa9Hgp8jO0jDX98F6";
 
 const TechnologyPage = () => {
-  const { data: sections, isLoading, error } = useTechnologySections();
+  const { technologies, isLoading, error } = useTechnologySections();
   const { setBreadcrumbs, getSchemaFormattedBreadcrumbs } = useBreadcrumbs();
   
   useEffect(() => {
@@ -52,7 +52,7 @@ const TechnologyPage = () => {
       </div>
 
       <TechnologyPageHero entryId={HERO_CONTENT_ID} />
-      <TechnologySections sections={sections} isLoading={isLoading} error={error} />
+      <TechnologySections sections={technologies} />
     </Layout>
   );
 };
