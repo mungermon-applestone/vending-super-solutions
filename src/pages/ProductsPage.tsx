@@ -3,10 +3,11 @@ import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useContentfulProducts } from '@/hooks/cms/useContentfulProducts';
 import { useProductsPageContent } from '@/hooks/cms/useProductsPageContent';
-import { isContentfulConfigured } from '@/config/cms';
+import { isContentfulConfigured, logContentfulConfig, CONTENTFUL_CONFIG } from '@/config/cms';
 import { toast } from 'sonner';
 import { refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 import ContentfulDebug from '@/components/debug/ContentfulDebug';
+import ContentfulConfigVerifier from '@/components/debug/ContentfulConfigVerifier';
 import PurposeStatement from '@/components/products/sections/PurposeStatement';
 import DemoRequest from '@/components/products/sections/DemoRequest';
 import ConfigurationError from '@/components/products/sections/ConfigurationError';
@@ -44,16 +45,24 @@ const ProductsPage = () => {
   
   useEffect(() => {
     console.log('[ProductsPage] Page Content:', pageContent);
+    // Log configuration information on component mount
+    logContentfulConfig();
   }, [pageContent]);
   
   // Check if Contentful is configured
   useEffect(() => {
-    const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
-    const envId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
-    const hasToken = !!(import.meta.env.CONTENTFUL_DELIVERY_TOKEN || import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN);
+    const spaceId = CONTENTFUL_CONFIG.SPACE_ID;
+    const envId = CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master';
+    const hasToken = !!CONTENTFUL_CONFIG.DELIVERY_TOKEN;
+    
+    console.log('[ProductsPage] Config variables detected:', { 
+      spaceId, 
+      envId, 
+      hasToken 
+    });
     
     setDebugInfo({
-      spaceId: typeof spaceId === 'string' ? (spaceId.slice(0, 4) + '...') : undefined,
+      spaceId: typeof spaceId === 'string' ? (spaceId) : undefined,
       environmentId: envId,
       hasToken
     });
@@ -79,6 +88,9 @@ const ProductsPage = () => {
 
   return (
     <Layout>
+      {/* Add configuration verifier at the top for easy debugging */}
+      {import.meta.env.DEV && <ContentfulConfigVerifier />}
+      
       {/* Hero/Purpose Statement Section */}
       {pageContent && (
         <PurposeStatement 
@@ -145,7 +157,14 @@ const ProductsPage = () => {
           <details className="bg-gray-100 p-4 rounded-lg mb-4">
             <summary className="font-semibold cursor-pointer">Debug Information</summary>
             <div className="mt-4 text-sm">
-              <h4 className="font-bold">Products Data:</h4>
+              <h4 className="font-bold">Current Environment Variables:</h4>
+              <div className="bg-gray-200 p-3 rounded mt-2 font-mono">
+                <p>VITE_CONTENTFUL_SPACE_ID: {CONTENTFUL_CONFIG.SPACE_ID || 'Not set'}</p>
+                <p>VITE_CONTENTFUL_ENVIRONMENT_ID: {CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'Not set'}</p>
+                <p>VITE_CONTENTFUL_DELIVERY_TOKEN: {CONTENTFUL_CONFIG.DELIVERY_TOKEN ? 'Set' : 'Not set'}</p>
+              </div>
+              
+              <h4 className="font-bold mt-4">Products Data:</h4>
               <pre className="bg-gray-200 p-3 rounded mt-2 overflow-auto max-h-48">
                 {JSON.stringify(productTypes, null, 2)}
               </pre>

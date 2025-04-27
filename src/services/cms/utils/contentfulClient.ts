@@ -1,3 +1,4 @@
+
 import { createClient } from 'contentful';
 import { CONTENTFUL_CONFIG, logContentfulConfig } from '@/config/cms';
 import { toast } from 'sonner';
@@ -34,6 +35,14 @@ export const getContentfulClient = async () => {
     
     const { SPACE_ID, DELIVERY_TOKEN, ENVIRONMENT_ID } = CONTENTFUL_CONFIG;
     
+    // Print environment variables debugging info
+    console.log('[getContentfulClient] Environment variables check:', {
+      VITE_CONTENTFUL_SPACE_ID_EXISTS: !!import.meta.env.VITE_CONTENTFUL_SPACE_ID,
+      CONTENTFUL_SPACE_ID_EXISTS: !!import.meta.env.CONTENTFUL_SPACE_ID,
+      VITE_CONTENTFUL_DELIVERY_TOKEN_EXISTS: !!import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
+      CONTENTFUL_DELIVERY_TOKEN_EXISTS: !!import.meta.env.CONTENTFUL_DELIVERY_TOKEN,
+    });
+    
     if (!SPACE_ID || SPACE_ID.trim() === '') {
       console.error('[getContentfulClient] Invalid Space ID:', SPACE_ID);
       throw new Error('Invalid Contentful Space ID configuration');
@@ -59,9 +68,17 @@ export const getContentfulClient = async () => {
     console.log('[getContentfulClient] Successfully connected to Contentful space');
     console.log(`[getContentfulClient] Test query returned ${testEntry.total} total entries`);
     
+    // Clear any previous error
+    lastConfigError = null;
+    lastConfigCheck = now;
+    
     return contentfulClient;
   } catch (error) {
     console.error('[getContentfulClient] Error creating Contentful client:', error);
+    
+    // Store the error for cache decision making
+    lastConfigError = error instanceof Error ? error : new Error(String(error));
+    lastConfigCheck = now;
     
     // Clear the client on critical error
     contentfulClient = null;
@@ -75,6 +92,9 @@ export const getContentfulClient = async () => {
         throw new Error('Invalid Contentful space configuration. Please check your Space ID.');
       }
     }
+    
+    // Show a toast notification with debugging info
+    toast.error(`Contentful connection failed: ${error instanceof Error ? error.message : 'Unknown error'}. Check console for details.`);
     
     throw error;
   }
