@@ -10,6 +10,7 @@ interface BlogSchemaDataProps {
     datePublished: string;
     author: string;
     url: string;
+    image?: string;
   }>;
   singlePost?: {
     title: string;
@@ -19,6 +20,8 @@ interface BlogSchemaDataProps {
     url: string;
     image?: string;
     wordCount?: number;
+    category?: string;
+    keywords?: string[];
   };
 }
 
@@ -70,6 +73,12 @@ const BlogSchemaData: React.FC<BlogSchemaDataProps> = ({
     }),
     ...(singlePost.wordCount && {
       "wordCount": singlePost.wordCount
+    }),
+    ...(singlePost.category && {
+      "articleSection": singlePost.category
+    }),
+    ...(singlePost.keywords && {
+      "keywords": singlePost.keywords.join(', ')
     })
   } : {
     "@context": "https://schema.org",
@@ -86,7 +95,13 @@ const BlogSchemaData: React.FC<BlogSchemaDataProps> = ({
         "@type": "Person",
         "name": post.author
       },
-      "url": post.url
+      "url": post.url,
+      ...(post.image && {
+        "image": {
+          "@type": "ImageObject",
+          "url": post.image
+        }
+      })
     }))
   };
 

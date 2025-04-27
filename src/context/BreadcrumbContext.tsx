@@ -10,6 +10,7 @@ export interface Breadcrumb {
 interface BreadcrumbContextType {
   breadcrumbs: Breadcrumb[];
   setBreadcrumbs: (breadcrumbs: Breadcrumb[]) => void;
+  getSchemaFormattedBreadcrumbs: () => Breadcrumb[];
 }
 
 const BreadcrumbContext = createContext<BreadcrumbContextType | undefined>(undefined);
@@ -17,8 +18,16 @@ const BreadcrumbContext = createContext<BreadcrumbContextType | undefined>(undef
 export const BreadcrumbProvider = ({ children }: { children: ReactNode }) => {
   const [breadcrumbs, setBreadcrumbs] = React.useState<Breadcrumb[]>([]);
 
+  const getSchemaFormattedBreadcrumbs = () => {
+    return breadcrumbs.map(crumb => ({
+      name: crumb.name,
+      url: `https://yourdomain.com${crumb.url}`,
+      position: crumb.position
+    }));
+  };
+
   return (
-    <BreadcrumbContext.Provider value={{ breadcrumbs, setBreadcrumbs }}>
+    <BreadcrumbContext.Provider value={{ breadcrumbs, setBreadcrumbs, getSchemaFormattedBreadcrumbs }}>
       {children}
     </BreadcrumbContext.Provider>
   );
