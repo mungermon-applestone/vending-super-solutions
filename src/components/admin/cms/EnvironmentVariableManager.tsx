@@ -16,6 +16,12 @@ export const EnvironmentVariableManager = () => {
   const [spaceId, setSpaceId] = useState('');
   const [deliveryToken, setDeliveryToken] = useState('');
   const [environmentId, setEnvironmentId] = useState('master');
+  
+  // New state variables for key names
+  const [spaceIdKeyName, setSpaceIdKeyName] = useState('VITE_CONTENTFUL_SPACE_ID');
+  const [deliveryTokenKeyName, setDeliveryTokenKeyName] = useState('VITE_CONTENTFUL_DELIVERY_TOKEN');
+  const [environmentIdKeyName, setEnvironmentIdKeyName] = useState('VITE_CONTENTFUL_ENVIRONMENT_ID');
+  
   const [isSaving, setIsSaving] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
@@ -30,18 +36,24 @@ export const EnvironmentVariableManager = () => {
         setDeliveryToken(parsedVars.deliveryToken || '');
         setEnvironmentId(parsedVars.environmentId || 'master');
         
+        // Also load the key names if available
+        if (parsedVars.keyNames) {
+          setSpaceIdKeyName(parsedVars.keyNames.spaceId || 'VITE_CONTENTFUL_SPACE_ID');
+          setDeliveryTokenKeyName(parsedVars.keyNames.deliveryToken || 'VITE_CONTENTFUL_DELIVERY_TOKEN');
+          setEnvironmentIdKeyName(parsedVars.keyNames.environmentId || 'VITE_CONTENTFUL_ENVIRONMENT_ID');
+        }
+        
         // Set these values to window.env for access throughout the app
         if (parsedVars.spaceId) {
           if (!window.env) {
-            window.env = {
-              VITE_CONTENTFUL_SPACE_ID: parsedVars.spaceId,
-              VITE_CONTENTFUL_DELIVERY_TOKEN: parsedVars.deliveryToken,
-              VITE_CONTENTFUL_ENVIRONMENT_ID: parsedVars.environmentId || 'master'
-            };
+            window.env = {};
+            window.env[parsedVars.keyNames?.spaceId || 'VITE_CONTENTFUL_SPACE_ID'] = parsedVars.spaceId;
+            window.env[parsedVars.keyNames?.deliveryToken || 'VITE_CONTENTFUL_DELIVERY_TOKEN'] = parsedVars.deliveryToken;
+            window.env[parsedVars.keyNames?.environmentId || 'VITE_CONTENTFUL_ENVIRONMENT_ID'] = parsedVars.environmentId || 'master';
           } else {
-            window.env.VITE_CONTENTFUL_SPACE_ID = parsedVars.spaceId;
-            window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = parsedVars.deliveryToken;
-            window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = parsedVars.environmentId || 'master';
+            window.env[parsedVars.keyNames?.spaceId || 'VITE_CONTENTFUL_SPACE_ID'] = parsedVars.spaceId;
+            window.env[parsedVars.keyNames?.deliveryToken || 'VITE_CONTENTFUL_DELIVERY_TOKEN'] = parsedVars.deliveryToken;
+            window.env[parsedVars.keyNames?.environmentId || 'VITE_CONTENTFUL_ENVIRONMENT_ID'] = parsedVars.environmentId || 'master';
           }
           
           console.log('Loaded environment variables from local storage', window.env);
@@ -57,21 +69,29 @@ export const EnvironmentVariableManager = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Store in local storage
-      const envVars = { spaceId, deliveryToken, environmentId };
+      // Store in local storage with both values and key names
+      const envVars = { 
+        spaceId, 
+        deliveryToken, 
+        environmentId,
+        keyNames: {
+          spaceId: spaceIdKeyName,
+          deliveryToken: deliveryTokenKeyName,
+          environmentId: environmentIdKeyName
+        }
+      };
       localStorage.setItem(ENV_STORAGE_KEY, JSON.stringify(envVars));
       
       // Make variables available to the app
       if (!window.env) {
-        window.env = {
-          VITE_CONTENTFUL_SPACE_ID: spaceId,
-          VITE_CONTENTFUL_DELIVERY_TOKEN: deliveryToken,
-          VITE_CONTENTFUL_ENVIRONMENT_ID: environmentId
-        };
+        window.env = {};
+        window.env[spaceIdKeyName] = spaceId;
+        window.env[deliveryTokenKeyName] = deliveryToken;
+        window.env[environmentIdKeyName] = environmentId;
       } else {
-        window.env.VITE_CONTENTFUL_SPACE_ID = spaceId;
-        window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = deliveryToken;
-        window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = environmentId;
+        window.env[spaceIdKeyName] = spaceId;
+        window.env[deliveryTokenKeyName] = deliveryToken;
+        window.env[environmentIdKeyName] = environmentId;
       }
       
       // Force reload to apply the environment variables
@@ -120,44 +140,88 @@ export const EnvironmentVariableManager = () => {
           </AlertDescription>
         </Alert>
 
-        <div className="space-y-2">
-          <Label htmlFor="space-id">Space ID</Label>
-          <Input
-            id="space-id"
-            placeholder="e.g., al01e4yh2wq4"
-            value={spaceId}
-            onChange={(e) => setSpaceId(e.target.value)}
-          />
-          <p className="text-xs text-muted-foreground">
-            Your Contentful space identifier
-          </p>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="delivery-token">Delivery Token</Label>
-          <Input
-            id="delivery-token"
-            type="password"
-            placeholder="Contentful Content Delivery API token"
-            value={deliveryToken}
-            onChange={(e) => setDeliveryToken(e.target.value)}
-          />
-          <p className="text-xs text-muted-foreground">
-            API token used to fetch content from Contentful
-          </p>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="environment-id">Environment ID</Label>
-          <Input
-            id="environment-id"
-            placeholder="e.g., master"
-            value={environmentId}
-            onChange={(e) => setEnvironmentId(e.target.value)}
-          />
-          <p className="text-xs text-muted-foreground">
-            Usually "master" unless you're using a custom environment
-          </p>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="space-id-key">Space ID Variable Name</Label>
+              <Input
+                id="space-id-key"
+                placeholder="e.g., VITE_CONTENTFUL_SPACE_ID"
+                value={spaceIdKeyName}
+                onChange={(e) => setSpaceIdKeyName(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                The environment variable name for the Space ID
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="space-id">Space ID Value</Label>
+              <Input
+                id="space-id"
+                placeholder="e.g., al01e4yh2wq4"
+                value={spaceId}
+                onChange={(e) => setSpaceId(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Your Contentful space identifier
+              </p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="delivery-token-key">Delivery Token Variable Name</Label>
+              <Input
+                id="delivery-token-key"
+                placeholder="e.g., VITE_CONTENTFUL_DELIVERY_TOKEN"
+                value={deliveryTokenKeyName}
+                onChange={(e) => setDeliveryTokenKeyName(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                The environment variable name for the Delivery Token
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="delivery-token">Delivery Token Value</Label>
+              <Input
+                id="delivery-token"
+                type="password"
+                placeholder="Contentful Content Delivery API token"
+                value={deliveryToken}
+                onChange={(e) => setDeliveryToken(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                API token used to fetch content from Contentful
+              </p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="environment-id-key">Environment ID Variable Name</Label>
+              <Input
+                id="environment-id-key"
+                placeholder="e.g., VITE_CONTENTFUL_ENVIRONMENT_ID"
+                value={environmentIdKeyName}
+                onChange={(e) => setEnvironmentIdKeyName(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                The environment variable name for the Environment ID
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="environment-id">Environment ID Value</Label>
+              <Input
+                id="environment-id"
+                placeholder="e.g., master"
+                value={environmentId}
+                onChange={(e) => setEnvironmentId(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Usually "master" unless you're using a custom environment
+              </p>
+            </div>
+          </div>
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
@@ -175,7 +239,7 @@ export const EnvironmentVariableManager = () => {
         </Button>
         <Button 
           onClick={handleSave} 
-          disabled={isSaving || !spaceId || !deliveryToken}
+          disabled={isSaving || !spaceId || !deliveryToken || !spaceIdKeyName || !deliveryTokenKeyName || !environmentIdKeyName}
         >
           {isSaving ? (
             <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
