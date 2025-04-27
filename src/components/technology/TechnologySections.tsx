@@ -8,7 +8,6 @@ interface TechnologySectionsProps {
 }
 
 const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => {
-  // Handle case when sections is undefined or empty
   if (!sections || sections.length === 0) {
     console.warn('[TechnologySections] No sections provided');
     return (
@@ -18,7 +17,6 @@ const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => 
     );
   }
 
-  // Sort sections by display order
   const sortedSections = [...sections].sort(
     (a, b) => a.display_order - b.display_order
   );
@@ -26,7 +24,6 @@ const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => 
   return (
     <div>
       {sortedSections.map((section, index) => {
-        // Skip sections without a title as they're likely invalid
         if (!section.title) {
           console.warn(`[TechnologySections] Section at index ${index} has no title, skipping`);
           return null;
@@ -37,9 +34,12 @@ const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => 
             key={section.id || `section-${index}`} 
             id={section.id || `section-${index}`}
             title={section.title}
-            summary={section.summary || ''}
+            summary={section.description || ''}
             bulletPoints={section.bulletPoints || []}
-            image={section.sectionImage?.url || section.image?.url || ''}
+            image={{
+              url: section.image?.url || '',
+              alt: section.image?.alt || section.title
+            }}
             index={index}
             className={index === 0 ? 'pt-0' : ''}
           />

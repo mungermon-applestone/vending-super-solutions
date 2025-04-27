@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
@@ -83,7 +82,24 @@ const SimpleTechnologyPage = () => {
   const isFetching = useIsFetching({ queryKey: ['technologies'] }) > 0;
 
   // Transform technology data for rendering
-  const transformedTechnologies = technologies.map(mapTechnologyData);
+  const transformedTechnologies = technologies.map(tech => {
+    console.log(`[SimpleTechnologyPage] Transforming tech '${tech.title}'`, {
+      techData: tech,
+      hasImage: !!tech.image
+    });
+
+    return {
+      id: tech.id,
+      title: tech.title,
+      summary: tech.summary,
+      bulletPoints: tech.bulletPoints,
+      features: tech.features,
+      image: {
+        url: tech.image?.url || '',
+        alt: tech.title || 'Technology section'
+      }
+    };
+  });
 
   // Log the transformed technologies to help debug the summary issue
   useEffect(() => {
@@ -177,7 +193,7 @@ const SimpleTechnologyPage = () => {
                 title={tech.title}
                 summary={tech.summary}
                 bulletPoints={tech.bulletPoints}
-                image={tech.image || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"}
+                image={tech.image}
                 index={index}
                 className={index === 0 ? 'pt-0' : ''}
               />
