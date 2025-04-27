@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CMSTechnologySection } from '@/types/cms';
 import TechnologySection from './TechnologySection';
 
@@ -8,6 +8,15 @@ interface TechnologySectionsProps {
 }
 
 const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => {
+  useEffect(() => {
+    // Add more detailed logging to help debug the sections data
+    console.log('[TechnologySections] Received sections data:', {
+      sectionsProvided: !!sections,
+      sectionsLength: sections?.length || 0,
+      sectionsData: sections
+    });
+  }, [sections]);
+
   if (!sections || sections.length === 0) {
     console.warn('[TechnologySections] No sections provided');
     return (
@@ -28,6 +37,14 @@ const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => 
           console.warn(`[TechnologySections] Section at index ${index} has no title, skipping`);
           return null;
         }
+        
+        // Enhanced logging for each section to debug image issues
+        console.log(`[TechnologySections] Processing section: "${section.title}"`, {
+          sectionId: section.id,
+          hasImage: !!section.image?.url || !!section.sectionImage?.url,
+          imageUrl: section.image?.url || section.sectionImage?.url || '',
+          summary: section.summary || section.description || ''
+        });
         
         const imageUrl = section.image?.url || 
                         section.sectionImage?.url || 

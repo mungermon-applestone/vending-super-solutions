@@ -27,6 +27,16 @@ const TechnologySection = ({
   const isEven = index % 2 === 0;
   
   useEffect(() => {
+    // Enhanced logging to help debug image rendering issues
+    console.log(`[TechnologySection ${id}] Rendering section with image:`, {
+      title,
+      summaryProvided: !!summary,
+      summaryLength: summary?.length || 0,
+      imageProvided: !!image,
+      imageUrl: image?.url || 'No URL',
+      bulletPointsCount: bulletPoints?.length || 0
+    });
+    
     if (!title) {
       console.warn(`[TechnologySection ${id}] Missing title for section`);
     }
@@ -38,7 +48,7 @@ const TechnologySection = ({
     if (!image?.url) {
       console.warn(`[TechnologySection ${id}] Missing image URL for section "${title}"`);
     }
-  }, [id, title, summary, image]);
+  }, [id, title, summary, image, bulletPoints]);
 
   return (
     <section id={id} className={cn("py-16 bg-gradient-to-b from-white to-gray-50", className)}>
@@ -48,11 +58,11 @@ const TechnologySection = ({
           <div className="w-full md:w-1/2">
             <div className="relative aspect-[4/3] rounded-lg overflow-hidden shadow-xl">
               <img 
-                src={image.url || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"} 
-                alt={image.alt || title || "Technology section"}
+                src={image?.url || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"} 
+                alt={image?.alt || title || "Technology section"}
                 className="absolute inset-0 w-full h-full object-cover"
                 onError={(e) => {
-                  console.error(`[TechnologySection ${id}] Image failed to load:`, image.url);
+                  console.error(`[TechnologySection ${id}] Image failed to load:`, image?.url);
                   e.currentTarget.src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
                 }}
               />

@@ -1,14 +1,15 @@
+
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyHeroSimple from '@/components/technology/TechnologyHeroSimple';
-import TechnologySection from '@/components/technology/TechnologySection';
+import TechnologySections from '@/components/technology/TechnologySections';
 import { useTechnologySections } from '@/hooks/useTechnologySections';
 import { useIsFetching } from '@tanstack/react-query';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertTriangle } from 'lucide-react';
-import { CMSTechnology } from '@/types/cms';
+import { CMSTechnology, CMSTechnologySection } from '@/types/cms';
 
 const SimpleTechnologyPage = () => {
   const { technologies = [], isLoading, error } = useTechnologySections({
@@ -16,59 +17,74 @@ const SimpleTechnologyPage = () => {
   });
   const isFetching = useIsFetching({ queryKey: ['technologies'] }) > 0;
 
-  // Transform technology data for rendering
-  const transformedTechnologies = technologies.map(tech => {
-    console.log(`[SimpleTechnologyPage] Transforming tech '${tech.title}'`, {
-      techData: tech,
-      sections: tech.sections,
-      hasImage: !!tech.image
-    });
-
-    let summary = '';
-    let bulletPoints: string[] = [];
-    
-    // Get summary from first section if available, otherwise use tech description
-    if (tech.sections && tech.sections.length > 0) {
-      summary = tech.sections[0].summary || tech.sections[0].description || '';
-      bulletPoints = tech.sections[0].bulletPoints || [];
+  // Extract all sections from all technologies
+  const allSections: CMSTechnologySection[] = React.useMemo(() => {
+    if (!technologies || technologies.length === 0) {
+      console.log('[SimpleTechnologyPage] No technologies found for sections');
+      return [];
     }
     
-    // Fallback to technology description if no section summary
-    if (!summary && tech.description) {
-      summary = tech.description;
-    }
-
-    return {
-      id: tech.id,
-      title: tech.title,
-      summary,
-      bulletPoints,
-      image: {
-        url: tech.sections?.[0]?.image?.url || 
-             tech.sections?.[0]?.sectionImage?.url || 
-             (tech.image && typeof tech.image === 'object' ? tech.image.url : '') || 
-             '',
-        alt: tech.title || 'Technology section'
-      }
-    };
-  });
-
-  // Log the transformed technologies to help debug the summary issue
-  useEffect(() => {
-    if (transformedTechnologies.length > 0) {
-      console.log("[SimpleTechnologyPage] Transformed Technologies:", transformedTechnologies);
-      transformedTechnologies.forEach(tech => {
-        console.log(`[SimpleTechnologyPage] Tech '${tech.title}' summary:`, {
-          summary: tech.summary,
-          summaryType: typeof tech.summary,
-          summaryLength: tech.summary?.length || 0,
-          hasSummaryContent: !!tech.summary && tech.summary.trim() !== ''
-        });
+    // Collect all sections from all technologies
+    const sections: CMSTechnologySection[] = [];
+    
+    technologies.forEach((tech, techIndex) => {
+      console.log(`[SimpleTechnologyPage] Processing tech #${techIndex}: ${tech.title}`, {
+        hasSections: Array.isArray(tech.sections),
+        sectionsCount: tech.sections?.length || 0
       });
-    } else {
-      console.log("[SimpleTechnologyPage] No technologies to transform");
-    }
-  }, [transformedTechnologies]);
+      
+      if (tech.sections && Array.isArray(tech.sections)) {
+        tech.sections.forEach(section => {
+          // Ensure section has needed properties
+          const processedSection: CMSTechnologySection = {
+            id: section.id || `section-${techIndex}-${sections.length}`,
+            title: section.title || 'Technology Section',
+            description: section.description || '',
+            summary: section.summary || section.description || '',
+            bulletPoints: section.bulletPoints || [],
+            image: section.image || (section.sectionImage ? {
+              url: section.sectionImage.url,
+              alt: section.title || 'Technology section'
+            } : undefined),
+            sectionImage: section.sectionImage,
+            features: section.features || [],
+            technology_id: tech.id,
+            section_type: section.section_type || 'general',
+            display_order: section.display_order || 0
+          };
+          
+          sections.push(processedSection);
+        });
+      } else if (tech.description) {
+        // Create a default section from the technology itself if no sections
+        console.log(`[SimpleTechnologyPage] Creating default section for: ${tech.title}`);
+        
+        const imageObject = tech.image && typeof tech.image === 'object' ? 
+          tech.image : { url: typeof tech.image === 'string' ? tech.image : '', alt: tech.title || 'Technology' };
+        
+        sections.push({
+          id: `default-section-${tech.id}`,
+          title: tech.title,
+          description: tech.description,
+          summary: tech.description,
+          image: imageObject,
+          technology_id: tech.id,
+          section_type: 'default',
+          display_order: 0,
+          features: [],
+          bulletPoints: []
+        });
+      }
+    });
+    
+    console.log(`[SimpleTechnologyPage] Processed ${sections.length} total sections`);
+    return sections;
+  }, [technologies]);
+
+  // Log detailed information about the sections we've extracted
+  useEffect(() => {
+    console.log('[SimpleTechnologyPage] Processed sections:', allSections);
+  }, [allSections]);
 
   return (
     <Layout>
@@ -116,7 +132,7 @@ const SimpleTechnologyPage = () => {
       )}
 
       {/* Empty State */}
-      {!isLoading && !isFetching && !error && transformedTechnologies.length === 0 && (
+      {!isLoading && !isFetching && !error && technologies.length === 0 && (
         <div className="container max-w-7xl mx-auto px-4 py-12">
           <Alert>
             <AlertDescription>
@@ -127,32 +143,19 @@ const SimpleTechnologyPage = () => {
       )}
 
       {/* Technology Sections */}
-      {!isLoading && !error && transformedTechnologies.length > 0 && (
-        <>
-          {transformedTechnologies.map((tech, index) => {
-            console.log(`[SimpleTechnologyPage] Rendering TechnologySection for '${tech.title}'`, {
-              id: tech.id,
-              summary: tech.summary,
-              summaryLength: tech.summary?.length || 0,
-              hasSummary: Boolean(tech.summary),
-              image: tech.image
-            });
-            
-            return (
-              <TechnologySection
-                key={tech.id}
-                id={tech.id}
-                title={tech.title}
-                summary={tech.summary}
-                bulletPoints={tech.bulletPoints}
-                image={tech.image}
-                index={index}
-                className={index === 0 ? 'pt-0' : ''}
-              />
-            );
-          })}
-        </>
-      )}
+      {!isLoading && !error && allSections.length > 0 ? (
+        <div className="container max-w-7xl mx-auto px-4 py-12">
+          <TechnologySections sections={allSections} />
+        </div>
+      ) : !isLoading && !isFetching && !error && technologies.length > 0 ? (
+        <div className="container max-w-7xl mx-auto px-4 py-12">
+          <Alert>
+            <AlertDescription>
+              Technologies were found but no sections were available to display.
+            </AlertDescription>
+          </Alert>
+        </div>
+      ) : null}
 
       {/* Contact Form */}
       <InquiryForm title="Technology Solutions" />
