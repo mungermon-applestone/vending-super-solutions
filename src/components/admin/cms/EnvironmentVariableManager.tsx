@@ -32,10 +32,17 @@ export const EnvironmentVariableManager = () => {
         
         // Set these values to window.env for access throughout the app
         if (parsedVars.spaceId) {
-          window.env = window.env || {};
-          window.env.VITE_CONTENTFUL_SPACE_ID = parsedVars.spaceId;
-          window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = parsedVars.deliveryToken;
-          window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = parsedVars.environmentId || 'master';
+          if (!window.env) {
+            window.env = {
+              VITE_CONTENTFUL_SPACE_ID: parsedVars.spaceId,
+              VITE_CONTENTFUL_DELIVERY_TOKEN: parsedVars.deliveryToken,
+              VITE_CONTENTFUL_ENVIRONMENT_ID: parsedVars.environmentId || 'master'
+            };
+          } else {
+            window.env.VITE_CONTENTFUL_SPACE_ID = parsedVars.spaceId;
+            window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = parsedVars.deliveryToken;
+            window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = parsedVars.environmentId || 'master';
+          }
           
           console.log('Loaded environment variables from local storage', window.env);
         }
@@ -55,10 +62,17 @@ export const EnvironmentVariableManager = () => {
       localStorage.setItem(ENV_STORAGE_KEY, JSON.stringify(envVars));
       
       // Make variables available to the app
-      window.env = window.env || {};
-      window.env.VITE_CONTENTFUL_SPACE_ID = spaceId;
-      window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = deliveryToken;
-      window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = environmentId;
+      if (!window.env) {
+        window.env = {
+          VITE_CONTENTFUL_SPACE_ID: spaceId,
+          VITE_CONTENTFUL_DELIVERY_TOKEN: deliveryToken,
+          VITE_CONTENTFUL_ENVIRONMENT_ID: environmentId
+        };
+      } else {
+        window.env.VITE_CONTENTFUL_SPACE_ID = spaceId;
+        window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = deliveryToken;
+        window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = environmentId;
+      }
       
       // Force reload to apply the environment variables
       await refreshContentful();
