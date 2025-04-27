@@ -12,3 +12,15 @@ Sitemap: https://yourdomain.com/sitemap.xml
 
 # Crawl delay to prevent server overload
 Crawl-delay: 10
+
+# Allow image indexing
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.png$
+Allow: /*.gif$
+Allow: /*.webp$
+Allow: /*.svg$
+
+# Prevent duplicate content indexing
+Disallow: /*?*sort=
+Disallow: /*?*filter=

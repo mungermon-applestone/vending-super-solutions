@@ -25,6 +25,8 @@ interface SEOProps {
   };
   additionalMetaTags?: Array<{ name: string; content: string }>;
   schema?: object;
+  language?: string;
+  alternateLanguages?: Array<{ hrefLang: string; href: string }>;
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -37,7 +39,9 @@ const SEO: React.FC<SEOProps> = ({
   openGraph,
   twitter,
   additionalMetaTags = [],
-  schema
+  schema,
+  language = 'en',
+  alternateLanguages = []
 }) => {
   const siteName = 'Vending Solutions';
   const defaultDescription = 'Advanced vending solutions for modern businesses. Automate your retail operations with smart vending machines and IoT technology.';
@@ -48,7 +52,7 @@ const SEO: React.FC<SEOProps> = ({
   const canonical = canonicalUrl || currentUrl;
 
   return (
-    <Helmet>
+    <Helmet htmlAttributes={{ lang: language }}>
       {/* Basic Meta Tags */}
       <title>{fullTitle}</title>
       <meta name="description" content={description || defaultDescription} />
@@ -71,6 +75,11 @@ const SEO: React.FC<SEOProps> = ({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description || defaultDescription} />
       <meta name="twitter:image" content={twitter?.image || image || defaultImage} />
+
+      {/* Alternate Language Links */}
+      {alternateLanguages.map((lang, i) => (
+        <link key={i} rel="alternate" hrefLang={lang.hrefLang} href={lang.href} />
+      ))}
 
       {/* Additional Meta Tags */}
       <meta name="format-detection" content="telephone=no" />

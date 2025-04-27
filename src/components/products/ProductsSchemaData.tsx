@@ -7,12 +7,14 @@ interface ProductsSchemaDataProps {
   products: CMSProductType[];
   organizationName?: string;
   organizationLogo?: string;
+  breadcrumbItems?: Array<{name: string, url: string, position: number}>;
 }
 
 const ProductsSchemaData: React.FC<ProductsSchemaDataProps> = ({
   products,
   organizationName = 'Vending Solutions',
-  organizationLogo = '/logo.png'
+  organizationLogo = '/logo.png',
+  breadcrumbItems
 }) => {
   // Create the item list schema
   const itemListSchema = {
@@ -43,7 +45,7 @@ const ProductsSchemaData: React.FC<ProductsSchemaDataProps> = ({
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    "itemListElement": [
+    "itemListElement": breadcrumbItems || [
       {
         "@type": "ListItem",
         "position": 1,
