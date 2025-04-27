@@ -14,7 +14,8 @@ const ProductsSchemaData: React.FC<ProductsSchemaDataProps> = ({
   organizationName = 'Vending Solutions',
   organizationLogo = '/logo.png'
 }) => {
-  const schemaData = {
+  // Create the item list schema
+  const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "itemListElement": products.map((product, index) => ({
@@ -38,10 +39,45 @@ const ProductsSchemaData: React.FC<ProductsSchemaDataProps> = ({
     }))
   };
 
+  // Create breadcrumb schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://yourdomain.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Products",
+        "item": "https://yourdomain.com/products"
+      }
+    ]
+  };
+
+  // Create organization schema
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": organizationName,
+    "logo": organizationLogo,
+    "url": "https://yourdomain.com"
+  };
+
   return (
     <Helmet>
       <script type="application/ld+json">
-        {JSON.stringify(schemaData)}
+        {JSON.stringify(itemListSchema)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(breadcrumbSchema)}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify(organizationSchema)}
       </script>
     </Helmet>
   );
