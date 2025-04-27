@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useTechnologySections } from '@/hooks/useTechnologySections';
 import { Button } from '@/components/ui/button';
@@ -16,14 +17,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { deleteTechnology, cloneTechnology } from '@/services/cms/technologies';
 import { useConfirm } from '@/hooks/useConfirm';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { CMSTechnology } from '@/types/cms';
 
 const TechnologyList = () => {
   const { technologies = [], isLoading, error, refetch } = useTechnologySections();
-  const { toast } = useToast();
-  const { confirm } = useConfirm();
+  const { toast, dismiss, toasts } = useToast();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const handleDelete = async (technology: CMSTechnology) => {
     const confirmed = await confirm({
@@ -33,7 +34,7 @@ const TechnologyList = () => {
 
     if (confirmed) {
       try {
-        await deleteTechnology(technology.slug, { toast });
+        await deleteTechnology(technology.slug);
         toast({
           title: "Technology deleted",
           description: `${technology.title} has been deleted successfully.`,
@@ -52,7 +53,7 @@ const TechnologyList = () => {
 
   const handleClone = async (technology: CMSTechnology) => {
     try {
-      await cloneTechnology(technology.id, { toast });
+      await cloneTechnology(technology.id);
       refetch();
     } catch (error) {
       console.error("Error cloning technology:", error);
@@ -206,6 +207,8 @@ const TechnologyList = () => {
           </Table>
         </div>
       )}
+      
+      <ConfirmDialog />
     </div>
   );
 };

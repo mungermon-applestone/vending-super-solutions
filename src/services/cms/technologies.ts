@@ -1,8 +1,9 @@
+
 import { CMSTechnology } from '@/types/cms';
 import { getCMSProviderConfig } from './providerConfig';
 import { getTechnologyAdapter } from './adapters/technologies/technologyAdapterFactory';
 import { TechnologyCreateInput, TechnologyUpdateInput } from './adapters/technologies/types';
-import { UseToastReturn } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 // Import technologyOperations from the correct path
 import { technologyOperations } from './contentTypes/technologies';
 
@@ -63,31 +64,14 @@ export async function getTechnologyById(id: string): Promise<CMSTechnology | nul
 /**
  * Create a new technology
  */
-export async function createTechnology(data: TechnologyCreateInput, toast?: UseToastReturn): Promise<string> {
+export async function createTechnology(data: TechnologyCreateInput): Promise<string> {
   console.log('[technology.ts] Creating new technology:', data);
   try {
     const adapter = getTechnologyAdapter(getCMSProviderConfig());
     const result = await adapter.create(data);
-    
-    if (toast) {
-      toast.toast({
-        title: "Technology created",
-        description: `${data.title} has been created successfully.`
-      });
-    }
-    
     return result.id;
   } catch (error) {
     console.error('[technology.ts] Error creating technology:', error);
-    
-    if (toast) {
-      toast.toast({
-        title: "Error",
-        description: `Failed to create technology: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        variant: "destructive"
-      });
-    }
-    
     throw error;
   }
 }
@@ -95,36 +79,15 @@ export async function createTechnology(data: TechnologyCreateInput, toast?: UseT
 /**
  * Update an existing technology
  */
-export async function updateTechnology(
-  id: string, 
-  data: TechnologyUpdateInput, 
-  toast?: UseToastReturn
-): Promise<string> {
+export async function updateTechnology(id: string, data: TechnologyUpdateInput): Promise<string> {
   console.log('[technology.ts] Updating technology:', id, data);
   
   try {
     const adapter = getTechnologyAdapter(getCMSProviderConfig());
     const result = await adapter.update(id, data);
-    
-    if (toast) {
-      toast.toast({
-        title: "Technology updated",
-        description: `${data.title} has been updated successfully.`
-      });
-    }
-    
     return result.id;
   } catch (error) {
     console.error('[technology.ts] Error updating technology:', error);
-    
-    if (toast) {
-      toast.toast({
-        title: "Error",
-        description: `Failed to update technology: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        variant: "destructive"
-      });
-    }
-    
     throw error;
   }
 }
@@ -132,7 +95,7 @@ export async function updateTechnology(
 /**
  * Delete a technology
  */
-export async function deleteTechnology(slug: string, toast?: UseToastReturn): Promise<boolean> {
+export async function deleteTechnology(slug: string): Promise<boolean> {
   console.log(`[technology.ts] Deleting technology with slug: ${slug}`);
   
   try {
@@ -146,26 +109,9 @@ export async function deleteTechnology(slug: string, toast?: UseToastReturn): Pr
     }
     
     const success = await adapter.delete(technology.id);
-    
-    if (toast && success) {
-      toast.toast({
-        title: "Technology deleted",
-        description: `The technology has been deleted successfully.`
-      });
-    }
-    
     return success;
   } catch (error) {
     console.error(`[technology.ts] Error deleting technology "${slug}":`, error);
-    
-    if (toast) {
-      toast.toast({
-        title: "Error",
-        description: `Failed to delete technology: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        variant: "destructive"
-      });
-    }
-    
     throw error;
   }
 }
@@ -173,32 +119,15 @@ export async function deleteTechnology(slug: string, toast?: UseToastReturn): Pr
 /**
  * Clone a technology
  */
-export async function cloneTechnology(id: string, toast?: UseToastReturn): Promise<CMSTechnology | null> {
+export async function cloneTechnology(id: string): Promise<CMSTechnology | null> {
   console.log(`[technology.ts] Cloning technology with ID: ${id}`);
   
   try {
     const adapter = getTechnologyAdapter(getCMSProviderConfig());
     const result = await adapter.clone(id);
-    
-    if (toast && result) {
-      toast.toast({
-        title: "Technology cloned",
-        description: `${result.title} has been cloned successfully.`
-      });
-    }
-    
     return result;
   } catch (error) {
     console.error(`[technology.ts] Error cloning technology "${id}":`, error);
-    
-    if (toast) {
-      toast.toast({
-        title: "Error",
-        description: `Failed to clone technology: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        variant: "destructive"
-      });
-    }
-    
     throw error;
   }
 }
