@@ -1,147 +1,38 @@
-
-import React, { useEffect } from 'react';
+import React from 'react';
 import Layout from '@/components/layout/Layout';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyHeroSimple from '@/components/technology/TechnologyHeroSimple';
 import TechnologySections from '@/components/technology/TechnologySections';
 import { useTechnologySections } from '@/hooks/useTechnologySections';
-import { useIsFetching } from '@tanstack/react-query';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertTriangle } from 'lucide-react';
-import { CMSTechnology, CMSTechnologySection } from '@/types/cms';
+import type { CMSTechnologySection } from '@/types/cms';
 
 const SimpleTechnologyPage = () => {
-  const { technologies = [], isLoading, error } = useTechnologySections({
+  const { data: technologies = [], isLoading, error } = useTechnologySections({
     enableToasts: true
   });
-  const isFetching = useIsFetching({ queryKey: ['technologies'] }) > 0;
 
-  // Extract all sections from all technologies
+  // Extract all sections from technologies
   const allSections: CMSTechnologySection[] = React.useMemo(() => {
-    console.log('[SimpleTechnologyPage] Processing technologies for sections:', {
-      technologiesCount: technologies?.length || 0,
-      technologiesProvided: !!technologies && technologies.length > 0,
-      firstTechnology: technologies?.[0] ? 
-        { id: technologies[0].id, title: technologies[0].title, hasSections: !!technologies[0].sections } : 
-        'None'
+    console.log('[SimpleTechnologyPage] Processing technologies:', {
+      count: technologies?.length || 0,
+      data: technologies
     });
     
-    if (!technologies || technologies.length === 0) {
-      console.log('[SimpleTechnologyPage] No technologies found for sections');
-      return [];
-    }
+    if (!technologies || technologies.length === 0) return [];
     
-    // Collect all sections from all technologies
-    const sections: CMSTechnologySection[] = [];
-    
-    technologies.forEach((tech, techIndex) => {
-      console.log(`[SimpleTechnologyPage] Processing tech #${techIndex}: ${tech.title}`, {
-        hasSections: Array.isArray(tech.sections),
-        sectionsCount: tech.sections?.length || 0
-      });
-      
-      if (tech.sections && Array.isArray(tech.sections) && tech.sections.length > 0) {
-        tech.sections.forEach(section => {
-          // Ensure section has needed properties
-          const processedSection: CMSTechnologySection = {
-            id: section.id || `section-${techIndex}-${sections.length}`,
-            title: section.title || 'Technology Section',
-            description: section.description || '',
-            summary: section.summary || section.description || '',
-            bulletPoints: section.bulletPoints || [],
-            image: section.image || (section.sectionImage ? {
-              url: section.sectionImage.url,
-              alt: section.title || 'Technology section'
-            } : undefined),
-            sectionImage: section.sectionImage,
-            features: section.features || [],
-            technology_id: tech.id,
-            section_type: section.section_type || 'general',
-            display_order: section.display_order || 0
-          };
-          
-          console.log(`[SimpleTechnologyPage] Adding section: ${processedSection.title}`, {
-            imageUrl: processedSection.image?.url || processedSection.sectionImage?.url || 'No image'
-          });
-          
-          sections.push(processedSection);
-        });
-      } else if (tech.description) {
-        // Create a default section from the technology itself if no sections
-        console.log(`[SimpleTechnologyPage] Creating default section for: ${tech.title}`);
-        
-        const imageObject = tech.image && typeof tech.image === 'object' ? 
-          tech.image : { url: typeof tech.image === 'string' ? tech.image : '', alt: tech.title || 'Technology' };
-        
-        sections.push({
-          id: `default-section-${tech.id}`,
-          title: tech.title,
-          description: tech.description,
-          summary: tech.description,
-          image: imageObject,
-          technology_id: tech.id,
-          section_type: 'default',
-          display_order: 0,
-          features: [],
-          bulletPoints: []
-        });
-        
-        console.log(`[SimpleTechnologyPage] Created default section with image:`, {
-          imageUrl: imageObject.url || 'No image URL'
-        });
+    return technologies.flatMap(tech => {
+      if (!tech.sections) {
+        console.warn(`[SimpleTechnologyPage] No sections found for technology ${tech.title}`);
+        return [];
       }
+      
+      console.log(`[SimpleTechnologyPage] Found ${tech.sections.length} sections for ${tech.title}`);
+      return tech.sections;
     });
-    
-    console.log(`[SimpleTechnologyPage] Processed ${sections.length} total sections`);
-    return sections;
   }, [technologies]);
-
-  // Log detailed information about the sections we've extracted
-  useEffect(() => {
-    console.log('[SimpleTechnologyPage] Processed sections:', allSections);
-    
-    if (allSections.length === 0) {
-      // Check if we have technologies but no sections
-      if (technologies && technologies.length > 0) {
-        console.warn('[SimpleTechnologyPage] Technologies found but no sections were created');
-        console.log('[SimpleTechnologyPage] First technology data:', technologies[0]);
-      }
-    } else {
-      // Log image URLs for all sections to help debug
-      allSections.forEach(section => {
-        console.log(`[SimpleTechnologyPage] Section "${section.title}" image:`, {
-          directImageUrl: section.image?.url || 'No direct image',
-          sectionImageUrl: section.sectionImage?.url || 'No section image',
-          hasBulletPoints: (section.bulletPoints?.length || 0) > 0
-        });
-      });
-    }
-  }, [allSections, technologies]);
-
-  // Create a fallback section if we have technologies but no sections
-  const sectionsToRender = React.useMemo(() => {
-    if (allSections.length === 0 && technologies && technologies.length > 0) {
-      console.log('[SimpleTechnologyPage] Creating fallback sections from technologies');
-      
-      return technologies.map((tech, index) => ({
-        id: `fallback-section-${tech.id || index}`,
-        title: tech.title || 'Technology',
-        summary: tech.description || '',
-        description: tech.description || '',
-        image: tech.image && typeof tech.image === 'object' ? 
-          tech.image : 
-          { url: typeof tech.image === 'string' ? tech.image : '', alt: tech.title || 'Technology' },
-        technology_id: tech.id || `tech-${index}`,
-        section_type: 'fallback',
-        display_order: index,
-        features: [],
-        bulletPoints: []
-      }));
-    }
-    
-    return allSections;
-  }, [allSections, technologies]);
 
   return (
     <Layout>
@@ -154,7 +45,7 @@ const SimpleTechnologyPage = () => {
       />
 
       {/* Loading State */}
-      {(isLoading || isFetching) && (
+      {isLoading && (
         <div className="container max-w-7xl mx-auto px-4 py-12">
           <div className="space-y-12">
             {[1, 2, 3].map(i => (
@@ -176,7 +67,7 @@ const SimpleTechnologyPage = () => {
       )}
 
       {/* Error State */}
-      {error && !isFetching && (
+      {error && !isLoading && (
         <div className="container max-w-7xl mx-auto px-4 py-12">
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
@@ -188,31 +79,12 @@ const SimpleTechnologyPage = () => {
         </div>
       )}
 
-      {/* Empty State */}
-      {!isLoading && !isFetching && !error && technologies.length === 0 && (
+      {/* Technology Sections */}
+      {!isLoading && !error && (
         <div className="container max-w-7xl mx-auto px-4 py-12">
-          <Alert>
-            <AlertDescription>
-              No technology information is currently available.
-            </AlertDescription>
-          </Alert>
+          <TechnologySections sections={allSections} />
         </div>
       )}
-
-      {/* Technology Sections */}
-      {!isLoading && !error && sectionsToRender.length > 0 ? (
-        <div className="container max-w-7xl mx-auto px-4 py-12">
-          <TechnologySections sections={sectionsToRender} />
-        </div>
-      ) : !isLoading && !isFetching && !error && technologies.length > 0 ? (
-        <div className="container max-w-7xl mx-auto px-4 py-12">
-          <Alert>
-            <AlertDescription>
-              Technologies were found but no sections were available to display.
-            </AlertDescription>
-          </Alert>
-        </div>
-      ) : null}
 
       {/* Contact Form */}
       <InquiryForm title="Technology Solutions" />

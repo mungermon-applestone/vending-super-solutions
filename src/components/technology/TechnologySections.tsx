@@ -9,18 +9,14 @@ interface TechnologySectionsProps {
 
 const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => {
   useEffect(() => {
-    // Add more detailed logging to help debug the sections data
-    console.log('[TechnologySections] Received sections data:', {
-      sectionsProvided: !!sections,
-      sectionsLength: sections?.length || 0,
-      sectionsData: JSON.stringify(sections).substring(0, 200) + '...' // Log a preview of the data
+    console.log('[TechnologySections] Rendering sections:', {
+      sectionsCount: sections?.length || 0,
+      sectionsData: sections?.map(s => ({
+        id: s.id,
+        title: s.title,
+        hasImage: !!s.sectionImage || !!s.image
+      }))
     });
-    
-    if (!sections || sections.length === 0) {
-      console.warn('[TechnologySections] No sections provided or empty array');
-    } else {
-      console.log(`[TechnologySections] Found ${sections.length} sections to render`);
-    }
   }, [sections]);
 
   if (!sections || sections.length === 0) {
@@ -39,33 +35,22 @@ const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => 
   return (
     <div>
       {sortedSections.map((section, index) => {
-        if (!section.title) {
-          console.warn(`[TechnologySections] Section at index ${index} has no title, skipping`);
-          return null;
-        }
-        
-        // Enhanced logging for each section to debug image issues
-        console.log(`[TechnologySections] Processing section: "${section.title}"`, {
-          sectionId: section.id,
-          hasImage: !!section.image?.url || !!section.sectionImage?.url,
-          imageUrl: section.image?.url || section.sectionImage?.url || '',
-          summary: section.summary || section.description || ''
+        console.log(`[TechnologySections] Processing section ${index}:`, {
+          title: section.title,
+          hasImage: !!section.sectionImage || !!section.image,
+          imageUrl: section.sectionImage?.url || section.image?.url
         });
-        
-        const imageUrl = section.image?.url || 
-                        section.sectionImage?.url || 
-                        '';
-        
+
         return (
-          <TechnologySection 
-            key={section.id || `section-${index}`} 
-            id={section.id || `section-${index}`}
+          <TechnologySection
+            key={section.id}
+            id={section.id}
             title={section.title}
             summary={section.summary || section.description || ''}
             bulletPoints={section.bulletPoints || []}
             image={{
-              url: imageUrl,
-              alt: section.title || 'Technology section'
+              url: section.sectionImage?.url || section.image?.url || '',
+              alt: section.title
             }}
             index={index}
             className={index === 0 ? 'pt-0' : ''}
