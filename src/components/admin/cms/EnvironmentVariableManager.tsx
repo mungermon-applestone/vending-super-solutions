@@ -59,7 +59,7 @@ export const EnvironmentVariableManager = () => {
       window.env = {};
     }
     
-    // Use the key names from storage if available, otherwise use defaults
+    // Use the key names from storage if available
     const keyNames = vars.keyNames || {
       spaceId: 'VITE_CONTENTFUL_SPACE_ID',
       deliveryToken: 'VITE_CONTENTFUL_DELIVERY_TOKEN',
@@ -93,6 +93,7 @@ export const EnvironmentVariableManager = () => {
           environmentId: environmentIdKeyName
         }
       };
+      
       localStorage.setItem(ENV_STORAGE_KEY, JSON.stringify(envVars));
       
       // Initialize window.env with the saved values

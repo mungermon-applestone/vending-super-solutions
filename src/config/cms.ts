@@ -1,15 +1,11 @@
-
 // CMS Configuration
+
+// Storage key for environment variables
+const ENV_STORAGE_KEY = 'vending-cms-env-variables';
 
 // Helper to get environment variables from different sources
 function getEnvVariable(key: string): string {
-  // Check window.env first (set by our environment variable manager)
-  if (typeof window !== 'undefined' && window.env && window.env[key]) {
-    return window.env[key];
-  }
-  
-  // Check localStorage using env storage key
-  const ENV_STORAGE_KEY = 'vending-cms-env-variables';
+  // First check localStorage using env storage key
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
       const storedVars = window.localStorage.getItem(ENV_STORAGE_KEY);
@@ -21,15 +17,10 @@ function getEnvVariable(key: string): string {
           return parsedVars[key];
         }
         
-        // Then try to map common keys to their values
-        if (key === 'VITE_CONTENTFUL_SPACE_ID' && parsedVars.spaceId) {
-          return parsedVars.spaceId;
-        }
-        if (key === 'VITE_CONTENTFUL_DELIVERY_TOKEN' && parsedVars.deliveryToken) {
-          return parsedVars.deliveryToken;
-        }
-        if (key === 'VITE_CONTENTFUL_ENVIRONMENT_ID' && parsedVars.environmentId) {
-          return parsedVars.environmentId;
+        // Check if the key exists in keyNames mapping
+        if (parsedVars.keyNames) {
+          const mappedValue = parsedVars[parsedVars.keyNames[key]] || '';
+          if (mappedValue) return mappedValue;
         }
       }
     } catch (e) {
@@ -37,29 +28,62 @@ function getEnvVariable(key: string): string {
     }
   }
   
-  // Then check import.meta.env
+  // Then check window.env
+  if (typeof window !== 'undefined' && window.env && window.env[key]) {
+    return window.env[key];
+  }
+  
+  // Finally check import.meta.env
   if (import.meta.env[key]) {
     return import.meta.env[key];
   }
   
+  console.warn(`Environment variable ${key} not found in any source`);
   return '';
 }
 
+// Initialize window.env from localStorage if needed
+function initializeWindowEnv() {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    const storedVars = window.localStorage.getItem(ENV_STORAGE_KEY);
+    if (storedVars) {
+      const parsedVars = JSON.parse(storedVars);
+      if (!window.env) {
+        window.env = {};
+      }
+      
+      // Map stored values to window.env
+      if (parsedVars.keyNames) {
+        const keyMappings = parsedVars.keyNames;
+        Object.entries(keyMappings).forEach(([key, value]) => {
+          if (typeof value === 'string' && parsedVars[key]) {
+            window.env[value] = parsedVars[key];
+          }
+        });
+      }
+      
+      // Also set direct values for compatibility
+      window.env.spaceId = parsedVars.spaceId;
+      window.env.deliveryToken = parsedVars.deliveryToken;
+      window.env.environmentId = parsedVars.environmentId;
+    }
+  } catch (e) {
+    console.error('Error initializing window.env:', e);
+  }
+}
+
+// Initialize window.env on load
+initializeWindowEnv();
+
 // Contentful Configuration
 export const CONTENTFUL_CONFIG = {
-  // Space ID can come from environment variable or use the hardcoded fallback
-  SPACE_ID: getEnvVariable('VITE_CONTENTFUL_SPACE_ID') || 'al01e4yh2wq4',
-  // Delivery token can come from different environment variable formats
-  DELIVERY_TOKEN: getEnvVariable('VITE_CONTENTFUL_DELIVERY_TOKEN') || 
-                  getEnvVariable('CONTENTFUL_DELIVERY_TOKEN') || 
-                  '',
-  PREVIEW_TOKEN: getEnvVariable('VITE_CONTENTFUL_PREVIEW_TOKEN') || 
-                getEnvVariable('CONTENTFUL_PREVIEW_TOKEN') || 
-                '',
-  MANAGEMENT_TOKEN: getEnvVariable('VITE_CONTENTFUL_MANAGEMENT_TOKEN') || 
-                    getEnvVariable('CONTENTFUL_MANAGEMENT_TOKEN') || 
-                    '',
-  ENVIRONMENT_ID: getEnvVariable('VITE_CONTENTFUL_ENVIRONMENT_ID') || 'master',
+  SPACE_ID: getEnvVariable('VITE_CONTENTFUL_SPACE_ID'),
+  DELIVERY_TOKEN: getEnvVariable('VITE_CONTENTFUL_DELIVERY_TOKEN'),
+  PREVIEW_TOKEN: getEnvVariable('VITE_CONTENTFUL_PREVIEW_TOKEN'),
+  MANAGEMENT_TOKEN: getEnvVariable('VITE_CONTENTFUL_MANAGEMENT_TOKEN'),
+  ENVIRONMENT_ID: getEnvVariable('VITE_CONTENTFUL_ENVIRONMENT_ID') || 'master'
 };
 
 export const IS_DEVELOPMENT = import.meta.env.DEV || false;
@@ -91,21 +115,22 @@ export function checkContentfulConfig() {
 
 // Add the isContentfulConfigured function that was missing
 export function isContentfulConfigured() {
-  return checkContentfulConfig().isConfigured;
+  const config = checkContentfulConfig();
+  return config.isConfigured;
 }
 
 // Enhanced logging function for debugging configuration
 export function logContentfulConfig() {
-  const config = checkContentfulConfig();
   console.log('[cms.ts] Current Contentful configuration:', {
-    hasSpaceId: !!CONTENTFUL_CONFIG.SPACE_ID,
     spaceId: CONTENTFUL_CONFIG.SPACE_ID,
     hasDeliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
-    deliveryTokenPreview: CONTENTFUL_CONFIG.DELIVERY_TOKEN ? `${CONTENTFUL_CONFIG.DELIVERY_TOKEN.substring(0, 4)}...` : 'not set',
+    deliveryTokenPreview: CONTENTFUL_CONFIG.DELIVERY_TOKEN ? 
+      `${CONTENTFUL_CONFIG.DELIVERY_TOKEN.substring(0, 4)}...` : 'not set',
     environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID,
-    isConfigured: config.isConfigured,
-    missingValues: config.missingValues,
-    windowEnv: typeof window !== 'undefined' ? window.env : undefined
+    isConfigured: isContentfulConfigured(),
+    windowEnvExists: typeof window !== 'undefined' && !!window.env,
+    storedVarsExist: typeof window !== 'undefined' && 
+      !!window.localStorage.getItem(ENV_STORAGE_KEY)
   });
 }
 
