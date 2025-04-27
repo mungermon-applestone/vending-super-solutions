@@ -11,19 +11,67 @@ interface BlogSchemaDataProps {
     author: string;
     url: string;
   }>;
+  singlePost?: {
+    title: string;
+    description: string;
+    datePublished: string;
+    author: string;
+    url: string;
+    image?: string;
+    wordCount?: number;
+  };
 }
 
 const BlogSchemaData: React.FC<BlogSchemaDataProps> = ({
   breadcrumbItems,
-  blogPosts = []
+  blogPosts = [],
+  singlePost
 }) => {
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    "itemListElement": breadcrumbItems
+    "itemListElement": breadcrumbItems.map((item, index) => ({
+      "@type": "ListItem",
+      "position": item.position,
+      "item": {
+        "@id": item.url,
+        "name": item.name
+      }
+    }))
   };
 
-  const blogSchema = {
+  const blogSchema = singlePost ? {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": singlePost.title,
+    "description": singlePost.description,
+    "datePublished": singlePost.datePublished,
+    "author": {
+      "@type": "Person",
+      "name": singlePost.author
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Vending Solutions",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://yourdomain.com/logo.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": singlePost.url
+    },
+    ...(singlePost.image && {
+      "image": {
+        "@type": "ImageObject",
+        "url": singlePost.image
+      }
+    }),
+    ...(singlePost.wordCount && {
+      "wordCount": singlePost.wordCount
+    })
+  } : {
     "@context": "https://schema.org",
     "@type": "Blog",
     "name": "Vending Solutions Blog",
