@@ -55,23 +55,62 @@ export const resetContentfulClient = async () => {
 export const testContentfulConnection = async () => {
   console.log('[contentfulClient] Testing Contentful connection');
   try {
-    // Force a new client for the test
-    contentfulClient = null;
-    const client = await getContentfulClient(true);
+    // Check if configuration is available first
+    if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
+      console.warn('[contentfulClient] Missing Contentful configuration');
+      return {
+        success: false,
+        message: 'Contentful configuration missing. Please navigate to Admin > Environment Variables to set up your Contentful credentials.',
+        details: {
+          missingConfig: true,
+          spaceName: null,
+          spaceId: null
+        }
+      };
+    }
     
-    // Try fetching space information as a test
-    const space = await client.getSpace();
-    
-    return {
-      success: true,
-      message: `Successfully connected to Contentful space: ${space.name}`,
-      details: {
-        spaceName: space.name,
-        spaceId: space.sys.id
+    try {
+      // Force a new client for the test
+      contentfulClient = null;
+      const client = await getContentfulClient(true);
+      
+      // Try fetching space information as a test
+      const space = await client.getSpace();
+      
+      toast.success(`Connected to Contentful space: ${space.name}`);
+      
+      return {
+        success: true,
+        message: `Successfully connected to Contentful space: ${space.name}`,
+        details: {
+          spaceName: space.name,
+          spaceId: space.sys.id
+        }
+      };
+    } catch (error: any) {
+      console.error('[contentfulClient] Connection test failed:', error);
+      
+      // Provide more specific error messages based on error codes
+      let message = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (error.sys?.id === 'NotFound') {
+        message = `Space not found. Check your Space ID (${CONTENTFUL_CONFIG.SPACE_ID}).`;
+      } else if (error.sys?.id === 'AccessTokenInvalid') {
+        message = 'Invalid access token. Check your Delivery Token.';
+      } else if (error.name === 'TypeError' && message.includes('getSpace')) {
+        message = 'Unable to connect to Contentful API. Check if your tokens are correct.';
       }
-    };
+      
+      toast.error(`Contentful connection failed: ${message}`);
+      
+      return {
+        success: false,
+        message,
+        details: error
+      };
+    }
   } catch (error) {
-    console.error('[contentfulClient] Connection test failed:', error);
+    console.error('[contentfulClient] Error in connection test:', error);
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Unknown error',
