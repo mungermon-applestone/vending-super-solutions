@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useMachineById, useCreateMachine, useUpdateMachine } from '@/hooks/useMachinesData';
 import MachineForm from '@/components/admin/machine-editor/MachineForm';
-import { MachineFormValues } from '@/utils/machineMigration/types';
+import { MachineFormValues, MachineData } from '@/utils/machineMigration/types';
 import { useToast } from '@/hooks/use-toast';
+import { CMSMachine } from '@/types/cms';
 
 const MachineEditor = () => {
   const { machineId } = useParams<{ machineId: string }>();
@@ -21,9 +22,23 @@ const MachineEditor = () => {
   console.log('[MachineEditor] Machine ID from URL:', machineId);
   console.log('[MachineEditor] Is edit mode:', isEditMode);
 
-  const { data: machine, isLoading, error: machineError } = useMachineById(machineId);
+  const { data: cmsMachine, isLoading, error: machineError } = useMachineById(machineId);
   const createMachineMutation = useCreateMachine();
   const updateMachineMutation = useUpdateMachine();
+  
+  // Convert CMSMachine to MachineData with required fields
+  const machine: MachineData | null = cmsMachine ? {
+    id: cmsMachine.id,
+    title: cmsMachine.title,
+    slug: cmsMachine.slug,
+    type: cmsMachine.type || 'vending', // Provide default value for type
+    temperature: cmsMachine.temperature || 'ambient', // Provide default value for temperature
+    description: cmsMachine.description,
+    images: cmsMachine.images || [],
+    specs: cmsMachine.specs || {},
+    features: cmsMachine.features || [],
+    deploymentExamples: cmsMachine.deploymentExamples || []
+  } : null;
   
   const handleFormSubmit = async (data: MachineFormValues) => {
     console.log('[MachineEditor] Form submission with data:', data);
