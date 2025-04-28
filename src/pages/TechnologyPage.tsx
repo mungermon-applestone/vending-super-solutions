@@ -73,7 +73,7 @@ const TechnologyPage = () => {
 
         <TechnologySections sections={sections} />
         
-        <InquiryForm />
+        <InquiryForm title="Ready to transform your vending operations?" />
       </div>
     </Layout>
   );

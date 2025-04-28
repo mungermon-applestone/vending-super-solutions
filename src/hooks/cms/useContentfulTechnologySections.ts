@@ -16,7 +16,7 @@ export function useContentfulTechnologySections() {
         
         const entries = await client.getEntries({
           content_type: 'technologySection',
-          order: 'fields.displayOrder'
+          order: ['fields.displayOrder'] // Fixed: Changed from string to array of strings
         });
 
         console.log('[useContentfulTechnologySections] Raw response:', entries);
