@@ -44,6 +44,19 @@ const HeroContent: React.FC<HeroContentProps> = ({
               {error instanceof Error && error.message === 'CONTENTFUL_CONFIG_MISSING' && (
                 <p className="text-xs text-amber-700 mt-1">Configure Contentful in Admin → Environment Variables</p>
               )}
+              
+              {/* Development Mode Diagnostics */}
+              {process.env.NODE_ENV === 'development' && error && (
+                <details className="mt-2 text-xs text-amber-700">
+                  <summary>Error Details</summary>
+                  <pre className="p-2 bg-amber-100 rounded mt-1 overflow-auto max-h-40">
+                    {error instanceof Error 
+                      ? `${error.name}: ${error.message}\n${error.stack || "No stack trace"}` 
+                      : JSON.stringify(error, null, 2)}
+                  </pre>
+                  <p className="mt-1">Entry ID: {entryId}</p>
+                </details>
+              )}
             </div>
           </div>
         </div>

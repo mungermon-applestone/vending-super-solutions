@@ -31,6 +31,31 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({
     }
   }, [error, entryId]);
   
+  // Try to refetch on mount for machines page to ensure we get the content
+  useEffect(() => {
+    // Special case for machines entry ID - retry additional times on mount
+    if (entryId === '3bH4WrT0pLKDeG35mUekGq') {
+      console.log(`[TechnologyPageHero] Special case: Attempting refetch for machines hero (${entryId})`);
+      
+      // Refetch once on mount
+      refetch().catch(refetchError => {
+        console.error(`[TechnologyPageHero] Initial refetch failed for ${entryId}:`, refetchError);
+      });
+      
+      // Add a second retry with a delay to ensure Contentful client is fully initialized
+      const retryTimer = setTimeout(() => {
+        if (!hero && (error || isLoading)) {
+          console.log(`[TechnologyPageHero] Attempting delayed refetch for machines hero (${entryId})`);
+          refetch().catch(retryError => {
+            console.error(`[TechnologyPageHero] Delayed refetch failed for ${entryId}:`, retryError);
+          });
+        }
+      }, 2000);
+      
+      return () => clearTimeout(retryTimer);
+    }
+  }, [entryId, refetch, hero, error, isLoading]);
+  
   // Display a fallback when there's an error or no data
   const isUsingFallback = Boolean(!hero || error);
   

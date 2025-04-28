@@ -21,6 +21,8 @@ interface HeroContent {
 }
 
 export function useHeroContent(entryId: string) {
+  console.log(`[useHeroContent] Initializing for entry ID: ${entryId}`);
+  
   return useQuery({
     queryKey: ['contentful', 'hero', entryId],
     queryFn: async () => {
@@ -45,24 +47,39 @@ export function useHeroContent(entryId: string) {
         }
         
         console.log(`[useHeroContent] Client created, fetching entry: ${entryId}`);
-        const entry = await client.getEntry(entryId);
         
-        console.log(`[useHeroContent] Successfully fetched entry: ${entry.sys.id}`, entry);
-        
-        return {
-          title: entry.fields.title as string,
-          subtitle: entry.fields.subtitle as string,
-          pageKey: entry.fields.pageKey as string,
-          image: {
-            url: (entry.fields.image as any)?.fields?.file?.url,
-            alt: entry.fields.imageAlt as string
-          },
-          primaryButtonText: entry.fields.primaryButtonText as string,
-          primaryButtonUrl: entry.fields.primaryButtonUrl as string,
-          secondaryButtonText: entry.fields.secondaryButtonText as string,
-          secondaryButtonUrl: entry.fields.secondaryButtonUrl as string,
-          backgroundClass: entry.fields.backgroundClass as string
-        } as HeroContent;
+        try {
+          const entry = await client.getEntry(entryId);
+          
+          console.log(`[useHeroContent] Successfully fetched entry: ${entry.sys.id}`, entry);
+          
+          return {
+            title: entry.fields.title as string,
+            subtitle: entry.fields.subtitle as string,
+            pageKey: entry.fields.pageKey as string,
+            image: {
+              url: (entry.fields.image as any)?.fields?.file?.url,
+              alt: entry.fields.imageAlt as string
+            },
+            primaryButtonText: entry.fields.primaryButtonText as string,
+            primaryButtonUrl: entry.fields.primaryButtonUrl as string,
+            secondaryButtonText: entry.fields.secondaryButtonText as string,
+            secondaryButtonUrl: entry.fields.secondaryButtonUrl as string,
+            backgroundClass: entry.fields.backgroundClass as string
+          } as HeroContent;
+        } catch (entryError) {
+          console.error(`[useHeroContent] Error fetching entry ${entryId}:`, entryError);
+          
+          // Check if the error is a 404 (entry not found)
+          const errorMessage = entryError instanceof Error ? entryError.message : 'Unknown error';
+          if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+            console.error(`[useHeroContent] Entry not found: ${entryId}`);
+            throw new Error(`CONTENTFUL_ENTRY_NOT_FOUND:${entryId}`);
+          }
+          
+          // Re-throw the original error
+          throw entryError;
+        }
       } catch (error) {
         // Enhanced error logging with structured data for easier debugging
         console.error(`[useHeroContent] Error fetching hero content for entry ID: ${entryId}`, {
@@ -93,7 +110,7 @@ export function useHeroContent(entryId: string) {
         throw error;
       }
     },
-    retry: 1,
+    retry: 2,
     retryDelay: 1000,
     // For specific machines page hero ID, improve caching and refetch behavior
     staleTime: entryId === '3bH4WrT0pLKDeG35mUekGq' ? 5 * 60 * 1000 : 0, // 5 minutes for machines hero, default for others
