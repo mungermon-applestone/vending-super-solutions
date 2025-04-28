@@ -7,27 +7,39 @@ import { AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface ContentfulFallbackMessageProps {
+  title?: string;              // Added title prop
   message: string;
   contentType: string;
   showRefresh?: boolean;
   showAdmin?: boolean;
+  actionText?: string;         // Added actionText prop
+  actionHref?: string;         // Added actionHref prop
+  onAction?: () => void;       // Added onAction prop
 }
 
 const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
+  title,
   message,
   contentType,
   showRefresh = false,
   showAdmin = true,
+  actionText,
+  actionHref,
+  onAction,
 }) => {
   const handleRefresh = () => {
-    window.location.reload();
+    if (onAction) {
+      onAction();
+    } else {
+      window.location.reload();
+    }
   };
 
   return (
     <div className="max-w-3xl mx-auto py-8">
       <Alert variant="warning" className="mb-6">
         <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Unable to load {contentType}</AlertTitle>
+        <AlertTitle>{title || `Unable to load ${contentType}`}</AlertTitle>
         <AlertDescription className="mt-2">
           <p>{message}</p>
         </AlertDescription>
@@ -37,11 +49,19 @@ const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
         {showRefresh && (
           <Button onClick={handleRefresh} variant="outline">
             <RefreshCw className="mr-2 h-4 w-4" />
-            Refresh Page
+            {actionText || "Refresh Page"}
           </Button>
         )}
         
-        {showAdmin && (
+        {actionHref && actionText && !showRefresh && (
+          <Button onClick={onAction || (() => {})} asChild>
+            <Link to={actionHref}>
+              {actionText}
+            </Link>
+          </Button>
+        )}
+        
+        {showAdmin && !actionHref && (
           <Button asChild>
             <Link to="/admin/contentful-config">
               Configure Contentful
