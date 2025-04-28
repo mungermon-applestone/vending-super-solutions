@@ -27,15 +27,24 @@ export function useHeroContent(entryId: string) {
       // First check if Contentful is configured
       if (!isContentfulConfigured()) {
         console.error(`[useHeroContent] Contentful is not configured properly for entryId: ${entryId}`);
-        throw new Error('Contentful is not configured properly. Check your environment variables.');
+        
+        // Throw a specific error for missing configuration that's easy to identify
+        throw new Error('CONTENTFUL_CONFIG_MISSING');
       }
       
       try {
         console.log(`[useHeroContent] Fetching hero content for entry ID: ${entryId}`);
         const client = await getContentfulClient();
+        
+        if (!client) {
+          console.error(`[useHeroContent] Failed to get Contentful client`);
+          throw new Error('Failed to initialize Contentful client');
+        }
+        
+        console.log(`[useHeroContent] Client created, fetching entry: ${entryId}`);
         const entry = await client.getEntry(entryId);
         
-        console.log(`[useHeroContent] Successfully fetched entry: ${entry.sys.id}`);
+        console.log(`[useHeroContent] Successfully fetched entry: ${entry.sys.id}`, entry);
         
         return {
           title: entry.fields.title as string,
@@ -52,7 +61,26 @@ export function useHeroContent(entryId: string) {
           backgroundClass: entry.fields.backgroundClass as string
         } as HeroContent;
       } catch (error) {
-        console.error(`[useHeroContent] Error fetching hero content for entry ID: ${entryId}`, error);
+        // Enhanced error logging with structured data for easier debugging
+        console.error(`[useHeroContent] Error fetching hero content for entry ID: ${entryId}`, {
+          error,
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          errorStack: error instanceof Error ? error.stack : 'No stack trace',
+          timestamp: new Date().toISOString()
+        });
+        
+        // Re-throw specific error types to allow consumers to handle them differently
+        if (error instanceof Error) {
+          if (error.message.includes('not found') || error.message.includes('404')) {
+            console.error(`[useHeroContent] Entry not found: ${entryId}`);
+            throw new Error(`CONTENTFUL_ENTRY_NOT_FOUND:${entryId}`);
+          }
+          
+          if (error.message.includes('access token') || error.message.includes('401')) {
+            console.error(`[useHeroContent] Authentication error`);
+            throw new Error('CONTENTFUL_AUTH_ERROR');
+          }
+        }
         
         // Show toast only in non-preview environments to reduce noise during development
         if (!window.location.hostname.includes('lovable')) {

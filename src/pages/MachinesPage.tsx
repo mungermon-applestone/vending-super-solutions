@@ -12,43 +12,34 @@ import { toast } from 'sonner';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
-import { forceContentfulProvider, initCMS } from '@/services/cms/cmsInit';
 import { isContentfulConfigured } from '@/config/cms';
 
-const MachinesPage: React.FC = () => {
-  // Force the use of Contentful provider and initialize CMS
-  useEffect(() => {
-    const setupCMS = async () => {
-      try {
-        if (isContentfulConfigured()) {
-          await initCMS();
-        } else {
-          console.log('[MachinesPage] Contentful not configured, forcing provider anyway');
-          forceContentfulProvider();
-        }
-      } catch (error) {
-        console.error('[MachinesPage] Error initializing CMS:', error);
-      }
-    };
-    
-    setupCMS();
-  }, []);
+const MACHINES_HERO_ENTRY_ID = '3bH4WrT0pLKDeG35mUekGq';
 
+const MachinesPage: React.FC = () => {
+  const renderTime = new Date().toISOString();
+  console.log(`[MachinesPage] Rendering at ${renderTime}`);
+  
   const { data: machines, isLoading, error, refetch } = useContentfulMachines();
   const { data: pageContent } = useMachinesPageContent();
   const { data: testimonialSection } = useTestimonialSection('machines');
   
   useEffect(() => {
     if (machines) {
-      console.log(`Retrieved ${machines.length} machines from Contentful:`, machines);
+      console.log(`[MachinesPage] Retrieved ${machines.length} machines from Contentful:`, machines);
       if (machines.length === 0) {
         toast.warning('No machines found in Contentful. Check console logs for more details.');
       }
     }
   }, [machines]);
 
-  console.log('Machines data from Contentful:', machines);
-  console.log('Page content from Contentful:', pageContent);
+  console.log('[MachinesPage] Rendering with data:', {
+    hasMachines: !!machines && machines.length > 0,
+    machineCount: machines?.length || 0,
+    hasPageContent: !!pageContent,
+    hasTestimonials: !!testimonialSection,
+    isContentfulConfigured: isContentfulConfigured()
+  });
 
   const vendingMachines = machines?.filter(machine => machine.type === 'vending') || [];
   const lockers = machines?.filter(machine => machine.type === 'locker') || [];
@@ -112,9 +103,8 @@ const MachinesPage: React.FC = () => {
 
   return (
     <Layout>
-      {/* Use the improved TechnologyPageHero with fallback handling */}
       <TechnologyPageHero 
-        entryId="3bH4WrT0pLKDeG35mUekGq" 
+        entryId={MACHINES_HERO_ENTRY_ID}
         fallbackTitle="Advanced Vending Machines"
         fallbackSubtitle="Our machines combine cutting-edge technology with reliable performance to meet your business needs."
         fallbackImageUrl="https://images.unsplash.com/photo-1562184552-997c461abbe6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
