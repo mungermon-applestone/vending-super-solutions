@@ -7,13 +7,45 @@ import ContentfulConfigurationPage from '@/pages/ContentfulConfigurationPage';
 import EnvironmentVariablesPage from '@/pages/admin/EnvironmentVariablesPage';
 import AdminLayout from '@/components/AdminLayout';
 import { adminRoutes } from '@/router/adminRoutes';
+import RootLayout from '@/components/RootLayout';
+import Index from '@/pages/Index';
+import Products from '@/pages/Products';
+import Machines from '@/pages/Machines';
+import BusinessGoalsPage from '@/pages/BusinessGoalsPage';
+import NotFound from '@/pages/NotFound';
+import TechnologyPage from '@/pages/TechnologyPage';
 
-// Define the routes for the application
 const routes: RouteObject[] = [
   {
     path: '/',
-    element: <div>Home Page</div>, // Simple placeholder
-    errorElement: <ErrorPage />
+    element: <RootLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        index: true,
+        element: <Index />
+      },
+      {
+        path: 'products',
+        element: <Products />
+      },
+      {
+        path: 'machines',
+        element: <Machines />
+      },
+      {
+        path: 'technology',
+        element: <TechnologyPage />
+      },
+      {
+        path: 'business-goals',
+        element: <BusinessGoalsPage />
+      },
+      {
+        path: '*',
+        element: <NotFound />
+      }
+    ]
   },
   {
     path: '/admin',
