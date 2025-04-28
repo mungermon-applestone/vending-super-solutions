@@ -9,6 +9,10 @@ import { AlertCircle, Bug } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import { Skeleton } from '@/components/ui/skeleton';
+import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
+
+// Content ID for the technology hero section
+const TECHNOLOGY_HERO_ENTRY_ID = '66FG7FxpIy3YkSXj2mu846';
 
 const TechnologyPage = () => {
   const { data: pageContent, isLoading: isLoadingContent, error: contentError } = useContentfulTechnologyPageContent();
@@ -49,6 +53,9 @@ const TechnologyPage = () => {
 
   return (
     <Layout>
+      {/* Hero Section */}
+      <TechnologyPageHero entryId={TECHNOLOGY_HERO_ENTRY_ID} />
+      
       <div className="container mx-auto px-4 py-8">
         {pageContent && (
           <div className="max-w-4xl mx-auto text-center mb-12">
@@ -80,3 +87,4 @@ const TechnologyPage = () => {
 };
 
 export default TechnologyPage;
+
