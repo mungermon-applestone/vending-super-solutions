@@ -42,7 +42,7 @@ const HeroContent: React.FC<HeroContentProps> = ({
                     : "Error loading content from Contentful. Using fallback content."}
               </p>
               {error instanceof Error && error.message === 'CONTENTFUL_CONFIG_MISSING' && (
-                <p className="text-xs text-amber-700 mt-1">Configure Contentful in Admin &rarr; Environment Variables</p>
+                <p className="text-xs text-amber-700 mt-1">Configure Contentful in Admin → Environment Variables</p>
               )}
             </div>
           </div>

@@ -32,7 +32,7 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({
   }, [error, entryId]);
   
   // Display a fallback when there's an error or no data
-  const shouldUseFallback = !hero || error;
+  const isUsingFallback = Boolean(!hero || error);
   
   if (isLoading) {
     return (
@@ -47,19 +47,19 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({
       <div className="container-wide py-16 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <HeroContent 
-            title={shouldUseFallback ? fallbackTitle : hero.title}
-            subtitle={shouldUseFallback ? fallbackSubtitle : hero.subtitle}
-            primaryButtonText={!shouldUseFallback && hero.primaryButtonText ? hero.primaryButtonText : "Request Information"}
-            primaryButtonUrl={!shouldUseFallback && hero.primaryButtonUrl ? hero.primaryButtonUrl : "/contact"}
-            secondaryButtonText={!shouldUseFallback && hero.secondaryButtonText ? hero.secondaryButtonText : "View Products"}
-            secondaryButtonUrl={!shouldUseFallback && hero.secondaryButtonUrl ? hero.secondaryButtonUrl : "/products"}
+            title={isUsingFallback ? fallbackTitle : hero.title}
+            subtitle={isUsingFallback ? fallbackSubtitle : hero.subtitle}
+            primaryButtonText={!isUsingFallback && hero.primaryButtonText ? hero.primaryButtonText : "Request Information"}
+            primaryButtonUrl={!isUsingFallback && hero.primaryButtonUrl ? hero.primaryButtonUrl : "/contact"}
+            secondaryButtonText={!isUsingFallback && hero.secondaryButtonText ? hero.secondaryButtonText : "View Products"}
+            secondaryButtonUrl={!isUsingFallback && hero.secondaryButtonUrl ? hero.secondaryButtonUrl : "/products"}
             error={error}
-            isUsingFallback={shouldUseFallback}
+            isUsingFallback={isUsingFallback}
             entryId={entryId}
           />
           <HeroImage 
-            imageUrl={shouldUseFallback ? fallbackImageUrl : `https:${hero.image?.url}`}
-            imageAlt={shouldUseFallback ? "Vending Machines" : (hero.image?.alt || hero.title)}
+            imageUrl={isUsingFallback ? fallbackImageUrl : `https:${hero.image?.url}`}
+            imageAlt={isUsingFallback ? "Vending Machines" : (hero.image?.alt || hero.title)}
           />
         </div>
       </div>
