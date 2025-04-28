@@ -1,9 +1,9 @@
-
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import TechnologySections from '@/components/technology/TechnologySections';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 import { useTechnologySections } from '@/hooks/useTechnologySections';
+import { useContentfulConfig } from '@/hooks/useContentfulConfig';
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Link } from 'react-router-dom';
 import { useBreadcrumbs } from '@/context/BreadcrumbContext';
@@ -11,15 +11,18 @@ import TechnologySchemaData from '@/components/technology/TechnologySchemaData';
 import SEO from '@/components/seo/SEO';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const HERO_CONTENT_ID = "66FG7FxpIy3YkSXj2mu846";
 
 const TechnologyPage = () => {
-  const { technologies = [], isLoading, error } = useTechnologySections();
+  const { isValid: isConfigValid, error: configError } = useContentfulConfig();
+  const { technologies = [], isLoading, error, refetch } = useTechnologySections({ enableToasts: true });
   const { setBreadcrumbs, getSchemaFormattedBreadcrumbs } = useBreadcrumbs();
   
   useEffect(() => {
-    console.log('[TechnologyPage] Technologies data loaded:', {
+    console.log('[TechnologyPage] Rendering with config valid:', isConfigValid);
+    console.log('[TechnologyPage] Technologies data:', {
       count: technologies?.length,
       data: technologies
     });
@@ -28,9 +31,27 @@ const TechnologyPage = () => {
       { name: "Home", url: "/", position: 1 },
       { name: "Technology", url: "/technology", position: 2 }
     ]);
-  }, [setBreadcrumbs, technologies]);
+  }, [setBreadcrumbs, technologies, isConfigValid]);
 
-  // Extract sections from all technologies to create a flattened array of sections
+  const showError = (error: Error | null, title: string) => (
+    <Alert variant="destructive" className="mb-4">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle>{title}</AlertTitle>
+      <AlertDescription>
+        {error instanceof Error ? error.message : 'An unexpected error occurred'}
+      </AlertDescription>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="mt-2"
+        onClick={() => refetch()}
+      >
+        Try Again
+      </Button>
+    </Alert>
+  );
+
+  // Extract sections from all technologies
   const allSections = React.useMemo(() => {
     if (!technologies?.length) {
       console.log('[TechnologyPage] No technologies data available to extract sections');
@@ -65,6 +86,16 @@ const TechnologyPage = () => {
     return sections;
   }, [technologies]);
 
+  if (!isConfigValid) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-8">
+          {showError(configError, "Contentful Configuration Error")}
+        </div>
+      </Layout>
+    );
+  }
+
   if (isLoading) {
     return (
       <Layout>
@@ -77,17 +108,10 @@ const TechnologyPage = () => {
   }
 
   if (error) {
-    console.error('[TechnologyPage] Error loading technology data:', error);
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Error Loading Technology Data</AlertTitle>
-            <AlertDescription>
-              {error instanceof Error ? error.message : 'An unexpected error occurred while loading technology data.'}
-            </AlertDescription>
-          </Alert>
+          {showError(error as Error, "Error Loading Technology Data")}
         </div>
       </Layout>
     );
@@ -128,9 +152,12 @@ const TechnologyPage = () => {
       ) : (
         <div className="container mx-auto px-4 py-12 text-center">
           <h3 className="text-lg font-medium mb-2">No Technology Sections Available</h3>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-4">
             Technology information is currently being updated. Please check back later.
           </p>
+          <Button variant="outline" onClick={() => refetch()}>
+            Refresh Data
+          </Button>
         </div>
       )}
     </Layout>
