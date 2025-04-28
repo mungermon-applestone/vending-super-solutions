@@ -1,9 +1,9 @@
 
 import React, { useEffect } from 'react';
 import { useHeroContent } from '@/hooks/cms/useHeroContent';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import HeroContent from './HeroContent';
+import HeroImage from './HeroImage';
 
 interface TechnologyPageHeroProps {
   entryId: string;
@@ -45,73 +45,22 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({
   return (
     <section className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
       <div className="container-wide py-16 md:py-24">
-        {shouldUseFallback && (
-          <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-6">
-            <div className="flex items-center">
-              <AlertTriangle className="h-5 w-5 text-amber-600 mr-2" />
-              <div>
-                <p className="text-sm text-amber-800">
-                  {error instanceof Error && error.message === 'CONTENTFUL_CONFIG_MISSING' 
-                    ? "Contentful is not configured. Using fallback content." 
-                    : error instanceof Error && error.message.includes('CONTENTFUL_ENTRY_NOT_FOUND')
-                      ? `Content entry (${entryId}) not found in Contentful`
-                      : "Error loading content from Contentful. Using fallback content."}
-                </p>
-                {error instanceof Error && error.message === 'CONTENTFUL_CONFIG_MISSING' && (
-                  <p className="text-xs text-amber-700 mt-1">Configure Contentful in Admin {'->'} Environment Variables</p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-vending-blue-dark">
-              {shouldUseFallback ? fallbackTitle : hero.title}
-            </h1>
-            <p className="text-xl text-gray-700">
-              {shouldUseFallback ? fallbackSubtitle : hero.subtitle}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              {(!shouldUseFallback && hero.primaryButtonText) ? (
-                <Button asChild size="lg">
-                  <Link to={hero.primaryButtonUrl || '#'}>
-                    {hero.primaryButtonText}
-                  </Link>
-                </Button>
-              ) : (
-                <Button asChild size="lg">
-                  <Link to="/contact">
-                    Request Information
-                  </Link>
-                </Button>
-              )}
-              
-              {(!shouldUseFallback && hero.secondaryButtonText) ? (
-                <Button asChild variant="outline" size="lg">
-                  <Link to={hero.secondaryButtonUrl || '#'}>
-                    {hero.secondaryButtonText}
-                  </Link>
-                </Button>
-              ) : (
-                <Button asChild variant="outline" size="lg">
-                  <Link to="/products">
-                    View Products
-                  </Link>
-                </Button>
-              )}
-            </div>
-          </div>
-          <div className="relative">
-            <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-              <img 
-                src={shouldUseFallback ? fallbackImageUrl : `https:${hero.image?.url}`}
-                alt={shouldUseFallback ? "Vending Machines" : (hero.image?.alt || hero.title)}
-                className="w-full h-auto object-cover"
-              />
-            </div>
-          </div>
+          <HeroContent 
+            title={shouldUseFallback ? fallbackTitle : hero.title}
+            subtitle={shouldUseFallback ? fallbackSubtitle : hero.subtitle}
+            primaryButtonText={!shouldUseFallback && hero.primaryButtonText ? hero.primaryButtonText : "Request Information"}
+            primaryButtonUrl={!shouldUseFallback && hero.primaryButtonUrl ? hero.primaryButtonUrl : "/contact"}
+            secondaryButtonText={!shouldUseFallback && hero.secondaryButtonText ? hero.secondaryButtonText : "View Products"}
+            secondaryButtonUrl={!shouldUseFallback && hero.secondaryButtonUrl ? hero.secondaryButtonUrl : "/products"}
+            error={error}
+            isUsingFallback={shouldUseFallback}
+            entryId={entryId}
+          />
+          <HeroImage 
+            imageUrl={shouldUseFallback ? fallbackImageUrl : `https:${hero.image?.url}`}
+            imageAlt={shouldUseFallback ? "Vending Machines" : (hero.image?.alt || hero.title)}
+          />
         </div>
       </div>
     </section>
