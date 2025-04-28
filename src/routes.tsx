@@ -14,6 +14,9 @@ import Machines from '@/pages/Machines';
 import BusinessGoalsPage from '@/pages/BusinessGoalsPage';
 import NotFound from '@/pages/NotFound';
 import TechnologyPage from '@/pages/TechnologyPage';
+import AboutUs from '@/pages/AboutUs';
+import BlogPage from '@/pages/BlogPage';
+import Contact from '@/pages/Contact';
 
 const routes: RouteObject[] = [
   {
@@ -40,6 +43,18 @@ const routes: RouteObject[] = [
       {
         path: 'business-goals',
         element: <BusinessGoalsPage />
+      },
+      {
+        path: 'about',
+        element: <AboutUs />
+      },
+      {
+        path: 'blog',
+        element: <BlogPage />
+      },
+      {
+        path: 'contact',
+        element: <Contact />
       },
       {
         path: '*',

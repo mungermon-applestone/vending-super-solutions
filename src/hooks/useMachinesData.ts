@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchMachines, fetchMachineById } from '@/services/cms/contentTypes/machines';
 import { useToast } from '@/hooks/use-toast';
@@ -7,26 +6,32 @@ import { createMachine } from '@/services/cms/contentTypes/machines/create';
 import { updateMachine } from '@/services/cms/contentTypes/machines/update';
 import { deleteMachine } from '@/services/cms/contentTypes/machines/delete';
 import { MachineFormValues } from '@/utils/machineMigration/types';
+import { useContentfulMachines, useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 
 /**
  * Hook to fetch machines data
  */
 export const useMachines = () => {
-  return useQuery({
-    queryKey: ['machines'],
-    queryFn: fetchMachines,
-  });
+  // Use the Contentful machines hook to ensure consistent data source
+  const contentfulMachines = useContentfulMachines();
+  
+  return {
+    ...contentfulMachines,
+    data: contentfulMachines.data || []
+  };
 };
 
 /**
  * Hook to fetch a specific machine by ID
  */
 export const useMachineById = (id: string | undefined) => {
-  return useQuery({
-    queryKey: ['machine', id],
-    queryFn: () => fetchMachineById(id || ''),
-    enabled: !!id && id !== 'new',
-  });
+  // Use the Contentful machine hook to ensure consistent data source
+  const contentfulMachine = useContentfulMachine(id);
+  
+  return {
+    ...contentfulMachine,
+    data: contentfulMachine.data
+  };
 };
 
 /**

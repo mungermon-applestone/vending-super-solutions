@@ -64,6 +64,36 @@ const RootLayout = () => {
               </li>
               <li>
                 <NavLink 
+                  to="/about" 
+                  className={({ isActive }) => 
+                    isActive ? "text-blue-600 font-medium" : "text-gray-800 hover:text-blue-600"
+                  }
+                >
+                  About
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
+                  to="/blog" 
+                  className={({ isActive }) => 
+                    isActive ? "text-blue-600 font-medium" : "text-gray-800 hover:text-blue-600"
+                  }
+                >
+                  Blog
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
+                  to="/contact" 
+                  className={({ isActive }) => 
+                    isActive ? "text-blue-600 font-medium" : "text-gray-800 hover:text-blue-600"
+                  }
+                >
+                  Contact
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
                   to="/admin" 
                   className={({ isActive }) => 
                     isActive ? "text-blue-600 font-medium" : "text-gray-800 hover:text-blue-600"
