@@ -74,7 +74,7 @@ const ContactPage = () => {
         {/* FAQ Section */}
         {faqItems && faqItems.length > 0 && (
           <FAQSection 
-            title={faqSectionTitle || 'Frequently Asked Questions'} 
+            faqSectionTitle={faqSectionTitle || 'Frequently Asked Questions'} 
             faqItems={faqItems} 
           />
         )}
