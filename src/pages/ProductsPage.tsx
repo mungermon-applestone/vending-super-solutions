@@ -1,5 +1,6 @@
 
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useContentfulProducts } from '@/hooks/cms/useContentfulProducts';
 import { useProductsPageContent } from '@/hooks/cms/useProductsPageContent';
@@ -16,8 +17,13 @@ import ProductsError from '@/components/products/sections/ProductsError';
 import EmptyProductsList from '@/components/products/sections/EmptyProductsList';
 import ProductGrid from '@/components/products/sections/ProductGrid';
 import KeyFeaturesSection from '@/components/products/sections/KeyFeaturesSection';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
 
 const ProductsPage = () => {
+  const navigate = useNavigate();
+  
   const { 
     data: productTypes, 
     isLoading: isLoadingProducts, 
@@ -38,15 +44,24 @@ const ProductsPage = () => {
   const [debugInfo, setDebugInfo] = React.useState<{
     spaceId?: string,
     environmentId?: string,
-    hasToken: boolean
+    hasToken: boolean,
+    storedInLocalStorage: boolean
   }>({
-    hasToken: false
+    hasToken: false,
+    storedInLocalStorage: false
   });
   
   useEffect(() => {
     console.log('[ProductsPage] Page Content:', pageContent);
     // Log configuration information on component mount
     logContentfulConfig();
+    
+    const localStorageVars = localStorage.getItem('vending-cms-env-variables');
+    console.log('[ProductsPage] LocalStorage vars exist:', !!localStorageVars);
+    
+    if (!contentfulConfigured) {
+      toast.warning('Contentful not configured. Please set up credentials in Admin > Environment Variables.');
+    }
   }, [pageContent]);
   
   // Check if Contentful is configured
@@ -54,22 +69,24 @@ const ProductsPage = () => {
     const spaceId = CONTENTFUL_CONFIG.SPACE_ID;
     const envId = CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master';
     const hasToken = !!CONTENTFUL_CONFIG.DELIVERY_TOKEN;
+    const storedVars = localStorage.getItem('vending-cms-env-variables');
     
     console.log('[ProductsPage] Config variables detected:', { 
       spaceId, 
       envId, 
-      hasToken 
+      hasToken,
+      storedInLocalStorage: !!storedVars
     });
     
     setDebugInfo({
       spaceId: typeof spaceId === 'string' ? (spaceId) : undefined,
       environmentId: envId,
-      hasToken
+      hasToken,
+      storedInLocalStorage: !!storedVars
     });
     
     if (!contentfulConfigured) {
       console.warn('Contentful is not properly configured. Check your environment variables.');
-      toast.warning('Contentful configuration missing. Some content may not display correctly.');
     }
   }, [contentfulConfigured]);
 
@@ -85,6 +102,29 @@ const ProductsPage = () => {
       console.error("Error refreshing Contentful client:", err);
     }
   };
+
+  if (!contentfulConfigured) {
+    return (
+      <Layout>
+        <div className="container py-12">
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Contentful Not Configured</AlertTitle>
+            <AlertDescription className="space-y-4">
+              <p>Your Contentful account needs to be configured to display content on this page.</p>
+              <div className="flex gap-4">
+                <Button onClick={() => navigate('/admin/environment-variables')}>
+                  Configure Contentful
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+          
+          <ContentfulDebug />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -114,8 +154,6 @@ const ProductsPage = () => {
           </div>
         )}
 
-        {!contentfulConfigured && <ConfigurationError debugInfo={debugInfo} />}
-        
         {isLoadingProducts && <ProductsLoadingState />}
         
         {productsError && (
@@ -162,6 +200,7 @@ const ProductsPage = () => {
                 <p>VITE_CONTENTFUL_SPACE_ID: {CONTENTFUL_CONFIG.SPACE_ID || 'Not set'}</p>
                 <p>VITE_CONTENTFUL_ENVIRONMENT_ID: {CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'Not set'}</p>
                 <p>VITE_CONTENTFUL_DELIVERY_TOKEN: {CONTENTFUL_CONFIG.DELIVERY_TOKEN ? 'Set' : 'Not set'}</p>
+                <p>LocalStorage Variables: {debugInfo.storedInLocalStorage ? 'Found' : 'Not Found'}</p>
               </div>
               
               <h4 className="font-bold mt-4">Products Data:</h4>

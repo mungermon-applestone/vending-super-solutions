@@ -18,7 +18,11 @@ export const getContentfulClient = async (forceRefresh = false) => {
     logContentfulConfig();
     
     if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
-      throw new Error('Contentful configuration missing. Please check your environment variables.');
+      console.error('[contentfulClient] Missing Contentful configuration', {
+        spaceId: !!CONTENTFUL_CONFIG.SPACE_ID,
+        deliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN
+      });
+      throw new Error('Contentful configuration missing. Please navigate to Admin > Environment Variables to set up your Contentful credentials.');
     }
 
     contentfulClient = createClient({
@@ -27,7 +31,10 @@ export const getContentfulClient = async (forceRefresh = false) => {
       environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master'
     });
 
-    console.log('[contentfulClient] Client created successfully');
+    console.log('[contentfulClient] Client created successfully', {
+      spaceId: CONTENTFUL_CONFIG.SPACE_ID,
+      environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master'
+    });
     return contentfulClient;
   } catch (error) {
     console.error('[contentfulClient] Error creating client:', error);
@@ -57,14 +64,18 @@ export const testContentfulConnection = async () => {
   try {
     // Check if configuration is available first
     if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
-      console.warn('[contentfulClient] Missing Contentful configuration');
+      console.warn('[contentfulClient] Missing Contentful configuration', {
+        hasSpaceId: !!CONTENTFUL_CONFIG.SPACE_ID,
+        hasDeliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN
+      });
       return {
         success: false,
         message: 'Contentful configuration missing. Please navigate to Admin > Environment Variables to set up your Contentful credentials.',
         details: {
           missingConfig: true,
           spaceName: null,
-          spaceId: null
+          spaceId: null,
+          configuredIn: typeof window !== 'undefined' ? localStorage.getItem('vending-cms-env-variables') ? 'localStorage' : 'none' : 'server'
         }
       };
     }
