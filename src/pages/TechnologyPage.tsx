@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import TechnologySections from '@/components/technology/TechnologySections';
@@ -90,7 +91,7 @@ const TechnologyPage = () => {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
-          {showError(configError, "Contentful Configuration Error")}
+          {showError(configError ? new Error(configError) : null, "Contentful Configuration Error")}
         </div>
       </Layout>
     );
