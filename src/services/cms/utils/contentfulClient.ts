@@ -46,6 +46,12 @@ export const refreshContentfulClient = async () => {
   }
 };
 
+export const resetContentfulClient = async () => {
+  console.log('[contentfulClient] Resetting Contentful client');
+  contentfulClient = null;
+  return true;
+};
+
 export const testContentfulConnection = async () => {
   console.log('[contentfulClient] Testing Contentful connection');
   try {
