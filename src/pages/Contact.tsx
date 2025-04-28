@@ -55,7 +55,7 @@ const ContactPage = () => {
         {/* Page Title & Description */}
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-3xl font-bold mb-4">{introTitle || 'Contact Us'}</h1>
-          <p className="text-lg text-gray-600">{introDescription || 'We'd love to hear from you. Send us a message and we'll respond as soon as possible.'}</p>
+          <p className="text-lg text-gray-600">{introDescription || "We'd love to hear from you. Send us a message and we'll respond as soon as possible."}</p>
         </div>
         
         <div className="grid md:grid-cols-2 gap-12 mb-16">
