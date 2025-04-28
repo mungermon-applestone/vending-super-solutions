@@ -27,6 +27,23 @@ const HeroContent: React.FC<HeroContentProps> = ({
   isUsingFallback,
   entryId,
 }) => {
+  // Enhanced debug logging
+  React.useEffect(() => {
+    if (isUsingFallback) {
+      console.log(`[HeroContent] Using fallback content for entry ID: ${entryId}`, {
+        errorType: error instanceof Error ? error.message : 'Unknown error',
+        errorDetails: error,
+        title,
+        subtitle
+      });
+    } else {
+      console.log(`[HeroContent] Successfully loaded content for entry ID: ${entryId}`, {
+        title,
+        subtitle
+      });
+    }
+  }, [error, entryId, isUsingFallback, title, subtitle]);
+
   return (
     <div className="space-y-6">
       {isUsingFallback && (
@@ -45,18 +62,16 @@ const HeroContent: React.FC<HeroContentProps> = ({
                 <p className="text-xs text-amber-700 mt-1">Configure Contentful in Admin → Environment Variables</p>
               )}
               
-              {/* Development Mode Diagnostics */}
-              {process.env.NODE_ENV === 'development' && error && (
-                <details className="mt-2 text-xs text-amber-700">
-                  <summary>Error Details</summary>
-                  <pre className="p-2 bg-amber-100 rounded mt-1 overflow-auto max-h-40">
-                    {error instanceof Error 
-                      ? `${error.name}: ${error.message}\n${error.stack || "No stack trace"}` 
-                      : JSON.stringify(error, null, 2)}
-                  </pre>
-                  <p className="mt-1">Entry ID: {entryId}</p>
-                </details>
-              )}
+              {/* Development Mode Diagnostics - Always show for debugging */}
+              <details className="mt-2 text-xs text-amber-700" open>
+                <summary>Error Details</summary>
+                <p className="mt-1">Entry ID: <strong>{entryId}</strong></p>
+                <pre className="p-2 bg-amber-100 rounded mt-1 overflow-auto max-h-40">
+                  {error instanceof Error 
+                    ? `${error.name}: ${error.message}\n${error.stack || "No stack trace"}` 
+                    : JSON.stringify(error, null, 2)}
+                </pre>
+              </details>
             </div>
           </div>
         </div>

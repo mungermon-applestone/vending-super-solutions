@@ -39,7 +39,7 @@ export function useHeroContent(entryId: string) {
       
       try {
         console.log(`[useHeroContent] Fetching hero content for entry ID: ${entryId}`);
-        const client = await getContentfulClient();
+        const client = await getContentfulClient(true); // Force refresh client to ensure latest config
         
         if (!client) {
           console.error(`[useHeroContent] Failed to get Contentful client`);
@@ -51,16 +51,23 @@ export function useHeroContent(entryId: string) {
         try {
           const entry = await client.getEntry(entryId);
           
-          console.log(`[useHeroContent] Successfully fetched entry: ${entry.sys.id}`, entry);
+          console.log(`[useHeroContent] Successfully fetched entry: ${entry.sys.id}`, {
+            contentType: entry.sys.contentType?.sys?.id || 'unknown',
+            fields: Object.keys(entry.fields || {}),
+            title: entry.fields.title,
+            subtitle: entry.fields.subtitle,
+            hasImage: !!entry.fields.image,
+            rawEntry: entry
+          });
           
           return {
             title: entry.fields.title as string,
             subtitle: entry.fields.subtitle as string,
             pageKey: entry.fields.pageKey as string,
-            image: {
+            image: entry.fields.image ? {
               url: (entry.fields.image as any)?.fields?.file?.url,
               alt: entry.fields.imageAlt as string
-            },
+            } : null,
             primaryButtonText: entry.fields.primaryButtonText as string,
             primaryButtonUrl: entry.fields.primaryButtonUrl as string,
             secondaryButtonText: entry.fields.secondaryButtonText as string,
@@ -110,10 +117,10 @@ export function useHeroContent(entryId: string) {
         throw error;
       }
     },
-    retry: 2,
-    retryDelay: 1000,
+    retry: 3, // Increase retries for the machines page hero
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000), // Exponential backoff
     // For specific machines page hero ID, improve caching and refetch behavior
     staleTime: entryId === '3bH4WrT0pLKDeG35mUekGq' ? 5 * 60 * 1000 : 0, // 5 minutes for machines hero, default for others
-    refetchOnWindowFocus: false // Disable refetch on window focus to reduce unnecessary API calls
+    refetchOnWindowFocus: entryId === '3bH4WrT0pLKDeG35mUekGq' // Enable refetch on window focus for machines hero
   });
 }
