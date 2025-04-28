@@ -49,6 +49,7 @@ export function useHeroContent(entryId: string) {
         console.log(`[useHeroContent] Client created, fetching entry: ${entryId}`);
         
         try {
+          console.log(`[useHeroContent] About to call client.getEntry for: ${entryId}`);
           const entry = await client.getEntry(entryId);
           
           console.log(`[useHeroContent] Successfully fetched entry: ${entry.sys.id}`, {
@@ -60,12 +61,15 @@ export function useHeroContent(entryId: string) {
             rawEntry: entry
           });
           
-          return {
+          const imageUrl = entry.fields.image ? (entry.fields.image as any)?.fields?.file?.url : null;
+          console.log(`[useHeroContent] Extracted image URL: ${imageUrl}`);
+          
+          const result = {
             title: entry.fields.title as string,
             subtitle: entry.fields.subtitle as string,
             pageKey: entry.fields.pageKey as string,
             image: entry.fields.image ? {
-              url: (entry.fields.image as any)?.fields?.file?.url,
+              url: imageUrl,
               alt: entry.fields.imageAlt as string
             } : null,
             primaryButtonText: entry.fields.primaryButtonText as string,
@@ -74,6 +78,9 @@ export function useHeroContent(entryId: string) {
             secondaryButtonUrl: entry.fields.secondaryButtonUrl as string,
             backgroundClass: entry.fields.backgroundClass as string
           } as HeroContent;
+          
+          console.log(`[useHeroContent] Returning processed hero content:`, result);
+          return result;
         } catch (entryError) {
           console.error(`[useHeroContent] Error fetching entry ${entryId}:`, entryError);
           

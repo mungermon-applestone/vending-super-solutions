@@ -23,9 +23,20 @@ const HeroImage: React.FC<HeroImageProps> = ({ imageUrl, imageAlt }) => {
     imageUrl.startsWith('/')
   );
 
-  // Use a fallback if the URL is invalid
-  const finalImageUrl = validImageUrl ? imageUrl : 
+  // Extract the final image URL, ensuring it has proper protocol
+  let finalImageUrl = validImageUrl ? imageUrl : 
     "https://images.unsplash.com/photo-1562184552-997c461abbe6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1740&q=80";
+    
+  // Add https: if the URL starts with // (protocol-relative URL)
+  if (finalImageUrl.startsWith('//')) {
+    finalImageUrl = 'https:' + finalImageUrl;
+    console.log('[HeroImage] Added https protocol to URL:', finalImageUrl);
+  }
+
+  // Log the final URL we're using
+  React.useEffect(() => {
+    console.log('[HeroImage] Using final image URL:', finalImageUrl);
+  }, [finalImageUrl]);
 
   return (
     <div className="relative">
@@ -34,6 +45,7 @@ const HeroImage: React.FC<HeroImageProps> = ({ imageUrl, imageAlt }) => {
           src={finalImageUrl}
           alt={imageAlt || "Vending Technology"}
           className="w-full h-auto object-cover"
+          onLoad={() => console.log('[HeroImage] Successfully loaded image:', finalImageUrl)}
           onError={(e) => {
             console.error('[HeroImage] Failed to load image:', finalImageUrl);
             e.currentTarget.src = "https://images.unsplash.com/photo-1562184552-997c461abbe6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1740&q=80";

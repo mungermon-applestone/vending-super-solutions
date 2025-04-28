@@ -1,61 +1,57 @@
 
 import { LandingPage } from '@/types/landingPage';
-import { supabase } from '@/integrations/supabase/client';
 import { IS_DEVELOPMENT } from '@/config/cms';
 import { useMockData } from '../../mockDataHandler';
 import { fetchLandingPages } from './fetchLandingPages';
+import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 
 export async function fetchLandingPageByKey(key: string): Promise<LandingPage | null> {
   try {
     console.log(`[fetchLandingPageByKey] Fetching landing page with key: ${key}`);
     
-    // Try to fetch from Supabase first
-    const { data: landingPage, error } = await supabase
-      .from('landing_pages')
-      .select(`
-        id, 
-        page_key, 
-        page_name, 
-        hero_content_id,
-        created_at,
-        updated_at,
-        hero_content:hero_content_id (
-          id, 
-          title, 
-          subtitle, 
-          image_url, 
-          image_alt, 
-          cta_primary_text, 
-          cta_primary_url, 
-          cta_secondary_text, 
-          cta_secondary_url, 
-          background_class,
-          created_at, 
-          updated_at
-        )
-      `)
-      .eq('page_key', key)
-      .single();
+    // Skip Supabase attempts entirely since they're causing errors
+    console.log(`[fetchLandingPageByKey] Skipping Supabase, going directly to fallback/mock data`);
     
-    if (error) {
-      if (error.code !== 'PGRST116') { // PGRST116 = no rows returned
-        console.error(`[fetchLandingPageByKey] Supabase error for key ${key}:`, error);
-      } else {
-        console.log(`[fetchLandingPageByKey] No landing page found in Supabase with key ${key}`);
+    // Try to fetch from Contentful if available
+    try {
+      const client = await getContentfulClient();
+      const entries = await client.getEntries({
+        content_type: 'landingPage',
+        'fields.pageKey': key,
+        limit: 1,
+        include: 2
+      });
+      
+      if (entries.items.length > 0) {
+        const entry = entries.items[0];
+        console.log(`[fetchLandingPageByKey] Found landing page in Contentful with key ${key}:`, entry);
+        
+        return {
+          id: entry.sys.id,
+          page_key: entry.fields.pageKey,
+          page_name: entry.fields.pageName,
+          hero_content_id: entry.fields.heroContentId || entry.sys.id,
+          hero_content: {
+            id: entry.sys.id,
+            title: entry.fields.title,
+            subtitle: entry.fields.subtitle,
+            image_url: entry.fields.image?.fields?.file?.url,
+            image_alt: entry.fields.imageAlt,
+            cta_primary_text: entry.fields.ctaPrimaryText,
+            cta_primary_url: entry.fields.ctaPrimaryUrl,
+            cta_secondary_text: entry.fields.ctaSecondaryText,
+            cta_secondary_url: entry.fields.ctaSecondaryUrl,
+            background_class: entry.fields.backgroundClass,
+            created_at: entry.sys.createdAt,
+            updated_at: entry.sys.updatedAt
+          }
+        } as LandingPage;
       }
-    } else if (landingPage) {
-      console.log(`[fetchLandingPageByKey] Found landing page in Supabase with key ${key}:`, landingPage);
-      
-      // Fix the type issue: Supabase returns hero_content as an array but we need an object
-      const heroContent = Array.isArray(landingPage.hero_content) ? landingPage.hero_content[0] : landingPage.hero_content;
-      
-      return {
-        ...landingPage,
-        hero_content: heroContent
-      } as LandingPage;
+    } catch (contentfulError) {
+      console.log(`[fetchLandingPageByKey] Error fetching from Contentful:`, contentfulError);
     }
     
-    // Fallback to mock data if no records found in Supabase or in development mode
+    // Fallback to mock data if no records found in Contentful or in development mode
     if (IS_DEVELOPMENT && useMockData) {
       const pages = await fetchLandingPages();
       const page = pages.find(page => page.page_key === key);

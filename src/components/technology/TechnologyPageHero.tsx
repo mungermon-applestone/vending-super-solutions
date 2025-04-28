@@ -29,7 +29,8 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({
       fallbackTitle,
       fallbackSubtitle,
       retryCount,
-      hasManuallyRetried
+      hasManuallyRetried,
+      component: 'TechnologyPageHero' // Add component name for debugging
     });
     
     // Special detailed logging for the machines hero ID
@@ -54,7 +55,8 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({
         isConfigError: error instanceof Error && error.message === 'CONTENTFUL_CONFIG_MISSING',
         isNotFoundError: error instanceof Error && error.message.includes('CONTENTFUL_ENTRY_NOT_FOUND'),
         errorDetails: error,
-        retryCount
+        retryCount,
+        component: 'TechnologyPageHero'
       });
     }
   }, [error, entryId, retryCount]);
@@ -115,6 +117,18 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({
   // Display a fallback when there's an error or no data
   const isUsingFallback = Boolean(!hero || isError);
   
+  // Special debugging when we're using fallback
+  useEffect(() => {
+    if (isUsingFallback) {
+      console.log(`[TechnologyPageHero] Using FALLBACK content for entry ID: ${entryId}`, {
+        error,
+        isLoading,
+        hasHeroData: !!hero,
+        retryCount,
+      });
+    }
+  }, [isUsingFallback, entryId, error, isLoading, hero, retryCount]);
+
   if (isLoading && !hero && retryCount === 0) {
     return (
       <div className="flex justify-center items-center min-h-[60vh] bg-gray-50">
@@ -142,7 +156,7 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({
             entryId={entryId}
           />
           <HeroImage 
-            imageUrl={isUsingFallback ? fallbackImageUrl : `https:${hero?.image?.url || ''}`}
+            imageUrl={isUsingFallback ? fallbackImageUrl : (hero?.image?.url || '')}
             imageAlt={isUsingFallback ? "Vending Machines" : (hero?.image?.alt || hero?.title || "Vending Technology")}
           />
         </div>

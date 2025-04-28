@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import ErrorPage from '@/components/ErrorPage';
@@ -11,7 +10,7 @@ import RootLayout from '@/components/RootLayout';
 import Index from '@/pages/Index';
 import Products from '@/pages/Products';
 import ProductDetailPage from '@/pages/ProductDetailPage';
-import Machines from '@/pages/Machines';
+import MachinesPage from '@/pages/MachinesPage';
 import MachineDetailPage from '@/pages/MachineDetailPage';
 import BusinessGoalsPage from '@/pages/BusinessGoalsPage';
 import BusinessGoalDetailPage from '@/pages/BusinessGoalDetailPage';
@@ -44,7 +43,7 @@ const routes: RouteObject[] = [
       },
       {
         path: 'machines',
-        element: <Machines />
+        element: <MachinesPage />
       },
       {
         path: 'machines/:slug',
@@ -64,11 +63,6 @@ const routes: RouteObject[] = [
       },
       {
         path: 'business-goals/:slug',
-        element: <BusinessGoalDetailPage />
-      },
-      // Add redirect route for /business/:slug to maintain compatibility
-      {
-        path: 'business/:slug',
         element: <BusinessGoalDetailPage />
       },
       {
