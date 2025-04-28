@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import TechnologySections from '@/components/technology/TechnologySections';
@@ -18,7 +17,10 @@ const HERO_CONTENT_ID = "66FG7FxpIy3YkSXj2mu846";
 
 const TechnologyPage = () => {
   const { isValid: isConfigValid, error: configError } = useContentfulConfig();
-  const { technologies = [], isLoading, error, refetch } = useTechnologySections({ enableToasts: true });
+  const { technologies = [], isLoading, error, refetch } = useTechnologySections({ 
+    enableToasts: true,
+    refetchInterval: isConfigValid ? false : 5000  // Retry every 5 seconds if config is invalid
+  });
   const { setBreadcrumbs, getSchemaFormattedBreadcrumbs } = useBreadcrumbs();
   
   useEffect(() => {
@@ -52,7 +54,6 @@ const TechnologyPage = () => {
     </Alert>
   );
 
-  // Extract sections from all technologies
   const allSections = React.useMemo(() => {
     if (!technologies?.length) {
       console.log('[TechnologyPage] No technologies data available to extract sections');
@@ -88,10 +89,11 @@ const TechnologyPage = () => {
   }, [technologies]);
 
   if (!isConfigValid) {
+    console.error('[TechnologyPage] Invalid Contentful configuration:', configError);
     return (
       <Layout>
         <div className="container mx-auto px-4 py-8">
-          {showError(configError ? new Error(configError) : null, "Contentful Configuration Error")}
+          {showError(configError ? new Error(configError) : new Error('Invalid configuration'), "Contentful Configuration Error")}
         </div>
       </Layout>
     );

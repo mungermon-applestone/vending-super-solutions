@@ -8,16 +8,25 @@ export function useContentfulConfig() {
 
   useEffect(() => {
     const validateConfig = () => {
-      console.log('[useContentfulConfig] Validating configuration');
-      
-      if (!CONTENTFUL_CONFIG.SPACE_ID) {
-        setError('Missing Contentful Space ID');
+      console.log('[useContentfulConfig] Starting configuration validation');
+      console.log('[useContentfulConfig] Current config:', {
+        hasSpaceId: !!CONTENTFUL_CONFIG.SPACE_ID,
+        spaceIdLength: CONTENTFUL_CONFIG.SPACE_ID?.length || 0,
+        hasDeliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
+        tokenLength: CONTENTFUL_CONFIG.DELIVERY_TOKEN?.length || 0,
+        environmentId: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master'
+      });
+
+      if (!CONTENTFUL_CONFIG.SPACE_ID || CONTENTFUL_CONFIG.SPACE_ID.trim() === '') {
+        console.error('[useContentfulConfig] Missing or empty Space ID');
+        setError('Missing or invalid Contentful Space ID');
         setIsValid(false);
         return;
       }
 
-      if (!CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
-        setError('Missing Contentful Delivery Token');
+      if (!CONTENTFUL_CONFIG.DELIVERY_TOKEN || CONTENTFUL_CONFIG.DELIVERY_TOKEN.trim() === '') {
+        console.error('[useContentfulConfig] Missing or empty Delivery Token');
+        setError('Missing or invalid Contentful Delivery Token');
         setIsValid(false);
         return;
       }
@@ -25,15 +34,15 @@ export function useContentfulConfig() {
       setIsValid(true);
       setError(null);
       
-      console.log('[useContentfulConfig] Configuration is valid:', {
-        hasSpaceId: !!CONTENTFUL_CONFIG.SPACE_ID,
-        hasDeliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
-        environmentId: CONTENTFUL_CONFIG.ENVIRONMENT_ID
-      });
+      console.log('[useContentfulConfig] Configuration validated successfully');
     };
 
     validateConfig();
   }, []);
 
-  return { isValid, error };
+  return { 
+    isValid, 
+    error,
+    config: isValid ? CONTENTFUL_CONFIG : null 
+  };
 }
