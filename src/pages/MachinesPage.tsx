@@ -1,11 +1,10 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Loader2, ExternalLink, Server, HardDrive } from 'lucide-react';
+import { Loader2, ExternalLink, Server, HardDrive, AlertTriangle } from 'lucide-react';
 import { useMachinesPageContent } from '@/hooks/cms/useMachinesPageContent';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
@@ -13,12 +12,26 @@ import { toast } from 'sonner';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
-import { forceContentfulProvider } from '@/services/cms/cmsInit';
+import { forceContentfulProvider, initCMS } from '@/services/cms/cmsInit';
+import { isContentfulConfigured } from '@/config/cms';
 
 const MachinesPage: React.FC = () => {
-  // Force the use of Contentful provider
+  // Force the use of Contentful provider and initialize CMS
   useEffect(() => {
-    forceContentfulProvider();
+    const setupCMS = async () => {
+      try {
+        if (isContentfulConfigured()) {
+          await initCMS();
+        } else {
+          console.log('[MachinesPage] Contentful not configured, forcing provider anyway');
+          forceContentfulProvider();
+        }
+      } catch (error) {
+        console.error('[MachinesPage] Error initializing CMS:', error);
+      }
+    };
+    
+    setupCMS();
   }, []);
 
   const { data: machines, isLoading, error, refetch } = useContentfulMachines();
@@ -30,8 +43,6 @@ const MachinesPage: React.FC = () => {
       console.log(`Retrieved ${machines.length} machines from Contentful:`, machines);
       if (machines.length === 0) {
         toast.warning('No machines found in Contentful. Check console logs for more details.');
-      } else {
-        toast.success(`Found ${machines.length} machines (${machines.filter(m => m.type === 'vending').length} vending, ${machines.filter(m => m.type === 'locker').length} lockers)`);
       }
     }
   }, [machines]);
@@ -84,10 +95,6 @@ const MachinesPage: React.FC = () => {
                 <p className="text-gray-600 line-clamp-3">
                   {machine.description || 'No description available'}
                 </p>
-                <div className="mt-2">
-                  <p className="text-xs text-gray-500">ID: {machine.id}</p>
-                  {machine.slug && <p className="text-xs text-gray-500">Slug: {machine.slug}</p>}
-                </div>
               </CardContent>
               <CardFooter>
                 <Button asChild className="w-full">
@@ -105,7 +112,13 @@ const MachinesPage: React.FC = () => {
 
   return (
     <Layout>
-      <TechnologyPageHero entryId="3bH4WrT0pLKDeG35mUekGq" />
+      {/* Use the improved TechnologyPageHero with fallback handling */}
+      <TechnologyPageHero 
+        entryId="3bH4WrT0pLKDeG35mUekGq" 
+        fallbackTitle="Advanced Vending Machines"
+        fallbackSubtitle="Our machines combine cutting-edge technology with reliable performance to meet your business needs."
+        fallbackImageUrl="https://images.unsplash.com/photo-1562184552-997c461abbe6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+      />
 
       {pageContent && (
         <section className="bg-white py-12 md:py-16">
@@ -131,6 +144,23 @@ const MachinesPage: React.FC = () => {
             {pageContent?.machineTypesDescription || "Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs."}
           </p>
         </div>
+
+        {!isContentfulConfigured() && (
+          <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-8">
+            <div className="flex items-start">
+              <AlertTriangle className="h-5 w-5 text-amber-600 mr-2 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-amber-800">Contentful is not configured</p>
+                <p className="text-sm text-amber-700 mt-1">
+                  Please set up your Contentful Space ID and Delivery Token in Admin &gt; Environment Variables.
+                </p>
+                <p className="text-sm text-amber-700 mt-1">
+                  Using fallback data for preview purposes.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-end mb-8">
           <Button onClick={() => refetch()} variant="outline" className="flex items-center gap-2">
