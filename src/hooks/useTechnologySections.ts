@@ -10,12 +10,38 @@ type UseTechnologySectionsOptions = {
   enableToasts?: boolean;
   refetchInterval?: number | false;
   debug?: boolean;
+  fallbackToEmptyArray?: boolean;
 };
 
 export function useTechnologySections(options: UseTechnologySectionsOptions = {}) {
-  const { slug, enableToasts = false, refetchInterval = false, debug = false } = options;
+  const { 
+    slug, 
+    enableToasts = false, 
+    refetchInterval = false, 
+    debug = false,
+    fallbackToEmptyArray = true 
+  } = options;
   const { toast } = useToast();
   const { isValid, error: configError, config } = useContentfulConfig();
+
+  // Log configuration details when component mounts
+  console.log('[useTechnologySections] Initial config state:', { 
+    isValid, 
+    hasError: !!configError,
+    configErrorMessage: configError || 'No error',
+    configValues: {
+      hasSpaceId: !!config?.SPACE_ID,
+      spaceIdLength: config?.SPACE_ID?.length || 0,
+      hasDeliveryToken: !!config?.DELIVERY_TOKEN,
+      tokenLength: config?.DELIVERY_TOKEN?.length || 0,
+      environment: config?.ENVIRONMENT_ID || 'not set'
+    },
+    windowEnv: typeof window !== 'undefined' && window.env ? {
+      hasSpaceId: !!window.env.VITE_CONTENTFUL_SPACE_ID,
+      hasDeliveryToken: !!window.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
+      hasEnvId: !!window.env.VITE_CONTENTFUL_ENVIRONMENT_ID
+    } : 'No window.env available'
+  });
 
   const query = useQuery({
     queryKey: ['contentful', 'technology', slug].filter(Boolean),
@@ -46,6 +72,13 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
           }
           throw new Error(error);
         }
+        
+        console.log('[useTechnologySections] Content type found:', {
+          id: technologyType.sys.id,
+          name: technologyType.name,
+          description: technologyType.description,
+          fields: technologyType.fields.map(f => f.id)
+        });
 
         // Fetch technology entries
         const query = {

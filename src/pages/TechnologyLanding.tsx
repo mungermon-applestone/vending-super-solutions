@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -6,18 +7,19 @@ import PageHero from '@/components/common/PageHero';
 import CTASection from '@/components/common/CTASection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
-import { ArrowRight, AlertCircle, ExternalLink, Wrench, FileQuestion, RefreshCcw, Database, BookOpen } from 'lucide-react';
+import { ArrowRight, AlertCircle, ExternalLink, Wrench, FileQuestion, RefreshCcw, Database, BookOpen, Bug } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import SimpleConnectionTest from '@/components/admin/cms/SimpleConnectionTest';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import ContentfulDebug from '@/components/debug/ContentfulDebug';
 
 const TechnologyLanding = () => {
   const { technologies = [], isLoading, error, refetch } = useTechnologySections({
     enableToasts: true,
-    debug: process.env.NODE_ENV === 'development'
+    debug: true // Always enable debug for troubleshooting
   });
   
   const hasTechnologies = technologies && technologies.length > 0;
@@ -27,6 +29,14 @@ const TechnologyLanding = () => {
     toast.loading("Refreshing content...");
     await refetch();
     toast.success("Content refreshed");
+  };
+
+  const clearCacheAndRefresh = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('vending-cms-env-variables');
+      toast.success("Cache cleared, reloading page");
+      setTimeout(() => window.location.reload(), 1000);
+    }
   };
   
   return (
@@ -48,15 +58,29 @@ const TechnologyLanding = () => {
             </p>
           </div>
           
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRefresh}
-            className="flex items-center gap-2"
-          >
-            <RefreshCcw className="h-4 w-4" />
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefresh}
+              className="flex items-center gap-2"
+            >
+              <RefreshCcw className="h-4 w-4" />
+              Refresh
+            </Button>
+            
+            {process.env.NODE_ENV === 'development' && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={clearCacheAndRefresh}
+                className="flex items-center gap-2"
+              >
+                <Bug className="h-4 w-4" />
+                Clear Cache
+              </Button>
+            )}
+          </div>
         </div>
         
         {error && (
@@ -65,16 +89,32 @@ const TechnologyLanding = () => {
             <AlertTitle>Error loading technologies</AlertTitle>
             <AlertDescription>
               {error instanceof Error ? error.message : 'An unknown error occurred'}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => refetch()} 
-                className="ml-2"
-              >
-                Try again
-              </Button>
+              <div className="flex gap-2 mt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => refetch()} 
+                >
+                  Try again
+                </Button>
+                {process.env.NODE_ENV === 'development' && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={clearCacheAndRefresh} 
+                  >
+                    Clear Cache
+                  </Button>
+                )}
+              </div>
             </AlertDescription>
           </Alert>
+        )}
+
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-8">
+            <ContentfulDebug />
+          </div>
         )}
         
         {isLoading ? (
@@ -116,14 +156,13 @@ const TechnologyLanding = () => {
                   <TabsContent value="database" className="space-y-4 pt-4">
                     <Alert className="bg-blue-50 border-blue-200">
                       <Database className="h-4 w-4 text-blue-600" />
-                      <AlertTitle className="text-blue-800">Using Homegrown CMS</AlertTitle>
+                      <AlertTitle className="text-blue-800">Using Contentful CMS</AlertTitle>
                       <AlertDescription className="text-blue-700">
-                        Your application is currently using a homegrown CMS solution connected to your Supabase database.
+                        Your application is currently configured to use the Contentful CMS. Make sure your content model includes the following:
                         <div className="mt-2">
-                          <Badge variant="secondary" className="mr-2 mb-2">technologies</Badge>
-                          <Badge variant="secondary" className="mr-2 mb-2">technology_sections</Badge>
+                          <Badge variant="secondary" className="mr-2 mb-2">technology</Badge>
+                          <Badge variant="secondary" className="mr-2 mb-2">technologySection</Badge>
                           <Badge variant="secondary" className="mr-2 mb-2">technology_features</Badge>
-                          <Badge variant="secondary" className="mr-2 mb-2">technology_feature_items</Badge>
                         </div>
                       </AlertDescription>
                     </Alert>
@@ -131,18 +170,18 @@ const TechnologyLanding = () => {
                     <div className="p-4 border rounded-md bg-gray-50 space-y-2">
                       <h4 className="font-medium">No technology content found because:</h4>
                       <ul className="list-disc pl-5 space-y-1 text-sm">
-                        <li>You may not have created any technology entries yet</li>
-                        <li>The tables may not exist in your Supabase database</li>
-                        <li>There might be Row Level Security (RLS) preventing access</li>
+                        <li>You may not have created any technology entries in Contentful</li>
+                        <li>The content model may not exist in your Contentful space</li>
+                        <li>There might be configuration issues with your Contentful connection</li>
                       </ul>
                     </div>
                     
                     <div className="p-4 border rounded-md bg-gray-50 space-y-2 border-l-4 border-l-blue-500">
                       <h4 className="font-medium">Next steps:</h4>
                       <ol className="list-decimal pl-5 text-sm space-y-1">
-                        <li>Check your Supabase database for the required tables</li>
-                        <li>Create a test technology entry through the admin interface</li>
-                        <li>Verify the adapter implementation is correct</li>
+                        <li>Verify your Contentful configuration in Admin settings</li>
+                        <li>Create a test technology entry in Contentful</li>
+                        <li>Verify the content model matches our expected structure</li>
                       </ol>
                       <div className="flex gap-2 mt-3">
                         <Link to="/admin/technology">
@@ -165,16 +204,16 @@ const TechnologyLanding = () => {
                   
                   <TabsContent value="test" className="space-y-4 pt-4">
                     <div className="p-4 border rounded-md bg-gray-50">
-                      <p className="text-sm mb-4">Test the database connection:</p>
+                      <p className="text-sm mb-4">Test the Contentful connection:</p>
                       <SimpleConnectionTest />
                     </div>
                   </TabsContent>
                   
                   <TabsContent value="docs" className="space-y-4 pt-4">
                     <div className="p-4 border rounded-md bg-gray-50">
-                      <h4 className="font-medium mb-2">Homegrown CMS Documentation</h4>
+                      <h4 className="font-medium mb-2">Contentful Documentation</h4>
                       <p className="text-sm mb-3">
-                        Your application uses a custom CMS implementation with Supabase. Here's how the technologies content type works:
+                        Your application uses the Contentful CMS. Here's how the technologies content type works:
                       </p>
                       <div className="space-y-4 text-sm">
                         <div className="p-3 bg-white rounded border">
@@ -184,14 +223,13 @@ const TechnologyLanding = () => {
                             <li>Basic details (title, slug, description)</li>
                             <li>Sections (grouped content areas)</li>
                             <li>Features (individual capabilities)</li>
-                            <li>Items (detail points for features)</li>
                           </ul>
                         </div>
                         
                         <div className="p-3 bg-white rounded border">
                           <h5 className="font-medium text-blue-700">Creating Content</h5>
                           <p className="mb-0">
-                            Use the Admin interface to create and manage technology content. Each technology can have multiple sections,
+                            Use the Contentful web interface to create and manage technology content. Each technology can have multiple sections,
                             and each section can have multiple features.
                           </p>
                         </div>
@@ -222,11 +260,11 @@ const TechnologyLanding = () => {
                 
                 <Button 
                   variant="outline"
-                  onClick={() => window.open('https://supabase.com/dashboard', '_blank')}
+                  onClick={() => window.open('https://app.contentful.com/login', '_blank')}
                   size="sm"
                 >
                   <ExternalLink className="mr-2 h-4 w-4" />
-                  Supabase Dashboard
+                  Contentful Dashboard
                 </Button>
               </CardFooter>
             </Card>
