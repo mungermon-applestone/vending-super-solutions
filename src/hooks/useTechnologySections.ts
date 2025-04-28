@@ -9,17 +9,18 @@ type UseTechnologySectionsOptions = {
   slug?: string;
   enableToasts?: boolean;
   refetchInterval?: number | false;
+  debug?: boolean;
 };
 
 export function useTechnologySections(options: UseTechnologySectionsOptions = {}) {
-  const { slug, enableToasts = false, refetchInterval = false } = options;
+  const { slug, enableToasts = false, refetchInterval = false, debug = false } = options;
   const { toast } = useToast();
   const { isValid, error: configError, config } = useContentfulConfig();
 
   const query = useQuery({
     queryKey: ['contentful', 'technology', slug].filter(Boolean),
     queryFn: async () => {
-      console.log('[useTechnologySections] Starting technology fetch');
+      console.log('[useTechnologySections] Starting technology fetch with debug:', debug);
       console.log('[useTechnologySections] Config validation:', { isValid, configError });
       
       if (!isValid || !config) {
@@ -31,6 +32,22 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
         const client = await getContentfulClient();
         console.log('[useTechnologySections] Client initialized successfully');
         
+        // First verify the content type exists
+        const contentTypes = await client.getContentTypes();
+        const technologyType = contentTypes.items.find(type => type.sys.id === 'technology');
+        
+        if (!technologyType) {
+          const error = 'Technology content type not found in Contentful space';
+          console.error('[useTechnologySections]', error);
+          if (debug) {
+            console.log('[useTechnologySections] Available content types:', 
+              contentTypes.items.map(type => type.sys.id)
+            );
+          }
+          throw new Error(error);
+        }
+
+        // Fetch technology entries
         const query = {
           content_type: 'technology',
           include: 2,
@@ -40,18 +57,44 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
         console.log('[useTechnologySections] Fetching with query:', query);
         
         const entries = await client.getEntries(query);
+        
+        if (debug) {
+          console.log('[useTechnologySections] Raw Contentful response:', JSON.stringify(entries, null, 2));
+        }
+        
         console.log(`[useTechnologySections] Received ${entries.items.length} technologies`);
 
-        if (entries.items.length === 0 && enableToasts) {
-          toast({
-            title: "No Technologies Found",
-            description: "No technology data is currently available.",
-            variant: "default",
-          });
+        if (entries.items.length === 0) {
+          const message = slug 
+            ? `No technology found with slug: ${slug}`
+            : "No technologies found";
+            
+          console.warn('[useTechnologySections]', message);
+          
+          if (enableToasts) {
+            toast({
+              title: "No Technologies Found",
+              description: message,
+              variant: "default",
+            });
+          }
+          
+          return [];
         }
 
         return entries.items.map(entry => {
           const fields = entry.fields as any;
+          
+          if (debug) {
+            console.log('[useTechnologySections] Processing technology:', {
+              id: entry.sys.id,
+              title: fields.title,
+              hasImage: !!fields.image,
+              hasSections: Array.isArray(fields.sections),
+              sections: fields.sections?.length || 0
+            });
+          }
+          
           return {
             id: entry.sys.id,
             title: fields.title,
@@ -71,7 +114,12 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
                 url: `https:${section.fields.sectionImage.fields.file.url}`,
                 alt: section.fields.title
               } : undefined,
-              features: []
+              features: section.fields.features?.map((feature: any) => ({
+                id: feature.sys.id,
+                title: feature.fields.title,
+                description: feature.fields.description,
+                icon: feature.fields.icon
+              })) || []
             })) || [],
             visible: fields.visible ?? true,
             image: fields.image ? {

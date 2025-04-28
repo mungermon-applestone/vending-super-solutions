@@ -15,7 +15,11 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
 const TechnologyLanding = () => {
-  const { technologies = [], isLoading, error, refetch } = useTechnologySections();
+  const { technologies = [], isLoading, error, refetch } = useTechnologySections({
+    enableToasts: true,
+    debug: process.env.NODE_ENV === 'development'
+  });
+  
   const hasTechnologies = technologies && technologies.length > 0;
   console.log('TechnologyLanding rendering with technologies:', technologies);
   
