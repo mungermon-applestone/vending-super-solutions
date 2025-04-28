@@ -187,7 +187,7 @@ export const EnvironmentVariableManager = () => {
           </div>
           
           {testSuccess && (
-            <Alert variant="success" className="bg-green-50 border-green-200 text-green-800">
+            <Alert variant="default" className="border-green-200 bg-green-50 text-green-800">
               <AlertTitle>Connection Verified</AlertTitle>
               <AlertDescription>
                 Your Contentful connection is working properly. You can now view content in the app.
