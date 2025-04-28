@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { CMSTechnology, CMSTechnologySection, CMSImage } from '@/types/cms';
@@ -73,6 +74,11 @@ export function useTechnologySections(options: UseTechnologySectionsOptions = {}
               features: []
             })) || [],
             visible: fields.visible ?? true,
+            image: fields.image ? {
+              id: fields.image.sys.id,
+              url: `https:${fields.image.fields.file.url}`,
+              alt: fields.title || 'Technology image'
+            } : undefined
           };
         });
       } catch (error) {

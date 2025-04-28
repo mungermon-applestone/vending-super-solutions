@@ -234,8 +234,8 @@ const TechnologyLanding = () => {
                 {tech.image && (
                   <div className="aspect-video w-full overflow-hidden">
                     <img 
-                      src={typeof tech.image === 'string' ? tech.image : tech.image.url} 
-                      alt={typeof tech.image === 'string' ? tech.title : tech.image.alt || tech.title}
+                      src={tech.image.url}
+                      alt={tech.image.alt || tech.title}
                       className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
                     />
                   </div>
