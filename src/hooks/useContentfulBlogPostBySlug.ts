@@ -51,6 +51,8 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
         await refreshContentfulClient();
         const client = await getContentfulClient();
         
+        console.log(`[useContentfulBlogPostBySlug] Querying for blog post with slug: "${slug}"`);
+        
         const response = await client.getEntries({
           content_type: CMS_MODELS.BLOG_POST,
           "fields.slug": slug,
@@ -59,7 +61,7 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
         });
         
         console.log('[useContentfulBlogPostBySlug] Raw response:', response);
-        console.log('[useContentfulBlogPostBySlug] Response items:', response.items);
+        console.log('[useContentfulBlogPostBySlug] Response items count:', response.items.length);
         
         if (!response.items.length) {
           console.error(`[useContentfulBlogPostBySlug] No blog post found with slug: ${slug}`);

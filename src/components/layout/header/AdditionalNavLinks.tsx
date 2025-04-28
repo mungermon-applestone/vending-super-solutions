@@ -10,6 +10,7 @@ interface AdditionalNavLinksProps {
 const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
   const location = useLocation();
   const isBlogActive = location.pathname.startsWith('/blog');
+  const isBusinessActive = location.pathname.startsWith('/business') || location.pathname.startsWith('/business-goals');
   
   return (
     <div className="flex items-center space-x-2">
@@ -21,7 +22,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
       </Button>
       <Button 
         asChild 
-        variant="ghost"
+        variant={isBusinessActive ? "default" : "ghost"}
       >
         <Link to="/business-goals">Business Goals</Link>
       </Button>

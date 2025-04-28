@@ -16,10 +16,13 @@ export async function initCMS() {
       initialized: false,
       error: 'Contentful credentials not configured'
     });
-    throw new Error('Contentful credentials not configured');
+    throw new Error('Contentful credentials not configured. Please set up your Space ID and Delivery Token in Admin > Environment Variables.');
   }
   
   try {
+    // Refresh the client to ensure we have the latest configuration
+    await refreshContentfulClient();
+    
     // Test Contentful connection
     const testResult = await testContentfulConnection();
     if (!testResult.success) {
@@ -29,7 +32,7 @@ export async function initCMS() {
         initialized: false,
         error: testResult.message
       });
-      throw new Error(testResult.message);
+      throw new Error(`Contentful connection failed: ${testResult.message}`);
     }
     
     console.log('[initCMS] Using Contentful CMS provider');
@@ -69,6 +72,6 @@ export async function refreshCmsConnection() {
     return await initCMS();
   } catch (error) {
     console.error('[refreshCmsConnection] Error refreshing connection:', error);
-    return false;
+    throw error;
   }
 }
