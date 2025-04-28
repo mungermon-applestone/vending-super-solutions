@@ -5,6 +5,8 @@ import ErrorPage from '@/components/ErrorPage';
 import AdminPage from '@/pages/AdminPage';
 import ContentfulConfigurationPage from '@/pages/ContentfulConfigurationPage';
 import EnvironmentVariablesPage from '@/pages/admin/EnvironmentVariablesPage';
+import AdminLayout from '@/components/AdminLayout';
+import { adminRoutes } from '@/router/adminRoutes';
 
 // Define the routes for the application
 const routes: RouteObject[] = [
@@ -15,15 +17,22 @@ const routes: RouteObject[] = [
   },
   {
     path: '/admin',
-    element: <AdminPage />
-  },
-  {
-    path: '/admin/contentful-config',
-    element: <ContentfulConfigurationPage />
-  },
-  {
-    path: '/admin/environment-variables',
-    element: <EnvironmentVariablesPage />
+    element: <AdminLayout />,
+    children: [
+      {
+        index: true,
+        element: <AdminPage />
+      },
+      {
+        path: 'contentful-config',
+        element: <ContentfulConfigurationPage />
+      },
+      {
+        path: 'environment-variables',
+        element: <EnvironmentVariablesPage />
+      },
+      ...adminRoutes
+    ]
   }
 ];
 
