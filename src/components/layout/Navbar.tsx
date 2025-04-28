@@ -9,7 +9,14 @@ import {
   Settings
 } from 'lucide-react';
 
+// This component is now disabled to prevent duplicate navigation
+// We're using Header.tsx as the main navigation component
 const Navbar = () => {
+  // This component is now disabled to prevent duplicate navigation
+  // It's kept for reference purposes but not rendered in the app
+  return null;
+  
+  /* Original implementation removed to avoid duplicate navigation
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -165,6 +172,7 @@ const Navbar = () => {
       </div>
     </nav>
   );
+  */
 };
 
 export default Navbar;

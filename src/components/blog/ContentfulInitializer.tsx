@@ -1,12 +1,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { forceContentfulProvider } from '@/services/cms/cmsInit';
-import { getContentfulClient, testContentfulConnection } from '@/services/cms/utils/contentfulClient';
+import { getContentfulClient, testContentfulConnection, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { isContentfulConfigured } from '@/config/cms';
 
 interface ContentfulInitializerProps {
   children: React.ReactNode;
@@ -20,8 +21,16 @@ export const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [attempted, setAttempted] = useState(false);
 
   const initContentful = async () => {
+    if (!isContentfulConfigured()) {
+      setError(new Error('Contentful is not configured. Please set up your API credentials in the admin panel.'));
+      setIsLoading(false);
+      setAttempted(true);
+      return;
+    }
+    
     setIsLoading(true);
     try {
       console.log('[ContentfulInitializer] Starting Contentful initialization');
@@ -29,7 +38,10 @@ export const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
       // Force Contentful provider
       forceContentfulProvider();
       
-      // Test the connection
+      // Test the connection - first try with a refreshed client
+      await refreshContentfulClient();
+      
+      // Then test the connection
       const testResult = await testContentfulConnection();
       
       if (!testResult.success) {
@@ -45,6 +57,7 @@ export const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
       setError(err instanceof Error ? err : new Error('Failed to initialize Contentful'));
     } finally {
       setIsLoading(false);
+      setAttempted(true);
     }
   };
 
@@ -61,7 +74,7 @@ export const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
     );
   }
 
-  if (error) {
+  if (error && attempted) {
     return fallback || (
       <div className="p-4">
         <Alert variant="destructive" className="mb-6">

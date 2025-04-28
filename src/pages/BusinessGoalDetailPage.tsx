@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Check, Shield, Server, Settings, Bell, Battery, ClipboardCheck, RefreshCcw, TrendingUp, PieChart, Map, UserCheck } from 'lucide-react';
@@ -12,8 +11,9 @@ import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
 import BusinessGoalVideoSection from '@/components/businessGoals/BusinessGoalVideoSection';
 import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
+import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
+import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 
-// Function to get the icon component based on icon name from Contentful
 const getIconComponent = (iconName: string | undefined): React.ReactNode => {
   if (!iconName) return <Star className="h-6 w-6" />;
   
@@ -49,6 +49,32 @@ const getIconComponent = (iconName: string | undefined): React.ReactNode => {
 
 const BusinessGoalDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  
+  console.log('[BusinessGoalDetailPage] Rendering with slug:', slug);
+  
+  return (
+    <Layout>
+      <ContentfulInitializer
+        fallback={
+          <div className="container mx-auto p-4">
+            <ContentfulFallbackMessage
+              title="Business Goal Not Available"
+              message="We're having trouble loading this business goal. Please check your Contentful configuration."
+              contentType="business goal"
+              showRefresh={true}
+              actionText="View All Business Goals"
+              actionHref="/business-goals"
+            />
+          </div>
+        }
+      >
+        <BusinessGoalContent slug={slug} />
+      </ContentfulInitializer>
+    </Layout>
+  );
+};
+
+const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
   const { data: businessGoal, isLoading, error } = useContentfulBusinessGoal(slug || '');
   
   console.log('Business Goal Detail Page Rendering:', {
@@ -60,55 +86,51 @@ const BusinessGoalDetailPage = () => {
   
   if (isLoading) {
     return (
-      <Layout>
-        <div className="container mx-auto py-12">
-          <div className="max-w-4xl mx-auto">
-            <Skeleton className="h-12 w-3/4 mb-4" />
-            <Skeleton className="h-6 w-full mb-2" />
-            <Skeleton className="h-6 w-full mb-8" />
-            <Skeleton className="h-96 w-full rounded-lg mb-8" />
-            <Skeleton className="h-6 w-full mb-2" />
-            <Skeleton className="h-6 w-full mb-2" />
-            <Skeleton className="h-6 w-3/4" />
-          </div>
+      <div className="container mx-auto py-12">
+        <div className="max-w-4xl mx-auto">
+          <Skeleton className="h-12 w-3/4 mb-4" />
+          <Skeleton className="h-6 w-full mb-2" />
+          <Skeleton className="h-6 w-full mb-8" />
+          <Skeleton className="h-96 w-full rounded-lg mb-8" />
+          <Skeleton className="h-6 w-full mb-2" />
+          <Skeleton className="h-6 w-full mb-2" />
+          <Skeleton className="h-6 w-3/4" />
         </div>
-      </Layout>
+      </div>
     );
   }
   
   if (error) {
     return (
-      <Layout>
-        <div className="container mx-auto py-12">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-red-50 border border-red-200 rounded-md p-6 text-center">
-              <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Business Goal</h3>
-              <p className="text-red-600">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
-              <Button asChild variant="outline" className="mt-4">
-                <Link to="/goals">Return to Business Goals</Link>
-              </Button>
-            </div>
-          </div>
+      <div className="container mx-auto py-12">
+        <div className="max-w-4xl mx-auto">
+          <ContentfulFallbackMessage
+            title="Error Loading Business Goal"
+            message={error instanceof Error ? error.message : 'An unknown error occurred'}
+            contentType="business goal"
+            actionText="Return to Business Goals"
+            actionHref="/business-goals"
+            showAdmin={false}
+          />
         </div>
-      </Layout>
+      </div>
     );
   }
   
   if (!businessGoal) {
     return (
-      <Layout>
-        <div className="container mx-auto py-12">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-amber-50 border border-amber-200 rounded-md p-6 text-center">
-              <h3 className="text-lg font-semibold text-amber-800 mb-2">Business Goal Not Found</h3>
-              <p className="text-amber-600">The business goal you're looking for doesn't exist or has been removed.</p>
-              <Button asChild variant="outline" className="mt-4">
-                <Link to="/goals">Return to Business Goals</Link>
-              </Button>
-            </div>
-          </div>
+      <div className="container mx-auto py-12">
+        <div className="max-w-4xl mx-auto">
+          <ContentfulFallbackMessage
+            title="Business Goal Not Found"
+            message="The business goal you're looking for doesn't exist or has been removed."
+            contentType="business goal"
+            actionText="Return to Business Goals"
+            actionHref="/business-goals"
+            showAdmin={false}
+          />
         </div>
-      </Layout>
+      </div>
     );
   }
   
@@ -120,11 +142,10 @@ const BusinessGoalDetailPage = () => {
   
   const imageUrl = businessGoal?.image?.url || "https://via.placeholder.com/1200x800?text=Business+Goal+Image";
   
-  // Add debugging information to the page
   const showDebugInfo = true; // Set to true to show debug info
   
   return (
-    <Layout>
+    <>
       <BusinessGoalHero
         title={businessGoal?.title || ''}
         description={businessGoal?.description || ''}
@@ -132,7 +153,6 @@ const BusinessGoalDetailPage = () => {
         image={imageUrl}
       />
       
-      {/* Debugging Information - Always visible in development and production for troubleshooting */}
       {showDebugInfo && (
         <section className="py-4 bg-gray-50 border-t border-b border-gray-200">
           <div className="container mx-auto">
@@ -159,7 +179,6 @@ const BusinessGoalDetailPage = () => {
         </section>
       )}
       
-      {/* Benefits Section */}
       {businessGoal?.benefits && businessGoal.benefits.length > 0 && (
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto">
@@ -180,7 +199,6 @@ const BusinessGoalDetailPage = () => {
         </section>
       )}
       
-      {/* Features Section */}
       {businessGoal?.features && businessGoal.features.length > 0 && (
         <section className="py-16 bg-white">
           <div className="container mx-auto">
@@ -204,7 +222,6 @@ const BusinessGoalDetailPage = () => {
         </section>
       )}
       
-      {/* Video Section - Always show, even if video is undefined, for debugging */}
       {businessGoal?.video && (
         <BusinessGoalVideoSection 
           video={businessGoal.video}
@@ -213,7 +230,6 @@ const BusinessGoalDetailPage = () => {
         />
       )}
       
-      {/* Missing Video Notice */}
       {!businessGoal.video && (
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto">
@@ -233,14 +249,12 @@ const BusinessGoalDetailPage = () => {
         </section>
       )}
       
-      {/* Recommended Machines Section */}
       {businessGoal?.recommendedMachines && businessGoal.recommendedMachines.length > 0 && (
         <RecommendedMachines machines={businessGoal.recommendedMachines} />
       )}
       
-      {/* Inquiry Form */}
       <InquiryForm title={`Ready to learn more about ${businessGoal?.title || 'achieving your business goals'}?`} />
-    </Layout>
+    </>
   );
 };
 

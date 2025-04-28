@@ -1,27 +1,18 @@
 
-import React, { ReactNode } from "react";
-import Header from "./Header";
-import Footer from "./Footer";
-import { useLocation } from "react-router-dom";
+import Header from './Header';
+import Footer from './Footer';
+import React from 'react';
 
 interface LayoutProps {
-  children: ReactNode;
-  noFooter?: boolean;
-  fullWidth?: boolean;
-  className?: string;
+  children: React.ReactNode;
 }
 
-const Layout = ({
-  children,
-  noFooter = false,
-  fullWidth = false,
-  className = "",
-}: LayoutProps) => {
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className={`flex-grow ${className}`}>{children}</main>
-      {!noFooter && <Footer />}
+      <main className="flex-grow">{children}</main>
+      <Footer />
     </div>
   );
 };

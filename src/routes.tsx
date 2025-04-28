@@ -14,6 +14,7 @@ import ProductDetailPage from '@/pages/ProductDetailPage';
 import Machines from '@/pages/Machines';
 import MachineDetailPage from '@/pages/MachineDetailPage';
 import BusinessGoalsPage from '@/pages/BusinessGoalsPage';
+import BusinessGoalDetailPage from '@/pages/BusinessGoalDetailPage';
 import NotFound from '@/pages/NotFound';
 import TechnologyPage from '@/pages/TechnologyPage';
 import About from '@/pages/About';
@@ -38,7 +39,7 @@ const routes: RouteObject[] = [
         element: <Products />
       },
       {
-        path: 'products/:productId',
+        path: 'products/:slug',
         element: <ProductDetailPage />
       },
       {
@@ -60,6 +61,15 @@ const routes: RouteObject[] = [
       {
         path: 'business-goals',
         element: <BusinessGoalsPage />
+      },
+      {
+        path: 'business-goals/:slug',
+        element: <BusinessGoalDetailPage />
+      },
+      // Add redirect route for /business/:slug to maintain compatibility
+      {
+        path: 'business/:slug',
+        element: <BusinessGoalDetailPage />
       },
       {
         path: 'about',

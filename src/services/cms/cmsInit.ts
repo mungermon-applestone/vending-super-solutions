@@ -1,11 +1,23 @@
 
 import { ContentProviderType } from './adapters/types';
 import { setCMSProviderConfig } from './providerConfig';
-import { testContentfulConnection, getContentfulClient } from './utils/contentfulClient';
+import { testContentfulConnection, getContentfulClient, refreshContentfulClient } from './utils/contentfulClient';
 import { toast } from 'sonner';
+import { isContentfulConfigured } from '@/config/cms';
 
 export async function initCMS() {
   console.log('[initCMS] Initializing CMS configuration...');
+  
+  // Check if Contentful is configured
+  if (!isContentfulConfigured()) {
+    console.error('[initCMS] Contentful is not configured');
+    setCMSProviderConfig({
+      type: ContentProviderType.CONTENTFUL,
+      initialized: false,
+      error: 'Contentful credentials not configured'
+    });
+    throw new Error('Contentful credentials not configured');
+  }
   
   try {
     // Test Contentful connection
@@ -53,7 +65,7 @@ export async function refreshCmsConnection() {
   console.log('[refreshCmsConnection] Refreshing CMS connection');
   try {
     // Reset client first
-    await getContentfulClient(true); 
+    await refreshContentfulClient(); 
     return await initCMS();
   } catch (error) {
     console.error('[refreshCmsConnection] Error refreshing connection:', error);

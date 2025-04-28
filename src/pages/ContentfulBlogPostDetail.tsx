@@ -1,116 +1,61 @@
 
-import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import Layout from "@/components/layout/Layout";
-import ContentfulBlogPostContent from "@/components/blog/ContentfulBlogPostContent";
-import { useContentfulBlogPostBySlug } from "@/hooks/useContentfulBlogPostBySlug";
-import { Loader2 } from "lucide-react";
-import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
-import { useQuery } from "@tanstack/react-query";
-import ContentfulInitializer from "@/components/blog/ContentfulInitializer";
-import ContentfulFallbackMessage from "@/components/common/ContentfulFallbackMessage";
-
-// Interface for adjacent post navigation
-interface AdjacentBlogPost {
-  slug: string;
-  title: string;
-}
-
-// Type safety helper for extracting field data
-const extractSafeBlogInfo = (entry: any): AdjacentBlogPost | null => {
-  if (!entry || !entry.fields || typeof entry.fields.slug !== 'string' || typeof entry.fields.title !== 'string') {
-    return null;
-  }
-  
-  return {
-    slug: entry.fields.slug,
-    title: entry.fields.title
-  };
-};
-
-// Hook for getting "previous" and "next" posts for navigation
-function useAdjacentContentfulPosts(currentSlug: string | undefined) {
-  return useQuery({
-    queryKey: ["contentful-adjacent-posts", currentSlug],
-    enabled: !!currentSlug,
-    queryFn: async () => {
-      console.log('[useAdjacentContentfulPosts] Current slug:', currentSlug);
-      
-      if (!currentSlug) return { previous: null, next: null };
-      const client = await getContentfulClient();
-      
-      // Fetch all published posts sorted by publishDate ascending
-      const response = await client.getEntries({
-        content_type: "blogPost",
-        order: ["fields.publishDate"],
-        select: ["fields.slug", "fields.title", "fields.publishDate"],
-      });
-      
-      const posts = response.items || [];
-      console.log('[useAdjacentContentfulPosts] Total posts:', posts.length);
-      
-      const idx = posts.findIndex(p => p.fields && p.fields.slug === currentSlug);
-      console.log('[useAdjacentContentfulPosts] Current post index:', idx);
-      
-      if (idx === -1) return { previous: null, next: null };
-      
-      const previous = idx > 0 ? extractSafeBlogInfo(posts[idx - 1]) : null;
-      const next = idx < posts.length - 1 ? extractSafeBlogInfo(posts[idx + 1]) : null;
-      
-      console.log('[useAdjacentContentfulPosts] Previous post:', previous);
-      console.log('[useAdjacentContentfulPosts] Next post:', next);
-      
-      return { previous, next };
-    }
-  });
-}
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import Layout from '@/components/layout/Layout';
+import { useContentfulBlogPostBySlug } from '@/hooks/useContentfulBlogPostBySlug';
+import ContentfulBlogPostContent from '@/components/blog/ContentfulBlogPostContent';
+import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
+import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
+import { Loader2 } from 'lucide-react';
 
 const ContentfulBlogPostDetail = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  
   return (
     <Layout>
       <ContentfulInitializer
         fallback={
           <div className="container mx-auto p-4">
             <ContentfulFallbackMessage
-              message="We're having trouble loading this blog post. Please configure Contentful in the Admin area."
+              title="Blog Post Not Available"
+              message="We're having trouble loading this blog post. Please check your Contentful configuration."
               contentType="blog post"
               showRefresh={true}
+              actionText="View All Blog Posts"
+              actionHref="/blog"
             />
           </div>
         }
       >
-        <BlogPostDetailContent />
+        <BlogPostContent slug={slug} />
       </ContentfulInitializer>
     </Layout>
   );
 };
 
-const BlogPostDetailContent = () => {
-  const { slug } = useParams<{ slug: string }>();
+const BlogPostContent = ({ slug }: { slug: string | undefined }) => {
+  const { data: post, isLoading, error } = useContentfulBlogPostBySlug({ slug });
   const navigate = useNavigate();
-  const {
-    data: post,
-    isLoading: isLoadingPost,
-    error,
-  } = useContentfulBlogPostBySlug({ slug });
-
-  const { data: adjacentPosts, isLoading: isLoadingAdjacent } = useAdjacentContentfulPosts(slug);
-
+  
   React.useEffect(() => {
-    console.log('ContentfulBlogPostDetail - Current slug:', slug);
-    console.log('ContentfulBlogPostDetail - Post data:', post);
+    console.log("[BlogPostContent] Content loaded:", {
+      slug,
+      post: post?.sys?.id,
+      loading: isLoading,
+      error: error?.message
+    });
     
-    if (!isLoadingPost && !post) {
-      console.error('No post found, navigating to not found');
-      navigate("/not-found", { replace: true });
+    // Handle 404 for non-existent posts after loading
+    if (!isLoading && !error && !post) {
+      console.log("[BlogPostContent] Post not found, navigating to 404");
+      navigate('/not-found', { replace: true });
     }
-  }, [post, slug, isLoadingPost, navigate]);
-
-  const isLoading = isLoadingPost || isLoadingAdjacent;
+  }, [post, isLoading, error, navigate, slug]);
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-16 flex justify-center">
+      <div className="container mx-auto flex justify-center py-16">
         <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
       </div>
     );
@@ -118,24 +63,37 @@ const BlogPostDetailContent = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto p-4">
-        <div className="bg-red-50 border border-red-200 p-4 rounded-md mb-8">
-          <h2 className="text-lg font-semibold text-red-700 mb-2">Error loading blog post</h2>
-          <p className="text-red-600">{error instanceof Error ? error.message : 'Unknown error'}</p>
-        </div>
+      <div className="container mx-auto py-12">
+        <ContentfulFallbackMessage
+          title="Error Loading Blog Post"
+          message={error instanceof Error ? error.message : 'An unknown error occurred'}
+          contentType="blog post"
+          actionText="Return to Blog"
+          actionHref="/blog"
+          showAdmin={false}
+        />
       </div>
     );
   }
-  
-  if (!post) return null;
+
+  if (!post) {
+    return (
+      <div className="container mx-auto py-12">
+        <ContentfulFallbackMessage
+          title="Blog Post Not Found"
+          message={`We couldn't find the blog post "${slug}" in our database.`}
+          contentType="blog post"
+          actionText="Return to Blog"
+          actionHref="/blog"
+          showAdmin={false}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto py-12">        
-      <ContentfulBlogPostContent 
-        post={post} 
-        previousPost={adjacentPosts?.previous}
-        nextPost={adjacentPosts?.next}
-      />
+    <div className="container mx-auto py-12">
+      <ContentfulBlogPostContent post={post} />
     </div>
   );
 };

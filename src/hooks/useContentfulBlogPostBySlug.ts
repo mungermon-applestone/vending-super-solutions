@@ -1,9 +1,10 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
+import { getContentfulClient, refreshContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { Document } from "@contentful/rich-text-types";
 import { Asset, Entry } from "contentful";
 import { CMS_MODELS } from "@/config/cms";
+import { toast } from "sonner";
 
 export interface BlogPostFields {
   title: string;
@@ -44,9 +45,12 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
       console.log('[useContentfulBlogPostBySlug] Fetching post with slug:', slug);
       
       if (!slug) throw new Error("No slug provided");
-      const client = await getContentfulClient();
       
       try {
+        // Try to get a fresh client first
+        await refreshContentfulClient();
+        const client = await getContentfulClient();
+        
         const response = await client.getEntries({
           content_type: CMS_MODELS.BLOG_POST,
           "fields.slug": slug,
@@ -74,6 +78,14 @@ export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlu
       } catch (error) {
         console.error('[useContentfulBlogPostBySlug] Error fetching blog post:', error);
         throw error;
+      }
+    },
+    retry: 1,
+    retryDelay: 1000,
+    meta: {
+      onError: (error: Error) => {
+        toast.error(`Error loading blog post: ${error.message}`);
+        console.error('[useContentfulBlogPostBySlug] Error:', error);
       }
     }
   });
