@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import ErrorPage from '@/components/ErrorPage';
@@ -20,6 +19,7 @@ import About from '@/pages/About';
 import BlogPage from '@/pages/BlogPage';
 import BlogPostDetail from '@/pages/BlogPostDetail';
 import Contact from '@/pages/Contact';
+import StrapiSetupPage from '@/pages/admin/StrapiSetupPage';
 
 const routes: RouteObject[] = [
   {
@@ -96,6 +96,10 @@ const routes: RouteObject[] = [
       {
         path: 'environment-variables',
         element: <EnvironmentVariablesPage />
+      },
+      {
+        path: 'strapi-setup',
+        element: <StrapiSetupPage />
       },
       ...adminRoutes
     ]

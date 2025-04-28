@@ -3,7 +3,7 @@ import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Settings } from 'lucide-react';
+import { Settings, Database } from 'lucide-react';
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -23,6 +23,18 @@ const AdminPage = () => {
             <span className="font-medium">Contentful Configuration</span>
             <span className="text-xs text-muted-foreground text-center">
               Set up environment variables for Contentful CMS
+            </span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="p-6 h-auto flex flex-col items-center gap-2 border-dashed"
+            onClick={() => navigate('/admin/strapi-setup')}
+          >
+            <Database className="h-6 w-6" />
+            <span className="font-medium">Strapi Configuration</span>
+            <span className="text-xs text-muted-foreground text-center">
+              Set up environment variables for Strapi CMS
             </span>
           </Button>
         </div>
