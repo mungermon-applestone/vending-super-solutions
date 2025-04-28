@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import ErrorPage from '@/components/ErrorPage';
@@ -17,9 +18,10 @@ import NotFound from '@/pages/NotFound';
 import TechnologyPage from '@/pages/TechnologyPage';
 import About from '@/pages/About';
 import BlogPage from '@/pages/BlogPage';
-import BlogPostDetail from '@/pages/BlogPostDetail';
+import ContentfulBlogPostDetail from '@/pages/ContentfulBlogPostDetail';
 import Contact from '@/pages/Contact';
 import StrapiSetupPage from '@/pages/admin/StrapiSetupPage';
+import ZhilaiApplestoneAnnouncement from '@/pages/ZhilaiApplestoneAnnouncement';
 
 const routes: RouteObject[] = [
   {
@@ -69,7 +71,11 @@ const routes: RouteObject[] = [
       },
       {
         path: 'blog/:slug',
-        element: <BlogPostDetail />
+        element: <ContentfulBlogPostDetail />
+      },
+      {
+        path: 'blog/zhilai-applestone-announcement',
+        element: <ZhilaiApplestoneAnnouncement />
       },
       {
         path: 'contact',

@@ -3,10 +3,12 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import ContentfulBlogPostContent from "@/components/blog/ContentfulBlogPostContent";
-import { useContentfulBlogPostBySlug, ContentfulBlogPost } from "@/hooks/useContentfulBlogPostBySlug";
+import { useContentfulBlogPostBySlug } from "@/hooks/useContentfulBlogPostBySlug";
 import { Loader2 } from "lucide-react";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
 import { useQuery } from "@tanstack/react-query";
+import ContentfulInitializer from "@/components/blog/ContentfulInitializer";
+import ContentfulFallbackMessage from "@/components/common/ContentfulFallbackMessage";
 
 // Interface for adjacent post navigation
 interface AdjacentBlogPost {
@@ -64,6 +66,26 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
 }
 
 const ContentfulBlogPostDetail = () => {
+  return (
+    <Layout>
+      <ContentfulInitializer
+        fallback={
+          <div className="container mx-auto p-4">
+            <ContentfulFallbackMessage
+              message="We're having trouble loading this blog post. Please configure Contentful in the Admin area."
+              contentType="blog post"
+              showRefresh={true}
+            />
+          </div>
+        }
+      >
+        <BlogPostDetailContent />
+      </ContentfulInitializer>
+    </Layout>
+  );
+};
+
+const BlogPostDetailContent = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const {
@@ -88,39 +110,33 @@ const ContentfulBlogPostDetail = () => {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="container mx-auto py-16 flex justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-        </div>
-      </Layout>
+      <div className="container mx-auto py-16 flex justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Layout>
-        <div className="container mx-auto p-4">
-          <div className="bg-red-50 border border-red-200 p-4 rounded-md mb-8">
-            <h2 className="text-lg font-semibold text-red-700 mb-2">Error loading blog post</h2>
-            <p className="text-red-600">{error instanceof Error ? error.message : 'Unknown error'}</p>
-          </div>
+      <div className="container mx-auto p-4">
+        <div className="bg-red-50 border border-red-200 p-4 rounded-md mb-8">
+          <h2 className="text-lg font-semibold text-red-700 mb-2">Error loading blog post</h2>
+          <p className="text-red-600">{error instanceof Error ? error.message : 'Unknown error'}</p>
         </div>
-      </Layout>
+      </div>
     );
   }
   
   if (!post) return null;
 
   return (
-    <Layout>
-      <div className="container mx-auto py-12">        
-        <ContentfulBlogPostContent 
-          post={post} 
-          previousPost={adjacentPosts?.previous}
-          nextPost={adjacentPosts?.next}
-        />
-      </div>
-    </Layout>
+    <div className="container mx-auto py-12">        
+      <ContentfulBlogPostContent 
+        post={post} 
+        previousPost={adjacentPosts?.previous}
+        nextPost={adjacentPosts?.next}
+      />
+    </div>
   );
 };
 
