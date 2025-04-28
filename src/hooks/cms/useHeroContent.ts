@@ -24,6 +24,9 @@ export function useHeroContent(entryId: string) {
   return useQuery({
     queryKey: ['contentful', 'hero', entryId],
     queryFn: async () => {
+      // Enhanced logging for this specific entry
+      console.log(`[useHeroContent] Starting to fetch hero content for entry ID: ${entryId}`);
+      
       // First check if Contentful is configured
       if (!isContentfulConfigured()) {
         console.error(`[useHeroContent] Contentful is not configured properly for entryId: ${entryId}`);
@@ -91,6 +94,9 @@ export function useHeroContent(entryId: string) {
       }
     },
     retry: 1,
-    retryDelay: 1000
+    retryDelay: 1000,
+    // For specific machines page hero ID, improve caching and refetch behavior
+    staleTime: entryId === '3bH4WrT0pLKDeG35mUekGq' ? 5 * 60 * 1000 : 0, // 5 minutes for machines hero, default for others
+    refetchOnWindowFocus: false // Disable refetch on window focus to reduce unnecessary API calls
   });
 }

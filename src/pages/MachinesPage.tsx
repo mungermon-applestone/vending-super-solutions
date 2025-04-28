@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -14,11 +15,14 @@ import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
 import { isContentfulConfigured } from '@/config/cms';
 
+// Define the Contentful entry ID for the machines page hero
+// This ID specifically points to the hero content for the machines page
 const MACHINES_HERO_ENTRY_ID = '3bH4WrT0pLKDeG35mUekGq';
 
 const MachinesPage: React.FC = () => {
   const renderTime = new Date().toISOString();
   console.log(`[MachinesPage] Rendering at ${renderTime}`);
+  console.log(`[MachinesPage] Using hero entry ID: ${MACHINES_HERO_ENTRY_ID}`);
   
   const { data: machines, isLoading, error, refetch } = useContentfulMachines();
   const { data: pageContent } = useMachinesPageContent();
@@ -38,7 +42,8 @@ const MachinesPage: React.FC = () => {
     machineCount: machines?.length || 0,
     hasPageContent: !!pageContent,
     hasTestimonials: !!testimonialSection,
-    isContentfulConfigured: isContentfulConfigured()
+    isContentfulConfigured: isContentfulConfigured(),
+    heroEntryId: MACHINES_HERO_ENTRY_ID
   });
 
   const vendingMachines = machines?.filter(machine => machine.type === 'vending') || [];
