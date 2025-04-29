@@ -1,49 +1,39 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import Layout from '@/components/layout/Layout';
-import PageHero from '@/components/common/PageHero';
+import HeroSection from '@/components/home/HeroSection';
 import FeaturesSection from '@/components/home/FeaturesSection';
 import ProductTypesSection from '@/components/home/ProductTypesSection';
 import BusinessGoalsSection from '@/components/home/BusinessGoalsSection';
-import MachineTypesSection from '@/components/home/MachineTypesSection';
-import TestimonialsSection from '@/components/home/TestimonialsSection';
-import CTASection from '@/components/common/CTASection';
-import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
-import { initCMS } from '@/services/cms/cmsInit';
-
-// Initialize the CMS configuration
-initCMS();
+import AvailableMachinesSection from '@/components/home/AvailableMachinesSection';
+import ContactForm from '@/components/contact/ContactForm';
+import { useHomePageContent } from '@/hooks/useHomePageContent';
 
 const Index = () => {
-  // Explicit key for the home page hero content
-  const { refetch } = useLandingPageByKey('home');
-
-  useEffect(() => {
-    // Force refetch to ensure the latest data from Supabase
-    refetch().catch(err => {
-      console.error('Error refetching landing page data:', err);
-    });
-  }, [refetch]);
+  const { data: homeContent } = useHomePageContent();
 
   return (
     <Layout>
-      <PageHero 
-        pageKey="home"
-        fallbackTitle="Vend Anything You Sell"
-        fallbackSubtitle="Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue."
-        fallbackImage="https://images.unsplash.com/photo-1605810230434-7631ac76ec81"
-        fallbackImageAlt="Vending Machine Software Interface"
-        fallbackPrimaryButtonText="Request a Demo"
-        fallbackPrimaryButtonUrl="/contact"
-        fallbackSecondaryButtonText="Explore Solutions"
-        fallbackSecondaryButtonUrl="/products"
-      />
+      <HeroSection />
       <FeaturesSection />
       <ProductTypesSection />
-      <MachineTypesSection />
       <BusinessGoalsSection />
-      <TestimonialsSection />
-      <CTASection />
+      <AvailableMachinesSection />
+      <section className="py-16 md:py-24 bg-vending-blue-light">
+        <div className="container-wide">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-6">
+                {homeContent?.ctaSectionTitle || "Ready to Transform Your Vending Operations?"}
+              </h2>
+              <p className="text-xl text-gray-700 mb-8">
+                {homeContent?.ctaSectionDescription || "Get started with our platform today and see the difference in your operations."}
+              </p>
+            </div>
+            <ContactForm formSectionTitle="Get in touch with us" />
+          </div>
+        </div>
+      </section>
     </Layout>
   );
 };

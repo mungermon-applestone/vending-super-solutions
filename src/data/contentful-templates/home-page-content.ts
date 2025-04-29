@@ -41,6 +41,20 @@ export const homePageContentTemplate: ContentTypeTemplate = {
         localized: false,
       },
       {
+        id: 'availableMachines',
+        name: 'Available Machines Title',
+        type: 'Symbol',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'availableMachinesDescription',
+        name: 'Available Machines Description',
+        type: 'Text',
+        required: false,
+        localized: false,
+      },
+      {
         id: 'ctaSectionTitle',
         name: 'CTA Section Title',
         type: 'Symbol',

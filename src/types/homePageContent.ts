@@ -4,6 +4,8 @@ export interface HomePageContent {
   productCategoriesDescription: string;
   businessGoalsTitle: string;
   businessGoalsDescription: string;
+  availableMachines?: string;
+  availableMachinesDescription?: string;
   ctaSectionTitle: string;
   ctaSectionDescription: string;
   ctaPrimaryButtonText?: string;

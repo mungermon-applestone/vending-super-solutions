@@ -3,14 +3,13 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
-import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
 import { Skeleton } from '@/components/ui/skeleton';
-import { LandingPage } from '@/types/landingPage';
+import { useHomePageContent } from '@/hooks/useHomePageContent';
 
 const HeroSection = () => {
-  const { data: landingPage, isLoading, error } = useLandingPageByKey('home');
+  const { data: homeContent, isLoading } = useHomePageContent();
   
-  console.log("Hero section rendering", { landingPage, isLoading, error });
+  console.log("Hero section rendering", { homeContent, isLoading });
   
   // If we're loading, show a skeleton
   if (isLoading) {
@@ -43,43 +42,28 @@ const HeroSection = () => {
     );
   }
   
-  if (error) {
-    console.error("Error loading landing page data:", error);
-  }
-  
-  // Type assertion to ensure landingPage is treated correctly
-  const typedLandingPage = landingPage as LandingPage | undefined;
-  const hero = typedLandingPage?.hero_content;
-  
-  // Add more debugging to see what we're actually getting
-  console.log("Hero content:", hero);
-  
   return (
-    <div className={hero?.background_class || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"}>
+    <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
       <div className="container-wide py-16 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-vending-blue-dark">
-              {hero?.title || "Vend Anything You Sell"}
+              Vend Anything You Sell
             </h1>
             <p className="text-xl text-gray-700 max-w-2xl">
-              {hero?.subtitle || "Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue."}
+              Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              {hero?.cta_primary_text && (
-                <Button asChild className="btn-primary" size="lg">
-                  <Link to={hero.cta_primary_url || "#"}>
-                    {hero.cta_primary_text} <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-              )}
-              {hero?.cta_secondary_text && (
-                <Button asChild variant="outline" size="lg">
-                  <Link to={hero.cta_secondary_url || "#"}>
-                    {hero.cta_secondary_text}
-                  </Link>
-                </Button>
-              )}
+              <Button asChild className="btn-primary" size="lg">
+                <Link to="/contact">
+                  Request a Demo <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link to="/products">
+                  Explore Solutions
+                </Link>
+              </Button>
             </div>
             <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex items-center gap-2">
@@ -103,8 +87,8 @@ const HeroSection = () => {
           <div className="relative flex justify-center">
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
               <img 
-                src={hero?.image_url || "https://images.unsplash.com/photo-1605810230434-7631ac76ec81"}
-                alt={hero?.image_alt || "Vending Machine Software Interface"}
+                src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81"
+                alt="Vending Machine Software Interface"
                 className="w-full h-auto object-cover"
                 onError={(e) => {
                   e.currentTarget.src = "https://images.unsplash.com/photo-1605810230434-7631ac76ec81";
