@@ -31,6 +31,15 @@ export const getContentfulClient = async (forceRefresh = false) => {
       environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master'
     });
 
+    // Test immediate functionality
+    try {
+      await contentfulClient.getSpace();
+      console.log('[contentfulClient] Test connection successful');
+    } catch (testError) {
+      console.error('[contentfulClient] Test connection failed:', testError);
+      // Don't throw here, let subsequent requests handle errors instead
+    }
+
     console.log('[contentfulClient] Client created successfully', {
       spaceId: CONTENTFUL_CONFIG.SPACE_ID,
       environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master'

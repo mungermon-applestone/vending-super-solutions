@@ -4,12 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useHomePageContent } from '@/hooks/useHomePageContent';
+import { useHeroContent } from '@/hooks/cms/useHeroContent';
+
+const HERO_ENTRY_ID = '2a1R6EfAcjJkb6WaRF2lGS';
 
 const HeroSection = () => {
-  const { data: homeContent, isLoading } = useHomePageContent();
+  const { data: heroContent, isLoading } = useHeroContent(HERO_ENTRY_ID);
   
-  console.log("Hero section rendering", { homeContent, isLoading });
+  console.log("Hero section rendering", { heroContent, isLoading, entryId: HERO_ENTRY_ID });
   
   // If we're loading, show a skeleton
   if (isLoading) {
@@ -42,26 +44,37 @@ const HeroSection = () => {
     );
   }
   
+  // Use content from Contentful or fallback to default values
+  const title = heroContent?.title || "Vend Anything You Sell";
+  const subtitle = heroContent?.subtitle || "Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.";
+  const primaryButtonText = heroContent?.primaryButtonText || "Request a Demo";
+  const primaryButtonUrl = heroContent?.primaryButtonUrl || "/contact";
+  const secondaryButtonText = heroContent?.secondaryButtonText || "Explore Solutions";
+  const secondaryButtonUrl = heroContent?.secondaryButtonUrl || "/products";
+  const imageUrl = heroContent?.image?.url || "https://images.unsplash.com/photo-1605810230434-7631ac76ec81";
+  const imageAlt = heroContent?.image?.alt || "Vending Machine Software Interface";
+  const backgroundClass = heroContent?.backgroundClass || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light";
+  
   return (
-    <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
+    <div className={backgroundClass}>
       <div className="container-wide py-16 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-vending-blue-dark">
-              Vend Anything You Sell
+              {title}
             </h1>
             <p className="text-xl text-gray-700 max-w-2xl">
-              Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.
+              {subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <Button asChild className="btn-primary" size="lg">
-                <Link to="/contact">
-                  Request a Demo <ArrowRight className="ml-2 h-5 w-5" />
+                <Link to={primaryButtonUrl}>
+                  {primaryButtonText} <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
-                <Link to="/products">
-                  Explore Solutions
+                <Link to={secondaryButtonUrl}>
+                  {secondaryButtonText}
                 </Link>
               </Button>
             </div>
@@ -87,8 +100,8 @@ const HeroSection = () => {
           <div className="relative flex justify-center">
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
               <img 
-                src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81"
-                alt="Vending Machine Software Interface"
+                src={imageUrl}
+                alt={imageAlt}
                 className="w-full h-auto object-cover"
                 onError={(e) => {
                   e.currentTarget.src = "https://images.unsplash.com/photo-1605810230434-7631ac76ec81";

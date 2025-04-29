@@ -33,6 +33,14 @@ export function useHeroContent(entryId: string) {
       if (!isContentfulConfigured()) {
         console.error(`[useHeroContent] Contentful is not configured properly for entryId: ${entryId}`);
         
+        // For the home page hero, show a specific toast message
+        if (entryId === '2a1R6EfAcjJkb6WaRF2lGS') {
+          toast.error('Failed to load home page hero from Contentful - check configuration', {
+            id: 'home-hero-error',
+            duration: 5000
+          });
+        }
+        
         // Throw a specific error for missing configuration that's easy to identify
         throw new Error('CONTENTFUL_CONFIG_MISSING');
       }
@@ -61,17 +69,26 @@ export function useHeroContent(entryId: string) {
             rawEntry: entry
           });
           
-          const imageUrl = entry.fields.image ? (entry.fields.image as any)?.fields?.file?.url : null;
+          // Handle home page hero (ID: 2a1R6EfAcjJkb6WaRF2lGS) with special logging
+          if (entryId === '2a1R6EfAcjJkb6WaRF2lGS') {
+            console.log('[useHeroContent] Processing HOME PAGE hero content', entry.fields);
+          }
+          
+          const image = entry.fields.image;
+          const imageUrl = image && (image as any).fields && (image as any).fields.file 
+            ? `https:${(image as any).fields.file.url}`
+            : null;
+            
           console.log(`[useHeroContent] Extracted image URL: ${imageUrl}`);
           
           const result = {
             title: entry.fields.title as string,
             subtitle: entry.fields.subtitle as string,
             pageKey: entry.fields.pageKey as string,
-            image: entry.fields.image ? {
+            image: {
               url: imageUrl,
-              alt: entry.fields.imageAlt as string
-            } : null,
+              alt: entry.fields.imageAlt as string || entry.fields.title as string
+            },
             primaryButtonText: entry.fields.primaryButtonText as string,
             primaryButtonUrl: entry.fields.primaryButtonUrl as string,
             secondaryButtonText: entry.fields.secondaryButtonText as string,
@@ -103,6 +120,12 @@ export function useHeroContent(entryId: string) {
           timestamp: new Date().toISOString()
         });
         
+        // Special handling for home page hero errors
+        if (entryId === '2a1R6EfAcjJkb6WaRF2lGS') {
+          console.error('[useHeroContent] HOME PAGE HERO FAILED TO LOAD:', error);
+          toast.error('Failed to load home page hero');
+        }
+        
         // Re-throw specific error types to allow consumers to handle them differently
         if (error instanceof Error) {
           if (error.message.includes('not found') || error.message.includes('404')) {
@@ -124,10 +147,9 @@ export function useHeroContent(entryId: string) {
         throw error;
       }
     },
-    retry: 3, // Increase retries for the machines page hero
+    retry: 3, 
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000), // Exponential backoff
-    // For specific machines page hero ID, improve caching and refetch behavior
-    staleTime: entryId === '3bH4WrT0pLKDeG35mUekGq' ? 5 * 60 * 1000 : 0, // 5 minutes for machines hero, default for others
-    refetchOnWindowFocus: entryId === '3bH4WrT0pLKDeG35mUekGq' // Enable refetch on window focus for machines hero
+    staleTime: entryId === '2a1R6EfAcjJkb6WaRF2lGS' ? 5 * 60 * 1000 : 0, // 5 minutes for home hero
+    refetchOnWindowFocus: entryId === '2a1R6EfAcjJkb6WaRF2lGS' // Enable refetch on focus for home hero
   });
 }
