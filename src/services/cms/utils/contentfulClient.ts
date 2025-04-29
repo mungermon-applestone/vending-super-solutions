@@ -131,3 +131,75 @@ export const refreshContentfulClient = async () => {
   resetContentfulClient();
   return await getContentfulClient(true);
 };
+
+/**
+ * Fetch Contentful entries based on content type and query parameters
+ * @param contentType The Contentful content type ID
+ * @param query Additional query parameters (optional)
+ * @returns Array of entries matching the query
+ */
+export const fetchContentfulEntries = async <T>(contentType: string, query: Record<string, any> = {}): Promise<T[]> => {
+  try {
+    console.log(`[fetchContentfulEntries] Fetching entries of type: ${contentType}`, query);
+    
+    const client = await getContentfulClient();
+    
+    const entries = await client.getEntries({
+      content_type: contentType,
+      ...query,
+    });
+    
+    console.log(`[fetchContentfulEntries] Found ${entries.items.length} entries for type: ${contentType}`);
+    
+    if (!entries.items.length) {
+      return [];
+    }
+    
+    return entries.items as T[];
+  } catch (error) {
+    console.error(`[fetchContentfulEntries] Error fetching entries of type ${contentType}:`, error);
+    
+    if (process.env.NODE_ENV !== 'development') {
+      toast.error(`Failed to fetch content: ${error instanceof Error ? error.message : 'Unknown error'}`, {
+        id: `contentful-fetch-error-${contentType}`
+      });
+    }
+    
+    throw error;
+  }
+};
+
+/**
+ * Fetch a single Contentful entry by ID
+ * @param entryId The Contentful entry ID
+ * @param query Additional query parameters (optional)
+ * @returns The requested entry or null if not found
+ */
+export const fetchContentfulEntry = async <T>(entryId: string, query: Record<string, any> = {}): Promise<T> => {
+  try {
+    console.log(`[fetchContentfulEntry] Fetching entry with ID: ${entryId}`);
+    
+    const client = await getContentfulClient();
+    
+    const entry = await client.getEntry(entryId, query);
+    
+    console.log(`[fetchContentfulEntry] Successfully fetched entry ID: ${entryId}`);
+    
+    return entry as T;
+  } catch (error) {
+    console.error(`[fetchContentfulEntry] Error fetching entry ID ${entryId}:`, error);
+    
+    if (process.env.NODE_ENV !== 'development') {
+      toast.error(`Failed to fetch content: ${error instanceof Error ? error.message : 'Unknown error'}`, {
+        id: `contentful-entry-error-${entryId}`
+      });
+    }
+    
+    if ((error as any)?.sys?.id === 'NotFound') {
+      console.warn(`[fetchContentfulEntry] Entry not found with ID: ${entryId}`);
+      throw new Error(`Entry not found with ID: ${entryId}`);
+    }
+    
+    throw error;
+  }
+};
