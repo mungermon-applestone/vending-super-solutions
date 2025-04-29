@@ -4,23 +4,40 @@ import { Loader2 } from 'lucide-react';
 import BusinessGoalsCompact from '@/components/businessGoals/BusinessGoalsCompact';
 import ContentfulConfigWarning from '@/components/machines/ContentfulConfigWarning';
 import { isContentfulConfigured } from '@/config/cms';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { validateContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { toast } from 'sonner';
 
 const FeaturedBusinessGoals = ({ entryId }: { entryId: string }) => {
   const { data: goals, isLoading, error, refetch } = useFeaturedBusinessGoals(entryId);
   const isConfigured = isContentfulConfigured();
 
+  // Auto-initialize on component mount if needed
+  useEffect(() => {
+    if (!goals && !isLoading && (error || !isConfigured)) {
+      console.log('[FeaturedBusinessGoals] Auto-initializing content on mount');
+      handleRetry();
+    }
+  }, []);
+
   const handleRetry = useCallback(async () => {
     console.log('[FeaturedBusinessGoals] Retrying content fetch');
 
-    // Validate client first, refresh if needed
-    const isValid = await validateContentfulClient();
-    if (!isValid) {
-      await refreshContentfulClient();
+    try {
+      // Validate client first, refresh if needed
+      const isValid = await validateContentfulClient();
+      if (!isValid) {
+        console.log('[FeaturedBusinessGoals] Client invalid, refreshing...');
+        await refreshContentfulClient();
+        toast.success('Content connection refreshed', { id: 'contentful-refresh' });
+      }
+      
+      // Force refetch data
+      await refetch();
+      console.log('[FeaturedBusinessGoals] Content refetched successfully');
+    } catch (refreshError) {
+      console.error('[FeaturedBusinessGoals] Error refreshing client:', refreshError);
     }
-    
-    refetch();
   }, [refetch]);
 
   // Show warning if Contentful is not configured or there's a connection error

@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import ContentfulConfigWarning from '@/components/machines/ContentfulConfigWarni
 import { isContentfulConfigured } from '@/config/cms';
 import { validateContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
+import { toast } from 'sonner';
 
 const BusinessGoalsLanding = () => {
   const { data: featuredContent, isLoading, error, refetch } = useFeaturedBusinessGoalsContent();
@@ -23,16 +24,33 @@ const BusinessGoalsLanding = () => {
   const navigate = useNavigate();
   const isConfigured = isContentfulConfigured();
 
+  // Enhanced retry logic with automatic attempt on page load
+  useEffect(() => {
+    if (!featuredContent && !isLoading && (error || !isConfigured)) {
+      console.log('[BusinessGoalsLanding] Auto-initializing content on page load');
+      handleRetry();
+    }
+  }, []);
+
   const handleRetry = useCallback(async () => {
     console.log('[BusinessGoalsLanding] Retrying content fetch');
 
-    // Validate client first, refresh if needed
-    const isValid = await validateContentfulClient();
-    if (!isValid) {
-      await refreshContentfulClient();
+    try {
+      // Validate client first, refresh if needed
+      const isValid = await validateContentfulClient();
+      if (!isValid) {
+        console.log('[BusinessGoalsLanding] Client invalid, refreshing...');
+        await refreshContentfulClient();
+        toast.success('Refreshed content connection');
+      }
+      
+      // Force refetch data
+      await refetch();
+      console.log('[BusinessGoalsLanding] Content refetched successfully');
+    } catch (refreshError) {
+      console.error('[BusinessGoalsLanding] Error refreshing client:', refreshError);
+      toast.error('Failed to refresh content connection');
     }
-    
-    refetch();
   }, [refetch]);
 
   return (
