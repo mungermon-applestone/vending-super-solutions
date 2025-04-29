@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { RefreshCw, AlertTriangle, CheckCircle, Bug, ShieldAlert, Settings, Info } from 'lucide-react';
 import { toast } from 'sonner';
-import { CONTENTFUL_CONFIG, isContentfulConfigured, logContentfulConfig } from '@/config/cms';
+import { CONTENTFUL_CONFIG, isContentfulConfigured } from '@/config/cms';
 import { refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { useNavigate } from 'react-router-dom';
 
@@ -144,7 +143,7 @@ const ContentfulConfigVerifier = () => {
               </div>
               
               {credentialSource === 'fallback-hardcoded' && (
-                <Alert variant="info" className="mt-4 border-blue-200 bg-blue-50">
+                <Alert variant="default" className="mt-4 border-blue-200 bg-blue-50">
                   <Info className="h-4 w-4 text-blue-600" />
                   <AlertTitle className="text-blue-700">Using Fallback Credentials</AlertTitle>
                   <AlertDescription className="text-blue-600">
