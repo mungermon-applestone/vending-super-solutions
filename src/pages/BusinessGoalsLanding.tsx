@@ -41,7 +41,7 @@ const BusinessGoalsLanding = () => {
       {/* Featured Business Goals Grid */}
       <div className="container mx-auto py-12">
         {featuredContent && (
-          <div className="text-center mb-12">
+          <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               {featuredContent.title}
             </h2>

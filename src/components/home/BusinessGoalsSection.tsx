@@ -1,7 +1,6 @@
 
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { TrendingUp, ShoppingBag, Activity, BarChart, Truck, Users } from 'lucide-react';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
 import BusinessGoalsCompact from '../businessGoals/BusinessGoalsCompact';
 

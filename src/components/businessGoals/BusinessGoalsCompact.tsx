@@ -33,14 +33,14 @@ const BusinessGoalsCompact: React.FC<BusinessGoalsCompactProps> = ({
   };
 
   return (
-    <div className={`grid ${getColumnClass()} gap-8`}>
+    <div className={`grid ${getColumnClass()} gap-6`}>
       {goals.map((goal) => (
         <div 
           key={goal.id}
-          className="border border-gray-200 rounded-lg p-5 hover:border-vending-blue hover:shadow-sm transition-all duration-200"
+          className="border border-gray-200 rounded-lg p-4 hover:border-vending-blue hover:shadow-sm transition-all duration-200"
         >
-          <Link to={`/business-goals/${goal.slug}`} className="flex items-center">
-            <div className="mr-4">
+          <Link to={`/business-goals/${goal.slug}`} className="flex items-center gap-3">
+            <div className="flex-shrink-0">
               <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full h-12 w-12 flex items-center justify-center text-vending-blue">
                 {goal.icon ? (
                   <MachineTypeIcon type={goal.icon} />
@@ -51,11 +51,11 @@ const BusinessGoalsCompact: React.FC<BusinessGoalsCompactProps> = ({
             </div>
             
             <div className="flex-grow">
-              <h3 className="text-xl font-medium text-vending-blue-dark">{goal.title}</h3>
-              <p className="text-sm text-gray-600 line-clamp-1 mt-0.5">{goal.description}</p>
+              <h3 className="text-lg font-medium text-vending-blue-dark mb-1">{goal.title}</h3>
+              <p className="text-sm text-gray-600 line-clamp-2">{goal.description}</p>
             </div>
             
-            <div className="ml-2 flex-shrink-0 text-vending-blue">
+            <div className="flex-shrink-0 text-vending-blue">
               <ArrowRight className="h-5 w-5" />
             </div>
           </Link>
