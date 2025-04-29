@@ -92,7 +92,7 @@ const BusinessGoalsLanding = () => {
           ) : featuredContent?.businessGoals && featuredContent.businessGoals.length > 0 ? (
             <BusinessGoalsCompact 
               goals={featuredContent.businessGoals.filter(goal => goal.visible !== false)}
-              columnCount={2}
+              columnCount={3}
             />
           ) : (
             <div className="text-center py-12">
