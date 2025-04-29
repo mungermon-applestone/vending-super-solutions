@@ -18,153 +18,116 @@ export const getContentfulClient = async (forceRefresh = false) => {
     logContentfulConfig();
     
     if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
-      console.error('[contentfulClient] Missing Contentful configuration', {
-        spaceId: !!CONTENTFUL_CONFIG.SPACE_ID,
-        deliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN
-      });
-      throw new Error('Contentful configuration missing. Please navigate to Admin > Environment Variables to set up your Contentful credentials.');
+      console.error('[contentfulClient] Missing Contentful configuration');
+      throw new Error('Contentful is not configured. Please set your Space ID and Delivery Token in the environment variables.');
     }
 
     contentfulClient = createClient({
       space: CONTENTFUL_CONFIG.SPACE_ID,
       accessToken: CONTENTFUL_CONFIG.DELIVERY_TOKEN,
-      environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master'
+      environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master',
     });
 
-    // Test immediate functionality
-    try {
-      await contentfulClient.getSpace();
-      console.log('[contentfulClient] Test connection successful');
-    } catch (testError) {
-      console.error('[contentfulClient] Test connection failed:', testError);
-      // Don't throw here, let subsequent requests handle errors instead
-    }
-
-    console.log('[contentfulClient] Client created successfully', {
-      spaceId: CONTENTFUL_CONFIG.SPACE_ID,
-      environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master'
-    });
+    console.log('[contentfulClient] Client created successfully');
+    
     return contentfulClient;
   } catch (error) {
     console.error('[contentfulClient] Error creating client:', error);
-    throw error;
-  }
-};
-
-export const refreshContentfulClient = async () => {
-  console.log('[contentfulClient] Refreshing Contentful client');
-  try {
-    contentfulClient = null;
-    return await getContentfulClient(true);
-  } catch (error) {
-    console.error('[contentfulClient] Error refreshing client:', error);
-    throw error;
-  }
-};
-
-export const resetContentfulClient = async () => {
-  console.log('[contentfulClient] Resetting Contentful client');
-  contentfulClient = null;
-  return true;
-};
-
-export const testContentfulConnection = async () => {
-  console.log('[contentfulClient] Testing Contentful connection');
-  try {
-    // Check if configuration is available first
-    if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
-      console.warn('[contentfulClient] Missing Contentful configuration', {
-        hasSpaceId: !!CONTENTFUL_CONFIG.SPACE_ID,
-        hasDeliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN
+    
+    // Don't show toast when running in development to avoid spamming
+    if (process.env.NODE_ENV !== 'development') {
+      toast.error('Failed to initialize Contentful client', {
+        description: error instanceof Error ? error.message : 'Check your Contentful configuration',
+        id: 'contentful-client-error'
       });
-      return {
-        success: false,
-        message: 'Contentful configuration missing. Please navigate to Admin > Environment Variables to set up your Contentful credentials.',
-        details: {
-          missingConfig: true,
-          spaceName: null,
-          spaceId: null,
-          configuredIn: typeof window !== 'undefined' ? localStorage.getItem('vending-cms-env-variables') ? 'localStorage' : 'none' : 'server'
-        }
+    }
+    
+    // Throw a clearer error
+    if (error instanceof Error) {
+      throw new Error(`Failed to initialize Contentful client: ${error.message}`);
+    }
+    
+    throw error;
+  }
+};
+
+// Test the Contentful connection with the current client
+export const testContentfulConnection = async () => {
+  try {
+    console.log('[testContentfulConnection] Testing Contentful connection');
+    
+    if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
+      console.error('[testContentfulConnection] Missing Contentful configuration');
+      return { 
+        success: false, 
+        message: 'Contentful is not configured. Please set your Space ID and Delivery Token.'
       };
     }
     
-    try {
-      // Force a new client for the test
-      contentfulClient = null;
-      const client = await getContentfulClient(true);
+    const client = await getContentfulClient(true);
+    
+    // Make a simple request to verify the connection works
+    const response = await client.getEntries({
+      limit: 1
+    });
+    
+    console.log('[testContentfulConnection] Connection test successful');
+    return { 
+      success: true, 
+      message: `Successfully connected to Contentful. Found ${response.total} entries.`,
+      details: { totalEntries: response.total }
+    };
+  } catch (error) {
+    console.error('[testContentfulConnection] Connection test failed:', error);
+    
+    let message = 'Failed to connect to Contentful.';
+    let status = null;
+    let responseInfo = null;
+    
+    if (error instanceof Error) {
+      message = `Connection failed: ${error.message}`;
       
-      // Try fetching space information as a test
-      const space = await client.getSpace();
-      
-      toast.success(`Connected to Contentful space: ${space.name}`);
-      
-      return {
-        success: true,
-        message: `Successfully connected to Contentful space: ${space.name}`,
-        details: {
-          spaceName: space.name,
-          spaceId: space.sys.id
-        }
-      };
-    } catch (error: any) {
-      console.error('[contentfulClient] Connection test failed:', error);
-      
-      // Provide more specific error messages based on error codes
-      let message = error instanceof Error ? error.message : 'Unknown error';
-      
-      if (error.sys?.id === 'NotFound') {
-        message = `Space not found. Check your Space ID (${CONTENTFUL_CONFIG.SPACE_ID}).`;
-      } else if (error.sys?.id === 'AccessTokenInvalid') {
-        message = 'Invalid access token. Check your Delivery Token.';
-      } else if (error.name === 'TypeError' && message.includes('getSpace')) {
-        message = 'Unable to connect to Contentful API. Check if your tokens are correct.';
+      // Get more details from Contentful API errors
+      if ('sys' in (error as any)) {
+        status = (error as any).sys.id;
+        message = `Contentful error: ${status}`;
       }
       
-      toast.error(`Contentful connection failed: ${message}`);
-      
-      return {
-        success: false,
-        message,
-        details: error
-      };
+      // Check for response data in axios errors
+      if ('response' in (error as any)) {
+        status = (error as any).response?.status;
+        responseInfo = {
+          status,
+          statusText: (error as any).response?.statusText,
+          data: (error as any).response?.data
+        };
+        
+        if (status === 401) {
+          message = 'Authentication failed. Please check your Contentful Delivery Token.';
+        } else if (status === 404) {
+          message = 'Space not found. Please check your Contentful Space ID.';
+        }
+      }
     }
-  } catch (error) {
-    console.error('[contentfulClient] Error in connection test:', error);
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : 'Unknown error',
-      details: error
+    
+    return { 
+      success: false, 
+      message,
+      error: JSON.stringify(error, null, 2),
+      status,
+      responseInfo
     };
   }
 };
 
-// Utility functions for Contentful entries
-export async function fetchContentfulEntries<T>(contentType: string, query: Record<string, any> = {}) {
-  console.log(`[contentfulClient] Fetching entries of type: ${contentType}`);
-  try {
-    const client = await getContentfulClient();
-    const entries = await client.getEntries({
-      content_type: contentType,
-      include: 3, // Include nested entries up to 3 levels deep
-      ...query
-    });
-    
-    return entries.items as unknown as T[];
-  } catch (error) {
-    console.error(`[contentfulClient] Error fetching ${contentType} entries:`, error);
-    throw error;
-  }
-}
+// Reset the client to force a refresh on next use
+export const resetContentfulClient = () => {
+  console.log('[contentfulClient] Resetting client');
+  contentfulClient = null;
+};
 
-export async function fetchContentfulEntry<T>(id: string) {
-  console.log(`[contentfulClient] Fetching entry with ID: ${id}`);
-  try {
-    const client = await getContentfulClient();
-    const entry = await client.getEntry(id, { include: 3 });
-    return entry as unknown as T;
-  } catch (error) {
-    console.error(`[contentfulClient] Error fetching entry ${id}:`, error);
-    throw error;
-  }
-}
+// Refresh the client by resetting it and then getting a new instance
+export const refreshContentfulClient = async () => {
+  resetContentfulClient();
+  return await getContentfulClient(true);
+};
