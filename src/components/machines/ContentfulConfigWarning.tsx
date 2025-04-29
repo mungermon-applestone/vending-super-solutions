@@ -29,6 +29,9 @@ const ContentfulConfigWarning: React.FC<ContentfulConfigWarningProps> = ({
       
       if (result.success) {
         toast.success("Contentful connection refreshed successfully!");
+        // Set global flag to indicate successful connection
+        window._contentfulInitialized = true;
+        
         if (onRetry) {
           onRetry();
         } else {

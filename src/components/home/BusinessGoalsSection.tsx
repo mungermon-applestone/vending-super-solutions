@@ -1,13 +1,15 @@
 
+import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
 import BusinessGoalsCompact from '../businessGoals/BusinessGoalsCompact';
 import ContentfulConfigWarning from '../machines/ContentfulConfigWarning';
 import { isContentfulConfigured } from '@/config/cms';
+import { validateContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 
 const BusinessGoalsSection = () => {
-  const { data: homeContent, error } = useHomePageContent();
+  const { data: homeContent, error, refetch } = useHomePageContent();
   const isConfigured = isContentfulConfigured();
   
   console.log('[BusinessGoalsSection] Content:', homeContent);
@@ -63,13 +65,31 @@ const BusinessGoalsSection = () => {
     }
   ];
   
+  // Handler for retrying connection and refetching data
+  const handleRetry = useCallback(async () => {
+    console.log('[BusinessGoalsSection] Retrying content fetch');
+    
+    // Validate client first, refresh if needed
+    const isValid = await validateContentfulClient();
+    if (!isValid) {
+      await refreshContentfulClient();
+    }
+    
+    refetch();
+  }, [refetch]);
+  
   // Show the warning if there's an error but continue showing the fallback data
   const showWarning = error || !isConfigured;
   
   return (
     <section className="py-16 md:py-24">
       <div className="container-wide">
-        {showWarning && <ContentfulConfigWarning showDetails={false} />}
+        {showWarning && (
+          <ContentfulConfigWarning 
+            showDetails={false} 
+            onRetry={handleRetry}
+          />
+        )}
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
           <div>

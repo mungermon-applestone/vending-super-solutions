@@ -1,16 +1,27 @@
-
 import { createClient } from 'contentful';
 import { CONTENTFUL_CONFIG, logContentfulConfig } from '@/config/cms';
 import { toast } from 'sonner';
 
 let contentfulClient: any = null;
+let lastClientCreationTime = 0;
+let connectionAttempts = 0;
+const MAX_CONNECTION_ATTEMPTS = 3;
 
+// Client creation with retry logic
 export const getContentfulClient = async (forceRefresh = false) => {
   console.log('[contentfulClient] Getting Contentful client');
   
+  // If we have a client and no refresh is requested, return it
   if (!forceRefresh && contentfulClient) {
-    console.log('[contentfulClient] Returning existing client');
-    return contentfulClient;
+    // If the client was created more than 30 minutes ago, force a refresh anyway
+    const now = Date.now();
+    if (now - lastClientCreationTime > 30 * 60 * 1000) { // 30 minutes
+      console.log('[contentfulClient] Client is stale, forcing refresh');
+      forceRefresh = true;
+    } else {
+      console.log('[contentfulClient] Returning existing client');
+      return contentfulClient;
+    }
   }
 
   try {
@@ -26,16 +37,24 @@ export const getContentfulClient = async (forceRefresh = false) => {
       space: CONTENTFUL_CONFIG.SPACE_ID,
       accessToken: CONTENTFUL_CONFIG.DELIVERY_TOKEN,
       environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master',
+      retryOnError: true,
     });
 
+    // Reset connection attempts on successful creation
+    connectionAttempts = 0;
+    lastClientCreationTime = Date.now();
+    
     console.log('[contentfulClient] Client created successfully');
     
     return contentfulClient;
   } catch (error) {
     console.error('[contentfulClient] Error creating client:', error);
     
-    // Don't show toast when running in development to avoid spamming
-    if (process.env.NODE_ENV !== 'development') {
+    // Increment attempts counter
+    connectionAttempts++;
+    
+    // Only show toast if we've tried multiple times and not in development mode
+    if (connectionAttempts >= MAX_CONNECTION_ATTEMPTS && process.env.NODE_ENV !== 'development') {
       toast.error('Failed to initialize Contentful client', {
         description: error instanceof Error ? error.message : 'Check your Contentful configuration',
         id: 'contentful-client-error'
@@ -52,9 +71,11 @@ export const getContentfulClient = async (forceRefresh = false) => {
 };
 
 // Test the Contentful connection with the current client
-export const testContentfulConnection = async () => {
+export const testContentfulConnection = async (silent = false) => {
   try {
-    console.log('[testContentfulConnection] Testing Contentful connection');
+    if (!silent) {
+      console.log('[testContentfulConnection] Testing Contentful connection');
+    }
     
     if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
       console.error('[testContentfulConnection] Missing Contentful configuration');
@@ -64,14 +85,18 @@ export const testContentfulConnection = async () => {
       };
     }
     
-    const client = await getContentfulClient(true);
+    // Always get a fresh client for the test
+    const client = await getContentfulClient(false);
     
     // Make a simple request to verify the connection works
     const response = await client.getEntries({
       limit: 1
     });
     
-    console.log('[testContentfulConnection] Connection test successful');
+    if (!silent) {
+      console.log('[testContentfulConnection] Connection test successful');
+    }
+    
     return { 
       success: true, 
       message: `Successfully connected to Contentful. Found ${response.total} entries.`,
@@ -124,12 +149,29 @@ export const testContentfulConnection = async () => {
 export const resetContentfulClient = () => {
   console.log('[contentfulClient] Resetting client');
   contentfulClient = null;
+  lastClientCreationTime = 0; // Reset creation time
 };
 
 // Refresh the client by resetting it and then getting a new instance
 export const refreshContentfulClient = async () => {
   resetContentfulClient();
   return await getContentfulClient(true);
+};
+
+// Validate if the current client is still working
+export const validateContentfulClient = async () => {
+  try {
+    if (!contentfulClient) {
+      return false;
+    }
+    
+    // Make a simple query to check if the client is still valid
+    const result = await testContentfulConnection(true); // silent mode
+    return result.success;
+  } catch (error) {
+    console.error('[validateContentfulClient] Client validation failed:', error);
+    return false;
+  }
 };
 
 /**

@@ -8,6 +8,7 @@ import { isContentfulConfigured, isPreviewEnvironment } from '@/config/cms';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import PreviewEnvironmentDetector from './contentful/PreviewEnvironmentDetector';
+import ContentfulPersistenceProvider from './providers/ContentfulPersistenceProvider';
 
 const RootLayout = () => {
   const [contentfulInitialized, setContentfulInitialized] = useState(false);
@@ -156,35 +157,37 @@ const RootLayout = () => {
   }
   
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      
-      {/* Show the preview environment detector if needed */}
-      {isPreview && (
-        <div className="container mx-auto px-4 pt-4">
-          <PreviewEnvironmentDetector />
-        </div>
-      )}
-      
-      {/* Main content */}
-      <main className="flex-1 bg-gray-50">
-        <Outlet />
-      </main>
+    <ContentfulPersistenceProvider>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        
+        {/* Show the preview environment detector if needed */}
+        {isPreview && (
+          <div className="container mx-auto px-4 pt-4">
+            <PreviewEnvironmentDetector />
+          </div>
+        )}
+        
+        {/* Main content */}
+        <main className="flex-1 bg-gray-50">
+          <Outlet />
+        </main>
 
-      {/* Footer */}
-      <Footer />
-      
-      {/* Debug panel in development mode */}
-      {process.env.NODE_ENV === 'development' && initializationError && (
-        <div className="fixed bottom-4 right-4 bg-red-50 border border-red-200 p-4 rounded shadow-lg max-w-md z-50">
-          <h4 className="text-red-800 font-semibold">CMS Initialization Error</h4>
-          <p className="text-red-700 text-sm">{initializationError.message}</p>
-          <pre className="mt-2 text-xs bg-red-100 p-2 rounded overflow-auto max-h-32">
-            {initializationError.stack}
-          </pre>
-        </div>
-      )}
-    </div>
+        {/* Footer */}
+        <Footer />
+        
+        {/* Debug panel in development mode */}
+        {process.env.NODE_ENV === 'development' && initializationError && (
+          <div className="fixed bottom-4 right-4 bg-red-50 border border-red-200 p-4 rounded shadow-lg max-w-md z-50">
+            <h4 className="text-red-800 font-semibold">CMS Initialization Error</h4>
+            <p className="text-red-700 text-sm">{initializationError.message}</p>
+            <pre className="mt-2 text-xs bg-red-100 p-2 rounded overflow-auto max-h-32">
+              {initializationError.stack}
+            </pre>
+          </div>
+        )}
+      </div>
+    </ContentfulPersistenceProvider>
   );
 };
 
