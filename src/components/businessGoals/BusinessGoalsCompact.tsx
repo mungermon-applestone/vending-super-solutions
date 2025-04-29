@@ -37,28 +37,29 @@ const BusinessGoalsCompact: React.FC<BusinessGoalsCompactProps> = ({
       {goals.map((goal) => (
         <div 
           key={goal.id}
-          className="border border-gray-200 rounded-lg p-4 hover:border-vending-blue hover:shadow-sm transition-all duration-200"
+          className="border border-gray-200 rounded-lg p-5 hover:border-vending-blue hover:shadow-sm transition-all duration-200 flex items-center gap-4"
         >
-          <Link to={`/business-goals/${goal.slug}`} className="flex items-center gap-3">
-            <div className="flex-shrink-0">
-              <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full h-12 w-12 flex items-center justify-center text-vending-blue">
-                {goal.icon ? (
-                  <MachineTypeIcon type={goal.icon} />
-                ) : (
-                  <ArrowRight className="h-6 w-6" />
-                )}
-              </div>
+          <div className="flex-shrink-0">
+            <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full h-12 w-12 flex items-center justify-center text-vending-blue">
+              {goal.icon ? (
+                <MachineTypeIcon type={goal.icon} />
+              ) : (
+                <ArrowRight className="h-6 w-6" />
+              )}
             </div>
-            
-            <div className="flex-grow">
-              <h3 className="text-lg font-medium text-vending-blue-dark mb-1">{goal.title}</h3>
-              <p className="text-sm text-gray-600 line-clamp-2">{goal.description}</p>
-            </div>
-            
-            <div className="flex-shrink-0 text-vending-blue">
-              <ArrowRight className="h-5 w-5" />
-            </div>
-          </Link>
+          </div>
+          
+          <div className="flex-grow">
+            <h3 className="text-lg font-medium text-vending-blue-dark">{goal.title}</h3>
+            <p className="text-sm text-gray-600 line-clamp-2 mb-1">{goal.description}</p>
+            <Link 
+              to={`/business-goals/${goal.slug}`} 
+              className="text-sm font-medium text-vending-blue hover:text-vending-blue-dark flex items-center"
+            >
+              Learn more
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
         </div>
       ))}
     </div>

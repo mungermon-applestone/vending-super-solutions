@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -187,6 +186,8 @@ const BusinessGoalsPage: React.FC = () => {
         goals={displayGoals || []}
         isLoading={false}
         error={null}
+        compactView={true}
+        columnCount={3}
       />
 
       {displayContent && displayContent.keyBenefitsTitle && displayContent.keyBenefits && displayContent.keyBenefits.length > 0 && (
