@@ -187,7 +187,8 @@ const BusinessGoalsPage: React.FC = () => {
         isLoading={false}
         error={null}
         compactView={true}
-        columnCount={3}
+        columnCount={4}
+        ultraCompact={true}
       />
 
       {displayContent && displayContent.keyBenefitsTitle && displayContent.keyBenefits && displayContent.keyBenefits.length > 0 && (

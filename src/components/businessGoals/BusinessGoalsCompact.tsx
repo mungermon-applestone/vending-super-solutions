@@ -7,12 +7,14 @@ import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
 
 interface BusinessGoalsCompactProps {
   goals: CMSBusinessGoal[];
-  columnCount?: 1 | 2 | 3;
+  columnCount?: 1 | 2 | 3 | 4;
+  ultraCompact?: boolean;
 }
 
 const BusinessGoalsCompact: React.FC<BusinessGoalsCompactProps> = ({ 
   goals,
-  columnCount = 2
+  columnCount = 2,
+  ultraCompact = false
 }) => {
   if (!goals?.length) {
     return (
@@ -27,11 +29,30 @@ const BusinessGoalsCompact: React.FC<BusinessGoalsCompactProps> = ({
     switch(columnCount) {
       case 1: return 'grid-cols-1';
       case 3: return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+      case 4: return 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
       case 2:
       default: return 'grid-cols-1 md:grid-cols-2';
     }
   };
 
+  // Ultra compact mode just shows the title in a simple box
+  if (ultraCompact) {
+    return (
+      <div className={`grid ${getColumnClass()} gap-4`}>
+        {goals.map((goal) => (
+          <Link 
+            key={goal.id} 
+            to={`/business-goals/${goal.slug}`}
+            className="border border-gray-200 rounded-lg p-4 hover:border-vending-blue hover:bg-vending-blue-light/10 transition-all duration-200 text-center"
+          >
+            <h3 className="text-vending-blue-dark font-medium text-base">{goal.title}</h3>
+          </Link>
+        ))}
+      </div>
+    );
+  }
+
+  // Regular compact mode (as before)
   return (
     <div className={`grid ${getColumnClass()} gap-6`}>
       {goals.map((goal) => (

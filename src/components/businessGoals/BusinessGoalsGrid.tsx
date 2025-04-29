@@ -15,7 +15,8 @@ interface BusinessGoalsGridProps {
   isLoading?: boolean;
   error?: Error | null;
   compactView?: boolean;
-  columnCount?: 1 | 2 | 3;
+  columnCount?: 1 | 2 | 3 | 4;
+  ultraCompact?: boolean;
 }
 
 const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
@@ -25,7 +26,8 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
   isLoading = false,
   error = null,
   compactView = false,
-  columnCount = 3
+  columnCount = 3,
+  ultraCompact = false
 }) => {
   const navigate = useNavigate();
 
@@ -76,7 +78,7 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
         )}
 
         {compactView ? (
-          <BusinessGoalsCompact goals={goals} columnCount={columnCount} />
+          <BusinessGoalsCompact goals={goals} columnCount={columnCount} ultraCompact={ultraCompact} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {goals.map((goal) => (
