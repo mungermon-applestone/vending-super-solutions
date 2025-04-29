@@ -154,12 +154,5 @@ const RootLayout = () => {
   );
 };
 
-// Add the missing TypeScript definition for the global _contentfulInitialized flag
-declare global {
-  interface Window {
-    _contentfulInitialized?: boolean | string;
-    env?: Record<string, string>;
-  }
-}
-
 export default RootLayout;
+
