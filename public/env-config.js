@@ -9,12 +9,32 @@
   // Define a function to fetch runtime config
   async function fetchRuntimeConfig() {
     try {
+      console.log('[env-config] Attempting to fetch runtime configuration from /api/runtime-config');
       // Attempt to fetch runtime configuration from the server
-      // This is useful for deployment platforms that inject environment variables
       const response = await fetch('/api/runtime-config');
-      if (!response.ok) throw new Error('Failed to fetch runtime config');
       
-      const config = await response.json();
+      if (!response.ok) {
+        console.error('[env-config] Failed to fetch runtime config:', response.status, response.statusText);
+        throw new Error(`Failed to fetch runtime config: ${response.status} ${response.statusText}`);
+      }
+      
+      const configText = await response.text();
+      console.log('[env-config] Received runtime config response:', configText.substring(0, 50) + '...');
+      
+      let config;
+      try {
+        config = JSON.parse(configText);
+      } catch (parseError) {
+        console.error('[env-config] Failed to parse runtime config JSON:', parseError);
+        console.error('[env-config] Raw content:', configText);
+        throw new Error('Failed to parse runtime config JSON');
+      }
+      
+      console.log('[env-config] Parsed runtime config:', {
+        hasSpaceId: !!config.VITE_CONTENTFUL_SPACE_ID,
+        hasDeliveryToken: !!config.VITE_CONTENTFUL_DELIVERY_TOKEN,
+        hasEnvironmentId: !!config.VITE_CONTENTFUL_ENVIRONMENT_ID
+      });
       
       // Check if the values are placeholders (containing {{)
       const isSpaceIdPlaceholder = config.VITE_CONTENTFUL_SPACE_ID && config.VITE_CONTENTFUL_SPACE_ID.includes('{{');
@@ -37,7 +57,8 @@
       console.log('[env-config] Loaded runtime config:', {
         hasSpaceId: !!window.env.VITE_CONTENTFUL_SPACE_ID,
         hasDeliveryToken: !!window.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
-        hasEnvironmentId: !!window.env.VITE_CONTENTFUL_ENVIRONMENT_ID
+        hasEnvironmentId: !!window.env.VITE_CONTENTFUL_ENVIRONMENT_ID,
+        spaceIdValue: window.env.VITE_CONTENTFUL_SPACE_ID
       });
       
       // Dispatch an event to notify the app that config is ready
@@ -49,7 +70,7 @@
       console.warn('[env-config] Runtime config contains placeholder values, skipping');
       return false;
     } catch (error) {
-      console.warn('[env-config] Could not load runtime config, will use default sources:', error);
+      console.error('[env-config] Could not load runtime config:', error);
       return false;
     }
   }
@@ -84,7 +105,11 @@
         window.env.deliveryToken = parsedVars.deliveryToken;
         window.env.environmentId = parsedVars.environmentId || 'master';
         
-        console.log('[env-config] Loaded variables from localStorage');
+        console.log('[env-config] Loaded variables from localStorage:', {
+          spaceId: window.env.VITE_CONTENTFUL_SPACE_ID,
+          hasToken: !!window.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
+          environmentId: window.env.VITE_CONTENTFUL_ENVIRONMENT_ID
+        });
         return true;
       }
     } catch (error) {
@@ -100,10 +125,21 @@
       console.log('[env-config] Preview environment detected, attempting to fetch runtime config');
       const configLoaded = await fetchRuntimeConfig();
       
-      // If runtime config failed and we're not in strict mode, fall back to localStorage
-      if (!configLoaded) {
-        console.warn('[env-config] No runtime config found for preview environment, falling back to localStorage');
-        loadFromLocalStorage();
+      // If runtime config successful, set a flag
+      if (configLoaded) {
+        window._contentfulInitialized = true;
+        console.log('[env-config] Runtime config loaded successfully for preview environment');
+        return;
+      }
+      
+      // If runtime config failed, fall back to localStorage
+      console.warn('[env-config] No runtime config found for preview environment, falling back to localStorage');
+      const localStorageLoaded = loadFromLocalStorage();
+      
+      if (localStorageLoaded) {
+        window._contentfulInitialized = 'localStorage';
+      } else {
+        window._contentfulInitialized = false;
       }
     } else {
       // For development, prefer localStorage
@@ -112,7 +148,14 @@
       // If no localStorage, try fetch runtime config as fallback
       if (!localStorageLoaded) {
         console.log('[env-config] No localStorage variables, trying runtime config');
-        await fetchRuntimeConfig();
+        const configLoaded = await fetchRuntimeConfig();
+        if (configLoaded) {
+          window._contentfulInitialized = 'runtime-config';
+        } else {
+          window._contentfulInitialized = false;
+        }
+      } else {
+        window._contentfulInitialized = 'localStorage';
       }
     }
     
@@ -120,7 +163,8 @@
     console.log('[env-config] Environment configuration initialized:', {
       hasSpaceId: !!window.env.VITE_CONTENTFUL_SPACE_ID,
       hasDeliveryToken: !!window.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
-      environmentId: window.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
+      environmentId: window.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master',
+      source: window._contentfulInitialized
     });
   }
   
