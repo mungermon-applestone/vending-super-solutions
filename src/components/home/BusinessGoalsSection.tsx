@@ -1,10 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { 
-  TrendingUp, ShoppingBag, Activity,
-  BarChart, Truck, Users 
-} from 'lucide-react';
+import { TrendingUp, ShoppingBag, Activity, BarChart, Truck, Users } from 'lucide-react';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
 import BusinessGoalsCompact from '../businessGoals/BusinessGoalsCompact';
 
@@ -15,7 +12,7 @@ const BusinessGoalsSection = () => {
   
   const businessGoals = [
     {
-      icon: <TrendingUp className="h-10 w-10 text-vending-blue" />,
+      icon: "vending",
       title: "Expand Footprint",
       description: "Grow your business with scalable vending solutions that adapt to various locations and needs.",
       link: "/business-goals/expand-footprint",
@@ -23,7 +20,7 @@ const BusinessGoalsSection = () => {
       slug: "expand-footprint"
     },
     {
-      icon: <ShoppingBag className="h-10 w-10 text-vending-blue" />,
+      icon: "vending",
       title: "Buy Online, Pickup In Store (BOPIS)",
       description: "Enable customers to order ahead and collect purchases from your vending machines.",
       link: "/business-goals/bopis",
@@ -31,7 +28,7 @@ const BusinessGoalsSection = () => {
       slug: "bopis"
     },
     {
-      icon: <Activity className="h-10 w-10 text-vending-blue" />,
+      icon: "vending",
       title: "Marketing & Promotions",
       description: "Drive sales with targeted promotions, digital advertising, and customer loyalty programs.",
       link: "/business-goals/marketing",
@@ -39,7 +36,7 @@ const BusinessGoalsSection = () => {
       slug: "marketing"
     },
     {
-      icon: <BarChart className="h-10 w-10 text-vending-blue" />,
+      icon: "vending",
       title: "Data & Analytics",
       description: "Leverage powerful insights to optimize your inventory, pricing, and machine placement.",
       link: "/business-goals/data",
@@ -47,7 +44,7 @@ const BusinessGoalsSection = () => {
       slug: "data"
     },
     {
-      icon: <Truck className="h-10 w-10 text-vending-blue" />,
+      icon: "vending",
       title: "Fleet Management",
       description: "Efficiently manage your entire network of machines with centralized controls and monitoring.",
       link: "/business-goals/fleet-management",
@@ -55,7 +52,7 @@ const BusinessGoalsSection = () => {
       slug: "fleet-management"
     },
     {
-      icon: <Users className="h-10 w-10 text-vending-blue" />,
+      icon: "vending",
       title: "Customer Satisfaction",
       description: "Enhance user experience with intuitive interfaces, reliable service, and modern payment options.",
       link: "/business-goals/customer-satisfaction",
