@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, Settings } from 'lucide-react';
 import { isPreviewEnvironment, isContentfulConfigured } from '@/config/cms';
 import { useNavigate } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
 
 const PreviewEnvironmentDetector = () => {
   const navigate = useNavigate();
@@ -37,8 +38,11 @@ const PreviewEnvironmentDetector = () => {
   
   return (
     <Alert variant="warning" className="mb-6 border-amber-300 bg-amber-50">
-      <AlertTriangle className="h-5 w-5 text-amber-600" />
-      <AlertTitle className="text-amber-800 font-bold">Preview Environment Configuration Needed</AlertTitle>
+      <div className="flex items-center gap-2 mb-2">
+        <AlertTriangle className="h-5 w-5 text-amber-600" />
+        <AlertTitle className="text-amber-800 font-bold">Preview Environment Configuration Needed</AlertTitle>
+        <Badge variant="warning" className="ml-auto">Action Required</Badge>
+      </div>
       <AlertDescription className="space-y-3 text-amber-700">
         <p>
           You're viewing this site in a preview environment, but Contentful credentials are not configured.
