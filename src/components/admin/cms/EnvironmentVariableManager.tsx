@@ -4,10 +4,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Save, RefreshCw, Info } from 'lucide-react';
+import { Save, RefreshCw, Info, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { refreshContentfulClient, testContentfulConnection } from '@/services/cms/utils/contentfulClient';
+import { isPreviewEnvironment } from '@/config/cms';
 
 // Storage keys for environment variables
 const ENV_STORAGE_KEY = 'vending-cms-env-variables';
@@ -21,10 +23,31 @@ export const EnvironmentVariableManager = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
   const [testSuccess, setTestSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState('local');
+  
+  const isPreview = isPreviewEnvironment();
 
   // Load variables from local storage on component mount
   useEffect(() => {
     try {
+      // First check window.env for values
+      if (typeof window !== 'undefined' && window.env) {
+        const spaceIdFromEnv = window.env.VITE_CONTENTFUL_SPACE_ID;
+        const tokenFromEnv = window.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
+        const envIdFromEnv = window.env.VITE_CONTENTFUL_ENVIRONMENT_ID;
+        
+        if (spaceIdFromEnv) setSpaceId(spaceIdFromEnv);
+        if (tokenFromEnv) setDeliveryToken(tokenFromEnv);
+        if (envIdFromEnv) setEnvironmentId(envIdFromEnv);
+        
+        console.log('[EnvironmentVariableManager] Loaded vars from window.env:', {
+          hasSpaceId: !!spaceIdFromEnv,
+          hasDeliveryToken: !!tokenFromEnv,
+          envId: envIdFromEnv || 'master'
+        });
+      }
+      
+      // Then check localStorage as a fallback
       const storedVars = localStorage.getItem(ENV_STORAGE_KEY);
       console.log('[EnvironmentVariableManager] Checking localStorage:', { 
         hasStoredVars: !!storedVars,
@@ -33,9 +56,12 @@ export const EnvironmentVariableManager = () => {
       
       if (storedVars) {
         const parsedVars = JSON.parse(storedVars);
-        setSpaceId(parsedVars.spaceId || '');
-        setDeliveryToken(parsedVars.deliveryToken || '');
-        setEnvironmentId(parsedVars.environmentId || 'master');
+        
+        // Only update values that aren't already set from window.env
+        if (!spaceId && parsedVars.spaceId) setSpaceId(parsedVars.spaceId);
+        if (!deliveryToken && parsedVars.deliveryToken) setDeliveryToken(parsedVars.deliveryToken);
+        if (!environmentId && parsedVars.environmentId) setEnvironmentId(parsedVars.environmentId);
+        
         console.log('[EnvironmentVariableManager] Loaded vars from storage:', {
           hasSpaceId: !!parsedVars.spaceId,
           hasDeliveryToken: !!parsedVars.deliveryToken,
@@ -57,9 +83,9 @@ export const EnvironmentVariableManager = () => {
         deliveryToken,
         environmentId: environmentId || 'master',
         keyNames: {
-          spaceId: 'VITE_CONTENTFUL_SPACE_ID',
-          deliveryToken: 'VITE_CONTENTFUL_DELIVERY_TOKEN',
-          environmentId: 'VITE_CONTENTFUL_ENVIRONMENT_ID'
+          VITE_CONTENTFUL_SPACE_ID: 'spaceId',
+          VITE_CONTENTFUL_DELIVERY_TOKEN: 'deliveryToken',
+          VITE_CONTENTFUL_ENVIRONMENT_ID: 'environmentId'
         }
       };
       
@@ -132,69 +158,146 @@ export const EnvironmentVariableManager = () => {
           Environment Variables Manager
         </CardTitle>
         <CardDescription>
-          Set your Contentful environment variables here for Lovable previews
+          {isPreview 
+            ? "Configure your Contentful environment variables for this preview environment" 
+            : "Set your Contentful environment variables for local development"}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Alert className="mb-4">
-          <AlertTitle>Important Information</AlertTitle>
-          <AlertDescription>
-            These variables will be stored in your browser's local storage and will only work for preview
-            environments. When you deploy your app to production, you'll need to set these variables in
-            your hosting platform (e.g., Vercel).
-          </AlertDescription>
-        </Alert>
+        {isPreview && (
+          <Alert variant="warning" className="mb-6">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Preview Environment Detected</AlertTitle>
+            <AlertDescription>
+              <p>You're currently in a preview environment. For production deployments, you should:</p>
+              <ol className="list-decimal ml-5 mt-2">
+                <li>Add environment variables to your hosting platform (Vercel, Netlify, etc.)</li>
+                <li>Make sure your build process includes these variables</li>
+                <li>The values set here will be stored in browser localStorage and only work for this browser session</li>
+              </ol>
+            </AlertDescription>
+          </Alert>
+        )}
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="space-id">Space ID</Label>
-            <Input
-              id="space-id"
-              placeholder="e.g., abc123def456"
-              value={spaceId}
-              onChange={(e) => setSpaceId(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Your Contentful space identifier
-            </p>
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList>
+            <TabsTrigger value="local">Local Storage</TabsTrigger>
+            <TabsTrigger value="runtime">Runtime Environment</TabsTrigger>
+            <TabsTrigger value="help">Help</TabsTrigger>
+          </TabsList>
           
-          <div className="space-y-2">
-            <Label htmlFor="delivery-token">Content Delivery API Token</Label>
-            <Input
-              id="delivery-token"
-              type="password"
-              placeholder="Contentful Content Delivery API token"
-              value={deliveryToken}
-              onChange={(e) => setDeliveryToken(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              API token used to fetch content from Contentful
-            </p>
-          </div>
+          <TabsContent value="local">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="space-id">Space ID</Label>
+                <Input
+                  id="space-id"
+                  placeholder="e.g., abc123def456"
+                  value={spaceId}
+                  onChange={(e) => setSpaceId(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Your Contentful space identifier
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="delivery-token">Content Delivery API Token</Label>
+                <Input
+                  id="delivery-token"
+                  type="password"
+                  placeholder="Contentful Content Delivery API token"
+                  value={deliveryToken}
+                  onChange={(e) => setDeliveryToken(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  API token used to fetch content from Contentful
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="environment-id">Environment ID</Label>
+                <Input
+                  id="environment-id"
+                  placeholder="e.g., master"
+                  value={environmentId}
+                  onChange={(e) => setEnvironmentId(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Usually "master" unless you're using a custom environment
+                </p>
+              </div>
+            </div>
+          </TabsContent>
           
-          <div className="space-y-2">
-            <Label htmlFor="environment-id">Environment ID</Label>
-            <Input
-              id="environment-id"
-              placeholder="e.g., master"
-              value={environmentId}
-              onChange={(e) => setEnvironmentId(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Usually "master" unless you're using a custom environment
-            </p>
-          </div>
+          <TabsContent value="runtime">
+            <div className="space-y-4">
+              <Alert>
+                <AlertTitle>Runtime Environment Information</AlertTitle>
+                <AlertDescription>
+                  <div className="space-y-2 mt-2">
+                    <p><strong>window.env available:</strong> {typeof window !== 'undefined' && window.env ? "Yes" : "No"}</p>
+                    
+                    {typeof window !== 'undefined' && window.env && (
+                      <>
+                        <p><strong>Space ID:</strong> {window.env.VITE_CONTENTFUL_SPACE_ID || "Not set"}</p>
+                        <p><strong>Environment ID:</strong> {window.env.VITE_CONTENTFUL_ENVIRONMENT_ID || "Not set"}</p>
+                        <p><strong>Delivery Token:</strong> {window.env.VITE_CONTENTFUL_DELIVERY_TOKEN ? "Set" : "Not set"}</p>
+                      </>
+                    )}
+                    
+                    <p><strong>import.meta.env available:</strong> {import.meta.env ? "Yes" : "No"}</p>
+                    <p><strong>Local Storage variables:</strong> {typeof window !== 'undefined' && localStorage.getItem(ENV_STORAGE_KEY) ? "Yes" : "No"}</p>
+                    <p><strong>Preview Environment:</strong> {isPreview ? "Yes" : "No"}</p>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            </div>
+          </TabsContent>
           
-          {testSuccess && (
-            <Alert variant="default" className="border-green-200 bg-green-50 text-green-800">
-              <AlertTitle>Connection Verified</AlertTitle>
-              <AlertDescription>
-                Your Contentful connection is working properly. You can now view content in the app.
-              </AlertDescription>
-            </Alert>
-          )}
-        </div>
+          <TabsContent value="help">
+            <div className="prose max-w-none dark:prose-invert">
+              <h3>Environment Variables Help</h3>
+              
+              <h4>Local Development</h4>
+              <p>
+                For local development, you can enter your Contentful credentials here and they will be stored in localStorage.
+                This is convenient for development, but not secure for production environments.
+              </p>
+              
+              <h4>Preview & Production Environments</h4>
+              <p>
+                For preview and production environments, you should set environment variables in your hosting platform:
+              </p>
+              <ul>
+                <li><code>VITE_CONTENTFUL_SPACE_ID</code> - Your Contentful space ID</li>
+                <li><code>VITE_CONTENTFUL_DELIVERY_TOKEN</code> - Your Contentful delivery token</li>
+                <li><code>VITE_CONTENTFUL_ENVIRONMENT_ID</code> - Your Contentful environment (usually "master")</li>
+              </ul>
+              
+              <h4>Troubleshooting</h4>
+              <p>
+                If you're having issues with Contentful connectivity:
+              </p>
+              <ol>
+                <li>Check browser console for errors</li>
+                <li>Ensure your Space ID and Delivery Token are correct</li>
+                <li>Verify that your token has the correct permissions</li>
+                <li>Try refreshing the client after making changes</li>
+                <li>Clear browser cache and local storage if needed</li>
+              </ol>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {testSuccess && (
+          <Alert variant="default" className="border-green-200 bg-green-50 text-green-800">
+            <AlertTitle>Connection Verified</AlertTitle>
+            <AlertDescription>
+              Your Contentful connection is working properly. You can now view content in the app.
+            </AlertDescription>
+          </Alert>
+        )}
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button 

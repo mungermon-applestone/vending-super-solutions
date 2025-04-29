@@ -12,12 +12,11 @@ import BusinessGoalsGrid from '@/components/businessGoals/BusinessGoalsGrid';
 import BusinessGoalKeyBenefits from '@/components/businessGoals/BusinessGoalKeyBenefits';
 import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry';
 import BusinessGoalsDebugSection from '@/components/businessGoals/BusinessGoalsDebugSection';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { CONTENTFUL_CONFIG, isContentfulConfigured } from '@/config/cms';
+import { CONTENTFUL_CONFIG, isContentfulConfigured, isPreviewEnvironment } from '@/config/cms';
 import ContentfulConfigWarning from '@/components/machines/ContentfulConfigWarning';
+import PreviewEnvironmentDetector from '@/components/contentful/PreviewEnvironmentDetector';
 
 const BUSINESS_GOALS_CONTENT_ID = "3z7Q1mcHEnk6S4YVCyaklz";
 const HERO_CONTENT_ID = "4b40Npa9Hgp8jO0jDX98F6";
@@ -117,6 +116,7 @@ const fallbackPageContent = {
 const BusinessGoalsPage: React.FC = () => {
   const navigate = useNavigate();
   const isConfigured = isContentfulConfigured();
+  const isPreview = isPreviewEnvironment();
   
   const { data: businessGoals, isLoading: goalsLoading, error: goalsError } = useContentfulBusinessGoals();
   const { data: pageContent, isLoading: contentLoading, error: contentError } = useBusinessGoalsPageContent(BUSINESS_GOALS_CONTENT_ID);
@@ -131,10 +131,11 @@ const BusinessGoalsPage: React.FC = () => {
     // Log for debugging purposes
     console.log('[BusinessGoalsPage] Contentful configuration status:', {
       isConfigured, 
+      isPreview,
       spaceId: CONTENTFUL_CONFIG.SPACE_ID?.length > 0,
       tokenConfigured: CONTENTFUL_CONFIG.DELIVERY_TOKEN?.length > 0
     });
-  }, [isConfigured]);
+  }, [isConfigured, isPreview]);
   
   // Use fallback content if Contentful is not configured
   const displayContent = isConfigured ? pageContent : fallbackPageContent;
@@ -153,7 +154,10 @@ const BusinessGoalsPage: React.FC = () => {
 
   return (
     <Layout>
-      {!isConfigured && (
+      {/* Show preview environment warning when applicable */}
+      <PreviewEnvironmentDetector />
+      
+      {!isConfigured && !isPreview && (
         <div className="container py-6">
           <ContentfulConfigWarning />
         </div>
@@ -166,6 +170,15 @@ const BusinessGoalsPage: React.FC = () => {
           title={displayContent.introTitle} 
           description={displayContent.introDescription} 
         />
+      )}
+
+      {/* Add an indicator that we're using fallback data in preview mode */}
+      {isPreview && !isConfigured && (
+        <div className="container py-2">
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-md text-sm">
+            Using fallback business goals data. Configure Contentful to see real content.
+          </div>
+        </div>
       )}
 
       <BusinessGoalsGrid 

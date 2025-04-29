@@ -10,4 +10,5 @@ interface Window {
     environmentId?: string;
     [key: string]: string | undefined;
   };
+  _contentfulInitialized?: boolean | string;
 }
