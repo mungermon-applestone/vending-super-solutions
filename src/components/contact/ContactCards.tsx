@@ -48,8 +48,8 @@ const ContactCards = ({ data }: ContactCardsProps) => {
           <MapPin className="h-6 w-6" />
         </div>
         <div>
-          <h3 className="text-lg font-medium mb-1">{data.addressCardTitle || 'Visit Us'}</h3>
-          <p className="text-gray-600 whitespace-pre-line">{data.address || '123 Business Avenue\nSuite 200\nSan Francisco, CA 94107'}</p>
+          <h3 className="text-lg font-medium mb-1">{data.addressCardTitle || 'Mailing Address'}</h3>
+          <p className="text-gray-600 whitespace-pre-line">{data.address || '3607 Main St.\nStone Ridge, NY 12484'}</p>
           {data.addressType && (
             <p className="text-gray-400 text-sm">{data.addressType}</p>
           )}
