@@ -9,16 +9,31 @@ const ENV_STORAGE_KEY = 'vending-cms-env-variables';
 function getEnvVariable(key: string): string {
   console.log(`[getEnvVariable] Looking for ${key}`);
   
+  // Check if value contains placeholder markers
+  const isPlaceholder = (value: string) => {
+    return value && (value.includes('{{') || value.includes('}}'));
+  };
+  
   // Check import.meta.env first (highest priority)
   if (import.meta.env && import.meta.env[key]) {
-    console.log(`[getEnvVariable] Found value in import.meta.env for ${key}`);
-    return import.meta.env[key];
+    const value = import.meta.env[key];
+    if (!isPlaceholder(value)) {
+      console.log(`[getEnvVariable] Found value in import.meta.env for ${key}`);
+      return value;
+    } else {
+      console.warn(`[getEnvVariable] Found placeholder value in import.meta.env for ${key}`);
+    }
   }
   
   // Then check window.env (second priority)
   if (typeof window !== 'undefined' && window.env && window.env[key]) {
-    console.log(`[getEnvVariable] Found value in window.env for ${key}`);
-    return window.env[key];
+    const value = window.env[key];
+    if (!isPlaceholder(value)) {
+      console.log(`[getEnvVariable] Found value in window.env for ${key}`);
+      return value;
+    } else {
+      console.warn(`[getEnvVariable] Found placeholder value in window.env for ${key}`);
+    }
   }
   
   // Detect if we're in a preview environment
@@ -42,14 +57,18 @@ function getEnvVariable(key: string): string {
         
         // First check direct key mapping
         if (parsedVars[key]) {
-          console.log(`[getEnvVariable] Found direct value for ${key} in localStorage`);
-          return parsedVars[key];
+          const value = parsedVars[key];
+          if (!isPlaceholder(value)) {
+            console.log(`[getEnvVariable] Found direct value for ${key} in localStorage`);
+            return value;
+          }
         }
         
         // Then check key names mapping
         if (parsedVars.keyNames && parsedVars.keyNames[key]) {
-          const mappedValue = parsedVars[parsedVars.keyNames[key]] || '';
-          if (mappedValue) {
+          const mappedKey = parsedVars.keyNames[key];
+          const mappedValue = parsedVars[mappedKey] || '';
+          if (mappedValue && !isPlaceholder(mappedValue)) {
             console.log(`[getEnvVariable] Found mapped value for ${key} in localStorage`);
             return mappedValue;
           }
@@ -58,8 +77,11 @@ function getEnvVariable(key: string): string {
         // Finally check for legacy keys without VITE_ prefix
         const legacyKey = key.replace('VITE_', '');
         if (parsedVars[legacyKey]) {
-          console.log(`[getEnvVariable] Found legacy value for ${key} in localStorage`);
-          return parsedVars[legacyKey];
+          const value = parsedVars[legacyKey];
+          if (!isPlaceholder(value)) {
+            console.log(`[getEnvVariable] Found legacy value for ${key} in localStorage`);
+            return value;
+          }
         }
       }
     } catch (e) {
@@ -168,6 +190,18 @@ export function checkContentfulConfig() {
 // Add the isContentfulConfigured function
 export function isContentfulConfigured() {
   const config = checkContentfulConfig();
+  
+  // Additional check for placeholder values
+  const hasPlaceholders = 
+    CONTENTFUL_CONFIG.SPACE_ID?.includes('{{') || 
+    CONTENTFUL_CONFIG.DELIVERY_TOKEN?.includes('{{') ||
+    CONTENTFUL_CONFIG.ENVIRONMENT_ID?.includes('{{');
+  
+  if (hasPlaceholders) {
+    console.warn('[isContentfulConfigured] Found placeholder values in configuration');
+    return false;
+  }
+  
   return config.isConfigured;
 }
 

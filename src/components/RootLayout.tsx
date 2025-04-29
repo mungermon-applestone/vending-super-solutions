@@ -7,6 +7,7 @@ import { forceContentfulProvider, initCMS } from '@/services/cms/cmsInit';
 import { isContentfulConfigured, isPreviewEnvironment } from '@/config/cms';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import PreviewEnvironmentDetector from './contentful/PreviewEnvironmentDetector';
 
 const RootLayout = () => {
   const [contentfulInitialized, setContentfulInitialized] = useState(false);
@@ -45,6 +46,32 @@ const RootLayout = () => {
   
   const setupCMS = async () => {
     try {
+      // Check for placeholder values in configuration
+      const configHasPlaceholders = typeof window !== 'undefined' && 
+        window.env && 
+        ((window.env.VITE_CONTENTFUL_SPACE_ID && window.env.VITE_CONTENTFUL_SPACE_ID.includes('{{')) || 
+         (window.env.VITE_CONTENTFUL_DELIVERY_TOKEN && window.env.VITE_CONTENTFUL_DELIVERY_TOKEN.includes('{{')));
+      
+      if (configHasPlaceholders) {
+        console.warn('[RootLayout] Detected placeholder values in configuration, forcing fallback');
+        forceContentfulProvider();
+        setContentfulInitialized(true);
+        window._contentfulInitialized = 'placeholder-values';
+        setInitializing(false);
+        
+        if (isPreview && !location.pathname.includes('/admin')) {
+          toast.warning('Placeholder values detected in Contentful configuration. Please configure environment variables.', {
+            duration: 8000,
+            id: 'placeholder-values',
+            action: {
+              label: 'Configure',
+              onClick: () => window.location.href = '/admin/environment-variables'
+            }
+          });
+        }
+        return;
+      }
+    
       if (isContentfulConfigured()) {
         console.log('[RootLayout] Initializing CMS');
         setInitializing(true);
@@ -132,6 +159,13 @@ const RootLayout = () => {
     <div className="flex min-h-screen flex-col">
       <Header />
       
+      {/* Show the preview environment detector if needed */}
+      {isPreview && (
+        <div className="container mx-auto px-4 pt-4">
+          <PreviewEnvironmentDetector />
+        </div>
+      )}
+      
       {/* Main content */}
       <main className="flex-1 bg-gray-50">
         <Outlet />
@@ -155,4 +189,3 @@ const RootLayout = () => {
 };
 
 export default RootLayout;
-

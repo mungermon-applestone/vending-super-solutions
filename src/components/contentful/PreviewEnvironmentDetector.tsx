@@ -36,10 +36,10 @@ const PreviewEnvironmentDetector = () => {
   }
   
   return (
-    <Alert variant="warning" className="mb-6">
-      <AlertTriangle className="h-4 w-4" />
-      <AlertTitle>Preview Environment Configuration Needed</AlertTitle>
-      <AlertDescription className="space-y-2">
+    <Alert variant="warning" className="mb-6 border-amber-300 bg-amber-50">
+      <AlertTriangle className="h-5 w-5 text-amber-600" />
+      <AlertTitle className="text-amber-800 font-bold">Preview Environment Configuration Needed</AlertTitle>
+      <AlertDescription className="space-y-3 text-amber-700">
         <p>
           You're viewing this site in a preview environment, but Contentful credentials are not configured.
           Content will appear as fallback data until you configure Contentful.
@@ -47,11 +47,11 @@ const PreviewEnvironmentDetector = () => {
         <div className="mt-3">
           <Button 
             variant="default" 
-            size="sm" 
             onClick={() => navigate('/admin/environment-variables')}
+            className="bg-amber-600 hover:bg-amber-700 text-white"
           >
             <Settings className="mr-2 h-4 w-4" />
-            Configure Contentful
+            Configure Contentful Now
           </Button>
         </div>
       </AlertDescription>

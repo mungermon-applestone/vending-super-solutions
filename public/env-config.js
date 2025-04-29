@@ -16,19 +16,38 @@
       
       const config = await response.json();
       
+      // Check if the values are placeholders (containing {{)
+      const isSpaceIdPlaceholder = config.VITE_CONTENTFUL_SPACE_ID && config.VITE_CONTENTFUL_SPACE_ID.includes('{{');
+      const isTokenPlaceholder = config.VITE_CONTENTFUL_DELIVERY_TOKEN && config.VITE_CONTENTFUL_DELIVERY_TOKEN.includes('{{');
+      const isEnvIdPlaceholder = config.VITE_CONTENTFUL_ENVIRONMENT_ID && config.VITE_CONTENTFUL_ENVIRONMENT_ID.includes('{{');
+      
+      // Only use values that are not placeholders
+      if (!isSpaceIdPlaceholder && config.VITE_CONTENTFUL_SPACE_ID) {
+        window.env.VITE_CONTENTFUL_SPACE_ID = config.VITE_CONTENTFUL_SPACE_ID;
+      }
+      
+      if (!isTokenPlaceholder && config.VITE_CONTENTFUL_DELIVERY_TOKEN) {
+        window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = config.VITE_CONTENTFUL_DELIVERY_TOKEN;
+      }
+      
+      if (!isEnvIdPlaceholder && config.VITE_CONTENTFUL_ENVIRONMENT_ID) {
+        window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = config.VITE_CONTENTFUL_ENVIRONMENT_ID;
+      }
+      
       console.log('[env-config] Loaded runtime config:', {
-        hasSpaceId: !!config.VITE_CONTENTFUL_SPACE_ID,
-        hasDeliveryToken: !!config.VITE_CONTENTFUL_DELIVERY_TOKEN,
-        hasEnvironmentId: !!config.VITE_CONTENTFUL_ENVIRONMENT_ID
+        hasSpaceId: !!window.env.VITE_CONTENTFUL_SPACE_ID,
+        hasDeliveryToken: !!window.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
+        hasEnvironmentId: !!window.env.VITE_CONTENTFUL_ENVIRONMENT_ID
       });
       
-      // Update window.env with fetched configuration
-      Object.assign(window.env, config);
-      
       // Dispatch an event to notify the app that config is ready
-      window.dispatchEvent(new Event('env-config-loaded'));
+      if (!isSpaceIdPlaceholder || !isTokenPlaceholder || !isEnvIdPlaceholder) {
+        window.dispatchEvent(new Event('env-config-loaded'));
+        return true;
+      }
       
-      return true;
+      console.warn('[env-config] Runtime config contains placeholder values, skipping');
+      return false;
     } catch (error) {
       console.warn('[env-config] Could not load runtime config, will use default sources:', error);
       return false;
