@@ -2,9 +2,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useBusinessGoalsPageContent } from '@/hooks/cms/useBusinessGoalsPageContent';
 import { useFeaturedBusinessGoalsContent } from '@/hooks/cms/useFeaturedBusinessGoalsContent';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
@@ -12,17 +11,31 @@ import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import BusinessGoalsCompact from '@/components/businessGoals/BusinessGoalsCompact';
+import ContentfulConfigWarning from '@/components/machines/ContentfulConfigWarning';
+import { isContentfulConfigured } from '@/config/cms';
 
 const BusinessGoalsLanding = () => {
-  const { data: featuredContent, isLoading, error } = useFeaturedBusinessGoalsContent();
+  const { data: featuredContent, isLoading, error, refetch } = useFeaturedBusinessGoalsContent();
   const { data: pageContent } = useBusinessGoalsPageContent();
   const { data: testimonialSection } = useTestimonialSection('business-goals');
   const navigate = useNavigate();
+  const isConfigured = isContentfulConfigured();
+
+  const handleRetry = () => {
+    refetch();
+  };
 
   return (
     <Layout>
       {/* Hero Section */}
       <TechnologyPageHero entryId="4b40Npa9Hgp8jO0jDX98F6" />
+
+      {/* Display config warning if there's an error or configuration issue */}
+      {(error || !isConfigured) && (
+        <div className="container mx-auto mt-8">
+          <ContentfulConfigWarning onRetry={handleRetry} />
+        </div>
+      )}
 
       {/* Intro Section */}
       {pageContent && (
@@ -61,6 +74,9 @@ const BusinessGoalsLanding = () => {
           <div className="text-center py-12">
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Business Goals</h3>
             <p className="text-gray-600">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
+            <Button onClick={handleRetry} className="mt-4" variant="outline">
+              Try Again
+            </Button>
           </div>
         ) : featuredContent?.businessGoals && featuredContent.businessGoals.length > 0 ? (
           <BusinessGoalsCompact 
