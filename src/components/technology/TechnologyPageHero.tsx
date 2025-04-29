@@ -53,7 +53,7 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({
       console.log(`[TechnologyPageHero] Error loading hero content for entryId: ${entryId}`, {
         errorType: error instanceof Error ? error.message : 'Unknown error',
         isConfigError: error instanceof Error && error.message === 'CONTENTFUL_CONFIG_MISSING',
-        isNotFoundError: error instanceof Error && error.message.includes('CONTENTFUL_ENTRY_NOT_FOUND'),
+        isNotFoundError: error instanceof Error && error.message.includes('HERO_CONTENT_NOT_FOUND'),
         errorDetails: error,
         retryCount,
         component: 'TechnologyPageHero'
