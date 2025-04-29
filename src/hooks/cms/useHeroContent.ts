@@ -20,21 +20,21 @@ interface HeroContent {
   backgroundClass?: string;
 }
 
-export function useHeroContent(entryId: string) {
-  console.log(`[useHeroContent] Initializing for entry ID: ${entryId}`);
+export function useHeroContent(pageKey: string) {
+  console.log(`[useHeroContent] Initializing for page key: ${pageKey}`);
   
   return useQuery({
-    queryKey: ['contentful', 'hero', entryId],
+    queryKey: ['contentful', 'hero', pageKey],
     queryFn: async () => {
-      // Enhanced logging for this specific entry
-      console.log(`[useHeroContent] Starting to fetch hero content for entry ID: ${entryId}`);
+      // Enhanced logging for this specific query
+      console.log(`[useHeroContent] Starting to fetch hero content for page key: ${pageKey}`);
       
       // First check if Contentful is configured
       if (!isContentfulConfigured()) {
-        console.error(`[useHeroContent] Contentful is not configured properly for entryId: ${entryId}`);
+        console.error(`[useHeroContent] Contentful is not configured properly for page key: ${pageKey}`);
         
         // For the home page hero, show a specific toast message
-        if (entryId === '2a1R6EfAcjJkb6WaRF2lGS') {
+        if (pageKey === "home") {
           toast.error('Failed to load home page hero from Contentful - check configuration', {
             id: 'home-hero-error',
             duration: 5000
@@ -46,7 +46,7 @@ export function useHeroContent(entryId: string) {
       }
       
       try {
-        console.log(`[useHeroContent] Fetching hero content for entry ID: ${entryId}`);
+        console.log(`[useHeroContent] Fetching hero content for page key: ${pageKey}`);
         const client = await getContentfulClient(true); // Force refresh client to ensure latest config
         
         if (!client) {
@@ -54,23 +54,42 @@ export function useHeroContent(entryId: string) {
           throw new Error('Failed to initialize Contentful client');
         }
         
-        console.log(`[useHeroContent] Client created, fetching entry: ${entryId}`);
+        console.log(`[useHeroContent] Client created, fetching entries with page key: ${pageKey}`);
         
+        // Instead of getting a specific entry by ID, query for entries with matching page key
         try {
-          console.log(`[useHeroContent] About to call client.getEntry for: ${entryId}`);
-          const entry = await client.getEntry(entryId);
+          console.log(`[useHeroContent] About to query entries with page key: ${pageKey}`);
           
-          console.log(`[useHeroContent] Successfully fetched entry: ${entry.sys.id}`, {
+          const entries = await client.getEntries({
+            content_type: 'heroContent',
+            'fields.pageKey': pageKey,
+            limit: 1,
+            include: 2
+          });
+          
+          console.log(`[useHeroContent] Query results for page key ${pageKey}:`, {
+            total: entries.total,
+            hasItems: entries.items.length > 0
+          });
+          
+          if (entries.items.length === 0) {
+            console.warn(`[useHeroContent] No hero content found for page key: ${pageKey}`);
+            throw new Error(`HERO_CONTENT_NOT_FOUND:${pageKey}`);
+          }
+          
+          const entry = entries.items[0];
+          
+          console.log(`[useHeroContent] Successfully fetched entry for page key ${pageKey}:`, {
             contentType: entry.sys.contentType?.sys?.id || 'unknown',
             fields: Object.keys(entry.fields || {}),
             title: entry.fields.title,
             subtitle: entry.fields.subtitle,
             hasImage: !!entry.fields.image,
-            rawEntry: entry
+            id: entry.sys.id
           });
           
-          // Handle home page hero (ID: 2a1R6EfAcjJkb6WaRF2lGS) with special logging
-          if (entryId === '2a1R6EfAcjJkb6WaRF2lGS') {
+          // Handle home page hero with special logging
+          if (pageKey === "home") {
             console.log('[useHeroContent] Processing HOME PAGE hero content', entry.fields);
           }
           
@@ -99,13 +118,13 @@ export function useHeroContent(entryId: string) {
           console.log(`[useHeroContent] Returning processed hero content:`, result);
           return result;
         } catch (entryError) {
-          console.error(`[useHeroContent] Error fetching entry ${entryId}:`, entryError);
+          console.error(`[useHeroContent] Error fetching entries for page key ${pageKey}:`, entryError);
           
           // Check if the error is a 404 (entry not found)
           const errorMessage = entryError instanceof Error ? entryError.message : 'Unknown error';
           if (errorMessage.includes('not found') || errorMessage.includes('404')) {
-            console.error(`[useHeroContent] Entry not found: ${entryId}`);
-            throw new Error(`CONTENTFUL_ENTRY_NOT_FOUND:${entryId}`);
+            console.error(`[useHeroContent] Entry not found for page key: ${pageKey}`);
+            throw new Error(`CONTENTFUL_ENTRY_NOT_FOUND:${pageKey}`);
           }
           
           // Re-throw the original error
@@ -113,7 +132,7 @@ export function useHeroContent(entryId: string) {
         }
       } catch (error) {
         // Enhanced error logging with structured data for easier debugging
-        console.error(`[useHeroContent] Error fetching hero content for entry ID: ${entryId}`, {
+        console.error(`[useHeroContent] Error fetching hero content for page key: ${pageKey}`, {
           error,
           errorMessage: error instanceof Error ? error.message : 'Unknown error',
           errorStack: error instanceof Error ? error.stack : 'No stack trace',
@@ -121,7 +140,7 @@ export function useHeroContent(entryId: string) {
         });
         
         // Special handling for home page hero errors
-        if (entryId === '2a1R6EfAcjJkb6WaRF2lGS') {
+        if (pageKey === "home") {
           console.error('[useHeroContent] HOME PAGE HERO FAILED TO LOAD:', error);
           toast.error('Failed to load home page hero');
         }
@@ -129,8 +148,8 @@ export function useHeroContent(entryId: string) {
         // Re-throw specific error types to allow consumers to handle them differently
         if (error instanceof Error) {
           if (error.message.includes('not found') || error.message.includes('404')) {
-            console.error(`[useHeroContent] Entry not found: ${entryId}`);
-            throw new Error(`CONTENTFUL_ENTRY_NOT_FOUND:${entryId}`);
+            console.error(`[useHeroContent] Entry not found for page key: ${pageKey}`);
+            throw new Error(`CONTENTFUL_ENTRY_NOT_FOUND:${pageKey}`);
           }
           
           if (error.message.includes('access token') || error.message.includes('401')) {
@@ -149,7 +168,7 @@ export function useHeroContent(entryId: string) {
     },
     retry: 3, 
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000), // Exponential backoff
-    staleTime: entryId === '2a1R6EfAcjJkb6WaRF2lGS' ? 5 * 60 * 1000 : 0, // 5 minutes for home hero
-    refetchOnWindowFocus: entryId === '2a1R6EfAcjJkb6WaRF2lGS' // Enable refetch on focus for home hero
+    staleTime: pageKey === 'home' ? 5 * 60 * 1000 : 0, // 5 minutes for home hero
+    refetchOnWindowFocus: pageKey === 'home' // Enable refetch on focus for home hero
   });
 }

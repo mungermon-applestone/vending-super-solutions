@@ -5,10 +5,8 @@ import { ExternalLink } from 'lucide-react';
 import { useHeroContent } from '@/hooks/cms/useHeroContent';
 import { Loader2 } from 'lucide-react';
 
-const PRODUCTS_HERO_ENTRY_ID = '7H7L7AIXZFAYOAKpA0vila';
-
 export default function ProductsHero() {
-  const { data: heroContent, isLoading, error } = useHeroContent(PRODUCTS_HERO_ENTRY_ID);
+  const { data: heroContent, isLoading, error } = useHeroContent("products");
 
   if (isLoading) {
     return (

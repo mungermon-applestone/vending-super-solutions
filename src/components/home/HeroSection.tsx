@@ -6,12 +6,10 @@ import { ArrowRight, CheckCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useHeroContent } from '@/hooks/cms/useHeroContent';
 
-const HERO_ENTRY_ID = '2a1R6EfAcjJkb6WaRF2lGS';
-
 const HeroSection = () => {
-  const { data: heroContent, isLoading } = useHeroContent(HERO_ENTRY_ID);
+  const { data: heroContent, isLoading } = useHeroContent("home");
   
-  console.log("Hero section rendering", { heroContent, isLoading, entryId: HERO_ENTRY_ID });
+  console.log("Hero section rendering", { heroContent, isLoading, pageKey: "home" });
   
   // If we're loading, show a skeleton
   if (isLoading) {
