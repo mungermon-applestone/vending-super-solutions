@@ -30,7 +30,7 @@ const FeaturedBusinessGoals = ({ entryId }: { entryId: string }) => {
           </CardHeader>
           <div className="p-6 pt-0">
             <Button asChild variant="outline" size="sm">
-              <Link to={`/goals/${goal.slug}`}>
+              <Link to={`/business-goals/${goal.slug}`}>
                 Learn More <ExternalLink className="ml-2 h-4 w-4" />
               </Link>
             </Button>

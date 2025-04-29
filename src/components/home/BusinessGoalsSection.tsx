@@ -17,37 +17,37 @@ const BusinessGoalsSection = () => {
       icon: <TrendingUp className="h-10 w-10 text-vending-blue" />,
       title: "Expand Footprint",
       description: "Grow your business with scalable vending solutions that adapt to various locations and needs.",
-      link: "/goals/expand-footprint"
+      link: "/business-goals/expand-footprint"
     },
     {
       icon: <ShoppingBag className="h-10 w-10 text-vending-blue" />,
       title: "Buy Online, Pickup In Store (BOPIS)",
       description: "Enable customers to order ahead and collect purchases from your vending machines.",
-      link: "/goals/bopis"
+      link: "/business-goals/bopis"
     },
     {
       icon: <Activity className="h-10 w-10 text-vending-blue" />,
       title: "Marketing & Promotions",
       description: "Drive sales with targeted promotions, digital advertising, and customer loyalty programs.",
-      link: "/goals/marketing"
+      link: "/business-goals/marketing"
     },
     {
       icon: <BarChart className="h-10 w-10 text-vending-blue" />,
       title: "Data & Analytics",
       description: "Leverage powerful insights to optimize your inventory, pricing, and machine placement.",
-      link: "/goals/data"
+      link: "/business-goals/data"
     },
     {
       icon: <Truck className="h-10 w-10 text-vending-blue" />,
       title: "Fleet Management",
       description: "Efficiently manage your entire network of machines with centralized controls and monitoring.",
-      link: "/goals/fleet-management"
+      link: "/business-goals/fleet-management"
     },
     {
       icon: <Users className="h-10 w-10 text-vending-blue" />,
       title: "Customer Satisfaction",
       description: "Enhance user experience with intuitive interfaces, reliable service, and modern payment options.",
-      link: "/goals/customer-satisfaction"
+      link: "/business-goals/customer-satisfaction"
     }
   ];
   
@@ -64,7 +64,7 @@ const BusinessGoalsSection = () => {
             </p>
           </div>
           <Button asChild className="mt-4 md:mt-0">
-            <Link to="/goals">Explore All Business Goals</Link>
+            <Link to="/business-goals">Explore All Business Goals</Link>
           </Button>
         </div>
         

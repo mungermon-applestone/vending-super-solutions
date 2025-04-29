@@ -92,7 +92,7 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
               <Button 
                 variant="ghost" 
                 className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
-                onClick={() => navigate(`/business/${goal.slug}`)}
+                onClick={() => navigate(`/business-goals/${goal.slug}`)}
               >
                 Learn more
                 <ArrowRight className="ml-2 h-4 w-4" />

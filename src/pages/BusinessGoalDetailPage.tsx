@@ -51,6 +51,7 @@ const BusinessGoalDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   
   console.log('[BusinessGoalDetailPage] Rendering with slug:', slug);
+  console.log('[BusinessGoalDetailPage] Current route path:', window.location.pathname);
   
   return (
     <Layout>
@@ -77,11 +78,19 @@ const BusinessGoalDetailPage = () => {
 const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
   const { data: businessGoal, isLoading, error } = useContentfulBusinessGoal(slug || '');
   
-  console.log('Business Goal Detail Page Rendering:', {
-    slug,
-    businessGoalData: businessGoal,
-    hasVideo: businessGoal?.video ? true : false,
-    videoDetails: businessGoal?.video
+  console.log('[BusinessGoalContent] Content data for slug:', slug, {
+    isLoading,
+    hasError: !!error,
+    errorMessage: error ? error.message : null,
+    businessGoalData: businessGoal ? {
+      id: businessGoal.id,
+      title: businessGoal.title,
+      slug: businessGoal.slug,
+      hasFeatures: businessGoal.features?.length > 0,
+      hasBenefits: businessGoal.benefits?.length > 0,
+      hasVideo: !!businessGoal.video,
+      hasRecommendedMachines: businessGoal.recommendedMachines?.length > 0
+    } : null
   });
   
   if (isLoading) {
@@ -101,6 +110,7 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
   }
   
   if (error) {
+    console.error('[BusinessGoalContent] Error loading business goal:', error);
     return (
       <div className="container mx-auto py-12">
         <div className="max-w-4xl mx-auto">
@@ -118,12 +128,13 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
   }
   
   if (!businessGoal) {
+    console.warn('[BusinessGoalContent] No business goal data returned for slug:', slug);
     return (
       <div className="container mx-auto py-12">
         <div className="max-w-4xl mx-auto">
           <ContentfulFallbackMessage
             title="Business Goal Not Found"
-            message="The business goal you're looking for doesn't exist or has been removed."
+            message={`The business goal with slug "${slug}" doesn't exist or has been removed.`}
             contentType="business goal"
             actionText="Return to Business Goals"
             actionHref="/business-goals"
@@ -134,6 +145,8 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
     );
   }
   
+  console.log('[BusinessGoalContent] Successfully loaded business goal:', businessGoal.title);
+  
   const icon = businessGoal?.icon ? (
     <MachineTypeIcon type={businessGoal.icon} className="text-white" />
   ) : (
@@ -142,7 +155,7 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
   
   const imageUrl = businessGoal?.image?.url || "https://via.placeholder.com/1200x800?text=Business+Goal+Image";
   
-  const showDebugInfo = true; // Set to true to show debug info
+  const showDebugInfo = false; // Set to true to show debug info in production
   
   return (
     <>

@@ -1,6 +1,8 @@
 
 import { CMSBusinessGoal } from '@/types/cms';
-import { supabase } from '@/integrations/supabase/client';
+import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { useMockData } from '../../mockDataHandler';
+import { IS_DEVELOPMENT } from '@/config/cms';
 
 /**
  * Fetches a single business goal by its slug.
@@ -16,101 +18,89 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
       return null;
     }
 
-    // First query the main business goal
-    const { data: goalData, error: goalError } = await supabase
-      .from('business_goals')
-      .select(`
-        id,
-        slug,
-        title,
-        description,
-        image_url,
-        image_alt,
-        visible,
-        created_at,
-        updated_at,
-        icon,
-        video_url,
-        video_title
-      `)
-      .eq('slug', slug)
-      .single();
-
-    if (goalError) {
-      console.error("[fetchBusinessGoalBySlug] Error fetching business goal:", goalError);
-      return null;
-    }
-
-    if (!goalData) {
-      console.log("[fetchBusinessGoalBySlug] Business goal not found.");
-      return null;
-    }
-
-    // Log video data if it exists
-    if (goalData.video_url) {
-      console.log("[fetchBusinessGoalBySlug] Found video data:", {
-        url: goalData.video_url,
-        title: goalData.video_title
+    // Try to fetch from Contentful
+    try {
+      const client = await getContentfulClient();
+      
+      // Query Contentful for the business goal with matching slug
+      const entries = await client.getEntries({
+        content_type: 'businessGoal',
+        'fields.slug': slug,
+        include: 2,
+        limit: 1
       });
-    } else {
-      console.log("[fetchBusinessGoalBySlug] No video data found in business goal.");
+      
+      if (entries.items.length === 0) {
+        console.log(`[fetchBusinessGoalBySlug] No business goal found in Contentful with slug: ${slug}`);
+      } else {
+        const entry = entries.items[0];
+        console.log(`[fetchBusinessGoalBySlug] Found business goal in Contentful: ${entry.fields.title}`);
+        
+        // Map the Contentful data to our CMSBusinessGoal interface
+        const businessGoal: CMSBusinessGoal = {
+          id: entry.sys.id,
+          slug: entry.fields.slug as string,
+          title: entry.fields.title as string,
+          description: entry.fields.description as string,
+          image: entry.fields.image ? {
+            id: (entry.fields.image as any).sys.id,
+            url: `https:${(entry.fields.image as any).fields.file.url}`,
+            alt: (entry.fields.image as any).fields.title || entry.fields.title
+          } : undefined,
+          visible: entry.fields.visible as boolean ?? true,
+          icon: entry.fields.icon as string,
+          benefits: (entry.fields.benefits as string[]) || [],
+          features: (entry.fields.features || []).map((feature: any) => ({
+            id: feature.sys?.id,
+            title: feature.fields?.title,
+            description: feature.fields?.description,
+            icon: feature.fields?.icon,
+            display_order: feature.fields?.displayOrder || 0
+          })),
+          // Add video if available
+          video: entry.fields.video ? {
+            id: (entry.fields.video as any).sys.id,
+            url: `https:${(entry.fields.video as any).fields.file.url}`,
+            title: (entry.fields.video as any).fields.title || 'Business Goal Video'
+          } : undefined,
+          // Add recommended machines if available
+          recommendedMachines: (entry.fields.recommendedMachines || []).map((machine: any) => ({
+            id: machine.sys.id,
+            slug: machine.fields.slug,
+            title: machine.fields.title,
+            description: machine.fields.description,
+            image: machine.fields.images?.[0] ? {
+              url: `https:${machine.fields.images[0].fields.file.url}`,
+              alt: machine.fields.images[0].fields.title || machine.fields.title
+            } : undefined
+          }))
+        };
+        
+        return businessGoal as T;
+      }
+    } catch (contentfulError) {
+      console.error("[fetchBusinessGoalBySlug] Error fetching business goal from Contentful:", contentfulError);
     }
-
-    // Then query the features separately to avoid relation errors
-    const { data: featuresData, error: featuresError } = await supabase
-      .from('business_goal_features')
-      .select(`
-        id,
-        title,
-        description,
-        icon,
-        display_order
-      `)
-      .eq('business_goal_id', goalData.id);
-
-    if (featuresError) {
-      console.error("[fetchBusinessGoalBySlug] Error fetching features:", featuresError);
-      // Continue without features
-    }
-
-    // Map the data to the CMSBusinessGoal interface
-    const businessGoal: CMSBusinessGoal = {
-      id: goalData.id,
-      slug: goalData.slug,
-      title: goalData.title,
-      description: goalData.description,
-      image: {
-        id: `img-${Math.random().toString(36).substr(2, 9)}`,
-        url: goalData.image_url || '',
-        alt: goalData.image_alt || goalData.title
-      },
-      visible: goalData.visible,
-      created_at: goalData.created_at,
-      updated_at: goalData.updated_at,
-      icon: goalData.icon,
-      // Legacy field support
-      image_url: goalData.image_url,
-      image_alt: goalData.image_alt,
-      benefits: [], // Assuming benefits are not directly fetched here
-      features: featuresData ? featuresData.map(feature => ({
-        id: feature.id || `feature-${Math.random().toString(36).substr(2, 9)}`,
-        title: feature.title,
-        description: feature.description,
-        icon: feature.icon,
-        display_order: feature.display_order
-      })) : [],
-      // Add video if available
-      video: goalData.video_url ? {
-        id: `video-${Math.random().toString(36).substr(2, 9)}`,
-        url: goalData.video_url,
-        title: goalData.video_title || 'Business Goal Video'
-      } : undefined
-    };
-
-    console.log(`[fetchBusinessGoalBySlug] Successfully fetched business goal: ${businessGoal.title}`);
-    console.log(`[fetchBusinessGoalBySlug] Video object:`, businessGoal.video);
     
-    return businessGoal as T;
+    // If we're in development and mock data is enabled, try mock data
+    if (IS_DEVELOPMENT && useMockData) {
+      console.log("[fetchBusinessGoalBySlug] Attempting to use mock data");
+      try {
+        const { fetchBusinessGoals } = await import('./fetchBusinessGoals');
+        const goals = await fetchBusinessGoals();
+        const goal = goals.find(g => g.slug === slug);
+        
+        if (goal) {
+          console.log(`[fetchBusinessGoalBySlug] Found business goal in mock data: ${goal.title}`);
+          return goal as T;
+        }
+      } catch (mockError) {
+        console.error("[fetchBusinessGoalBySlug] Error using mock data:", mockError);
+      }
+    }
+    
+    console.log(`[fetchBusinessGoalBySlug] Business goal with slug "${slug}" not found`);
+    return null;
   } catch (error) {
     console.error("[fetchBusinessGoalBySlug] Unexpected error:", error);
     return null;

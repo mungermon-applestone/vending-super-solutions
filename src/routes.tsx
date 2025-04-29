@@ -66,6 +66,10 @@ const routes: RouteObject[] = [
         element: <BusinessGoalDetailPage />
       },
       {
+        path: 'business/:slug',
+        element: <BusinessGoalDetailPage />
+      },
+      {
         path: 'about',
         element: <About />
       },
