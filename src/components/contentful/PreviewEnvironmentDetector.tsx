@@ -2,15 +2,18 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Settings, CheckCircle } from 'lucide-react';
+import { AlertTriangle, Settings, CheckCircle, RefreshCw } from 'lucide-react';
 import { isPreviewEnvironment, isContentfulConfigured, CONTENTFUL_CONFIG } from '@/config/cms';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 
 const PreviewEnvironmentDetector = () => {
   const navigate = useNavigate();
   const [isPreview, setIsPreview] = useState(false);
   const [configurationNeeded, setConfigurationNeeded] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [configStatus, setConfigStatus] = useState<{
     isConfigured: boolean;
     spaceId: string | null;
@@ -24,6 +27,20 @@ const PreviewEnvironmentDetector = () => {
     envId: null,
     source: null
   });
+  
+  const refreshCredentials = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshContentfulClient();
+      toast.success("Contentful client refreshed successfully");
+      window.location.reload();
+    } catch (error) {
+      toast.error("Failed to refresh Contentful client");
+      console.error("[PreviewEnvironmentDetector] Failed to refresh client:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
   
   useEffect(() => {
     // Detect if we're in a preview environment
@@ -41,8 +58,11 @@ const PreviewEnvironmentDetector = () => {
         spaceId: CONTENTFUL_CONFIG.SPACE_ID || null,
         hasToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
         envId: CONTENTFUL_CONFIG.ENVIRONMENT_ID || null,
-        source: window._contentfulInitialized === true ? 'runtime-config' : 
-                window._contentfulInitialized ? String(window._contentfulInitialized) : 'unknown'
+        source: typeof window !== 'undefined' && window._contentfulInitialized === true ? 
+                  'runtime-config' : 
+                typeof window !== 'undefined' && window._contentfulInitialized ? 
+                  String(window._contentfulInitialized) : 
+                  'unknown'
       });
       
       // Log information for debugging
@@ -54,7 +74,7 @@ const PreviewEnvironmentDetector = () => {
           spaceId: CONTENTFUL_CONFIG.SPACE_ID || null,
           hasToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
           envId: CONTENTFUL_CONFIG.ENVIRONMENT_ID || null,
-          source: window._contentfulInitialized
+          source: typeof window !== 'undefined' ? window._contentfulInitialized : undefined
         }
       });
     }
@@ -79,9 +99,28 @@ const PreviewEnvironmentDetector = () => {
             Your preview environment is properly configured with Contentful credentials.
             Space ID: <code className="bg-green-100 px-1 rounded">{configStatus.spaceId}</code>
           </p>
-          <p className="text-xs text-green-600">
-            Source: {configStatus.source === 'runtime-config' ? 'Runtime configuration file' : configStatus.source}
-          </p>
+          <div className="flex justify-between items-center text-xs mt-2">
+            <span>Source: {configStatus.source === 'runtime-config' 
+              ? 'Runtime configuration file' 
+              : configStatus.source === 'fallback-hardcoded' 
+                ? 'Hardcoded fallback credentials' 
+                : configStatus.source}
+            </span>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="h-7 text-xs"
+              onClick={refreshCredentials}
+              disabled={isRefreshing}
+            >
+              {isRefreshing ? (
+                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+              ) : (
+                <RefreshCw className="h-3 w-3 mr-1" />
+              )}
+              Refresh
+            </Button>
+          </div>
         </AlertDescription>
       </Alert>
     );
@@ -100,7 +139,7 @@ const PreviewEnvironmentDetector = () => {
           You're viewing this site in a preview environment, but Contentful credentials are not configured.
           Content will appear as fallback data until you configure Contentful.
         </p>
-        <div className="mt-3">
+        <div className="mt-3 flex gap-2">
           <Button 
             variant="default" 
             onClick={() => navigate('/admin/environment-variables')}
@@ -108,6 +147,19 @@ const PreviewEnvironmentDetector = () => {
           >
             <Settings className="mr-2 h-4 w-4" />
             Configure Contentful Now
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={refreshCredentials}
+            disabled={isRefreshing}
+            className="border-amber-500 text-amber-700"
+          >
+            {isRefreshing ? (
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            Refresh Credentials
           </Button>
         </div>
       </AlertDescription>

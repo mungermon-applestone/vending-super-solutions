@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { RefreshCw, AlertTriangle, CheckCircle, Bug, ShieldAlert, Settings } from 'lucide-react';
+import { RefreshCw, AlertTriangle, CheckCircle, Bug, ShieldAlert, Settings, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { CONTENTFUL_CONFIG, isContentfulConfigured, logContentfulConfig } from '@/config/cms';
 import { refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
@@ -16,6 +16,7 @@ const ContentfulConfigVerifier = () => {
   const navigate = useNavigate();
   
   const isConfigured = isContentfulConfigured();
+  const credentialSource = typeof window !== 'undefined' ? window._contentfulInitialized : undefined;
   
   const handleCheckConfig = () => {
     setIsChecking(true);
@@ -32,7 +33,8 @@ const ContentfulConfigVerifier = () => {
         SPACE_ID: CONTENTFUL_CONFIG.SPACE_ID,
         ENVIRONMENT_ID: CONTENTFUL_CONFIG.ENVIRONMENT_ID,
         HAS_DELIVERY_TOKEN: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
-        WINDOW_ENV: typeof window !== 'undefined' ? window.env : undefined
+        WINDOW_ENV: typeof window !== 'undefined' ? window.env : undefined,
+        CREDENTIAL_SOURCE: credentialSource
       });
       
       toast.info('Contentful config check complete. Check browser console for details.');
@@ -51,6 +53,9 @@ const ContentfulConfigVerifier = () => {
       toast.info('Refreshing Contentful client...');
       await refreshContentfulClient();
       toast.success('Contentful client refreshed');
+      
+      // Reload the page to apply changes
+      window.location.reload();
     } catch (error) {
       console.error('Error refreshing client:', error);
       toast.error('Failed to refresh client');
@@ -101,6 +106,7 @@ const ContentfulConfigVerifier = () => {
                 <div>ENVIRONMENT_ID: {CONTENTFUL_CONFIG.ENVIRONMENT_ID || '❌ Not set'}</div>
                 <div>DELIVERY_TOKEN: {CONTENTFUL_CONFIG.DELIVERY_TOKEN ? '✅ Set' : '❌ Not set'}</div>
                 <div className="mt-2 pt-2 border-t border-gray-300">
+                  <div>Credential Source: {credentialSource || 'Unknown'}</div>
                   <div>window.env: {typeof window !== 'undefined' && window.env ? '✅ Available' : '❌ Not set'}</div>
                 </div>
               </div>
@@ -137,6 +143,17 @@ const ContentfulConfigVerifier = () => {
                 </Button>
               </div>
               
+              {credentialSource === 'fallback-hardcoded' && (
+                <Alert variant="info" className="mt-4 border-blue-200 bg-blue-50">
+                  <Info className="h-4 w-4 text-blue-600" />
+                  <AlertTitle className="text-blue-700">Using Fallback Credentials</AlertTitle>
+                  <AlertDescription className="text-blue-600">
+                    Your application is currently using hardcoded fallback credentials for the Lovable preview environment.
+                    These credentials are built into the app for preview purposes.
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               {!isConfigured && (
                 <Alert variant="warning" className="mt-4">
                   <AlertDescription>
@@ -158,14 +175,15 @@ const ContentfulConfigVerifier = () => {
           <TabsContent value="debug">
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                For Lovable preview environments, environment variables need to be set directly using the Environment Variables Manager.
+                For Lovable preview environments, a fallback mechanism is in place if the /api/runtime-config endpoint doesn't work.
               </p>
               
               <Alert variant="warning" className="mt-3">
                 <ShieldAlert className="h-4 w-4" />
                 <AlertTitle>Important for Lovable Previews</AlertTitle>
                 <AlertDescription>
-                  You must add your environment variables using the Environment Variables Manager for previews to work.
+                  <p className="mb-2">Preview environments use a fallback mechanism with hardcoded credentials if runtime-config fails.</p>
+                  <p className="text-xs text-muted-foreground">Credential source: {credentialSource || 'Unknown'}</p>
                   <div className="mt-2">
                     <Button 
                       variant="outline" 
@@ -195,7 +213,11 @@ const ContentfulConfigVerifier = () => {
                 </li>
                 <li>
                   <strong>Environment Variables Not Loading:</strong> For Lovable previews,
-                  environment variables must be set using the Environment Variables Manager.
+                  a fallback mechanism with hardcoded credentials should ensure content loads.
+                </li>
+                <li>
+                  <strong>Need to Refresh:</strong> Sometimes you may need to refresh the page
+                  after changing environment variables.
                 </li>
               </ul>
               

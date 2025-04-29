@@ -5,6 +5,14 @@
   
   // Initialize window.env if it doesn't exist
   window.env = window.env || {};
+  
+  // Hardcoded credentials for preview environments as fallback
+  // These will only be used in preview environments when the fetch fails
+  const FALLBACK_PREVIEW_CREDENTIALS = {
+    VITE_CONTENTFUL_SPACE_ID: "al01e4yh2wq4",
+    VITE_CONTENTFUL_DELIVERY_TOKEN: "fxpQth03vfdKzI4VNT_fYg8cD5BwoTiGaa6INIyYync",
+    VITE_CONTENTFUL_ENVIRONMENT_ID: "master"
+  };
 
   // Define a function to fetch runtime config
   async function fetchRuntimeConfig() {
@@ -88,6 +96,33 @@
     );
   }
   
+  // Apply hardcoded fallback credentials for preview environments
+  function applyFallbackCredentials() {
+    console.log('[env-config] Applying fallback credentials for preview environment');
+    
+    window.env.VITE_CONTENTFUL_SPACE_ID = FALLBACK_PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
+    window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = FALLBACK_PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN;
+    window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = FALLBACK_PREVIEW_CREDENTIALS.VITE_CONTENTFUL_ENVIRONMENT_ID;
+    
+    // Set legacy keys for backward compatibility
+    window.env.spaceId = FALLBACK_PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
+    window.env.deliveryToken = FALLBACK_PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN;
+    window.env.environmentId = FALLBACK_PREVIEW_CREDENTIALS.VITE_CONTENTFUL_ENVIRONMENT_ID;
+    
+    window._contentfulInitialized = 'fallback-hardcoded';
+    
+    console.log('[env-config] Fallback credentials applied:', {
+      spaceId: window.env.VITE_CONTENTFUL_SPACE_ID,
+      hasToken: !!window.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
+      environmentId: window.env.VITE_CONTENTFUL_ENVIRONMENT_ID,
+      source: window._contentfulInitialized
+    });
+    
+    // Trigger event to notify app that environment variables are loaded
+    window.dispatchEvent(new Event('env-config-loaded'));
+    return true;
+  }
+  
   // Load environment variables from localStorage if available
   function loadFromLocalStorage() {
     try {
@@ -127,20 +162,18 @@
       
       // If runtime config successful, set a flag
       if (configLoaded) {
-        window._contentfulInitialized = true;
+        window._contentfulInitialized = 'runtime-config';
         console.log('[env-config] Runtime config loaded successfully for preview environment');
         return;
       }
       
-      // If runtime config failed, fall back to localStorage
-      console.warn('[env-config] No runtime config found for preview environment, falling back to localStorage');
-      const localStorageLoaded = loadFromLocalStorage();
+      // If runtime config failed, apply hardcoded fallback credentials
+      console.warn('[env-config] No runtime config found for preview environment, applying fallback credentials');
+      applyFallbackCredentials();
+      return;
       
-      if (localStorageLoaded) {
-        window._contentfulInitialized = 'localStorage';
-      } else {
-        window._contentfulInitialized = false;
-      }
+      // Note: We're not falling back to localStorage in preview environments anymore,
+      // instead we use hardcoded credentials for better reliability
     } else {
       // For development, prefer localStorage
       const localStorageLoaded = loadFromLocalStorage();
