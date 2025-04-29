@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -10,6 +11,7 @@ import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
+import BusinessGoalsCompact from '@/components/businessGoals/BusinessGoalsCompact';
 
 const BusinessGoalsLanding = () => {
   const { data: featuredContent, isLoading, error } = useFeaturedBusinessGoalsContent();
@@ -44,7 +46,7 @@ const BusinessGoalsLanding = () => {
               {featuredContent.title}
             </h2>
             {featuredContent.description && (
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
                 {featuredContent.description}
               </p>
             )}
@@ -61,31 +63,10 @@ const BusinessGoalsLanding = () => {
             <p className="text-gray-600">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
           </div>
         ) : featuredContent?.businessGoals && featuredContent.businessGoals.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredContent.businessGoals.filter(goal => goal.visible !== false).map((goal) => (
-              <Card key={goal.id} className="group hover:border-vending-blue transition-colors duration-300">
-                <CardHeader>
-                  {goal.icon && (
-                    <div className="bg-vending-blue/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
-                      <ArrowRight className="h-6 w-6 text-vending-blue" />
-                    </div>
-                  )}
-                  <CardTitle className="text-xl">{goal.title}</CardTitle>
-                  <CardDescription>{goal.description}</CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Button 
-                    variant="ghost" 
-                    className="p-0 hover:bg-transparent text-vending-blue font-medium"
-                    onClick={() => navigate(`/business/${goal.slug}`)}
-                  >
-                    Learn more
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+          <BusinessGoalsCompact 
+            goals={featuredContent.businessGoals.filter(goal => goal.visible !== false)}
+            columnCount={2}
+          />
         ) : (
           <div className="text-center py-12">
             <h3 className="text-xl font-semibold text-gray-900 mb-2">No Featured Business Goals</h3>

@@ -6,6 +6,7 @@ import {
   BarChart, Truck, Users 
 } from 'lucide-react';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
+import BusinessGoalsCompact from '../businessGoals/BusinessGoalsCompact';
 
 const BusinessGoalsSection = () => {
   const { data: homeContent } = useHomePageContent();
@@ -17,37 +18,49 @@ const BusinessGoalsSection = () => {
       icon: <TrendingUp className="h-10 w-10 text-vending-blue" />,
       title: "Expand Footprint",
       description: "Grow your business with scalable vending solutions that adapt to various locations and needs.",
-      link: "/business-goals/expand-footprint"
+      link: "/business-goals/expand-footprint",
+      id: "expand-footprint",
+      slug: "expand-footprint"
     },
     {
       icon: <ShoppingBag className="h-10 w-10 text-vending-blue" />,
       title: "Buy Online, Pickup In Store (BOPIS)",
       description: "Enable customers to order ahead and collect purchases from your vending machines.",
-      link: "/business-goals/bopis"
+      link: "/business-goals/bopis",
+      id: "bopis",
+      slug: "bopis"
     },
     {
       icon: <Activity className="h-10 w-10 text-vending-blue" />,
       title: "Marketing & Promotions",
       description: "Drive sales with targeted promotions, digital advertising, and customer loyalty programs.",
-      link: "/business-goals/marketing"
+      link: "/business-goals/marketing",
+      id: "marketing",
+      slug: "marketing"
     },
     {
       icon: <BarChart className="h-10 w-10 text-vending-blue" />,
       title: "Data & Analytics",
       description: "Leverage powerful insights to optimize your inventory, pricing, and machine placement.",
-      link: "/business-goals/data"
+      link: "/business-goals/data",
+      id: "data",
+      slug: "data"
     },
     {
       icon: <Truck className="h-10 w-10 text-vending-blue" />,
       title: "Fleet Management",
       description: "Efficiently manage your entire network of machines with centralized controls and monitoring.",
-      link: "/business-goals/fleet-management"
+      link: "/business-goals/fleet-management",
+      id: "fleet-management",
+      slug: "fleet-management"
     },
     {
       icon: <Users className="h-10 w-10 text-vending-blue" />,
       title: "Customer Satisfaction",
       description: "Enhance user experience with intuitive interfaces, reliable service, and modern payment options.",
-      link: "/business-goals/customer-satisfaction"
+      link: "/business-goals/customer-satisfaction",
+      id: "customer-satisfaction",
+      slug: "customer-satisfaction"
     }
   ];
   
@@ -68,26 +81,7 @@ const BusinessGoalsSection = () => {
           </Button>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {businessGoals.map((goal, index) => (
-            <div key={index} className="border border-gray-200 rounded-lg p-6 bg-white hover:border-vending-blue transition-colors duration-300 card-hover">
-              <div className="mb-4">
-                {goal.icon}
-              </div>
-              <h3 className="text-xl font-semibold mb-3">{goal.title}</h3>
-              <p className="text-gray-600 mb-4">{goal.description}</p>
-              <Link 
-                to={goal.link} 
-                className="text-vending-blue hover:text-vending-blue-dark font-medium inline-flex items-center"
-              >
-                Learn more
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
-          ))}
-        </div>
+        <BusinessGoalsCompact goals={businessGoals as any[]} columnCount={3} />
       </div>
     </section>
   );

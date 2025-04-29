@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
+import BusinessGoalsCompact from './BusinessGoalsCompact';
 
 interface BusinessGoalsGridProps {
   title?: string;
@@ -13,6 +14,8 @@ interface BusinessGoalsGridProps {
   goals: CMSBusinessGoal[];
   isLoading?: boolean;
   error?: Error | null;
+  compactView?: boolean;
+  columnCount?: 1 | 2 | 3;
 }
 
 const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
@@ -20,7 +23,9 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
   description,
   goals,
   isLoading = false,
-  error = null
+  error = null,
+  compactView = false,
+  columnCount = 3
 }) => {
   const navigate = useNavigate();
 
@@ -70,36 +75,40 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {goals.map((goal) => (
-            <div 
-              key={goal.id} 
-              className="border border-gray-200 rounded-lg p-6 bg-white hover:border-vending-blue transition-colors duration-300 card-hover"
-            >
-              <div className="mb-4">
-                {goal.icon ? (
-                  <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full w-12 h-12 flex items-center justify-center text-vending-blue">
-                    <MachineTypeIcon type={goal.icon} />
-                  </div>
-                ) : (
-                  <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full w-12 h-12 flex items-center justify-center text-vending-blue">
-                    <ArrowRight className="h-6 w-6" />
-                  </div>
-                )}
-              </div>
-              <h3 className="text-xl font-semibold mb-3">{goal.title}</h3>
-              <p className="text-gray-600 mb-4 line-clamp-3">{goal.description}</p>
-              <Button 
-                variant="ghost" 
-                className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
-                onClick={() => navigate(`/business-goals/${goal.slug}`)}
+        {compactView ? (
+          <BusinessGoalsCompact goals={goals} columnCount={columnCount} />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {goals.map((goal) => (
+              <div 
+                key={goal.id} 
+                className="border border-gray-200 rounded-lg p-6 bg-white hover:border-vending-blue transition-colors duration-300 card-hover"
               >
-                Learn more
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
+                <div className="mb-4">
+                  {goal.icon ? (
+                    <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full w-12 h-12 flex items-center justify-center text-vending-blue">
+                      <MachineTypeIcon type={goal.icon} />
+                    </div>
+                  ) : (
+                    <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full w-12 h-12 flex items-center justify-center text-vending-blue">
+                      <ArrowRight className="h-6 w-6" />
+                    </div>
+                  )}
+                </div>
+                <h3 className="text-xl font-semibold mb-3">{goal.title}</h3>
+                <p className="text-gray-600 mb-4 line-clamp-3">{goal.description}</p>
+                <Button 
+                  variant="ghost" 
+                  className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
+                  onClick={() => navigate(`/business-goals/${goal.slug}`)}
+                >
+                  Learn more
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
