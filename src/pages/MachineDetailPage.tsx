@@ -17,6 +17,8 @@ const MachineDetailPage = () => {
   // Force use of Contentful provider for this page
   useEffect(() => {
     forceContentfulProvider();
+    // Scroll to the top of the page when component mounts
+    window.scrollTo(0, 0);
   }, []);
 
   console.log('MachineDetailPage - Route params:', { slug, machineId, identifier });

@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
@@ -12,6 +12,11 @@ const ContentfulMachineDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: machine, isLoading, error } = useContentfulMachine(slug);
   const { data: testimonialSection } = useTestimonialSection('machines');
+
+  // Scroll to top when the component mounts or slug changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
 
   const formattedMachine = useMemo(() => {
     if (!machine) return null;

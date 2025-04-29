@@ -45,7 +45,7 @@ const FeaturesSection = () => {
             icon={<Award className="h-8 w-8" />}
             title="Business Goal Focused"
             description="Meet your specific objectives with custom solutions for BOPIS, loss prevention, marketing, and more."
-            link="/goals"
+            link="/business-goals"
           />
           <FeatureCard 
             icon={<Globe className="h-8 w-8" />}
@@ -57,19 +57,19 @@ const FeaturesSection = () => {
             icon={<BarChart4 className="h-8 w-8" />}
             title="Advanced Analytics"
             description="Gain valuable insights with real-time reporting and analytics to optimize your operations."
-            link="/technology/data"
+            link="/technology"
           />
           <FeatureCard 
             icon={<ShieldCheck className="h-8 w-8" />}
             title="Enterprise Security"
             description="Protect your business and customer data with our robust security infrastructure."
-            link="/technology/security"
+            link="/technology"
           />
           <FeatureCard 
             icon={<Zap className="h-8 w-8" />}
             title="Seamless Integration"
             description="Connect with existing systems through our open standards and third-party integration capabilities."
-            link="/technology/integrations"
+            link="/technology"
           />
         </div>
       </div>
