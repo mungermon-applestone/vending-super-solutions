@@ -1,3 +1,4 @@
+
 export interface CMSImage {
   id: string;
   url: string;
@@ -53,6 +54,28 @@ export interface BusinessGoal {
   image?: CMSImage;
   icon?: string;
   visible: boolean;
+  benefits?: string[];
+  features?: BusinessGoalFeature[];
+  video?: CMSVideo;
+  recommendedMachines?: CMSMachine[];
+  displayOrder?: number;
+  showOnHomepage?: boolean;
+  homepageOrder?: number;
+}
+
+export interface BusinessGoalFeature {
+  id: string;
+  title: string;
+  description?: string;
+  icon?: string;
+  screenshot?: CMSImage;
+  display_order?: number;
+}
+
+export interface CMSVideo {
+  id: string;
+  url: string | null;
+  title: string;
 }
 
 export interface CaseStudy {
@@ -76,10 +99,18 @@ export interface Machine {
   title: string;
   slug: string;
   description: string;
+  type?: string;
+  temperature?: string;
   product_types: string[];
   business_goals: string[];
   visible: boolean;
   image?: CMSImage;
+  images?: CMSImage[];
+  features?: string[];
+  specs?: Record<string, string>;
+  displayOrder?: number;
+  showOnHomepage?: boolean;
+  homepageOrder?: number;
 }
 
 export interface ProductType {
@@ -88,7 +119,21 @@ export interface ProductType {
   slug: string;
   description: string;
   image?: CMSImage;
+  benefits?: string[];
+  features?: ProductFeature[];
   visible: boolean;
+  recommendedMachines?: CMSMachine[];
+  video?: CMSVideo;
+  displayOrder?: number;
+  showOnHomepage?: boolean;
+  homepageOrder?: number;
+}
+
+export interface ProductFeature {
+  id: string;
+  title: string;
+  description?: string;
+  icon?: string;
 }
 
 export interface Testimonial {
@@ -106,3 +151,8 @@ export interface QueryOptions {
   page?: number;
   pageSize?: number;
 }
+
+// Type aliases for better clarity
+export type CMSBusinessGoal = BusinessGoal;
+export type CMSProductType = ProductType;
+export type CMSMachine = Machine;

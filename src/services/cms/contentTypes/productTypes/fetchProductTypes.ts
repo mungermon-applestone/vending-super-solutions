@@ -35,6 +35,16 @@ export async function fetchProductTypes(filters?: any): Promise<CMSProductType[]
       if (filters.visible !== undefined) {
         query['fields.visible'] = filters.visible;
       }
+      if (filters.showOnHomepage !== undefined) {
+        query['fields.showOnHomepage'] = filters.showOnHomepage;
+      }
+    }
+    
+    // Apply sorting if specified or default to displayOrder
+    if (filters && filters.sort) {
+      query['order'] = filters.sort;
+    } else {
+      query['order'] = 'fields.displayOrder,fields.title';
     }
     
     console.log('[fetchProductTypes] Query:', query);
@@ -61,6 +71,20 @@ export async function fetchProductTypes(filters?: any): Promise<CMSProductType[]
         icon: feature.fields.icon || undefined
       })) : [],
       visible: !!entry.fields.visible,
+      displayOrder: entry.fields.displayOrder ? Number(entry.fields.displayOrder) : undefined,
+      showOnHomepage: !!entry.fields.showOnHomepage,
+      homepageOrder: entry.fields.homepageOrder ? Number(entry.fields.homepageOrder) : undefined,
+      recommendedMachines: entry.fields.recommendedMachines ? 
+        (entry.fields.recommendedMachines as any[]).map(machine => ({
+          id: machine.sys.id,
+          slug: machine.fields.slug,
+          title: machine.fields.title,
+          description: machine.fields.description,
+          image: machine.fields.images?.[0] ? {
+            url: `https:${machine.fields.images[0].fields.file.url}`,
+            alt: machine.fields.images[0].fields.title || machine.fields.title
+          } : undefined
+        })) : []
     }));
   } catch (error) {
     console.error('[fetchProductTypes] Error fetching product types:', error);

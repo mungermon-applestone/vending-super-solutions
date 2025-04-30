@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { transformMachineData } from '../../utils/transformers';
 
 /**
- * Fetch machines from the CMS
+ * Fetch machines from the CMS with sorting options
  */
 export async function fetchMachines<T = any>(params: Record<string, any> = {}): Promise<T[]> {
   try {
@@ -17,6 +17,9 @@ export async function fetchMachines<T = any>(params: Record<string, any> = {}): 
         type,
         temperature,
         description,
+        display_order,
+        show_on_homepage,
+        homepage_order,
         machine_images (
           id,
           url,
@@ -49,10 +52,22 @@ export async function fetchMachines<T = any>(params: Record<string, any> = {}): 
     // Apply filters if provided
     query = applyFiltersToQuery(query, params);
     
+    // Apply sorting
+    if (params.sort) {
+      query = query.order(params.sort);
+    } else if (params.showOnHomepage) {
+      // If showing homepage items, sort by homepage_order
+      query = query.order('homepage_order', { ascending: true, nullsLast: true });
+    } else {
+      // Default sort by display_order then title
+      query = query.order('display_order', { ascending: true, nullsLast: true })
+                  .order('title');
+    }
+    
     // Print the final query for debugging
     console.log('[fetchMachines] Running query with filters:', params);
     
-    const { data, error } = await query.order('title');
+    const { data, error } = await query;
     
     if (error) {
       console.error('[fetchMachines] Error fetching machines:', error);
@@ -90,6 +105,10 @@ function applyFiltersToQuery(query: any, params: Record<string, any>) {
   
   if (params.id) {
     query = query.eq('id', params.id);
+  }
+  
+  if (params.showOnHomepage !== undefined) {
+    query = query.eq('show_on_homepage', params.showOnHomepage);
   }
   
   return query;

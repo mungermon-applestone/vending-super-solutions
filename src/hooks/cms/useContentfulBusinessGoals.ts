@@ -1,16 +1,35 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { CMSBusinessGoal } from '@/types/cms';
 import { ContentfulBusinessGoal, ContentfulVideo } from '@/types/contentful';
 
-export function useContentfulBusinessGoals() {
+export function useContentfulBusinessGoals(options?: {
+  showOnHomepage?: boolean;
+  sort?: 'homepageOrder' | 'displayOrder';
+}) {
   return useQuery({
-    queryKey: ['contentful', 'businessGoals'],
+    queryKey: ['contentful', 'businessGoals', options],
     queryFn: async () => {
-      console.log('[useContentfulBusinessGoals] Fetching all business goals');
+      console.log('[useContentfulBusinessGoals] Fetching all business goals with options:', options);
       try {
-        const entries = await fetchContentfulEntries<ContentfulBusinessGoal>('businessGoal');
+        // Build query params
+        const queryParams: Record<string, any> = {};
+        
+        if (options?.showOnHomepage !== undefined) {
+          queryParams['fields.showOnHomepage'] = options.showOnHomepage;
+        }
+        
+        // Determine sorting
+        let orderField = 'sys.createdAt';
+        if (options?.sort === 'homepageOrder' && options?.showOnHomepage) {
+          orderField = 'fields.homepageOrder';
+        } else if (options?.sort === 'displayOrder' || !options?.sort) {
+          orderField = 'fields.displayOrder';
+        }
+        
+        queryParams['order'] = orderField;
+        
+        const entries = await fetchContentfulEntries<ContentfulBusinessGoal>('businessGoal', queryParams);
         
         console.log('[useContentfulBusinessGoals] Raw entries:', entries);
         

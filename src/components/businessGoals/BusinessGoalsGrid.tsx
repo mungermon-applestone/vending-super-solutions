@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CMSBusinessGoal } from '@/types/cms';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,6 +16,7 @@ interface BusinessGoalsGridProps {
   compactView?: boolean;
   columnCount?: 1 | 2 | 3 | 4;
   ultraCompact?: boolean;
+  isHomepage?: boolean;
 }
 
 const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
@@ -27,9 +27,33 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
   error = null,
   compactView = false,
   columnCount = 3,
-  ultraCompact = false
+  ultraCompact = false,
+  isHomepage = false
 }) => {
   const navigate = useNavigate();
+
+  // Sort goals based on order properties
+  const sortedGoals = useMemo(() => {
+    if (!goals || goals.length === 0) return [];
+    
+    return [...goals].sort((a, b) => {
+      // For homepage, use homepageOrder
+      if (isHomepage) {
+        const orderA = a.homepageOrder ?? 999;
+        const orderB = b.homepageOrder ?? 999;
+        if (orderA !== orderB) return orderA - orderB;
+      } 
+      // Otherwise use displayOrder
+      else {
+        const orderA = a.displayOrder ?? 999;
+        const orderB = b.displayOrder ?? 999;
+        if (orderA !== orderB) return orderA - orderB;
+      }
+      
+      // Fall back to title sort if orders are the same
+      return a.title.localeCompare(b.title);
+    });
+  }, [goals, isHomepage]);
 
   if (isLoading) {
     return (
@@ -58,7 +82,7 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
     );
   }
 
-  if (goals.length === 0) {
+  if (sortedGoals.length === 0) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-md p-6 text-center">
         <h3 className="text-lg font-semibold text-gray-800 mb-2">No Business Goals Found</h3>
@@ -78,10 +102,10 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
         )}
 
         {compactView ? (
-          <BusinessGoalsCompact goals={goals} columnCount={columnCount} ultraCompact={ultraCompact} />
+          <BusinessGoalsCompact goals={sortedGoals} columnCount={columnCount} ultraCompact={ultraCompact} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {goals.map((goal) => (
+            {sortedGoals.map((goal) => (
               <div 
                 key={goal.id} 
                 className="border border-gray-200 rounded-lg p-6 bg-white hover:border-vending-blue transition-colors duration-300 card-hover"

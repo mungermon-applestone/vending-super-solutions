@@ -1,15 +1,20 @@
-
 import { CMSBusinessGoal } from '@/types/cms';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Fetches all business goals from the database.
+ * @param options Optional query parameters including filters and sorting
  * @returns A promise that resolves to an array of CMSBusinessGoal objects.
  */
-export const fetchBusinessGoals = async (): Promise<CMSBusinessGoal[]> => {
+export const fetchBusinessGoals = async (options?: { 
+  filters?: Record<string, any>,
+  sort?: string
+}): Promise<CMSBusinessGoal[]> => {
   try {
+    const { filters, sort } = options || {};
+    
     // First, fetch all business goals
-    const { data: goalsData, error: goalsError } = await supabase
+    let query = supabase
       .from('business_goals')
       .select(`
         id,
@@ -21,8 +26,35 @@ export const fetchBusinessGoals = async (): Promise<CMSBusinessGoal[]> => {
         visible,
         created_at,
         updated_at,
-        icon
+        icon,
+        display_order,
+        show_on_homepage,
+        homepage_order
       `);
+
+    // Apply filters if provided
+    if (filters) {
+      if (filters.visible !== undefined) {
+        query = query.eq('visible', filters.visible);
+      }
+      if (filters.showOnHomepage !== undefined) {
+        query = query.eq('show_on_homepage', filters.showOnHomepage);
+      }
+    }
+    
+    // Apply sorting
+    if (sort) {
+      query = query.order(sort);
+    } else if (filters?.showOnHomepage) {
+      // If showing homepage items, sort by homepage_order
+      query = query.order('homepage_order', { ascending: true, nullsLast: true });
+    } else {
+      // Default sorting by display_order and then title
+      query = query.order('display_order', { ascending: true, nullsLast: true })
+                  .order('title', { ascending: true });
+    }
+
+    const { data: goalsData, error: goalsError } = await query;
 
     if (goalsError) {
       console.error("Error fetching business goals:", goalsError);
@@ -44,6 +76,9 @@ export const fetchBusinessGoals = async (): Promise<CMSBusinessGoal[]> => {
       created_at: goal.created_at,
       updated_at: goal.updated_at,
       icon: goal.icon,
+      displayOrder: goal.display_order,
+      showOnHomepage: goal.show_on_homepage,
+      homepageOrder: goal.homepage_order,
       image: goal.image_url ? {
         id: `img-${Math.random().toString(36).substr(2, 9)}`,
         url: goal.image_url,
