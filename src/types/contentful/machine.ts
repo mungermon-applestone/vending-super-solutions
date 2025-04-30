@@ -30,6 +30,17 @@ export interface ContentfulEntry {
         title?: string;
       };
     }>;
+    thumbnail?: {
+      sys?: {
+        id: string;
+      };
+      fields?: {
+        file?: {
+          url?: string;
+        };
+        title?: string;
+      };
+    };
     dimensions?: string;
     weight?: string;
     capacity?: string;
@@ -62,6 +73,17 @@ export interface ContentfulEntry {
       title?: string;
     };
   }>;
+  thumbnail?: {
+    sys?: {
+      id: string;
+    };
+    fields?: {
+      file?: {
+        url?: string;
+      };
+      title?: string;
+    };
+  };
   dimensions?: string;
   weight?: string;
   capacity?: string;

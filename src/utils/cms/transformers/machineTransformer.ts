@@ -39,6 +39,19 @@ export const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => 
     });
   }
   
+  // Extract thumbnail if available
+  let thumbnail = undefined;
+  if (fields.thumbnail) {
+    const thumbFields = fields.thumbnail.fields || {};
+    const thumbUrl = thumbFields.file?.url ? `https:${thumbFields.file.url}` : '';
+    const thumbAlt = thumbFields.title || title || '';
+    thumbnail = {
+      id: fields.thumbnail.sys?.id || '',
+      url: thumbUrl,
+      alt: thumbAlt
+    };
+  }
+  
   // Safe access to specs with proper fallbacks
   const specs = {
     dimensions: fields.dimensions || (fields.specs?.dimensions) || '',
@@ -62,6 +75,7 @@ export const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => 
     temperature: temperature,
     features: features,
     images: images,
+    thumbnail: thumbnail, // Add thumbnail to the returned machine object
     specs: specs
   };
   
@@ -78,4 +92,3 @@ export const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => 
     throw validationError;
   }
 };
-

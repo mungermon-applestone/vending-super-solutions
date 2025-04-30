@@ -2,57 +2,52 @@
 import { CMSMachine } from '@/types/cms';
 
 /**
- * Validates machine data to ensure it conforms to the CMSMachine interface
+ * Validates machine data to ensure it meets minimum requirements
  * 
  * @param machine - The machine data to validate
- * @returns The validated machine data with proper typing
+ * @returns The validated machine data
  * @throws Error if validation fails
  */
-export const validateMachineData = (machine: any): CMSMachine => {
-  console.log('Validating machine data:', machine);
-  
-  // Check required fields
+export const validateMachineData = (machine: CMSMachine): CMSMachine => {
+  // Ensure required fields are present
   if (!machine.id) {
-    throw new Error('Machine missing required field: id');
+    throw new Error('Machine must have an ID');
   }
   
   if (!machine.title) {
-    throw new Error('Machine missing required field: title');
+    throw new Error('Machine must have a title');
   }
   
   if (!machine.slug) {
-    throw new Error('Machine missing required field: slug');
+    throw new Error('Machine must have a slug');
   }
   
-  // Ensure type is strictly "vending" or "locker"
-  const validType = machine.type === 'locker' ? 'locker' : 'vending';
+  // Validate slug format
+  if (!/^[a-z0-9-]+$/.test(machine.slug)) {
+    console.warn(`Machine slug "${machine.slug}" contains invalid characters, this may cause issues`);
+  }
   
-  // Validate images array
-  const validatedImages = Array.isArray(machine.images) 
-    ? machine.images.map(img => ({
-        id: img.id || `img-${Math.random().toString(36).substring(2, 10)}`,
-        url: img.url || '',
-        alt: img.alt || machine.title || 'Machine image'
-      }))
-    : [];
+  // Validate type
+  if (!['vending', 'locker'].includes(machine.type)) {
+    console.warn(`Machine type "${machine.type}" is not recognized, defaulting to "vending"`);
+    machine.type = 'vending';
+  }
   
-  // Validate and sanitize specs
-  const validatedSpecs = machine.specs || {};
+  // Ensure arrays are defined
+  machine.features = machine.features || [];
+  machine.images = machine.images || [];
   
-  // Return validated machine
-  const validatedMachine: CMSMachine = {
-    id: machine.id,
-    title: machine.title,
-    slug: machine.slug,
-    type: validType as 'vending' | 'locker',
-    description: machine.description || '',
-    temperature: machine.temperature || 'ambient',
-    features: Array.isArray(machine.features) ? machine.features : [],
-    images: validatedImages,
-    specs: validatedSpecs
-  };
+  // Validate thumbnail if present
+  if (machine.thumbnail) {
+    if (!machine.thumbnail.url) {
+      console.warn('Machine thumbnail missing URL, this may cause display issues');
+    }
+    if (!machine.thumbnail.alt) {
+      console.warn('Machine thumbnail missing alt text, adding default alt text');
+      machine.thumbnail.alt = `${machine.title} thumbnail`;
+    }
+  }
   
-  console.log('Validation successful:', validatedMachine);
-  return validatedMachine;
+  // Return the validated machine
+  return machine;
 };
-

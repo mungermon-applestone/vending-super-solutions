@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CMSProductType } from '@/types/cms';
 import ProductCard from '@/components/products/ProductCard';
@@ -35,6 +36,14 @@ const ProductGrid = ({ products, isHomepage = false }: ProductGridProps) => {
       return a.title.localeCompare(b.title);
     });
   }, [products, isHomepage]);
+  
+  // Add logging to help diagnose thumbnail issues
+  console.log('[ProductGrid] Products data:', sortedProducts.map(product => ({
+    id: product.id,
+    title: product.title,
+    hasThumbnail: !!product.thumbnail,
+    thumbnailUrl: product.thumbnail?.url || 'none'
+  })));
   
   // Create breadcrumb items for schema
   const breadcrumbItems = [
