@@ -9,19 +9,19 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           {/* Company Info */}
           <div className="lg:col-span-2">
-            <Link to="/" className="text-2xl font-bold mb-4 block">VendingSoft</Link>
+            <Link to="/" className="text-2xl font-bold mb-4 block">Applestone Solutions</Link>
             <p className="text-gray-300 mb-6 max-w-md">
-              Advanced vending software solutions that integrate with multiple machines and offer versatile features for various products and business needs.
+              Sell Anyting, Anywhere. It's the future of retail. 
             </p>
             <div className="flex flex-col space-y-2">
               <a href="mailto:info@vendingsoft.com" className="text-gray-300 hover:text-white flex items-center gap-2 transition-colors">
                 <Mail size={16} /> info@vendingsoft.com
               </a>
               <a href="tel:+18005551234" className="text-gray-300 hover:text-white flex items-center gap-2 transition-colors">
-                <Phone size={16} /> 1-800-555-1234
+                <Phone size={16} /> (909) 314-1011
               </a>
               <address className="text-gray-300 not-italic flex items-center gap-2">
-                <MapPin size={16} /> 123 Vending Way, Suite 400<br />San Francisco, CA 94103
+                <MapPin size={16} /> 3607 Main St., <br />Stone Ridge, NY 12484
               </address>
             </div>
           </div>
@@ -69,7 +69,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/blog" className="text-gray-300 hover:text-white flex items-center gap-1 transition-colors">
-                  <ChevronRight size={14} /> Blog
+                  <ChevronRight size={14} /> Updates
                 </Link>
               </li>
               <li>
