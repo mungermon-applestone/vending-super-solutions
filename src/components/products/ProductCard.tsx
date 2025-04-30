@@ -16,11 +16,16 @@ const ProductCard = ({ product }: ProductCardProps) => {
   // Extract the slug but ensure it's valid
   const productSlug = product?.slug || '';
   
+  // Determine which image to use - thumbnail has priority over main image
+  const imageToUse = product.thumbnail || product.image;
+  
   // Add logging to track product data
   console.log(`[ProductCard] Rendering card for: ${product.title}`, {
     id: product.id,
     slug: productSlug,
-    hasImage: !!product.image
+    hasImage: !!imageToUse,
+    hasThumbnail: !!product.thumbnail,
+    imageSource: product.thumbnail ? 'thumbnail' : (product.image ? 'main image' : 'none')
   });
   
   return (
@@ -31,11 +36,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
       aria-labelledby={`product-title-${product.id}`}
     >
       <div className="w-full h-48 overflow-hidden bg-gray-100">
-        {product.image ? (
+        {imageToUse ? (
           <Image 
-            src={product.image.url} 
-            alt={product.image.alt || product.title} 
-            className="w-full h-full object-cover"
+            src={imageToUse.url} 
+            alt={imageToUse.alt || product.title}
+            className="w-full h-full" 
+            objectFit={product.thumbnail ? 'contain' : 'cover'}
+            isThumbnail={!!product.thumbnail}
             itemProp="image"
           />
         ) : (

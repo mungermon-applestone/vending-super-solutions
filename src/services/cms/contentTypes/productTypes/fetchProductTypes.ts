@@ -60,21 +60,29 @@ export async function fetchProductTypes(filters?: any): Promise<CMSProductType[]
         title: entry.fields?.title,
         hasSlug: !!entry.fields?.slug,
         hasImage: !!entry.fields?.image,
+        hasThumbnail: !!entry.fields?.thumbnail,
         hasRecommendedMachines: Array.isArray(entry.fields?.recommendedMachines),
         recommendedMachineCount: Array.isArray(entry.fields?.recommendedMachines) ? entry.fields.recommendedMachines.length : 0
       });
 
       // Safely process the entry with null checks
-      return {
+      const processedEntry: CMSProductType = {
         id: entry.sys.id,
         title: entry.fields.title as string,
         slug: entry.fields.slug as string,
         description: entry.fields.description as string,
         benefits: Array.isArray(entry.fields.benefits) ? entry.fields.benefits as string[] : [],
+        // Process main image if available
         image: entry.fields.image ? {
           id: (entry.fields.image as any).sys.id,
           url: `https:${(entry.fields.image as any).fields.file.url}`,
           alt: (entry.fields.image as any).fields.title || entry.fields.title,
+        } : undefined,
+        // Process thumbnail if available
+        thumbnail: entry.fields.thumbnail ? {
+          id: (entry.fields.thumbnail as any).sys.id,
+          url: `https:${(entry.fields.thumbnail as any).fields.file.url}`,
+          alt: (entry.fields.thumbnail as any).fields.title || entry.fields.title,
         } : undefined,
         features: entry.fields.features ? (entry.fields.features as any[]).map(feature => ({
           id: feature.sys.id,
@@ -86,24 +94,40 @@ export async function fetchProductTypes(filters?: any): Promise<CMSProductType[]
         displayOrder: entry.fields.displayOrder ? Number(entry.fields.displayOrder) : undefined,
         showOnHomepage: !!entry.fields.showOnHomepage,
         homepageOrder: entry.fields.homepageOrder ? Number(entry.fields.homepageOrder) : undefined,
-        recommendedMachines: entry.fields.recommendedMachines && Array.isArray(entry.fields.recommendedMachines) ? 
-          (entry.fields.recommendedMachines as any[]).map(machine => {
+      };
+      
+      // Process recommended machines if available
+      if (entry.fields.recommendedMachines && Array.isArray(entry.fields.recommendedMachines)) {
+        processedEntry.recommendedMachines = (entry.fields.recommendedMachines as any[])
+          .map(machine => {
             if (!machine || !machine.fields) {
               console.warn('[fetchProductTypes] Invalid machine in recommendedMachines', machine);
               return null;
             }
+            
             return {
               id: machine.sys.id,
               slug: machine.fields.slug,
               title: machine.fields.title,
               description: machine.fields.description,
+              // Include main image if available
               image: machine.fields.images && machine.fields.images[0] ? {
                 url: `https:${machine.fields.images[0].fields.file.url}`,
                 alt: machine.fields.images[0].fields.title || machine.fields.title
+              } : undefined,
+              // Include thumbnail if available
+              thumbnail: machine.fields.thumbnail ? {
+                url: `https:${machine.fields.thumbnail.fields.file.url}`,
+                alt: machine.fields.thumbnail.fields.title || machine.fields.title
               } : undefined
             };
-          }).filter(Boolean) : [] // Filter out any null values
-      };
+          })
+          .filter(Boolean); // Filter out any null values
+      } else {
+        processedEntry.recommendedMachines = [];
+      }
+      
+      return processedEntry;
     });
   } catch (error) {
     console.error('[fetchProductTypes] Error fetching product types:', error);

@@ -12,6 +12,7 @@ export interface CMSProductType {
   slug: string;
   description: string;
   image?: CMSImage;
+  thumbnail?: CMSImage;
   created_at?: string;
   updated_at?: string;
   benefits?: string[];
@@ -27,6 +28,20 @@ export interface CMSProductType {
   displayOrder?: number;
   showOnHomepage?: boolean;
   homepageOrder?: number;
+  recommendedMachines?: {
+    id: string;
+    slug: string;
+    title: string;
+    description: string;
+    image?: {
+      url: string;
+      alt?: string;
+    };
+    thumbnail?: {
+      url: string;
+      alt?: string;
+    };
+  }[];
 }
 
 export interface CMSMachine {

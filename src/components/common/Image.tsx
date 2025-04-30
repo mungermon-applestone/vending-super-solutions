@@ -5,15 +5,37 @@ interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
   className?: string;
+  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
+  aspectRatio?: string;
+  isThumbnail?: boolean;
 }
 
-const Image: React.FC<ImageProps> = ({ src, alt, className = '', ...props }) => {
+const Image: React.FC<ImageProps> = ({ 
+  src, 
+  alt, 
+  className = '', 
+  objectFit = 'cover',
+  aspectRatio,
+  isThumbnail = false,
+  ...props 
+}) => {
+  // Apply object fit class based on the prop
+  const objectFitClass = `object-${objectFit}`;
+  
+  // Apply aspect ratio style if provided
+  const aspectRatioStyle = aspectRatio ? { aspectRatio } : {};
+
   return (
     <img 
       src={src} 
       alt={alt}
-      className={className}
+      className={`${objectFitClass} ${className}`}
       loading="lazy"
+      style={{
+        ...aspectRatioStyle,
+        ...props.style
+      }}
+      data-thumbnail={isThumbnail ? 'true' : undefined}
       {...props}
     />
   );
