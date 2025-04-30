@@ -36,7 +36,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         asChild
         variant={isBlogActive ? "default" : "ghost"}
       >
-        <Link to="/blog">Blog</Link>
+        <Link to="/blog">Updates</Link>
       </Button>
       <Button 
         asChild
