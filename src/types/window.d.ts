@@ -11,4 +11,5 @@ interface Window {
     [key: string]: string | undefined;
   };
   _contentfulInitialized?: boolean | string;
+  _contentfulInitializedSource?: string;
 }
