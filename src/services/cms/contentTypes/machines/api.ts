@@ -57,10 +57,10 @@ export async function fetchMachines<T = any>(params: Record<string, any> = {}): 
       query = query.order(params.sort);
     } else if (params.showOnHomepage) {
       // If showing homepage items, sort by homepage_order
-      query = query.order('homepage_order', { ascending: true, nullsLast: true });
+      query = query.order('homepage_order', { ascending: true });
     } else {
       // Default sort by display_order then title
-      query = query.order('display_order', { ascending: true, nullsLast: true })
+      query = query.order('display_order', { ascending: true })
                   .order('title');
     }
     

@@ -47,10 +47,10 @@ export const fetchBusinessGoals = async (options?: {
       query = query.order(sort);
     } else if (filters?.showOnHomepage) {
       // If showing homepage items, sort by homepage_order
-      query = query.order('homepage_order', { ascending: true, nullsLast: true });
+      query = query.order('homepage_order', { ascending: true });
     } else {
       // Default sorting by display_order and then title
-      query = query.order('display_order', { ascending: true, nullsLast: true })
+      query = query.order('display_order', { ascending: true })
                   .order('title', { ascending: true });
     }
 

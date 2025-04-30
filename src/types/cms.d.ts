@@ -1,8 +1,135 @@
-
 export interface CMSImage {
   id: string;
   url: string;
-  alt?: string;
+  alt: string;
+  width?: number;
+  height?: number;
+}
+
+export interface CMSProductType {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  image?: CMSImage;
+  created_at?: string;
+  updated_at?: string;
+  benefits?: string[];
+  features?: CMSFeature[];
+  examples?: CMSExample[];
+  video?: {
+    title: string;
+    description: string;
+    thumbnailImage: CMSImage;
+    url?: string;
+  };
+  visible?: boolean;
+  displayOrder?: number;
+  showOnHomepage?: boolean;
+  homepageOrder?: number;
+}
+
+export interface CMSMachine {
+  id: string;
+  title: string;
+  slug: string;
+  type: 'vending' | 'locker';
+  description: string;
+  features?: string[];
+  images?: CMSImage[];
+  product_types?: CMSProductType[];
+  created_at?: string;
+  updated_at?: string;
+  temperature?: string;
+  specs?: Record<string, string>;
+  deploymentExamples?: CMSDeploymentExample[];
+  visible?: boolean;
+  displayOrder?: number;
+  showOnHomepage?: boolean;
+  homepageOrder?: number;
+}
+
+export interface CMSTestimonial {
+  id: string;
+  name: string;
+  title: string;
+  company: string;
+  testimonial: string;
+  image_url?: string;
+  rating: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CMSBusinessGoal {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  image?: CMSImage;
+  icon?: string;
+  benefits?: string[];
+  features?: CMSFeature[];
+  visible?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  video?: {
+    id: string;
+    url: string | null;
+    title?: string;
+  };
+  recommendedMachines?: {
+    id: string;
+    slug: string;
+    title: string;
+    description: string;
+    image?: {
+      url: string;
+      alt?: string;
+    };
+  }[];
+  image_url?: string;
+  image_alt?: string;
+  caseStudies?: CMSExample[];
+  displayOrder?: number;
+  showOnHomepage?: boolean;
+  homepageOrder?: number;
+}
+
+export interface CMSTechnology {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  image_alt?: string;
+  visible: boolean;
+  created_at?: string;
+  updated_at?: string;
+  sections?: CMSTechnologySection[];
+  features?: CMSTechnologyFeature[];
+  image?: CMSImage | string;
+}
+
+export interface CMSTechnologySection {
+  id: string;
+  technology_id: string;
+  title: string;
+  description?: string;
+  summary?: string;
+  section_type: string;
+  display_order: number;
+  features?: CMSTechnologyFeature[];
+  images?: CMSTechnologyImage[];
+  bulletPoints?: string[];
+  sectionImage?: {
+    url: string;
+    alt?: string;
+  };
+  image?: {
+    url: string;
+    alt?: string;
+  };
 }
 
 export interface CMSTechnologyFeature {
@@ -12,147 +139,105 @@ export interface CMSTechnologyFeature {
   description?: string;
   icon?: string;
   display_order: number;
-  image?: CMSImage;
+  items?: CMSTechnologyFeatureItem[];
 }
 
-export interface CMSTechnologySection {
+export interface CMSTechnologyFeatureItem {
+  id: string;
+  feature_id: string;
+  text: string;
+  display_order: number;
+}
+
+export interface CMSTechnologyImage {
   id: string;
   technology_id: string;
-  title: string;
-  subtitle?: string;
-  summary?: string;
-  description?: string;
-  section_type?: string;
+  section_id?: string;
+  url: string;
+  alt: string;
+  width?: number;
+  height?: number;
   display_order: number;
-  features: CMSTechnologyFeature[];
-  images?: CMSImage[];
-  bulletPoints?: string[];
-  image?: CMSImage;
-  sectionImage?: CMSImage;
 }
 
-export interface CMSTechnology {
-  id: string;
+export interface CMSFeature {
+  id?: string;
   title: string;
-  slug: string;
-  subtitle?: string;
-  description?: string;
-  sections?: CMSTechnologySection[];
-  visible?: boolean;
-  image?: CMSImage;
-  primaryButtonText?: string;
-  primaryButtonUrl?: string;
-  secondaryButtonText?: string;
-  secondaryButtonUrl?: string;
-}
-
-export interface BusinessGoal {
-  id: string;
-  title: string;
-  slug: string;
   description: string;
-  image?: CMSImage;
-  icon?: string;
-  visible: boolean;
-  benefits?: string[];
-  features?: BusinessGoalFeature[];
-  video?: CMSVideo;
-  recommendedMachines?: CMSMachine[];
-  displayOrder?: number;
-  showOnHomepage?: boolean;
-  homepageOrder?: number;
-}
-
-export interface BusinessGoalFeature {
-  id: string;
-  title: string;
-  description?: string;
-  icon?: string;
+  icon?: string | React.ReactNode;
   screenshot?: CMSImage;
+  screenshotUrl?: string;
+  screenshotAlt?: string;
   display_order?: number;
 }
 
-export interface CMSVideo {
-  id: string;
-  url: string | null;
+export interface CMSExample {
+  id?: string;
   title: string;
+  description: string;
+  image: CMSImage;
+  slug?: string;
+  results?: string[];
+  display_order?: number;
 }
 
-export interface CaseStudy {
+export interface CMSDeploymentExample {
+  id?: string;
+  title: string;
+  description: string;
+  image: CMSImage;
+  display_order?: number;
+}
+
+export interface CMSCaseStudy {
   id: string;
   title: string;
   slug: string;
   summary: string;
   content: string;
+  industry?: string;
+  image_url?: string;
+  image_alt?: string;
   visible: boolean;
-  image?: CMSImage;
+  created_at?: string;
+  updated_at?: string;
+  results?: CMSCaseStudyResult[];
+  testimonial?: CMSCaseStudyTestimonial;
 }
 
-export interface LandingPage {
+export interface CMSCaseStudyResult {
   id: string;
-  key: string;
-  content: string;
+  case_study_id: string;
+  text: string;
+  display_order: number;
 }
 
-export interface Machine {
+export interface CMSCaseStudyTestimonial {
   id: string;
-  title: string;
-  slug: string;
-  description: string;
-  type?: string;
-  temperature?: string;
-  product_types: string[];
-  business_goals: string[];
-  visible: boolean;
-  image?: CMSImage;
-  images?: CMSImage[];
-  features?: string[];
-  specs?: Record<string, string>;
-  displayOrder?: number;
-  showOnHomepage?: boolean;
-  homepageOrder?: number;
-}
-
-export interface ProductType {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  image?: CMSImage;
-  benefits?: string[];
-  features?: ProductFeature[];
-  visible: boolean;
-  recommendedMachines?: CMSMachine[];
-  video?: CMSVideo;
-  displayOrder?: number;
-  showOnHomepage?: boolean;
-  homepageOrder?: number;
-}
-
-export interface ProductFeature {
-  id: string;
-  title: string;
-  description?: string;
-  icon?: string;
-}
-
-export interface Testimonial {
-  id: string;
+  case_study_id: string;
   quote: string;
   author: string;
-  role: string;
-  company: string;
-  image?: CMSImage;
+  company?: string;
+  position?: string;
 }
 
+export interface MockImage {
+  id: string;
+  url: string;
+  alt: string;
+  width?: number;
+  height?: number;
+}
+
+/**
+ * Standard query options interface for CMS operations
+ */
 export interface QueryOptions {
   filters?: Record<string, any>;
-  sort?: string;
-  page?: number;
-  pageSize?: number;
+  limit?: number;
+  offset?: number;
+  orderBy?: string;
+  orderDirection?: 'asc' | 'desc';
+  search?: string;
+  exactMatch?: boolean;
 }
-
-// Type aliases for better clarity
-export type CMSBusinessGoal = BusinessGoal;
-export type CMSProductType = ProductType;
-export type CMSMachine = Machine;
