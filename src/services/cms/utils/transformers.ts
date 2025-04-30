@@ -1,58 +1,62 @@
-
 import { CMSImage, CMSMachine } from '@/types/cms';
 
 /**
- * Transforms raw machine data from the database into the application's CMSMachine format.
- * @param data Raw machine data from the database
- * @returns Array of transformed CMSMachine objects
+ * Transform machine data from Supabase to our app's format
  */
-export function transformMachineData(data: any[]): CMSMachine[] {
-  if (!data || !Array.isArray(data)) return [];
+export function transformMachineData(machinesData: any[]): CMSMachine[] {
+  if (!machinesData || !Array.isArray(machinesData)) {
+    console.warn('[transformMachineData] Invalid machines data:', machinesData);
+    return [];
+  }
   
-  return data.map(machine => {
-    // Extract and transform machine images
-    const images: CMSImage[] = machine.machine_images && Array.isArray(machine.machine_images)
-      ? machine.machine_images
-          .sort((a: any, b: any) => (a.display_order || 999) - (b.display_order || 999))
-          .map((img: any) => ({
-            id: img.id,
-            url: img.url,
-            alt: img.alt || machine.title
-          }))
-      : [];
-    
-    // Extract machine features as simple array of strings
-    const features: string[] = machine.machine_features && Array.isArray(machine.machine_features)
-      ? machine.machine_features
-          .sort((a: any, b: any) => (a.display_order || 999) - (b.display_order || 999))
-          .map((feat: any) => feat.feature)
-      : [];
-    
-    // Extract machine specs into a key-value object
+  return machinesData.map(machine => {
+    const images = (machine.machine_images || []).map((image: any) => ({
+      id: image.id,
+      url: image.url,
+      alt: image.alt || machine.title,
+      width: image.width,
+      height: image.height
+    })).sort((a: any, b: any) => (a.display_order || 999) - (b.display_order || 999));
+
     const specs: Record<string, string> = {};
-    if (machine.machine_specs && Array.isArray(machine.machine_specs)) {
-      machine.machine_specs.forEach((spec: any) => {
-        if (spec.key) specs[spec.key] = spec.value || '';
-      });
-    }
-    
-    // Transform to CMSMachine format
+    (machine.machine_specs || []).forEach((spec: any) => {
+      if (spec.key) {
+        specs[spec.key] = spec.value || '';
+      }
+    });
+
+    const features = (machine.machine_features || [])
+      .map((feature: any) => feature.feature)
+      .filter(Boolean)
+      .sort((a: any, b: any) => (a.display_order || 999) - (b.display_order || 999));
+
+    const deploymentExamples = (machine.deployment_examples || []).map((example: any) => ({
+      id: example.id,
+      title: example.title,
+      description: example.description,
+      display_order: example.display_order,
+      image: {
+        id: `img-${example.id}`,
+        url: example.image_url,
+        alt: example.image_alt || example.title
+      }
+    })).sort((a: any, b: any) => (a.display_order || 999) - (b.display_order || 999));
+
     return {
       id: machine.id,
       slug: machine.slug,
       title: machine.title,
-      type: machine.type || 'vending',
-      temperature: machine.temperature || 'ambient',
-      description: machine.description || '',
-      visible: true,  // We already filter for visible=true in the query
+      type: machine.type,
+      temperature: machine.temperature,
+      description: machine.description,
       images,
-      features,
       specs,
-      displayOrder: machine.display_order || undefined,
-      showOnHomepage: !!machine.show_on_homepage,
-      homepageOrder: machine.homepage_order || undefined,
-      product_types: [],  // These would be filled in another place
-      business_goals: []  // These would be filled in another place
+      features,
+      deploymentExamples,
+      visible: machine.visible,
+      displayOrder: machine.display_order || null,
+      showOnHomepage: machine.show_on_homepage || false,
+      homepageOrder: machine.homepage_order || null
     };
   });
 }

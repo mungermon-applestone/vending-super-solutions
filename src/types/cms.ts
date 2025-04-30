@@ -24,6 +24,9 @@ export interface CMSProductType {
     url?: string;
   };
   visible?: boolean;
+  displayOrder?: number;
+  showOnHomepage?: boolean;
+  homepageOrder?: number;
 }
 
 export interface CMSMachine {
@@ -41,6 +44,9 @@ export interface CMSMachine {
   specs?: Record<string, string>;
   deploymentExamples?: CMSDeploymentExample[];
   visible?: boolean;
+  displayOrder?: number;
+  showOnHomepage?: boolean;
+  homepageOrder?: number;
 }
 
 export interface CMSTestimonial {
@@ -85,6 +91,9 @@ export interface CMSBusinessGoal {
   image_url?: string;
   image_alt?: string;
   caseStudies?: CMSExample[];
+  displayOrder?: number;
+  showOnHomepage?: boolean;
+  homepageOrder?: number;
 }
 
 export interface CMSTechnology {

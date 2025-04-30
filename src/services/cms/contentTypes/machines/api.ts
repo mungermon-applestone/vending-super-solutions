@@ -166,6 +166,9 @@ export async function fetchMachineById<T = any>(id: string): Promise<T | null> {
         type,
         temperature,
         description,
+        display_order,
+        show_on_homepage,
+        homepage_order,
         machine_images (
           id,
           url,
