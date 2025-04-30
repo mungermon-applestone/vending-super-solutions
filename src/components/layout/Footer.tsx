@@ -14,8 +14,8 @@ const Footer = () => {
               Sell Anyting, Anywhere. It's the future of retail. 
             </p>
             <div className="flex flex-col space-y-2">
-              <a href="mailto:info@vendingsoft.com" className="text-gray-300 hover:text-white flex items-center gap-2 transition-colors">
-                <Mail size={16} /> info@vendingsoft.com
+              <a href="mailto:hello@applestonesolutions.com" className="text-gray-300 hover:text-white flex items-center gap-2 transition-colors">
+                <Mail size={16} /> hello@applestonesolutions.com
               </a>
               <a href="tel:+18005551234" className="text-gray-300 hover:text-white flex items-center gap-2 transition-colors">
                 <Phone size={16} /> (909) 314-1011
