@@ -24,6 +24,18 @@ const MachineDetailPage = () => {
   console.log('MachineDetailPage - Route params:', { slug, machineId, identifier });
 
   const { data: machine, isLoading, error } = useContentfulMachine(identifier);
+  
+  // Add logging to help diagnose thumbnail issues
+  useEffect(() => {
+    if (machine) {
+      console.log('[MachineDetailPage] Loaded machine:', {
+        id: machine.id,
+        title: machine.title,
+        hasThumbnail: !!machine.thumbnail,
+        thumbnailUrl: machine.thumbnail?.url || 'none'
+      });
+    }
+  }, [machine]);
 
   useEffect(() => {
     // If we loaded a machine and we're on the old /machine/:id route,

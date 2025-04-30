@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchMachines, fetchMachineById } from '@/services/cms/contentTypes/machines';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +15,11 @@ import { useContentfulMachines, useContentfulMachine } from '@/hooks/cms/useCont
 export const useMachines = () => {
   // Use the Contentful machines hook to ensure consistent data source
   const contentfulMachines = useContentfulMachines();
+  
+  console.log('[useMachines] Contentful machines data:', {
+    count: contentfulMachines.data?.length || 0,
+    machinesWithThumbnails: contentfulMachines.data?.filter(m => !!m.thumbnail).length || 0
+  });
   
   return {
     ...contentfulMachines,
@@ -43,6 +49,17 @@ export const useMachineBySlug = (type: string | undefined, slug: string | undefi
     queryFn: async () => {
       // For now, we'll use the existing machines function and filter by type and slug
       const machines = await fetchMachines({ type, slug });
+      
+      if (machines.length > 0) {
+        // Log machine data to help diagnose thumbnail issues
+        console.log('[useMachineBySlug] Found machine:', {
+          id: machines[0].id,
+          title: machines[0].title,
+          hasThumbnail: !!machines[0].thumbnail,
+          thumbnailUrl: machines[0].thumbnail?.url || 'none'
+        });
+      }
+      
       return machines.length > 0 ? machines[0] : null;
     },
     enabled: !!type && !!slug,

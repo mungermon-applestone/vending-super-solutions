@@ -16,6 +16,10 @@ const DiviSS = () => {
       { url: "https://images.unsplash.com/photo-1627998792088-f8016b438988", alt: "DIVI-SS - Front View" },
       { url: "https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55", alt: "DIVI-SS - Closeup of Interface" }
     ],
+    thumbnail: {
+      url: "https://images.unsplash.com/photo-1627998792088-f8016b438988", 
+      alt: "DIVI-SS Thumbnail"
+    },
     specs: {
       dimensions: "72\"H x 39\"W x 33\"D",
       weight: "600 lbs (empty)",
@@ -59,6 +63,13 @@ const DiviSS = () => {
 
   // Fetch machine data from the database
   const { data: dbMachineData, isLoading, error } = useMachineBySlug('vending', 'divi-ss');
+  
+  console.log('[DiviSS] Machine data from DB:', {
+    isLoading,
+    hasError: !!error,
+    hasMachineData: !!dbMachineData,
+    hasThumbnail: dbMachineData && !!dbMachineData.thumbnail
+  });
 
   // Use database data if available, otherwise fall back to static data
   const machineData = dbMachineData || fallbackMachineData;

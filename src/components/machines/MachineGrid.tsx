@@ -10,6 +10,15 @@ interface MachineGridProps {
 const MachineGrid: React.FC<MachineGridProps> = ({ machines, title }) => {
   if (!machines?.length) return null;
   
+  // Add logging to help diagnose thumbnail issues
+  console.log(`[MachineGrid] Rendering ${machines.length} machines with title: ${title}`);
+  console.log('[MachineGrid] Machines data:', machines.map(machine => ({
+    id: machine.id,
+    title: machine.title,
+    hasThumbnail: !!machine.thumbnail,
+    thumbnailUrl: machine.thumbnail?.url || 'none'
+  })));
+  
   return (
     <div className="mb-16">
       <h3 className="text-2xl font-semibold mb-6">{title}</h3>

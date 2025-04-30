@@ -47,6 +47,7 @@ export function useContentfulProducts() {
             id: item.sys.id,
             title: item.fields.title,
             slug: item.fields.slug,
+            hasThumbnail: !!item.fields.thumbnail,
             contentType: item.sys.contentType?.sys?.id
           }))
         );
@@ -64,6 +65,12 @@ export function useContentfulProducts() {
               id: (fields.image as any).sys.id,
               url: `https:${(fields.image as any).fields.file.url}`,
               alt: (fields.image as any).fields.title || fields.title,
+            } : undefined,
+            // Properly extract thumbnail data
+            thumbnail: fields.thumbnail ? {
+              id: (fields.thumbnail as any).sys.id,
+              url: `https:${(fields.thumbnail as any).fields.file.url}`,
+              alt: (fields.thumbnail as any).fields.title || fields.title,
             } : undefined,
             features: fields.features ? (fields.features as any[]).map(feature => ({
               id: feature.sys.id,
