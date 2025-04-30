@@ -13,6 +13,16 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const navigate = useNavigate();
   
+  // Extract the slug but ensure it's valid
+  const productSlug = product?.slug || '';
+  
+  // Add logging to track product data
+  console.log(`[ProductCard] Rendering card for: ${product.title}`, {
+    id: product.id,
+    slug: productSlug,
+    hasImage: !!product.image
+  });
+  
   return (
     <article 
       className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow"
@@ -53,7 +63,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <Button 
           variant="ghost" 
           className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
-          onClick={() => navigate(`/products/${product.slug}`)}
+          onClick={() => {
+            console.log(`[ProductCard] Navigating to product: ${productSlug}`);
+            navigate(`/products/${productSlug}`);
+          }}
           aria-label={`Learn more about ${product.title}`}
         >
           Learn more

@@ -1,30 +1,32 @@
 
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getProductTypes } from '@/services/cms';
 import { CMSProductType } from '@/types/cms';
-import { normalizeSlug } from '@/services/cms/utils/slugMatching';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
 import ProductCard from '@/components/products/ProductCard';
+import { useFeaturedProducts } from '@/hooks/cms/useFeaturedItems';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ProductTypesSection = () => {
   const { data: homeContent } = useHomePageContent();
   
   console.log('[ProductTypesSection] Content:', homeContent);
 
-  const { data: productTypes = [], isLoading, error } = useQuery({
-    queryKey: ['productTypes'],
-    queryFn: () => getProductTypes(),
-    retry: 2,
-    retryDelay: 1000,
-    meta: {
-      onError: (err: any) => {
-        console.error('Error fetching product types:', err);
-      }
-    }
+  // Use the specific hook for featured products
+  const { 
+    data: productTypes = [], 
+    isLoading, 
+    error 
+  } = useFeaturedProducts();
+
+  console.log('[ProductTypesSection] Featured products:', {
+    count: productTypes?.length,
+    data: productTypes,
+    isLoading,
+    hasError: !!error
   });
 
+  // Fallback static data when no products are available
   const staticProductTypes = [
     {
       title: "Grocery",
@@ -52,10 +54,16 @@ const ProductTypesSection = () => {
     }
   ];
 
-  const displayProductTypes = (productTypes && productTypes.length > 0) 
+  // Only use productTypes if they are available and not empty, otherwise use static data
+  // But only if we're not still loading and there's no error
+  const shouldUseRealData = !isLoading && !error && productTypes && productTypes.length > 0;
+  
+  // Map the CMS data or fallback to static data
+  const displayProductTypes = shouldUseRealData
     ? productTypes.map((product: CMSProductType) => ({
         ...product,
         image: product.image || {
+          id: product.id,
           url: "https://images.unsplash.com/photo-1606787366850-de6330128bfc",
           alt: product.title
         }
@@ -66,6 +74,7 @@ const ProductTypesSection = () => {
         description: product.description,
         slug: product.path.replace('/products/', ''),
         image: {
+          id: product.path,
           url: product.image,
           alt: product.title
         }
@@ -73,7 +82,11 @@ const ProductTypesSection = () => {
   
   const featuredProductTypes = displayProductTypes.slice(0, 4);
   
-  const shouldShowLoading = isLoading && !error;
+  console.log('[ProductTypesSection] Display types:', {
+    isUsingRealData: shouldUseRealData,
+    featuredCount: featuredProductTypes.length,
+    firstItem: featuredProductTypes[0]?.title
+  });
   
   return (
     <section className="py-16 md:py-24">
@@ -92,18 +105,26 @@ const ProductTypesSection = () => {
           </Button>
         </div>
         
-        {shouldShowLoading ? (
+        {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="rounded-lg overflow-hidden shadow-md bg-white p-4">
-                <div className="animate-pulse">
-                  <div className="bg-gray-300 h-48 w-full mb-4"></div>
-                  <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-gray-300 rounded w-full mb-4"></div>
-                  <div className="h-10 bg-gray-300 rounded w-full"></div>
-                </div>
+                <Skeleton className="h-48 w-full mb-4" />
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-full mb-4" />
+                <Skeleton className="h-10 w-full" />
               </div>
             ))}
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <p className="text-red-500 mb-4">Error loading product types</p>
+            <p className="text-sm text-gray-500">Using fallback product data</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+              {featuredProductTypes.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

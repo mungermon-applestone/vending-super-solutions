@@ -79,11 +79,39 @@ export function useFeaturedProducts() {
   return useQuery({
     queryKey: ['homepage', 'products'],
     queryFn: async () => {
+      console.log('[useFeaturedProducts] Fetching featured products for homepage');
+      
       const products = await fetchProductTypes({
         showOnHomepage: true,
         sort: 'fields.homepageOrder'
       });
-      return products;
+      
+      // Sort products by homepageOrder if available
+      const sortedProducts = [...products].sort((a, b) => {
+        const orderA = a.homepageOrder !== undefined ? a.homepageOrder : 999;
+        const orderB = b.homepageOrder !== undefined ? b.homepageOrder : 999;
+        return orderA - orderB;
+      });
+      
+      console.log(`[useFeaturedProducts] Fetched ${sortedProducts.length} products for homepage`);
+      
+      if (sortedProducts.length > 0) {
+        console.log('[useFeaturedProducts] First product:', {
+          title: sortedProducts[0]?.title,
+          slug: sortedProducts[0]?.slug,
+          homepageOrder: sortedProducts[0]?.homepageOrder
+        });
+      } else {
+        console.log('[useFeaturedProducts] No featured products found');
+      }
+      
+      return sortedProducts;
+    },
+    staleTime: 60000, // 1 minute before refetching
+    meta: {
+      onError: (error: Error) => {
+        console.error('[useFeaturedProducts] Error fetching featured products:', error);
+      }
     }
   });
 }

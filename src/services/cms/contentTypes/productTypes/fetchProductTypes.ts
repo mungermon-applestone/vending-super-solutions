@@ -53,39 +53,58 @@ export async function fetchProductTypes(filters?: any): Promise<CMSProductType[]
     
     console.log(`[fetchProductTypes] Found ${entries.items.length} product types`);
     
-    return entries.items.map(entry => ({
-      id: entry.sys.id,
-      title: entry.fields.title as string,
-      slug: entry.fields.slug as string,
-      description: entry.fields.description as string,
-      benefits: Array.isArray(entry.fields.benefits) ? entry.fields.benefits as string[] : [],
-      image: entry.fields.image ? {
-        id: (entry.fields.image as any).sys.id,
-        url: `https:${(entry.fields.image as any).fields.file.url}`,
-        alt: (entry.fields.image as any).fields.title || entry.fields.title,
-      } : undefined,
-      features: entry.fields.features ? (entry.fields.features as any[]).map(feature => ({
-        id: feature.sys.id,
-        title: feature.fields.title,
-        description: feature.fields.description,
-        icon: feature.fields.icon || undefined
-      })) : [],
-      visible: !!entry.fields.visible,
-      displayOrder: entry.fields.displayOrder ? Number(entry.fields.displayOrder) : undefined,
-      showOnHomepage: !!entry.fields.showOnHomepage,
-      homepageOrder: entry.fields.homepageOrder ? Number(entry.fields.homepageOrder) : undefined,
-      recommendedMachines: entry.fields.recommendedMachines ? 
-        (entry.fields.recommendedMachines as any[]).map(machine => ({
-          id: machine.sys.id,
-          slug: machine.fields.slug,
-          title: machine.fields.title,
-          description: machine.fields.description,
-          image: machine.fields.images?.[0] ? {
-            url: `https:${machine.fields.images[0].fields.file.url}`,
-            alt: machine.fields.images[0].fields.title || machine.fields.title
-          } : undefined
-        })) : []
-    }));
+    return entries.items.map(entry => {
+      // Log the entry structure to help with debugging
+      console.log(`[fetchProductTypes] Processing entry:`, {
+        id: entry.sys.id,
+        title: entry.fields?.title,
+        hasSlug: !!entry.fields?.slug,
+        hasImage: !!entry.fields?.image,
+        hasRecommendedMachines: Array.isArray(entry.fields?.recommendedMachines),
+        recommendedMachineCount: Array.isArray(entry.fields?.recommendedMachines) ? entry.fields.recommendedMachines.length : 0
+      });
+
+      // Safely process the entry with null checks
+      return {
+        id: entry.sys.id,
+        title: entry.fields.title as string,
+        slug: entry.fields.slug as string,
+        description: entry.fields.description as string,
+        benefits: Array.isArray(entry.fields.benefits) ? entry.fields.benefits as string[] : [],
+        image: entry.fields.image ? {
+          id: (entry.fields.image as any).sys.id,
+          url: `https:${(entry.fields.image as any).fields.file.url}`,
+          alt: (entry.fields.image as any).fields.title || entry.fields.title,
+        } : undefined,
+        features: entry.fields.features ? (entry.fields.features as any[]).map(feature => ({
+          id: feature.sys.id,
+          title: feature.fields.title,
+          description: feature.fields.description,
+          icon: feature.fields.icon || undefined
+        })) : [],
+        visible: !!entry.fields.visible,
+        displayOrder: entry.fields.displayOrder ? Number(entry.fields.displayOrder) : undefined,
+        showOnHomepage: !!entry.fields.showOnHomepage,
+        homepageOrder: entry.fields.homepageOrder ? Number(entry.fields.homepageOrder) : undefined,
+        recommendedMachines: entry.fields.recommendedMachines && Array.isArray(entry.fields.recommendedMachines) ? 
+          (entry.fields.recommendedMachines as any[]).map(machine => {
+            if (!machine || !machine.fields) {
+              console.warn('[fetchProductTypes] Invalid machine in recommendedMachines', machine);
+              return null;
+            }
+            return {
+              id: machine.sys.id,
+              slug: machine.fields.slug,
+              title: machine.fields.title,
+              description: machine.fields.description,
+              image: machine.fields.images && machine.fields.images[0] ? {
+                url: `https:${machine.fields.images[0].fields.file.url}`,
+                alt: machine.fields.images[0].fields.title || machine.fields.title
+              } : undefined
+            };
+          }).filter(Boolean) : [] // Filter out any null values
+      };
+    });
   } catch (error) {
     console.error('[fetchProductTypes] Error fetching product types:', error);
     toast.error(`Error loading products: ${error instanceof Error ? error.message : 'Unknown error'}`);
