@@ -57,8 +57,8 @@ const Blog = () => {
   return (
     <Layout>
       <div className="container mx-auto py-10">
-        <h1 className="text-4xl font-bold mb-2">Our Blog</h1>
-        <p className="text-gray-600 mb-8 text-lg">Latest updates and insights from our team</p>
+        <h1 className="text-4xl font-bold mb-2">Updates</h1>
+        <p className="text-gray-600 mb-8 text-lg">The latest news, product notes, and insights from our team</p>
         
         {posts.length > 0 ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
