@@ -41,7 +41,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             src={imageToUse.url} 
             alt={imageToUse.alt || product.title}
             className="w-full h-full" 
-            objectFit={product.thumbnail ? 'contain' : 'cover'}
+            objectFit="contain"
             isThumbnail={!!product.thumbnail}
             itemProp="image"
           />

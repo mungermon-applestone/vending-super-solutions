@@ -37,12 +37,15 @@ const ProductGrid = ({ products, isHomepage = false }: ProductGridProps) => {
     });
   }, [products, isHomepage]);
   
-  // Add logging to help diagnose thumbnail issues
+  // Add detailed logging to help diagnose thumbnail issues
   console.log('[ProductGrid] Products data:', sortedProducts.map(product => ({
     id: product.id,
     title: product.title,
     hasThumbnail: !!product.thumbnail,
-    thumbnailUrl: product.thumbnail?.url || 'none'
+    thumbnailUrl: product.thumbnail?.url || 'none',
+    hasImage: !!product.image,
+    imageUrl: product.image?.url || 'none',
+    imageToUse: product.thumbnail ? 'thumbnail' : (product.image ? 'regular image' : 'none')
   })));
   
   // Create breadcrumb items for schema
