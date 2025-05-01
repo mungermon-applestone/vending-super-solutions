@@ -22,6 +22,9 @@ const Image: React.FC<ImageProps> = ({
   // Apply object fit class based on the prop
   const objectFitClass = `object-${objectFit}`;
   
+  // Add debugging information
+  console.log(`[Image] Rendering image: ${alt}, objectFit: ${objectFit}, isThumbnail: ${isThumbnail}`);
+  
   // Apply aspect ratio style if provided
   const aspectRatioStyle = aspectRatio ? { aspectRatio } : {};
 

@@ -36,19 +36,26 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
             // Determine which image to use - thumbnail has priority
             const imageToUse = machine.thumbnail || machine.image;
             
+            // Log which image we're using for debugging
+            console.log(`[RecommendedMachines] Machine ${machine.title}: Using ${machine.thumbnail ? 'thumbnail' : 'regular image'}`);
+            
             return (
               <div key={machine.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                {imageToUse && (
-                  <div className="aspect-video w-full overflow-hidden">
+                <div className="aspect-video w-full overflow-hidden">
+                  {imageToUse ? (
                     <Image
                       src={imageToUse.url}
                       alt={imageToUse.alt || machine.title}
                       className="w-full h-full"
-                      objectFit={machine.thumbnail ? 'contain' : 'cover'}
+                      objectFit="contain"
                       isThumbnail={!!machine.thumbnail}
                     />
-                  </div>
-                )}
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                      <span className="text-gray-400">No image available</span>
+                    </div>
+                  )}
+                </div>
                 <div className="p-6">
                   <h3 className="text-xl font-bold mb-3">{machine.title}</h3>
                   <p className="text-gray-600 mb-4 line-clamp-2">{machine.description}</p>
