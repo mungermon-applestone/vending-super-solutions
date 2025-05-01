@@ -39,15 +39,16 @@ const BlogPageContent: React.FC = () => {
     isLoading: isLoadingPosts,
     error: postsError 
   } = useContentfulBlogPosts({ 
-    limit: 9,
-    order: "-sys.createdAt" 
+    limit: 10,
+    order: "-fields.publishDate" // Explicitly set reverse chronological order
   });
 
   // Enhanced logging for debugging
   React.useEffect(() => {
     console.log("[BlogPageContent] Current state:", {
       blogPosts,
-      totalPosts: blogPosts?.length || 0
+      totalPosts: blogPosts?.length || 0,
+      postDates: blogPosts?.map(post => post.publishDate)
     });
   }, [blogPosts]);
 
@@ -71,7 +72,7 @@ const BlogPageContent: React.FC = () => {
     );
   }
 
-  // Safely handle blog posts data
+  // Safely handle blog posts data - ensure they're ordered by publishDate
   const latestPost = blogPosts && blogPosts.length > 0 ? blogPosts[0] : null;
   const olderPosts = blogPosts && blogPosts.length > 1 ? blogPosts.slice(1) : [];
 

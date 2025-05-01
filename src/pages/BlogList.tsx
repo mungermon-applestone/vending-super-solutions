@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import BlogPostCard from '@/components/blog/BlogPostCard';
@@ -8,13 +9,14 @@ import { Link } from 'react-router-dom';
 import BlogSchemaData from '@/components/blog/BlogSchemaData';
 import SEO from '@/components/seo/SEO';
 import { useBreadcrumbs } from '@/context/BreadcrumbContext';
-import { useEffect } from 'react';
 
 const POSTS_PER_PAGE = 9;
 
 const BlogList = () => {
   const [page, setPage] = useState(0);
   const { setBreadcrumbs } = useBreadcrumbs();
+  
+  // Get posts ordered by published_at in descending order (newest first)
   const { data: blogPosts = [], isLoading, error } = useBlogPosts({ 
     status: 'published',
     limit: POSTS_PER_PAGE,

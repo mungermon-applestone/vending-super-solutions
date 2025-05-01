@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { BlogPost, BlogPostFormData } from "@/types/blog";
 
@@ -33,7 +32,7 @@ export const fetchBlogPosts = async (filters: {
     query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1);
   }
   
-  // Sort by published_at for published posts, created_at for drafts
+  // Sort by published_at for published posts in descending order (newest first)
   query = query.order('published_at', { ascending: false, nullsFirst: false })
                .order('created_at', { ascending: false });
   

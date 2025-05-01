@@ -14,10 +14,16 @@ import { RefreshCw } from 'lucide-react';
 
 const Blog = () => {
   const { isInitialized, error: initError } = useContentfulInit();
-  const { data: posts = [], isLoading, error: postsError, refetch } = useContentfulBlogPosts();
+  const { data: posts = [], isLoading, error: postsError, refetch } = useContentfulBlogPosts({
+    order: '-fields.publishDate' // Explicitly set reverse chronological order
+  });
 
   console.log('[Blog] Contentful initialization status:', { isInitialized, error: initError?.message });
-  console.log('[Blog] Posts fetch status:', { isLoading, postsCount: posts.length });
+  console.log('[Blog] Posts fetch status:', { 
+    isLoading, 
+    postsCount: posts.length,
+    postDates: posts.map(post => post.publishDate)
+  });
 
   if (initError || postsError) {
     return (

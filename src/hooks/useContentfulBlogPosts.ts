@@ -62,7 +62,8 @@ const formatBlogPost = (item: any): ContentfulBlogPost => {
 };
 
 export function useContentfulBlogPosts(options: BlogPostsQueryOptions = {}) {
-  const { limit = 10, skip = 0, tag, order = '-sys.createdAt' } = options;
+  // Default to reverse chronological order ('-fields.publishDate')
+  const { limit = 10, skip = 0, tag, order = '-fields.publishDate' } = options;
 
   return useContentful<ContentfulBlogPost[]>({
     queryKey: ['contentful-blog-posts', String(limit), String(skip), tag, order],

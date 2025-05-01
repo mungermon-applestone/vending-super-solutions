@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useContentfulBlogPostBySlug } from '@/hooks/useContentfulBlogPostBySlug';
 import Layout from '@/components/layout/Layout';
@@ -36,10 +35,11 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
       if (!currentSlug) return { previous: null, next: null };
       const client = await getContentfulClient();
       
-      // Fetch all published posts sorted by publishDate ascending
+      // Fetch all published posts sorted by publishDate descending (newest first)
+      // This means "previous" is newer and "next" is older
       const response = await client.getEntries({
         content_type: "blogPost",
-        order: ["fields.publishDate"],
+        order: ["-fields.publishDate"],
         select: ["fields.slug", "fields.title", "fields.publishDate"],
       });
       
@@ -48,7 +48,9 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
       const idx = posts.findIndex(p => p.fields && p.fields.slug === currentSlug);
       if (idx === -1) return { previous: null, next: null };
       
+      // Previous is a newer post (comes before in the sorted array)
       const previous = idx > 0 ? extractBlogInfo(posts[idx - 1]) : null;
+      // Next is an older post (comes after in the sorted array)
       const next = idx < posts.length - 1 ? extractBlogInfo(posts[idx + 1]) : null;
       
       return { previous, next };

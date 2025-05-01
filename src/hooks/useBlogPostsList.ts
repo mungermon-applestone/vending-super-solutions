@@ -34,6 +34,7 @@ const createQueryParams = (options: BlogPostsQueryOptions): Record<string, strin
   // Build base params with explicit string conversions
   const params: Record<string, string> = {
     content_type: "blogPost",
+    // Sort by publishDate in descending order (newest first)
     order: "-fields.publishDate",
     limit: String(limit),
     skip: String(skip)
