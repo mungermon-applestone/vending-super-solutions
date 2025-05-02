@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -14,7 +13,6 @@ import BusinessGoalsGrid from '@/components/businessGoals/BusinessGoalsGrid';
 import BusinessGoalKeyBenefits from '@/components/businessGoals/BusinessGoalKeyBenefits';
 import ContactForm from '@/components/contact/ContactForm';
 import BusinessGoalsDebugSection from '@/components/businessGoals/BusinessGoalsDebugSection';
-import { Loader2 } from 'lucide-react';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 import { CONTENTFUL_CONFIG, isContentfulConfigured, isPreviewEnvironment } from '@/config/cms';
 import ContentfulConfigWarning from '@/components/machines/ContentfulConfigWarning';
