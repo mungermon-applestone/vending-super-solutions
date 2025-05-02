@@ -8,6 +8,11 @@ export interface HeroContent {
   video_url?: string;
   video_thumbnail?: string;
   is_video?: boolean;
+  video_file?: {
+    url: string;
+    contentType: string;
+    fileName: string;
+  };
   cta_primary_text?: string;
   cta_primary_url?: string;
   cta_secondary_text?: string;
@@ -38,6 +43,11 @@ export interface LandingPageFormData {
     video_url?: string;
     video_thumbnail?: string;
     is_video?: boolean;
+    video_file?: {
+      url: string;
+      contentType: string;
+      fileName: string;
+    };
     cta_primary_text: string;
     cta_primary_url: string;
     cta_secondary_text: string;

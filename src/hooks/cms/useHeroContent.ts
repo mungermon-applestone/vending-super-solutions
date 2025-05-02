@@ -15,6 +15,8 @@ interface HeroContent {
   video?: {
     url: string;
     thumbnail?: string;
+    contentType?: string;
+    fileName?: string;
   };
   isVideo?: boolean;
   imageAlt: string;
@@ -70,7 +72,7 @@ export function useHeroContent(idOrPageKey: string) {
           if (isUUID) {
             // Direct ID lookup for legacy components
             console.log(`[useHeroContent] Fetching entry directly by ID: ${idOrPageKey}`);
-            entry = await client.getEntry(idOrPageKey);
+            entry = await client.getEntry(idOrPageKey, { include: 2 });
           } else {
             // Page key lookup for the newer pattern
             console.log(`[useHeroContent] Querying entries with page key: ${idOrPageKey}`);
@@ -101,7 +103,7 @@ export function useHeroContent(idOrPageKey: string) {
             title: entry.fields.title,
             subtitle: entry.fields.subtitle,
             hasImage: !!entry.fields.image,
-            hasVideo: !!entry.fields.videoUrl,
+            hasVideo: !!entry.fields.videoUrl || !!entry.fields.video,
             isVideo: !!entry.fields.isVideo,
             id: entry.sys.id
           });
@@ -120,6 +122,17 @@ export function useHeroContent(idOrPageKey: string) {
             ? `https:${(entry.fields.videoThumbnail as any).fields.file.url}`
             : null;
           
+          // Check for directly uploaded video asset in Contentful
+          let videoAsset = null;
+          if (entry.fields.video && entry.fields.video.fields && entry.fields.video.fields.file) {
+            videoAsset = {
+              url: `https:${entry.fields.video.fields.file.url}`,
+              contentType: entry.fields.video.fields.file.contentType,
+              fileName: entry.fields.video.fields.file.fileName
+            };
+            console.log(`[useHeroContent] Found uploaded video asset:`, videoAsset);
+          }
+          
           const result = {
             title: entry.fields.title as string,
             subtitle: entry.fields.subtitle as string,
@@ -137,10 +150,12 @@ export function useHeroContent(idOrPageKey: string) {
           } as HeroContent;
           
           // Add video properties if this is a video hero
-          if (isVideo && videoUrl) {
+          if (isVideo) {
             result.video = {
-              url: videoUrl,
-              thumbnail: videoThumbnail
+              url: videoAsset ? videoAsset.url : videoUrl,
+              thumbnail: videoThumbnail,
+              contentType: videoAsset ? videoAsset.contentType : undefined,
+              fileName: videoAsset ? videoAsset.fileName : undefined
             };
           }
           

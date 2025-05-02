@@ -70,6 +70,7 @@ const PageHero: React.FC<PageHeroProps> = ({
       buttonText: heroContent?.cta_primary_text || fallbackPrimaryButtonText,
       isVideo: heroContent?.is_video,
       videoUrl: heroContent?.video_url,
+      videoFile: heroContent?.video_file,
     });
   }, [heroContent, pageKey, fallbackTitle, fallbackSubtitle, fallbackImage, fallbackPrimaryButtonText]);
   
@@ -85,6 +86,14 @@ const PageHero: React.FC<PageHeroProps> = ({
   const isVideo = heroContent?.is_video || false;
   const videoUrl = heroContent?.video_url || '';
   const videoThumbnail = heroContent?.video_thumbnail || imageUrl;
+  const videoFile = heroContent?.video_file;
+  const videoContentType = videoFile?.contentType;
+  
+  // Check if we have a Contentful uploaded video
+  const hasContentfulVideo = isVideo && videoFile && videoFile.url;
+  
+  // Get the effective video URL (either external URL or Contentful file URL)
+  const effectiveVideoUrl = hasContentfulVideo ? videoFile.url : videoUrl;
   
   // Function to process video URL for embedding
   const getVideoEmbedUrl = (url: string) => {
@@ -126,10 +135,16 @@ const PageHero: React.FC<PageHeroProps> = ({
   };
 
   const handlePlayVideo = () => {
-    if (videoUrl) {
+    if (effectiveVideoUrl) {
       setIsVideoPlaying(true);
     }
   };
+  
+  // Check if this is a Contentful uploaded video
+  const isContentfulVideo = isVideo && videoContentType && (
+    videoContentType.includes('video/') || 
+    videoContentType.includes('application/')
+  );
   
   return (
     <section className={`py-16 ${backgroundClass}`} data-testid={`page-hero-${pageKey}`}>
@@ -163,18 +178,31 @@ const PageHero: React.FC<PageHeroProps> = ({
             )}
           </div>
           <div className="mt-8 lg:mt-0">
-            {isVideo && videoUrl ? (
+            {isVideo && effectiveVideoUrl ? (
               isVideoPlaying ? (
                 <div className="aspect-video rounded-lg shadow-lg overflow-hidden">
-                  <iframe
-                    src={getVideoEmbedUrl(videoUrl)}
-                    title={title}
-                    className="w-full h-full"
-                    style={{ maxHeight: '500px' }}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
+                  {isContentfulVideo ? (
+                    <video 
+                      src={effectiveVideoUrl}
+                      className="w-full h-full"
+                      controls
+                      autoPlay
+                      playsInline
+                    >
+                      <source src={effectiveVideoUrl} type={videoContentType} />
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <iframe
+                      src={getVideoEmbedUrl(effectiveVideoUrl)}
+                      title={title}
+                      className="w-full h-full"
+                      style={{ maxHeight: '500px' }}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  )}
                 </div>
               ) : (
                 <div 

@@ -8,6 +8,7 @@ interface HeroImageProps {
   videoUrl?: string;
   isVideo?: boolean;
   videoThumbnail?: string;
+  videoContentType?: string;
 }
 
 const HeroImage: React.FC<HeroImageProps> = ({ 
@@ -15,7 +16,8 @@ const HeroImage: React.FC<HeroImageProps> = ({
   imageAlt,
   videoUrl,
   isVideo = false,
-  videoThumbnail
+  videoThumbnail,
+  videoContentType
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   
@@ -27,9 +29,10 @@ const HeroImage: React.FC<HeroImageProps> = ({
       videoUrl,
       isVideo,
       videoThumbnail,
+      videoContentType,
       isPlaying
     });
-  }, [imageUrl, imageAlt, videoUrl, isVideo, videoThumbnail, isPlaying]);
+  }, [imageUrl, imageAlt, videoUrl, isVideo, videoThumbnail, videoContentType, isPlaying]);
 
   // Make sure we have valid URLs
   const validImageUrl = imageUrl && (
@@ -59,6 +62,12 @@ const HeroImage: React.FC<HeroImageProps> = ({
   
   // Use thumbnail if provided, otherwise use the image URL
   const thumbnailUrl = videoThumbnail || finalImageUrl;
+  
+  // Check if the video is an uploaded file in Contentful
+  const isContentfulVideo = validVideoUrl && videoContentType && (
+    videoContentType.includes('video/') || 
+    videoContentType.includes('application/') // for formats like application/mp4
+  );
   
   // Process video URL for embedding if it's YouTube or Vimeo
   const getVideoEmbedUrl = (url: string) => {
@@ -113,14 +122,27 @@ const HeroImage: React.FC<HeroImageProps> = ({
         {isVideo && validVideoUrl ? (
           isPlaying ? (
             <div className="aspect-video w-full">
-              <iframe
-                src={getVideoEmbedUrl(videoUrl as string)}
-                title={imageAlt || "Video content"}
-                className="w-full h-full"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
+              {isContentfulVideo ? (
+                <video 
+                  src={videoUrl}
+                  className="w-full h-full"
+                  controls
+                  autoPlay
+                  playsInline
+                >
+                  <source src={videoUrl} type={videoContentType} />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <iframe
+                  src={getVideoEmbedUrl(videoUrl as string)}
+                  title={imageAlt || "Video content"}
+                  className="w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              )}
             </div>
           ) : (
             <div className="relative cursor-pointer" onClick={handlePlayVideo}>

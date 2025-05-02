@@ -111,8 +111,39 @@ const HeroContentTab: React.FC<HeroContentTabProps> = ({ form, backgroundOptions
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Video URL</FormLabel>
+                  <FormDescription>
+                    Enter a URL for external videos (YouTube, Vimeo, etc.) or select a video file below
+                  </FormDescription>
                   <FormControl>
                     <Input placeholder="URL to the video (YouTube, Vimeo or direct link)" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="hero.video_file"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Video File</FormLabel>
+                  <FormDescription>
+                    Upload or select a video file from your media library
+                  </FormDescription>
+                  <FormControl>
+                    <MediaSelector
+                      value={field.value?.url || ""}
+                      onChange={(url, contentType, fileName) => {
+                        form.setValue("hero.video_file", {
+                          url,
+                          contentType: contentType || "video/mp4",
+                          fileName: fileName || "video"
+                        });
+                      }}
+                      buttonLabel="Select Video File"
+                      mediaType="video/*"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,6 +156,9 @@ const HeroContentTab: React.FC<HeroContentTabProps> = ({ form, backgroundOptions
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Video Thumbnail</FormLabel>
+                  <FormDescription>
+                    This image will be shown before the video is played
+                  </FormDescription>
                   <FormControl>
                     <MediaSelector
                       value={field.value}
@@ -132,6 +166,7 @@ const HeroContentTab: React.FC<HeroContentTabProps> = ({ form, backgroundOptions
                         form.setValue("hero.video_thumbnail", url);
                       }}
                       buttonLabel="Select Thumbnail Image"
+                      mediaType="image/*"
                     />
                   </FormControl>
                   <FormMessage />
@@ -154,6 +189,7 @@ const HeroContentTab: React.FC<HeroContentTabProps> = ({ form, backgroundOptions
                         form.setValue("hero.image_url", url);
                       }}
                       buttonLabel="Select Hero Image"
+                      mediaType="image/*"
                     />
                   </FormControl>
                   <FormMessage />

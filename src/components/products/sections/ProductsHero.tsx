@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Play } from 'lucide-react';
 import { useHeroContent } from '@/hooks/cms/useHeroContent';
 import { Loader2 } from 'lucide-react';
 
@@ -58,6 +58,11 @@ export default function ProductsHero() {
     );
   }
 
+  // Check if this is a video hero and has video
+  const isVideoHero = heroContent.isVideo && (heroContent.video?.url);
+  const isContentfulVideo = isVideoHero && heroContent.video?.contentType && 
+    (heroContent.video.contentType.includes('video/') || heroContent.video.contentType.includes('application/'));
+
   return (
     <section className={heroContent.backgroundClass || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"}>
       <div className="container py-16 md:py-24">
@@ -87,13 +92,49 @@ export default function ProductsHero() {
             </div>
           </div>
           <div className="relative">
-            <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-              <img 
-                src={heroContent.image.url}
-                alt={heroContent.image.alt}
-                className="w-full h-auto object-cover"
-              />
-            </div>
+            {isVideoHero ? (
+              <div className="bg-white rounded-lg shadow-xl overflow-hidden aspect-video">
+                {isContentfulVideo ? (
+                  <video
+                    src={heroContent.video.url}
+                    controls
+                    autoPlay
+                    muted
+                    playsInline
+                    poster={heroContent.video.thumbnail}
+                    className="w-full h-full object-cover"
+                  >
+                    <source src={heroContent.video.url} type={heroContent.video.contentType} />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <div className="relative cursor-pointer">
+                    <img
+                      src={heroContent.video?.thumbnail || heroContent.image.url}
+                      alt={heroContent.image.alt}
+                      className="w-full h-auto object-cover"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Link 
+                        to={heroContent.video?.url || "#"} 
+                        target="_blank"
+                        className="bg-vending-blue-dark/75 rounded-full p-4 text-white hover:bg-vending-blue-dark transition-colors"
+                      >
+                        <Play className="h-8 w-8" />
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+                <img 
+                  src={heroContent.image.url}
+                  alt={heroContent.image.alt}
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
