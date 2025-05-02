@@ -1,17 +1,23 @@
+
 import React from 'react';
 import { CMSMachine } from '@/types/cms';
 
 interface MachinePageTemplateProps {
-  machines: CMSMachine[];
+  machines?: CMSMachine[];
+  machine?: CMSMachine;
   title?: string;
   description?: string;
 }
 
 const MachinePageTemplate: React.FC<MachinePageTemplateProps> = ({ 
   machines = [], 
+  machine,
   title, 
   description 
 }) => {
+  // If a single machine is provided, use that; otherwise use the machines array
+  const machinesToDisplay = machine ? [machine] : machines;
+  
   return (
     <div className="container mx-auto px-4 py-8">
       {title && (
@@ -21,9 +27,9 @@ const MachinePageTemplate: React.FC<MachinePageTemplateProps> = ({
         <p className="text-gray-600 mb-8">{description}</p>
       )}
       
-      {machines.length > 0 ? (
+      {machinesToDisplay.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {machines.map((machine) => (
+          {machinesToDisplay.map((machine) => (
             <div key={machine.id} className="bg-white rounded-lg shadow-md overflow-hidden">
               {machine.images && machine.images.length > 0 && (
                 <img 
@@ -40,9 +46,9 @@ const MachinePageTemplate: React.FC<MachinePageTemplateProps> = ({
                     Temperature: {machine.temperature}
                   </div>
                 )}
-                {machine.dimensions && (
+                {machine.specs && machine.specs.dimensions && (
                   <div className="text-sm text-gray-500">
-                    Dimensions: {machine.dimensions}
+                    Dimensions: {machine.specs.dimensions}
                   </div>
                 )}
               </div>
