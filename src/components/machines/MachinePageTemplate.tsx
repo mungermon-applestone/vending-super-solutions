@@ -1,91 +1,60 @@
-
 import React from 'react';
-import Layout from '@/components/layout/Layout';
-import CTASection from '@/components/common/CTASection';
-import MachineHero from './hero/MachineHero';
-import SpecificationsSection from './specs/SpecificationsSection';
-import FeaturesList from './features/FeaturesList';
-import DeploymentExamplesSection from './examples/DeploymentExamplesSection';
-import AdditionalViews from './gallery/AdditionalViews';
-import InquiryForm from './contact/InquiryForm';
-import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
-import { ContentfulTestimonialSection } from '@/types/contentful/testimonial';
+import { CMSMachine } from '@/types/cms';
 
-export interface MachineTemplateProps {
-  machine: {
-    id: string;
-    slug: string;
-    title: string;
-    type: 'vending' | 'locker';
-    temperature: string;
-    description: string;
-    images: Array<{
-      url: string;
-      alt: string;
-    }>;
-    specs: {
-      [key: string]: string | undefined;
-    };
-    features: string[];
-    deploymentExamples: Array<{
-      title: string;
-      description: string;
-      image: {
-        url: string;
-        alt: string;
-      };
-    }>;
-    testimonialSection?: ContentfulTestimonialSection;
-  };
+interface MachinePageTemplateProps {
+  machines: CMSMachine[];
+  title?: string;
+  description?: string;
 }
 
-const MachinePageTemplate: React.FC<MachineTemplateProps> = ({ machine }) => {
+const MachinePageTemplate: React.FC<MachinePageTemplateProps> = ({ 
+  machines = [], 
+  title, 
+  description 
+}) => {
   return (
-    <Layout>
-      {/* Hero Section */}
-      <MachineHero machine={machine} />
+    <div className="container mx-auto px-4 py-8">
+      {title && (
+        <h1 className="text-3xl font-bold mb-4">{title}</h1>
+      )}
+      {description && (
+        <p className="text-gray-600 mb-8">{description}</p>
+      )}
       
-      {/* Specifications Section */}
-      <section className="py-12 bg-white" id="specifications">
-        <div className="container-wide">
-          <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center text-vending-blue-dark">
-            Specifications
-          </h2>
-          <div className="bg-vending-gray rounded-lg shadow-md p-8">
-            <SpecificationsSection specs={machine.specs} />
-          </div>
+      {machines.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {machines.map((machine) => (
+            <div key={machine.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+              {machine.images && machine.images.length > 0 && (
+                <img 
+                  src={machine.images[0].url} 
+                  alt={machine.images[0].alt || machine.title} 
+                  className="w-full h-48 object-cover"
+                />
+              )}
+              <div className="p-6">
+                <h2 className="text-xl font-semibold mb-2">{machine.title}</h2>
+                <p className="text-gray-600 mb-4">{machine.description}</p>
+                {machine.temperature && (
+                  <div className="text-sm text-gray-500 mb-2">
+                    Temperature: {machine.temperature}
+                  </div>
+                )}
+                {machine.dimensions && (
+                  <div className="text-sm text-gray-500">
+                    Dimensions: {machine.dimensions}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
-      </section>
-      
-      {/* Features Section */}
-      <section className="py-12 bg-vending-gray" id="features">
-        <div className="container-wide">
-          <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center text-vending-blue-dark">
-            Features
-          </h2>
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <FeaturesList features={machine.features} />
-          </div>
+      ) : (
+        <div className="text-center py-10">
+          <p>No machines found.</p>
         </div>
-      </section>
-      
-      {/* Deployment Examples Section */}
-      <DeploymentExamplesSection examples={machine.deploymentExamples} />
-      
-      {/* Additional Views Section */}
-      <AdditionalViews 
-        title={machine.title} 
-        images={machine.images} 
-      />
-      
-      {/* Testimonials Section */}
-      {machine.testimonialSection && <TestimonialsSection data={machine.testimonialSection} />}
-      
-      {/* Contact Section */}
-      <InquiryForm title={machine.title} />
-
-      <CTASection />
-    </Layout>
+      )}
+    </div>
   );
 };
 
