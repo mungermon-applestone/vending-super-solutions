@@ -2,21 +2,21 @@
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ExternalLink, Play } from 'lucide-react';
-import { useHeroContent } from '@/hooks/cms/useHeroContent';
 import { Loader2 } from 'lucide-react';
+import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
 
 export default function ProductsHero() {
-  const { data: heroContent, isLoading, error } = useHeroContent("products");
+  const { data: landingPage, isLoading, error } = useLandingPageByKey("products");
 
-  // Add detailed logging for video properties
-  if (heroContent) {
-    console.log("[ProductsHero] Hero content loaded:", {
-      title: heroContent.title,
-      isVideo: heroContent.isVideo,
-      videoUrl: heroContent.video?.url,
-      videoThumb: heroContent.video?.thumbnail,
-      videoContentType: heroContent.video?.contentType,
-      imageUrl: heroContent.image?.url
+  // Add detailed logging for video properties from landing page
+  if (landingPage && landingPage.hero_content) {
+    console.log("[ProductsHero] Landing page hero content loaded:", {
+      title: landingPage.hero_content.title,
+      isVideo: landingPage.hero_content.is_video,
+      videoUrl: landingPage.hero_content.video_url,
+      videoFile: landingPage.hero_content.video_file,
+      videoThumb: landingPage.hero_content.video_thumbnail,
+      imageUrl: landingPage.hero_content.image_url
     });
   }
 
@@ -28,7 +28,7 @@ export default function ProductsHero() {
     );
   }
 
-  if (error || !heroContent) {
+  if (error || !landingPage || !landingPage.hero_content) {
     console.error("[ProductsHero] Error loading hero content:", error);
     // Fallback content
     return (
@@ -70,65 +70,78 @@ export default function ProductsHero() {
     );
   }
 
-  // Improved video detection logic
-  const isVideoHero = heroContent.isVideo;
+  const hero = landingPage.hero_content;
+  
+  // Improved video detection logic with better logging
+  const isVideoHero = !!hero.is_video;
   const hasVideoFile = isVideoHero && 
-    heroContent.video?.url && 
-    heroContent.video.url.length > 0;
+    hero.video_file && 
+    hero.video_file.url && 
+    hero.video_file.url.length > 0;
+  
+  const hasVideoUrl = isVideoHero && 
+    hero.video_url && 
+    hero.video_url.length > 0;
     
-  // Better detection for Contentful videos
+  // Determine if it's a Contentful video (directly uploaded) or external URL
   const isContentfulVideo = hasVideoFile && 
-    heroContent.video?.contentType && 
-    (heroContent.video.contentType.includes('video/') || 
-     heroContent.video.contentType.includes('application/'));
+    hero.video_file?.contentType && 
+    (hero.video_file.contentType.includes('video/') || 
+     hero.video_file.contentType.includes('application/'));
 
   // Ensure video URL has proper protocol
   const videoUrl = hasVideoFile ? 
-    (heroContent.video?.url.startsWith('//') ? 
-      'https:' + heroContent.video.url : 
-      heroContent.video?.url) : 
-    '';
+    (hero.video_file?.url.startsWith('//') ? 
+      'https:' + hero.video_file.url : 
+      hero.video_file?.url) : 
+    hasVideoUrl ? 
+      (hero.video_url?.startsWith('//') ? 
+        'https:' + hero.video_url : 
+        hero.video_url) : 
+      '';
   
-  // Log video details for debugging
+  // Log detailed video information for debugging
   console.log("[ProductsHero] Video details:", {
     isVideoHero,
     hasVideoFile,
+    hasVideoUrl,
     isContentfulVideo,
     videoUrl,
-    contentType: heroContent.video?.contentType,
-    thumbnailUrl: heroContent.video?.thumbnail
+    contentType: hero.video_file?.contentType,
+    thumbnailUrl: hero.video_thumbnail,
+    videoFileObject: hero.video_file
   });
 
   return (
-    <section className={heroContent.backgroundClass || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"}>
+    <section className={hero.background_class || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"}>
       <div className="container py-16 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-vending-blue-dark">
-              {heroContent.title}
+              {hero.title}
             </h1>
             <p className="text-xl text-gray-700 max-w-2xl">
-              {heroContent.subtitle}
+              {hero.subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              {heroContent.primaryButtonUrl && (
+              {hero.cta_primary_text && hero.cta_primary_url && (
                 <Button asChild size="lg">
-                  <Link to={heroContent.primaryButtonUrl}>
-                    {heroContent.primaryButtonText} <ExternalLink className="ml-2 h-5 w-5" />
+                  <Link to={hero.cta_primary_url}>
+                    {hero.cta_primary_text} <ExternalLink className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
               )}
-              {heroContent.secondaryButtonUrl && (
+              {hero.cta_secondary_text && hero.cta_secondary_url && (
                 <Button asChild variant="outline" size="lg">
-                  <Link to={heroContent.secondaryButtonUrl}>
-                    {heroContent.secondaryButtonText}
+                  <Link to={hero.cta_secondary_url}>
+                    {hero.cta_secondary_text}
                   </Link>
                 </Button>
               )}
             </div>
           </div>
           <div className="relative">
-            {isVideoHero && hasVideoFile ? (
+            {isVideoHero && (videoUrl || hasVideoFile) ? (
               <div className="bg-white rounded-lg shadow-xl overflow-hidden aspect-video">
                 {isContentfulVideo ? (
                   <video
@@ -137,7 +150,7 @@ export default function ProductsHero() {
                     autoPlay
                     muted
                     playsInline
-                    poster={heroContent.video?.thumbnail}
+                    poster={hero.video_thumbnail}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       console.error("[ProductsHero] Video failed to load:", videoUrl, e);
@@ -146,21 +159,21 @@ export default function ProductsHero() {
                       const parent = e.currentTarget.parentElement;
                       if (parent) {
                         const img = document.createElement('img');
-                        img.src = heroContent.image?.url || heroContent.video?.thumbnail || '/placeholder.jpg';
-                        img.alt = heroContent.image?.alt || "Video failed to load";
+                        img.src = hero.image_url || hero.video_thumbnail || '/placeholder.jpg';
+                        img.alt = hero.image_alt || "Video failed to load";
                         img.className = "w-full h-full object-cover";
                         parent.appendChild(img);
                       }
                     }}
                   >
-                    <source src={videoUrl} type={heroContent.video?.contentType} />
+                    <source src={videoUrl} type={hero.video_file?.contentType} />
                     Your browser does not support the video tag.
                   </video>
                 ) : (
                   <div className="relative cursor-pointer">
                     <img
-                      src={heroContent.video?.thumbnail || heroContent.image?.url}
-                      alt={heroContent.image?.alt}
+                      src={hero.video_thumbnail || hero.image_url}
+                      alt={hero.image_alt}
                       className="w-full h-auto object-cover"
                       onError={(e) => {
                         console.error("[ProductsHero] Thumbnail failed to load");
@@ -169,7 +182,7 @@ export default function ProductsHero() {
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Link 
-                        to={heroContent.video?.url || "#"} 
+                        to={hero.video_url || "#"} 
                         target="_blank"
                         className="bg-vending-blue-dark/75 rounded-full p-4 text-white hover:bg-vending-blue-dark transition-colors"
                       >
@@ -182,11 +195,11 @@ export default function ProductsHero() {
             ) : (
               <div className="bg-white rounded-lg shadow-xl overflow-hidden">
                 <img 
-                  src={heroContent.image?.url}
-                  alt={heroContent.image?.alt}
+                  src={hero.image_url}
+                  alt={hero.image_alt}
                   className="w-full h-auto object-cover"
                   onError={(e) => {
-                    console.error("[ProductsHero] Image failed to load:", heroContent.image?.url);
+                    console.error("[ProductsHero] Image failed to load:", hero.image_url);
                     e.currentTarget.src = "https://images.unsplash.com/photo-1556742031-c6961e8560b0?ixlib=rb-4.0.3";
                   }}
                 />

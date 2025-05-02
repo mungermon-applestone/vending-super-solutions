@@ -31,61 +31,51 @@ const PageHero: React.FC<PageHeroProps> = ({
 }) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   
-  // Add refetchOnMount and refetchInterval options to ensure fresh data
+  // Force refetchOnMount: always to ensure fresh data
   const { data: landingPage, isLoading, error, refetch } = useLandingPageByKey(pageKey);
   
-  // Enhanced debugging to track what's happening
+  // Debug logging to track component lifecycle
   useEffect(() => {
-    console.log(`PageHero component for ${pageKey} - mounted/updated`);
-    console.log(`PageHero component for ${pageKey}:`, {
-      landingPage,
-      isLoading,
-      error,
-      hasCmsData: !!landingPage,
-      heroContent: landingPage ? (landingPage as LandingPage).hero_content : null,
+    console.log(`[PageHero] Component for ${pageKey} mounted/updated, landingPage:`, landingPage);
+    
+    // Force refetch when component mounts to ensure we have the latest data
+    refetch().catch(err => {
+      console.error(`[PageHero] Refetch error for ${pageKey}:`, err);
     });
-
-    // Detailed logging for video content
-    if (landingPage && landingPage.hero_content) {
+    
+    // Log video-specific details if available
+    if (landingPage?.hero_content) {
       const hero = landingPage.hero_content;
-      console.log(`PageHero video details for ${pageKey}:`, {
+      console.log(`[PageHero] Video details for ${pageKey}:`, {
         isVideo: hero.is_video,
         videoUrl: hero.video_url,
         videoFile: hero.video_file,
         videoThumbnail: hero.video_thumbnail
       });
     }
-    
-    if (error) {
-      console.error(`PageHero component for ${pageKey} - Error:`, error);
-    }
-    
-    // Force refetch when component mounts to ensure we have the latest data
-    refetch().catch(err => {
-      console.error(`PageHero component for ${pageKey} - Refetch error:`, err);
-    });
-  }, [pageKey, refetch]);
+  }, [pageKey, landingPage, refetch]);
   
-  // Use CMS data if available, otherwise fall back to props
-  // Explicitly cast landingPage to LandingPage type to access hero_content
+  // Get hero content or use fallback values
   const typedLandingPage = landingPage as LandingPage | null;
   const heroContent = typedLandingPage?.hero_content || null;
   
-  // Debug what content we're actually using
+  // Detailed logging for debugging purposes
   useEffect(() => {
-    console.log(`PageHero for ${pageKey} - Using content:`, {
-      usingCmsData: !!heroContent,
-      title: heroContent?.title || fallbackTitle,
-      subtitle: heroContent?.subtitle || fallbackSubtitle,
-      imageUrl: heroContent?.image_url || fallbackImage,
-      buttonText: heroContent?.cta_primary_text || fallbackPrimaryButtonText,
-      isVideo: heroContent?.is_video,
-      videoUrl: heroContent?.video_url,
-      videoFile: heroContent?.video_file,
-      videoThumbnail: heroContent?.video_thumbnail
-    });
-  }, [heroContent, pageKey, fallbackTitle, fallbackSubtitle, fallbackImage, fallbackPrimaryButtonText]);
+    if (heroContent) {
+      console.log(`[PageHero] Using CMS content for ${pageKey}:`, {
+        title: heroContent.title,
+        isVideo: heroContent.is_video,
+        hasVideoFile: !!heroContent.video_file,
+        videoFileUrl: heroContent.video_file?.url,
+        videoUrl: heroContent.video_url,
+        videoThumbnail: heroContent.video_thumbnail
+      });
+    } else {
+      console.log(`[PageHero] Using fallback content for ${pageKey}`);
+    }
+  }, [heroContent, pageKey]);
   
+  // Get content values with fallbacks
   const title = heroContent?.title || fallbackTitle;
   const subtitle = heroContent?.subtitle || fallbackSubtitle;
   const imageUrl = heroContent?.image_url || fallbackImage;
@@ -95,35 +85,43 @@ const PageHero: React.FC<PageHeroProps> = ({
   const secondaryButtonText = heroContent?.cta_secondary_text || fallbackSecondaryButtonText;
   const secondaryButtonUrl = heroContent?.cta_secondary_url || fallbackSecondaryButtonUrl;
   const backgroundClass = heroContent?.background_class || 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light';
-  const isVideo = heroContent?.is_video || false;
-  const videoUrl = heroContent?.video_url || '';
+  
+  // Video-related properties with improved handling
+  const isVideo = !!heroContent?.is_video;
+  
+  // Handle both uploaded Contentful videos and external URLs
+  const hasVideoFile = isVideo && heroContent?.video_file && heroContent.video_file.url;
+  const hasVideoUrl = isVideo && heroContent?.video_url && heroContent.video_url.length > 0;
+  const videoContentType = heroContent?.video_file?.contentType;
+  
+  // Get the video URL with proper protocol handling
+  const rawVideoUrl = hasVideoFile ? heroContent?.video_file?.url : heroContent?.video_url || '';
+  const videoUrl = rawVideoUrl.startsWith('//') ? 'https:' + rawVideoUrl : rawVideoUrl;
+  
+  // Get video thumbnail, falling back to image if needed
   const videoThumbnail = heroContent?.video_thumbnail || imageUrl;
-  const videoFile = heroContent?.video_file;
-  const videoContentType = videoFile?.contentType;
   
-  // Check if we have a Contentful uploaded video
-  const hasContentfulVideo = isVideo && videoFile && videoFile.url && videoFile.url.length > 0;
-  
-  // Get the effective video URL (either external URL or Contentful file URL)
-  const effectiveVideoUrl = hasContentfulVideo ? videoFile.url : videoUrl;
-
-  // Ensure URL has proper protocol
-  const finalVideoUrl = effectiveVideoUrl && effectiveVideoUrl.startsWith('//') ? 
-    'https:' + effectiveVideoUrl : effectiveVideoUrl;
-  
-  // Debug video information
+  // Enhanced debug logging for video properties
   useEffect(() => {
     if (isVideo) {
-      console.log(`[PageHero] Video details for ${pageKey}:`, {
-        hasContentfulVideo,
-        effectiveVideoUrl,
-        finalVideoUrl,
+      console.log(`[PageHero] Processed video details for ${pageKey}:`, {
+        isVideo,
+        hasVideoFile,
+        hasVideoUrl,
+        rawVideoUrl,
+        processedVideoUrl: videoUrl,
         videoContentType,
         videoThumbnail,
         isVideoPlaying
       });
     }
-  }, [isVideo, pageKey, hasContentfulVideo, effectiveVideoUrl, finalVideoUrl, videoContentType, videoThumbnail, isVideoPlaying]);
+  }, [isVideo, pageKey, hasVideoFile, hasVideoUrl, rawVideoUrl, videoUrl, videoContentType, videoThumbnail, isVideoPlaying]);
+  
+  // Determine if this is an embedded video or a Contentful direct upload
+  const isContentfulVideo = isVideo && videoContentType && (
+    videoContentType.includes('video/') || 
+    videoContentType.includes('application/')
+  );
   
   // Function to process video URL for embedding
   const getVideoEmbedUrl = (url: string) => {
@@ -165,19 +163,97 @@ const PageHero: React.FC<PageHeroProps> = ({
   };
 
   const handlePlayVideo = () => {
-    if (finalVideoUrl) {
+    if (videoUrl) {
       setIsVideoPlaying(true);
-      console.log(`[PageHero] Playing video: ${finalVideoUrl}`);
+      console.log(`[PageHero] Playing video: ${videoUrl}`);
     } else {
       console.warn(`[PageHero] Attempted to play video but URL is empty`);
     }
   };
   
-  // Check if this is a Contentful uploaded video
-  const isContentfulVideo = isVideo && videoContentType && (
-    videoContentType.includes('video/') || 
-    videoContentType.includes('application/')
-  );
+  // Enhanced video rendering logic
+  const renderVideo = () => {
+    if (!isVideo || (!hasVideoFile && !hasVideoUrl)) {
+      return (
+        <img
+          src={imageUrl}
+          alt={imageAlt}
+          className="rounded-lg shadow-lg w-full h-auto object-cover"
+          style={{ maxHeight: '500px' }}
+          onError={(e) => {
+            console.error(`[PageHero] Image failed to load: ${imageUrl}`);
+            e.currentTarget.src = "https://via.placeholder.com/800x500?text=Image+Not+Found";
+          }}
+        />
+      );
+    }
+    
+    if (isVideoPlaying) {
+      if (isContentfulVideo) {
+        return (
+          <video 
+            src={videoUrl}
+            className="w-full h-full"
+            controls
+            autoPlay
+            playsInline
+            poster={videoThumbnail}
+            onError={(e) => {
+              console.error(`[PageHero] Video failed to load: ${videoUrl}`, e);
+              // Show fallback image
+              const parent = e.currentTarget.parentElement;
+              if (parent) {
+                e.currentTarget.style.display = 'none';
+                const img = document.createElement('img');
+                img.src = imageUrl || '/placeholder.jpg';
+                img.alt = imageAlt;
+                img.className = "w-full h-full object-cover";
+                parent.appendChild(img);
+              }
+            }}
+          >
+            <source src={videoUrl} type={videoContentType} />
+            Your browser does not support the video tag.
+          </video>
+        );
+      } else {
+        return (
+          <iframe
+            src={getVideoEmbedUrl(videoUrl)}
+            title={title}
+            className="w-full h-full"
+            style={{ maxHeight: '500px' }}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        );
+      }
+    } else {
+      return (
+        <div 
+          className="relative cursor-pointer rounded-lg shadow-lg overflow-hidden"
+          onClick={handlePlayVideo}
+        >
+          <img
+            src={videoThumbnail || imageUrl}
+            alt={imageAlt}
+            className="w-full h-auto object-cover"
+            style={{ maxHeight: '500px' }}
+            onError={(e) => {
+              console.error(`[PageHero] Thumbnail failed to load: ${videoThumbnail}`);
+              e.currentTarget.src = imageUrl || '/placeholder.jpg';
+            }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+            <div className="bg-vending-blue/90 rounded-full p-5 text-white hover:bg-vending-blue transition-colors">
+              <Play className="h-12 w-12" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+  };
   
   return (
     <section className={`py-16 ${backgroundClass}`} data-testid={`page-hero-${pageKey}`}>
@@ -211,79 +287,9 @@ const PageHero: React.FC<PageHeroProps> = ({
             )}
           </div>
           <div className="mt-8 lg:mt-0">
-            {isVideo && finalVideoUrl ? (
-              isVideoPlaying ? (
-                <div className="aspect-video rounded-lg shadow-lg overflow-hidden">
-                  {isContentfulVideo ? (
-                    <video 
-                      src={finalVideoUrl}
-                      className="w-full h-full"
-                      controls
-                      autoPlay
-                      playsInline
-                      onError={(e) => {
-                        console.error(`[PageHero] Video failed to load: ${finalVideoUrl}`, e);
-                        // Show fallback image
-                        const parent = e.currentTarget.parentElement;
-                        if (parent) {
-                          e.currentTarget.style.display = 'none';
-                          const img = document.createElement('img');
-                          img.src = imageUrl || '/placeholder.jpg';
-                          img.alt = imageAlt;
-                          img.className = "w-full h-full object-cover";
-                          parent.appendChild(img);
-                        }
-                      }}
-                    >
-                      <source src={finalVideoUrl} type={videoContentType} />
-                      Your browser does not support the video tag.
-                    </video>
-                  ) : (
-                    <iframe
-                      src={getVideoEmbedUrl(finalVideoUrl)}
-                      title={title}
-                      className="w-full h-full"
-                      style={{ maxHeight: '500px' }}
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    ></iframe>
-                  )}
-                </div>
-              ) : (
-                <div 
-                  className="relative cursor-pointer rounded-lg shadow-lg overflow-hidden"
-                  onClick={handlePlayVideo}
-                >
-                  <img
-                    src={videoThumbnail || imageUrl}
-                    alt={imageAlt}
-                    className="w-full h-auto object-cover"
-                    style={{ maxHeight: '500px' }}
-                    onError={(e) => {
-                      console.error(`[PageHero] Thumbnail failed to load: ${videoThumbnail}`);
-                      e.currentTarget.src = imageUrl || '/placeholder.jpg';
-                    }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                    <div className="bg-vending-blue/90 rounded-full p-5 text-white hover:bg-vending-blue transition-colors">
-                      <Play className="h-12 w-12" />
-                    </div>
-                  </div>
-                </div>
-              )
-            ) : (
-              <img
-                src={imageUrl}
-                alt={imageAlt}
-                className="rounded-lg shadow-lg w-full h-auto object-cover"
-                style={{ maxHeight: '500px' }}
-                onError={(e) => {
-                  console.error(`[PageHero] Image failed to load: ${imageUrl}`);
-                  e.currentTarget.src = "https://via.placeholder.com/800x500?text=Image+Not+Found";
-                }}
-              />
-            )}
+            <div className="aspect-video rounded-lg shadow-lg overflow-hidden">
+              {renderVideo()}
+            </div>
           </div>
         </div>
       </div>
