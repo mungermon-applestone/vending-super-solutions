@@ -35,18 +35,18 @@ const BusinessGoalsCompact: React.FC<BusinessGoalsCompactProps> = ({
           onClick={() => navigate(`/business-goals/${goal.slug}`)}
           className="border border-gray-200 rounded-lg p-5 bg-white hover:shadow-md transition-shadow cursor-pointer"
         >
-          <div className="flex items-center">
-            <div className="flex-grow flex items-center">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center flex-grow">
               {goal.icon ? (
-                <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full w-12 h-12 flex items-center justify-center text-vending-blue mr-4">
+                <div className="bg-vending-blue-light bg-opacity-20 p-3 rounded-full w-12 h-12 flex items-center justify-center text-vending-blue mr-4 flex-shrink-0">
                   <MachineTypeIcon type={goal.icon} />
                 </div>
               ) : null}
-              <h3 className="text-xl md:text-2xl font-semibold text-vending-blue-dark">
+              <h3 className="text-xl md:text-2xl font-semibold text-vending-blue-dark my-auto">
                 {goal.title}
               </h3>
             </div>
-            <ArrowRight className="h-5 w-5 text-vending-blue ml-2 flex-shrink-0" />
+            <ArrowRight className="h-5 w-5 text-vending-blue ml-4 flex-shrink-0" />
           </div>
           {!ultraCompact && goal.description && (
             <p className="text-sm text-gray-600 mt-3 line-clamp-2">{goal.description}</p>
