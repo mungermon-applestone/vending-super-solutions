@@ -12,6 +12,11 @@ interface HeroContent {
     url: string;
     alt: string;
   };
+  video?: {
+    url: string;
+    thumbnail?: string;
+  };
+  isVideo?: boolean;
   imageAlt: string;
   primaryButtonText?: string;
   primaryButtonUrl?: string;
@@ -96,6 +101,8 @@ export function useHeroContent(idOrPageKey: string) {
             title: entry.fields.title,
             subtitle: entry.fields.subtitle,
             hasImage: !!entry.fields.image,
+            hasVideo: !!entry.fields.videoUrl,
+            isVideo: !!entry.fields.isVideo,
             id: entry.sys.id
           });
           
@@ -106,10 +113,18 @@ export function useHeroContent(idOrPageKey: string) {
             
           console.log(`[useHeroContent] Extracted image URL: ${imageUrl}`);
           
+          // Process video data if available
+          const isVideo = !!entry.fields.isVideo;
+          const videoUrl = entry.fields.videoUrl || null;
+          const videoThumbnail = entry.fields.videoThumbnail 
+            ? `https:${(entry.fields.videoThumbnail as any).fields.file.url}`
+            : null;
+          
           const result = {
             title: entry.fields.title as string,
             subtitle: entry.fields.subtitle as string,
             pageKey: entry.fields.pageKey as string,
+            isVideo: isVideo,
             image: {
               url: imageUrl,
               alt: entry.fields.imageAlt as string || entry.fields.title as string
@@ -120,6 +135,14 @@ export function useHeroContent(idOrPageKey: string) {
             secondaryButtonUrl: entry.fields.secondaryButtonUrl as string,
             backgroundClass: entry.fields.backgroundClass as string
           } as HeroContent;
+          
+          // Add video properties if this is a video hero
+          if (isVideo && videoUrl) {
+            result.video = {
+              url: videoUrl,
+              thumbnail: videoThumbnail
+            };
+          }
           
           console.log(`[useHeroContent] Returning processed hero content:`, result);
           return result;

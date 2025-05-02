@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { LandingPage } from '@/types/landingPage';
+import { Play } from 'lucide-react';
 
 interface PageHeroProps {
   pageKey: string;
@@ -27,6 +29,8 @@ const PageHero: React.FC<PageHeroProps> = ({
   fallbackSecondaryButtonText,
   fallbackSecondaryButtonUrl,
 }) => {
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  
   // Add refetchOnMount and refetchInterval options to ensure fresh data
   const { data: landingPage, isLoading, error, refetch } = useLandingPageByKey(pageKey);
   
@@ -64,6 +68,8 @@ const PageHero: React.FC<PageHeroProps> = ({
       subtitle: heroContent?.subtitle || fallbackSubtitle,
       imageUrl: heroContent?.image_url || fallbackImage,
       buttonText: heroContent?.cta_primary_text || fallbackPrimaryButtonText,
+      isVideo: heroContent?.is_video,
+      videoUrl: heroContent?.video_url,
     });
   }, [heroContent, pageKey, fallbackTitle, fallbackSubtitle, fallbackImage, fallbackPrimaryButtonText]);
   
@@ -76,6 +82,54 @@ const PageHero: React.FC<PageHeroProps> = ({
   const secondaryButtonText = heroContent?.cta_secondary_text || fallbackSecondaryButtonText;
   const secondaryButtonUrl = heroContent?.cta_secondary_url || fallbackSecondaryButtonUrl;
   const backgroundClass = heroContent?.background_class || 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light';
+  const isVideo = heroContent?.is_video || false;
+  const videoUrl = heroContent?.video_url || '';
+  const videoThumbnail = heroContent?.video_thumbnail || imageUrl;
+  
+  // Function to process video URL for embedding
+  const getVideoEmbedUrl = (url: string) => {
+    if (!url) return '';
+    
+    // Make sure URL has proper protocol
+    let processedUrl = url.startsWith('//') ? 'https:' + url : url;
+    
+    // YouTube URLs
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      // Extract video ID
+      let videoId = '';
+      if (url.includes('youtube.com/watch?v=')) {
+        videoId = url.split('v=')[1];
+        const ampersandPosition = videoId?.indexOf('&');
+        if (ampersandPosition !== -1) {
+          videoId = videoId.substring(0, ampersandPosition);
+        }
+      } else if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1];
+      }
+      
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      }
+    }
+    
+    // Vimeo URLs
+    if (url.includes('vimeo.com')) {
+      const vimeoRegex = /vimeo\.com\/(\d+)($|\/|\?)/;
+      const match = url.match(vimeoRegex);
+      if (match && match[1]) {
+        return `https://player.vimeo.com/video/${match[1]}?autoplay=1`;
+      }
+    }
+    
+    // Return the original URL if it's not YouTube or Vimeo
+    return processedUrl;
+  };
+
+  const handlePlayVideo = () => {
+    if (videoUrl) {
+      setIsVideoPlaying(true);
+    }
+  };
   
   return (
     <section className={`py-16 ${backgroundClass}`} data-testid={`page-hero-${pageKey}`}>
@@ -88,34 +142,70 @@ const PageHero: React.FC<PageHeroProps> = ({
             <p className="text-lg md:text-xl">
               {subtitle}
             </p>
-            <div className="flex flex-wrap gap-4">
-              {primaryButtonText && primaryButtonUrl && (
-                <Link to={primaryButtonUrl}>
-                  <Button size="lg">
-                    {primaryButtonText}
-                  </Button>
-                </Link>
-              )}
-              {secondaryButtonText && secondaryButtonUrl && (
-                <Link to={secondaryButtonUrl}>
-                  <Button size="lg" variant="outline">
-                    {secondaryButtonText}
-                  </Button>
-                </Link>
-              )}
-            </div>
+            {/* Only render buttons if they have both text and URL */}
+            {((primaryButtonText && primaryButtonUrl) || (secondaryButtonText && secondaryButtonUrl)) && (
+              <div className="flex flex-wrap gap-4">
+                {primaryButtonText && primaryButtonUrl && (
+                  <Link to={primaryButtonUrl}>
+                    <Button size="lg">
+                      {primaryButtonText}
+                    </Button>
+                  </Link>
+                )}
+                {secondaryButtonText && secondaryButtonUrl && (
+                  <Link to={secondaryButtonUrl}>
+                    <Button size="lg" variant="outline">
+                      {secondaryButtonText}
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
           <div className="mt-8 lg:mt-0">
-            <img
-              src={imageUrl}
-              alt={imageAlt}
-              className="rounded-lg shadow-lg w-full h-auto object-cover"
-              style={{ maxHeight: '500px' }}
-              onError={(e) => {
-                e.currentTarget.src = "https://via.placeholder.com/800x500?text=Image+Not+Found";
-                console.log("Image failed to load:", imageUrl);
-              }}
-            />
+            {isVideo && videoUrl ? (
+              isVideoPlaying ? (
+                <div className="aspect-video rounded-lg shadow-lg overflow-hidden">
+                  <iframe
+                    src={getVideoEmbedUrl(videoUrl)}
+                    title={title}
+                    className="w-full h-full"
+                    style={{ maxHeight: '500px' }}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              ) : (
+                <div 
+                  className="relative cursor-pointer rounded-lg shadow-lg overflow-hidden"
+                  onClick={handlePlayVideo}
+                >
+                  <img
+                    src={videoThumbnail || imageUrl}
+                    alt={imageAlt}
+                    className="w-full h-auto object-cover"
+                    style={{ maxHeight: '500px' }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <div className="bg-vending-blue/90 rounded-full p-5 text-white hover:bg-vending-blue transition-colors">
+                      <Play className="h-12 w-12" />
+                    </div>
+                  </div>
+                </div>
+              )
+            ) : (
+              <img
+                src={imageUrl}
+                alt={imageAlt}
+                className="rounded-lg shadow-lg w-full h-auto object-cover"
+                style={{ maxHeight: '500px' }}
+                onError={(e) => {
+                  e.currentTarget.src = "https://via.placeholder.com/800x500?text=Image+Not+Found";
+                  console.log("Image failed to load:", imageUrl);
+                }}
+              />
+            )}
           </div>
         </div>
       </div>
