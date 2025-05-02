@@ -17,14 +17,16 @@ import { MediaFiltersParams } from '@/types/media';
 
 interface MediaLibraryProps {
   selectable?: boolean;
-  onSelectMedia?: (mediaId: string, url: string) => void;
+  onSelectMedia?: (mediaId: string, url: string, contentType?: string, fileName?: string) => void;
   selectedMediaIds?: string[];
+  mediaType?: string;
 }
 
 const MediaLibrary: React.FC<MediaLibraryProps> = ({
   selectable = false,
   onSelectMedia,
-  selectedMediaIds = []
+  selectedMediaIds = [],
+  mediaType = "image/*"
 }) => {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [filters, setFilters] = useState<MediaFiltersParams>({});
@@ -51,13 +53,24 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({
   const handleSelectMedia = (media: any) => {
     if (onSelectMedia) {
       const publicUrl = `https://eyxlqcavscrthjkonght.supabase.co/storage/v1/object/public/cms_media/${media.storage_path}`;
-      onSelectMedia(media.id, publicUrl);
+      onSelectMedia(media.id, publicUrl, media.file_type, media.filename);
     }
   };
   
   const handleRefresh = () => {
     refetch();
   };
+
+  // Apply initial filter based on mediaType if provided
+  React.useEffect(() => {
+    if (mediaType && mediaType !== "image/*") {
+      const fileType = mediaType.split("/")[0] + "/";
+      setFilters(prev => ({
+        ...prev,
+        file_type: fileType
+      }));
+    }
+  }, [mediaType]);
 
   return (
     <div className="space-y-4">
