@@ -131,15 +131,6 @@ const MachinesPage: React.FC = () => {
       )}
 
       <div className="container py-12 md:py-16" id="machines-section">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            {pageContent?.machineTypesTitle || "Our Machine Range"}
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            {pageContent?.machineTypesDescription || "Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs."}
-          </p>
-        </div>
-
         {!isContentfulConfigured() && <ContentfulConfigWarning />}
 
         <RefreshDataButton isLoading={isLoading} onRefresh={refetch} />
