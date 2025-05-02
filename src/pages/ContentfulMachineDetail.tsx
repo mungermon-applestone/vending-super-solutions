@@ -33,6 +33,15 @@ const ContentfulMachineDetail: React.FC = () => {
     // Ensure type is strictly "vending" or "locker" as a union type
     const machineType = machine.type === 'locker' ? 'locker' : 'vending' as 'vending' | 'locker';
 
+    // Ensure all images have an id property
+    const processedImages = Array.isArray(machine.images) 
+      ? machine.images.map((img, index) => ({
+          id: img.id || `img-${machine.id}-${index}`, // Use existing id or create one
+          url: img.url,
+          alt: img.alt || machine.title
+        }))
+      : [];
+
     return {
       id: machine.id,
       slug: machine.slug,
@@ -40,14 +49,8 @@ const ContentfulMachineDetail: React.FC = () => {
       type: machineType,
       temperature: machine.temperature || 'ambient',
       description: machine.description,
-      // Ensure images is always an array with the required format
-      images: Array.isArray(machine.images) ? machine.images.map(img => ({
-        url: img.url,
-        alt: img.alt
-      })) : [],
-      // Ensure specs is an object
+      images: processedImages, // Use the processed images with IDs
       specs: machine.specs || {},
-      // Ensure features is an array
       features: machine.features || [],
       deploymentExamples,
       testimonialSection
