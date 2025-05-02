@@ -161,7 +161,7 @@ const HeroContentTab: React.FC<HeroContentTabProps> = ({ form, backgroundOptions
                   </FormDescription>
                   <FormControl>
                     <MediaSelector
-                      value={field.value}
+                      value={field.value || ""}
                       onChange={(url) => {
                         form.setValue("hero.video_thumbnail", url);
                       }}
@@ -184,7 +184,7 @@ const HeroContentTab: React.FC<HeroContentTabProps> = ({ form, backgroundOptions
                   <FormLabel>Hero Image</FormLabel>
                   <FormControl>
                     <MediaSelector
-                      value={field.value}
+                      value={field.value || ""}
                       onChange={(url) => {
                         form.setValue("hero.image_url", url);
                       }}

@@ -7,14 +7,16 @@ import MediaLibrary from './MediaLibrary';
 
 interface MediaSelectorProps {
   value: string;
-  onChange: (url: string) => void;
+  onChange: (url: string, contentType?: string, fileName?: string) => void;
   buttonLabel?: string;
+  mediaType?: string;
 }
 
 const MediaSelector: React.FC<MediaSelectorProps> = ({
   value,
   onChange,
-  buttonLabel = "Select Image"
+  buttonLabel = "Select Image",
+  mediaType = "image/*"
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedMediaIds, setSelectedMediaIds] = useState<string[]>([]);
@@ -35,20 +37,20 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
     }
   };
   
-  const handleSelectMedia = (mediaId: string, url: string) => {
-    console.log("[MediaSelector] Selected media:", mediaId, url);
+  const handleSelectMedia = (mediaId: string, url: string, contentType?: string, fileName?: string) => {
+    console.log("[MediaSelector] Selected media:", mediaId, url, contentType, fileName);
     setSelectedMediaIds([mediaId]);
     setCurrentImageUrl(url);
     
     // Call the onChange prop to propagate the change upwards
-    onChange(url);
+    onChange(url, contentType, fileName);
     setIsOpen(false);
   };
   
   const handleRemove = () => {
     console.log("[MediaSelector] Removing selected image");
     setCurrentImageUrl('');
-    onChange('');
+    onChange('', '', '');
     setSelectedMediaIds([]);
   };
   
@@ -97,6 +99,7 @@ const MediaSelector: React.FC<MediaSelectorProps> = ({
               selectable={true}
               onSelectMedia={handleSelectMedia}
               selectedMediaIds={selectedMediaIds}
+              mediaType={mediaType}
             />
           </div>
         </DialogContent>
