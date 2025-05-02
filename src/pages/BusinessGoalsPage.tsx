@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -16,10 +17,7 @@ import BusinessGoalsLoader from '@/components/businessGoals/BusinessGoalsLoader'
 import BusinessGoalsIntro from '@/components/businessGoals/BusinessGoalsIntro';
 import BusinessGoalsFallbackNotice from '@/components/businessGoals/BusinessGoalsFallbackNotice';
 import BusinessGoalsContactSection from '@/components/businessGoals/BusinessGoalsContactSection';
-import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 import { CONTENTFUL_CONFIG, isContentfulConfigured, isPreviewEnvironment } from '@/config/cms';
-import ContentfulConfigWarning from '@/components/machines/ContentfulConfigWarning';
-import PreviewEnvironmentDetector from '@/components/contentful/PreviewEnvironmentDetector';
 
 const BUSINESS_GOALS_CONTENT_ID = "3z7Q1mcHEnk6S4YVCyaklz";
 const HERO_CONTENT_ID = "4b40Npa9Hgp8jO0jDX98F6";
@@ -138,11 +136,19 @@ const BusinessGoalsPage: React.FC = () => {
       spaceId: CONTENTFUL_CONFIG.SPACE_ID?.length > 0,
       tokenConfigured: CONTENTFUL_CONFIG.DELIVERY_TOKEN?.length > 0
     });
-  }, [isConfigured, isPreview]);
+    
+    console.log('[BusinessGoalsPage] Business goals data:', {
+      businessGoals,
+      fallbackBusinessGoals,
+      displayGoals: isConfigured ? businessGoals : fallbackBusinessGoals
+    });
+  }, [isConfigured, isPreview, businessGoals]);
   
   // Use fallback content if Contentful is not configured
   const displayContent = isConfigured ? pageContent : fallbackPageContent;
-  const displayGoals = isConfigured ? businessGoals : fallbackBusinessGoals;
+  
+  // Always use fallbackBusinessGoals if Contentful is not configured or if businessGoals is empty
+  const displayGoals = (isConfigured && businessGoals && businessGoals.length > 0) ? businessGoals : fallbackBusinessGoals;
   
   if (isLoading && !displayContent && !displayGoals) {
     return (
@@ -170,8 +176,20 @@ const BusinessGoalsPage: React.FC = () => {
       {/* Add an indicator that we're using fallback data in preview mode */}
       <BusinessGoalsFallbackNotice isPreview={isPreview} isConfigured={isConfigured} />
 
+      {/* Fixed: Add a title section above the grid */}
+      <section className="bg-white py-8">
+        <div className="container mx-auto text-center">
+          <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">
+            {displayContent?.goalsSectionTitle || "Business Goals We Help You Achieve"}
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
+            {displayContent?.goalsSectionDescription || "Explore how our solutions can help you reach your business objectives."}
+          </p>
+        </div>
+      </section>
+
       <BusinessGoalsGrid 
-        goals={displayGoals || []}
+        goals={displayGoals}
         isLoading={false}
         error={null}
         compactView={true}
