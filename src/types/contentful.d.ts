@@ -1,4 +1,3 @@
-
 import { Asset, Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 import { Document, BLOCKS } from '@contentful/rich-text-types';
 

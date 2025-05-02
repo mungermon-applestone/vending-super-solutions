@@ -12,13 +12,6 @@ interface HeroContent {
     url: string;
     alt: string;
   };
-  video?: {
-    url: string;
-    thumbnail?: string;
-    contentType?: string;
-    fileName?: string;
-  };
-  isVideo?: boolean;
   imageAlt: string;
   primaryButtonText?: string;
   primaryButtonUrl?: string;
@@ -72,7 +65,7 @@ export function useHeroContent(idOrPageKey: string) {
           if (isUUID) {
             // Direct ID lookup for legacy components
             console.log(`[useHeroContent] Fetching entry directly by ID: ${idOrPageKey}`);
-            entry = await client.getEntry(idOrPageKey, { include: 2 });
+            entry = await client.getEntry(idOrPageKey);
           } else {
             // Page key lookup for the newer pattern
             console.log(`[useHeroContent] Querying entries with page key: ${idOrPageKey}`);
@@ -103,12 +96,9 @@ export function useHeroContent(idOrPageKey: string) {
             title: entry.fields.title,
             subtitle: entry.fields.subtitle,
             hasImage: !!entry.fields.image,
-            hasVideo: !!entry.fields.videoUrl || !!entry.fields.video,
-            isVideo: !!entry.fields.isVideo,
             id: entry.sys.id
           });
           
-          // Process image data
           const image = entry.fields.image;
           const imageUrl = image && (image as any).fields && (image as any).fields.file 
             ? `https:${(image as any).fields.file.url}`
@@ -116,58 +106,12 @@ export function useHeroContent(idOrPageKey: string) {
             
           console.log(`[useHeroContent] Extracted image URL: ${imageUrl}`);
           
-          // Enhanced video detection - better handling of different video sources
-          const isVideo = !!entry.fields.isVideo;
-          
-          // Detect both direct video upload and external URL
-          const hasVideoField = !!entry.fields.video;
-          const hasVideoUrlField = !!entry.fields.videoUrl && entry.fields.videoUrl.length > 0;
-          
-          // Get video URL from either source
-          let videoUrl = null;
-          let videoContentType = null;
-          let videoFileName = null;
-          
-          // Process a direct Contentful video upload
-          if (hasVideoField) {
-            console.log(`[useHeroContent] Found video field:`, entry.fields.video);
-            
-            if (entry.fields.video.fields && entry.fields.video.fields.file) {
-              videoUrl = `https:${entry.fields.video.fields.file.url}`;
-              videoContentType = entry.fields.video.fields.file.contentType;
-              videoFileName = entry.fields.video.fields.file.fileName;
-              
-              console.log(`[useHeroContent] Extracted video asset details:`, {
-                url: videoUrl,
-                contentType: videoContentType,
-                fileName: videoFileName
-              });
-            }
-          }
-          // Process external video URL
-          else if (hasVideoUrlField) {
-            videoUrl = entry.fields.videoUrl;
-            console.log(`[useHeroContent] Using external video URL: ${videoUrl}`);
-          }
-          
-          // Process video thumbnail
-          let videoThumbnail = null;
-          if (entry.fields.videoThumbnail) {
-            const thumbData = entry.fields.videoThumbnail;
-            
-            if (thumbData.fields && thumbData.fields.file && thumbData.fields.file.url) {
-              videoThumbnail = `https:${thumbData.fields.file.url}`;
-              console.log(`[useHeroContent] Extracted video thumbnail URL: ${videoThumbnail}`);
-            }
-          }
-          
           const result = {
             title: entry.fields.title as string,
             subtitle: entry.fields.subtitle as string,
             pageKey: entry.fields.pageKey as string,
-            isVideo: isVideo && (hasVideoField || hasVideoUrlField),
             image: {
-              url: imageUrl || '',
+              url: imageUrl,
               alt: entry.fields.imageAlt as string || entry.fields.title as string
             },
             primaryButtonText: entry.fields.primaryButtonText as string,
@@ -177,19 +121,7 @@ export function useHeroContent(idOrPageKey: string) {
             backgroundClass: entry.fields.backgroundClass as string
           } as HeroContent;
           
-          // Always include the video object if this is a video hero
-          // This ensures we don't have undefined checks downstream
-          if (isVideo && (videoUrl || hasVideoField || hasVideoUrlField)) {
-            result.video = {
-              url: videoUrl || '',
-              thumbnail: videoThumbnail || '',
-              contentType: videoContentType || undefined,
-              fileName: videoFileName || undefined
-            };
-            
-            console.log(`[useHeroContent] Added video object to result:`, result.video);
-          }
-          
+          console.log(`[useHeroContent] Returning processed hero content:`, result);
           return result;
         } catch (entryError) {
           console.error(`[useHeroContent] Error fetching entry for ${idOrPageKey}:`, entryError);

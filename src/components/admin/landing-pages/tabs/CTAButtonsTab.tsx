@@ -2,10 +2,8 @@
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { InfoIcon } from 'lucide-react';
 import * as z from 'zod';
 
 interface CTAButtonsTabProps {
@@ -19,17 +17,9 @@ const CTAButtonsTab: React.FC<CTAButtonsTabProps> = ({ form }) => {
         <CardTitle>Call to Action Buttons</CardTitle>
         <CardDescription>
           Configure the call to action buttons for this hero section.
-          Leave fields blank to hide buttons.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Alert className="mb-6">
-          <InfoIcon className="h-4 w-4" />
-          <AlertDescription>
-            Buttons will only be displayed if both the text and URL fields are filled in.
-          </AlertDescription>
-        </Alert>
-        
         <div className="space-y-6">
           <div>
             <h3 className="text-lg font-medium mb-3">Primary Button</h3>
@@ -43,7 +33,6 @@ const CTAButtonsTab: React.FC<CTAButtonsTabProps> = ({ form }) => {
                     <FormControl>
                       <Input placeholder="e.g., Get Started" {...field} />
                     </FormControl>
-                    <FormDescription>Leave blank to hide this button</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -77,7 +66,6 @@ const CTAButtonsTab: React.FC<CTAButtonsTabProps> = ({ form }) => {
                     <FormControl>
                       <Input placeholder="e.g., Learn More" {...field} />
                     </FormControl>
-                    <FormDescription>Leave blank to hide this button</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

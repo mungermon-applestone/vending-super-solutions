@@ -5,14 +5,6 @@ export interface HeroContent {
   subtitle: string;
   image_url: string;
   image_alt: string;
-  video_url?: string;
-  video_thumbnail?: string;
-  is_video?: boolean;
-  video_file?: {
-    url: string;
-    contentType: string;
-    fileName: string;
-  };
   cta_primary_text?: string;
   cta_primary_url?: string;
   cta_secondary_text?: string;
@@ -40,14 +32,6 @@ export interface LandingPageFormData {
     subtitle: string;
     image_url: string;
     image_alt: string;
-    video_url?: string;
-    video_thumbnail?: string;
-    is_video?: boolean;
-    video_file?: {
-      url: string;
-      contentType: string;
-      fileName: string;
-    };
     cta_primary_text: string;
     cta_primary_url: string;
     cta_secondary_text: string;

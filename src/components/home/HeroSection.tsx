@@ -1,26 +1,15 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useHeroContent } from '@/hooks/cms/useHeroContent';
-import HeroVideo from '@/components/common/HeroVideo';
 
 const HeroSection = () => {
   const { data: heroContent, isLoading } = useHeroContent("home");
   
-  // Debug logging for the hero section - always runs
-  useEffect(() => {
-    console.log("Hero section rendering", { 
-      heroContent, 
-      isLoading, 
-      pageKey: "home",
-      hasVideo: heroContent?.isVideo,
-      videoUrl: heroContent?.video?.url,
-      videoThumbnail: heroContent?.video?.thumbnail
-    });
-  }, [heroContent, isLoading]);
+  console.log("Hero section rendering", { heroContent, isLoading, pageKey: "home" });
   
   // If we're loading, show a skeleton
   if (isLoading) {
@@ -63,23 +52,6 @@ const HeroSection = () => {
   const imageUrl = heroContent?.image?.url || "https://images.unsplash.com/photo-1605810230434-7631ac76ec81";
   const imageAlt = heroContent?.image?.alt || "Vending Machine Software Interface";
   const backgroundClass = heroContent?.backgroundClass || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light";
-  
-  // Video properties - always define these variables regardless of isVideo value
-  const isVideo = Boolean(heroContent?.isVideo);
-  const videoUrl = heroContent?.video?.url || '';
-  const videoThumbnail = heroContent?.video?.thumbnail || imageUrl;
-  const videoContentType = heroContent?.video?.contentType || '';
-  
-  // Debug logging for video content - always call this hook, never conditionally
-  useEffect(() => {
-    console.log("[HeroSection] Video details:", {
-      isVideo,
-      videoUrl,
-      videoThumbnail,
-      contentType: videoContentType,
-      videoObject: heroContent?.video || 'No video object'
-    });
-  }, [isVideo, videoUrl, videoThumbnail, videoContentType, heroContent?.video]);
   
   return (
     <div className={backgroundClass}>
@@ -124,15 +96,17 @@ const HeroSection = () => {
             </div>
           </div>
           <div className="relative flex justify-center">
-            <HeroVideo
-              isVideo={isVideo}
-              videoUrl={videoUrl}
-              videoThumbnail={videoThumbnail}
-              videoContentType={videoContentType}
-              imageUrl={imageUrl}
-              imageAlt={imageAlt}
-              className="w-full"
-            />
+            <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+              <img 
+                src={imageUrl}
+                alt={imageAlt}
+                className="w-full h-auto object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1605810230434-7631ac76ec81";
+                  console.log("Image failed to load, using fallback");
+                }}
+              />
+            </div>
             <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
               <p className="font-bold">Works with 150+ machine models</p>
             </div>

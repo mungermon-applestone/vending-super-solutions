@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, Play } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 interface HeroContentProps {
   title: string;
@@ -39,12 +39,10 @@ const HeroContent: React.FC<HeroContentProps> = ({
     } else {
       console.log(`[HeroContent] Successfully loaded content for entry ID: ${entryId}`, {
         title,
-        subtitle,
-        hasPrimaryButton: !!primaryButtonText && !!primaryButtonUrl,
-        hasSecondaryButton: !!secondaryButtonText && !!secondaryButtonUrl
+        subtitle
       });
     }
-  }, [error, entryId, isUsingFallback, title, subtitle, primaryButtonText, primaryButtonUrl, secondaryButtonText, secondaryButtonUrl]);
+  }, [error, entryId, isUsingFallback, title, subtitle]);
 
   return (
     <div className="space-y-6">
@@ -85,27 +83,23 @@ const HeroContent: React.FC<HeroContentProps> = ({
       <p className="text-xl text-gray-700">
         {subtitle}
       </p>
-      
-      {/* Only render buttons section if at least one button has both text and URL */}
-      {((primaryButtonText && primaryButtonUrl) || (secondaryButtonText && secondaryButtonUrl)) && (
-        <div className="flex flex-col sm:flex-row gap-4 pt-2">
-          {primaryButtonText && primaryButtonUrl && (
-            <Button asChild size="lg">
-              <Link to={primaryButtonUrl}>
-                {primaryButtonText}
-              </Link>
-            </Button>
-          )}
-          
-          {secondaryButtonText && secondaryButtonUrl && (
-            <Button asChild variant="outline" size="lg">
-              <Link to={secondaryButtonUrl}>
-                {secondaryButtonText}
-              </Link>
-            </Button>
-          )}
-        </div>
-      )}
+      <div className="flex flex-col sm:flex-row gap-4 pt-2">
+        {primaryButtonText && (
+          <Button asChild size="lg">
+            <Link to={primaryButtonUrl || '#'}>
+              {primaryButtonText}
+            </Link>
+          </Button>
+        )}
+        
+        {secondaryButtonText && (
+          <Button asChild variant="outline" size="lg">
+            <Link to={secondaryButtonUrl || '#'}>
+              {secondaryButtonText}
+            </Link>
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
