@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useMachines } from '@/hooks/useMachinesData';
@@ -115,9 +114,6 @@ const MachinesPage = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">Vending Machines</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              A comprehensive selection of vending machines to suit various environments and product requirements.
-            </p>
           </div>
           
           {isLoading ? (
@@ -150,9 +146,6 @@ const MachinesPage = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">Smart Lockers</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Secure, temperature-controlled locker solutions for automated pickup and delivery.
-            </p>
           </div>
           
           {isLoading ? (
