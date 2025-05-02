@@ -1,15 +1,18 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { useContentfulBusinessGoals } from '@/hooks/cms/useContentfulBusinessGoals';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import { useBusinessGoalsPageContent } from '@/hooks/cms/useBusinessGoalsPageContent';
+import { useContentfulBusinessGoals } from '@/hooks/cms/useContentfulBusinessGoals';
 import { useHeroContent } from '@/hooks/cms/useHeroContent';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import BusinessGoalsPurposeStatement from '@/components/businessGoals/BusinessGoalsPurposeStatement';
 import BusinessGoalsGrid from '@/components/businessGoals/BusinessGoalsGrid';
 import BusinessGoalKeyBenefits from '@/components/businessGoals/BusinessGoalKeyBenefits';
-import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry';
+import ContactForm from '@/components/contact/ContactForm';
 import BusinessGoalsDebugSection from '@/components/businessGoals/BusinessGoalsDebugSection';
 import { Loader2 } from 'lucide-react';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
@@ -181,8 +184,6 @@ const BusinessGoalsPage: React.FC = () => {
       )}
 
       <BusinessGoalsGrid 
-        title={displayContent?.goalsSectionTitle || "Achieve Your Business Objectives"}
-        description={displayContent?.goalsSectionDescription || "Transform your vending operations with solutions designed to meet specific business needs."}
         goals={displayGoals || []}
         isLoading={false}
         error={null}
@@ -203,13 +204,22 @@ const BusinessGoalsPage: React.FC = () => {
         <TestimonialsSection data={testimonialSection} />
       )}
 
-      <BusinessGoalInquiry 
-        title={displayContent?.customSolutionTitle}
-        description={displayContent?.customSolutionDescription}
-        bulletPoints={displayContent?.inquiryBulletPoints}
-        buttonText={displayContent?.customSolutionButtonText}
-        buttonUrl={displayContent?.customSolutionButtonUrl}
-      />
+      {/* Standard contact form section */}
+      <section className="py-16 bg-vending-blue-light bg-opacity-10">
+        <div className="container mx-auto">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <h2 className="text-3xl font-bold text-vending-blue-dark">Need Help With Your Business Goals?</h2>
+                <p className="text-gray-700">
+                  Our team is ready to assist you with achieving your specific business goals using our vending solutions.
+                </p>
+              </div>
+              <ContactForm />
+            </div>
+          </div>
+        </div>
+      </section>
 
       {process.env.NODE_ENV === 'development' && (
         <BusinessGoalsDebugSection 
