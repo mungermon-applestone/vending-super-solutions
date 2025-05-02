@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ExternalLink, Loader2 } from 'lucide-react';
@@ -75,15 +76,32 @@ export default function ProductsHero() {
   if (landingPage?.hero_content) {
     const hero = landingPage.hero_content;
     
-    // Enhanced video detection
+    // Enhanced video detection with more debugging
     const isVideoHero = !!hero.is_video;
     const hasVideoFile = hero.video_file && hero.video_file.url;
     const hasVideoUrl = hero.video_url && hero.video_url.length > 0;
     
-    // Get the final video URL
+    // Get the final video URL with more explicit logging
     const videoUrl = hasVideoFile ? hero.video_file.url : (hasVideoUrl ? hero.video_url : '');
     const videoContentType = hasVideoFile ? hero.video_file.contentType : undefined;
     const videoThumbnail = hero.video_thumbnail || hero.image_url;
+    
+    console.log('[ProductsHero] Video details:', {
+      isVideoHero, 
+      hasVideoFile, 
+      hasVideoUrl,
+      videoUrl,
+      videoContentType,
+      videoThumbnail
+    });
+    
+    if (isVideoHero && videoUrl) {
+      console.log("[ProductsHero] Video will be displayed with:", {
+        url: videoUrl,
+        type: videoContentType || 'auto-detect',
+        thumbnail: videoThumbnail
+      });
+    }
     
     return (
       <section className={hero.background_class || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"}>
@@ -114,13 +132,14 @@ export default function ProductsHero() {
               </div>
             </div>
             <div className="relative">
-              {isVideoHero && (videoUrl) ? (
+              {isVideoHero && videoUrl ? (
                 <VideoPlayer 
                   videoUrl={videoUrl}
                   thumbnailUrl={videoThumbnail}
                   contentType={videoContentType}
                   title={hero.image_alt || 'Product video'}
                   className="w-full rounded-lg shadow-xl overflow-hidden"
+                  isVideo={true}
                 />
               ) : (
                 <div className="bg-white rounded-lg shadow-xl overflow-hidden">
@@ -152,7 +171,8 @@ export default function ProductsHero() {
     console.log("[ProductsHero] Using generic hero content with video details:", {
       isVideo: isVideoContent,
       videoUrl,
-      videoThumbnail
+      videoThumbnail,
+      contentType: videoContentType
     });
     
     return (
@@ -191,6 +211,7 @@ export default function ProductsHero() {
                   contentType={videoContentType}
                   title={heroContent.image?.alt || "Product video"}
                   className="w-full rounded-lg shadow-xl overflow-hidden"
+                  isVideo={true}
                 />
               ) : (
                 <div className="bg-white rounded-lg shadow-xl overflow-hidden">

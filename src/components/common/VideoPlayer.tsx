@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { Play } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
 
 interface VideoPlayerProps {
   videoUrl: string;
@@ -23,6 +23,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 }) => {
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [error, setError] = useState<string | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   
   // Debug logging for troubleshooting
   useEffect(() => {
@@ -39,32 +41,61 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const processedVideoUrl = videoUrl?.startsWith('//') ? `https:${videoUrl}` : videoUrl;
   const processedThumbnailUrl = thumbnailUrl?.startsWith('//') ? `https:${thumbnailUrl}` : thumbnailUrl;
   
+  // Detect content type if not provided
+  const detectContentType = () => {
+    if (contentType) return contentType;
+    
+    if (processedVideoUrl) {
+      if (processedVideoUrl.endsWith('.mp4')) return 'video/mp4';
+      if (processedVideoUrl.endsWith('.webm')) return 'video/webm';
+      if (processedVideoUrl.endsWith('.ogg')) return 'video/ogg';
+      if (processedVideoUrl.endsWith('.mov')) return 'video/quicktime';
+    }
+    
+    // Default to mp4 if we can't determine
+    return 'video/mp4';
+  };
+  
   // Detect if this is a Contentful direct video upload
-  const isContentfulVideo = contentType && (
-    contentType.includes('video/') || 
-    contentType.includes('application/')
-  );
+  const isContentfulVideo = () => {
+    if (contentType && (contentType.includes('video/') || contentType.includes('application/'))) {
+      return true;
+    }
+    
+    // Check URL patterns
+    if (processedVideoUrl && (
+      processedVideoUrl.includes('videos.ctfassets.net') || 
+      processedVideoUrl.includes('.mp4') || 
+      processedVideoUrl.includes('.webm') || 
+      processedVideoUrl.includes('.mov')
+    )) {
+      return true;
+    }
+    
+    return false;
+  };
   
   // Check if this is YouTube or Vimeo
-  const isYouTube = videoUrl?.includes('youtube.com') || videoUrl?.includes('youtu.be');
-  const isVimeo = videoUrl?.includes('vimeo.com');
+  const isYouTube = processedVideoUrl?.includes('youtube.com') || processedVideoUrl?.includes('youtu.be');
+  const isVimeo = processedVideoUrl?.includes('vimeo.com');
   const isExternalVideo = isYouTube || isVimeo;
+  const isDirectVideo = isContentfulVideo();
   
   // Process external video URLs for embedding
   const getEmbedUrl = () => {
-    if (!videoUrl) return '';
+    if (!processedVideoUrl) return '';
     
     // YouTube URLs
     if (isYouTube) {
       let videoId = '';
-      if (videoUrl.includes('youtube.com/watch?v=')) {
-        videoId = videoUrl.split('v=')[1];
+      if (processedVideoUrl.includes('youtube.com/watch?v=')) {
+        videoId = processedVideoUrl.split('v=')[1];
         const ampersandPosition = videoId?.indexOf('&');
         if (ampersandPosition !== -1) {
           videoId = videoId.substring(0, ampersandPosition);
         }
-      } else if (videoUrl.includes('youtu.be/')) {
-        videoId = videoUrl.split('youtu.be/')[1];
+      } else if (processedVideoUrl.includes('youtu.be/')) {
+        videoId = processedVideoUrl.split('youtu.be/')[1];
       }
       
       if (videoId) {
@@ -75,7 +106,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     // Vimeo URLs
     if (isVimeo) {
       const vimeoRegex = /vimeo\.com\/(\d+)($|\/|\?)/;
-      const match = videoUrl.match(vimeoRegex);
+      const match = processedVideoUrl.match(vimeoRegex);
       if (match && match[1]) {
         return `https://player.vimeo.com/video/${match[1]}?autoplay=1`;
       }
@@ -85,13 +116,20 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   const handlePlay = () => {
-    if (!videoUrl) {
+    if (!processedVideoUrl) {
       setError("No video URL provided");
       return;
     }
     
-    console.log('[VideoPlayer] Playing video:', videoUrl);
+    console.log('[VideoPlayer] Playing video:', processedVideoUrl);
     setIsPlaying(true);
+  };
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(!isMuted);
+    }
   };
 
   const handleError = (e: React.SyntheticEvent<HTMLVideoElement | HTMLIFrameElement, Event>) => {
@@ -100,7 +138,20 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     setError(errorMsg);
   };
 
-  if (!isVideo || !videoUrl) {
+  // Debug what type of video we have
+  useEffect(() => {
+    console.log('[VideoPlayer] Video type analysis:', {
+      url: processedVideoUrl,
+      isDirectVideo,
+      isExternalVideo,
+      isYouTube,
+      isVimeo,
+      contentType: detectContentType(),
+      providedContentType: contentType
+    });
+  }, [processedVideoUrl, contentType]);
+
+  if (!isVideo || !processedVideoUrl) {
     return null;
   }
 
@@ -115,11 +166,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   // Show video player if playing
   if (isPlaying) {
-    // Direct Contentful video or other direct video URL
-    if (!isExternalVideo) {
+    // Direct video (Contentful video or other direct video URL)
+    if (isDirectVideo) {
+      const detectedContentType = detectContentType();
+      
       return (
-        <div className={`aspect-video ${className}`}>
+        <div className={`aspect-video relative ${className}`}>
           <video 
+            ref={videoRef}
             src={processedVideoUrl}
             poster={processedThumbnailUrl}
             controls
@@ -128,25 +182,55 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
             className="w-full h-full object-cover rounded-lg"
             onError={handleError as any}
           >
-            <source src={processedVideoUrl} type={contentType} />
+            <source src={processedVideoUrl} type={detectedContentType} />
             Your browser does not support the video tag.
           </video>
+          <div className="absolute bottom-2 right-2 bg-black/50 rounded-full p-2 cursor-pointer" onClick={toggleMute}>
+            {isMuted ? (
+              <VolumeX className="h-5 w-5 text-white" />
+            ) : (
+              <Volume2 className="h-5 w-5 text-white" />
+            )}
+          </div>
         </div>
       );
     }
     
     // YouTube or Vimeo embed
+    if (isExternalVideo) {
+      return (
+        <div className={`aspect-video ${className}`}>
+          <iframe
+            src={getEmbedUrl()}
+            title={title}
+            className="w-full h-full rounded-lg"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            onError={handleError as any}
+          ></iframe>
+        </div>
+      );
+    }
+    
+    // Fallback for unknown video types
     return (
       <div className={`aspect-video ${className}`}>
-        <iframe
-          src={getEmbedUrl()}
-          title={title}
-          className="w-full h-full rounded-lg"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
+        <video 
+          ref={videoRef}
+          src={processedVideoUrl}
+          poster={processedThumbnailUrl}
+          controls
+          autoPlay
+          playsInline
+          className="w-full h-full object-cover rounded-lg"
           onError={handleError as any}
-        ></iframe>
+        >
+          <source src={processedVideoUrl} type="video/mp4" />
+          <source src={processedVideoUrl} type="video/webm" />
+          <source src={processedVideoUrl} type="video/ogg" />
+          Your browser does not support the video tag.
+        </video>
       </div>
     );
   }

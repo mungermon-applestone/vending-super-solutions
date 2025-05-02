@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
@@ -10,7 +10,17 @@ import VideoPlayer from '@/components/common/VideoPlayer';
 const HeroSection = () => {
   const { data: heroContent, isLoading } = useHeroContent("home");
   
-  console.log("Hero section rendering", { heroContent, isLoading, pageKey: "home" });
+  // Debug logging for the hero section
+  useEffect(() => {
+    console.log("Hero section rendering", { 
+      heroContent, 
+      isLoading, 
+      pageKey: "home",
+      hasVideo: heroContent?.isVideo,
+      videoUrl: heroContent?.video?.url,
+      videoThumbnail: heroContent?.video?.thumbnail
+    });
+  }, [heroContent, isLoading]);
   
   // If we're loading, show a skeleton
   if (isLoading) {
@@ -60,15 +70,18 @@ const HeroSection = () => {
   const videoThumbnail = heroContent?.video?.thumbnail || imageUrl;
   const videoContentType = heroContent?.video?.contentType;
   
-  // Debug logging for video content
-  if (isVideo) {
-    console.log("[HeroSection] Video details:", {
-      isVideo,
-      videoUrl,
-      videoThumbnail,
-      contentType: videoContentType
-    });
-  }
+  // Enhanced debug logging for video content
+  useEffect(() => {
+    if (isVideo && videoUrl) {
+      console.log("[HeroSection] Video details:", {
+        isVideo,
+        videoUrl,
+        videoThumbnail,
+        contentType: videoContentType,
+        videoObject: heroContent?.video
+      });
+    }
+  }, [isVideo, videoUrl, videoThumbnail, videoContentType, heroContent]);
   
   return (
     <div className={backgroundClass}>
@@ -120,6 +133,7 @@ const HeroSection = () => {
                 contentType={videoContentType}
                 title={imageAlt}
                 className="w-full shadow-xl rounded-lg"
+                isVideo={true}
               />
             ) : (
               <div className="bg-white rounded-lg shadow-xl overflow-hidden">
