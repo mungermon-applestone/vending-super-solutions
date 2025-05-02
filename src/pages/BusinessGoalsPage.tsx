@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -175,18 +174,6 @@ const BusinessGoalsPage: React.FC = () => {
 
       {/* Add an indicator that we're using fallback data in preview mode */}
       <BusinessGoalsFallbackNotice isPreview={isPreview} isConfigured={isConfigured} />
-
-      {/* Fixed: Add a title section above the grid */}
-      <section className="bg-white py-8">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">
-            {displayContent?.goalsSectionTitle || "Business Goals We Help You Achieve"}
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
-            {displayContent?.goalsSectionDescription || "Explore how our solutions can help you reach your business objectives."}
-          </p>
-        </div>
-      </section>
 
       <BusinessGoalsGrid 
         goals={displayGoals}
