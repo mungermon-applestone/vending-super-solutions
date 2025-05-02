@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Check } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 interface ContactFormProps {
   formSectionTitle?: string;
@@ -35,13 +36,26 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
     setSubmitting(true);
     
     try {
-      // In a real implementation, you would use a backend API or service like EmailJS, FormSpree, etc.
-      // For now, we'll simulate sending an email with a timeout
-      console.log('Sending form submission to munger@applestonesolutons.com');
-      console.log({ name, email, subject, message });
+      // Send data to our API endpoint
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          subject,
+          message,
+          formType: 'Contact Form'
+        }),
+      });
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message');
+      }
       
       // Show success message
       toast({
@@ -125,10 +139,10 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
               <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
                 Message*
               </label>
-              <textarea 
+              <Textarea 
                 id="message" 
                 rows={5} 
-                className="w-full border border-input bg-background px-3 py-2 text-base ring-offset-background rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
+                className="w-full" 
                 placeholder="Tell us about your project or inquiry..." 
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}

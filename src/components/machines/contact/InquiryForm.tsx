@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
 
 interface InquiryFormProps {
   title: string;
@@ -36,12 +37,27 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
     setSubmitting(true);
     
     try {
-      // In a production environment, this would connect to a backend service
-      console.log('Sending demo request to munger@applestonesolutons.com');
-      console.log({ fullName, email, company, phone, message });
+      // Send data to our API endpoint
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: fullName,
+          email,
+          company,
+          phone,
+          message,
+          formType: 'Demo Request'
+        }),
+      });
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send demo request');
+      }
       
       // Show success message
       toast({
@@ -144,12 +160,12 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
                   </div>
                   <div>
                     <Label htmlFor="message">Message</Label>
-                    <textarea
+                    <Textarea
                       id="message"
                       rows={4}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      className="w-full"
                       placeholder="Tell us about your needs and any questions you have."
                     />
                   </div>
