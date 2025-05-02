@@ -58,6 +58,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   
   // Detect if this is a Contentful direct video upload
   const isContentfulVideo = () => {
+    if (!processedVideoUrl) return false;
+    
     if (contentType && (contentType.includes('video/') || contentType.includes('application/'))) {
       return true;
     }
@@ -151,7 +153,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     });
   }, [processedVideoUrl, contentType]);
 
+  // Guard clause if we don't have a video or valid URL
   if (!isVideo || !processedVideoUrl) {
+    console.log("[VideoPlayer] No video to display - missing URL or isVideo=false");
     return null;
   }
 
@@ -169,6 +173,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     // Direct video (Contentful video or other direct video URL)
     if (isDirectVideo) {
       const detectedContentType = detectContentType();
+      console.log("[VideoPlayer] Rendering direct video with type:", detectedContentType);
       
       return (
         <div className={`aspect-video relative ${className}`}>
@@ -198,6 +203,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     
     // YouTube or Vimeo embed
     if (isExternalVideo) {
+      console.log("[VideoPlayer] Rendering external video embed");
       return (
         <div className={`aspect-video ${className}`}>
           <iframe
@@ -214,6 +220,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
     
     // Fallback for unknown video types
+    console.log("[VideoPlayer] Rendering fallback video player");
     return (
       <div className={`aspect-video ${className}`}>
         <video 
@@ -236,6 +243,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }
 
   // Show thumbnail with play button
+  console.log("[VideoPlayer] Rendering thumbnail with play button");
   return (
     <div 
       className={`relative cursor-pointer rounded-lg overflow-hidden ${className}`}

@@ -77,7 +77,7 @@ export default function ProductsHero() {
     const hero = landingPage.hero_content;
     
     // Enhanced video detection with more debugging
-    const isVideoHero = !!hero.is_video;
+    const isVideoHero = Boolean(hero.is_video);
     const hasVideoFile = hero.video_file && hero.video_file.url;
     const hasVideoUrl = hero.video_url && hero.video_url.length > 0;
     
@@ -94,14 +94,6 @@ export default function ProductsHero() {
       videoContentType,
       videoThumbnail
     });
-    
-    if (isVideoHero && videoUrl) {
-      console.log("[ProductsHero] Video will be displayed with:", {
-        url: videoUrl,
-        type: videoContentType || 'auto-detect',
-        thumbnail: videoThumbnail
-      });
-    }
     
     return (
       <section className={hero.background_class || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"}>
@@ -163,7 +155,7 @@ export default function ProductsHero() {
   
   // If landing page isn't available, try to use heroContent
   if (heroContent) {
-    const isVideoContent = !!heroContent.isVideo;
+    const isVideoContent = Boolean(heroContent.isVideo);
     const videoUrl = heroContent.video?.url || '';
     const videoThumbnail = heroContent.video?.thumbnail || heroContent.image?.url;
     const videoContentType = heroContent.video?.contentType;

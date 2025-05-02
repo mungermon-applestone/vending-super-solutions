@@ -64,24 +64,22 @@ const HeroSection = () => {
   const imageAlt = heroContent?.image?.alt || "Vending Machine Software Interface";
   const backgroundClass = heroContent?.backgroundClass || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light";
   
-  // Video properties
-  const isVideo = !!heroContent?.isVideo;
+  // Video properties - always define these variables regardless of isVideo value
+  const isVideo = Boolean(heroContent?.isVideo);
   const videoUrl = heroContent?.video?.url || '';
   const videoThumbnail = heroContent?.video?.thumbnail || imageUrl;
-  const videoContentType = heroContent?.video?.contentType;
+  const videoContentType = heroContent?.video?.contentType || '';
   
-  // Enhanced debug logging for video content
+  // Debug logging for video content - ensure this is always called
   useEffect(() => {
-    if (isVideo && videoUrl) {
-      console.log("[HeroSection] Video details:", {
-        isVideo,
-        videoUrl,
-        videoThumbnail,
-        contentType: videoContentType,
-        videoObject: heroContent?.video
-      });
-    }
-  }, [isVideo, videoUrl, videoThumbnail, videoContentType, heroContent]);
+    console.log("[HeroSection] Video details:", {
+      isVideo,
+      videoUrl,
+      videoThumbnail,
+      contentType: videoContentType,
+      videoObject: heroContent?.video || 'No video object'
+    });
+  }, [isVideo, videoUrl, videoThumbnail, videoContentType, heroContent?.video]);
   
   return (
     <div className={backgroundClass}>
