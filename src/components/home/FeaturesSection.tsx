@@ -38,37 +38,37 @@ const FeaturesSection = () => {
           <FeatureCard 
             icon={<ShoppingCart className="h-8 w-8" />}
             title="Multiple Product Types"
-            description="From grocery and fresh food to vape products and collectibles, our software supports diverse product categories."
+            description="From grocery and fresh food to vape products and collectibles, you can sell a diverse array of products."
             link="/products"
           />
           <FeatureCard 
             icon={<Award className="h-8 w-8" />}
             title="Business Goal Focused"
-            description="Meet your specific objectives with custom solutions for BOPIS, loss prevention, marketing, and more."
+            description="Meet revenue-producing, creative objectives with custom solutions for BOPIS, loss prevention, marketing, and more."
             link="/business-goals"
           />
           <FeatureCard 
             icon={<Globe className="h-8 w-8" />}
             title="Hardware Flexibility"
-            description="Compatible with various vending machines and lockers from leading manufacturers worldwide."
+            description="Compatible with various vending machines and lockers from leading global manufacturers."
             link="/machines"
           />
           <FeatureCard 
             icon={<BarChart4 className="h-8 w-8" />}
             title="Advanced Analytics"
-            description="Gain valuable insights with real-time reporting and analytics to optimize your operations."
+            description="Tune up your operations with up-to-the-second reporting and analytics."
             link="/technology"
           />
           <FeatureCard 
             icon={<ShieldCheck className="h-8 w-8" />}
             title="Enterprise Security"
-            description="Protect your business and customer data with our robust security infrastructure."
+            description="We don't collect any retail customer PII and observe rigorous security protocols."
             link="/technology"
           />
           <FeatureCard 
             icon={<Zap className="h-8 w-8" />}
             title="Seamless Integration"
-            description="Connect with existing systems through our open standards and third-party integration capabilities."
+            description="Open standards allow our solution to connect to your existing systems."
             link="/technology"
           />
         </div>
