@@ -37,7 +37,7 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
     try {
       // In a real implementation, you would use a backend API or service like EmailJS, FormSpree, etc.
       // For now, we'll simulate sending an email with a timeout
-      console.log('Sending form submission to hello@applestonesolutions.com');
+      console.log('Sending form submission to munger@applestonesolutons.com');
       console.log({ name, email, subject, message });
       
       // Simulate API call

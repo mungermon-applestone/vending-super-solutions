@@ -37,7 +37,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
     
     try {
       // In a production environment, this would connect to a backend service
-      console.log('Sending demo request to hello@applestonesolutions.com');
+      console.log('Sending demo request to munger@applestonesolutons.com');
       console.log({ fullName, email, company, phone, message });
       
       // Simulate API call
