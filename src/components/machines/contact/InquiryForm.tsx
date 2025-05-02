@@ -18,8 +18,9 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Form validation
@@ -32,17 +33,34 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
       return;
     }
     
-    // Handle form submission (would normally send to server)
-    console.log({ fullName, email, company, phone, message });
+    setSubmitting(true);
     
-    // Show success message
-    toast({
-      title: "Success!",
-      description: "Thank you for your interest. We'll be in touch soon.",
-    });
-    
-    // Reset form and show success state
-    setSubmitted(true);
+    try {
+      // In a production environment, this would connect to a backend service
+      console.log('Sending demo request to hello@applestonesolutions.com');
+      console.log({ fullName, email, company, phone, message });
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Show success message
+      toast({
+        title: "Success!",
+        description: "Thank you for your interest. We'll be in touch soon.",
+      });
+      
+      // Reset form and show success state
+      setSubmitted(true);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast({
+        title: "Error",
+        description: "There was a problem sending your request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -138,8 +156,9 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
                   <Button 
                     type="submit" 
                     className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white"
+                    disabled={submitting}
                   >
-                    Request Demo
+                    {submitting ? 'Sending...' : 'Request Demo'}
                   </Button>
                 </form>
               </>

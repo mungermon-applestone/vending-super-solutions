@@ -1,76 +1,165 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
+import { useToast } from '@/hooks/use-toast';
+import { Check } from 'lucide-react';
 
 interface ContactFormProps {
   formSectionTitle?: string;
 }
 
 const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
+  const { toast } = useToast();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!name || !email || !message) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setSubmitting(true);
+    
+    try {
+      // In a real implementation, you would use a backend API or service like EmailJS, FormSpree, etc.
+      // For now, we'll simulate sending an email with a timeout
+      console.log('Sending form submission to hello@applestonesolutions.com');
+      console.log({ name, email, subject, message });
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Show success message
+      toast({
+        title: "Message sent!",
+        description: "Thank you for your message. We'll respond as soon as possible.",
+      });
+      
+      // Reset form and show success state
+      setSubmitted(true);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "There was a problem sending your message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleReset = () => {
+    setName('');
+    setEmail('');
+    setSubject('');
+    setMessage('');
+    setSubmitted(false);
+  };
+
   return (
     <div className="flex-1">
       <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
         <h2 className="text-2xl font-bold mb-6">{formSectionTitle || 'Send Us a Message'}</h2>
-        <form className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {!submitted ? (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Your Name*
+                </label>
+                <Input 
+                  id="name" 
+                  type="text" 
+                  className="w-full" 
+                  placeholder="John Doe" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required 
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address*
+                </label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  className="w-full" 
+                  placeholder="john@example.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required 
+                />
+              </div>
+            </div>
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Your Name
+              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                Subject
               </label>
               <Input 
-                id="name" 
+                id="subject" 
                 type="text" 
                 className="w-full" 
-                placeholder="John Doe" 
-                required 
+                placeholder="How can we help?" 
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
+              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                Message*
               </label>
-              <Input 
-                id="email" 
-                type="email" 
-                className="w-full" 
-                placeholder="john@example.com" 
+              <textarea 
+                id="message" 
+                rows={5} 
+                className="w-full border border-input bg-background px-3 py-2 text-base ring-offset-background rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
+                placeholder="Tell us about your project or inquiry..." 
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 required 
               />
             </div>
+            <Button 
+              type="submit" 
+              className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white font-semibold py-3"
+              disabled={submitting}
+            >
+              {submitting ? 'Sending...' : 'Send Message'}
+            </Button>
+          </form>
+        ) : (
+          <div className="text-center py-8">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 mb-4">
+              <Check className="h-6 w-6 text-green-600" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Message Sent!</h3>
+            <p className="text-gray-600 mb-6">
+              Thank you for reaching out. We'll get back to you at {email} as soon as possible.
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={handleReset}
+            >
+              Send Another Message
+            </Button>
           </div>
-          <div>
-            <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-              Subject
-            </label>
-            <Input 
-              id="subject" 
-              type="text" 
-              className="w-full" 
-              placeholder="How can we help?" 
-              required 
-            />
-          </div>
-          <div>
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-              Message
-            </label>
-            <textarea 
-              id="message" 
-              rows={5} 
-              className="w-full border border-input bg-background px-3 py-2 text-base ring-offset-background rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
-              placeholder="Tell us about your project or inquiry..." 
-              required 
-            />
-          </div>
-          <Button 
-            type="submit" 
-            className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white font-semibold py-3"
-          >
-            Send Message
-          </Button>
-        </form>
+        )}
       </div>
     </div>
   );

@@ -17,7 +17,7 @@ const Footer = () => {
               <a href="mailto:hello@applestonesolutions.com" className="text-gray-300 hover:text-white flex items-center gap-2 transition-colors">
                 <Mail size={16} /> hello@applestonesolutions.com
               </a>
-              <a href="tel:+18005551234" className="text-gray-300 hover:text-white flex items-center gap-2 transition-colors">
+              <a href="tel:+19093141011" className="text-gray-300 hover:text-white flex items-center gap-2 transition-colors">
                 <Phone size={16} /> (909) 314-1011
               </a>
               <address className="text-gray-300 not-italic flex items-center gap-2">
