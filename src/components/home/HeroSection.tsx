@@ -108,7 +108,7 @@ const HeroSection = () => {
               />
             </div>
             <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
-              <p className="font-bold">Works with 150+ machine models</p>
+              <p className="font-bold">Works with multiple machine models</p>
             </div>
           </div>
         </div>
