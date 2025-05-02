@@ -11,7 +11,7 @@ const Footer = () => {
           <div className="lg:col-span-2">
             <Link to="/" className="text-2xl font-bold mb-4 block">Applestone Solutions</Link>
             <p className="text-gray-300 mb-6 max-w-md">
-              Sell Anyting, Anywhere. It's the future of retail. 
+              Sell Anything, anywhere. It's the future of retail. 
             </p>
             <div className="flex flex-col space-y-2">
               <a href="mailto:hello@applestonesolutions.com" className="text-gray-300 hover:text-white flex items-center gap-2 transition-colors">
