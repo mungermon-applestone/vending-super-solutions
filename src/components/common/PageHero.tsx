@@ -44,6 +44,17 @@ const PageHero: React.FC<PageHeroProps> = ({
       hasCmsData: !!landingPage,
       heroContent: landingPage ? (landingPage as LandingPage).hero_content : null,
     });
+
+    // Detailed logging for video content
+    if (landingPage && landingPage.hero_content) {
+      const hero = landingPage.hero_content;
+      console.log(`PageHero video details for ${pageKey}:`, {
+        isVideo: hero.is_video,
+        videoUrl: hero.video_url,
+        videoFile: hero.video_file,
+        videoThumbnail: hero.video_thumbnail
+      });
+    }
     
     if (error) {
       console.error(`PageHero component for ${pageKey} - Error:`, error);
@@ -71,6 +82,7 @@ const PageHero: React.FC<PageHeroProps> = ({
       isVideo: heroContent?.is_video,
       videoUrl: heroContent?.video_url,
       videoFile: heroContent?.video_file,
+      videoThumbnail: heroContent?.video_thumbnail
     });
   }, [heroContent, pageKey, fallbackTitle, fallbackSubtitle, fallbackImage, fallbackPrimaryButtonText]);
   
@@ -90,10 +102,28 @@ const PageHero: React.FC<PageHeroProps> = ({
   const videoContentType = videoFile?.contentType;
   
   // Check if we have a Contentful uploaded video
-  const hasContentfulVideo = isVideo && videoFile && videoFile.url;
+  const hasContentfulVideo = isVideo && videoFile && videoFile.url && videoFile.url.length > 0;
   
   // Get the effective video URL (either external URL or Contentful file URL)
   const effectiveVideoUrl = hasContentfulVideo ? videoFile.url : videoUrl;
+
+  // Ensure URL has proper protocol
+  const finalVideoUrl = effectiveVideoUrl && effectiveVideoUrl.startsWith('//') ? 
+    'https:' + effectiveVideoUrl : effectiveVideoUrl;
+  
+  // Debug video information
+  useEffect(() => {
+    if (isVideo) {
+      console.log(`[PageHero] Video details for ${pageKey}:`, {
+        hasContentfulVideo,
+        effectiveVideoUrl,
+        finalVideoUrl,
+        videoContentType,
+        videoThumbnail,
+        isVideoPlaying
+      });
+    }
+  }, [isVideo, pageKey, hasContentfulVideo, effectiveVideoUrl, finalVideoUrl, videoContentType, videoThumbnail, isVideoPlaying]);
   
   // Function to process video URL for embedding
   const getVideoEmbedUrl = (url: string) => {
@@ -135,8 +165,11 @@ const PageHero: React.FC<PageHeroProps> = ({
   };
 
   const handlePlayVideo = () => {
-    if (effectiveVideoUrl) {
+    if (finalVideoUrl) {
       setIsVideoPlaying(true);
+      console.log(`[PageHero] Playing video: ${finalVideoUrl}`);
+    } else {
+      console.warn(`[PageHero] Attempted to play video but URL is empty`);
     }
   };
   
@@ -178,23 +211,36 @@ const PageHero: React.FC<PageHeroProps> = ({
             )}
           </div>
           <div className="mt-8 lg:mt-0">
-            {isVideo && effectiveVideoUrl ? (
+            {isVideo && finalVideoUrl ? (
               isVideoPlaying ? (
                 <div className="aspect-video rounded-lg shadow-lg overflow-hidden">
                   {isContentfulVideo ? (
                     <video 
-                      src={effectiveVideoUrl}
+                      src={finalVideoUrl}
                       className="w-full h-full"
                       controls
                       autoPlay
                       playsInline
+                      onError={(e) => {
+                        console.error(`[PageHero] Video failed to load: ${finalVideoUrl}`, e);
+                        // Show fallback image
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          e.currentTarget.style.display = 'none';
+                          const img = document.createElement('img');
+                          img.src = imageUrl || '/placeholder.jpg';
+                          img.alt = imageAlt;
+                          img.className = "w-full h-full object-cover";
+                          parent.appendChild(img);
+                        }
+                      }}
                     >
-                      <source src={effectiveVideoUrl} type={videoContentType} />
+                      <source src={finalVideoUrl} type={videoContentType} />
                       Your browser does not support the video tag.
                     </video>
                   ) : (
                     <iframe
-                      src={getVideoEmbedUrl(effectiveVideoUrl)}
+                      src={getVideoEmbedUrl(finalVideoUrl)}
                       title={title}
                       className="w-full h-full"
                       style={{ maxHeight: '500px' }}
@@ -214,6 +260,10 @@ const PageHero: React.FC<PageHeroProps> = ({
                     alt={imageAlt}
                     className="w-full h-auto object-cover"
                     style={{ maxHeight: '500px' }}
+                    onError={(e) => {
+                      console.error(`[PageHero] Thumbnail failed to load: ${videoThumbnail}`);
+                      e.currentTarget.src = imageUrl || '/placeholder.jpg';
+                    }}
                   />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                     <div className="bg-vending-blue/90 rounded-full p-5 text-white hover:bg-vending-blue transition-colors">
@@ -229,8 +279,8 @@ const PageHero: React.FC<PageHeroProps> = ({
                 className="rounded-lg shadow-lg w-full h-auto object-cover"
                 style={{ maxHeight: '500px' }}
                 onError={(e) => {
+                  console.error(`[PageHero] Image failed to load: ${imageUrl}`);
                   e.currentTarget.src = "https://via.placeholder.com/800x500?text=Image+Not+Found";
-                  console.log("Image failed to load:", imageUrl);
                 }}
               />
             )}

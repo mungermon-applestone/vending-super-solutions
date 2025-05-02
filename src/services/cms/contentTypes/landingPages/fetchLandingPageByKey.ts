@@ -26,6 +26,11 @@ export async function fetchLandingPageByKey(key: string): Promise<LandingPage | 
         const entry = entries.items[0];
         console.log(`[fetchLandingPageByKey] Found landing page in Contentful with key ${key}:`, entry);
         
+        // Process video data from Contentful
+        const videoFile = entry.fields.video?.fields?.file;
+        const videoThumbnail = entry.fields.videoThumbnail?.fields?.file?.url;
+        
+        // Create hero_content with all necessary video fields
         return {
           id: entry.sys.id,
           page_key: entry.fields.pageKey,
@@ -37,6 +42,14 @@ export async function fetchLandingPageByKey(key: string): Promise<LandingPage | 
             subtitle: entry.fields.subtitle,
             image_url: entry.fields.image?.fields?.file?.url,
             image_alt: entry.fields.imageAlt,
+            is_video: !!entry.fields.isVideo,
+            video_url: entry.fields.videoUrl || '',
+            video_thumbnail: videoThumbnail ? `https:${videoThumbnail}` : '',
+            video_file: videoFile ? {
+              url: `https:${videoFile.url}`,
+              contentType: videoFile.contentType,
+              fileName: videoFile.fileName
+            } : undefined,
             cta_primary_text: entry.fields.ctaPrimaryText,
             cta_primary_url: entry.fields.ctaPrimaryUrl,
             cta_secondary_text: entry.fields.ctaSecondaryText,

@@ -8,6 +8,18 @@ import { Loader2 } from 'lucide-react';
 export default function ProductsHero() {
   const { data: heroContent, isLoading, error } = useHeroContent("products");
 
+  // Add detailed logging for video properties
+  if (heroContent) {
+    console.log("[ProductsHero] Hero content loaded:", {
+      title: heroContent.title,
+      isVideo: heroContent.isVideo,
+      videoUrl: heroContent.video?.url,
+      videoThumb: heroContent.video?.thumbnail,
+      videoContentType: heroContent.video?.contentType,
+      imageUrl: heroContent.image?.url
+    });
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -58,10 +70,34 @@ export default function ProductsHero() {
     );
   }
 
-  // Check if this is a video hero and has video
-  const isVideoHero = heroContent.isVideo && (heroContent.video?.url);
-  const isContentfulVideo = isVideoHero && heroContent.video?.contentType && 
-    (heroContent.video.contentType.includes('video/') || heroContent.video.contentType.includes('application/'));
+  // Improved video detection logic
+  const isVideoHero = heroContent.isVideo;
+  const hasVideoFile = isVideoHero && 
+    heroContent.video?.url && 
+    heroContent.video.url.length > 0;
+    
+  // Better detection for Contentful videos
+  const isContentfulVideo = hasVideoFile && 
+    heroContent.video?.contentType && 
+    (heroContent.video.contentType.includes('video/') || 
+     heroContent.video.contentType.includes('application/'));
+
+  // Ensure video URL has proper protocol
+  const videoUrl = hasVideoFile ? 
+    (heroContent.video?.url.startsWith('//') ? 
+      'https:' + heroContent.video.url : 
+      heroContent.video?.url) : 
+    '';
+  
+  // Log video details for debugging
+  console.log("[ProductsHero] Video details:", {
+    isVideoHero,
+    hasVideoFile,
+    isContentfulVideo,
+    videoUrl,
+    contentType: heroContent.video?.contentType,
+    thumbnailUrl: heroContent.video?.thumbnail
+  });
 
   return (
     <section className={heroContent.backgroundClass || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"}>
@@ -92,27 +128,44 @@ export default function ProductsHero() {
             </div>
           </div>
           <div className="relative">
-            {isVideoHero ? (
+            {isVideoHero && hasVideoFile ? (
               <div className="bg-white rounded-lg shadow-xl overflow-hidden aspect-video">
                 {isContentfulVideo ? (
                   <video
-                    src={heroContent.video.url}
+                    src={videoUrl}
                     controls
                     autoPlay
                     muted
                     playsInline
-                    poster={heroContent.video.thumbnail}
+                    poster={heroContent.video?.thumbnail}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error("[ProductsHero] Video failed to load:", videoUrl, e);
+                      e.currentTarget.style.display = 'none';
+                      // Show error message or fallback image
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        const img = document.createElement('img');
+                        img.src = heroContent.image?.url || heroContent.video?.thumbnail || '/placeholder.jpg';
+                        img.alt = heroContent.image?.alt || "Video failed to load";
+                        img.className = "w-full h-full object-cover";
+                        parent.appendChild(img);
+                      }
+                    }}
                   >
-                    <source src={heroContent.video.url} type={heroContent.video.contentType} />
+                    <source src={videoUrl} type={heroContent.video?.contentType} />
                     Your browser does not support the video tag.
                   </video>
                 ) : (
                   <div className="relative cursor-pointer">
                     <img
-                      src={heroContent.video?.thumbnail || heroContent.image.url}
-                      alt={heroContent.image.alt}
+                      src={heroContent.video?.thumbnail || heroContent.image?.url}
+                      alt={heroContent.image?.alt}
                       className="w-full h-auto object-cover"
+                      onError={(e) => {
+                        console.error("[ProductsHero] Thumbnail failed to load");
+                        e.currentTarget.src = '/placeholder.jpg';
+                      }}
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <Link 
@@ -129,9 +182,13 @@ export default function ProductsHero() {
             ) : (
               <div className="bg-white rounded-lg shadow-xl overflow-hidden">
                 <img 
-                  src={heroContent.image.url}
-                  alt={heroContent.image.alt}
+                  src={heroContent.image?.url}
+                  alt={heroContent.image?.alt}
                   className="w-full h-auto object-cover"
+                  onError={(e) => {
+                    console.error("[ProductsHero] Image failed to load:", heroContent.image?.url);
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1556742031-c6961e8560b0?ixlib=rb-4.0.3";
+                  }}
                 />
               </div>
             )}

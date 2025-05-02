@@ -108,6 +108,7 @@ export function useHeroContent(idOrPageKey: string) {
             id: entry.sys.id
           });
           
+          // Process image data
           const image = entry.fields.image;
           const imageUrl = image && (image as any).fields && (image as any).fields.file 
             ? `https:${(image as any).fields.file.url}`
@@ -115,22 +116,37 @@ export function useHeroContent(idOrPageKey: string) {
             
           console.log(`[useHeroContent] Extracted image URL: ${imageUrl}`);
           
-          // Process video data if available
+          // Process video data if available - improved handling
           const isVideo = !!entry.fields.isVideo;
           const videoUrl = entry.fields.videoUrl || null;
-          const videoThumbnail = entry.fields.videoThumbnail 
-            ? `https:${(entry.fields.videoThumbnail as any).fields.file.url}`
-            : null;
           
-          // Check for directly uploaded video asset in Contentful
+          // More detailed logging for video thumbnail
+          let videoThumbnail = null;
+          if (entry.fields.videoThumbnail) {
+            const thumbData = entry.fields.videoThumbnail;
+            console.log(`[useHeroContent] Video thumbnail data:`, thumbData);
+            
+            if (thumbData.fields && thumbData.fields.file && thumbData.fields.file.url) {
+              videoThumbnail = `https:${thumbData.fields.file.url}`;
+              console.log(`[useHeroContent] Extracted video thumbnail URL: ${videoThumbnail}`);
+            }
+          }
+          
+          // Check for directly uploaded video asset in Contentful with detailed logging
           let videoAsset = null;
-          if (entry.fields.video && entry.fields.video.fields && entry.fields.video.fields.file) {
-            videoAsset = {
-              url: `https:${entry.fields.video.fields.file.url}`,
-              contentType: entry.fields.video.fields.file.contentType,
-              fileName: entry.fields.video.fields.file.fileName
-            };
-            console.log(`[useHeroContent] Found uploaded video asset:`, videoAsset);
+          if (entry.fields.video) {
+            console.log(`[useHeroContent] Found video field:`, entry.fields.video);
+            
+            if (entry.fields.video.fields && entry.fields.video.fields.file) {
+              videoAsset = {
+                url: `https:${entry.fields.video.fields.file.url}`,
+                contentType: entry.fields.video.fields.file.contentType,
+                fileName: entry.fields.video.fields.file.fileName
+              };
+              console.log(`[useHeroContent] Extracted video asset details:`, videoAsset);
+            } else {
+              console.log(`[useHeroContent] Video field doesn't contain expected file structure`);
+            }
           }
           
           const result = {
@@ -149,14 +165,17 @@ export function useHeroContent(idOrPageKey: string) {
             backgroundClass: entry.fields.backgroundClass as string
           } as HeroContent;
           
-          // Add video properties if this is a video hero
+          // Add video properties if this is a video hero - with improved validation
           if (isVideo) {
+            // Always create the video object to avoid undefined checks
             result.video = {
-              url: videoAsset ? videoAsset.url : videoUrl,
-              thumbnail: videoThumbnail,
+              url: videoAsset ? videoAsset.url : (videoUrl || ''),
+              thumbnail: videoThumbnail || '',
               contentType: videoAsset ? videoAsset.contentType : undefined,
               fileName: videoAsset ? videoAsset.fileName : undefined
             };
+            
+            console.log(`[useHeroContent] Created video object:`, result.video);
           }
           
           console.log(`[useHeroContent] Returning processed hero content:`, result);
