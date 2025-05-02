@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useHeroContent } from '@/hooks/cms/useHeroContent';
+import VideoPlayer from '@/components/common/VideoPlayer';
 
 const HeroSection = () => {
   const { data: heroContent, isLoading } = useHeroContent("home");
@@ -53,6 +54,22 @@ const HeroSection = () => {
   const imageAlt = heroContent?.image?.alt || "Vending Machine Software Interface";
   const backgroundClass = heroContent?.backgroundClass || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light";
   
+  // Video properties
+  const isVideo = !!heroContent?.isVideo;
+  const videoUrl = heroContent?.video?.url || '';
+  const videoThumbnail = heroContent?.video?.thumbnail || imageUrl;
+  const videoContentType = heroContent?.video?.contentType;
+  
+  // Debug logging for video content
+  if (isVideo) {
+    console.log("[HeroSection] Video details:", {
+      isVideo,
+      videoUrl,
+      videoThumbnail,
+      contentType: videoContentType
+    });
+  }
+  
   return (
     <div className={backgroundClass}>
       <div className="container-wide py-16 md:py-24">
@@ -96,17 +113,27 @@ const HeroSection = () => {
             </div>
           </div>
           <div className="relative flex justify-center">
-            <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-              <img 
-                src={imageUrl}
-                alt={imageAlt}
-                className="w-full h-auto object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = "https://images.unsplash.com/photo-1605810230434-7631ac76ec81";
-                  console.log("Image failed to load, using fallback");
-                }}
+            {isVideo && videoUrl ? (
+              <VideoPlayer
+                videoUrl={videoUrl}
+                thumbnailUrl={videoThumbnail}
+                contentType={videoContentType}
+                title={imageAlt}
+                className="w-full shadow-xl rounded-lg"
               />
-            </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+                <img 
+                  src={imageUrl}
+                  alt={imageAlt}
+                  className="w-full h-auto object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1605810230434-7631ac76ec81";
+                    console.log("Image failed to load, using fallback");
+                  }}
+                />
+              </div>
+            )}
             <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
               <p className="font-bold">Works with 150+ machine models</p>
             </div>

@@ -1,4 +1,3 @@
-
 import { LandingPage } from '@/types/landingPage';
 import { IS_DEVELOPMENT } from '@/config/cms';
 import { useMockData } from '../../mockDataHandler';
@@ -30,6 +29,30 @@ export async function fetchLandingPageByKey(key: string): Promise<LandingPage | 
           const entry = entries.items[0];
           console.log(`[fetchLandingPageByKey] Found heroContent in Contentful with key ${key}:`, entry);
           
+          // Enhanced video detection
+          const isVideo = !!entry.fields.isVideo;
+          const hasVideo = !!entry.fields.video;
+          const hasVideoUrl = !!entry.fields.videoUrl;
+          
+          // Log video details for debugging
+          if (isVideo) {
+            console.log(`[fetchLandingPageByKey] Video content detected in heroContent:`, {
+              isVideo,
+              hasVideoAsset: hasVideo,
+              videoUrl: entry.fields.videoUrl || 'not set',
+              videoThumbnail: entry.fields.videoThumbnail ? 'present' : 'not set' 
+            });
+            
+            // Check if file data is available when we have a video asset
+            if (hasVideo && entry.fields.video?.fields?.file) {
+              console.log(`[fetchLandingPageByKey] Video file details:`, {
+                url: entry.fields.video.fields.file.url,
+                contentType: entry.fields.video.fields.file.contentType,
+                fileName: entry.fields.video.fields.file.fileName
+              });
+            }
+          }
+          
           // Map heroContent to landingPage format
           return {
             id: entry.sys.id,
@@ -42,10 +65,15 @@ export async function fetchLandingPageByKey(key: string): Promise<LandingPage | 
               subtitle: entry.fields.subtitle,
               image_url: entry.fields.image?.fields?.file?.url ? `https:${entry.fields.image.fields.file.url}` : '',
               image_alt: entry.fields.imageAlt || '',
-              is_video: !!entry.fields.isVideo,
-              video_url: entry.fields.videoUrl || '',
-              video_thumbnail: entry.fields.videoThumbnail?.fields?.file?.url ? `https:${entry.fields.videoThumbnail.fields.file.url}` : '',
-              video_file: entry.fields.video?.fields?.file ? {
+              is_video: isVideo,
+              // Enhanced video handling - process video URL from either direct asset or external URL
+              video_url: hasVideo && entry.fields.video?.fields?.file?.url 
+                ? `https:${entry.fields.video.fields.file.url}`
+                : (hasVideoUrl ? entry.fields.videoUrl : ''),
+              video_thumbnail: entry.fields.videoThumbnail?.fields?.file?.url 
+                ? `https:${entry.fields.videoThumbnail.fields.file.url}` 
+                : '',
+              video_file: hasVideo && entry.fields.video?.fields?.file ? {
                 url: `https:${entry.fields.video.fields.file.url}`,
                 contentType: entry.fields.video.fields.file.contentType,
                 fileName: entry.fields.video.fields.file.fileName
