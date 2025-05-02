@@ -25,7 +25,7 @@ const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({
                 <p className="text-gray-700">{description}</p>
               )}
             </div>
-            <ContactForm />
+            <ContactForm formSectionTitle="Send Us a Message" />
           </div>
         </div>
       </div>

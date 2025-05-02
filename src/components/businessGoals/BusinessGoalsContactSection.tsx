@@ -14,7 +14,7 @@ const BusinessGoalsContactSection = () => {
                 Our team is ready to assist you with achieving your specific business goals using our vending solutions.
               </p>
             </div>
-            <ContactForm />
+            <ContactForm formSectionTitle="Send Us a Message" />
           </div>
         </div>
       </div>
