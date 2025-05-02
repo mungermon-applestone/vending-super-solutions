@@ -11,8 +11,11 @@ import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import BusinessGoalsPurposeStatement from '@/components/businessGoals/BusinessGoalsPurposeStatement';
 import BusinessGoalsGrid from '@/components/businessGoals/BusinessGoalsGrid';
 import BusinessGoalKeyBenefits from '@/components/businessGoals/BusinessGoalKeyBenefits';
-import ContactForm from '@/components/contact/ContactForm';
 import BusinessGoalsDebugSection from '@/components/businessGoals/BusinessGoalsDebugSection';
+import BusinessGoalsLoader from '@/components/businessGoals/BusinessGoalsLoader';
+import BusinessGoalsIntro from '@/components/businessGoals/BusinessGoalsIntro';
+import BusinessGoalsFallbackNotice from '@/components/businessGoals/BusinessGoalsFallbackNotice';
+import BusinessGoalsContactSection from '@/components/businessGoals/BusinessGoalsContactSection';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 import { CONTENTFUL_CONFIG, isContentfulConfigured, isPreviewEnvironment } from '@/config/cms';
 import ContentfulConfigWarning from '@/components/machines/ContentfulConfigWarning';
@@ -144,26 +147,18 @@ const BusinessGoalsPage: React.FC = () => {
   if (isLoading && !displayContent && !displayGoals) {
     return (
       <Layout>
-        <div className="flex justify-center items-center py-24">
-          <Loader2 className="h-12 w-12 animate-spin text-vending-blue" />
-          <span className="ml-3 text-xl">Loading page content...</span>
-        </div>
+        <BusinessGoalsLoader />
       </Layout>
     );
   }
 
   return (
     <Layout>
-      {/* Show preview environment warning when applicable */}
-      <PreviewEnvironmentDetector />
-      
-      {!isConfigured && !isPreview && (
-        <div className="container py-6">
-          <ContentfulConfigWarning />
-        </div>
-      )}
-      
-      <TechnologyPageHero entryId={HERO_CONTENT_ID} />
+      <BusinessGoalsIntro 
+        heroContentId={HERO_CONTENT_ID}
+        isConfigured={isConfigured}
+        isPreview={isPreview}
+      />
 
       {displayContent && displayContent.introTitle && (
         <BusinessGoalsPurposeStatement 
@@ -173,13 +168,7 @@ const BusinessGoalsPage: React.FC = () => {
       )}
 
       {/* Add an indicator that we're using fallback data in preview mode */}
-      {isPreview && !isConfigured && (
-        <div className="container py-2">
-          <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-md text-sm">
-            Using fallback business goals data. Configure Contentful to see real content.
-          </div>
-        </div>
-      )}
+      <BusinessGoalsFallbackNotice isPreview={isPreview} isConfigured={isConfigured} />
 
       <BusinessGoalsGrid 
         goals={displayGoals || []}
@@ -203,21 +192,7 @@ const BusinessGoalsPage: React.FC = () => {
       )}
 
       {/* Standard contact form section */}
-      <section className="py-16 bg-vending-blue-light bg-opacity-10">
-        <div className="container mx-auto">
-          <div className="max-w-5xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-4">
-                <h2 className="text-3xl font-bold text-vending-blue-dark">Need Help With Your Business Goals?</h2>
-                <p className="text-gray-700">
-                  Our team is ready to assist you with achieving your specific business goals using our vending solutions.
-                </p>
-              </div>
-              <ContactForm />
-            </div>
-          </div>
-        </div>
-      </section>
+      <BusinessGoalsContactSection />
 
       {process.env.NODE_ENV === 'development' && (
         <BusinessGoalsDebugSection 
