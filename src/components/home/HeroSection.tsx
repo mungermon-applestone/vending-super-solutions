@@ -10,7 +10,7 @@ import VideoPlayer from '@/components/common/VideoPlayer';
 const HeroSection = () => {
   const { data: heroContent, isLoading } = useHeroContent("home");
   
-  // Debug logging for the hero section
+  // Debug logging for the hero section - always runs
   useEffect(() => {
     console.log("Hero section rendering", { 
       heroContent, 
@@ -70,7 +70,7 @@ const HeroSection = () => {
   const videoThumbnail = heroContent?.video?.thumbnail || imageUrl;
   const videoContentType = heroContent?.video?.contentType || '';
   
-  // Debug logging for video content - ensure this is always called
+  // Debug logging for video content - always call this hook, never conditionally
   useEffect(() => {
     console.log("[HeroSection] Video details:", {
       isVideo,

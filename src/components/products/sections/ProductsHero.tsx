@@ -30,7 +30,7 @@ export default function ProductsHero() {
     }
   }, [isLoadingLandingPage, isLoadingHeroContent]);
   
-  // Debug logs for video troubleshooting
+  // Debug logs for video troubleshooting - always run this hook
   useEffect(() => {
     console.log("[ProductsHero] Component rendering with data:", {
       hasLandingPage: !!landingPage,
@@ -128,7 +128,7 @@ export default function ProductsHero() {
                 <VideoPlayer 
                   videoUrl={videoUrl}
                   thumbnailUrl={videoThumbnail}
-                  contentType={videoContentType}
+                  contentType={videoContentType || ''}
                   title={hero.image_alt || 'Product video'}
                   className="w-full rounded-lg shadow-xl overflow-hidden"
                   isVideo={true}
@@ -158,7 +158,7 @@ export default function ProductsHero() {
     const isVideoContent = Boolean(heroContent.isVideo);
     const videoUrl = heroContent.video?.url || '';
     const videoThumbnail = heroContent.video?.thumbnail || heroContent.image?.url;
-    const videoContentType = heroContent.video?.contentType;
+    const videoContentType = heroContent.video?.contentType || '';
     
     console.log("[ProductsHero] Using generic hero content with video details:", {
       isVideo: isVideoContent,
