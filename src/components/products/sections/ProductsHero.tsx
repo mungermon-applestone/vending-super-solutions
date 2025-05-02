@@ -5,7 +5,7 @@ import { ExternalLink, Loader2 } from 'lucide-react';
 import { useLandingPageByKey } from '@/hooks/cms/useLandingPages';
 import { useHeroContent } from '@/hooks/cms/useHeroContent';
 import { useState, useEffect } from 'react';
-import VideoPlayer from '@/components/common/VideoPlayer';
+import HeroVideo from '@/components/common/HeroVideo';
 
 export default function ProductsHero() {
   // Try both content sources - landingPage is preferred
@@ -124,28 +124,14 @@ export default function ProductsHero() {
               </div>
             </div>
             <div className="relative">
-              {isVideoHero && videoUrl ? (
-                <VideoPlayer 
-                  videoUrl={videoUrl}
-                  thumbnailUrl={videoThumbnail}
-                  contentType={videoContentType || ''}
-                  title={hero.image_alt || 'Product video'}
-                  className="w-full rounded-lg shadow-xl overflow-hidden"
-                  isVideo={true}
-                />
-              ) : (
-                <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-                  <img 
-                    src={hero.image_url}
-                    alt={hero.image_alt}
-                    className="w-full h-auto object-cover"
-                    onError={(e) => {
-                      console.error("[ProductsHero] Image failed to load:", hero.image_url);
-                      e.currentTarget.src = "https://images.unsplash.com/photo-1556742031-c6961e8560b0?ixlib=rb-4.0.3";
-                    }}
-                  />
-                </div>
-              )}
+              <HeroVideo 
+                isVideo={isVideoHero}
+                videoUrl={videoUrl}
+                videoThumbnail={videoThumbnail}
+                videoContentType={videoContentType || ''}
+                imageUrl={hero.image_url}
+                imageAlt={hero.image_alt || "Product image"}
+              />
             </div>
           </div>
         </div>
@@ -196,28 +182,14 @@ export default function ProductsHero() {
               </div>
             </div>
             <div className="relative">
-              {isVideoContent && videoUrl ? (
-                <VideoPlayer 
-                  videoUrl={videoUrl}
-                  thumbnailUrl={videoThumbnail}
-                  contentType={videoContentType}
-                  title={heroContent.image?.alt || "Product video"}
-                  className="w-full rounded-lg shadow-xl overflow-hidden"
-                  isVideo={true}
-                />
-              ) : (
-                <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-                  <img 
-                    src={heroContent.image?.url}
-                    alt={heroContent.image?.alt || "Product image"}
-                    className="w-full h-auto object-cover"
-                    onError={(e) => {
-                      console.error("[ProductsHero] Hero content image failed to load");
-                      e.currentTarget.src = "https://images.unsplash.com/photo-1556742031-c6961e8560b0?ixlib=rb-4.0.3";
-                    }}
-                  />
-                </div>
-              )}
+              <HeroVideo
+                isVideo={isVideoContent}
+                videoUrl={videoUrl}
+                videoThumbnail={videoThumbnail}
+                videoContentType={videoContentType}
+                imageUrl={heroContent.image?.url || ''}
+                imageAlt={heroContent.image?.alt || "Product image"}
+              />
             </div>
           </div>
         </div>

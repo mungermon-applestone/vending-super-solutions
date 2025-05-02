@@ -1,11 +1,10 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useHeroContent } from '@/hooks/cms/useHeroContent';
-import VideoPlayer from '@/components/common/VideoPlayer';
+import HeroVideo from '@/components/common/HeroVideo';
 
 const HeroSection = () => {
   const { data: heroContent, isLoading } = useHeroContent("home");
@@ -124,28 +123,15 @@ const HeroSection = () => {
             </div>
           </div>
           <div className="relative flex justify-center">
-            {isVideo && videoUrl ? (
-              <VideoPlayer
-                videoUrl={videoUrl}
-                thumbnailUrl={videoThumbnail}
-                contentType={videoContentType}
-                title={imageAlt}
-                className="w-full shadow-xl rounded-lg"
-                isVideo={true}
-              />
-            ) : (
-              <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-                <img 
-                  src={imageUrl}
-                  alt={imageAlt}
-                  className="w-full h-auto object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = "https://images.unsplash.com/photo-1605810230434-7631ac76ec81";
-                    console.log("Image failed to load, using fallback");
-                  }}
-                />
-              </div>
-            )}
+            <HeroVideo
+              isVideo={isVideo}
+              videoUrl={videoUrl}
+              videoThumbnail={videoThumbnail}
+              videoContentType={videoContentType}
+              imageUrl={imageUrl}
+              imageAlt={imageAlt}
+              className="w-full"
+            />
             <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
               <p className="font-bold">Works with 150+ machine models</p>
             </div>
