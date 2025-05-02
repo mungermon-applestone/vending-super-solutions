@@ -10,13 +10,12 @@ import { refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 import ContentfulDebug from '@/components/debug/ContentfulDebug';
 import ContentfulConfigVerifier from '@/components/debug/ContentfulConfigVerifier';
 import PurposeStatement from '@/components/products/sections/PurposeStatement';
-import DemoRequest from '@/components/products/sections/DemoRequest';
+import KeyFeaturesSection from '@/components/products/sections/KeyFeaturesSection';
 import ConfigurationError from '@/components/products/sections/ConfigurationError';
 import ProductsLoadingState from '@/components/products/sections/ProductsLoadingState';
 import ProductsError from '@/components/products/sections/ProductsError';
 import EmptyProductsList from '@/components/products/sections/EmptyProductsList';
 import ProductGrid from '@/components/products/sections/ProductGrid';
-import KeyFeaturesSection from '@/components/products/sections/KeyFeaturesSection';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
@@ -177,15 +176,6 @@ const ProductsPage = () => {
           title={pageContent.keyFeaturesTitle}
           description={pageContent.keyFeaturesDescription}
           features={pageContent.keyFeatures}
-        />
-      )}
-
-      {/* Demo Request Section */}
-      {pageContent && (
-        <DemoRequest 
-          title={pageContent.demoRequestTitle || "Request a Demo"}
-          description={pageContent.demoRequestDescription}
-          bulletPoints={pageContent.demoRequestBulletPoints}
         />
       )}
       

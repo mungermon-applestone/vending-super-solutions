@@ -13,9 +13,7 @@ import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import PurposeStatement from '@/components/products/sections/PurposeStatement';
 import KeyFeaturesSection from '@/components/products/sections/KeyFeaturesSection';
-import DemoRequest from '@/components/products/sections/DemoRequest';
 import ProductsHero from '@/components/products/sections/ProductsHero';
-import FeaturedBusinessGoals from '@/components/products/sections/FeaturedBusinessGoals';
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import ProductGrid from '@/components/products/sections/ProductGrid';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
@@ -152,30 +150,13 @@ const Products = () => {
           )}
         </main>
         
-        {/* Key Features Section with Business Goals - Proper sections with headings */}
+        {/* Key Features Section with headings */}
         {pageContent && (
-          <>
-            <section aria-labelledby="key-features-title">
-              <KeyFeaturesSection 
-                title={pageContent.keyFeaturesTitle}
-                description={pageContent.keyFeaturesDescription}
-                features={pageContent.keyFeatures}
-              />
-            </section>
-            <section aria-labelledby="business-goals-title" className="container py-12">
-              <h2 id="business-goals-title" className="text-2xl font-bold mb-6">Featured Business Goals</h2>
-              <FeaturedBusinessGoals entryId="2pS1t6cAI5cgijwX0mtWzx" />
-            </section>
-          </>
-        )}
-
-        {/* Demo Request Section - Proper section */}
-        {pageContent && (
-          <section aria-labelledby="demo-request-title">
-            <DemoRequest 
-              title={pageContent.demoRequestTitle || "Request a Demo"}
-              description={pageContent.demoRequestDescription}
-              bulletPoints={pageContent.demoRequestBulletPoints}
+          <section aria-labelledby="key-features-title">
+            <KeyFeaturesSection 
+              title={pageContent.keyFeaturesTitle}
+              description={pageContent.keyFeaturesDescription}
+              features={pageContent.keyFeatures}
             />
           </section>
         )}
