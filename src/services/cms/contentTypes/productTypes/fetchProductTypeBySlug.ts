@@ -1,7 +1,7 @@
 
 import { CMSProductType } from '@/types/cms';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
-import { normalizeSlug, getSlugVariations, mapUrlSlugToDatabaseSlug, logSlugSearch, logSlugResult } from '@/services/cms/utils/slugMatching';
+import { normalizeSlug, getSlugVariations, mapUrlSlugToDatabaseSlug, logSlugSearch, logSlugResult, findBestSlugMatch } from '@/services/cms/utils/slugMatching';
 import { toast } from 'sonner';
 // Import the new isContentfulConfigured function
 import { isContentfulConfigured } from '@/config/cms';
@@ -39,7 +39,64 @@ export async function fetchProductTypeBySlug(slug: string): Promise<CMSProductTy
     
     let productType: CMSProductType | null = null;
     
-    // Iterate through slug variations to find a match
+    // First try: attempt to get all product types to have complete list for matching
+    try {
+      const allProductsQuery = await client.getEntries({
+        content_type: 'productType',
+        limit: 100
+      });
+      
+      if (allProductsQuery.items.length > 0) {
+        // Extract all available slugs
+        const allSlugs = allProductsQuery.items.map(item => item.fields.slug as string);
+        console.log(`[fetchProductTypeBySlug] Found ${allSlugs.length} product types for matching`);
+        
+        // Try to find best match using our advanced matching
+        const bestMatch = findBestSlugMatch(normalizedSlug, allSlugs);
+        
+        if (bestMatch) {
+          console.log(`[fetchProductTypeBySlug] Found best match: "${bestMatch}" for search slug: "${normalizedSlug}"`);
+          
+          // Get the matching product from our results
+          const matchedProduct = allProductsQuery.items.find(item => 
+            (item.fields.slug as string) === bestMatch
+          );
+          
+          if (matchedProduct) {
+            const entry = matchedProduct;
+            
+            productType = {
+              id: entry.sys.id,
+              title: entry.fields.title as string,
+              slug: entry.fields.slug as string,
+              description: entry.fields.description as string,
+              benefits: Array.isArray(entry.fields.benefits) ? entry.fields.benefits as string[] : [],
+              image: entry.fields.image ? {
+                id: (entry.fields.image as any).sys.id,
+                url: `https:${(entry.fields.image as any).fields.file.url}`,
+                alt: (entry.fields.image as any).fields.title || entry.fields.title,
+              } : undefined,
+              features: entry.fields.features ? (entry.fields.features as any[]).map(feature => ({
+                id: feature.sys.id,
+                title: feature.fields.title,
+                description: feature.fields.description,
+                icon: feature.fields.icon || undefined
+              })) : [],
+              visible: !!entry.fields.visible,
+            };
+            
+            logSlugResult('productType', normalizedSlug, bestMatch, true);
+            console.log(`[fetchProductTypeBySlug] Successfully found product via best match: ${entry.fields.title}`);
+            return productType;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[fetchProductTypeBySlug] Error during advanced slug matching:', error);
+      // Continue with traditional approach if advanced matching fails
+    }
+    
+    // Traditional approach: Iterate through slug variations to find a match
     for (const slugVariation of slugVariations) {
       const dbSlug = mapUrlSlugToDatabaseSlug(slugVariation);
       const query: any = {
