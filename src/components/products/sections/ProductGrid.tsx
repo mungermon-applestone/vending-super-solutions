@@ -16,11 +16,34 @@ const ProductGrid = ({ products, isHomepage = false, isLoading = false }: Produc
   const location = useLocation();
   const currentUrl = `https://applestonesolutions.com${location.pathname}`;
   
+  // Validate products array to make sure it's valid
+  const validProducts = React.useMemo(() => {
+    if (!Array.isArray(products)) {
+      console.error('[ProductGrid] products is not an array:', products);
+      return [];
+    }
+    
+    // Filter out invalid products to prevent rendering errors
+    return products.filter(product => {
+      if (!product) {
+        console.error('[ProductGrid] Received null or undefined product in array');
+        return false;
+      }
+      
+      if (!product.id || !product.title || !product.slug) {
+        console.error('[ProductGrid] Product is missing required properties:', product);
+        return false;
+      }
+      
+      return true;
+    });
+  }, [products]);
+  
   // Sort products if they have ordering properties - memoize to prevent recomputing on each render
   const sortedProducts = React.useMemo(() => {
-    if (!products || products.length === 0) return [];
+    if (!validProducts || validProducts.length === 0) return [];
     
-    return [...products].sort((a, b) => {
+    return [...validProducts].sort((a, b) => {
       // For homepage, use homepageOrder
       if (isHomepage) {
         const orderA = a.homepageOrder ?? 999;
@@ -37,7 +60,7 @@ const ProductGrid = ({ products, isHomepage = false, isLoading = false }: Produc
       // Fall back to title sort if orders are the same
       return a.title.localeCompare(b.title);
     });
-  }, [products, isHomepage]);
+  }, [validProducts, isHomepage]);
   
   // Create breadcrumb items for schema
   const breadcrumbItems = [
@@ -56,6 +79,16 @@ const ProductGrid = ({ products, isHomepage = false, isLoading = false }: Produc
   // If loading, show loading state
   if (isLoading) {
     return <ProductsLoadingState />;
+  }
+  
+  // Handle case where no products are available
+  if (sortedProducts.length === 0) {
+    return (
+      <div className="container mx-auto py-12 text-center">
+        <h3 className="text-xl font-medium text-gray-700 mb-4">No products available</h3>
+        <p className="text-gray-500">Check your Contentful configuration or add some products.</p>
+      </div>
+    );
   }
 
   // Use IntersectionObserver to load cards as they come into view

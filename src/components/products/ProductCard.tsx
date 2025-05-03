@@ -17,6 +17,22 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [imageError, setImageError] = React.useState(false);
   
+  // Guard against null or undefined product
+  if (!product) {
+    console.error('[ProductCard] Received null or undefined product');
+    return (
+      <article className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow h-full flex flex-col">
+        <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
+          <span className="text-gray-400">Product data missing</span>
+        </div>
+        <div className="p-6">
+          <h3 className="text-xl font-semibold mb-3">Product Unavailable</h3>
+          <p className="text-gray-600 mb-4">This product could not be loaded.</p>
+        </div>
+      </article>
+    );
+  }
+  
   // Extract the slug but ensure it's valid
   const productSlug = product?.slug || '';
   

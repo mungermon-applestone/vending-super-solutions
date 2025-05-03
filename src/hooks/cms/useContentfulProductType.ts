@@ -98,36 +98,69 @@ export function useContentfulProductType(slug: string) {
         if (!entries.items.length) {
           console.error(`[useContentfulProductType] No product type found with slug: ${slug}`);
           
-          // Let's try a fallback query with a broader search to see what's available
-          const fallbackQuery = await client.getEntries({
-            content_type: 'productType',
-            limit: 5
-          });
+          // Try alternative formatting of the slug (often helps with URL vs DB format differences)
+          const alternativeSlug = slug.replace(/-/g, '_');
+          let entriesAlt;
           
-          console.log(`[useContentfulProductType] Fallback found ${fallbackQuery.total} productTypes:`, 
-            fallbackQuery.items.map(item => ({
-              id: item.sys.id,
-              title: item.fields.title,
-              slug: item.fields.slug
-            }))
-          );
+          // Try a second query with the alternative slug format
+          if (alternativeSlug !== slug) {
+            try {
+              console.log(`[useContentfulProductType] Trying alternative slug format: ${alternativeSlug}`);
+              entriesAlt = await client.getEntries({
+                content_type: 'productType',
+                'fields.slug': alternativeSlug,
+                include: 2
+              });
+              
+              if (entriesAlt.items.length > 0) {
+                console.log(`[useContentfulProductType] Found product with alternative slug: ${alternativeSlug}`);
+                entries.items = entriesAlt.items;
+              }
+            } catch (e) {
+              console.error(`[useContentfulProductType] Error trying alternative slug: ${e}`);
+            }
+          }
           
-          diagnosticInfo.responseData = {
-            ...diagnosticInfo.responseData,
-            fallbackResults: fallbackQuery.items.map(item => ({
-              id: item.sys.id,
-              title: item.fields.title,
-              slug: item.fields.slug
-            }))
-          };
-          
-          throw Object.assign(
-            new Error(`Product type not found: ${slug}`),
-            { diagnosticInfo }
-          );
+          // If still not found, try a fallback query with a broader search
+          if (!entries.items.length) {
+            const fallbackQuery = await client.getEntries({
+              content_type: 'productType',
+              limit: 5
+            });
+            
+            console.log(`[useContentfulProductType] Fallback found ${fallbackQuery.total} productTypes:`, 
+              fallbackQuery.items.map(item => ({
+                id: item.sys.id,
+                title: item.fields.title,
+                slug: item.fields.slug
+              }))
+            );
+            
+            diagnosticInfo.responseData = {
+              ...diagnosticInfo.responseData,
+              fallbackResults: fallbackQuery.items.map(item => ({
+                id: item.sys.id,
+                title: item.fields.title,
+                slug: item.fields.slug
+              }))
+            };
+            
+            throw Object.assign(
+              new Error(`Product type not found: ${slug}`),
+              { diagnosticInfo }
+            );
+          }
         }
 
         const entry = entries.items[0];
+        
+        if (!entry || !entry.fields) {
+          console.error(`[useContentfulProductType] Entry or entry.fields is undefined for slug: ${slug}`);
+          throw Object.assign(
+            new Error(`Invalid product data for slug: ${slug}`),
+            { diagnosticInfo }
+          );
+        }
         
         console.log(`[useContentfulProductType] Found product type:`, {
           id: entry.sys.id,
@@ -135,25 +168,36 @@ export function useContentfulProductType(slug: string) {
           slug: entry.fields.slug
         });
         
+        const fields = entry.fields;
+        
+        // Validate that we have the minimum required fields
+        if (!fields.title || !fields.slug) {
+          console.error(`[useContentfulProductType] Missing required fields for product type: ${slug}`);
+          throw Object.assign(
+            new Error(`Product data is incomplete: missing required fields`),
+            { diagnosticInfo }
+          );
+        }
+        
         const productType = {
           id: entry.sys.id,
-          title: entry.fields.title as string,
-          slug: entry.fields.slug as string,
-          description: entry.fields.description as string,
-          benefits: Array.isArray(entry.fields.benefits) ? entry.fields.benefits as string[] : [],
-          image: entry.fields.image ? {
-            id: (entry.fields.image as any).sys.id,
-            url: `https:${(entry.fields.image as any).fields.file.url}`,
-            alt: (entry.fields.image as any).fields.title || entry.fields.title,
+          title: fields.title as string,
+          slug: fields.slug as string,
+          description: fields.description as string,
+          benefits: Array.isArray(fields.benefits) ? fields.benefits as string[] : [],
+          image: fields.image ? {
+            id: (fields.image as any).sys.id,
+            url: `https:${(fields.image as any).fields.file.url}`,
+            alt: (fields.image as any).fields.title || fields.title,
           } : undefined,
-          features: entry.fields.features ? (entry.fields.features as any[]).map(feature => ({
+          features: fields.features ? (fields.features as any[]).map(feature => ({
             id: feature.sys.id,
             title: feature.fields.title,
             description: feature.fields.description,
             icon: feature.fields.icon || undefined
           })) : [],
-          recommendedMachines: entry.fields.recommendedMachines ? 
-            (entry.fields.recommendedMachines as any[]).map(machine => ({
+          recommendedMachines: fields.recommendedMachines ? 
+            (fields.recommendedMachines as any[]).map(machine => ({
               id: machine.sys.id,
               slug: machine.fields.slug,
               title: machine.fields.title,
@@ -193,6 +237,7 @@ export function useContentfulProductType(slug: string) {
           console.error('[useContentfulProductType] Diagnostic info:', error.diagnosticInfo);
         }
       }
-    }
+    },
+    enabled: !!slug
   });
 }

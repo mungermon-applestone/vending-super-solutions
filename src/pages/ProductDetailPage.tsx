@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useContentfulProductType } from '@/hooks/cms/useContentfulProductType';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import RecommendedMachines from '@/components/products/sections/RecommendedMachi
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
+import { toast } from 'sonner';
 
 const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -41,6 +42,7 @@ const ProductDetailPage = () => {
 };
 
 const ProductContent = ({ slug }: { slug: string | undefined }) => {
+  const navigate = useNavigate();
   const { 
     data, 
     isLoading, 
@@ -51,9 +53,14 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
     console.log("[ProductContent] Rendering with slug:", slug);
     console.log("[ProductContent] Current product data:", data);
     console.log("[ProductContent] Current error state:", error);
-    console.log("[ProductContent] Diagnostic info:", data?.diagnosticInfo);
-  }, [slug, data, error]);
+    
+    if (!slug) {
+      toast.error("Missing product slug");
+      navigate("/products");
+    }
+  }, [slug, data, error, navigate]);
   
+  // Handle the case when data is undefined but no error was thrown
   const product = data ? {
     title: data.title,
     slug: data.slug,
