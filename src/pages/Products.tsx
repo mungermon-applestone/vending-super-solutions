@@ -20,6 +20,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbS
 import { Link } from 'react-router-dom';
 
 const Products = () => {
+  // Optimized data fetching with React Query
   const { data: products, isLoading, error, refetch } = useContentfulProducts();
   const { 
     data: pageContent, 
@@ -30,14 +31,38 @@ const Products = () => {
   const { data: testimonialSection } = useTestimonialSection('products');
   const queryClient = useQueryClient();
   
-  console.log('[Products] Rendering Products page', { 
-    productsCount: products?.length || 0, 
-    isLoading, 
-    hasError: !!error,
-    errorMessage: error instanceof Error ? error.message : null
-  });
+  // Use React's lazy loading for performance monitoring
+  const [heroVisible, setHeroVisible] = React.useState(false);
+  const heroRef = React.useRef<HTMLDivElement>(null);
   
-  console.log('[Products] Page content:', pageContent);
+  // Intersection observer to track when hero is visible
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHeroVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    
+    if (heroRef.current) {
+      observer.observe(heroRef.current);
+    }
+    
+    return () => observer.disconnect();
+  }, []);
+
+  // Performance tracking for component mount
+  React.useEffect(() => {
+    const startTime = performance.now();
+    
+    return () => {
+      const endTime = performance.now();
+      console.log(`[Products] Render time: ${endTime - startTime}ms`);
+    };
+  }, []);
 
   const handleRefresh = () => {
     console.log('[Products] Refreshing products data');
@@ -45,10 +70,13 @@ const Products = () => {
     queryClient.invalidateQueries({ queryKey: ['contentful', 'productsPageContent'] });
   };
   
+  // Memoize products data to prevent unnecessary re-renders
+  const memoizedProducts = React.useMemo(() => products, [products]);
+  
   return (
     <Layout>
       <SEO 
-        title="Products"
+        title="Products | Vending Solutions"
         description={pageContent?.categoriesSectionDescription || "Explore our comprehensive range of vending solutions designed for modern businesses. Find the perfect product type for your needs."}
         type="website"
         canonicalUrl={window.location.href}
@@ -75,15 +103,30 @@ const Products = () => {
         </nav>
 
         {/* Hero Section - Semantic header */}
-        <ProductsHero />
+        <div ref={heroRef}>
+          <ProductsHero />
+        </div>
 
         {/* Purpose Statement Section - Proper section with heading */}
-        {pageContent && (
+        {(pageContent || isLoadingContent) && (
           <section aria-labelledby="purpose-statement-title">
-            <PurposeStatement 
-              title={pageContent.purposeStatementTitle || "Our Products"}
-              description={pageContent.purposeStatementDescription}
-            />
+            {isLoadingContent ? (
+              <div className="container py-16">
+                <div className="max-w-3xl mx-auto">
+                  <div className="space-y-4">
+                    <Loader2 className="h-8 w-8 animate-spin text-gray-500 mx-auto" />
+                    <div className="h-8 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                    <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                  </div>
+                </div>
+              </div>
+            ) : pageContent ? (
+              <PurposeStatement 
+                title={pageContent.purposeStatementTitle || "Our Products"}
+                description={pageContent.purposeStatementDescription}
+              />
+            ) : null}
           </section>
         )}
 
@@ -116,7 +159,7 @@ const Products = () => {
             </div>
           </div>
 
-          {isLoading || isLoadingContent ? (
+          {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12" aria-live="polite" aria-busy="true">
               <Loader2 className="h-8 w-8 animate-spin text-gray-500 mb-3" aria-hidden="true" />
               <p className="text-gray-500">Loading content from Contentful...</p>
@@ -132,10 +175,10 @@ const Products = () => {
                 actionText="Try Again"
               />
             </div>
-          ) : products && products.length > 0 ? (
+          ) : memoizedProducts && memoizedProducts.length > 0 ? (
             <section aria-labelledby="products-heading">
               <h2 id="products-heading" className="sr-only">Available Products</h2>
-              <ProductGrid products={products} />
+              <ProductGrid products={memoizedProducts} />
             </section>
           ) : (
             <div aria-live="assertive">
@@ -151,13 +194,36 @@ const Products = () => {
         </main>
         
         {/* Key Features Section with headings */}
-        {pageContent && (
+        {(pageContent || isLoadingContent) && (
           <section aria-labelledby="key-features-title">
-            <KeyFeaturesSection 
-              title={pageContent.keyFeaturesTitle}
-              description={pageContent.keyFeaturesDescription}
-              features={pageContent.keyFeatures}
-            />
+            {isLoadingContent ? (
+              <div className="container py-16 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="space-y-8">
+                    <div className="space-y-4 text-center">
+                      <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="space-y-3">
+                          <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+                          <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+                          <div className="h-4 bg-gray-200 rounded w-full"></div>
+                          <div className="h-4 bg-gray-200 rounded w-4/5"></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : pageContent?.keyFeaturesTitle ? (
+              <KeyFeaturesSection 
+                title={pageContent.keyFeaturesTitle}
+                description={pageContent.keyFeaturesDescription}
+                features={pageContent.keyFeatures}
+              />
+            ) : null}
           </section>
         )}
         
@@ -172,26 +238,6 @@ const Products = () => {
         <section aria-labelledby="inquiry-form-title">
           <InquiryForm title="Ready to transform your vending operations?" />
         </section>
-        
-        {/* Debug Information */}
-        {import.meta.env.DEV && (
-          <aside className="container mx-auto py-8 px-4">
-            <details className="bg-gray-100 p-4 rounded-lg mb-4">
-              <summary className="font-semibold cursor-pointer">Debug Information</summary>
-              <div className="mt-4 text-sm">
-                <h4 className="font-bold">Products Data:</h4>
-                <pre className="bg-gray-200 p-3 rounded mt-2 overflow-auto max-h-48">
-                  {JSON.stringify(products, null, 2)}
-                </pre>
-                
-                <h4 className="font-bold mt-4">Page Content:</h4>
-                <pre className="bg-gray-200 p-3 rounded mt-2 overflow-auto max-h-48">
-                  {JSON.stringify(pageContent, null, 2)}
-                </pre>
-              </div>
-            </details>
-          </aside>
-        )}
       </ContentfulErrorBoundary>
     </Layout>
   );

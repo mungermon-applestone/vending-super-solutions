@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import Image from '@/components/common/Image';
 import { CMSProductType } from '@/types/cms';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ProductCardProps {
   product: CMSProductType;
@@ -12,6 +13,8 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const navigate = useNavigate();
+  const [imageLoaded, setImageLoaded] = React.useState(false);
+  const [imageError, setImageError] = React.useState(false);
   
   // Extract the slug but ensure it's valid
   const productSlug = product?.slug || '';
@@ -35,16 +38,35 @@ const ProductCard = ({ product }: ProductCardProps) => {
       itemType="https://schema.org/Product"
       aria-labelledby={`product-title-${product.id}`}
     >
-      <div className="w-full h-48 overflow-hidden bg-gray-100">
+      <div className="w-full h-48 overflow-hidden bg-gray-100 relative">
         {imageToUse ? (
-          <Image 
-            src={imageToUse.url} 
-            alt={imageToUse.alt || product.title}
-            className="w-full h-full" 
-            objectFit="contain"
-            isThumbnail={!!product.thumbnail}
-            itemProp="image"
-          />
+          <>
+            {!imageLoaded && !imageError && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Skeleton className="w-full h-full absolute" />
+              </div>
+            )}
+            <Image 
+              src={imageToUse.url} 
+              alt={imageToUse.alt || product.title}
+              className={`w-full h-full transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              objectFit="contain"
+              isThumbnail={!!product.thumbnail}
+              itemProp="image"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => {
+                console.error(`[ProductCard] Failed to load image for: ${product.title}`);
+                setImageError(true);
+              }}
+              loading="lazy"
+              fetchPriority="auto"
+            />
+            {imageError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                <span className="text-gray-400">Image not available</span>
+              </div>
+            )}
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-50">
             <span className="text-gray-400">No image</span>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CMSProductType } from '@/types/cms';
 import ProductCard from '@/components/products/ProductCard';
@@ -12,7 +11,7 @@ interface ProductGridProps {
 
 const ProductGrid = ({ products, isHomepage = false }: ProductGridProps) => {
   const location = useLocation();
-  const currentUrl = `https://yourdomain.com${location.pathname}`;
+  const currentUrl = `https://applestonesolutions.com${location.pathname}`;
   
   // Sort products if they have ordering properties
   const sortedProducts = React.useMemo(() => {
@@ -37,22 +36,11 @@ const ProductGrid = ({ products, isHomepage = false }: ProductGridProps) => {
     });
   }, [products, isHomepage]);
   
-  // Add detailed logging to help diagnose thumbnail issues
-  console.log('[ProductGrid] Products data:', sortedProducts.map(product => ({
-    id: product.id,
-    title: product.title,
-    hasThumbnail: !!product.thumbnail,
-    thumbnailUrl: product.thumbnail?.url || 'none',
-    hasImage: !!product.image,
-    imageUrl: product.image?.url || 'none',
-    imageToUse: product.thumbnail ? 'thumbnail' : (product.image ? 'regular image' : 'none')
-  })));
-  
   // Create breadcrumb items for schema
   const breadcrumbItems = [
     {
       name: "Home",
-      url: "https://yourdomain.com",
+      url: "https://applestonesolutions.com",
       position: 1
     },
     {
