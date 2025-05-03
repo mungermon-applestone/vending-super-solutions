@@ -1,12 +1,22 @@
-
 /**
  * Slug matching functionality - main entry point
  * Refactored to use smaller, focused modules
  */
 
-// Export all functionality from the modular files
-export { normalizeSlug, exactSlugMatch } from './slug/normalize';
+// Export common utilities
+export { normalizeSlug } from './slug/common';
+
+// Export main slug variation functionality
+export { 
+  getSlugVariations, 
+  slugsMatch, 
+  findBestSlugMatch 
+} from './slug/variations';
+
+// Keep existing exports from other modules
 export { mapUrlSlugToDatabaseSlug, mapDatabaseSlugToUrlSlug, registerSlugChange } from './slug/mapping';
-export { getSlugVariations, slugsMatch, findBestSlugMatch } from './slug/variations';
 export { extractUUID, createSlugWithUUID, parseSlugWithUUID } from './slug/uuid';
 export { logSlugSearch, logSlugResult, getSlugNotFoundMessage } from './slug/logging';
+
+// Re-export any missing functionality from normalize.ts
+export { exactSlugMatch } from './slug/normalize';
