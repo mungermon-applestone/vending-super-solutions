@@ -1,3 +1,4 @@
+
 import { CMSProductType } from '@/types/cms';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { normalizeSlug, getSlugVariations, mapUrlSlugToDatabaseSlug } from '@/services/cms/utils/slugMatching';

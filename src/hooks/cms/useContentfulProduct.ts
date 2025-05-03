@@ -31,7 +31,7 @@ export function useContentfulProduct(slug: string) {
       }
       
       if (!client) {
-        console.error('[useContentfulProduct] Failed to initialize Contentful client after retry');
+        console.error('[useContentfulProduct] Failed to initialize Contentful client');
         throw new Error('Failed to initialize Contentful client');
       }
       
