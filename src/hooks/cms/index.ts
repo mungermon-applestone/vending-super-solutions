@@ -5,10 +5,12 @@ import { useBusinessGoal } from './useBusinessGoal';
 import { useMachines, useMachine } from './useMachines';
 import { useTechnologies, useTechnology } from './useTechnologies';
 import { useTestimonials } from './useTestimonials';
-import { useCloneProductType } from './useCloneProductType';
-import { useCloneBusinessGoal } from './useCloneBusinessGoal';
-import { useCloneTechnology } from './useCloneTechnology';
-import { useCloneMachine } from './useCloneMachine';
+import { 
+  useCloneProductType,
+  useCloneBusinessGoal,
+  useCloneTechnology,
+  useCloneMachine
+} from './useCloneCMS';
 
 export {
   useProductTypes, 
