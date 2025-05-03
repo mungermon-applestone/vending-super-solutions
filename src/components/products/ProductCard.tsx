@@ -41,6 +41,18 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
   
   // Use object-contain if no specific thumbnail is provided
   const objectFit = product.thumbnail ? 'cover' : 'contain';
+
+  // Handle the navigation to product detail page
+  const handleProductNavigation = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (productSlug) {
+      // Navigate to the product page and ensure we start at the top
+      navigate(`/products/${productSlug}`);
+      window.scrollTo(0, 0);
+    } else {
+      console.error(`[ProductCard] Cannot navigate: product slug is empty for ${product.title}`);
+    }
+  };
   
   return (
     <article 
@@ -103,13 +115,7 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
         <Button 
           variant="ghost" 
           className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
-          onClick={() => {
-            if (productSlug) {
-              navigate(`/products/${productSlug}`);
-            } else {
-              console.error(`[ProductCard] Cannot navigate: product slug is empty for ${product.title}`);
-            }
-          }}
+          onClick={handleProductNavigation}
           aria-label={`Learn more about ${product.title}`}
           disabled={!productSlug}
         >

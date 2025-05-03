@@ -17,6 +17,11 @@ import { toast } from 'sonner';
 const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   
+  // Scroll to top when the page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   console.log("[ProductDetailPage] Rendering with slug:", slug);
   
   return (
