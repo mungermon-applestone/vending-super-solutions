@@ -14,7 +14,7 @@ const BusinessGoalsSection = () => {
   
   console.log('[BusinessGoalsSection] Content:', homeContent);
   
-  // Updated with correct canonical slugs
+  // Updated with canonical slugs (using marketing-and-promotions since that's what we use in URLs)
   const businessGoals = [
     {
       icon: "vending",

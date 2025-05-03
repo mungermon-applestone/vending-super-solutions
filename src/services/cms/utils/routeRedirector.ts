@@ -19,7 +19,8 @@ const BUSINESS_GOAL_SLUG_MAP: Record<string, string> = {
   'market-expansion': 'expand-footprint',
   'footprint': 'expand-footprint',
   
-  // Marketing and promotions variations
+  // Marketing and promotions variations - important: support both forms as canonical
+  // In the database it's stored as marketing-promotions but in URLs we use marketing-and-promotions
   'marketing-and-promotions': 'marketing-and-promotions',
   'marketing_and_promotions': 'marketing-and-promotions',
   'marketing-promotions': 'marketing-and-promotions',
@@ -35,6 +36,8 @@ const BUSINESS_GOAL_SLUG_MAP: Record<string, string> = {
  */
 export function redirectToCanonicalBusinessGoalIfNeeded(slug: string): boolean {
   if (!slug) return false;
+  
+  console.log(`[redirectToCanonical] Checking if redirection needed for slug: ${slug}`);
   
   const normalizedSlug = slug.toLowerCase().replace(/_/g, '-');
   const canonicalSlug = BUSINESS_GOAL_SLUG_MAP[normalizedSlug];

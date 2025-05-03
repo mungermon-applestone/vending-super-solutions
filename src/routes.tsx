@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import ErrorPage from '@/components/ErrorPage';
@@ -14,6 +15,7 @@ import MachinesPage from '@/pages/MachinesPage';
 import MachineDetailPage from '@/pages/MachineDetailPage';
 import BusinessGoalsPage from '@/pages/BusinessGoalsPage';
 import BusinessGoalDetailPage from '@/pages/BusinessGoalDetailPage';
+import BusinessGoalDetail from '@/pages/BusinessGoalDetail'; // Old implementation
 import NotFound from '@/pages/NotFound';
 import TechnologyPage from '@/pages/TechnologyPage';
 import About from '@/pages/About';
@@ -64,6 +66,10 @@ const routes: RouteObject[] = [
       {
         path: 'business-goals/:slug',
         element: <BusinessGoalDetailPage />
+      },
+      {
+        path: 'goals/:slug',
+        element: <BusinessGoalDetail />
       },
       {
         path: 'business/:slug',

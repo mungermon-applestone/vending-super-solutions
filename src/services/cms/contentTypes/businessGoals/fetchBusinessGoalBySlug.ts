@@ -31,6 +31,14 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
     const normalizedSlug = normalizeSlug(slug);
     console.log(`[fetchBusinessGoalBySlug] Fetching business goal with normalized slug: ${normalizedSlug}`);
 
+    // Special case handling for marketing-and-promotions vs marketing-promotions
+    let searchSlug = normalizedSlug;
+    if (normalizedSlug === 'marketing-and-promotions') {
+      console.log('[fetchBusinessGoalBySlug] Marketing and promotions special case detected');
+      // Temporarily add a fallback to try both versions
+      searchSlug = 'marketing-promotions';
+    }
+
     // Try to fetch from Contentful
     try {
       const client = await getContentfulClient();
@@ -47,6 +55,9 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
         const allSlugs = allGoalsQuery.items.map(item => item.fields.slug as string);
         console.log(`[fetchBusinessGoalBySlug] Found ${allSlugs.length} business goals for matching`);
         
+        // Log all slugs for debugging
+        console.log(`[fetchBusinessGoalBySlug] Available slugs:`, allSlugs);
+        
         // Try to find best match using our advanced matching
         const bestMatch = findBestSlugMatch(normalizedSlug, allSlugs);
         
@@ -55,12 +66,13 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
           
           // Get the matching business goal from our results
           const matchedGoal = allGoalsQuery.items.find(item => 
-            (item.fields.slug as string) === bestMatch
+            slugsMatch((item.fields.slug as string), bestMatch)
           );
           
           if (matchedGoal) {
             const entry = matchedGoal;
             
+            // Map the Contentful data to our CMSBusinessGoal interface
             const businessGoal: CMSBusinessGoal = {
               id: entry.sys.id,
               slug: entry.fields.slug as string,
@@ -109,6 +121,14 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
       
       // If advanced matching fails, try traditional approach with slug variations
       const slugVariations = getSlugVariations(normalizedSlug);
+      
+      // For marketing-and-promotions, also try marketing-promotions
+      if (normalizedSlug === 'marketing-and-promotions' && !slugVariations.includes('marketing-promotions')) {
+        slugVariations.push('marketing-promotions');
+      } else if (normalizedSlug === 'marketing-promotions' && !slugVariations.includes('marketing-and-promotions')) {
+        slugVariations.push('marketing-and-promotions');
+      }
+      
       console.log(`[fetchBusinessGoalBySlug] Trying ${slugVariations.length} slug variations:`, slugVariations);
       
       // Try each variation
