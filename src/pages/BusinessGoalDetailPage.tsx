@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Check, Shield, Server, Settings, Bell, Battery, ClipboardCheck, RefreshCcw, TrendingUp, PieChart, Map, UserCheck } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
@@ -13,6 +13,7 @@ import RecommendedMachines from '@/components/products/sections/RecommendedMachi
 import InquiryForm from '@/components/machines/contact/InquiryForm';
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
+import { redirectToCanonicalBusinessGoalIfNeeded } from '@/services/cms/utils/routeRedirector';
 
 const getIconComponent = (iconName: string | undefined): React.ReactNode => {
   if (!iconName) return <Star className="h-6 w-6" />;
@@ -49,6 +50,13 @@ const getIconComponent = (iconName: string | undefined): React.ReactNode => {
 
 const BusinessGoalDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
+  
+  // Add effect to redirect to canonical URL if needed
+  useEffect(() => {
+    if (slug) {
+      redirectToCanonicalBusinessGoalIfNeeded(slug);
+    }
+  }, [slug]);
   
   console.log('[BusinessGoalDetailPage] Rendering with slug:', slug);
   console.log('[BusinessGoalDetailPage] Current route path:', window.location.pathname);

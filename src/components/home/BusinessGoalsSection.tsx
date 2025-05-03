@@ -14,6 +14,7 @@ const BusinessGoalsSection = () => {
   
   console.log('[BusinessGoalsSection] Content:', homeContent);
   
+  // Updated with correct canonical slugs
   const businessGoals = [
     {
       icon: "vending",
@@ -35,17 +36,17 @@ const BusinessGoalsSection = () => {
       icon: "vending",
       title: "Marketing & Promotions",
       description: "Drive sales with targeted promotions, digital advertising, and customer loyalty programs.",
-      link: "/business-goals/marketing",
-      id: "marketing",
-      slug: "marketing"
+      link: "/business-goals/marketing-and-promotions",
+      id: "marketing-and-promotions",
+      slug: "marketing-and-promotions"
     },
     {
       icon: "vending",
       title: "Data & Analytics",
       description: "Leverage powerful insights to optimize your inventory, pricing, and machine placement.",
-      link: "/business-goals/data",
-      id: "data",
-      slug: "data"
+      link: "/business-goals/data-analytics",
+      id: "data-analytics",
+      slug: "data-analytics"
     },
     {
       icon: "vending",

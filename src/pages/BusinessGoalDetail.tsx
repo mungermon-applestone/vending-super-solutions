@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -11,14 +10,19 @@ import BusinessGoalKeyBenefits from '@/components/businessGoals/BusinessGoalKeyB
 import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
+import { redirectToCanonicalBusinessGoalIfNeeded } from '@/services/cms/utils/routeRedirector';
 
 const BusinessGoalDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   
-  // Scroll to top when the page loads
+  // Perform redirection if needed and scroll to top when the page loads
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    
+    if (slug) {
+      redirectToCanonicalBusinessGoalIfNeeded(slug);
+    }
+  }, [slug]);
   
   console.log("[BusinessGoalDetail] Rendering with slug:", slug);
   

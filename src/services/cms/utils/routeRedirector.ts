@@ -5,20 +5,26 @@ import { navigate } from "@/services/navigation";
  * Map of problematic slugs to their proper canonical paths
  */
 const BUSINESS_GOAL_SLUG_MAP: Record<string, string> = {
+  // Data analytics variations
   'data-analytics': 'data-analytics',
   'data_analytics': 'data-analytics',
   'analytics': 'data-analytics',
   'data-analysis': 'data-analytics',
+  'data': 'data-analytics',
   
+  // Expand footprint variations
   'expand-footprint': 'expand-footprint',
   'expand_footprint': 'expand-footprint',
   'expansion': 'expand-footprint',
   'market-expansion': 'expand-footprint',
+  'footprint': 'expand-footprint',
   
+  // Marketing and promotions variations
   'marketing-and-promotions': 'marketing-and-promotions',
   'marketing_and_promotions': 'marketing-and-promotions',
   'marketing': 'marketing-and-promotions',
-  'promotions': 'marketing-and-promotions'
+  'promotions': 'marketing-and-promotions',
+  'marketing-promotions': 'marketing-and-promotions'
 };
 
 /**
@@ -50,4 +56,3 @@ export const navigationService = {
     window.location.href = path;
   }
 };
-
