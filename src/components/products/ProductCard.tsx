@@ -39,6 +39,9 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
   // Determine which image to use - thumbnail has priority over main image
   const imageToUse = product.thumbnail || product.image;
   
+  // Use object-contain if no specific thumbnail is provided
+  const objectFit = product.thumbnail ? 'cover' : 'contain';
+  
   return (
     <article 
       className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow h-full flex flex-col"
@@ -57,7 +60,8 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
             <Image 
               src={imageToUse.url} 
               alt={imageToUse.alt || product.title}
-              className={`w-full h-full object-contain transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              className={`w-full h-full transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              objectFit={objectFit}
               isThumbnail={!!product.thumbnail}
               itemProp="image"
               onLoad={() => setImageLoaded(true)}

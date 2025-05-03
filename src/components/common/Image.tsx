@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -56,12 +57,13 @@ const Image: React.FC<ImageProps> = ({
       // If it's a Contentful image without parameters, add optimization
       if (isContentfulImage) {
         const width = isThumbnail ? 400 : 800;
-        return `${url}?w=${width}&q=80&fm=webp&fit=fill`;
+        const fit = isThumbnail ? 'fill' : 'pad';
+        return `${url}?w=${width}&q=80&fm=webp&fit=${fit}`;
       }
       
       // For Unsplash images, use their optimization API
       if (isUnsplashImage && !url.includes('&auto=format')) {
-        return `${url}${url.includes('?') ? '&' : '?'}auto=format&q=80&w=${isThumbnail ? '400' : '800'}&fit=crop`;
+        return `${url}${url.includes('?') ? '&' : '?'}auto=format&q=80&w=${isThumbnail ? '400' : '800'}&fit=max`;
       }
       
       // For other images, return as is
