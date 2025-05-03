@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -42,42 +41,68 @@ const Image: React.FC<ImageProps> = ({
   const isContentfulImage = imageUrl.includes('images.ctfassets.net');
   const isUnsplashImage = imageUrl.includes('unsplash.com');
   
+  // Keep track of load attempts to prevent infinite retry loops
+  const [loadAttempts, setLoadAttempts] = React.useState(0);
+  const maxAttempts = 2;
+  
   // Optimize image loading based on service
   const optimizeUrl = (url: string) => {
-    // If it's already a Contentful image with defined parameters, don't modify
-    if (isContentfulImage && url.includes('?')) {
+    try {
+      // If it's already a Contentful image with defined parameters, don't modify
+      if (isContentfulImage && url.includes('?')) {
+        return url;
+      }
+      
+      // If it's a Contentful image without parameters, add optimization
+      if (isContentfulImage) {
+        const width = isThumbnail ? 400 : 800;
+        return `${url}?w=${width}&q=80&fm=webp&fit=fill`;
+      }
+      
+      // For Unsplash images, use their optimization API
+      if (isUnsplashImage && !url.includes('&auto=format')) {
+        return `${url}${url.includes('?') ? '&' : '?'}auto=format&q=80&w=${isThumbnail ? '400' : '800'}&fit=crop`;
+      }
+      
+      // For other images, return as is
       return url;
+    } catch (error) {
+      console.error(`[Image] Error optimizing URL: ${url}`, error);
+      return url; // Return original URL if optimization fails
     }
-    
-    // If it's a Contentful image without parameters, add optimization
-    if (isContentfulImage) {
-      const width = isThumbnail ? 400 : 800;
-      return `${url}?w=${width}&q=80&fm=webp&fit=fill`;
-    }
-    
-    // For Unsplash images, use their optimization API
-    if (isUnsplashImage && !url.includes('&auto=format')) {
-      return `${url}${url.includes('?') ? '&' : '?'}auto=format&q=80&w=${isThumbnail ? '400' : '800'}&fit=crop`;
-    }
-    
-    // For other images, return as is
-    return url;
   };
 
   // Prefetch important images 
   React.useEffect(() => {
     if (fetchPriority === 'high' && typeof window !== 'undefined') {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = optimizeUrl(imageUrl);
-      document.head.appendChild(link);
-      
-      return () => {
-        document.head.removeChild(link);
-      };
+      try {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.href = optimizeUrl(imageUrl);
+        document.head.appendChild(link);
+        
+        return () => {
+          document.head.removeChild(link);
+        };
+      } catch (error) {
+        console.error(`[Image] Error prefetching image: ${imageUrl}`, error);
+      }
     }
   }, [imageUrl, fetchPriority]);
+
+  // Handle error event to increment attempt counter
+  const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error(`[Image] Failed to load image (attempt ${loadAttempts + 1}): ${src}`);
+    
+    // Increment attempts counter
+    setLoadAttempts(prev => prev + 1);
+    
+    // Call the onError callback if provided
+    if (props.onError) {
+      props.onError(e);
+    }
+  };
 
   return (
     <img 
@@ -91,13 +116,9 @@ const Image: React.FC<ImageProps> = ({
         ...props.style
       }}
       data-thumbnail={isThumbnail ? 'true' : undefined}
+      data-load-attempts={loadAttempts}
       decoding="async" 
-      onError={(e) => {
-        console.error(`Failed to load image: ${src}`);
-        if (props.onError) {
-          props.onError(e);
-        }
-      }}
+      onError={handleError}
       {...props}
     />
   );

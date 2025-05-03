@@ -33,26 +33,14 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
     );
   }
   
-  // Extract the slug but ensure it's valid
+  // Safely extract the slug
   const productSlug = product?.slug || '';
   
   // Determine which image to use - thumbnail has priority over main image
   const imageToUse = product.thumbnail || product.image;
   
-  // Reset image states when visibility changes or product changes
-  React.useEffect(() => {
-    if (isVisible) {
-      setImageLoaded(false);
-      setImageError(false);
-    }
-  }, [isVisible, product.id]);
-  
-  // Performance optimization: Don't render the card until it's visible
-  const cardRef = React.useRef<HTMLDivElement>(null);
-  
   return (
     <article 
-      ref={cardRef}
       className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow h-full flex flex-col"
       itemScope 
       itemType="https://schema.org/Product"
@@ -66,23 +54,20 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
                 <Skeleton className="w-full h-full absolute" />
               </div>
             )}
-            {isVisible && (
-              <Image 
-                src={imageToUse.url} 
-                alt={imageToUse.alt || product.title}
-                className={`w-full h-full transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                objectFit="contain"
-                isThumbnail={!!product.thumbnail}
-                itemProp="image"
-                onLoad={() => setImageLoaded(true)}
-                onError={() => {
-                  console.error(`[ProductCard] Failed to load image for: ${product.title}`);
-                  setImageError(true);
-                }}
-                loading="lazy"
-                fetchPriority={isVisible ? "high" : "low"}
-              />
-            )}
+            <Image 
+              src={imageToUse.url} 
+              alt={imageToUse.alt || product.title}
+              className={`w-full h-full object-contain transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              isThumbnail={!!product.thumbnail}
+              itemProp="image"
+              onLoad={() => setImageLoaded(true)}
+              onError={() => {
+                console.error(`[ProductCard] Failed to load image for: ${product.title}`);
+                setImageError(true);
+              }}
+              loading="lazy"
+              fetchPriority={isVisible ? "high" : "low"}
+            />
             {imageError && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
                 <span className="text-gray-400">Image not available</span>
@@ -115,9 +100,14 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
           variant="ghost" 
           className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
           onClick={() => {
-            navigate(`/products/${productSlug}`);
+            if (productSlug) {
+              navigate(`/products/${productSlug}`);
+            } else {
+              console.error(`[ProductCard] Cannot navigate: product slug is empty for ${product.title}`);
+            }
           }}
           aria-label={`Learn more about ${product.title}`}
+          disabled={!productSlug}
         >
           Learn more
           <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />

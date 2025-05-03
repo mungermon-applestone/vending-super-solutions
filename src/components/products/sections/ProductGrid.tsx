@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CMSProductType } from '@/types/cms';
 import ProductCard from '@/components/products/ProductCard';

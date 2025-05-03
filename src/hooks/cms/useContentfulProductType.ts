@@ -74,7 +74,7 @@ export function useContentfulProductType(slug: string) {
       };
       
       diagnosticInfo.query = queryParams;
-      diagnosticInfo.endpoint = `spaces/${CONTENTFUL_CONFIG.SPACE_ID}/environments/${CONTENTFUL_CONFIG.ENVIRONMENT_ID}/entries`;
+      diagnosticInfo.endpoint = `spaces/${CONTENTFUL_CONFIG.SPACE_ID}/environments/${CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master'}/entries`;
 
       try {
         console.log(`[useContentfulProductType] Executing query with params:`, queryParams);
@@ -131,8 +131,8 @@ export function useContentfulProductType(slug: string) {
             console.log(`[useContentfulProductType] Fallback found ${fallbackQuery.total} productTypes:`, 
               fallbackQuery.items.map(item => ({
                 id: item.sys.id,
-                title: item.fields.title,
-                slug: item.fields.slug
+                title: item.fields?.title || 'No title',
+                slug: item.fields?.slug || 'No slug'
               }))
             );
             
@@ -140,8 +140,8 @@ export function useContentfulProductType(slug: string) {
               ...diagnosticInfo.responseData,
               fallbackResults: fallbackQuery.items.map(item => ({
                 id: item.sys.id,
-                title: item.fields.title,
-                slug: item.fields.slug
+                title: item.fields?.title || 'No title',
+                slug: item.fields?.slug || 'No slug'
               }))
             };
             
@@ -154,59 +154,66 @@ export function useContentfulProductType(slug: string) {
 
         const entry = entries.items[0];
         
-        if (!entry || !entry.fields) {
-          console.error(`[useContentfulProductType] Entry or entry.fields is undefined for slug: ${slug}`);
+        // Safety check for the entry
+        if (!entry) {
+          console.error(`[useContentfulProductType] Entry is undefined for slug: ${slug}`);
           throw Object.assign(
-            new Error(`Invalid product data for slug: ${slug}`),
+            new Error(`No product data available for: ${slug}`),
+            { diagnosticInfo }
+          );
+        }
+        
+        // Safety check for entry.fields
+        if (!entry.fields) {
+          console.error(`[useContentfulProductType] Entry.fields is undefined for slug: ${slug}`);
+          throw Object.assign(
+            new Error(`Invalid product data for slug: ${slug} (missing fields)`),
             { diagnosticInfo }
           );
         }
         
         console.log(`[useContentfulProductType] Found product type:`, {
           id: entry.sys.id,
-          title: entry.fields.title,
-          slug: entry.fields.slug
+          title: entry.fields.title || 'No title',
+          slug: entry.fields.slug || 'No slug'
         });
         
         const fields = entry.fields;
         
-        // Validate that we have the minimum required fields
-        if (!fields.title || !fields.slug) {
-          console.error(`[useContentfulProductType] Missing required fields for product type: ${slug}`);
-          throw Object.assign(
-            new Error(`Product data is incomplete: missing required fields`),
-            { diagnosticInfo }
-          );
-        }
-        
+        // Create a safe product object with all fields validated
         const productType = {
           id: entry.sys.id,
-          title: fields.title as string,
-          slug: fields.slug as string,
-          description: fields.description as string,
-          benefits: Array.isArray(fields.benefits) ? fields.benefits as string[] : [],
+          title: String(fields.title || ''),
+          slug: String(fields.slug || ''),
+          description: fields.description ? String(fields.description) : '',
+          benefits: Array.isArray(fields.benefits) ? fields.benefits.map(String) : [],
           image: fields.image ? {
-            id: (fields.image as any).sys.id,
-            url: `https:${(fields.image as any).fields.file.url}`,
-            alt: (fields.image as any).fields.title || fields.title,
-          } : undefined,
-          features: fields.features ? (fields.features as any[]).map(feature => ({
-            id: feature.sys.id,
-            title: feature.fields.title,
-            description: feature.fields.description,
-            icon: feature.fields.icon || undefined
+            id: fields.image.sys?.id || 'unknown',
+            url: fields.image.fields?.file?.url ? `https:${fields.image.fields.file.url}` : '',
+            alt: fields.image.fields?.title || fields.title || '',
+          } : null,
+          thumbnail: fields.thumbnail ? {
+            id: fields.thumbnail.sys?.id || 'unknown',
+            url: fields.thumbnail.fields?.file?.url ? `https:${fields.thumbnail.fields.file.url}` : '',
+            alt: fields.thumbnail.fields?.title || fields.title || '',
+          } : null,
+          features: Array.isArray(fields.features) ? fields.features.map(feature => ({
+            id: feature.sys?.id || `feature-${Math.random().toString(36).substring(2, 11)}`,
+            title: feature.fields?.title || '',
+            description: feature.fields?.description || '',
+            icon: feature.fields?.icon || undefined
           })) : [],
-          recommendedMachines: fields.recommendedMachines ? 
-            (fields.recommendedMachines as any[]).map(machine => ({
-              id: machine.sys.id,
-              slug: machine.fields.slug,
-              title: machine.fields.title,
-              description: machine.fields.description,
-              image: machine.fields.images?.[0] ? {
-                url: `https:${machine.fields.images[0].fields.file.url}`,
-                alt: machine.fields.images[0].fields.title || machine.fields.title
+          recommendedMachines: Array.isArray(fields.recommendedMachines) ? 
+            fields.recommendedMachines.map(machine => ({
+              id: machine.sys?.id || `machine-${Math.random().toString(36).substring(2, 11)}`,
+              slug: machine.fields?.slug || '',
+              title: machine.fields?.title || '',
+              description: machine.fields?.description || '',
+              image: machine.fields?.images && machine.fields.images[0] ? {
+                url: `https:${machine.fields.images[0].fields?.file?.url || ''}`,
+                alt: machine.fields.images[0].fields?.title || machine.fields?.title || ''
               } : undefined
-            })) : []
+            })).filter(machine => machine.slug && machine.title) : []
         };
         
         return {

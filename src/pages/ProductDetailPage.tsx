@@ -46,7 +46,8 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
   const { 
     data, 
     isLoading, 
-    error
+    error,
+    refetch
   } = useContentfulProductType(slug || '');
 
   useEffect(() => {
@@ -62,13 +63,13 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
   
   // Handle the case when data is undefined but no error was thrown
   const product = data ? {
-    title: data.title,
-    slug: data.slug,
-    description: data.description,
-    benefits: data.benefits,
-    image: data.image,
-    features: data.features,
-    recommendedMachines: data.recommendedMachines || []
+    title: data.title || 'Unnamed Product',
+    slug: data.slug || '',
+    description: data.description || '',
+    benefits: Array.isArray(data.benefits) ? data.benefits : [],
+    image: data.image || null,
+    features: Array.isArray(data.features) ? data.features : [],
+    recommendedMachines: Array.isArray(data.recommendedMachines) ? data.recommendedMachines : []
   } : null;
   
   const diagnosticInfo = data?.diagnosticInfo;
@@ -106,8 +107,9 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
               title="Error Loading Product"
               message={error instanceof Error ? error.message : 'Failed to load product details'}
               contentType="product"
-              actionText="Browse Products"
-              actionHref="/products"
+              actionText="Retry Loading"
+              actionHref="#"
+              onAction={() => refetch()}
               showAdmin={false}
             />
           </div>
@@ -152,7 +154,7 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
             </section>
           )}
 
-          {product && product.recommendedMachines && product.recommendedMachines.length > 0 && (
+          {product.recommendedMachines && product.recommendedMachines.length > 0 && (
             <RecommendedMachines machines={product.recommendedMachines} />
           )}
 
