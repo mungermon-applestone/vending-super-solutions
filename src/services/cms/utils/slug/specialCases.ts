@@ -1,4 +1,5 @@
 
+
 /**
  * Special case handling for slug variations
  */
@@ -17,11 +18,22 @@ export function getSpecialCaseVariations(slug: string): string[] {
   
   // Check if we have special variations for this slug
   for (const [targetSlug, specialVariations] of Object.entries(BUSINESS_GOAL_SLUG_MAP)) {
-    if (targetSlug === normalizedSlug) {
+    // If this is a target slug or one of its variations, add all related variations
+    if (targetSlug === normalizedSlug || specialVariations.includes(normalizedSlug)) {
+      // Add the canonical form
+      variations.push(targetSlug);
+      // Add all its variations
       variations.push(...specialVariations);
       console.log(`[getSpecialCaseVariations] Using special case variations for "${slug}":`, specialVariations);
       break;
     }
+  }
+  
+  // Special case for marketing-promotions vs marketing-and-promotions
+  if (normalizedSlug === 'marketing-promotions') {
+    variations.push('marketing-and-promotions');
+  } else if (normalizedSlug === 'marketing-and-promotions') {
+    variations.push('marketing-promotions');
   }
   
   // Add common suffix/prefix variations

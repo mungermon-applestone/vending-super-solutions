@@ -1,4 +1,5 @@
 
+
 /**
  * Utilities for generating and comparing slug variations
  * Refactored into smaller, focused modules
@@ -28,6 +29,14 @@ export function getSlugVariations(slug: string): string[] {
   // Add word-specific variations
   variations.push(...getWordSpecificVariations(slug));
   
+  // Special case for marketing-promotions vs marketing-and-promotions
+  const normalizedSlug = normalizeSlug(slug);
+  if (normalizedSlug === 'marketing-promotions') {
+    variations.push('marketing-and-promotions');
+  } else if (normalizedSlug === 'marketing-and-promotions') {
+    variations.push('marketing-promotions');
+  }
+  
   // Remove duplicates
   return [...new Set(variations)];
 }
@@ -38,3 +47,4 @@ export {
   slugsMatch,
   findBestSlugMatch
 };
+

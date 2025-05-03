@@ -20,11 +20,18 @@ export function slugsMatch(slugA: string, slugB: string): boolean {
   
   // Enhanced special case matching for known problematic slugs
   for (const [targetSlug, variations] of Object.entries(BUSINESS_GOAL_SLUG_MAP)) {
-    if (normalizedA === targetSlug || normalizedB === targetSlug) {
-      if (variations.includes(normalizedA) || variations.includes(normalizedB)) {
+    // Check if either slug is the target or in its variations
+    if (normalizedA === targetSlug || variations.includes(normalizedA)) {
+      if (normalizedB === targetSlug || variations.includes(normalizedB)) {
         return true;
       }
     }
+  }
+  
+  // Special case for "marketing-and-promotions" vs "marketing-promotions"
+  if ((normalizedA === 'marketing-and-promotions' && normalizedB === 'marketing-promotions') ||
+      (normalizedA === 'marketing-promotions' && normalizedB === 'marketing-and-promotions')) {
+    return true;
   }
   
   // Direct match

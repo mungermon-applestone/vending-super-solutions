@@ -22,9 +22,10 @@ const BUSINESS_GOAL_SLUG_MAP: Record<string, string> = {
   // Marketing and promotions variations
   'marketing-and-promotions': 'marketing-and-promotions',
   'marketing_and_promotions': 'marketing-and-promotions',
+  'marketing-promotions': 'marketing-and-promotions',
+  'marketing_promotions': 'marketing-and-promotions',
   'marketing': 'marketing-and-promotions',
-  'promotions': 'marketing-and-promotions',
-  'marketing-promotions': 'marketing-and-promotions'
+  'promotions': 'marketing-and-promotions'
 };
 
 /**
