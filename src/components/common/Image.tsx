@@ -38,21 +38,46 @@ const Image: React.FC<ImageProps> = ({
   // Apply aspect ratio style if provided
   const aspectRatioStyle = aspectRatio ? { aspectRatio } : {};
   
-  // Optimize image loading
+  // Detect image service type (Contentful, etc)
+  const isContentfulImage = imageUrl.includes('images.ctfassets.net');
+  const isUnsplashImage = imageUrl.includes('unsplash.com');
+  
+  // Optimize image loading based on service
   const optimizeUrl = (url: string) => {
     // If it's already a Contentful image with defined parameters, don't modify
-    if (url.includes('images.ctfassets.net') && url.includes('?')) {
+    if (isContentfulImage && url.includes('?')) {
       return url;
     }
     
     // If it's a Contentful image without parameters, add optimization
-    if (url.includes('images.ctfassets.net')) {
-      return `${url}?w=800&q=80&fm=webp&fit=fill`;
+    if (isContentfulImage) {
+      const width = isThumbnail ? 400 : 800;
+      return `${url}?w=${width}&q=80&fm=webp&fit=fill`;
+    }
+    
+    // For Unsplash images, use their optimization API
+    if (isUnsplashImage && !url.includes('&auto=format')) {
+      return `${url}${url.includes('?') ? '&' : '?'}auto=format&q=80&w=${isThumbnail ? '400' : '800'}&fit=crop`;
     }
     
     // For other images, return as is
     return url;
   };
+
+  // Prefetch important images 
+  React.useEffect(() => {
+    if (fetchPriority === 'high' && typeof window !== 'undefined') {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = optimizeUrl(imageUrl);
+      document.head.appendChild(link);
+      
+      return () => {
+        document.head.removeChild(link);
+      };
+    }
+  }, [imageUrl, fetchPriority]);
 
   return (
     <img 
@@ -66,6 +91,7 @@ const Image: React.FC<ImageProps> = ({
         ...props.style
       }}
       data-thumbnail={isThumbnail ? 'true' : undefined}
+      decoding="async" 
       onError={(e) => {
         console.error(`Failed to load image: ${src}`);
         if (props.onError) {
@@ -77,4 +103,4 @@ const Image: React.FC<ImageProps> = ({
   );
 };
 
-export default Image;
+export default React.memo(Image);

@@ -9,9 +9,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface ProductCardProps {
   product: CMSProductType;
+  isVisible?: boolean;
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [imageError, setImageError] = React.useState(false);
@@ -22,18 +23,21 @@ const ProductCard = ({ product }: ProductCardProps) => {
   // Determine which image to use - thumbnail has priority over main image
   const imageToUse = product.thumbnail || product.image;
   
-  // Add logging to track product data
-  console.log(`[ProductCard] Rendering card for: ${product.title}`, {
-    id: product.id,
-    slug: productSlug,
-    hasImage: !!imageToUse,
-    hasThumbnail: !!product.thumbnail,
-    imageSource: product.thumbnail ? 'thumbnail' : (product.image ? 'main image' : 'none')
-  });
+  // Reset image states when visibility changes or product changes
+  React.useEffect(() => {
+    if (isVisible) {
+      setImageLoaded(false);
+      setImageError(false);
+    }
+  }, [isVisible, product.id]);
+  
+  // Performance optimization: Don't render the card until it's visible
+  const cardRef = React.useRef<HTMLDivElement>(null);
   
   return (
     <article 
-      className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow"
+      ref={cardRef}
+      className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow h-full flex flex-col"
       itemScope 
       itemType="https://schema.org/Product"
       aria-labelledby={`product-title-${product.id}`}
@@ -46,21 +50,23 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 <Skeleton className="w-full h-full absolute" />
               </div>
             )}
-            <Image 
-              src={imageToUse.url} 
-              alt={imageToUse.alt || product.title}
-              className={`w-full h-full transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-              objectFit="contain"
-              isThumbnail={!!product.thumbnail}
-              itemProp="image"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => {
-                console.error(`[ProductCard] Failed to load image for: ${product.title}`);
-                setImageError(true);
-              }}
-              loading="lazy"
-              fetchPriority="auto"
-            />
+            {isVisible && (
+              <Image 
+                src={imageToUse.url} 
+                alt={imageToUse.alt || product.title}
+                className={`w-full h-full transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                objectFit="contain"
+                isThumbnail={!!product.thumbnail}
+                itemProp="image"
+                onLoad={() => setImageLoaded(true)}
+                onError={() => {
+                  console.error(`[ProductCard] Failed to load image for: ${product.title}`);
+                  setImageError(true);
+                }}
+                loading="lazy"
+                fetchPriority={isVisible ? "high" : "low"}
+              />
+            )}
             {imageError && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
                 <span className="text-gray-400">Image not available</span>
@@ -73,7 +79,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </div>
         )}
       </div>
-      <div className="p-6">
+      <div className="p-6 flex flex-col flex-grow">
         <h3 
           id={`product-title-${product.id}`}
           className="text-xl font-semibold mb-3" 
@@ -82,7 +88,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           {product.title}
         </h3>
         <p 
-          className="text-gray-600 mb-4 line-clamp-3" 
+          className="text-gray-600 mb-4 line-clamp-3 flex-grow" 
           itemProp="description"
         >
           {product.description}
@@ -93,7 +99,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
           variant="ghost" 
           className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
           onClick={() => {
-            console.log(`[ProductCard] Navigating to product: ${productSlug}`);
             navigate(`/products/${productSlug}`);
           }}
           aria-label={`Learn more about ${product.title}`}
@@ -106,4 +111,4 @@ const ProductCard = ({ product }: ProductCardProps) => {
   );
 };
 
-export default ProductCard;
+export default React.memo(ProductCard);

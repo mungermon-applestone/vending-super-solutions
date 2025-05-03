@@ -18,6 +18,7 @@ import InquiryForm from '@/components/machines/contact/InquiryForm';
 import ProductGrid from '@/components/products/sections/ProductGrid';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Link } from 'react-router-dom';
+import ProductsLoadingState from '@/components/products/sections/ProductsLoadingState';
 
 const Products = () => {
   // Optimized data fetching with React Query
@@ -64,14 +65,20 @@ const Products = () => {
     };
   }, []);
 
+  // Preload critical data for faster transitions
+  React.useEffect(() => {
+    // Start fetching testimonials immediately instead of waiting
+    queryClient.prefetchQuery({
+      queryKey: ['testimonialSection', 'products'],
+      queryFn: () => useTestimonialSection('products').refetch()
+    });
+  }, [queryClient]);
+
   const handleRefresh = () => {
     console.log('[Products] Refreshing products data');
     queryClient.invalidateQueries({ queryKey: ['contentful', 'products'] });
     queryClient.invalidateQueries({ queryKey: ['contentful', 'productsPageContent'] });
   };
-  
-  // Memoize products data to prevent unnecessary re-renders
-  const memoizedProducts = React.useMemo(() => products, [products]);
   
   return (
     <Layout>
@@ -80,6 +87,11 @@ const Products = () => {
         description={pageContent?.categoriesSectionDescription || "Explore our comprehensive range of vending solutions designed for modern businesses. Find the perfect product type for your needs."}
         type="website"
         canonicalUrl={window.location.href}
+        openGraph={{
+          title: "Vending Solutions Products",
+          description: pageContent?.categoriesSectionDescription || "Explore our comprehensive range of vending solutions designed for modern businesses.",
+          type: "website"
+        }}
       />
       <ContentfulErrorBoundary contentType="Products">
         {/* Skip to main content link for accessibility */}
@@ -152,17 +164,21 @@ const Products = () => {
                 variant="outline" 
                 className="flex items-center"
                 aria-label="Refresh content"
+                disabled={isLoading}
               >
-                <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
+                )}
                 Refresh Content
               </Button>
             </div>
           </div>
 
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12" aria-live="polite" aria-busy="true">
-              <Loader2 className="h-8 w-8 animate-spin text-gray-500 mb-3" aria-hidden="true" />
-              <p className="text-gray-500">Loading content from Contentful...</p>
+            <div aria-live="polite" aria-busy="true">
+              <ProductsLoadingState />
             </div>
           ) : error ? (
             <div aria-live="assertive">
@@ -175,10 +191,10 @@ const Products = () => {
                 actionText="Try Again"
               />
             </div>
-          ) : memoizedProducts && memoizedProducts.length > 0 ? (
+          ) : products && products.length > 0 ? (
             <section aria-labelledby="products-heading">
               <h2 id="products-heading" className="sr-only">Available Products</h2>
-              <ProductGrid products={memoizedProducts} />
+              <ProductGrid products={products} />
             </section>
           ) : (
             <div aria-live="assertive">
