@@ -1,19 +1,27 @@
 
-// Export all CMS hooks from specialized files
-export * from './useProductTypes';
-export * from './useBusinessGoals';
-export * from './useMachines';
-export * from './useTechnologies';
-export * from './useTestimonials';
-export * from './useQueryDefaults';
-export * from './useLandingPages';
+import { useProductTypes, useProductType } from './useProductTypes';
+import { useBusinessGoals } from './useBusinessGoals';
+import { useBusinessGoal } from './useBusinessGoal';
+import { useMachines, useMachine } from './useMachines';
+import { useTechnologies, useTechnology } from './useTechnologies';
+import { useTestimonials } from './useTestimonials';
+import { useCloneProductType } from './useCloneProductType';
+import { useCloneBusinessGoal } from './useCloneBusinessGoal';
+import { useCloneTechnology } from './useCloneTechnology';
+import { useCloneMachine } from './useCloneMachine';
 
-// Export the clone hooks directly from useCloneCMS
-// This resolves the duplicate export issue by not re-exporting useCloneProductType
-// which is already exported from useProductTypes
 export {
+  useProductTypes, 
+  useProductType,
+  useBusinessGoals,
+  useBusinessGoal,
+  useMachines,
+  useMachine,
+  useTechnologies,
+  useTechnology,
+  useTestimonials,
+  useCloneProductType,
   useCloneBusinessGoal,
   useCloneTechnology,
-  useCloneMachine,
-  useCloneProductType  // Explicitly export useCloneProductType
-} from './useCloneCMS';
+  useCloneMachine
+};

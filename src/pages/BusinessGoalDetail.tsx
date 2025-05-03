@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Star } from 'lucide-react';
 import { useBusinessGoal } from '@/hooks/cms/useBusinessGoal';
 import { Button } from '@/components/ui/button';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
@@ -78,6 +78,15 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
     );
   }
 
+  // Create a default icon if none is provided
+  const defaultIcon = <Star className="h-6 w-6 text-white" />;
+
+  // Convert features to the expected format with required icon property
+  const formattedFeatures = businessGoal.features?.map(feature => ({
+    ...feature,
+    icon: feature.icon || <Star className="h-6 w-6" /> // Provide default icon if missing
+  })) || [];
+
   return (
     <>
       <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
@@ -93,14 +102,18 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
         title={businessGoal.title}
         description={businessGoal.description}
         image={businessGoal.image?.url || '/placeholder.svg'}
+        icon={businessGoal.icon ? <span className="text-white">{businessGoal.icon}</span> : defaultIcon}
       />
 
       {businessGoal.benefits && businessGoal.benefits.length > 0 && (
-        <BusinessGoalKeyBenefits benefits={businessGoal.benefits} />
+        <BusinessGoalKeyBenefits 
+          benefits={businessGoal.benefits}
+          title={`Key Benefits of ${businessGoal.title}`}
+        />
       )}
 
-      {businessGoal.features && businessGoal.features.length > 0 && (
-        <BusinessGoalFeatures features={businessGoal.features} />
+      {formattedFeatures.length > 0 && (
+        <BusinessGoalFeatures features={formattedFeatures} />
       )}
 
       <BusinessGoalInquiry title={`Ready to learn more about ${businessGoal.title}?`} />

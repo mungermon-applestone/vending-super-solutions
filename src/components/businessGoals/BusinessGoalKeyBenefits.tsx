@@ -3,13 +3,13 @@ import React from 'react';
 import { Check } from 'lucide-react';
 
 interface BusinessGoalKeyBenefitsProps {
-  title: string;
+  title?: string;
   description?: string;
   benefits: string[];
 }
 
 const BusinessGoalKeyBenefits: React.FC<BusinessGoalKeyBenefitsProps> = ({
-  title,
+  title = "Key Benefits",
   description,
   benefits = []
 }) => {
