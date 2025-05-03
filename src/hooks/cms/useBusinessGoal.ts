@@ -44,3 +44,4 @@ export function useBusinessGoal(slug: string | undefined) {
     }
   });
 }
+

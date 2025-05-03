@@ -13,6 +13,19 @@ export function getSlugVariations(slug: string): string[] {
   
   const variations: string[] = [slug];
   
+  // Special case handling for known problematic slugs
+  const specialCases: Record<string, string[]> = {
+    'data-analytics': ['data_analytics', 'analytics', 'data-analytics-vending', 'data_analytics_vending'],
+    'expand-footprint': ['expand_footprint', 'expansion', 'footprint-expansion', 'expand_footprint_vending', 'market-expansion'],
+    'marketing-and-promotions': ['marketing_and_promotions', 'marketing', 'promotions', 'marketing_promotions', 'marketing-promotions']
+  };
+  
+  // Check if we have special variations for this slug
+  if (specialCases[slug]) {
+    variations.push(...specialCases[slug]);
+    console.log(`[getSlugVariations] Using special case variations for "${slug}":`, specialCases[slug]);
+  }
+  
   // Add hyphen version
   const hyphenVersion = slug.replace(/_/g, '-');
   if (!variations.includes(hyphenVersion)) {
@@ -45,6 +58,22 @@ export function getSlugVariations(slug: string): string[] {
     }
   });
   
+  // Handle specific word variations
+  if (slug.includes('analytics')) {
+    variations.push(slug.replace('analytics', 'analysis'));
+  }
+  
+  if (slug.includes('marketing')) {
+    variations.push(slug.replace('marketing', 'promotion'));
+    variations.push(slug.replace('marketing-and-promotions', 'marketing'));
+    variations.push(slug.replace('marketing-and-promotions', 'promotions'));
+  }
+  
+  if (slug.includes('expand')) {
+    variations.push(slug.replace('expand-footprint', 'expansion'));
+    variations.push(slug.replace('expand-footprint', 'market-expansion'));
+  }
+  
   // Handle plural/singular variations
   if (slug.endsWith('s')) {
     const singular = slug.slice(0, -1);
@@ -73,6 +102,28 @@ export function slugsMatch(slugA: string, slugB: string): boolean {
   // Normalize both slugs to lowercase with hyphens
   const normalizedA = slugA.toLowerCase().replace(/_/g, '-');
   const normalizedB = slugB.toLowerCase().replace(/_/g, '-');
+  
+  // Enhanced special case matching for known problematic slugs
+  if (normalizedA === 'data-analytics' || normalizedB === 'data-analytics') {
+    const dataAnalyticsVariations = ['data-analytics', 'analytics', 'data-analysis', 'analytics-vending'];
+    if (dataAnalyticsVariations.includes(normalizedA) && dataAnalyticsVariations.includes(normalizedB)) {
+      return true;
+    }
+  }
+  
+  if (normalizedA === 'expand-footprint' || normalizedB === 'expand-footprint') {
+    const expandFootprintVariations = ['expand-footprint', 'expansion', 'footprint-expansion', 'market-expansion'];
+    if (expandFootprintVariations.includes(normalizedA) && expandFootprintVariations.includes(normalizedB)) {
+      return true;
+    }
+  }
+  
+  if (normalizedA === 'marketing-and-promotions' || normalizedB === 'marketing-and-promotions') {
+    const marketingVariations = ['marketing-and-promotions', 'marketing', 'promotions', 'marketing-promotions'];
+    if (marketingVariations.includes(normalizedA) && marketingVariations.includes(normalizedB)) {
+      return true;
+    }
+  }
   
   // Direct match
   if (normalizedA === normalizedB) return true;
@@ -104,6 +155,29 @@ export function findBestSlugMatch(searchSlug: string, allSlugs: string[]): strin
   // Normalize the search slug
   const normalizedSearchSlug = searchSlug.toLowerCase().replace(/_/g, '-');
   
+  // Special case handling for specific business goals
+  const specialCaseMap: Record<string, string[]> = {
+    'data-analytics': ['data-analytics', 'data_analytics', 'analytics', 'data-analysis'],
+    'expand-footprint': ['expand-footprint', 'expand_footprint', 'expansion', 'market-expansion'],
+    'marketing-and-promotions': ['marketing-and-promotions', 'marketing_and_promotions', 'marketing', 'promotions']
+  };
+  
+  // Check if this is a special case
+  for (const [targetSlug, variations] of Object.entries(specialCaseMap)) {
+    if (variations.includes(normalizedSearchSlug)) {
+      // Find the actual slug that best matches our target
+      const matchingSlug = allSlugs.find(slug => {
+        const normalizedSlug = slug.toLowerCase().replace(/_/g, '-');
+        return normalizedSlug === targetSlug || variations.includes(normalizedSlug);
+      });
+      
+      if (matchingSlug) {
+        console.log(`[findBestSlugMatch] Special case match found for "${normalizedSearchSlug}" -> "${matchingSlug}"`);
+        return matchingSlug;
+      }
+    }
+  }
+  
   // First try direct match
   const directMatch = allSlugs.find(slug => slug.toLowerCase() === normalizedSearchSlug);
   if (directMatch) return directMatch;
@@ -127,3 +201,4 @@ export function findBestSlugMatch(searchSlug: string, allSlugs: string[]): strin
   
   return null;
 }
+
