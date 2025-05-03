@@ -1,36 +1,37 @@
 
 /**
- * Slug normalization utilities
+ * Utilities for normalizing slugs
  */
 
 /**
- * Normalize a slug by converting to lowercase, trimming and handling special cases
+ * Normalize a slug to a consistent format
  * @param slug The slug to normalize
- * @returns Normalized slug
+ * @returns A normalized version of the slug
  */
 export function normalizeSlug(slug: string): string {
   if (!slug) return '';
   
-  // Convert to lowercase and trim whitespace
-  const normalized = slug.toLowerCase().trim();
+  // Convert to lowercase
+  let normalizedSlug = slug.toLowerCase();
   
-  // Handle URL-encoded characters if any
-  try {
-    return decodeURIComponent(normalized);
-  } catch (e) {
-    // If decoding fails (e.g., not encoded), return the original normalized string
-    return normalized;
-  }
+  // Remove trailing slashes
+  normalizedSlug = normalizedSlug.replace(/\/$/, '');
+  
+  // Remove any URL parameters
+  normalizedSlug = normalizedSlug.split('?')[0];
+  
+  // Remove special characters except hyphens and underscores
+  normalizedSlug = normalizedSlug.replace(/[^a-z0-9_-]/g, '');
+  
+  return normalizedSlug;
 }
 
 /**
- * Compare two slugs for exact match (case-insensitive)
- * @param slug1 First slug to compare
- * @param slug2 Second slug to compare
- * @returns Boolean indicating if slugs match
+ * Check if two slugs are an exact match (case-sensitive)
+ * @param slugA First slug
+ * @param slugB Second slug
+ * @returns Whether the slugs are an exact match
  */
-export function exactSlugMatch(slug1: string, slug2: string): boolean {
-  const normalizedSlug1 = normalizeSlug(slug1);
-  const normalizedSlug2 = normalizeSlug(slug2);
-  return normalizedSlug1 === normalizedSlug2;
+export function exactSlugMatch(slugA: string, slugB: string): boolean {
+  return slugA === slugB;
 }

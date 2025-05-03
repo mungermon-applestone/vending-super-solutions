@@ -1,7 +1,7 @@
 
 import { CMSProductType } from '@/types/cms';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
-import { normalizeSlug, getSlugVariations, mapUrlSlugToDatabaseSlug } from '@/services/cms/utils/slugMatching';
+import { normalizeSlug, getSlugVariations, mapUrlSlugToDatabaseSlug, logSlugSearch, logSlugResult } from '@/services/cms/utils/slugMatching';
 import { toast } from 'sonner';
 // Import the new isContentfulConfigured function
 import { isContentfulConfigured } from '@/config/cms';
@@ -24,7 +24,8 @@ export async function fetchProductTypeBySlug(slug: string): Promise<CMSProductTy
       throw new Error('Contentful is not properly configured');
     }
     
-    console.log(`[fetchProductTypeBySlug] Fetching product type with slug: "${slug}"`);
+    // Log search parameters for debugging
+    logSlugSearch('productType', slug);
     
     const client = await getContentfulClient();
     
@@ -40,21 +41,23 @@ export async function fetchProductTypeBySlug(slug: string): Promise<CMSProductTy
     
     // Iterate through slug variations to find a match
     for (const slugVariation of slugVariations) {
+      const dbSlug = mapUrlSlugToDatabaseSlug(slugVariation);
       const query: any = {
         content_type: 'productType',
-        'fields.slug': slugVariation,
+        'fields.slug': dbSlug,
         include: 2,
         limit: 1
       };
       
-      console.log(`[fetchProductTypeBySlug] Querying with slug: "${slugVariation}"`);
+      console.log(`[fetchProductTypeBySlug] Querying with DB slug: "${dbSlug}" (from URL slug: "${slugVariation}")`);
       
       const entries = await client.getEntries(query);
       
       if (entries.items.length > 0) {
         const entry = entries.items[0];
         
-        console.log(`[fetchProductTypeBySlug] Found product type with slug "${slugVariation}": ${entry.fields.title}`);
+        logSlugResult('productType', slugVariation, dbSlug, true);
+        console.log(`[fetchProductTypeBySlug] Found product type with slug "${dbSlug}": ${entry.fields.title}`);
         
         productType = {
           id: entry.sys.id,
@@ -78,7 +81,8 @@ export async function fetchProductTypeBySlug(slug: string): Promise<CMSProductTy
         
         break; // Exit loop once a match is found
       } else {
-        console.log(`[fetchProductTypeBySlug] No product type found with slug: "${slugVariation}"`);
+        logSlugResult('productType', slugVariation, dbSlug, false);
+        console.log(`[fetchProductTypeBySlug] No product type found with slug: "${dbSlug}"`);
       }
     }
     

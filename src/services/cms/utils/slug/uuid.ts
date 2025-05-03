@@ -1,66 +1,59 @@
+
 /**
  * Utilities for working with UUIDs in slugs
  */
 
-// Import from normalize.ts using ES modules import syntax
-import { normalizeSlug } from './normalize';
+// UUID regex pattern
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
- * Extract and normalize a UUID from a mixed string format
- * This allows for product identification by UUID even if the slug changes
- * @param input String that might contain a UUID
- * @returns Extracted UUID or null if not found
+ * Extract a UUID from a slug if present
+ * @param slug The slug that may contain a UUID
+ * @returns The UUID if found, otherwise null
  */
-export function extractUUID(input: string): string | null {
-  // UUID pattern: 8-4-4-4-12 hexadecimal characters
-  const uuidPattern = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
-  const match = input && input.match(uuidPattern);
+export function extractUUID(slug: string): string | null {
+  if (!slug) return null;
   
-  if (match && match[1]) {
-    return match[1].toLowerCase();
+  // Check if the slug itself is a UUID
+  if (UUID_PATTERN.test(slug)) {
+    return slug;
+  }
+  
+  // Check for slug-uuid format
+  const parts = slug.split('-');
+  const lastPart = parts[parts.length - 1];
+  
+  if (UUID_PATTERN.test(lastPart)) {
+    return lastPart;
   }
   
   return null;
 }
 
 /**
- * Create a SEO-friendly URL that includes both slug and UUID
- * Format: slug--uuid
- * @param slug SEO-friendly slug
- * @param uuid Product UUID
- * @returns Combined slug with UUID
+ * Create a slug with a UUID appended
+ * @param baseSlug The base slug
+ * @param uuid The UUID to append
+ * @returns A slug with the UUID appended
  */
-export function createSlugWithUUID(slug: string, uuid: string): string {
-  const normalizedSlug = normalizeSlug(slug);
-  return `${normalizedSlug}--${uuid}`;
+export function createSlugWithUUID(baseSlug: string, uuid: string): string {
+  return `${baseSlug}-${uuid}`;
 }
 
 /**
- * Parse a combined slug-UUID to extract both components
- * @param combinedSlug Combined slug in format "slug--uuid"
- * @returns Object containing separated slug and UUID
+ * Parse a slug with a UUID to extract both parts
+ * @param slug The slug with a UUID
+ * @returns An object with the base slug and UUID
  */
-export function parseSlugWithUUID(combinedSlug: string): {slug: string, uuid: string | null} {
-  if (!combinedSlug) {
-    return { slug: '', uuid: null };
+export function parseSlugWithUUID(slug: string): { baseSlug: string; uuid: string | null } {
+  const uuid = extractUUID(slug);
+  
+  if (!uuid) {
+    return { baseSlug: slug, uuid: null };
   }
   
-  // Try to extract UUID from combined format
-  const parts = combinedSlug.split('--');
+  // Remove the UUID from the slug
+  const baseSlug = slug.replace(`-${uuid}`, '');
   
-  if (parts.length >= 2) {
-    const uuid = extractUUID(parts[parts.length - 1]);
-    // Join all parts except the last one (which is the UUID)
-    const slug = parts.slice(0, parts.length - 1).join('--');
-    return { slug: normalizeSlug(slug), uuid };
-  }
-  
-  // Check if the whole string is a UUID
-  const uuid = extractUUID(combinedSlug);
-  if (uuid) {
-    return { slug: '', uuid };
-  }
-  
-  // Otherwise just return the normalized slug
-  return { slug: normalizeSlug(combinedSlug), uuid: null };
+  return { baseSlug, uuid };
 }
