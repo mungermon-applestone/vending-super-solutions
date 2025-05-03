@@ -23,11 +23,11 @@ export const useProductTypeFromUrl = () => {
       console.log("[useProductTypeFromUrl] Using productType from URL params:", params.productType);
       
       // Parse the combined slug if it contains UUID
-      const { slug, uuid } = parseSlugWithUUID(params.productType);
-      console.log(`[useProductTypeFromUrl] Parsed slug: "${slug}", UUID: "${uuid || 'none'}"`);
+      const { baseSlug, uuid } = parseSlugWithUUID(params.productType);
+      console.log(`[useProductTypeFromUrl] Parsed slug: "${baseSlug || 'none'}", UUID: "${uuid || 'none'}"`);
       
       return { 
-        slug: normalizeSlug(slug || params.productType),
+        slug: normalizeSlug(baseSlug || params.productType),
         uuid 
       };
     }
@@ -37,11 +37,11 @@ export const useProductTypeFromUrl = () => {
       console.log("[useProductTypeFromUrl] Using id from URL params:", params.id);
       
       // Parse the combined slug if it contains UUID
-      const { slug, uuid } = parseSlugWithUUID(params.id);
-      console.log(`[useProductTypeFromUrl] Parsed slug: "${slug}", UUID: "${uuid || 'none'}"`);
+      const { baseSlug, uuid } = parseSlugWithUUID(params.id);
+      console.log(`[useProductTypeFromUrl] Parsed slug: "${baseSlug || 'none'}", UUID: "${uuid || 'none'}"`);
       
       return { 
-        slug: normalizeSlug(slug || params.id),
+        slug: normalizeSlug(baseSlug || params.id),
         uuid 
       };
     }
@@ -54,10 +54,10 @@ export const useProductTypeFromUrl = () => {
       console.log("[useProductTypeFromUrl] Extracted product type from products path:", productTypeFromPath);
       
       // Parse the combined slug if it contains UUID
-      const { slug, uuid } = parseSlugWithUUID(productTypeFromPath);
-      console.log(`[useProductTypeFromUrl] Parsed slug: "${slug}", UUID: "${uuid || 'none'}"`);
+      const { baseSlug, uuid } = parseSlugWithUUID(productTypeFromPath);
+      console.log(`[useProductTypeFromUrl] Parsed slug: "${baseSlug || 'none'}", UUID: "${uuid || 'none'}"`);
       
-      const normalizedSlug = normalizeSlug(slug || productTypeFromPath);
+      const normalizedSlug = normalizeSlug(baseSlug || productTypeFromPath);
       const mappedSlug = mapUrlSlugToDatabaseSlug(normalizedSlug);
       
       console.log("[useProductTypeFromUrl] Normalized slug:", normalizedSlug);
