@@ -5,11 +5,10 @@ import { useMockData } from '../../mockDataHandler';
 import { IS_DEVELOPMENT } from '@/config/cms';
 import { 
   normalizeSlug, 
+  getCanonicalSlug,
   getSlugVariations, 
   slugsMatch, 
-  findBestSlugMatch,
-  logSlugSearch, 
-  logSlugResult 
+  findBestSlugMatch
 } from '@/services/cms/utils/slugMatching';
 
 /**
@@ -25,176 +24,131 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
     }
 
     // Log search parameters for debugging
-    logSlugSearch('businessGoal', slug);
+    console.log(`[fetchBusinessGoalBySlug] Starting search for business goal with slug: "${slug}"`);
     
     // Normalize the slug to handle inconsistencies
     const normalizedSlug = normalizeSlug(slug);
-    console.log(`[fetchBusinessGoalBySlug] Fetching business goal with normalized slug: ${normalizedSlug}`);
-
-    // Special case handling for marketing-and-promotions vs marketing-promotions
-    let searchSlug = normalizedSlug;
-    if (normalizedSlug === 'marketing-and-promotions') {
-      console.log('[fetchBusinessGoalBySlug] Marketing and promotions special case detected');
-      // Temporarily add a fallback to try both versions
-      searchSlug = 'marketing-promotions';
-    }
-
+    const canonicalSlug = getCanonicalSlug(normalizedSlug);
+    
+    console.log(`[fetchBusinessGoalBySlug] Slug details:`, {
+      original: slug,
+      normalized: normalizedSlug,
+      canonical: canonicalSlug
+    });
+    
     // Try to fetch from Contentful
     try {
       const client = await getContentfulClient();
       
-      // First try: attempt to get all business goals for advanced matching
-      const allGoalsQuery = await client.getEntries({
+      // Step 1: Try with exact slug
+      console.log(`[fetchBusinessGoalBySlug] Trying exact match with slug: "${normalizedSlug}"`);
+      let entries = await client.getEntries({
         content_type: 'businessGoal',
+        'fields.slug': normalizedSlug,
         include: 2,
-        limit: 100
+        limit: 1
       });
       
-      if (allGoalsQuery.items.length > 0) {
-        // Extract all available slugs
-        const allSlugs = allGoalsQuery.items.map(item => item.fields.slug as string);
-        console.log(`[fetchBusinessGoalBySlug] Found ${allSlugs.length} business goals for matching`);
+      // Step 2: If not found and canonical is different, try with canonical slug
+      if (entries.items.length === 0 && canonicalSlug !== normalizedSlug) {
+        console.log(`[fetchBusinessGoalBySlug] Trying with canonical slug: "${canonicalSlug}"`);
+        entries = await client.getEntries({
+          content_type: 'businessGoal',
+          'fields.slug': canonicalSlug,
+          include: 2,
+          limit: 1
+        });
+      }
+      
+      // Step 3: If still not found, try advanced matching
+      if (entries.items.length === 0) {
+        console.log(`[fetchBusinessGoalBySlug] No direct match found, trying variations`);
         
-        // Log all slugs for debugging
-        console.log(`[fetchBusinessGoalBySlug] Available slugs:`, allSlugs);
+        // Get all business goals to compare slugs
+        const allGoalsQuery = await client.getEntries({
+          content_type: 'businessGoal',
+          include: 2,
+          limit: 100
+        });
         
-        // Try to find best match using our advanced matching
-        const bestMatch = findBestSlugMatch(normalizedSlug, allSlugs);
-        
-        if (bestMatch) {
-          console.log(`[fetchBusinessGoalBySlug] Found best match: "${bestMatch}" for search slug: "${normalizedSlug}"`);
+        if (allGoalsQuery.items.length > 0) {
+          // Extract all available slugs
+          const allSlugs = allGoalsQuery.items.map(item => item.fields.slug as string);
+          console.log(`[fetchBusinessGoalBySlug] Available slugs:`, allSlugs);
           
-          // Get the matching business goal from our results
-          const matchedGoal = allGoalsQuery.items.find(item => 
-            slugsMatch((item.fields.slug as string), bestMatch)
-          );
+          // Find best match using our matcher
+          const bestMatch = findBestSlugMatch(normalizedSlug, allSlugs);
           
-          if (matchedGoal) {
-            const entry = matchedGoal;
+          if (bestMatch) {
+            console.log(`[fetchBusinessGoalBySlug] Found best match: "${bestMatch}"`);
             
-            // Map the Contentful data to our CMSBusinessGoal interface
-            const businessGoal: CMSBusinessGoal = {
-              id: entry.sys.id,
-              slug: entry.fields.slug as string,
-              title: entry.fields.title as string,
-              description: entry.fields.description as string,
-              image: entry.fields.image ? {
-                id: (entry.fields.image as any).sys.id,
-                url: `https:${(entry.fields.image as any).fields.file.url}`,
-                alt: (entry.fields.image as any).fields.title || entry.fields.title
-              } : undefined,
-              visible: entry.fields.visible as boolean ?? true,
-              icon: entry.fields.icon as string,
-              benefits: (entry.fields.benefits as string[]) || [],
-              features: (entry.fields.features || []).map((feature: any) => ({
-                id: feature.sys?.id,
-                title: feature.fields?.title,
-                description: feature.fields?.description,
-                icon: feature.fields?.icon,
-                display_order: feature.fields?.displayOrder || 0
-              })),
-              // Add video if available
-              video: entry.fields.video ? {
-                id: (entry.fields.video as any).sys.id,
-                url: `https:${(entry.fields.video as any).fields.file.url}`,
-                title: (entry.fields.video as any).fields.title || 'Business Goal Video'
-              } : undefined,
-              // Add recommended machines if available
-              recommendedMachines: (entry.fields.recommendedMachines || []).map((machine: any) => ({
-                id: machine.sys.id,
-                slug: machine.fields.slug,
-                title: machine.fields.title,
-                description: machine.fields.description,
-                image: machine.fields.images?.[0] ? {
-                  url: `https:${machine.fields.images[0].fields.file.url}`,
-                  alt: machine.fields.images[0].fields.title || machine.fields.title
-                } : undefined
-              }))
-            };
+            // Get the matching business goal
+            const matchedGoal = allGoalsQuery.items.find(item => 
+              (item.fields.slug as string) === bestMatch
+            );
             
-            logSlugResult('businessGoal', normalizedSlug, bestMatch, true);
-            console.log(`[fetchBusinessGoalBySlug] Successfully found business goal via best match: ${entry.fields.title}`);
-            return businessGoal as T;
+            if (matchedGoal) {
+              entries = {
+                items: [matchedGoal],
+                total: 1,
+                limit: 1,
+                skip: 0,
+                sys: { type: 'Array' }
+              };
+            }
           }
         }
       }
       
-      // If advanced matching fails, try traditional approach with slug variations
-      const slugVariations = getSlugVariations(normalizedSlug);
-      
-      // For marketing-and-promotions, also try marketing-promotions
-      if (normalizedSlug === 'marketing-and-promotions' && !slugVariations.includes('marketing-promotions')) {
-        slugVariations.push('marketing-promotions');
-      } else if (normalizedSlug === 'marketing-promotions' && !slugVariations.includes('marketing-and-promotions')) {
-        slugVariations.push('marketing-and-promotions');
+      // If no entries found through any method, return null
+      if (entries.items.length === 0) {
+        console.log(`[fetchBusinessGoalBySlug] No business goal found with slug: "${slug}" or any variations`);
+        return null;
       }
       
-      console.log(`[fetchBusinessGoalBySlug] Trying ${slugVariations.length} slug variations:`, slugVariations);
+      // Process the found entry
+      const entry = entries.items[0];
+      console.log(`[fetchBusinessGoalBySlug] Successfully found business goal: ${entry.fields.title} (slug: ${entry.fields.slug})`);
       
-      // Try each variation
-      for (const slugVariation of slugVariations) {
-        console.log(`[fetchBusinessGoalBySlug] Trying slug variation: ${slugVariation}`);
-        
-        try {
-          const entries = await client.getEntries({
-            content_type: 'businessGoal',
-            'fields.slug': slugVariation,
-            include: 2,
-            limit: 1
-          });
-          
-          if (entries.items.length > 0) {
-            const entry = entries.items[0];
-            console.log(`[fetchBusinessGoalBySlug] Found business goal with slug "${slugVariation}": ${entry.fields.title}`);
-            
-            logSlugResult('businessGoal', normalizedSlug, slugVariation, true);
-            
-            // Map the Contentful data to our CMSBusinessGoal interface
-            const businessGoal: CMSBusinessGoal = {
-              id: entry.sys.id,
-              slug: entry.fields.slug as string,
-              title: entry.fields.title as string,
-              description: entry.fields.description as string,
-              image: entry.fields.image ? {
-                id: (entry.fields.image as any).sys.id,
-                url: `https:${(entry.fields.image as any).fields.file.url}`,
-                alt: (entry.fields.image as any).fields.title || entry.fields.title
-              } : undefined,
-              visible: entry.fields.visible as boolean ?? true,
-              icon: entry.fields.icon as string,
-              benefits: (entry.fields.benefits as string[]) || [],
-              features: (entry.fields.features || []).map((feature: any) => ({
-                id: feature.sys?.id,
-                title: feature.fields?.title,
-                description: feature.fields?.description,
-                icon: feature.fields?.icon,
-                display_order: feature.fields?.displayOrder || 0
-              })),
-              video: entry.fields.video ? {
-                id: (entry.fields.video as any).sys.id,
-                url: `https:${(entry.fields.video as any).fields.file.url}`,
-                title: (entry.fields.video as any).fields.title || 'Business Goal Video'
-              } : undefined,
-              recommendedMachines: (entry.fields.recommendedMachines || []).map((machine: any) => ({
-                id: machine.sys.id,
-                slug: machine.fields.slug,
-                title: machine.fields.title,
-                description: machine.fields.description,
-                image: machine.fields.images?.[0] ? {
-                  url: `https:${machine.fields.images[0].fields.file.url}`,
-                  alt: machine.fields.images[0].fields.title || machine.fields.title
-                } : undefined
-              }))
-            };
-            
-            return businessGoal as T;
-          } else {
-            logSlugResult('businessGoal', normalizedSlug, slugVariation, false);
-          }
-        } catch (error) {
-          console.error(`[fetchBusinessGoalBySlug] Error trying slug variation "${slugVariation}":`, error);
-        }
-      }
+      // Map the Contentful data to our CMSBusinessGoal interface
+      const businessGoal: CMSBusinessGoal = {
+        id: entry.sys.id,
+        slug: entry.fields.slug as string,
+        title: entry.fields.title as string,
+        description: entry.fields.description as string,
+        image: entry.fields.image ? {
+          id: (entry.fields.image as any).sys.id,
+          url: `https:${(entry.fields.image as any).fields.file.url}`,
+          alt: (entry.fields.image as any).fields.title || entry.fields.title
+        } : undefined,
+        visible: entry.fields.visible as boolean ?? true,
+        icon: entry.fields.icon as string,
+        benefits: (entry.fields.benefits as string[]) || [],
+        features: (entry.fields.features || []).map((feature: any) => ({
+          id: feature.sys?.id,
+          title: feature.fields?.title,
+          description: feature.fields?.description,
+          icon: feature.fields?.icon,
+          display_order: feature.fields?.displayOrder || 0
+        })),
+        video: entry.fields.video ? {
+          id: (entry.fields.video as any).sys.id,
+          url: `https:${(entry.fields.video as any).fields.file.url}`,
+          title: (entry.fields.video as any).fields.title || 'Business Goal Video'
+        } : undefined,
+        recommendedMachines: (entry.fields.recommendedMachines || []).map((machine: any) => ({
+          id: machine.sys.id,
+          slug: machine.fields.slug,
+          title: machine.fields.title,
+          description: machine.fields.description,
+          image: machine.fields.images?.[0] ? {
+            url: `https:${machine.fields.images[0].fields.file.url}`,
+            alt: machine.fields.images[0].fields.title || machine.fields.title
+          } : undefined
+        }))
+      };
+      
+      return businessGoal as T;
     } catch (contentfulError) {
       console.error("[fetchBusinessGoalBySlug] Error fetching business goal from Contentful:", contentfulError);
     }
@@ -209,17 +163,9 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
         // Try to find a match using our slug matching function
         for (const goal of goals) {
           if (slugsMatch(normalizedSlug, goal.slug)) {
-            console.log(`[fetchBusinessGoalBySlug] Found business goal in mock data via slug matching: ${goal.title}`);
+            console.log(`[fetchBusinessGoalBySlug] Found business goal in mock data: ${goal.title}`);
             return goal as T;
           }
-        }
-        
-        // If no match found with slug matching, try exact match
-        const goal = goals.find(g => g.slug === normalizedSlug);
-        
-        if (goal) {
-          console.log(`[fetchBusinessGoalBySlug] Found business goal in mock data with exact match: ${goal.title}`);
-          return goal as T;
         }
       } catch (mockError) {
         console.error("[fetchBusinessGoalBySlug] Error using mock data:", mockError);

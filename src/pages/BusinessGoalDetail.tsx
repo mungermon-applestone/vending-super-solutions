@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+
+import React, { useEffect, useState } from 'react';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { ArrowLeft, Loader2, Star } from 'lucide-react';
+import { ArrowLeft, Loader2, Star, Bug } from 'lucide-react';
 import { useBusinessGoal } from '@/hooks/cms/useBusinessGoal';
 import { Button } from '@/components/ui/button';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
@@ -11,9 +12,12 @@ import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry'
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { redirectToCanonicalBusinessGoalIfNeeded } from '@/services/cms/utils/routeRedirector';
+import { normalizeSlug, getCanonicalSlug } from '@/services/cms/utils/slug/common';
 
 const BusinessGoalDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
+  const [showDebug, setShowDebug] = useState(false);
   
   // Perform redirection if needed and scroll to top when the page loads
   useEffect(() => {
@@ -24,18 +28,66 @@ const BusinessGoalDetail = () => {
     }
   }, [slug]);
   
+  const toggleDebug = () => setShowDebug(!showDebug);
+  
   console.log("[BusinessGoalDetail] Rendering with slug:", slug);
+  console.log("[BusinessGoalDetail] Current path:", location.pathname);
+  
+  if (!slug) {
+    return (
+      <Layout>
+        <div className="container py-12 text-center">
+          <p className="text-red-600">Error: No slug parameter found in URL</p>
+        </div>
+      </Layout>
+    );
+  }
   
   return (
     <Layout>
       <ContentfulErrorBoundary contentType="Business Goal Details">
-        <BusinessGoalContent slug={slug} />
+        <div className="bg-white p-2 border-b">
+          <div className="container flex items-center justify-between">
+            <Link to="/business-goals" className="inline-flex items-center text-vending-blue-dark hover:text-vending-blue py-2">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Business Goals
+            </Link>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={toggleDebug}
+              className="text-xs"
+            >
+              <Bug className="h-3 w-3 mr-1" />
+              {showDebug ? 'Hide' : 'Show'} Debug
+            </Button>
+          </div>
+        </div>
+        
+        {showDebug && (
+          <div className="bg-gray-100 border-b border-gray-200 p-3">
+            <div className="container">
+              <details open className="text-xs font-mono">
+                <summary className="cursor-pointer font-medium">Slug Information</summary>
+                <div className="p-2 bg-white rounded mt-1">
+                  <p>Original slug: <code className="bg-gray-100 px-1">{slug}</code></p>
+                  <p>Normalized slug: <code className="bg-gray-100 px-1">{normalizeSlug(slug)}</code></p>
+                  <p>Canonical slug: <code className="bg-gray-100 px-1">{getCanonicalSlug(normalizeSlug(slug))}</code></p>
+                  <p>Current path: <code className="bg-gray-100 px-1">{location.pathname}</code></p>
+                </div>
+              </details>
+            </div>
+          </div>
+        )}
+        
+        <BusinessGoalContent slug={slug} showDebug={showDebug} />
       </ContentfulErrorBoundary>
     </Layout>
   );
 };
 
-const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
+const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDebug?: boolean }) => {
   const { data: businessGoal, isLoading, error, refetch } = useBusinessGoal(slug);
 
   if (isLoading) {
@@ -60,6 +112,15 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
             onAction={() => refetch()}
             showAdmin={false}
           />
+          
+          {showDebug && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-md">
+              <h3 className="text-sm font-semibold text-red-800 mb-2">Debug Information</h3>
+              <pre className="text-xs overflow-auto p-2 bg-white border border-red-100 rounded">
+                {error instanceof Error ? error.stack : JSON.stringify(error, null, 2)}
+              </pre>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -77,6 +138,28 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
             actionHref="/business-goals"
             showAdmin={false}
           />
+          
+          {showDebug && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-100 rounded-md">
+              <h3 className="text-sm font-semibold text-yellow-800 mb-2">Debug Information</h3>
+              <p className="text-xs mb-2">No business goal found for the following slug information:</p>
+              <pre className="text-xs overflow-auto p-2 bg-white border border-yellow-100 rounded">
+                {JSON.stringify({
+                  slug,
+                  normalized: normalizeSlug(slug),
+                  canonical: getCanonicalSlug(normalizeSlug(slug))
+                }, null, 2)}
+              </pre>
+              <Button 
+                onClick={() => refetch()} 
+                variant="outline" 
+                size="sm" 
+                className="mt-2"
+              >
+                Retry Query
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -93,15 +176,19 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
 
   return (
     <>
-      <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
-        <div className="container mx-auto">
-          <Link to="/business-goals" className="inline-flex items-center text-vending-blue-dark hover:text-vending-blue py-6">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Business Goals
-          </Link>
+      {showDebug && businessGoal && (
+        <div className="bg-green-50 border-b border-green-100 p-3">
+          <div className="container">
+            <details className="text-xs font-mono">
+              <summary className="cursor-pointer font-medium text-green-800">Business Goal Data Loaded Successfully</summary>
+              <div className="p-2 bg-white rounded mt-1 overflow-auto max-h-60">
+                <pre>{JSON.stringify(businessGoal, null, 2)}</pre>
+              </div>
+            </details>
+          </div>
         </div>
-      </div>
-
+      )}
+      
       <BusinessGoalHero
         title={businessGoal.title}
         description={businessGoal.description}

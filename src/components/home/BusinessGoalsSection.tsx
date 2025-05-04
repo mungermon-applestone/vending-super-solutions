@@ -14,7 +14,7 @@ const BusinessGoalsSection = () => {
   
   console.log('[BusinessGoalsSection] Content:', homeContent);
   
-  // Using canonical URL slugs
+  // Using canonical URL slugs from our defined constants
   const businessGoals = [
     {
       icon: "vending",

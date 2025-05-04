@@ -1,34 +1,6 @@
 
 import { navigate } from "@/services/navigation";
-
-/**
- * Map of problematic slugs to their proper canonical paths
- * KEYS are all the variations that might be in URLs
- * VALUES are the canonical URL form we want to display
- */
-const BUSINESS_GOAL_SLUG_MAP: Record<string, string> = {
-  // Data analytics variations
-  'data-analytics': 'data-analytics',
-  'data_analytics': 'data-analytics',
-  'analytics': 'data-analytics',
-  'data-analysis': 'data-analytics',
-  'data': 'data-analytics',
-  
-  // Expand footprint variations
-  'expand-footprint': 'expand-footprint',
-  'expand_footprint': 'expand-footprint',
-  'expansion': 'expand-footprint',
-  'market-expansion': 'expand-footprint',
-  'footprint': 'expand-footprint',
-  
-  // Marketing and promotions variations - canonical form in URLs is marketing-and-promotions
-  'marketing-and-promotions': 'marketing-and-promotions',
-  'marketing_and_promotions': 'marketing-and-promotions',
-  'marketing-promotions': 'marketing-and-promotions',
-  'marketing_promotions': 'marketing-and-promotions',
-  'marketing': 'marketing-and-promotions',
-  'promotions': 'marketing-and-promotions'
-};
+import { normalizeSlug, getCanonicalSlug } from "./slug/common";
 
 /**
  * Redirects to the canonical version of a business goal detail page if needed
@@ -40,8 +12,8 @@ export function redirectToCanonicalBusinessGoalIfNeeded(slug: string): boolean {
   
   console.log(`[redirectToCanonical] Checking if redirection needed for slug: ${slug}`);
   
-  const normalizedSlug = slug.toLowerCase().replace(/_/g, '-');
-  const canonicalSlug = BUSINESS_GOAL_SLUG_MAP[normalizedSlug];
+  const normalizedSlug = normalizeSlug(slug);
+  const canonicalSlug = getCanonicalSlug(normalizedSlug);
   
   // If we have a mapping and it's different from the current slug, redirect
   if (canonicalSlug && canonicalSlug !== normalizedSlug) {

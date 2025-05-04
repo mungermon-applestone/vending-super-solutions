@@ -1,11 +1,10 @@
 
-
 /**
  * Utilities for generating and comparing slug variations
  * Refactored into smaller, focused modules
  */
 
-import { normalizeSlug, getBasicVariations } from './common';
+import { normalizeSlug, getBasicVariations, getCanonicalSlug } from './common';
 import { getSpecialCaseVariations, getWordSpecificVariations } from './specialCases';
 import { slugsMatch, findBestSlugMatch } from './matcher';
 
@@ -20,6 +19,18 @@ export function getSlugVariations(slug: string): string[] {
   // Start with the original slug
   const variations: string[] = [slug];
   
+  // Add normalized slug
+  const normalizedSlug = normalizeSlug(slug);
+  if (!variations.includes(normalizedSlug)) {
+    variations.push(normalizedSlug);
+  }
+  
+  // Add canonical slug if different
+  const canonicalSlug = getCanonicalSlug(normalizedSlug);
+  if (canonicalSlug !== normalizedSlug && !variations.includes(canonicalSlug)) {
+    variations.push(canonicalSlug);
+  }
+  
   // Add basic format variations (hyphen/underscore)
   variations.push(...getBasicVariations(slug));
   
@@ -29,14 +40,6 @@ export function getSlugVariations(slug: string): string[] {
   // Add word-specific variations
   variations.push(...getWordSpecificVariations(slug));
   
-  // Special case for marketing-promotions vs marketing-and-promotions
-  const normalizedSlug = normalizeSlug(slug);
-  if (normalizedSlug === 'marketing-promotions') {
-    variations.push('marketing-and-promotions');
-  } else if (normalizedSlug === 'marketing-and-promotions') {
-    variations.push('marketing-promotions');
-  }
-  
   // Remove duplicates
   return [...new Set(variations)];
 }
@@ -44,7 +47,7 @@ export function getSlugVariations(slug: string): string[] {
 // Re-export functions from other modules
 export {
   normalizeSlug,
+  getCanonicalSlug,
   slugsMatch,
   findBestSlugMatch
 };
-

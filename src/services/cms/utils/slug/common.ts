@@ -10,9 +10,29 @@
 export const BUSINESS_GOAL_SLUG_MAP: Record<string, string[]> = {
   'data-analytics': ['data_analytics', 'analytics', 'data-analysis', 'data'],
   'expand-footprint': ['expand_footprint', 'expansion', 'market-expansion', 'footprint'],
-  // IMPORTANT: marketing-and-promotions is the canonical form in URLs, but marketing-promotions may exist in the database
-  'marketing-and-promotions': ['marketing_and_promotions', 'marketing-promotions', 'marketing_promotions', 'marketing', 'promotions']
+  // IMPORTANT: marketing-and-promotions is the canonical form in URLs
+  'marketing-and-promotions': ['marketing_and_promotions', 'marketing-promotions', 'marketing_promotions', 'marketing', 'promotions'],
+  'fleet-management': ['fleet_management', 'fleet'],
+  'customer-satisfaction': ['customer_satisfaction', 'satisfaction', 'customer-experience'],
+  'bopis': ['buy-online-pickup-in-store', 'buy_online_pickup_in_store']
 };
+
+/**
+ * Direct mapping from any possible slug variation to canonical form
+ * This is a flattened version of BUSINESS_GOAL_SLUG_MAP for quicker lookups
+ */
+export const CANONICAL_SLUG_MAP: Record<string, string> = {};
+
+// Initialize the canonical map
+Object.entries(BUSINESS_GOAL_SLUG_MAP).forEach(([canonical, variations]) => {
+  // Add the canonical form mapping to itself
+  CANONICAL_SLUG_MAP[canonical] = canonical;
+  
+  // Add each variation mapping to the canonical form
+  variations.forEach(variation => {
+    CANONICAL_SLUG_MAP[variation] = canonical;
+  });
+});
 
 /**
  * Industry-specific prefixes that might be used in slugs
@@ -25,6 +45,18 @@ export const COMMON_PREFIXES = ['retail', 'micro', 'smart'];
 export function normalizeSlug(slug: string): string {
   if (!slug) return '';
   return slug.toLowerCase().replace(/_/g, '-').trim();
+}
+
+/**
+ * Get the canonical form of a slug
+ * @param slug Any form of a slug (normalized or not)
+ * @returns The canonical form, or the original slug if no canonical form exists
+ */
+export function getCanonicalSlug(slug: string): string {
+  if (!slug) return '';
+  
+  const normalizedSlug = normalizeSlug(slug);
+  return CANONICAL_SLUG_MAP[normalizedSlug] || normalizedSlug;
 }
 
 /**
