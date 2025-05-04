@@ -1,6 +1,6 @@
 
 import { navigate } from "@/services/navigation";
-import { normalizeSlug, getCanonicalSlug } from "./slug/common";
+import { normalizeSlug, getCanonicalSlug } from "./slugMatching";
 
 /**
  * Redirects to the canonical version of a business goal detail page if needed

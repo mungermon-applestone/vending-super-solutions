@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { CMSBusinessGoal } from '@/types/cms';
-import { normalizeSlug, getCanonicalSlug } from '@/services/cms/utils/slug/common';
+import { normalizeSlug, getCanonicalSlug } from '@/services/cms/utils/slugMatching';
 
 /**
  * Custom hook to fetch a single business goal by slug

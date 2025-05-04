@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -12,7 +11,7 @@ import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry'
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { redirectToCanonicalBusinessGoalIfNeeded } from '@/services/cms/utils/routeRedirector';
-import { normalizeSlug, getCanonicalSlug } from '@/services/cms/utils/slug/common';
+import { normalizeSlug, getCanonicalSlug } from '@/services/cms/utils/slugMatching';
 
 const BusinessGoalDetail = () => {
   const { slug } = useParams<{ slug: string }>();

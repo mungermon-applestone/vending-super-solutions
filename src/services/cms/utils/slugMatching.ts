@@ -1,14 +1,15 @@
+
 /**
  * Slug matching functionality - main entry point
  * Refactored to use smaller, focused modules
  */
 
-// Export common utilities
-export { normalizeSlug } from './slug/common';
+// Export common utilities from common.ts
+export { normalizeSlug, getCanonicalSlug, getBasicVariations, BUSINESS_GOAL_SLUG_MAP } from './slug/common';
 
 // Export main slug variation functionality
 export { 
-  getSlugVariations, 
+  getSlugVariations,
   slugsMatch, 
   findBestSlugMatch 
 } from './slug/variations';
