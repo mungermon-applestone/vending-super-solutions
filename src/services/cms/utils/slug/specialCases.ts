@@ -1,5 +1,4 @@
 
-
 /**
  * Special case handling for slug variations
  */
@@ -16,6 +15,19 @@ export function getSpecialCaseVariations(slug: string): string[] {
   const variations: string[] = [];
   const normalizedSlug = normalizeSlug(slug);
   
+  // Critical special case for marketing promotions
+  if (normalizedSlug === 'marketing-and-promotions') {
+    console.log('[getSpecialCaseVariations] Adding marketing-promotions variation');
+    variations.push('marketing-promotions');
+    variations.push('marketing'); 
+    variations.push('promotions');
+  } else if (normalizedSlug === 'marketing-promotions') {
+    console.log('[getSpecialCaseVariations] Adding marketing-and-promotions variation');
+    variations.push('marketing-and-promotions');
+    variations.push('marketing');
+    variations.push('promotions');
+  }
+  
   // Check if we have special variations for this slug
   for (const [targetSlug, specialVariations] of Object.entries(BUSINESS_GOAL_SLUG_MAP)) {
     // If this is a target slug or one of its variations, add all related variations
@@ -27,13 +39,6 @@ export function getSpecialCaseVariations(slug: string): string[] {
       console.log(`[getSpecialCaseVariations] Using special case variations for "${slug}":`, specialVariations);
       break;
     }
-  }
-  
-  // Special case for marketing-promotions vs marketing-and-promotions
-  if (normalizedSlug === 'marketing-promotions') {
-    variations.push('marketing-and-promotions');
-  } else if (normalizedSlug === 'marketing-and-promotions') {
-    variations.push('marketing-promotions');
   }
   
   // Add common suffix/prefix variations
@@ -73,17 +78,31 @@ export function getWordSpecificVariations(slug: string): string[] {
   const variations: string[] = [];
   const normalizedSlug = normalizeSlug(slug);
   
+  // Critical special case handling for marketing and promotions
+  if (normalizedSlug.includes('marketing')) {
+    // Handle both forms as possible variations
+    if (normalizedSlug === 'marketing-and-promotions') {
+      variations.push('marketing-promotions');
+      variations.push('marketing');
+      variations.push('promotions');
+    } 
+    else if (normalizedSlug === 'marketing-promotions') {
+      variations.push('marketing-and-promotions');
+      variations.push('marketing');
+      variations.push('promotions');
+    }
+    else {
+      variations.push(normalizedSlug.replace('marketing', 'promotion'));
+      if (normalizedSlug.includes('marketing-and-promotions')) {
+        variations.push(normalizedSlug.replace('marketing-and-promotions', 'marketing'));
+        variations.push(normalizedSlug.replace('marketing-and-promotions', 'promotions'));
+      }
+    }
+  }
+  
   // Handle specific word variations
   if (normalizedSlug.includes('analytics')) {
     variations.push(normalizedSlug.replace('analytics', 'analysis'));
-  }
-  
-  if (normalizedSlug.includes('marketing')) {
-    variations.push(normalizedSlug.replace('marketing', 'promotion'));
-    if (normalizedSlug.includes('marketing-and-promotions')) {
-      variations.push(normalizedSlug.replace('marketing-and-promotions', 'marketing'));
-      variations.push(normalizedSlug.replace('marketing-and-promotions', 'promotions'));
-    }
   }
   
   if (normalizedSlug.includes('expand')) {

@@ -3,6 +3,8 @@ import { navigate } from "@/services/navigation";
 
 /**
  * Map of problematic slugs to their proper canonical paths
+ * KEYS are all the variations that might be in URLs
+ * VALUES are the canonical URL form we want to display
  */
 const BUSINESS_GOAL_SLUG_MAP: Record<string, string> = {
   // Data analytics variations
@@ -19,8 +21,7 @@ const BUSINESS_GOAL_SLUG_MAP: Record<string, string> = {
   'market-expansion': 'expand-footprint',
   'footprint': 'expand-footprint',
   
-  // Marketing and promotions variations - important: support both forms as canonical
-  // In the database it's stored as marketing-promotions but in URLs we use marketing-and-promotions
+  // Marketing and promotions variations - canonical form in URLs is marketing-and-promotions
   'marketing-and-promotions': 'marketing-and-promotions',
   'marketing_and_promotions': 'marketing-and-promotions',
   'marketing-promotions': 'marketing-and-promotions',

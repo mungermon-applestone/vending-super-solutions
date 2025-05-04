@@ -5,11 +5,13 @@
 
 /**
  * Special case mapping for known business goal slugs
+ * The key is the canonical URL slug, values are alternative forms that might exist in the database
  */
 export const BUSINESS_GOAL_SLUG_MAP: Record<string, string[]> = {
   'data-analytics': ['data_analytics', 'analytics', 'data-analysis', 'data'],
   'expand-footprint': ['expand_footprint', 'expansion', 'market-expansion', 'footprint'],
-  'marketing-and-promotions': ['marketing_and_promotions', 'marketing', 'promotions', 'marketing-promotions', 'marketing_promotions']
+  // IMPORTANT: marketing-and-promotions is the canonical form in URLs, but marketing-promotions may exist in the database
+  'marketing-and-promotions': ['marketing_and_promotions', 'marketing-promotions', 'marketing_promotions', 'marketing', 'promotions']
 };
 
 /**

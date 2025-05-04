@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Check, Shield, Server, Settings, Bell, Battery, ClipboardCheck, RefreshCcw, TrendingUp, PieChart, Map, UserCheck } from 'lucide-react';
@@ -14,6 +15,7 @@ import InquiryForm from '@/components/machines/contact/InquiryForm';
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { redirectToCanonicalBusinessGoalIfNeeded } from '@/services/cms/utils/routeRedirector';
+import { normalizeSlug } from '@/services/cms/utils/slug/common';
 
 const getIconComponent = (iconName: string | undefined): React.ReactNode => {
   if (!iconName) return <Star className="h-6 w-6" />;
@@ -51,14 +53,21 @@ const getIconComponent = (iconName: string | undefined): React.ReactNode => {
 const BusinessGoalDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   
+  // Add debug logs to track the slug processing
+  console.log(`[BusinessGoalDetailPage] Received slug from URL params: "${slug}"`);
+  
+  if (slug) {
+    console.log(`[BusinessGoalDetailPage] Normalized slug: "${normalizeSlug(slug)}"`);
+  }
+  
   // Add effect to redirect to canonical URL if needed
   useEffect(() => {
     if (slug) {
-      redirectToCanonicalBusinessGoalIfNeeded(slug);
+      const wasRedirected = redirectToCanonicalBusinessGoalIfNeeded(slug);
+      console.log(`[BusinessGoalDetailPage] Was redirected: ${wasRedirected}`);
     }
   }, [slug]);
   
-  console.log('[BusinessGoalDetailPage] Rendering with slug:', slug);
   console.log('[BusinessGoalDetailPage] Current route path:', window.location.pathname);
   
   return (
@@ -84,6 +93,9 @@ const BusinessGoalDetailPage = () => {
 };
 
 const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
+  // Add detailed debug logging
+  console.log(`[BusinessGoalContent] Attempting to load content with slug: "${slug}"`);
+  
   const { data: businessGoal, isLoading, error } = useContentfulBusinessGoal(slug || '');
   
   console.log('[BusinessGoalContent] Content data for slug:', slug, {

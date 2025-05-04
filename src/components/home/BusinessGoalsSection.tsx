@@ -14,7 +14,7 @@ const BusinessGoalsSection = () => {
   
   console.log('[BusinessGoalsSection] Content:', homeContent);
   
-  // Updated with canonical slugs (using marketing-and-promotions since that's what we use in URLs)
+  // Using canonical URL slugs
   const businessGoals = [
     {
       icon: "vending",
@@ -36,9 +36,9 @@ const BusinessGoalsSection = () => {
       icon: "vending",
       title: "Marketing & Promotions",
       description: "Drive sales with targeted promotions, digital advertising, and customer loyalty programs.",
-      link: "/business-goals/marketing-and-promotions",
-      id: "marketing-and-promotions",
-      slug: "marketing-and-promotions"
+      link: "/business-goals/marketing-and-promotions", // Canonical URL form with "and"
+      id: "marketing-and-promotions", 
+      slug: "marketing-and-promotions" // Canonical URL form with "and"
     },
     {
       icon: "vending",

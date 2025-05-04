@@ -21,39 +21,39 @@ export function slugsMatch(slugA: string, slugB: string): boolean {
   // Log for debugging
   console.log(`[slugsMatch] Comparing: "${normalizedA}" and "${normalizedB}"`);
   
+  // Critical special case for marketing-and-promotions vs marketing-promotions
+  if ((normalizedA === 'marketing-and-promotions' && normalizedB === 'marketing-promotions') ||
+      (normalizedA === 'marketing-promotions' && normalizedB === 'marketing-and-promotions')) {
+    console.log(`[slugsMatch] Marketing special case match found: "${normalizedA}" matches "${normalizedB}"`);
+    return true;
+  }
+  
   // Enhanced special case matching for known problematic slugs
-  for (const [targetSlug, variations] of Object.entries(BUSINESS_GOAL_SLUG_MAP)) {
-    // Check if either slug is the target or in its variations
-    if (normalizedA === targetSlug || variations.includes(normalizedA)) {
-      if (normalizedB === targetSlug || variations.includes(normalizedB)) {
-        console.log(`[slugsMatch] Match found via special case mapping for ${normalizedA} and ${normalizedB}`);
+  for (const [canonicalSlug, variations] of Object.entries(BUSINESS_GOAL_SLUG_MAP)) {
+    // Check if either slug is the canonical form or in its variations
+    if (normalizedA === canonicalSlug || variations.includes(normalizedA)) {
+      if (normalizedB === canonicalSlug || variations.includes(normalizedB)) {
+        console.log(`[slugsMatch] Match found via special case mapping: "${normalizedA}" matches "${normalizedB}"`);
         return true;
       }
     }
   }
   
-  // Special case for "marketing-and-promotions" vs "marketing-promotions"
-  if ((normalizedA === 'marketing-and-promotions' && normalizedB === 'marketing-promotions') ||
-      (normalizedA === 'marketing-promotions' && normalizedB === 'marketing-and-promotions')) {
-    console.log(`[slugsMatch] Marketing special case match found for ${normalizedA} and ${normalizedB}`);
-    return true;
-  }
-  
   // Direct match
   if (normalizedA === normalizedB) {
-    console.log(`[slugsMatch] Direct match found for ${normalizedA}`);
+    console.log(`[slugsMatch] Direct match found: "${normalizedA}" = "${normalizedB}"`);
     return true;
   }
   
   // Check if one has -vending suffix and the other doesn't
   if (normalizedA === `${normalizedB}-vending` || `${normalizedA}-vending` === normalizedB) {
-    console.log(`[slugsMatch] Vending suffix match found for ${normalizedA} and ${normalizedB}`);
+    console.log(`[slugsMatch] Vending suffix match found: "${normalizedA}" matches "${normalizedB}"`);
     return true;
   }
   
   // Check for plural/singular variations
   if (normalizedA + 's' === normalizedB || normalizedA === normalizedB + 's') {
-    console.log(`[slugsMatch] Plural/singular match found for ${normalizedA} and ${normalizedB}`);
+    console.log(`[slugsMatch] Plural/singular match found: "${normalizedA}" matches "${normalizedB}"`);
     return true;
   }
   
@@ -61,12 +61,12 @@ export function slugsMatch(slugA: string, slugB: string): boolean {
   for (const prefix of COMMON_PREFIXES) {
     const prefixWithHyphen = `${prefix}-`;
     if (normalizedA === prefixWithHyphen + normalizedB || normalizedB === prefixWithHyphen + normalizedA) {
-      console.log(`[slugsMatch] Prefix match found for ${normalizedA} and ${normalizedB} with prefix ${prefix}`);
+      console.log(`[slugsMatch] Prefix match found: "${normalizedA}" matches "${normalizedB}" with prefix ${prefix}`);
       return true;
     }
   }
   
-  console.log(`[slugsMatch] No match found for ${normalizedA} and ${normalizedB}`);
+  console.log(`[slugsMatch] No match found between "${normalizedA}" and "${normalizedB}"`);
   return false;
 }
 
@@ -84,14 +84,19 @@ export function findBestSlugMatch(searchSlug: string, allSlugs: string[]): strin
   // Normalize the search slug
   const normalizedSearchSlug = normalizeSlug(searchSlug);
   
-  // Special case handling for marketing-and-promotions vs marketing-promotions
+  // Critical special case handling for marketing-and-promotions vs marketing-promotions
   if (normalizedSearchSlug === 'marketing-and-promotions' || normalizedSearchSlug === 'marketing-promotions') {
     console.log('[findBestSlugMatch] Using special case handling for marketing/promotions');
-    const marketingMatch = allSlugs.find(slug => {
-      const normalizedSlug = normalizeSlug(slug);
-      return normalizedSlug === 'marketing-promotions' || normalizedSlug === 'marketing-and-promotions';
-    });
     
+    // First look for marketing-and-promotions (URL canonical form)
+    let marketingMatch = allSlugs.find(slug => normalizeSlug(slug) === 'marketing-and-promotions');
+    
+    // If not found, try marketing-promotions (possible DB form)
+    if (!marketingMatch) {
+      marketingMatch = allSlugs.find(slug => normalizeSlug(slug) === 'marketing-promotions');
+    }
+    
+    // If either form is found, return it
     if (marketingMatch) {
       console.log(`[findBestSlugMatch] Found marketing/promotions match: ${marketingMatch}`);
       return marketingMatch;
@@ -99,17 +104,24 @@ export function findBestSlugMatch(searchSlug: string, allSlugs: string[]): strin
   }
   
   // Special case handling for specific business goals
-  for (const [targetSlug, variations] of Object.entries(BUSINESS_GOAL_SLUG_MAP)) {
-    if (variations.includes(normalizedSearchSlug) || targetSlug === normalizedSearchSlug) {
-      // Find the actual slug that best matches our target
-      const matchingSlug = allSlugs.find(slug => {
-        const normalizedSlug = normalizeSlug(slug);
-        return normalizedSlug === targetSlug || variations.includes(normalizedSlug);
-      });
+  for (const [canonicalSlug, variations] of Object.entries(BUSINESS_GOAL_SLUG_MAP)) {
+    if (canonicalSlug === normalizedSearchSlug || variations.includes(normalizedSearchSlug)) {
+      console.log(`[findBestSlugMatch] Search slug "${normalizedSearchSlug}" matches canonical slug "${canonicalSlug}" or its variations`);
       
-      if (matchingSlug) {
-        console.log(`[findBestSlugMatch] Special case match found for "${normalizedSearchSlug}" -> "${matchingSlug}"`);
-        return matchingSlug;
+      // First try to find the exact canonical form
+      const exactCanonicalMatch = allSlugs.find(slug => normalizeSlug(slug) === canonicalSlug);
+      if (exactCanonicalMatch) {
+        console.log(`[findBestSlugMatch] Found exact canonical match: ${exactCanonicalMatch}`);
+        return exactCanonicalMatch;
+      }
+      
+      // If canonical form not found, try any of its variations
+      for (const variation of variations) {
+        const variationMatch = allSlugs.find(slug => normalizeSlug(slug) === variation);
+        if (variationMatch) {
+          console.log(`[findBestSlugMatch] Found variation match: ${variationMatch} for canonical slug ${canonicalSlug}`);
+          return variationMatch;
+        }
       }
     }
   }
