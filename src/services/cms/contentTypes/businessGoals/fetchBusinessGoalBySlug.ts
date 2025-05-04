@@ -1,4 +1,3 @@
-
 import { CMSBusinessGoal } from '@/types/cms';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { useMockData } from '../../mockDataHandler';
@@ -8,7 +7,9 @@ import {
   getCanonicalSlug,
   getSlugVariations, 
   slugsMatch, 
-  findBestSlugMatch
+  resolveSlug,
+  logSlugSearch,
+  logSlugResult
 } from '@/services/cms/utils/slugMatching';
 
 /**
@@ -24,37 +25,35 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
     }
 
     // Log search parameters for debugging
-    console.log(`[fetchBusinessGoalBySlug] Starting search for business goal with slug: "${slug}"`);
+    logSlugSearch("business goal", slug);
     
-    // Normalize the slug to handle inconsistencies
-    const normalizedSlug = normalizeSlug(slug);
-    const canonicalSlug = getCanonicalSlug(normalizedSlug);
+    // Resolve the slug using our centralized method
+    const resolvedSlug = resolveSlug(slug);
     
     console.log(`[fetchBusinessGoalBySlug] Slug details:`, {
       original: slug,
-      normalized: normalizedSlug,
-      canonical: canonicalSlug
+      resolved: resolvedSlug
     });
     
     // Try to fetch from Contentful
     try {
       const client = await getContentfulClient();
       
-      // Step 1: Try with exact slug
-      console.log(`[fetchBusinessGoalBySlug] Trying exact match with slug: "${normalizedSlug}"`);
+      // Step 1: Try with resolved slug
+      console.log(`[fetchBusinessGoalBySlug] Trying with resolved slug: "${resolvedSlug}"`);
       let entries = await client.getEntries({
         content_type: 'businessGoal',
-        'fields.slug': normalizedSlug,
+        'fields.slug': resolvedSlug,
         include: 2,
         limit: 1
       });
       
-      // Step 2: If not found and canonical is different, try with canonical slug
-      if (entries.items.length === 0 && canonicalSlug !== normalizedSlug) {
-        console.log(`[fetchBusinessGoalBySlug] Trying with canonical slug: "${canonicalSlug}"`);
+      // Step 2: If not found, try with original slug as fallback
+      if (entries.items.length === 0 && slug !== resolvedSlug) {
+        console.log(`[fetchBusinessGoalBySlug] Not found with resolved slug, trying original slug: "${slug}"`);
         entries = await client.getEntries({
           content_type: 'businessGoal',
-          'fields.slug': canonicalSlug,
+          'fields.slug': slug,
           include: 2,
           limit: 1
         });
@@ -76,10 +75,10 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
           const allSlugs = allGoalsQuery.items.map(item => item.fields.slug as string);
           console.log(`[fetchBusinessGoalBySlug] Available slugs:`, allSlugs);
           
-          // Find best match using our matcher
-          const bestMatch = findBestSlugMatch(normalizedSlug, allSlugs);
+          // Find best match using our centralized method
+          const bestMatch = resolveSlug(slug, allSlugs);
           
-          if (bestMatch) {
+          if (bestMatch && bestMatch !== resolvedSlug) {
             console.log(`[fetchBusinessGoalBySlug] Found best match: "${bestMatch}"`);
             
             // Get the matching business goal
@@ -102,13 +101,13 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
       
       // If no entries found through any method, return null
       if (entries.items.length === 0) {
-        console.log(`[fetchBusinessGoalBySlug] No business goal found with slug: "${slug}" or any variations`);
+        logSlugResult("business goal", slug, resolvedSlug, false);
         return null;
       }
       
       // Process the found entry
       const entry = entries.items[0];
-      console.log(`[fetchBusinessGoalBySlug] Successfully found business goal: ${entry.fields.title} (slug: ${entry.fields.slug})`);
+      logSlugResult("business goal", slug, entry.fields.slug as string, true);
       
       // Map the Contentful data to our CMSBusinessGoal interface
       const businessGoal: CMSBusinessGoal = {
@@ -153,7 +152,7 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
       console.error("[fetchBusinessGoalBySlug] Error fetching business goal from Contentful:", contentfulError);
     }
     
-    // If we're in development and mock data is enabled, try mock data
+    // If we're in development and mock data is enabled, try mock data as fallback
     if (IS_DEVELOPMENT && useMockData) {
       console.log("[fetchBusinessGoalBySlug] Attempting to use mock data");
       try {

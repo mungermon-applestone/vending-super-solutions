@@ -1,6 +1,6 @@
 
 import { navigate } from "@/services/navigation";
-import { normalizeSlug, getCanonicalSlug } from "./slugMatching";
+import { normalizeSlug, getCanonicalSlug, resolveSlug } from "./slugMatching";
 
 /**
  * Redirects to the canonical version of a business goal detail page if needed
@@ -12,13 +12,12 @@ export function redirectToCanonicalBusinessGoalIfNeeded(slug: string): boolean {
   
   console.log(`[redirectToCanonical] Checking if redirection needed for slug: ${slug}`);
   
-  const normalizedSlug = normalizeSlug(slug);
-  const canonicalSlug = getCanonicalSlug(normalizedSlug);
+  const resolvedSlug = resolveSlug(slug);
   
-  // If we have a mapping and it's different from the current slug, redirect
-  if (canonicalSlug && canonicalSlug !== normalizedSlug) {
-    console.log(`[redirectToCanonical] Redirecting from ${normalizedSlug} to canonical slug ${canonicalSlug}`);
-    navigate(`/business-goals/${canonicalSlug}`);
+  // If resolved slug is different from the normalized input, redirect
+  if (resolvedSlug && resolvedSlug !== normalizeSlug(slug)) {
+    console.log(`[redirectToCanonical] Redirecting from ${slug} to canonical slug ${resolvedSlug}`);
+    navigate(`/business-goals/${resolvedSlug}`);
     return true;
   }
   

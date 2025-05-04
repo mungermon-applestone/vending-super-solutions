@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -11,7 +12,9 @@ import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry'
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { redirectToCanonicalBusinessGoalIfNeeded } from '@/services/cms/utils/routeRedirector';
-import { normalizeSlug, getCanonicalSlug } from '@/services/cms/utils/slugMatching';
+import { normalizeSlug, getCanonicalSlug, resolveSlug } from '@/services/cms/utils/slugMatching';
+import BusinessGoalSEO from '@/components/seo/BusinessGoalSEO';
+import BusinessGoalsLoader from '@/components/businessGoals/BusinessGoalsLoader';
 
 const BusinessGoalDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -73,6 +76,7 @@ const BusinessGoalDetail = () => {
                   <p>Original slug: <code className="bg-gray-100 px-1">{slug}</code></p>
                   <p>Normalized slug: <code className="bg-gray-100 px-1">{normalizeSlug(slug)}</code></p>
                   <p>Canonical slug: <code className="bg-gray-100 px-1">{getCanonicalSlug(normalizeSlug(slug))}</code></p>
+                  <p>Resolved slug: <code className="bg-gray-100 px-1">{resolveSlug(slug)}</code></p>
                   <p>Current path: <code className="bg-gray-100 px-1">{location.pathname}</code></p>
                 </div>
               </details>
@@ -89,124 +93,113 @@ const BusinessGoalDetail = () => {
 const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDebug?: boolean }) => {
   const { data: businessGoal, isLoading, error, refetch } = useBusinessGoal(slug);
 
-  if (isLoading) {
-    return (
-      <div className="container py-12 text-center">
-        <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
-        <p className="text-gray-600">Loading business goal information...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container py-12">
-        <div className="max-w-3xl mx-auto">
-          <ContentfulFallbackMessage
-            title="Error Loading Business Goal"
-            message={error instanceof Error ? error.message : 'Failed to load business goal details'}
-            contentType="businessGoal"
-            actionText="Retry Loading"
-            actionHref="#"
-            onAction={() => refetch()}
-            showAdmin={false}
-          />
-          
-          {showDebug && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-md">
-              <h3 className="text-sm font-semibold text-red-800 mb-2">Debug Information</h3>
-              <pre className="text-xs overflow-auto p-2 bg-white border border-red-100 rounded">
-                {error instanceof Error ? error.stack : JSON.stringify(error, null, 2)}
-              </pre>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  if (!businessGoal) {
-    return (
-      <div className="container py-12">
-        <div className="max-w-3xl mx-auto">
-          <ContentfulFallbackMessage
-            title="Business Goal Not Found"
-            message={`We couldn't find the business goal "${slug}" in our database.`}
-            contentType="businessGoal"
-            actionText="Browse Business Goals"
-            actionHref="/business-goals"
-            showAdmin={false}
-          />
-          
-          {showDebug && (
-            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-100 rounded-md">
-              <h3 className="text-sm font-semibold text-yellow-800 mb-2">Debug Information</h3>
-              <p className="text-xs mb-2">No business goal found for the following slug information:</p>
-              <pre className="text-xs overflow-auto p-2 bg-white border border-yellow-100 rounded">
-                {JSON.stringify({
-                  slug,
-                  normalized: normalizeSlug(slug),
-                  canonical: getCanonicalSlug(normalizeSlug(slug))
-                }, null, 2)}
-              </pre>
-              <Button 
-                onClick={() => refetch()} 
-                variant="outline" 
-                size="sm" 
-                className="mt-2"
-              >
-                Retry Query
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Create a default icon if none is provided
-  const defaultIcon = <Star className="h-6 w-6 text-white" />;
-
-  // Convert features to the expected format with required icon property
-  const formattedFeatures = businessGoal.features?.map(feature => ({
-    ...feature,
-    icon: feature.icon || <Star className="h-6 w-6" /> // Provide default icon if missing
-  })) || [];
-
+  // Add SEO component for business goal
   return (
     <>
-      {showDebug && businessGoal && (
-        <div className="bg-green-50 border-b border-green-100 p-3">
-          <div className="container">
-            <details className="text-xs font-mono">
-              <summary className="cursor-pointer font-medium text-green-800">Business Goal Data Loaded Successfully</summary>
-              <div className="p-2 bg-white rounded mt-1 overflow-auto max-h-60">
-                <pre>{JSON.stringify(businessGoal, null, 2)}</pre>
+      {businessGoal && <BusinessGoalSEO businessGoal={businessGoal} />}
+      
+      {isLoading ? (
+        <BusinessGoalsLoader />
+      ) : error ? (
+        <div className="container py-12">
+          <div className="max-w-3xl mx-auto">
+            <ContentfulFallbackMessage
+              title="Error Loading Business Goal"
+              message={error instanceof Error ? error.message : 'Failed to load business goal details'}
+              contentType="businessGoal"
+              actionText="Retry Loading"
+              actionHref="#"
+              onAction={() => refetch()}
+              showAdmin={false}
+            />
+            
+            {showDebug && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-md">
+                <h3 className="text-sm font-semibold text-red-800 mb-2">Debug Information</h3>
+                <pre className="text-xs overflow-auto p-2 bg-white border border-red-100 rounded">
+                  {error instanceof Error ? error.stack : JSON.stringify(error, null, 2)}
+                </pre>
               </div>
-            </details>
+            )}
           </div>
         </div>
-      )}
-      
-      <BusinessGoalHero
-        title={businessGoal.title}
-        description={businessGoal.description}
-        image={businessGoal.image?.url || '/placeholder.svg'}
-        icon={businessGoal.icon ? <span className="text-white">{businessGoal.icon}</span> : defaultIcon}
-      />
+      ) : !businessGoal ? (
+        <div className="container py-12">
+          <div className="max-w-3xl mx-auto">
+            <ContentfulFallbackMessage
+              title="Business Goal Not Found"
+              message={`We couldn't find the business goal "${slug}" in our database.`}
+              contentType="businessGoal"
+              actionText="Browse Business Goals"
+              actionHref="/business-goals"
+              showAdmin={false}
+            />
+            
+            {showDebug && (
+              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-100 rounded-md">
+                <h3 className="text-sm font-semibold text-yellow-800 mb-2">Debug Information</h3>
+                <p className="text-xs mb-2">No business goal found for the following slug information:</p>
+                <pre className="text-xs overflow-auto p-2 bg-white border border-yellow-100 rounded">
+                  {JSON.stringify({
+                    slug,
+                    normalized: normalizeSlug(slug),
+                    canonical: getCanonicalSlug(normalizeSlug(slug)),
+                    resolved: resolveSlug(slug)
+                  }, null, 2)}
+                </pre>
+                <Button 
+                  onClick={() => refetch()} 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                >
+                  Retry Query
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          {showDebug && businessGoal && (
+            <div className="bg-green-50 border-b border-green-100 p-3">
+              <div className="container">
+                <details className="text-xs font-mono">
+                  <summary className="cursor-pointer font-medium text-green-800">Business Goal Data Loaded Successfully</summary>
+                  <div className="p-2 bg-white rounded mt-1 overflow-auto max-h-60">
+                    <pre>{JSON.stringify(businessGoal, null, 2)}</pre>
+                  </div>
+                </details>
+              </div>
+            </div>
+          )}
+          
+          <BusinessGoalHero
+            title={businessGoal.title}
+            description={businessGoal.description}
+            image={businessGoal.image?.url || '/placeholder.svg'}
+            icon={businessGoal.icon ? <span className="text-white">{businessGoal.icon}</span> : <Star className="h-6 w-6 text-white" />}
+          />
 
-      {businessGoal.benefits && businessGoal.benefits.length > 0 && (
-        <BusinessGoalKeyBenefits 
-          benefits={businessGoal.benefits}
-          title={`Key Benefits of ${businessGoal.title}`}
-        />
-      )}
+          {businessGoal.benefits && businessGoal.benefits.length > 0 && (
+            <BusinessGoalKeyBenefits 
+              benefits={businessGoal.benefits}
+              title={`Key Benefits of ${businessGoal.title}`}
+            />
+          )}
 
-      {formattedFeatures.length > 0 && (
-        <BusinessGoalFeatures features={formattedFeatures} />
-      )}
+          {businessGoal.features && businessGoal.features.length > 0 && (
+            <BusinessGoalFeatures 
+              features={businessGoal.features.map(feature => ({
+                ...feature,
+                icon: feature.icon || <Star className="h-6 w-6" />
+              }))} 
+            />
+          )}
 
-      <BusinessGoalInquiry title={`Ready to learn more about ${businessGoal.title}?`} />
+          <BusinessGoalInquiry title={`Ready to learn more about ${businessGoal.title}?`} />
+        </>
+      )}
     </>
   );
 };

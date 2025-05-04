@@ -18,7 +18,7 @@ const Image: React.FC<ImageProps> = ({
   aspectRatio,
   isThumbnail = false,
   loading = 'lazy',
-  fetchPriority = 'auto',
+  fetchPriority,
   ...props 
 }) => {
   // Apply object fit class based on the prop
@@ -45,6 +45,9 @@ const Image: React.FC<ImageProps> = ({
   // Keep track of load attempts to prevent infinite retry loops
   const [loadAttempts, setLoadAttempts] = React.useState(0);
   const maxAttempts = 2;
+
+  // Fix fetchPriority to use valid values only
+  const validatedFetchPriority = fetchPriority === 'high' || fetchPriority === 'low' ? fetchPriority : undefined;
   
   // Optimize image loading based on service
   const optimizeUrl = (url: string) => {
@@ -74,9 +77,9 @@ const Image: React.FC<ImageProps> = ({
     }
   };
 
-  // Prefetch important images 
+  // Handle prefetching important images
   React.useEffect(() => {
-    if (fetchPriority === 'high' && typeof window !== 'undefined') {
+    if (validatedFetchPriority === 'high' && typeof window !== 'undefined') {
       try {
         const link = document.createElement('link');
         link.rel = 'preload';
@@ -91,9 +94,9 @@ const Image: React.FC<ImageProps> = ({
         console.error(`[Image] Error prefetching image: ${imageUrl}`, error);
       }
     }
-  }, [imageUrl, fetchPriority]);
+  }, [imageUrl, validatedFetchPriority]);
 
-  // Handle error event to increment attempt counter
+  // Handle error event
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     console.error(`[Image] Failed to load image (attempt ${loadAttempts + 1}): ${src}`);
     
@@ -112,7 +115,7 @@ const Image: React.FC<ImageProps> = ({
       alt={alt}
       className={`${objectFitClass} ${className}`}
       loading={loading}
-      fetchPriority={fetchPriority}
+      fetchPriority={validatedFetchPriority}
       style={{
         ...aspectRatioStyle,
         ...props.style
