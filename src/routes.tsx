@@ -65,7 +65,7 @@ const routes: RouteObject[] = [
       },
       {
         path: 'business-goals/:slug',
-        element: <BusinessGoalDetail /> // Use the proven implementation for all business goals
+        element: <BusinessGoalDetail />, // Changed to use BusinessGoalDetail for all business goal routes
       },
       {
         path: 'goals/:slug',

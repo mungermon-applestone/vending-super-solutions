@@ -20,7 +20,7 @@ const BusinessGoalsSection = () => {
       icon: "vending",
       title: "Expand Footprint",
       description: "Grow your business with scalable vending solutions that adapt to various locations and needs.",
-      link: "/goals/expand-footprint", // Use the proven route
+      link: "/business-goals/expand-footprint", // Consistent URL format
       id: "expand-footprint",
       slug: "expand-footprint"
     },

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { ArrowLeft, Loader2, Star, Bug, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Loader2, Star, Bug, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useBusinessGoal } from '@/hooks/cms/useBusinessGoal';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -23,15 +23,36 @@ const BusinessGoalDetail = () => {
   const [showDebug, setShowDebug] = useState(false);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [forceSlug, setForceSlug] = useState<string | null>(null);
+  const [contentfulConfig, setContentfulConfig] = useState<any>(null);
   
   // Perform redirection if needed and scroll to top when the page loads
   useEffect(() => {
     window.scrollTo(0, 0);
     
+    // Check contentful configuration
+    const checkContentfulConfig = async () => {
+      try {
+        // Import locally to avoid circular dependencies
+        const { getContentfulConfig } = await import('@/config/cms');
+        const config = getContentfulConfig();
+        setContentfulConfig({
+          spaceId: config.spaceId ? '✓ Set' : '✗ Missing',
+          accessToken: config.accessToken ? '✓ Set' : '✗ Missing',
+          environment: config.environment || 'master'
+        });
+      } catch (err) {
+        console.error('Error checking Contentful config:', err);
+        setContentfulConfig({ error: 'Failed to load configuration' });
+      }
+    };
+    
+    checkContentfulConfig();
+    
     if (slug) {
       // Special handling for expand-footprint to ensure it works
       if (slug === 'expand-footprint' || (slug.includes('expand') && slug.includes('footprint'))) {
         console.log(`[BusinessGoalDetail] Special handling for expand-footprint slug`);
+        // Use the exact slug for expand-footprint
         setForceSlug('expand-footprint');
         return;
       }
@@ -63,7 +84,8 @@ const BusinessGoalDetail = () => {
         hardcodedSlug: slug ? getHardcodedSlug(slug) : null,
         path: location.pathname,
         search: location.search,
-        hostname: window.location.hostname
+        hostname: window.location.hostname,
+        contentfulConfig
       };
       
       console.log("[BusinessGoalDetail] Debug diagnostics:", diagnostics);
@@ -127,6 +149,17 @@ const BusinessGoalDetail = () => {
                   <p>Hardcoded slug: <code className="bg-gray-100 px-1">{getHardcodedSlug(slug) || 'none'}</code></p>
                   <p>Current path: <code className="bg-gray-100 px-1">{location.pathname}</code></p>
                   
+                  <div className="mt-2 border-t pt-2">
+                    <p className="font-medium">Contentful Configuration:</p>
+                    {contentfulConfig && (
+                      <ul>
+                        {Object.entries(contentfulConfig).map(([key, value]) => (
+                          <li key={key}>{key}: {value}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  
                   {errorDetails && (
                     <>
                       <p className="mt-3 font-semibold">Additional Diagnostics:</p>
@@ -150,21 +183,28 @@ const BusinessGoalDetail = () => {
 const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDebug?: boolean }) => {
   const { data: businessGoal, isLoading, error, refetch } = useBusinessGoal(slug);
   const [retryCount, setRetryCount] = useState(0);
+  const [isRefetching, setIsRefetching] = useState(false);
 
-  // Special handling for expand-footprint when it fails to load
-  useEffect(() => {
-    if (error && slug === 'expand-footprint' && retryCount < 2) {
-      console.log(`[BusinessGoalContent] Special handling for expand-footprint (retry ${retryCount + 1})`);
+  // Handle retrying with improved feedback
+  const handleRetry = async () => {
+    setIsRefetching(true);
+    setRetryCount(prev => prev + 1);
+    
+    try {
+      // Force refresh the contentful client before refetching
+      const { refreshContentfulClient } = await import('@/services/cms/utils/contentfulClient');
+      await refreshContentfulClient();
       
-      // Add a delay before retrying
-      const timer = setTimeout(() => {
-        setRetryCount(prev => prev + 1);
-        refetch();
-      }, 2000);
+      // Wait a moment to ensure client is refreshed
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      return () => clearTimeout(timer);
+      await refetch();
+    } catch (err) {
+      console.error('Error during retry:', err);
+    } finally {
+      setIsRefetching(false);
     }
-  }, [error, slug, retryCount, refetch]);
+  };
 
   // Add SEO component for business goal
   return (
@@ -182,29 +222,43 @@ const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDe
               contentType="businessGoal"
               actionText="Retry Loading"
               actionHref="#"
-              onAction={() => refetch()}
+              onAction={handleRetry}
               showAdmin={false}
             />
             
-            {/* Special case for expand-footprint */}
-            {slug === 'expand-footprint' && (
-              <Alert className="mt-6 bg-amber-50 border-amber-200">
-                <AlertTriangle className="h-4 w-4 text-amber-500" />
-                <AlertTitle className="text-amber-700">Known Issue with Expand Footprint</AlertTitle>
-                <AlertDescription className="text-amber-600">
-                  We're aware of an issue loading the "Expand Footprint" business goal. Our team is working to fix this.
-                  In the meantime, you can view other business goals or check our documentation for more information.
+            {/* Add manual content fetch button */}
+            <div className="mt-6 flex justify-center">
+              <Button 
+                onClick={handleRetry} 
+                disabled={isRefetching}
+                className="flex items-center"
+              >
+                {isRefetching ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Force Refresh Content ({retryCount})
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            {/* Special case debugging for expand-footprint */}
+            {slug === 'expand-footprint' && showDebug && (
+              <Alert className="mt-6">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Debugging Expand Footprint</AlertTitle>
+                <AlertDescription>
+                  <p className="mb-2">Special handling is enabled for this business goal.</p>
+                  <p>Error Details:</p>
+                  <pre className="text-xs bg-gray-50 p-2 rounded mt-1 overflow-auto max-h-40">
+                    {error instanceof Error ? error.stack : JSON.stringify(error, null, 2)}
+                  </pre>
                 </AlertDescription>
-                <div className="mt-4">
-                  <Button 
-                    onClick={() => refetch()} 
-                    variant="outline" 
-                    size="sm" 
-                    className="bg-white border-amber-300 text-amber-800 hover:bg-amber-50"
-                  >
-                    Try Loading Again
-                  </Button>
-                </div>
               </Alert>
             )}
             
@@ -230,6 +284,27 @@ const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDe
               showAdmin={false}
             />
             
+            {/* Add manual content fetch button */}
+            <div className="mt-6 flex justify-center">
+              <Button 
+                onClick={handleRetry} 
+                disabled={isRefetching}
+                className="flex items-center"
+              >
+                {isRefetching ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Force Refresh Content ({retryCount})
+                  </>
+                )}
+              </Button>
+            </div>
+            
             {showDebug && (
               <div className="mt-4 p-4 bg-yellow-50 border border-yellow-100 rounded-md">
                 <h3 className="text-sm font-semibold text-yellow-800 mb-2">Debug Information</h3>
@@ -244,12 +319,23 @@ const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDe
                   }, null, 2)}
                 </pre>
                 <Button 
-                  onClick={() => refetch()} 
+                  onClick={handleRetry} 
                   variant="outline" 
                   size="sm" 
                   className="mt-2"
+                  disabled={isRefetching}
                 >
-                  Retry Query
+                  {isRefetching ? (
+                    <>
+                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      Retrying...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      Retry Query
+                    </>
+                  )}
                 </Button>
               </div>
             )}
