@@ -86,7 +86,7 @@ const BusinessGoals = () => {
                 </CardContent>
                 <CardFooter>
                   <Button asChild variant="outline" size="sm">
-                    <Link to={`/goals/${goal.slug}`}>
+                    <Link to={`/business-goals/${goal.slug}`}>
                       Learn More <ExternalLink className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
