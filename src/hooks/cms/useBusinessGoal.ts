@@ -34,7 +34,7 @@ export function useBusinessGoal(slug: string | undefined) {
         // Dynamically import to avoid circular dependencies
         const { getBusinessGoalBySlug } = await import('@/services/cms/businessGoals');
         
-        // Try direct lookup first - always attempt to get the real content
+        // Try direct lookup first with the resolved slug
         const businessGoal = await getBusinessGoalBySlug(resolvedSlug);
         
         if (businessGoal) {
@@ -53,63 +53,13 @@ export function useBusinessGoal(slug: string | undefined) {
           }
         }
         
-        // Final attempt - try direct import from contentful operation
-        console.log('[useBusinessGoal] Last attempt - using direct contentful operation');
-        const { fetchBusinessGoalBySlug } = await import('@/services/cms/contentTypes/businessGoals/fetchBusinessGoalBySlug');
-        try {
-          const directResult = await fetchBusinessGoalBySlug(slug);
-          if (directResult) {
-            console.log(`[useBusinessGoal] Found via direct operation: ${directResult.title}`);
-            return directResult;
+        // Final attempt for expand-footprint - let's be very deliberate
+        if (slug === 'expand-footprint' || isExpandFootprintSlug(slug)) {
+          console.log('[useBusinessGoal] Final attempt for expand-footprint');
+          const expandFootprintGoal = await getBusinessGoalBySlug('expand-footprint');
+          if (expandFootprintGoal) {
+            return expandFootprintGoal;
           }
-        } catch (err) {
-          console.error('[useBusinessGoal] Error in direct fetch:', err);
-        }
-        
-        // Special case for expand-footprint - this is implemented as the last resort
-        if (isExpandFootprintSlug(slug)) {
-          console.log('[useBusinessGoal] Using special handling for expand-footprint');
-          
-          // Create a fallback if nothing is found
-          console.log(`[useBusinessGoal] No content found, using fallback for expand-footprint as last resort`);
-          return {
-            id: 'expand-footprint-fallback',
-            slug: 'expand-footprint',
-            title: 'Expand Your Footprint',
-            description: 'Grow your retail presence with automated smart vending solutions.',
-            visible: true,
-            icon: 'map',
-            benefits: [
-              'Expand to new locations without traditional store overhead',
-              'Reach customers in high-traffic areas with minimal space requirements',
-              'Test new markets with lower investment risk',
-              'Scale your retail footprint faster than traditional stores',
-              'Operate 24/7 without additional staffing costs'
-            ],
-            features: [
-              {
-                id: 'expandf-1',
-                title: 'Lower Entry Costs',
-                description: 'Automated retail machines cost a fraction of traditional store openings',
-                icon: 'trending-up',
-                display_order: 1
-              },
-              {
-                id: 'expandf-2',
-                title: 'Flexible Deployment',
-                description: 'Place machines in locations impossible for traditional retail',
-                icon: 'map',
-                display_order: 2
-              },
-              {
-                id: 'expandf-3',
-                title: 'Rapid Market Testing',
-                description: 'Quickly test product offerings in new demographic areas',
-                icon: 'pie-chart',
-                display_order: 3
-              }
-            ]
-          };
         }
         
         console.error(`[useBusinessGoal] No business goal found with any slug variation:`, {
@@ -124,7 +74,7 @@ export function useBusinessGoal(slug: string | undefined) {
       }
     },
     enabled: !!slug,
-    staleTime: 60 * 1000, // Reduced to 1 minute to allow for more frequent refetching
+    staleTime: 60 * 1000, // 1 minute to allow for more frequent refetching
     retry: 3,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 10000),
     meta: {

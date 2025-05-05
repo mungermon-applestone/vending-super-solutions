@@ -14,8 +14,7 @@ import ProductDetailPage from '@/pages/ProductDetailPage';
 import MachinesPage from '@/pages/MachinesPage';
 import MachineDetailPage from '@/pages/MachineDetailPage';
 import BusinessGoalsPage from '@/pages/BusinessGoalsPage';
-import BusinessGoalDetailPage from '@/pages/BusinessGoalDetailPage';
-import BusinessGoalDetail from '@/pages/BusinessGoalDetail'; // Old implementation
+import BusinessGoalDetail from '@/pages/BusinessGoalDetail'; 
 import NotFound from '@/pages/NotFound';
 import TechnologyPage from '@/pages/TechnologyPage';
 import About from '@/pages/About';
@@ -24,6 +23,7 @@ import ContentfulBlogPostDetail from '@/pages/ContentfulBlogPostDetail';
 import Contact from '@/pages/Contact';
 import StrapiSetupPage from '@/pages/admin/StrapiSetupPage';
 import ZhilaiApplestoneAnnouncement from '@/pages/ZhilaiApplestoneAnnouncement';
+import { businessGoalRoutes } from '@/routes/businessGoalRoutes';
 
 const routes: RouteObject[] = [
   {
@@ -63,23 +63,9 @@ const routes: RouteObject[] = [
         path: 'business-goals',
         element: <BusinessGoalsPage />
       },
-      {
-        path: 'business-goals/:slug',
-        element: <BusinessGoalDetail />
-      },
-      {
-        path: 'goals/:slug',
-        element: <BusinessGoalDetail />
-      },
-      {
-        path: 'business/:slug',
-        element: <BusinessGoalDetail />
-      },
-      // Make sure our special case works with a direct path
-      {
-        path: 'business-goals/expand-footprint',
-        element: <BusinessGoalDetail />
-      },
+      // Use the businessGoalRoutes for all business goal detail pages
+      // This centralizes all business goal routing patterns
+      {children: businessGoalRoutes},
       {
         path: 'about',
         element: <About />

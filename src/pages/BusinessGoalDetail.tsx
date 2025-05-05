@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -12,43 +11,57 @@ import BusinessGoalKeyBenefits from '@/components/businessGoals/BusinessGoalKeyB
 import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
-import { redirectToCanonicalBusinessGoalIfNeeded } from '@/services/cms/utils/routeRedirector';
 import { normalizeSlug, getCanonicalSlug, resolveSlug, getHardcodedSlug } from '@/services/cms/utils/slugMatching';
 import BusinessGoalSEO from '@/components/seo/BusinessGoalSEO';
 import BusinessGoalsLoader from '@/components/businessGoals/BusinessGoalsLoader';
 import { CONTENTFUL_CONFIG, isContentfulConfigured } from '@/config/cms';
 
-const BusinessGoalDetail = () => {
+interface BusinessGoalDetailProps {
+  forcedSlug?: string;
+}
+
+const BusinessGoalDetail = ({ forcedSlug }: BusinessGoalDetailProps) => {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
   const [showDebug, setShowDebug] = useState(false);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
-  const [forceSlug, setForceSlug] = useState<string | null>(null);
+  const [effectiveSlug, setEffectiveSlug] = useState<string>('');
   const [contentfulConfig, setContentfulConfig] = useState<any>(null);
   
-  // Extract slug from the URL path if not found in params
+  // Determine the effective slug to use
   useEffect(() => {
-    // Fallback: extract slug from URL path if params.slug is undefined
-    if (!slug) {
-      console.log("[BusinessGoalDetail] slug param is undefined, extracting from path:", location.pathname);
-      const pathSegments = location.pathname.split('/');
-      const extractedSlug = pathSegments[pathSegments.length - 1];
-      
-      if (extractedSlug && extractedSlug !== 'business-goals') {
-        console.log("[BusinessGoalDetail] Extracted slug from path:", extractedSlug);
-        setForceSlug(extractedSlug);
-      } else if (location.pathname.includes('expand-footprint')) {
-        console.log("[BusinessGoalDetail] Found expand-footprint in path, using as fallback");
-        setForceSlug('expand-footprint');
-      }
-    }
-  }, [slug, location.pathname]);
-  
-  // Perform redirection if needed and scroll to top when the page loads
-  useEffect(() => {
-    window.scrollTo(0, 0);
+    // Priority order:
+    // 1. forcedSlug prop (for special cases like expand-footprint)
+    // 2. URL parameter slug
+    // 3. Extract from path
     
-    // Check contentful configuration
+    if (forcedSlug) {
+      console.log(`[BusinessGoalDetail] Using forced slug: "${forcedSlug}"`);
+      setEffectiveSlug(forcedSlug);
+      return;
+    }
+    
+    if (slug) {
+      console.log(`[BusinessGoalDetail] Using URL param slug: "${slug}"`);
+      setEffectiveSlug(slug);
+      return;
+    }
+    
+    // Last resort: extract from path
+    const pathSegments = location.pathname.split('/');
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    
+    if (lastSegment && lastSegment !== 'business-goals') {
+      console.log(`[BusinessGoalDetail] Extracted slug from path: "${lastSegment}"`);
+      setEffectiveSlug(lastSegment);
+    } else {
+      console.warn('[BusinessGoalDetail] Could not determine a slug from any source');
+      setEffectiveSlug('');
+    }
+  }, [slug, forcedSlug, location.pathname]);
+  
+  // Get Contentful config information
+  useEffect(() => {
     const checkContentfulConfig = async () => {
       try {
         setContentfulConfig({
@@ -63,47 +76,21 @@ const BusinessGoalDetail = () => {
     };
     
     checkContentfulConfig();
-    
-    // Extract slug from URL if not in params
-    const pathSlug = slug || forceSlug || location.pathname.split('/').pop();
-    
-    if (pathSlug) {
-      // Special handling for expand-footprint to ensure it works
-      if (pathSlug === 'expand-footprint' || (pathSlug.includes('expand') && pathSlug.includes('footprint'))) {
-        console.log(`[BusinessGoalDetail] Special handling for expand-footprint slug`);
-        // Use the exact slug for expand-footprint
-        setForceSlug('expand-footprint');
-        return;
-      }
-      
-      // Check for hardcoded slug before redirection
-      const hardcodedSlug = getHardcodedSlug(pathSlug);
-      if (hardcodedSlug && hardcodedSlug !== pathSlug) {
-        console.log(`[BusinessGoalDetail] Found hardcoded slug match: ${hardcodedSlug}`);
-        // Redirect to hardcoded slug if needed
-        window.location.href = `/business-goals/${hardcodedSlug}`;
-        return;
-      }
-      
-      redirectToCanonicalBusinessGoalIfNeeded(pathSlug);
-    }
-  }, [slug, forceSlug, location.pathname]);
+  }, []);
   
   const toggleDebug = () => {
     setShowDebug(!showDebug);
     
     // When enabling debug, fetch additional diagnostic information
     if (!showDebug) {
-      const actualSlug = slug || forceSlug || location.pathname.split('/').pop();
       const diagnostics = {
-        slug,
-        forceSlug,
-        pathSlug: location.pathname.split('/').pop(),
-        actualSlug,
-        normalizedSlug: actualSlug ? normalizeSlug(actualSlug) : '',
-        canonicalSlug: actualSlug ? getCanonicalSlug(normalizeSlug(actualSlug)) : '',
-        resolvedSlug: actualSlug ? resolveSlug(actualSlug) : '',
-        hardcodedSlug: actualSlug ? getHardcodedSlug(actualSlug) : null,
+        urlSlug: slug,
+        forcedSlug,
+        effectiveSlug,
+        normalizedSlug: effectiveSlug ? normalizeSlug(effectiveSlug) : '',
+        canonicalSlug: effectiveSlug ? getCanonicalSlug(normalizeSlug(effectiveSlug)) : '',
+        resolvedSlug: effectiveSlug ? resolveSlug(effectiveSlug) : '',
+        hardcodedSlug: effectiveSlug ? getHardcodedSlug(effectiveSlug) : null,
         path: location.pathname,
         search: location.search,
         hostname: window.location.hostname,
@@ -115,14 +102,15 @@ const BusinessGoalDetail = () => {
     }
   };
   
-  console.log("[BusinessGoalDetail] Rendering with slug:", slug);
-  console.log("[BusinessGoalDetail] forceSlug:", forceSlug);
-  console.log("[BusinessGoalDetail] Current path:", location.pathname);
+  console.log("[BusinessGoalDetail] Current state:", {
+    urlSlug: slug,
+    forcedSlug,
+    effectiveSlug,
+    path: location.pathname
+  });
   
-  // Use the slug from params, or fallback to forced slug or path extraction
-  const effectiveSlug = slug || forceSlug || location.pathname.split('/').pop();
-  
-  if (!effectiveSlug || effectiveSlug === 'business-goals') {
+  // Show error if we couldn't determine a slug
+  if (!effectiveSlug) {
     return (
       <Layout>
         <div className="container py-12 text-center">
@@ -167,10 +155,9 @@ const BusinessGoalDetail = () => {
               <details open className="text-xs font-mono">
                 <summary className="cursor-pointer font-medium">Slug Information</summary>
                 <div className="p-2 bg-white rounded mt-1">
-                  <p>Original slug: <code className="bg-gray-100 px-1">{slug || 'none from params'}</code></p>
+                  <p>URL slug: <code className="bg-gray-100 px-1">{slug || 'none from params'}</code></p>
+                  <p>Forced slug: <code className="bg-gray-100 px-1">{forcedSlug || 'none'}</code></p>
                   <p>Effective slug: <code className="bg-gray-100 px-1">{effectiveSlug}</code></p>
-                  <p>Force slug: <code className="bg-gray-100 px-1">{forceSlug || 'none'}</code></p>
-                  <p>Path slug: <code className="bg-gray-100 px-1">{location.pathname.split('/').pop()}</code></p>
                   <p>Normalized slug: <code className="bg-gray-100 px-1">{normalizeSlug(effectiveSlug)}</code></p>
                   <p>Canonical slug: <code className="bg-gray-100 px-1">{getCanonicalSlug(normalizeSlug(effectiveSlug))}</code></p>
                   <p>Resolved slug: <code className="bg-gray-100 px-1">{resolveSlug(effectiveSlug)}</code></p>
