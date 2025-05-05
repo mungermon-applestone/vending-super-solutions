@@ -17,6 +17,9 @@ export function useBusinessGoal(slug: string | undefined) {
         throw new Error('Business goal slug is required');
       }
 
+      // Log the original slug for debugging
+      console.log(`[useBusinessGoal] Original slug received: "${slug}"`);
+
       // Special case for expand-footprint - early check to ensure it's treated correctly
       if (isExpandFootprintSlug(slug)) {
         console.log(`[useBusinessGoal] Identified as expand-footprint slug pattern: "${slug}"`);
@@ -27,24 +30,24 @@ export function useBusinessGoal(slug: string | undefined) {
       // Use centralized resolveSlug function
       const resolvedSlug = resolveSlug(slug);
       
-      console.log(`[useBusinessGoal] Fetching business goal with slug: "${slug}"`);
-      console.log(`[useBusinessGoal] Resolved slug: "${resolvedSlug}"`);
+      console.log(`[useBusinessGoal] Slug resolution: original="${slug}", resolved="${resolvedSlug}"`);
       
       try {
         // Dynamically import to avoid circular dependencies
         const { getBusinessGoalBySlug } = await import('@/services/cms/businessGoals');
         
         // Try direct lookup first with the resolved slug
+        console.log(`[useBusinessGoal] Attempting to fetch business goal with resolved slug: "${resolvedSlug}"`);
         const businessGoal = await getBusinessGoalBySlug(resolvedSlug);
         
         if (businessGoal) {
-          console.log(`[useBusinessGoal] Successfully loaded business goal: ${businessGoal.title}`);
+          console.log(`[useBusinessGoal] Successfully loaded business goal: ${businessGoal.title} with slug ${businessGoal.slug}`);
           return businessGoal;
         }
         
         // If the resolved slug didn't work, try with the original slug
         if (resolvedSlug !== slug) {
-          console.log(`[useBusinessGoal] Attempting with original slug: "${slug}"`);
+          console.log(`[useBusinessGoal] Resolved slug failed, attempting with original slug: "${slug}"`);
           const originalSlugResult = await getBusinessGoalBySlug(slug);
           
           if (originalSlugResult) {
@@ -55,9 +58,10 @@ export function useBusinessGoal(slug: string | undefined) {
         
         // Final attempt for expand-footprint - let's be very deliberate
         if (slug === 'expand-footprint' || isExpandFootprintSlug(slug)) {
-          console.log('[useBusinessGoal] Final attempt for expand-footprint');
+          console.log('[useBusinessGoal] Final attempt specifically for expand-footprint');
           const expandFootprintGoal = await getBusinessGoalBySlug('expand-footprint');
           if (expandFootprintGoal) {
+            console.log('[useBusinessGoal] Found expand-footprint goal in final attempt');
             return expandFootprintGoal;
           }
         }
