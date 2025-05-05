@@ -65,7 +65,7 @@ const routes: RouteObject[] = [
       },
       {
         path: 'business-goals/:slug',
-        element: <BusinessGoalDetail /> // Use the proven implementation for business goal routes
+        element: <BusinessGoalDetail />
       },
       {
         path: 'goals/:slug',
@@ -73,9 +73,9 @@ const routes: RouteObject[] = [
       },
       {
         path: 'business/:slug',
-        element: <BusinessGoalDetail /> // Use the proven implementation for backwards compatibility
+        element: <BusinessGoalDetail />
       },
-      // Add explicit route for expand-footprint to ensure it works
+      // Make sure our special case works with a direct path
       {
         path: 'business-goals/expand-footprint',
         element: <BusinessGoalDetail />

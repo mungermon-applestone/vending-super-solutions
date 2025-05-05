@@ -1,3 +1,4 @@
+
 /**
  * Special case handlers for specific slugs or slug patterns
  */
@@ -86,9 +87,16 @@ export function isExpandFootprintSlug(slug: string): boolean {
   const expandFootprintPattern = /expand[-_]?footprint|footprint[-_]?expand|expansion[-_]?footprint/i;
   if (expandFootprintPattern.test(slug)) return true;
   
+  // URL path matching
+  if (slug.includes('/business-goals/expand-footprint')) return true;
+  if (slug.includes('/goals/expand-footprint')) return true;
+  
   // Word matching
-  const words = slug.toLowerCase().split(/[-_\s]/);
+  const words = slug.toLowerCase().split(/[-_\s/]/);
   if (words.includes('expand') && words.includes('footprint')) return true;
+  
+  // Check if it's clearly a URL path with expand-footprint
+  if (slug.endsWith('/expand-footprint')) return true;
   
   // If it's clearly about expansion, it's likely this
   if (slug === 'expand' || slug === 'expansion' || slug === 'footprint') return true;
@@ -119,6 +127,12 @@ export function getSpecialCaseCanonicalSlug(slug: string): string | null {
  */
 export function getHardcodedSlug(slug: string): string | null {
   if (!slug) return null;
+  
+  // Check if it's a path rather than a slug and extract the last segment
+  if (slug.includes('/')) {
+    const segments = slug.split('/');
+    slug = segments[segments.length - 1];
+  }
   
   // Normalize to lowercase with hyphen
   const normalizedSlug = slug.toLowerCase().replace(/[_\s]+/g, '-');

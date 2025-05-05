@@ -26,6 +26,24 @@ const BusinessGoalDetail = () => {
   const [forceSlug, setForceSlug] = useState<string | null>(null);
   const [contentfulConfig, setContentfulConfig] = useState<any>(null);
   
+  // Extract slug from the URL path if not found in params
+  useEffect(() => {
+    // Fallback: extract slug from URL path if params.slug is undefined
+    if (!slug) {
+      console.log("[BusinessGoalDetail] slug param is undefined, extracting from path:", location.pathname);
+      const pathSegments = location.pathname.split('/');
+      const extractedSlug = pathSegments[pathSegments.length - 1];
+      
+      if (extractedSlug && extractedSlug !== 'business-goals') {
+        console.log("[BusinessGoalDetail] Extracted slug from path:", extractedSlug);
+        setForceSlug(extractedSlug);
+      } else if (location.pathname.includes('expand-footprint')) {
+        console.log("[BusinessGoalDetail] Found expand-footprint in path, using as fallback");
+        setForceSlug('expand-footprint');
+      }
+    }
+  }, [slug, location.pathname]);
+  
   // Perform redirection if needed and scroll to top when the page loads
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -46,9 +64,12 @@ const BusinessGoalDetail = () => {
     
     checkContentfulConfig();
     
-    if (slug) {
+    // Extract slug from URL if not in params
+    const pathSlug = slug || forceSlug || location.pathname.split('/').pop();
+    
+    if (pathSlug) {
       // Special handling for expand-footprint to ensure it works
-      if (slug === 'expand-footprint' || (slug.includes('expand') && slug.includes('footprint'))) {
+      if (pathSlug === 'expand-footprint' || (pathSlug.includes('expand') && pathSlug.includes('footprint'))) {
         console.log(`[BusinessGoalDetail] Special handling for expand-footprint slug`);
         // Use the exact slug for expand-footprint
         setForceSlug('expand-footprint');
@@ -56,30 +77,33 @@ const BusinessGoalDetail = () => {
       }
       
       // Check for hardcoded slug before redirection
-      const hardcodedSlug = getHardcodedSlug(slug);
-      if (hardcodedSlug && hardcodedSlug !== slug) {
+      const hardcodedSlug = getHardcodedSlug(pathSlug);
+      if (hardcodedSlug && hardcodedSlug !== pathSlug) {
         console.log(`[BusinessGoalDetail] Found hardcoded slug match: ${hardcodedSlug}`);
         // Redirect to hardcoded slug if needed
         window.location.href = `/business-goals/${hardcodedSlug}`;
         return;
       }
       
-      redirectToCanonicalBusinessGoalIfNeeded(slug);
+      redirectToCanonicalBusinessGoalIfNeeded(pathSlug);
     }
-  }, [slug]);
+  }, [slug, forceSlug, location.pathname]);
   
   const toggleDebug = () => {
     setShowDebug(!showDebug);
     
     // When enabling debug, fetch additional diagnostic information
     if (!showDebug) {
+      const actualSlug = slug || forceSlug || location.pathname.split('/').pop();
       const diagnostics = {
         slug,
         forceSlug,
-        normalizedSlug: slug ? normalizeSlug(slug) : '',
-        canonicalSlug: slug ? getCanonicalSlug(normalizeSlug(slug)) : '',
-        resolvedSlug: slug ? resolveSlug(slug) : '',
-        hardcodedSlug: slug ? getHardcodedSlug(slug) : null,
+        pathSlug: location.pathname.split('/').pop(),
+        actualSlug,
+        normalizedSlug: actualSlug ? normalizeSlug(actualSlug) : '',
+        canonicalSlug: actualSlug ? getCanonicalSlug(normalizeSlug(actualSlug)) : '',
+        resolvedSlug: actualSlug ? resolveSlug(actualSlug) : '',
+        hardcodedSlug: actualSlug ? getHardcodedSlug(actualSlug) : null,
         path: location.pathname,
         search: location.search,
         hostname: window.location.hostname,
@@ -92,9 +116,13 @@ const BusinessGoalDetail = () => {
   };
   
   console.log("[BusinessGoalDetail] Rendering with slug:", slug);
+  console.log("[BusinessGoalDetail] forceSlug:", forceSlug);
   console.log("[BusinessGoalDetail] Current path:", location.pathname);
   
-  if (!slug) {
+  // Use the slug from params, or fallback to forced slug or path extraction
+  const effectiveSlug = slug || forceSlug || location.pathname.split('/').pop();
+  
+  if (!effectiveSlug || effectiveSlug === 'business-goals') {
     return (
       <Layout>
         <div className="container py-12 text-center">
@@ -139,12 +167,14 @@ const BusinessGoalDetail = () => {
               <details open className="text-xs font-mono">
                 <summary className="cursor-pointer font-medium">Slug Information</summary>
                 <div className="p-2 bg-white rounded mt-1">
-                  <p>Original slug: <code className="bg-gray-100 px-1">{slug}</code></p>
+                  <p>Original slug: <code className="bg-gray-100 px-1">{slug || 'none from params'}</code></p>
+                  <p>Effective slug: <code className="bg-gray-100 px-1">{effectiveSlug}</code></p>
                   <p>Force slug: <code className="bg-gray-100 px-1">{forceSlug || 'none'}</code></p>
-                  <p>Normalized slug: <code className="bg-gray-100 px-1">{normalizeSlug(slug)}</code></p>
-                  <p>Canonical slug: <code className="bg-gray-100 px-1">{getCanonicalSlug(normalizeSlug(slug))}</code></p>
-                  <p>Resolved slug: <code className="bg-gray-100 px-1">{resolveSlug(slug)}</code></p>
-                  <p>Hardcoded slug: <code className="bg-gray-100 px-1">{getHardcodedSlug(slug) || 'none'}</code></p>
+                  <p>Path slug: <code className="bg-gray-100 px-1">{location.pathname.split('/').pop()}</code></p>
+                  <p>Normalized slug: <code className="bg-gray-100 px-1">{normalizeSlug(effectiveSlug)}</code></p>
+                  <p>Canonical slug: <code className="bg-gray-100 px-1">{getCanonicalSlug(normalizeSlug(effectiveSlug))}</code></p>
+                  <p>Resolved slug: <code className="bg-gray-100 px-1">{resolveSlug(effectiveSlug)}</code></p>
+                  <p>Hardcoded slug: <code className="bg-gray-100 px-1">{getHardcodedSlug(effectiveSlug) || 'none'}</code></p>
                   <p>Current path: <code className="bg-gray-100 px-1">{location.pathname}</code></p>
                   
                   <div className="mt-2 border-t pt-2">
@@ -172,7 +202,7 @@ const BusinessGoalDetail = () => {
           </div>
         )}
         
-        <BusinessGoalContent slug={forceSlug || slug} showDebug={showDebug} />
+        <BusinessGoalContent slug={effectiveSlug} showDebug={showDebug} />
       </ContentfulErrorBoundary>
     </Layout>
   );
