@@ -22,12 +22,20 @@ const BusinessGoalDetail = () => {
   const location = useLocation();
   const [showDebug, setShowDebug] = useState(false);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [forceSlug, setForceSlug] = useState<string | null>(null);
   
   // Perform redirection if needed and scroll to top when the page loads
   useEffect(() => {
     window.scrollTo(0, 0);
     
     if (slug) {
+      // Special handling for expand-footprint to ensure it works
+      if (slug === 'expand-footprint' || (slug.includes('expand') && slug.includes('footprint'))) {
+        console.log(`[BusinessGoalDetail] Special handling for expand-footprint slug`);
+        setForceSlug('expand-footprint');
+        return;
+      }
+      
       // Check for hardcoded slug before redirection
       const hardcodedSlug = getHardcodedSlug(slug);
       if (hardcodedSlug && hardcodedSlug !== slug) {
@@ -48,6 +56,7 @@ const BusinessGoalDetail = () => {
     if (!showDebug) {
       const diagnostics = {
         slug,
+        forceSlug,
         normalizedSlug: slug ? normalizeSlug(slug) : '',
         canonicalSlug: slug ? getCanonicalSlug(normalizeSlug(slug)) : '',
         resolvedSlug: slug ? resolveSlug(slug) : '',
@@ -111,6 +120,7 @@ const BusinessGoalDetail = () => {
                 <summary className="cursor-pointer font-medium">Slug Information</summary>
                 <div className="p-2 bg-white rounded mt-1">
                   <p>Original slug: <code className="bg-gray-100 px-1">{slug}</code></p>
+                  <p>Force slug: <code className="bg-gray-100 px-1">{forceSlug || 'none'}</code></p>
                   <p>Normalized slug: <code className="bg-gray-100 px-1">{normalizeSlug(slug)}</code></p>
                   <p>Canonical slug: <code className="bg-gray-100 px-1">{getCanonicalSlug(normalizeSlug(slug))}</code></p>
                   <p>Resolved slug: <code className="bg-gray-100 px-1">{resolveSlug(slug)}</code></p>
@@ -131,7 +141,7 @@ const BusinessGoalDetail = () => {
           </div>
         )}
         
-        <BusinessGoalContent slug={slug} showDebug={showDebug} />
+        <BusinessGoalContent slug={forceSlug || slug} showDebug={showDebug} />
       </ContentfulErrorBoundary>
     </Layout>
   );
@@ -139,15 +149,22 @@ const BusinessGoalDetail = () => {
 
 const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDebug?: boolean }) => {
   const { data: businessGoal, isLoading, error, refetch } = useBusinessGoal(slug);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Special handling for expand-footprint when it fails to load
   useEffect(() => {
-    if (error && slug === 'expand-footprint') {
-      console.log("[BusinessGoalContent] Special handling for expand-footprint");
+    if (error && slug === 'expand-footprint' && retryCount < 2) {
+      console.log(`[BusinessGoalContent] Special handling for expand-footprint (retry ${retryCount + 1})`);
       
-      // You could add specific fallback data here if needed
+      // Add a delay before retrying
+      const timer = setTimeout(() => {
+        setRetryCount(prev => prev + 1);
+        refetch();
+      }, 2000);
+      
+      return () => clearTimeout(timer);
     }
-  }, [error, slug]);
+  }, [error, slug, retryCount, refetch]);
 
   // Add SEO component for business goal
   return (
@@ -178,6 +195,16 @@ const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDe
                   We're aware of an issue loading the "Expand Footprint" business goal. Our team is working to fix this.
                   In the meantime, you can view other business goals or check our documentation for more information.
                 </AlertDescription>
+                <div className="mt-4">
+                  <Button 
+                    onClick={() => refetch()} 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-white border-amber-300 text-amber-800 hover:bg-amber-50"
+                  >
+                    Try Loading Again
+                  </Button>
+                </div>
               </Alert>
             )}
             
