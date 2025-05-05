@@ -63,9 +63,8 @@ const routes: RouteObject[] = [
         path: 'business-goals',
         element: <BusinessGoalsPage />
       },
-      // Use the businessGoalRoutes for all business goal detail pages
-      // This centralizes all business goal routing patterns
-      {children: businessGoalRoutes},
+      // Correctly spread the business goal routes array instead of trying to include the JSX element directly
+      ...businessGoalRoutes,
       {
         path: 'about',
         element: <About />
