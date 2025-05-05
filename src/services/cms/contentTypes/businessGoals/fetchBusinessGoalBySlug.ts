@@ -1,3 +1,4 @@
+
 import { CMSBusinessGoal } from '@/types/cms';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { useMockData } from '../../mockDataHandler';
@@ -161,7 +162,7 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
         
         // Try to find a match using our slug matching function
         for (const goal of goals) {
-          if (slugsMatch(normalizedSlug, goal.slug)) {
+          if (slugsMatch(normalizeSlug(slug), goal.slug)) {
             console.log(`[fetchBusinessGoalBySlug] Found business goal in mock data: ${goal.title}`);
             return goal as T;
           }

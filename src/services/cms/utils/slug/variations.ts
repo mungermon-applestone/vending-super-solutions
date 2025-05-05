@@ -46,8 +46,6 @@ export function getSlugVariations(slug: string): string[] {
 
 // Re-export functions from other modules
 export {
-  normalizeSlug,
-  getCanonicalSlug,
   slugsMatch,
   findBestSlugMatch
 };
