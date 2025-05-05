@@ -1,95 +1,120 @@
 
 /**
- * Common slug variation utilities and constants
+ * Common slug utilities
+ * Contains shared functionality for slug normalization and mapping
  */
 
-/**
- * Special case mapping for known business goal slugs
- * The key is the canonical URL slug, values are alternative forms that might exist in the database
- */
-export const BUSINESS_GOAL_SLUG_MAP: Record<string, string[]> = {
-  'data-analytics': ['data_analytics', 'analytics', 'data-analysis', 'data'],
-  'expand-footprint': ['expand_footprint', 'expansion', 'market-expansion', 'footprint'],
-  // IMPORTANT: marketing-and-promotions is the canonical form in URLs
-  'marketing-and-promotions': ['marketing_and_promotions', 'marketing-promotions', 'marketing_promotions', 'marketing', 'promotions'],
-  'fleet-management': ['fleet_management', 'fleet'],
-  'customer-satisfaction': ['customer_satisfaction', 'satisfaction', 'customer-experience'],
-  'bopis': ['buy-online-pickup-in-store', 'buy_online_pickup_in_store']
+// Define mapping of business goal slugs to their canonical forms
+export const BUSINESS_GOAL_SLUG_MAP: Record<string, string> = {
+  'cost-reduction': 'reduce-costs',
+  'cost-efficiency': 'reduce-costs',
+  'save-money': 'reduce-costs',
+  'revenue-growth': 'increase-revenue',
+  'grow-revenue': 'increase-revenue',
+  'boost-sales': 'increase-revenue',
+  'customer-experience': 'improve-customer-experience',
+  'cx-improvement': 'improve-customer-experience',
+  'operational-efficiency': 'improve-operations',
+  'efficiency': 'improve-operations',
+  'streamline': 'improve-operations',
+  'sustainability': 'environmental-sustainability',
+  'eco-friendly': 'environmental-sustainability',
+  'green-initiatives': 'environmental-sustainability',
+  'data-insights': 'data-analytics',
+  'analytics': 'data-analytics',
+  'business-intelligence': 'data-analytics'
 };
 
-/**
- * Direct mapping from any possible slug variation to canonical form
- * This is a flattened version of BUSINESS_GOAL_SLUG_MAP for quicker lookups
- */
-export const CANONICAL_SLUG_MAP: Record<string, string> = {};
+// Define a map of canonical slugs
+export const CANONICAL_SLUG_MAP: Record<string, string> = {
+  ...BUSINESS_GOAL_SLUG_MAP
+};
 
-// Initialize the canonical map
-Object.entries(BUSINESS_GOAL_SLUG_MAP).forEach(([canonical, variations]) => {
-  // Add the canonical form mapping to itself
-  CANONICAL_SLUG_MAP[canonical] = canonical;
-  
-  // Add each variation mapping to the canonical form
-  variations.forEach(variation => {
-    CANONICAL_SLUG_MAP[variation] = canonical;
-  });
-});
-
-/**
- * Industry-specific prefixes that might be used in slugs
- */
-export const COMMON_PREFIXES = ['retail', 'micro', 'smart'];
+// Common prefixes that might be added to slugs
+export const COMMON_PREFIXES = [
+  'vending-',
+  'vending-machine-',
+  'smart-',
+  'smart-vending-',
+  'automated-',
+  'automated-retail-',
+  'self-service-',
+  'unattended-',
+  'micro-market-',
+  'intelligent-'
+];
 
 /**
- * Simple normalization function for slugs
+ * Normalize a slug by converting to lowercase, replacing spaces with hyphens,
+ * and removing special characters
+ * @param slug The original slug
+ * @returns A normalized slug
  */
 export function normalizeSlug(slug: string): string {
   if (!slug) return '';
-  return slug.toLowerCase().replace(/_/g, '-').trim();
+  
+  return slug
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')       // Replace spaces with hyphens
+    .replace(/[^\w\-]+/g, '')   // Remove all non-word chars except hyphens
+    .replace(/\-\-+/g, '-')     // Replace multiple hyphens with single
+    .replace(/^-+/, '')         // Trim hyphens from start of text
+    .replace(/-+$/, '');        // Trim hyphens from end of text
 }
 
 /**
- * Get the canonical form of a slug
- * @param slug Any form of a slug (normalized or not)
- * @returns The canonical form, or the original slug if no canonical form exists
+ * Get the canonical form of a slug if it exists in the mapping
+ * @param slug The normalized slug to check
+ * @returns The canonical form or the original slug if no mapping exists
  */
 export function getCanonicalSlug(slug: string): string {
   if (!slug) return '';
   
-  const normalizedSlug = normalizeSlug(slug);
-  return CANONICAL_SLUG_MAP[normalizedSlug] || normalizedSlug;
+  // Check if the slug has a canonical form
+  return CANONICAL_SLUG_MAP[slug] || slug;
 }
 
 /**
- * Handles basic format conversions between slug formats
- * @param slug The slug to convert
- * @returns Array of basic variations
+ * Generate basic variations of a slug
+ * @param slug The original slug
+ * @returns An array of basic slug variations
  */
 export function getBasicVariations(slug: string): string[] {
   if (!slug) return [];
   
-  const variations: string[] = [slug];
+  const variations: string[] = [];
   
-  // Add hyphen version
-  const hyphenVersion = slug.replace(/_/g, '-');
-  if (!variations.includes(hyphenVersion)) {
-    variations.push(hyphenVersion);
+  // Try replacing hyphens with underscores and vice versa
+  if (slug.includes('-')) {
+    variations.push(slug.replace(/-/g, '_'));
   }
   
-  // Add underscore version
-  const underscoreVersion = slug.replace(/-/g, '_');
-  if (!variations.includes(underscoreVersion)) {
-    variations.push(underscoreVersion);
+  if (slug.includes('_')) {
+    variations.push(slug.replace(/_/g, '-'));
+  }
+  
+  // Try with and without common prefixes
+  const normalizedSlug = normalizeSlug(slug);
+  
+  for (const prefix of COMMON_PREFIXES) {
+    if (normalizedSlug.startsWith(prefix)) {
+      // Try without the prefix
+      variations.push(normalizedSlug.substring(prefix.length));
+    } else {
+      // Try with the prefix
+      variations.push(prefix + normalizedSlug);
+    }
   }
   
   return variations;
 }
 
 /**
- * Log details about slug operations for debugging
+ * Log a slug operation for debugging purposes
  * @param operation The operation being performed
- * @param slug The slug being operated on
  * @param details Additional details about the operation
  */
-export function logSlugOperation(operation: string, slug: string, details?: any): void {
-  console.log(`[SlugUtils:${operation}] ${slug}${details ? ` - ${JSON.stringify(details)}` : ''}`);
+export function logSlugOperation(operation: string, details: Record<string, any>): void {
+  console.log(`[SlugOperation:${operation}]`, details);
 }
