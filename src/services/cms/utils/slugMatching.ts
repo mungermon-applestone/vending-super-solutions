@@ -60,6 +60,7 @@ export function resolveSlug(inputSlug: string, availableSlugs?: string[]): strin
   console.log(`[resolveSlug] Processing input slug: "${inputSlug}"`);
   
   // Step 1: Normalize the input slug
+  // Import normalizeSlug from the common module to use it
   const normalizedSlug = normalizeSlug(inputSlug);
   console.log(`[resolveSlug] Normalized slug: "${normalizedSlug}"`);
   
