@@ -1,6 +1,6 @@
 
 import { navigate } from "@/services/navigation";
-import { normalizeSlug, getCanonicalSlug, resolveSlug } from "./slugMatching";
+import { normalizeSlug, getCanonicalSlug, resolveSlug, getHardcodedSlug } from "./slugMatching";
 
 /**
  * Redirects to the canonical version of a business goal detail page if needed
@@ -12,6 +12,15 @@ export function redirectToCanonicalBusinessGoalIfNeeded(slug: string): boolean {
   
   console.log(`[redirectToCanonical] Checking if redirection needed for slug: ${slug}`);
   
+  // Check for hardcoded slugs first
+  const hardcodedSlug = getHardcodedSlug(slug);
+  if (hardcodedSlug && hardcodedSlug !== slug) {
+    console.log(`[redirectToCanonical] Redirecting from ${slug} to hardcoded slug ${hardcodedSlug}`);
+    navigate(`/business-goals/${hardcodedSlug}`);
+    return true;
+  }
+  
+  // Then try the standard resolution process
   const resolvedSlug = resolveSlug(slug);
   
   // If resolved slug is different from the normalized input, redirect

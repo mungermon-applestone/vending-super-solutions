@@ -24,28 +24,39 @@ export function useBusinessGoal(slug: string | undefined) {
       
       try {
         // Dynamically import to avoid circular dependencies
-        const { fetchBusinessGoalBySlug } = await import('@/services/cms/contentTypes/businessGoals/fetchBusinessGoalBySlug');
+        const { getBusinessGoalBySlug } = await import('@/services/cms/businessGoals');
         
-        // Try to fetch using resolved slug
-        let businessGoal = await fetchBusinessGoalBySlug(resolvedSlug);
+        // Try direct method first
+        console.log(`[useBusinessGoal] Attempting direct fetch with resolved slug: "${resolvedSlug}"`);
+        let businessGoal = await getBusinessGoalBySlug(resolvedSlug);
         
-        // If not found and resolved is different from normalized, try with normalized
-        const normalizedSlug = normalizeSlug(slug);
-        if (!businessGoal && resolvedSlug !== normalizedSlug) {
-          console.log(`[useBusinessGoal] Not found with resolved slug, trying normalized slug`);
-          businessGoal = await fetchBusinessGoalBySlug(normalizedSlug);
+        // If not found and resolved is different from original, try with original
+        if (!businessGoal && resolvedSlug !== slug) {
+          console.log(`[useBusinessGoal] Not found with resolved slug, trying original slug: "${slug}"`);
+          businessGoal = await getBusinessGoalBySlug(slug);
         }
         
-        // If still not found, try with original slug as last resort
-        if (!businessGoal && normalizedSlug !== slug) {
-          console.log(`[useBusinessGoal] Not found with normalized slug, trying original slug`);
-          businessGoal = await fetchBusinessGoalBySlug(slug);
+        // If still not found, try fallback methods
+        if (!businessGoal) {
+          console.log('[useBusinessGoal] Trying fallback methods for slug lookup');
+          // Try normalized slug as another option
+          const normalizedSlug = normalizeSlug(slug);
+          if (normalizedSlug !== resolvedSlug && normalizedSlug !== slug) {
+            console.log(`[useBusinessGoal] Trying normalized slug: "${normalizedSlug}"`);
+            businessGoal = await getBusinessGoalBySlug(normalizedSlug);
+          }
+          
+          // Final attempt - try direct import from contentful operation
+          if (!businessGoal) {
+            console.log('[useBusinessGoal] Last attempt - using direct contentful operation');
+            const { fetchBusinessGoalBySlug } = await import('@/services/cms/contentTypes/businessGoals/fetchBusinessGoalBySlug');
+            businessGoal = await fetchBusinessGoalBySlug(slug);
+          }
         }
         
         if (!businessGoal) {
           console.error(`[useBusinessGoal] No business goal found with any slug variation:`, {
             original: slug,
-            normalized: normalizedSlug,
             resolved: resolvedSlug
           });
           throw new Error(`Business goal not found: ${slug}`);
@@ -60,7 +71,7 @@ export function useBusinessGoal(slug: string | undefined) {
     },
     enabled: !!slug,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes to improve performance
-    retry: 1, // Only retry once to avoid hammering the API
+    retry: 2, // Retry twice to improve chances of success
     meta: {
       onError: (error: Error) => {
         toast.error(`Error loading business goal: ${error.message}`);

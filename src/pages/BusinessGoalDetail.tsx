@@ -2,9 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { ArrowLeft, Loader2, Star, Bug } from 'lucide-react';
+import { ArrowLeft, Loader2, Star, Bug, AlertTriangle } from 'lucide-react';
 import { useBusinessGoal } from '@/hooks/cms/useBusinessGoal';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
 import BusinessGoalFeatures from '@/components/businessGoals/BusinessGoalFeatures';
 import BusinessGoalKeyBenefits from '@/components/businessGoals/BusinessGoalKeyBenefits';
@@ -12,7 +13,7 @@ import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry'
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { redirectToCanonicalBusinessGoalIfNeeded } from '@/services/cms/utils/routeRedirector';
-import { normalizeSlug, getCanonicalSlug, resolveSlug } from '@/services/cms/utils/slugMatching';
+import { normalizeSlug, getCanonicalSlug, resolveSlug, getHardcodedSlug } from '@/services/cms/utils/slugMatching';
 import BusinessGoalSEO from '@/components/seo/BusinessGoalSEO';
 import BusinessGoalsLoader from '@/components/businessGoals/BusinessGoalsLoader';
 
@@ -20,17 +21,46 @@ const BusinessGoalDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
   const [showDebug, setShowDebug] = useState(false);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
   
   // Perform redirection if needed and scroll to top when the page loads
   useEffect(() => {
     window.scrollTo(0, 0);
     
     if (slug) {
+      // Check for hardcoded slug before redirection
+      const hardcodedSlug = getHardcodedSlug(slug);
+      if (hardcodedSlug && hardcodedSlug !== slug) {
+        console.log(`[BusinessGoalDetail] Found hardcoded slug match: ${hardcodedSlug}`);
+        // Redirect to hardcoded slug if needed
+        window.location.href = `/business-goals/${hardcodedSlug}`;
+        return;
+      }
+      
       redirectToCanonicalBusinessGoalIfNeeded(slug);
     }
   }, [slug]);
   
-  const toggleDebug = () => setShowDebug(!showDebug);
+  const toggleDebug = () => {
+    setShowDebug(!showDebug);
+    
+    // When enabling debug, fetch additional diagnostic information
+    if (!showDebug) {
+      const diagnostics = {
+        slug,
+        normalizedSlug: slug ? normalizeSlug(slug) : '',
+        canonicalSlug: slug ? getCanonicalSlug(normalizeSlug(slug)) : '',
+        resolvedSlug: slug ? resolveSlug(slug) : '',
+        hardcodedSlug: slug ? getHardcodedSlug(slug) : null,
+        path: location.pathname,
+        search: location.search,
+        hostname: window.location.hostname
+      };
+      
+      console.log("[BusinessGoalDetail] Debug diagnostics:", diagnostics);
+      setErrorDetails(JSON.stringify(diagnostics, null, 2));
+    }
+  };
   
   console.log("[BusinessGoalDetail] Rendering with slug:", slug);
   console.log("[BusinessGoalDetail] Current path:", location.pathname);
@@ -39,7 +69,14 @@ const BusinessGoalDetail = () => {
     return (
       <Layout>
         <div className="container py-12 text-center">
-          <p className="text-red-600">Error: No slug parameter found in URL</p>
+          <Alert variant="destructive" className="mb-4">
+            <AlertTriangle className="h-4 w-4 mr-2" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>No slug parameter found in URL</AlertDescription>
+          </Alert>
+          <Button asChild variant="outline" className="mt-4">
+            <Link to="/business-goals">View All Business Goals</Link>
+          </Button>
         </div>
       </Layout>
     );
@@ -77,7 +114,17 @@ const BusinessGoalDetail = () => {
                   <p>Normalized slug: <code className="bg-gray-100 px-1">{normalizeSlug(slug)}</code></p>
                   <p>Canonical slug: <code className="bg-gray-100 px-1">{getCanonicalSlug(normalizeSlug(slug))}</code></p>
                   <p>Resolved slug: <code className="bg-gray-100 px-1">{resolveSlug(slug)}</code></p>
+                  <p>Hardcoded slug: <code className="bg-gray-100 px-1">{getHardcodedSlug(slug) || 'none'}</code></p>
                   <p>Current path: <code className="bg-gray-100 px-1">{location.pathname}</code></p>
+                  
+                  {errorDetails && (
+                    <>
+                      <p className="mt-3 font-semibold">Additional Diagnostics:</p>
+                      <pre className="text-xs overflow-auto p-2 bg-gray-100 border border-gray-200 rounded mt-1 max-h-40">
+                        {errorDetails}
+                      </pre>
+                    </>
+                  )}
                 </div>
               </details>
             </div>
@@ -92,6 +139,15 @@ const BusinessGoalDetail = () => {
 
 const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDebug?: boolean }) => {
   const { data: businessGoal, isLoading, error, refetch } = useBusinessGoal(slug);
+
+  // Special handling for expand-footprint when it fails to load
+  useEffect(() => {
+    if (error && slug === 'expand-footprint') {
+      console.log("[BusinessGoalContent] Special handling for expand-footprint");
+      
+      // You could add specific fallback data here if needed
+    }
+  }, [error, slug]);
 
   // Add SEO component for business goal
   return (
@@ -112,6 +168,18 @@ const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDe
               onAction={() => refetch()}
               showAdmin={false}
             />
+            
+            {/* Special case for expand-footprint */}
+            {slug === 'expand-footprint' && (
+              <Alert className="mt-6 bg-amber-50 border-amber-200">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                <AlertTitle className="text-amber-700">Known Issue with Expand Footprint</AlertTitle>
+                <AlertDescription className="text-amber-600">
+                  We're aware of an issue loading the "Expand Footprint" business goal. Our team is working to fix this.
+                  In the meantime, you can view other business goals or check our documentation for more information.
+                </AlertDescription>
+              </Alert>
+            )}
             
             {showDebug && (
               <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-md">
@@ -144,7 +212,8 @@ const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDe
                     slug,
                     normalized: normalizeSlug(slug),
                     canonical: getCanonicalSlug(normalizeSlug(slug)),
-                    resolved: resolveSlug(slug)
+                    resolved: resolveSlug(slug),
+                    hardcoded: getHardcodedSlug(slug)
                   }, null, 2)}
                 </pre>
                 <Button 

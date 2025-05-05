@@ -5,7 +5,7 @@
  */
 
 // Import necessary functions from modules
-import { normalizeSlug, getCanonicalSlug, getBasicVariations, BUSINESS_GOAL_SLUG_MAP, CANONICAL_SLUG_MAP, COMMON_PREFIXES, logSlugOperation } from './slug/common';
+import { normalizeSlug, getCanonicalSlug, getBasicVariations, getHardcodedSlug, BUSINESS_GOAL_SLUG_MAP, CANONICAL_SLUG_MAP, COMMON_PREFIXES, logSlugOperation } from './slug/common';
 
 // Import slug variation functionality
 import { getSlugVariations, slugsMatch, findBestSlugMatch } from './slug/variations';
@@ -26,7 +26,8 @@ import { exactSlugMatch } from './slug/normalize';
 export { 
   normalizeSlug, 
   getCanonicalSlug, 
-  getBasicVariations, 
+  getBasicVariations,
+  getHardcodedSlug,
   BUSINESS_GOAL_SLUG_MAP,
   CANONICAL_SLUG_MAP,
   COMMON_PREFIXES,
@@ -71,6 +72,13 @@ export function resolveSlug(inputSlug: string, availableSlugs?: string[]): strin
   if (!inputSlug) return '';
   
   console.log(`[resolveSlug] Processing input slug: "${inputSlug}"`);
+  
+  // Check for hardcoded special cases first
+  const hardcodedSlug = getHardcodedSlug(inputSlug);
+  if (hardcodedSlug) {
+    console.log(`[resolveSlug] Found hardcoded slug: "${hardcodedSlug}" for "${inputSlug}"`);
+    return hardcodedSlug;
+  }
   
   // Step 1: Normalize the input slug
   const normalizedSlug = normalizeSlug(inputSlug);
