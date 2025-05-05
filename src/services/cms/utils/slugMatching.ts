@@ -4,10 +4,28 @@
  * Centralized module for all slug handling
  */
 
-// Re-export common utilities
+// Import necessary functions from modules
+import { normalizeSlug as normalizeSlugFromCommon, getCanonicalSlug as getCanonicalSlugFromCommon, getBasicVariations, BUSINESS_GOAL_SLUG_MAP, CANONICAL_SLUG_MAP, COMMON_PREFIXES, logSlugOperation } from './slug/common';
+
+// Import slug variation functionality
+import { getSlugVariations, slugsMatch, findBestSlugMatch as findBestSlugMatchFromMatcher } from './slug/variations';
+
+// Import mapping utilities
+import { mapUrlSlugToDatabaseSlug, mapDatabaseSlugToUrlSlug, registerSlugChange } from './slug/mapping';
+
+// Import UUID utilities
+import { extractUUID, createSlugWithUUID, parseSlugWithUUID } from './slug/uuid';
+
+// Import logging utilities
+import { logSlugSearch, logSlugResult, getSlugNotFoundMessage } from './slug/logging';
+
+// Import normalize utilities
+import { exactSlugMatch } from './slug/normalize';
+
+// Re-export all the imported functions for use by external modules
 export { 
-  normalizeSlug, 
-  getCanonicalSlug, 
+  normalizeSlugFromCommon as normalizeSlug, 
+  getCanonicalSlugFromCommon as getCanonicalSlug, 
   getBasicVariations, 
   BUSINESS_GOAL_SLUG_MAP,
   CANONICAL_SLUG_MAP,
@@ -15,35 +33,30 @@ export {
   logSlugOperation
 } from './slug/common';
 
-// Export main slug variation functionality
 export { 
   getSlugVariations,
   slugsMatch, 
-  findBestSlugMatch 
+  findBestSlugMatchFromMatcher as findBestSlugMatch 
 } from './slug/variations';
 
-// Export mapping utilities
 export { 
   mapUrlSlugToDatabaseSlug, 
   mapDatabaseSlugToUrlSlug, 
   registerSlugChange 
 } from './slug/mapping';
 
-// Export UUID utilities
 export { 
   extractUUID, 
   createSlugWithUUID, 
   parseSlugWithUUID 
 } from './slug/uuid';
 
-// Export logging utilities
 export { 
   logSlugSearch, 
   logSlugResult, 
   getSlugNotFoundMessage 
 } from './slug/logging';
 
-// Export normalize utilities
 export { 
   exactSlugMatch 
 } from './slug/normalize';
@@ -60,12 +73,11 @@ export function resolveSlug(inputSlug: string, availableSlugs?: string[]): strin
   console.log(`[resolveSlug] Processing input slug: "${inputSlug}"`);
   
   // Step 1: Normalize the input slug
-  // Import normalizeSlug from the common module to use it
-  const normalizedSlug = normalizeSlug(inputSlug);
+  const normalizedSlug = normalizeSlugFromCommon(inputSlug);
   console.log(`[resolveSlug] Normalized slug: "${normalizedSlug}"`);
   
   // Step 2: Get the canonical form if it exists
-  const canonicalSlug = getCanonicalSlug(normalizedSlug);
+  const canonicalSlug = getCanonicalSlugFromCommon(normalizedSlug);
   console.log(`[resolveSlug] Canonical slug: "${canonicalSlug}"`);
   
   // Step 3: If we have available slugs, try to find a direct match
@@ -89,7 +101,7 @@ export function resolveSlug(inputSlug: string, availableSlugs?: string[]): strin
     }
     
     // If no direct match, try finding a best match
-    const bestMatch = findBestSlugMatch(canonicalSlug || normalizedSlug, availableSlugs);
+    const bestMatch = findBestSlugMatchFromMatcher(canonicalSlug || normalizedSlug, availableSlugs);
     if (bestMatch) {
       console.log(`[resolveSlug] Found best match: "${bestMatch}" for input: "${inputSlug}"`);
       return bestMatch;

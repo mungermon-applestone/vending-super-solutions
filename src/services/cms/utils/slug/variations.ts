@@ -44,7 +44,7 @@ export function getSlugVariations(slug: string): string[] {
   return [...new Set(variations)];
 }
 
-// Re-export functions from other modules
+// Re-export functions from matcher module
 export {
   slugsMatch,
   findBestSlugMatch
