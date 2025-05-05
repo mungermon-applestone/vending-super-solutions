@@ -65,7 +65,7 @@ const routes: RouteObject[] = [
       },
       {
         path: 'business-goals/:slug',
-        element: <BusinessGoalDetailPage />
+        element: <BusinessGoalDetail /> // Use the proven implementation for all business goals
       },
       {
         path: 'goals/:slug',
@@ -73,7 +73,7 @@ const routes: RouteObject[] = [
       },
       {
         path: 'business/:slug',
-        element: <BusinessGoalDetailPage />
+        element: <BusinessGoalDetail /> // Use the proven implementation for backwards compatibility
       },
       {
         path: 'about',
