@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { CMSBusinessGoal } from '@/types/cms';
 import { normalizeSlug, getCanonicalSlug, resolveSlug } from '@/services/cms/utils/slugMatching';
+import { isExpandFootprintSlug } from '@/services/cms/utils/slug/specialCases';
 
 /**
  * Custom hook to fetch a single business goal by slug
@@ -14,6 +15,13 @@ export function useBusinessGoal(slug: string | undefined) {
       if (!slug) {
         console.error('[useBusinessGoal] No slug provided');
         throw new Error('Business goal slug is required');
+      }
+
+      // Special case for expand-footprint - early check to ensure it's treated correctly
+      if (isExpandFootprintSlug(slug)) {
+        console.log(`[useBusinessGoal] Identified as expand-footprint slug pattern: "${slug}"`);
+        // Force the canonical slug for this special case
+        slug = 'expand-footprint';
       }
 
       // Use centralized resolveSlug function
@@ -59,7 +67,7 @@ export function useBusinessGoal(slug: string | undefined) {
         }
         
         // Special case for expand-footprint - this is implemented as the last resort
-        if (slug === 'expand-footprint' || (slug.includes('expand') && slug.includes('footprint'))) {
+        if (isExpandFootprintSlug(slug)) {
           console.log('[useBusinessGoal] Using special handling for expand-footprint');
           
           // Create a fallback if nothing is found

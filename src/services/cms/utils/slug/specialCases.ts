@@ -1,4 +1,3 @@
-
 /**
  * Special case handlers for specific slugs or slug patterns
  */
@@ -24,6 +23,9 @@ export function getSpecialCaseVariations(slug: string): string[] {
     variations.push('expand-retail-footprint');
     variations.push('retail-expansion');
     variations.push('footprint-expansion');
+    variations.push('expand'); // Add simple variations too
+    variations.push('footprint');
+    variations.push('expansion');
   }
   
   // Special handling for cost reduction
@@ -88,6 +90,9 @@ export function isExpandFootprintSlug(slug: string): boolean {
   const words = slug.toLowerCase().split(/[-_\s]/);
   if (words.includes('expand') && words.includes('footprint')) return true;
   
+  // If it's clearly about expansion, it's likely this
+  if (slug === 'expand' || slug === 'expansion' || slug === 'footprint') return true;
+  
   return false;
 }
 
@@ -104,4 +109,50 @@ export function getSpecialCaseCanonicalSlug(slug: string): string | null {
   // Add other special cases here
   
   return null;
+}
+
+/**
+ * Get a hardcoded slug for known special cases
+ * This is used for direct mapping from any variation to the canonical slug
+ * @param slug The original slug
+ * @returns The hardcoded canonical slug if it's a special case, or null
+ */
+export function getHardcodedSlug(slug: string): string | null {
+  if (!slug) return null;
+  
+  // Normalize to lowercase with hyphen
+  const normalizedSlug = slug.toLowerCase().replace(/[_\s]+/g, '-');
+  
+  // Special case for expand-footprint and its variations
+  if (isExpandFootprintSlug(normalizedSlug)) {
+    return 'expand-footprint';
+  }
+  
+  // Other hardcoded mappings can be added here as needed
+  const hardcodedMappings: Record<string, string> = {
+    'marketing-promotions': 'marketing-and-promotions',
+    'marketing-promotion': 'marketing-and-promotions',
+    'marketing': 'marketing-and-promotions',
+    'promotions': 'marketing-and-promotions',
+    'bopis': 'bopis',
+    'buy-online-pickup-in-store': 'bopis',
+    'buybopis': 'bopis',
+    'pickup-in-store': 'bopis',
+    'data-analytics': 'data-analytics',
+    'data': 'data-analytics',
+    'analytics': 'data-analytics',
+    'data-insight': 'data-analytics',
+    'data-insights': 'data-analytics',
+    'fleet-management': 'fleet-management',
+    'fleet': 'fleet-management',
+    'fleetmanagement': 'fleet-management',
+    'machine-management': 'fleet-management',
+    'customer-satisfaction': 'customer-satisfaction',
+    'customer-experience': 'customer-satisfaction',
+    'customer': 'customer-satisfaction',
+    'satisfaction': 'customer-satisfaction',
+    'csat': 'customer-satisfaction',
+  };
+  
+  return hardcodedMappings[normalizedSlug] || null;
 }

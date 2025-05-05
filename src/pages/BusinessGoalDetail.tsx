@@ -16,6 +16,7 @@ import { redirectToCanonicalBusinessGoalIfNeeded } from '@/services/cms/utils/ro
 import { normalizeSlug, getCanonicalSlug, resolveSlug, getHardcodedSlug } from '@/services/cms/utils/slugMatching';
 import BusinessGoalSEO from '@/components/seo/BusinessGoalSEO';
 import BusinessGoalsLoader from '@/components/businessGoals/BusinessGoalsLoader';
+import { CONTENTFUL_CONFIG, isContentfulConfigured } from '@/config/cms';
 
 const BusinessGoalDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -32,13 +33,10 @@ const BusinessGoalDetail = () => {
     // Check contentful configuration
     const checkContentfulConfig = async () => {
       try {
-        // Import locally to avoid circular dependencies
-        const { getContentfulConfig } = await import('@/config/cms');
-        const config = getContentfulConfig();
         setContentfulConfig({
-          spaceId: config.spaceId ? '✓ Set' : '✗ Missing',
-          accessToken: config.accessToken ? '✓ Set' : '✗ Missing',
-          environment: config.environment || 'master'
+          spaceId: CONTENTFUL_CONFIG.SPACE_ID ? '✓ Set' : '✗ Missing',
+          accessToken: CONTENTFUL_CONFIG.DELIVERY_TOKEN ? '✓ Set' : '✗ Missing',
+          environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master'
         });
       } catch (err) {
         console.error('Error checking Contentful config:', err);
@@ -154,7 +152,7 @@ const BusinessGoalDetail = () => {
                     {contentfulConfig && (
                       <ul>
                         {Object.entries(contentfulConfig).map(([key, value]) => (
-                          <li key={key}>{key}: {value}</li>
+                          <li key={key}>{key}: {String(value)}</li>
                         ))}
                       </ul>
                     )}
