@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Server, HardDrive } from 'lucide-react';
 import { CMSMachine } from '@/types/cms';
+import Image from '@/components/common/Image';
 
 interface MachineDetailHeroProps {
   machine: CMSMachine;
@@ -44,11 +45,16 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
           <div className="relative">
             <div className="bg-white rounded-lg shadow-xl p-8 overflow-hidden">
               {machine.images && machine.images[0] ? (
-                <img 
-                  src={machine.images[0].url} 
-                  alt={machine.images[0].alt || machine.title} 
-                  className="w-full h-auto object-contain"
-                />
+                <div className="aspect-square w-full flex items-center justify-center">
+                  <Image 
+                    src={machine.images[0].url} 
+                    alt={machine.images[0].alt || machine.title} 
+                    className="max-w-full max-h-full"
+                    objectFit="contain"
+                    isThumbnail={false}
+                    priority={true}
+                  />
+                </div>
               ) : (
                 <div className="aspect-square bg-gray-100 flex items-center justify-center">
                   {machine.type === 'vending' ? (

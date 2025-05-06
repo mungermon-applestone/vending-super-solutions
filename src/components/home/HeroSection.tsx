@@ -97,15 +97,18 @@ const HeroSection = () => {
             </div>
           </div>
           <div className="relative flex justify-center">
-            <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-              <Image 
-                src={imageUrl}
-                alt={imageAlt}
-                className="w-full h-auto object-cover"
-                aspectRatio="16/9"
-                priority={true}
-                sizes="(min-width: 1024px) 50vw, 100vw"
-              />
+            <div className="bg-white rounded-lg shadow-xl overflow-hidden w-full" style={{ maxHeight: '500px' }}>
+              <div className="aspect-[16/9] w-full">
+                <Image 
+                  src={imageUrl}
+                  alt={imageAlt}
+                  className="w-full h-full"
+                  objectFit="contain"
+                  aspectRatio="16/9"
+                  priority={true}
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                />
+              </div>
             </div>
             <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
               <p className="font-bold">Works with multiple machine models</p>

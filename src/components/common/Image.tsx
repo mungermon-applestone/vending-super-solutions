@@ -170,19 +170,38 @@ const Image: React.FC<ImageProps> = ({
   // Generate srcSet only for images that would benefit from it
   const srcSet = (isContentfulImage || isUnsplashImage) ? generateSrcSet(imageUrl) : undefined;
 
+  // Apply additional container styles for thumbnail vs regular images
+  const containerStyle = {
+    ...aspectRatioStyle,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    width: '100%',
+    height: isThumbnail ? '100%' : 'auto',
+  };
+
+  // Determine specific image styles based on thumbnail status
+  const imageStyle = {
+    ...props.style,
+    transition: 'opacity 0.3s ease-in-out',
+    maxWidth: '100%',
+    // For thumbnails we want to ensure they're fully contained without stretching
+    ...(isThumbnail && objectFit === 'contain' ? { maxHeight: '100%' } : {})
+  };
+
   return (
-    <div className={`image-container ${!isLoaded ? 'bg-gray-100 animate-pulse' : ''}`} style={aspectRatioStyle}>
+    <div 
+      className={`image-container ${!isLoaded ? 'bg-gray-100 animate-pulse' : ''}`} 
+      style={containerStyle}
+    >
       <img 
         src={optimizeUrl(imageUrl)} 
         alt={alt}
         className={`${objectFitClass} ${className} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         loading={loading}
         fetchPriority={fetchPriority as 'high' | 'low' | 'auto'}
-        style={{
-          ...aspectRatioStyle,
-          ...props.style,
-          transition: 'opacity 0.3s ease-in-out'
-        }}
+        style={imageStyle}
         onLoad={handleLoad}
         onError={handleError}
         srcSet={srcSet}

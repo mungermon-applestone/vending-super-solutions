@@ -31,14 +31,16 @@ const HeroImage: React.FC<HeroImageProps> = ({ imageUrl, imageAlt }) => {
   return (
     <div className="relative">
       <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-        <Image 
-          src={finalImageUrl}
-          alt={imageAlt || "Vending Technology"}
-          className="w-full h-auto object-cover"
-          priority={true} // This is a hero image, so it's important to load quickly
-          sizes="(min-width: 1280px) 1200px, (min-width: 768px) 768px, 100vw"
-          objectFit="cover"
-        />
+        <div className="aspect-[16/9] w-full flex items-center justify-center">
+          <Image 
+            src={finalImageUrl}
+            alt={imageAlt || "Vending Technology"}
+            className="w-full h-full"
+            objectFit="contain"
+            priority={true}
+            sizes="(min-width: 1280px) 1200px, (min-width: 768px) 768px, 100vw"
+          />
+        </div>
       </div>
     </div>
   );

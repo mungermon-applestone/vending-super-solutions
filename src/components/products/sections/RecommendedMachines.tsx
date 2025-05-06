@@ -41,7 +41,7 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
             
             return (
               <div key={machine.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="aspect-video w-full overflow-hidden">
+                <div className="aspect-video w-full overflow-hidden bg-white flex items-center justify-center">
                   {imageToUse ? (
                     <Image
                       src={imageToUse.url}
