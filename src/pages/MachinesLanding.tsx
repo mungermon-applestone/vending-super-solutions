@@ -1,7 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import CTASection from '@/components/common/CTASection';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Server, HardDrive } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,6 +11,7 @@ import { CMSMachine } from '@/types/cms';
 import PageHero from '@/components/common/PageHero';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
+import { SimpleContactCTA } from '@/components/common';
 
 const MachinesLanding = () => {
   const location = useLocation();
@@ -161,7 +162,8 @@ const MachinesLanding = () => {
       {/* Testimonials Section */}
       {testimonialSection && <TestimonialsSection data={testimonialSection} />}
 
-      <CTASection />
+      {/* Replace CTASection with SimpleContactCTA */}
+      <SimpleContactCTA />
     </Layout>
   );
 };

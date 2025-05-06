@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Check, Shield, Server, Settings, Bell, Battery, ClipboardCheck, RefreshCcw, TrendingUp, PieChart, Map, UserCheck } from 'lucide-react';
@@ -11,11 +10,11 @@ import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
 import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
 import BusinessGoalVideoSection from '@/components/businessGoals/BusinessGoalVideoSection';
 import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
-import InquiryForm from '@/components/machines/contact/InquiryForm';
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { redirectToCanonicalBusinessGoalIfNeeded } from '@/services/cms/utils/routeRedirector';
 import { normalizeSlug } from '@/services/cms/utils/slug/common';
+import { SimpleContactCTA } from '@/components/common';
 
 // Helper function to safely check for features array
 const hasValidFeatures = (businessGoal: any) => {
@@ -310,7 +309,8 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
         <RecommendedMachines machines={businessGoal.recommendedMachines.filter(m => m && m.title)} />
       )}
       
-      <InquiryForm title={`Ready to learn more about ${businessGoal?.title || 'achieving your business goals'}?`} />
+      {/* Replace InquiryForm with SimpleContactCTA */}
+      <SimpleContactCTA title={`Ready to learn more about ${businessGoal?.title || 'achieving your business goals'}?`} />
     </>
   );
 };

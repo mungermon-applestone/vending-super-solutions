@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -8,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
 import BusinessGoalFeatures from '@/components/businessGoals/BusinessGoalFeatures';
 import BusinessGoalKeyBenefits from '@/components/businessGoals/BusinessGoalKeyBenefits';
-import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry';
+import { SimpleContactCTA } from '@/components/common';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { redirectToCanonicalBusinessGoalIfNeeded } from '@/services/cms/utils/routeRedirector';
@@ -197,7 +196,7 @@ const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDe
             />
           )}
 
-          <BusinessGoalInquiry title={`Ready to learn more about ${businessGoal.title}?`} />
+          <SimpleContactCTA />
         </>
       )}
     </>

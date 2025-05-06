@@ -1,9 +1,7 @@
-
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { toast } from 'sonner';
 import { useMachinesPageContent } from '@/hooks/cms/useMachinesPageContent';
-import InquiryForm from '@/components/machines/contact/InquiryForm';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
@@ -21,6 +19,7 @@ import MachinesIntroSection from '@/components/machines/MachinesIntroSection';
 import RefreshDataButton from '@/components/machines/RefreshDataButton';
 import MachineGrid from '@/components/machines/MachineGrid';
 import { useHeroContent } from '@/hooks/cms/useHeroContent';
+import { SimpleContactCTA } from '@/components/common';
 
 // Define the Contentful entry ID for the machines page hero
 // This ID specifically points to the hero content for the machines page
@@ -151,7 +150,8 @@ const MachinesPage: React.FC = () => {
       
       {testimonialSection && <TestimonialsSection data={testimonialSection} />}
       
-      <InquiryForm title="Interested in our machines?" />
+      {/* Replace InquiryForm with SimpleContactCTA */}
+      <SimpleContactCTA />
     </Layout>
   );
 };

@@ -7,9 +7,9 @@ import { useContentfulTechnologySections } from '@/hooks/cms/useContentfulTechno
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, Bug } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import InquiryForm from '@/components/machines/contact/InquiryForm';
 import { Skeleton } from '@/components/ui/skeleton';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
+import { SimpleContactCTA } from '@/components/common';
 
 // Content ID for the technology hero section
 const TECHNOLOGY_HERO_ENTRY_ID = '66FG7FxpIy3YkSXj2mu846';
@@ -80,11 +80,11 @@ const TechnologyPage = () => {
 
         <TechnologySections sections={sections} />
         
-        <InquiryForm title="Ready to transform your vending operations?" />
+        {/* Replace InquiryForm with SimpleContactCTA */}
+        <SimpleContactCTA title="Ready to transform your vending operations?" />
       </div>
     </Layout>
   );
 };
 
 export default TechnologyPage;
-

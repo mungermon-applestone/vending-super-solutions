@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useMachines } from '@/hooks/useMachinesData';
-import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import { Loader2 } from 'lucide-react';
 import { CMSMachine } from '@/types/cms';
 import { forceContentfulProvider } from '@/services/cms/cmsInit';
@@ -14,6 +13,7 @@ import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import { Server, HardDrive, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { SimpleContactCTA } from '@/components/common';
 
 const MachinesPage = () => {
   // Force Contentful provider
@@ -177,7 +177,8 @@ const MachinesPage = () => {
       {/* Testimonials Section */}
       {testimonialSection && <TestimonialsSection data={testimonialSection} />}
 
-      <CTASection />
+      {/* Replace CTASection with SimpleContactCTA */}
+      <SimpleContactCTA />
     </Layout>
   );
 };

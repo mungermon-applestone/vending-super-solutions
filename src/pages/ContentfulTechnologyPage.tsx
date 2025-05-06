@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { useContentfulTechnology } from '@/hooks/cms/useContentfulTechnology';
@@ -5,13 +6,13 @@ import TechnologyHero from '@/components/technology/TechnologyHero';
 import TechnologySections from '@/components/technology/TechnologySections';
 import { Skeleton } from '@/components/ui/skeleton';
 import PageHero from '@/components/common/PageHero';
-import InquiryForm from '@/components/machines/contact/InquiryForm';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { testContentfulConnection, checkContentfulConfig } from '@/utils/contentfulConnectionTest';
 import { Button } from '@/components/ui/button';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
+import { SimpleContactCTA } from '@/components/common';
 
 const ContentfulTechnologyPage: React.FC = () => {
   const { data: technologies, isLoading, error, refetch } = useContentfulTechnology();
@@ -193,7 +194,8 @@ const ContentfulTechnologyPage: React.FC = () => {
         {/* Testimonials Section */}
         {testimonialSection && <TestimonialsSection data={testimonialSection} />}
         
-        <InquiryForm title="Ready to transform your vending operations?" />
+        {/* Replace the inquiry form with SimpleContactCTA */}
+        <SimpleContactCTA />
       </ContentfulErrorBoundary>
     </Layout>
   );
