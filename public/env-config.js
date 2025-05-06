@@ -26,9 +26,9 @@
     VITE_CONTENTFUL_SPACE_ID: "al01e4yh2wq4",
     VITE_CONTENTFUL_DELIVERY_TOKEN: "fxpQth03vfdKzI4VNT_fYg8cD5BwoTiGaa6INIyYync",
     VITE_CONTENTFUL_ENVIRONMENT_ID: "master",
-    // We don't include SendGrid API key here as it should be set in server environment variables
-    EMAIL_TO: "munger@applestonesolutons.com",
-    EMAIL_FROM: "noreply@applestonesolutions.com"
+    SENDGRID_API_KEY: "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",
+    EMAIL_TO: "hello@applestonesolutons.com",
+    EMAIL_FROM: "support@applestonesolutions.com"
   };
 
   // Simple function to detect if we're in a preview environment
@@ -81,6 +81,7 @@
       window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = storedCreds.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
       window.env.EMAIL_TO = storedCreds.EMAIL_TO;
       window.env.EMAIL_FROM = storedCreds.EMAIL_FROM;
+      window.env.SENDGRID_API_KEY = storedCreds.SENDGRID_API_KEY;
       
       // Also set legacy keys for backward compatibility
       window.env.spaceId = storedCreds.VITE_CONTENTFUL_SPACE_ID;
@@ -91,7 +92,34 @@
       return true;
     }
     
-    // Third, use preview credentials for preview environments
+    // Third, try fetching runtime config
+    fetchRuntimeConfig().then(config => {
+      if (config) {
+        console.log('[env-config] Loaded configuration from runtime-config');
+        
+        // Apply the configuration
+        Object.keys(config).forEach(key => {
+          window.env[key] = config[key];
+        });
+        
+        // Set legacy keys for backward compatibility
+        window.env.spaceId = config.VITE_CONTENTFUL_SPACE_ID;
+        window.env.deliveryToken = config.VITE_CONTENTFUL_DELIVERY_TOKEN;
+        window.env.environmentId = config.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+        
+        // Save to localStorage for future use
+        try {
+          localStorage.setItem('contentful_credentials', JSON.stringify(config));
+        } catch (e) {
+          console.warn('[env-config] Failed to save credentials to localStorage:', e);
+        }
+        
+        window._contentfulInitializedSource = 'runtime-config';
+        window.dispatchEvent(new Event('env-config-loaded'));
+      }
+    });
+    
+    // Fourth, use preview credentials for preview environments
     if (isPreviewEnvironment()) {
       console.log('[env-config] Preview/development environment detected, applying preview credentials');
       
@@ -100,6 +128,7 @@
       window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_ENVIRONMENT_ID;
       window.env.EMAIL_TO = PREVIEW_CREDENTIALS.EMAIL_TO;
       window.env.EMAIL_FROM = PREVIEW_CREDENTIALS.EMAIL_FROM;
+      window.env.SENDGRID_API_KEY = PREVIEW_CREDENTIALS.SENDGRID_API_KEY;
       
       // Also set legacy keys for backward compatibility
       window.env.spaceId = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
@@ -126,7 +155,8 @@
           VITE_CONTENTFUL_DELIVERY_TOKEN: window.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
           VITE_CONTENTFUL_ENVIRONMENT_ID: window.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master',
           EMAIL_TO: window.env.EMAIL_TO,
-          EMAIL_FROM: window.env.EMAIL_FROM
+          EMAIL_FROM: window.env.EMAIL_FROM,
+          SENDGRID_API_KEY: window.env.SENDGRID_API_KEY
         }));
       } catch (e) {
         console.warn('[env-config] Failed to save credentials to localStorage:', e);

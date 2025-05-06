@@ -31,6 +31,15 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
     setSubmitting(true);
     
     try {
+      // Get environment configuration from window.env
+      const emailConfig = typeof window !== 'undefined' && window.env ? {
+        SENDGRID_API_KEY: window.env.SENDGRID_API_KEY,
+        EMAIL_TO: window.env.EMAIL_TO,
+        EMAIL_FROM: window.env.EMAIL_FROM
+      } : null;
+      
+      console.log('Email configuration detected:', emailConfig ? 'Available' : 'Not available');
+      
       // Send data to our API endpoint
       const response = await fetch('/api/send-email', {
         method: 'POST',
@@ -42,7 +51,8 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
           email,
           subject,
           message,
-          formType: 'Contact Form'
+          formType: 'Contact Form',
+          config: emailConfig // Pass configuration to API handler
         }),
       });
       

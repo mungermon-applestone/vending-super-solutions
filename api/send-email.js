@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { name, email, subject, message, company, phone, formType } = req.body;
+    const { name, email, subject, message, company, phone, formType, config } = req.body;
     
     // Log the submission data (useful for debugging)
     console.log('Form submission received:', {
@@ -25,14 +25,15 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Email is required' });
     }
     
-    // Get email configuration from environment variables
-    // Note: In server context we can only use process.env, not window.env
-    const sendgridApiKey = process.env.SENDGRID_API_KEY;
-    const emailTo = process.env.EMAIL_TO || 'munger@applestonesolutons.com';
-    const emailFrom = process.env.EMAIL_FROM || 'noreply@applestonesolutions.com';
+    // Get email configuration - support both deployment methods
+    // For Lovable deployment, config will be passed from the client
+    // For Vercel deployment, process.env will be used
+    const sendgridApiKey = config?.SENDGRID_API_KEY || process.env.SENDGRID_API_KEY;
+    const emailTo = config?.EMAIL_TO || process.env.EMAIL_TO || 'munger@applestonesolutons.com';
+    const emailFrom = config?.EMAIL_FROM || process.env.EMAIL_FROM || 'noreply@applestonesolutions.com';
     
     // Check if we're in development or if SendGrid API key is missing
-    if (process.env.NODE_ENV === 'development' || !sendgridApiKey) {
+    if ((typeof window !== 'undefined' && window.location?.hostname === 'localhost') || !sendgridApiKey) {
       console.log('Email would be sent in production with the following details:');
       console.log('To:', emailTo);
       console.log('Subject:', `New ${formType || 'Contact Form'} Submission: ${subject || ''}`);
@@ -97,7 +98,7 @@ export default async function handler(req, res) {
       console.error('SendGrid error:', emailError);
       return res.status(500).json({ 
         error: 'Failed to send email',
-        details: process.env.NODE_ENV === 'development' ? emailError.message : 'Email service error'
+        details: emailError.message
       });
     }
     
@@ -105,7 +106,7 @@ export default async function handler(req, res) {
     console.error('Error processing form submission:', error);
     return res.status(500).json({ 
       error: 'Failed to process form submission',
-      details: process.env.NODE_ENV === 'development' ? error.message : 'Server error'
+      details: error.message
     });
   }
 }

@@ -39,6 +39,15 @@ const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({
     setIsSubmitting(true);
     
     try {
+      // Get environment configuration from window.env
+      const emailConfig = typeof window !== 'undefined' && window.env ? {
+        SENDGRID_API_KEY: window.env.SENDGRID_API_KEY,
+        EMAIL_TO: window.env.EMAIL_TO,
+        EMAIL_FROM: window.env.EMAIL_FROM
+      } : null;
+      
+      console.log('Email configuration detected:', emailConfig ? 'Available' : 'Not available');
+      
       // Send data to our API endpoint
       const response = await fetch('/api/send-email', {
         method: 'POST',
@@ -52,7 +61,8 @@ const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({
           phone,
           subject: `Business Goal Inquiry: ${goalName || 'Custom Solution'}`,
           message,
-          formType: 'Business Goal Inquiry'
+          formType: 'Business Goal Inquiry',
+          config: emailConfig // Pass configuration to API handler
         }),
       });
       
