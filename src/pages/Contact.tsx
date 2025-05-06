@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
 import ContactForm from '@/components/contact/ContactForm';
 import ContactCards from '@/components/contact/ContactCards';
 import FAQSection from '@/components/contact/FAQSection';
@@ -14,13 +13,13 @@ const Contact = () => {
   const navigate = useNavigate();
   
   return (
-    <Layout>
+    <div className="container mx-auto py-12">
       <ContentfulInitializer
         fallback={<ContactFallback />}
       >
         <ContactContent />
       </ContentfulInitializer>
-    </Layout>
+    </div>
   );
 };
 
@@ -53,7 +52,7 @@ const ContactContent = () => {
   } = processedData;
 
   return (
-    <div className="container mx-auto py-12">
+    <div>
       {/* Page Title & Description */}
       <div className="max-w-3xl mx-auto text-center mb-12">
         <h1 className="text-3xl font-bold mb-4">{introTitle || 'Contact Us'}</h1>
