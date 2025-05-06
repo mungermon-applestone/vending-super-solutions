@@ -15,7 +15,7 @@ const BusinessGoalSEO: React.FC<BusinessGoalSEOProps> = ({ businessGoal, canonic
   // Generate the URL for the current page
   const pageUrl = typeof window !== 'undefined' 
     ? canonicalUrl || window.location.href
-    : `https://yourdomain.com/business-goals/${businessGoal.slug}`;
+    : `https://applestonesolutions.com/business-goals/${businessGoal.slug}`;
   
   // Generate structured data for the business goal
   const structuredData = {

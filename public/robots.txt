@@ -8,7 +8,7 @@ Disallow: /api/
 Disallow: /*.json$
 
 # Define sitemap location
-Sitemap: https://vendingsolutions.com/sitemap.xml
+Sitemap: https://applestonesolutions.com/sitemap.xml
 
 # Crawl delay to prevent server overload
 Crawl-delay: 10
@@ -24,4 +24,3 @@ Allow: /*.svg$
 # Prevent duplicate content indexing
 Disallow: /*?*sort=
 Disallow: /*?*filter=
-

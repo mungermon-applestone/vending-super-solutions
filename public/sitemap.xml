@@ -3,102 +3,102 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
-    <loc>https://vendingsolutions.com/</loc>
+    <loc>https://applestonesolutions.com/</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/products</loc>
+    <loc>https://applestonesolutions.com/products</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
     <image:image>
-       <image:loc>https://vendingsolutions.com/og-image.jpg</image:loc>
+       <image:loc>https://applestonesolutions.com/og-image.jpg</image:loc>
        <image:title>Vending Machine Products</image:title>
     </image:image>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/machines</loc>
+    <loc>https://applestonesolutions.com/machines</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/technology</loc>
+    <loc>https://applestonesolutions.com/technology</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/business-goals</loc>
+    <loc>https://applestonesolutions.com/business-goals</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <!-- Business Goal Detail Pages with Canonical URLs -->
   <url>
-    <loc>https://vendingsolutions.com/business-goals/expand-footprint</loc>
+    <loc>https://applestonesolutions.com/business-goals/expand-footprint</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/business-goals/marketing-and-promotions</loc>
+    <loc>https://applestonesolutions.com/business-goals/marketing-and-promotions</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/business-goals/data-analytics</loc>
+    <loc>https://applestonesolutions.com/business-goals/data-analytics</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/business-goals/fleet-management</loc>
+    <loc>https://applestonesolutions.com/business-goals/fleet-management</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/business-goals/customer-satisfaction</loc>
+    <loc>https://applestonesolutions.com/business-goals/customer-satisfaction</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/business-goals/bopis</loc>
+    <loc>https://applestonesolutions.com/business-goals/bopis</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/blog</loc>
+    <loc>https://applestonesolutions.com/blog</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/contact</loc>
+    <loc>https://applestonesolutions.com/contact</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/about</loc>
+    <loc>https://applestonesolutions.com/about</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/privacy</loc>
+    <loc>https://applestonesolutions.com/privacy</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://vendingsolutions.com/terms</loc>
+    <loc>https://applestonesolutions.com/terms</loc>
     <lastmod>2025-05-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>

@@ -39,10 +39,10 @@ const TechnologySchemaData: React.FC<TechnologySchemaDataProps> = ({
     "@type": "TechArticle",
     "headline": technology.name,
     "description": technology.description,
-    "image": technology.image ? `https://yourdomain.com${technology.image}` : undefined,
+    "image": technology.image ? `https://applestonesolutions.com${technology.image}` : undefined,
     "author": {
       "@type": "Organization",
-      "name": "Vending Solutions"
+      "name": "Applestone Solutions"
     },
     ...(technology.features && {
       "articleBody": technology.features.map(f => `${f.name}: ${f.description}`).join('\n')
@@ -52,7 +52,7 @@ const TechnologySchemaData: React.FC<TechnologySchemaDataProps> = ({
     "@type": "CollectionPage",
     "name": "Vending Machine Technologies",
     "description": "Explore our advanced vending machine technologies and solutions.",
-    "url": "https://yourdomain.com/technology"
+    "url": "https://applestonesolutions.com/technology"
   } : undefined;
 
   return (
