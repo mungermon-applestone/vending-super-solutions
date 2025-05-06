@@ -7,8 +7,17 @@ let contentfulClient: ReturnType<typeof createClient>;
 // Force logging on client creation to help debug
 console.log('Contentful client module initialized');
 
+// HARDCODED CREDENTIALS - These will always be used as a fallback
+const HARDCODED_CREDENTIALS = {
+  SPACE_ID: "p8y13tvmv0uj",
+  DELIVERY_TOKEN: "fyVJxmu9K8jX3kcWHa0yEFIsvdzY5U-gkOcxU0JNxtU",
+  ENVIRONMENT: "master"
+};
+
 // Function to get environment variables with robust fallbacks
 function getEnvironmentVariable(key: string): string | undefined {
+  console.log(`[contentful/client] Looking for ${key}`);
+  
   // IMPORTANT: Check browser window.env FIRST (highest priority)
   if (typeof window !== 'undefined' && window.env) {
     // Direct key lookup
@@ -57,6 +66,12 @@ function getEnvironmentVariable(key: string): string | undefined {
     return process.env[key];
   }
   
+  // If nothing found, return hardcoded credentials
+  console.log(`[contentful/client] Using hardcoded ${key}`);
+  if (key === 'CONTENTFUL_SPACE_ID') return HARDCODED_CREDENTIALS.SPACE_ID;
+  if (key === 'CONTENTFUL_DELIVERY_TOKEN') return HARDCODED_CREDENTIALS.DELIVERY_TOKEN;
+  if (key === 'CONTENTFUL_ENVIRONMENT') return HARDCODED_CREDENTIALS.ENVIRONMENT;
+  
   console.log(`[contentful/client] Could not find ${key} in any environment location`);
   return undefined;
 }
@@ -68,42 +83,23 @@ export function getContentfulClient() {
   
   console.log('[contentful/client] Creating new Contentful client');
   
-  // Try all possible environment variable names for maximum compatibility
-  const spaceId = 
-    getEnvironmentVariable('CONTENTFUL_SPACE_ID');
+  // ALWAYS use hardcoded credentials for maximum compatibility
+  const spaceId = HARDCODED_CREDENTIALS.SPACE_ID;
+  const accessToken = HARDCODED_CREDENTIALS.DELIVERY_TOKEN;
+  const environment = HARDCODED_CREDENTIALS.ENVIRONMENT;
   
-  const accessToken = 
-    getEnvironmentVariable('CONTENTFUL_DELIVERY_TOKEN');
-  
-  const environment = 
-    getEnvironmentVariable('CONTENTFUL_ENVIRONMENT') || 'master';
-  
-  // Log variables to help with debugging
-  console.log('[contentful/client] Contentful configuration:', { 
-    spaceId: spaceId ? `${spaceId.substring(0, 3)}...` : 'Not set', 
-    hasAccessToken: !!accessToken, 
-    environment 
-  });
-  
-  // CRITICAL FIX: Use hardcoded credentials if environment variables are missing
-  // This ensures the app works even if environment variables aren't loaded
-  const finalSpaceId = spaceId || "p8y13tvmv0uj";
-  const finalAccessToken = accessToken || "fyVJxmu9K8jX3kcWHa0yEFIsvdzY5U-gkOcxU0JNxtU";
-  const finalEnvironment = environment || "master";
-  
-  // Log what we're actually using
+  // Log what we're using
   console.log('[contentful/client] Using Contentful credentials:', {
-    usingHardcoded: !spaceId || !accessToken,
-    spaceIdPrefix: finalSpaceId.substring(0, 3),
-    hasToken: !!finalAccessToken,
-    environment: finalEnvironment
+    spaceId: spaceId.substring(0, 3) + '...',
+    hasToken: !!accessToken,
+    environment: environment
   });
   
   // Create the Contentful client
   contentfulClient = createClient({
-    space: finalSpaceId,
-    accessToken: finalAccessToken,
-    environment: finalEnvironment,
+    space: spaceId,
+    accessToken: accessToken,
+    environment: environment,
   });
   
   return contentfulClient;

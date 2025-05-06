@@ -21,4 +21,3 @@ console.log("Contentful Environment configuration loaded from env-config.js:", {
   tokenAvailable: !!window.env?.CONTENTFUL_DELIVERY_TOKEN,
   environment: window.env?.CONTENTFUL_ENVIRONMENT || 'master'
 });
-

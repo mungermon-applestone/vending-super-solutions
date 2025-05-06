@@ -11,19 +11,18 @@ export const metadata = {
 }
 
 export default async function ProductsPage() {
-  console.log('[Next.js] Products page rendering with enhanced error handling');
+  console.log('[Next.js] Products page rendering');
   
   let products = [];
   let usedFallback = false;
   let error = null;
   
   try {
-    // Server-side data fetching with improved error logging
-    console.log('[Next.js] Attempting to fetch products from Contentful');
+    // Try to fetch from Contentful first
     products = await getProductTypes();
-    
     console.log(`[Next.js] Fetched ${products.length} products from Contentful`);
     
+    // If no products, use fallbacks
     if (products.length === 0) {
       console.warn('[Next.js] No products returned from Contentful, using fallbacks');
       products = Object.values(productFallbacks);
@@ -32,7 +31,7 @@ export default async function ProductsPage() {
   } catch (err) {
     console.error('[Next.js] Error fetching products from Contentful:', err);
     error = err instanceof Error ? err.message : 'Unknown error';
-    // Use fallback data if Contentful fetch fails
+    // Always use fallback data if there's an error
     products = Object.values(productFallbacks);
     usedFallback = true;
     console.log(`[Next.js] Using ${products.length} fallback products`);
@@ -65,11 +64,8 @@ export default async function ProductsPage() {
                 {error ? `Error connecting to Contentful: ${error}` : 'Unable to connect to Contentful content management system.'}
               </p>
               <p className="text-sm">
-                To display your own products, make sure your Contentful Space ID and API key are configured correctly.
+                Displaying example products for demonstration purposes.
               </p>
-              <div className="mt-4 pt-2 border-t border-blue-200">
-                <p className="text-xs">These example products are being used for demonstration purposes only.</p>
-              </div>
             </div>
           )}
           
