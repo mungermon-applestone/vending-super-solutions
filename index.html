@@ -12,6 +12,13 @@
       // Redirect to the Next.js route
       window.location.replace(`/products/${slug}`);
     }
+    // Also handle the old format URLs that might be bookmarked
+    else if (window.location.pathname.endsWith('-vending') || 
+             window.location.pathname.includes('-vending/')) {
+      const path = window.location.pathname;
+      const slug = path.split('/').pop();
+      window.location.replace(`/products/${slug}`);
+    }
   </script>
 </head>
 <body>

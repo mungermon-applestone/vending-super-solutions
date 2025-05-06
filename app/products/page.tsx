@@ -2,6 +2,7 @@
 import { getProductTypes } from '@/lib/contentful/products'
 import ProductCard from '@/components/products/ProductCard'
 import Link from 'next/link'
+import { productFallbacks } from './fallbacks'
 
 export const metadata = {
   title: 'Products | Vending Solutions',
@@ -11,12 +12,23 @@ export const metadata = {
 export default async function ProductsPage() {
   console.log('[Next.js] Products page rendering');
   
-  // Server-side data fetching
-  const products = await getProductTypes()
+  let products = [];
+  let usedFallback = false;
   
-  // Log products for debugging
-  console.log(`[Next.js] Fetched ${products.length} products`);
-  products.forEach(p => console.log(`- ${p.title} (slug: ${p.slug})`));
+  try {
+    // Server-side data fetching
+    products = await getProductTypes();
+    
+    // Log products for debugging
+    console.log(`[Next.js] Fetched ${products.length} products from Contentful`);
+    products.forEach(p => console.log(`- ${p.title} (slug: ${p.slug})`));
+  } catch (error) {
+    console.error('[Next.js] Error fetching products from Contentful:', error);
+    // Use fallback data if Contentful fetch fails
+    products = Object.values(productFallbacks);
+    usedFallback = true;
+    console.log(`[Next.js] Using ${products.length} fallback products`);
+  }
   
   // Filter visible products
   const visibleProducts = products.filter(product => product.visible !== false)
@@ -31,6 +43,13 @@ export default async function ProductsPage() {
               Discover our complete range of vending solutions for your business needs
             </p>
           </div>
+          
+          {/* Show notification if using fallback data */}
+          {usedFallback && (
+            <div className="mb-8 rounded-lg bg-blue-50 p-4 text-blue-800 border border-blue-200 max-w-3xl mx-auto">
+              <p>Using locally cached product data. Connect to Contentful for the latest product information.</p>
+            </div>
+          )}
           
           {visibleProducts.length === 0 ? (
             <div className="text-center py-12">

@@ -8,45 +8,105 @@ import PreviewEnvironmentNotice from '@/components/common/PreviewEnvironmentNoti
 import ContentfulDiagnostics from '@/components/common/ContentfulDiagnostics'
 import ProductBenefitsList from '@/components/products/ProductBenefitsList'
 import RequestDemoForm from '@/components/products/RequestDemoForm'
+import { productFallbacks } from '../fallbacks'
 
 // Generate static params for common products at build time
 export async function generateStaticParams() {
-  const products = await getProductTypes()
-  return products.map(product => ({
-    slug: product.slug,
-  }))
+  try {
+    const products = await getProductTypes()
+    return products.map(product => ({
+      slug: product.slug,
+    }))
+  } catch (error) {
+    // If Contentful fails, use our fallbacks
+    console.error('Failed to generate static params:', error)
+    return Object.keys(productFallbacks).map(slug => ({
+      slug,
+    }))
+  }
 }
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const product = await getProductTypeBySlug(params.slug)
-  
-  if (!product) {
-    return {
-      title: 'Product Not Found',
-      description: 'The requested product could not be found.',
+  try {
+    const product = await getProductTypeBySlug(params.slug)
+    
+    if (!product) {
+      // Check fallbacks
+      const fallbackProduct = productFallbacks[params.slug]
+      if (fallbackProduct) {
+        return {
+          title: `${fallbackProduct.title} | Vending Solutions`,
+          description: fallbackProduct.description,
+        }
+      }
+      
+      return {
+        title: 'Product Not Found',
+        description: 'The requested product could not be found.',
+      }
     }
-  }
-  
-  return {
-    title: `${product.title} | Vending Solutions`,
-    description: product.description,
+    
+    return {
+      title: `${product.title} | Vending Solutions`,
+      description: product.description,
+    }
+  } catch (error) {
+    console.error('Failed to generate metadata:', error)
+    // Check fallbacks
+    const fallbackProduct = productFallbacks[params.slug]
+    if (fallbackProduct) {
+      return {
+        title: `${fallbackProduct.title} | Vending Solutions`,
+        description: fallbackProduct.description,
+      }
+    }
+    
+    return {
+      title: 'Product | Vending Solutions',
+      description: 'Discover our innovative vending solutions.',
+    }
   }
 }
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   console.log('Next.js product page rendering for slug:', params.slug);
   
-  const product = await getProductTypeBySlug(params.slug)
+  let product;
+  let usedFallback = false;
   
-  // Handle product not found
-  if (!product) {
-    console.log('Product not found for slug:', params.slug);
-    notFound()
+  try {
+    product = await getProductTypeBySlug(params.slug)
+    
+    // Handle product not found, check fallbacks
+    if (!product) {
+      console.log('Product not found in Contentful for slug:', params.slug);
+      product = productFallbacks[params.slug];
+      usedFallback = !!product;
+      
+      if (!product) {
+        console.log('No fallback found for slug:', params.slug);
+        notFound();
+      } else {
+        console.log('Using fallback data for product:', product.title);
+      }
+    } else {
+      // Log when product is found from Contentful
+      console.log('Product found in Contentful:', product.title, 'with slug:', product.slug);
+    }
+  } catch (error) {
+    console.error('Error fetching product from Contentful:', error);
+    // Try fallback
+    product = productFallbacks[params.slug];
+    usedFallback = !!product;
+    
+    if (!product) {
+      console.log('No fallback found for slug after error:', params.slug);
+      notFound();
+    } else {
+      console.log('Using fallback data after error for product:', product.title);
+    }
   }
-
-  // Log when product is found for debugging
-  console.log('Product found:', product.title, 'with slug:', product.slug);
 
   // Check if in preview environment
   const isPreviewEnvironment = process.env.CONTENTFUL_ENVIRONMENT === 'preview'
@@ -68,8 +128,15 @@ export default async function ProductPage({ params }: { params: { slug: string }
           </Link>
         </div>
         
+        {/* Show notification if using fallback data */}
+        {usedFallback && (
+          <div className="mb-6 rounded-lg bg-blue-50 p-4 text-blue-800 border border-blue-200">
+            <p>Using locally cached product data. Connect to Contentful for the latest product information.</p>
+          </div>
+        )}
+        
         {/* Contentful Diagnostic Information (only shown in development) */}
-        {process.env.NODE_ENV === 'development' && (
+        {!usedFallback && process.env.NODE_ENV === 'development' && (
           <div className="mb-8">
             <ContentfulDiagnostics slug={params.slug} productId={product.id} />
           </div>
