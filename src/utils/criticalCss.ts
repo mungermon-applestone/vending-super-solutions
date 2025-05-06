@@ -90,15 +90,25 @@ export function setupDeferredCSS() {
   
   // Load stylesheets when browser is idle
   if ('requestIdleCallback' in window) {
-    // Use a type assertion with a specific interface
-    interface WindowWithIdleCallback extends Window {
-      requestIdleCallback: (callback: () => void) => number;
+    // Using the correct type definition for requestIdleCallback
+    type IdleCallbackHandle = number;
+    interface IdleRequestOptions {
+      timeout: number;
     }
-    // Apply the type assertion
-    const win = window as WindowWithIdleCallback;
-    win.requestIdleCallback(() => {
-      deferredStylesheets.forEach(loadStylesheet);
-    });
+    interface IdleRequestCallback {
+      (deadline: IdleDeadline): void;
+    }
+    
+    interface WindowWithIdleCallback {
+      requestIdleCallback(callback: IdleRequestCallback, options?: IdleRequestOptions): IdleCallbackHandle;
+    }
+    
+    // Safe casting with the correct interface
+    (window as unknown as WindowWithIdleCallback).requestIdleCallback(
+      () => {
+        deferredStylesheets.forEach(loadStylesheet);
+      }
+    );
   } else {
     // Safe approach for handling window in TypeScript
     const handleLoad = () => {
@@ -107,8 +117,10 @@ export function setupDeferredCSS() {
       }, 200);
     };
     
-    // Add event listener safely
-    window.addEventListener('load', handleLoad);
+    // Only add event listener if we're in a browser environment
+    if (typeof window !== 'undefined') {
+      window.addEventListener('load', handleLoad);
+    }
   }
 }
 
