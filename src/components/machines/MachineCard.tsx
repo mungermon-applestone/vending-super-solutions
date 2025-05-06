@@ -21,7 +21,7 @@ interface MachineCardProps {
     thumbnail?: {
       url: string;
       alt?: string;
-    }>;
+    };
   };
 }
 
