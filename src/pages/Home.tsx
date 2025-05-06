@@ -7,7 +7,7 @@ import ProductTypesSection from '@/components/home/ProductTypesSection';
 import BusinessGoalsSection from '@/components/home/BusinessGoalsSection';
 import MachineTypesSection from '@/components/home/MachineTypesSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
-import CTASection from '@/components/common/CTASection';
+import { SimpleContactCTA } from '@/components/common';
 import ContentfulDebug from '@/components/debug/ContentfulDebug';
 import { CONTENTFUL_CONFIG, isContentfulConfigured } from '@/config/cms';
 
@@ -28,7 +28,11 @@ const Home = () => {
       <MachineTypesSection />
       <BusinessGoalsSection />
       <TestimonialsSection />
-      <CTASection />
+      <SimpleContactCTA 
+        title="Ready to Transform Your Vending Operations?" 
+        description="Get started with our platform today and see the difference in your operations."
+        className="w-full"
+      />
       <ContentfulDebug />
     </Layout>
   );
