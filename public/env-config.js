@@ -4,7 +4,12 @@ window.env = {
   // These are the Contentful credentials that should be picked up by the application
   CONTENTFUL_SPACE_ID: "p8y13tvmv0uj", 
   CONTENTFUL_DELIVERY_TOKEN: "fyVJxmu9K8jX3kcWHa0yEFIsvdzY5U-gkOcxU0JNxtU",
-  CONTENTFUL_ENVIRONMENT: "master"
+  CONTENTFUL_ENVIRONMENT: "master",
+  
+  // Also add the NEXT_PUBLIC versions for compatibility
+  NEXT_PUBLIC_CONTENTFUL_SPACE_ID: "p8y13tvmv0uj",
+  NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN: "fyVJxmu9K8jX3kcWHa0yEFIsvdzY5U-gkOcxU0JNxtU",
+  NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT: "master"
 };
 
 // Enhanced debug logging
@@ -16,3 +21,4 @@ console.log("Contentful Environment configuration loaded from env-config.js:", {
   tokenAvailable: !!window.env?.CONTENTFUL_DELIVERY_TOKEN,
   environment: window.env?.CONTENTFUL_ENVIRONMENT || 'master'
 });
+

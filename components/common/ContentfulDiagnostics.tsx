@@ -43,10 +43,44 @@ export default function ContentfulDiagnostics({ slug, productId }: ContentfulDia
       return `${value.slice(0, 4)}****${value.slice(-2)}`;
     };
 
+    // Explicitly check both old and new naming conventions
+    const getSpaceId = () => {
+      if (typeof window !== 'undefined' && window.env) {
+        if (window.env['CONTENTFUL_SPACE_ID']) return window.env['CONTENTFUL_SPACE_ID'];
+        if (window.env['NEXT_PUBLIC_CONTENTFUL_SPACE_ID']) return window.env['NEXT_PUBLIC_CONTENTFUL_SPACE_ID'];
+      }
+      
+      if (process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID) return process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID;
+      if (process.env.CONTENTFUL_SPACE_ID) return process.env.CONTENTFUL_SPACE_ID;
+      
+      return 'Not set';
+    };
+    
+    const getToken = () => {
+      if (typeof window !== 'undefined' && window.env) {
+        if (window.env['CONTENTFUL_DELIVERY_TOKEN']) return window.env['CONTENTFUL_DELIVERY_TOKEN'];
+        if (window.env['NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN']) return window.env['NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN'];
+      }
+      
+      if (process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN) return process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN;
+      if (process.env.CONTENTFUL_DELIVERY_TOKEN) return process.env.CONTENTFUL_DELIVERY_TOKEN;
+      
+      return 'Not set';
+    };
+
     setEnvironmentVariables({
       spaceId: getEnvSafely('CONTENTFUL_SPACE_ID'),
-      accessToken: getEnvSafely('CONTENTFUL_DELIVERY_TOKEN', true),
+      accessToken: getToken() !== 'Not set' ? 'Set (hidden)' : 'Not set',
       environment: getEnvSafely('CONTENTFUL_ENVIRONMENT') === 'Not set' ? 'master' : getEnvSafely('CONTENTFUL_ENVIRONMENT')
+    });
+    
+    // Debug information for troubleshooting
+    console.log('ContentfulDiagnostics: Environment variables check', {
+      windowEnvExists: typeof window !== 'undefined' && !!window.env,
+      windowEnvKeys: typeof window !== 'undefined' && window.env ? Object.keys(window.env) : [],
+      processEnvNextPublic: typeof process !== 'undefined' && process.env ? Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_')) : [],
+      spaceId: getSpaceId(),
+      hasToken: getToken() !== 'Not set'
     });
   }, []);
   
@@ -55,9 +89,12 @@ export default function ContentfulDiagnostics({ slug, productId }: ContentfulDia
     const testConnection = async () => {
       setIsLoading(true);
       try {
+        console.log('ContentfulDiagnostics: Testing connection');
         const result = await testContentfulConnection();
+        console.log('ContentfulDiagnostics: Connection test result', result);
         setConnectionStatus(result);
       } catch (error) {
+        console.error('ContentfulDiagnostics: Connection test error', error);
         setConnectionStatus({ 
           success: false, 
           message: error instanceof Error ? error.message : 'Unknown error',
@@ -80,6 +117,7 @@ export default function ContentfulDiagnostics({ slug, productId }: ContentfulDia
         <p><strong>Environment:</strong> {environmentVariables.environment}</p>
         <p><strong>Has Delivery Token:</strong> {environmentVariables.accessToken !== 'Not set' ? 'Yes' : 'No'}</p>
         <p><strong>Window.env Available:</strong> {typeof window !== 'undefined' && !!window.env ? 'Yes' : 'No'}</p>
+        <p><strong>Window.env Keys:</strong> {typeof window !== 'undefined' && window.env ? Object.keys(window.env).join(', ') : 'None'}</p>
         {slug && <p><strong>Current Slug:</strong> {slug}</p>}
         {productId && <p><strong>Product ID:</strong> {productId}</p>}
         
