@@ -7,6 +7,7 @@ import { CMSProductType } from '@/types/cms';
  */
 export async function getProductTypes() {
   try {
+    console.log('[contentful/products] Attempting to fetch products');
     const client = getContentfulClient();
     
     const entries = await client.getEntries({
@@ -44,7 +45,7 @@ export async function getProductTypes() {
     });
   } catch (error) {
     console.error('[contentful/products] Error fetching product types:', error);
-    return [];
+    throw error; // Rethrow to handle at a higher level
   }
 }
 
@@ -62,15 +63,33 @@ export async function getProductTypeBySlug(slug: string) {
     
     const client = getContentfulClient();
     
-    const entries = await client.getEntries({
+    // Try different approaches to find the product
+    // 1. Exact match
+    let entries = await client.getEntries({
       content_type: 'productType',
       'fields.slug': slug,
       include: 2,
     });
     
+    // 2. If no exact match, try slug variations
     if (entries.items.length === 0) {
-      console.log(`[contentful/products] No product found with slug: "${slug}"`);
-      return null;
+      console.log(`[contentful/products] No exact match for "${slug}", trying variations`);
+      
+      // Try with/without -vending suffix
+      const altSlug = slug.endsWith('-vending') 
+        ? slug.substring(0, slug.length - 8) 
+        : `${slug}-vending`;
+      
+      entries = await client.getEntries({
+        content_type: 'productType',
+        'fields.slug': altSlug,
+        include: 2,
+      });
+      
+      if (entries.items.length === 0) {
+        console.log(`[contentful/products] No product found with slug "${slug}" or variations`);
+        return null;
+      }
     }
     
     const item = entries.items[0];
@@ -101,6 +120,6 @@ export async function getProductTypeBySlug(slug: string) {
     } as CMSProductType;
   } catch (error) {
     console.error(`[contentful/products] Error fetching product with slug "${slug}":`, error);
-    return null;
+    throw error; // Rethrow to handle at a higher level
   }
 }

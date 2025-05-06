@@ -79,6 +79,7 @@ export default function ContentfulDiagnostics({ slug, productId }: ContentfulDia
         <p><strong>Space ID:</strong> {environmentVariables.spaceId}</p>
         <p><strong>Environment:</strong> {environmentVariables.environment}</p>
         <p><strong>Has Delivery Token:</strong> {environmentVariables.accessToken !== 'Not set' ? 'Yes' : 'No'}</p>
+        <p><strong>Window.env Available:</strong> {typeof window !== 'undefined' && !!window.env ? 'Yes' : 'No'}</p>
         {slug && <p><strong>Current Slug:</strong> {slug}</p>}
         {productId && <p><strong>Product ID:</strong> {productId}</p>}
         

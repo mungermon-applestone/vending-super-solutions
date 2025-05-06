@@ -8,7 +8,7 @@ window.env = {
 };
 
 // Enhanced debug logging
-console.log("Contentful Environment configuration loaded:", { 
+console.log("Contentful Environment configuration loaded from env-config.js:", { 
   hasConfig: !!window.env,
   spaceId: window.env?.CONTENTFUL_SPACE_ID 
     ? `${window.env.CONTENTFUL_SPACE_ID.substring(0, 3)}...${window.env.CONTENTFUL_SPACE_ID.substring(window.env.CONTENTFUL_SPACE_ID.length-3)}` 
