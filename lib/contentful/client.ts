@@ -36,23 +36,17 @@ export function getContentfulClient() {
   
   // Try all possible environment variable names for maximum compatibility
   const spaceId = 
-    getEnvironmentVariable('NEXT_PUBLIC_CONTENTFUL_SPACE_ID') || 
-    getEnvironmentVariable('CONTENTFUL_SPACE_ID') ||
-    getEnvironmentVariable('VITE_CONTENTFUL_SPACE_ID') ||
+    getEnvironmentVariable('CONTENTFUL_SPACE_ID') || 
     process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID ||
     process.env.CONTENTFUL_SPACE_ID;
   
   const accessToken = 
-    getEnvironmentVariable('NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN') || 
-    getEnvironmentVariable('CONTENTFUL_DELIVERY_TOKEN') ||
-    getEnvironmentVariable('VITE_CONTENTFUL_DELIVERY_TOKEN') ||
+    getEnvironmentVariable('CONTENTFUL_DELIVERY_TOKEN') || 
     process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN ||
     process.env.CONTENTFUL_DELIVERY_TOKEN;
   
   const environment = 
-    getEnvironmentVariable('NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT') || 
     getEnvironmentVariable('CONTENTFUL_ENVIRONMENT') || 
-    getEnvironmentVariable('VITE_CONTENTFUL_ENVIRONMENT') || 
     process.env.NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT ||
     process.env.CONTENTFUL_ENVIRONMENT ||
     'master';
