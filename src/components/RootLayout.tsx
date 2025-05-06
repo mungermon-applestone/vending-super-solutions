@@ -9,10 +9,12 @@ import { isPreviewEnvironment, logContentfulConfig } from '@/config/cms';
 import { Offline } from '@/components/common';
 import SiteMetadata from './seo/SiteMetadata';
 import { Spinner } from '@/components/ui/spinner';
+import { createDynamicComponent } from '@/utils/dynamicLoader';
 
 // Lazy load non-critical components
-const PreviewEnvironmentDetector = lazy(() => 
-  import(/* webpackChunkName: "preview-detector" */ './contentful/PreviewEnvironmentDetector')
+const PreviewEnvironmentDetector = createDynamicComponent(
+  () => import(/* webpackChunkName: "preview-detector" */ './contentful/PreviewEnvironmentDetector'),
+  { priority: 'low' }
 );
 
 const RootLayout = () => {
