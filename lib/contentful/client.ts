@@ -10,6 +10,7 @@ function getEnvironmentVariable(key: string): string | undefined {
   if (typeof window !== 'undefined') {
     // Check window.env (runtime configuration)
     if (window.env && window.env[key]) {
+      console.log(`[contentful/client] Using window.env.${key}`);
       return window.env[key];
     }
     
@@ -56,34 +57,21 @@ export function getContentfulClient() {
     process.env.CONTENTFUL_ENVIRONMENT ||
     'master';
   
-  // Log all environment variables for debugging
-  console.log('Environment variables check:', {
-    processEnvSpaceId: process.env.CONTENTFUL_SPACE_ID,
-    processEnvNextPublicSpaceId: process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID,
-    processEnvAccessToken: process.env.CONTENTFUL_DELIVERY_TOKEN ? 'Set (hidden)' : 'Not set',
-    processEnvNextPublicAccessToken: process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN ? 'Set (hidden)' : 'Not set',
-    processEnvEnvironment: process.env.CONTENTFUL_ENVIRONMENT,
-    processEnvNextPublicEnvironment: process.env.NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT,
-    hasWindowEnv: typeof window !== 'undefined' && !!window.env,
-    resolvedSpaceId: spaceId,
-    resolvedAccessToken: accessToken ? 'Set (hidden)' : 'Not set',
-    resolvedEnvironment: environment
+  // Log variables to help with debugging
+  console.log('[contentful/client] Creating Contentful client with:', { 
+    spaceId: spaceId ? `${spaceId.substring(0, 3)}...` : 'Not set', 
+    hasAccessToken: !!accessToken, 
+    environment 
   });
   
   // Check if environment variables are set
   if (!spaceId || !accessToken) {
-    console.error('Contentful environment variables missing:', { 
+    console.error('[contentful/client] Contentful environment variables missing:', { 
       hasSpaceId: !!spaceId, 
       hasAccessToken: !!accessToken 
     });
     throw new Error('Contentful environment variables are not properly configured');
   }
-  
-  console.log('Initializing Contentful client with:', { 
-    spaceId, 
-    hasAccessToken: !!accessToken, 
-    environment 
-  });
   
   // Create the Contentful client
   contentfulClient = createClient({
@@ -109,7 +97,7 @@ export async function testContentfulConnection() {
       message: `Successfully connected to Contentful. Found ${response.total} entries.`
     };
   } catch (error) {
-    console.error('Contentful connection test failed:', error);
+    console.error('[contentful/client] Contentful connection test failed:', error);
     let message = 'Failed to connect to Contentful.';
     let details = '';
     

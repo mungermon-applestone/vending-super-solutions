@@ -8,9 +8,12 @@ window.env = {
   CONTENTFUL_ENVIRONMENT: "master"
 };
 
-// Log for debugging
-console.log("Environment configuration loaded", { 
+// Enhanced debug logging
+console.log("Contentful Environment configuration loaded:", { 
   hasConfig: !!window.env,
-  spaceIdAvailable: !!window.env?.CONTENTFUL_SPACE_ID,
-  tokenAvailable: !!window.env?.CONTENTFUL_DELIVERY_TOKEN
+  spaceId: window.env?.CONTENTFUL_SPACE_ID 
+    ? `${window.env.CONTENTFUL_SPACE_ID.substring(0, 3)}...${window.env.CONTENTFUL_SPACE_ID.substring(window.env.CONTENTFUL_SPACE_ID.length-3)}` 
+    : 'Not set',
+  tokenAvailable: !!window.env?.CONTENTFUL_DELIVERY_TOKEN,
+  environment: window.env?.CONTENTFUL_ENVIRONMENT || 'master'
 });

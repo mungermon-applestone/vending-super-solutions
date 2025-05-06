@@ -18,25 +18,35 @@ export default function ContentfulDiagnostics({ slug, productId }: ContentfulDia
   
   // Get environment variables for display
   useEffect(() => {
-    // Only show first few chars of IDs for security
-    const maskString = (str?: string) => {
-      if (!str) return 'Not set';
-      if (str.length <= 5) return '****' + str.slice(-2);
-      return str.slice(0, 4) + '****' + str.slice(-2);
+    // Helper function to check and mask sensitive data
+    const getEnvSafely = (key: string, isSecret = false) => {
+      let value;
+      
+      // Check window.env first (runtime config)
+      if (typeof window !== 'undefined' && window.env && window.env[key]) {
+        value = window.env[key];
+      } 
+      // Then check process.env
+      else if (process.env[`NEXT_PUBLIC_${key}`]) {
+        value = process.env[`NEXT_PUBLIC_${key}`];
+      } else if (process.env[key]) {
+        value = process.env[key];
+      }
+      
+      if (!value) return 'Not set';
+      
+      // Mask secrets for security
+      if (isSecret) return 'Set (hidden)';
+      
+      // Mask IDs for display (show first 4 chars and last 2)
+      if (value.length <= 6) return '******';
+      return `${value.slice(0, 4)}****${value.slice(-2)}`;
     };
 
     setEnvironmentVariables({
-      spaceId: process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID || 
-               process.env.CONTENTFUL_SPACE_ID || 
-               (typeof window !== 'undefined' && window.env?.CONTENTFUL_SPACE_ID),
-      accessToken: process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN || 
-                   process.env.CONTENTFUL_DELIVERY_TOKEN || 
-                   (typeof window !== 'undefined' && window.env?.CONTENTFUL_DELIVERY_TOKEN) ? 
-                   'Set (hidden)' : undefined,
-      environment: process.env.NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT || 
-                  process.env.CONTENTFUL_ENVIRONMENT || 
-                  (typeof window !== 'undefined' && window.env?.CONTENTFUL_ENVIRONMENT) || 
-                  'master'
+      spaceId: getEnvSafely('CONTENTFUL_SPACE_ID'),
+      accessToken: getEnvSafely('CONTENTFUL_DELIVERY_TOKEN', true),
+      environment: getEnvSafely('CONTENTFUL_ENVIRONMENT') === 'Not set' ? 'master' : getEnvSafely('CONTENTFUL_ENVIRONMENT')
     });
   }, []);
   
@@ -66,18 +76,20 @@ export default function ContentfulDiagnostics({ slug, productId }: ContentfulDia
       <h4 className="font-bold mb-2">Contentful Diagnostic Info</h4>
       <div className="space-y-2">
         <p><strong>Next.js Environment:</strong> {process.env.NODE_ENV}</p>
-        <p><strong>Space ID:</strong> {environmentVariables.spaceId ? 
-          (environmentVariables.spaceId.length > 5 ? 
-            `${environmentVariables.spaceId.substring(0, 3)}...${environmentVariables.spaceId.substring(environmentVariables.spaceId.length - 3)}` : 
-            '***') 
-          : 'Not set'}</p>
-        <p><strong>Environment:</strong> {environmentVariables.environment || 'master'}</p>
-        <p><strong>Has Delivery Token:</strong> {environmentVariables.accessToken ? 'Yes' : 'No'}</p>
+        <p><strong>Space ID:</strong> {environmentVariables.spaceId}</p>
+        <p><strong>Environment:</strong> {environmentVariables.environment}</p>
+        <p><strong>Has Delivery Token:</strong> {environmentVariables.accessToken !== 'Not set' ? 'Yes' : 'No'}</p>
         {slug && <p><strong>Current Slug:</strong> {slug}</p>}
         {productId && <p><strong>Product ID:</strong> {productId}</p>}
         
         <div className="mt-4 pt-2 border-t border-gray-300">
-          <p><strong>Connection Test:</strong> {isLoading ? 'Testing...' : connectionStatus ? (connectionStatus.success ? '✅ Connected' : '❌ Failed') : 'Not tested'}</p>
+          <p>
+            <strong>Connection Test:</strong> 
+            {isLoading ? 'Testing...' : 
+              connectionStatus ? 
+                (connectionStatus.success ? '✅ Connected' : '❌ Failed') : 
+                'Not tested'}
+          </p>
           {connectionStatus && (
             <div>
               <p className="text-xs mt-1">{connectionStatus.message}</p>
@@ -90,8 +102,8 @@ export default function ContentfulDiagnostics({ slug, productId }: ContentfulDia
         
         <div className="mt-4 pt-2 border-t border-gray-300">
           <p className="text-xs mt-1">
-            <strong>How to fix:</strong> Make sure your Contentful Space ID and Delivery Token are correctly set in the environment variables.
-            Verify that you have published content in your Contentful space.
+            <strong>Configuration Help:</strong> Make sure your Contentful credentials are set in public/env-config.js.
+            Check browser console for more detailed debug information.
           </p>
         </div>
       </div>

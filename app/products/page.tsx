@@ -11,17 +11,17 @@ export const metadata = {
 }
 
 export default async function ProductsPage() {
-  console.log('[Next.js] Products page rendering');
+  console.log('[Next.js] Products page rendering with enhanced error handling');
   
   let products = [];
   let usedFallback = false;
   let error = null;
   
   try {
-    // Server-side data fetching
+    // Server-side data fetching with improved error logging
+    console.log('[Next.js] Attempting to fetch products from Contentful');
     products = await getProductTypes();
     
-    // Log products for debugging
     console.log(`[Next.js] Fetched ${products.length} products from Contentful`);
     
     if (products.length === 0) {
