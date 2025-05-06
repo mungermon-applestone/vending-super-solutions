@@ -17,6 +17,16 @@ const nextConfig = {
     CONTENTFUL_PREVIEW_TOKEN: process.env.CONTENTFUL_PREVIEW_TOKEN,
     CONTENTFUL_ENVIRONMENT: process.env.CONTENTFUL_ENVIRONMENT || 'master',
   },
+  // Add async rewrites to handle routing conflicts
+  async rewrites() {
+    return [
+      // Rewrite any product URLs that might be handled by React Router to Next.js
+      {
+        source: '/products/:slug*',
+        destination: '/products/:slug*'
+      },
+    ];
+  },
 }
 
 module.exports = nextConfig
