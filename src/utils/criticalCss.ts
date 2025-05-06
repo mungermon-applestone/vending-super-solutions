@@ -87,11 +87,14 @@ export function setupDeferredCSS() {
     });
   } else {
     // Fallback for browsers without requestIdleCallback
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        deferredStylesheets.forEach(loadStylesheet);
-      }, 200);
-    });
+    // Fix: Explicitly handle the window type to avoid 'never' type error
+    if (typeof window !== 'undefined') {  // Redundant but helps TypeScript understand
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          deferredStylesheets.forEach(loadStylesheet);
+        }, 200);
+      });
+    }
   }
 }
 
