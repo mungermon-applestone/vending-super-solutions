@@ -27,18 +27,18 @@ export function logWebVitals(): void {
 
 // Function to send metrics to an analytics endpoint
 export function sendToAnalytics(metric: Metric): void {
-  // Here you would typically send to your analytics service
-  // This is a placeholder implementation
   const body = JSON.stringify({
     name: metric.name,
     value: metric.value,
     id: metric.id,
-    delta: metric.delta
+    delta: metric.delta,
+    navigationType: getNavigationType()
   });
   
   // Only log in development, in production we'd send to an actual endpoint
   if (import.meta.env.DEV) {
-    console.log(`[Analytics] ${metric.name}:`, metric.value);
+    console.log(`[Analytics] ${metric.name}:`, metric.value, 
+      'Rating:', classifyPerformanceScore(metric.value, metric.name));
   } else {
     // In production, we would send this data to an analytics endpoint
     // Using the sendBeacon API for better performance during page unload
@@ -76,4 +76,43 @@ export function classifyPerformanceScore(value: number, metric: string): 'good' 
   if (value <= good) return 'good';
   if (value <= poor) return 'needs-improvement';
   return 'poor';
+}
+
+// Get the navigation type (navigate, reload, back_forward, prerender)
+function getNavigationType(): string {
+  const navigation = (window as any).performance?.getEntriesByType?.('navigation')[0];
+  return navigation?.type || 'navigate';
+}
+
+// Capture First Input Delay for additional monitoring
+export function captureFirstInputDelay(): void {
+  let firstInput = false;
+  
+  function onFirstInput(event: Event): void {
+    if (firstInput) return;
+    firstInput = true;
+    
+    const delay = Date.now() - (event as any).timeStamp;
+    console.log('[FID] First Input Delay:', delay);
+    
+    // Remove the event listeners
+    document.removeEventListener('click', onFirstInput);
+    document.removeEventListener('keydown', onFirstInput);
+    document.removeEventListener('touchstart', onFirstInput);
+  }
+  
+  // Add event listeners
+  document.addEventListener('click', onFirstInput);
+  document.addEventListener('keydown', onFirstInput);
+  document.addEventListener('touchstart', onFirstInput);
+}
+
+// Initialize all performance monitoring
+export function initPerformanceMonitoring(): void {
+  if (import.meta.env.PROD) {
+    reportWebVitals(sendToAnalytics);
+    captureFirstInputDelay();
+  } else {
+    logWebVitals();
+  }
 }

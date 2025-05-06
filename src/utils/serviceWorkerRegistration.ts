@@ -6,6 +6,8 @@ export function registerServiceWorker() {
       navigator.serviceWorker.register('/service-worker.js')
         .then(registration => {
           console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          // Store registration for later use
+          window._swRegistration = registration;
         })
         .catch(err => {
           console.log('ServiceWorker registration failed: ', err);
@@ -35,4 +37,26 @@ export function setupServiceWorkerMessageListener(callback: (message: any) => vo
 // Check if the app is running in offline mode
 export function checkOfflineStatus(): boolean {
   return !navigator.onLine;
+}
+
+// Force update the service worker
+export function updateServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(registration => {
+      registration.update().then(() => {
+        console.log('Service worker updated');
+      });
+    });
+  }
+}
+
+// Add offline event listeners
+export function setupOfflineDetection(onOffline: () => void, onOnline: () => void) {
+  window.addEventListener('offline', onOffline);
+  window.addEventListener('online', onOnline);
+  
+  // Initial check
+  if (!navigator.onLine) {
+    onOffline();
+  }
 }

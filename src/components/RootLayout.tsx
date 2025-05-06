@@ -68,9 +68,21 @@ const RootLayout = () => {
             </div>
           )}
           
-          {/* Main content */}
-          <main className="flex-1 bg-gray-50">
-            <Outlet />
+          {/* Main content with layout shift optimization */}
+          <main 
+            className="flex-1 bg-gray-50"
+            style={{ 
+              contentVisibility: 'auto', 
+              containIntrinsicSize: '0 500px' 
+            }}
+          >
+            <Suspense fallback={
+              <div className="animate-pulse p-4">
+                <div className="h-64 bg-gray-200 rounded-lg w-full"></div>
+              </div>
+            }>
+              <Outlet />
+            </Suspense>
           </main>
 
           {/* Footer */}

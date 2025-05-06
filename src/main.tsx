@@ -6,8 +6,9 @@ import './index.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { BreadcrumbProvider } from './context/BreadcrumbContext';
-import { registerServiceWorker } from './utils/serviceWorkerRegistration';
+import { registerServiceWorker, setupOfflineDetection } from './utils/serviceWorkerRegistration';
 import { reportWebVitals, sendToAnalytics } from './utils/webVitalsMonitoring';
+import { toast } from 'sonner';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -31,6 +32,9 @@ const injectCriticalCSS = () => {
       #root { display: flex; flex-direction: column; min-height: 100vh; }
       img { opacity: 1; transition: opacity 0.3s; }
       img.loading { opacity: 0; }
+      @media (prefers-reduced-motion: reduce) {
+        *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+      }
     `;
 
     // Create and insert style element
@@ -47,23 +51,6 @@ const injectCriticalCSS = () => {
         }
       }, 1000);
     });
-  }
-};
-
-// Check if Contentful credentials are properly loaded
-const checkCredentialsLoaded = () => {
-  if (typeof window !== 'undefined' && window.env) {
-    const hasCredentials = 
-      !!window.env.VITE_CONTENTFUL_SPACE_ID && 
-      !!window.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
-      
-    if (hasCredentials) {
-      console.log('[main.tsx] Contentful credentials found in window.env');
-    } else {
-      console.warn('[main.tsx] Contentful credentials missing from window.env');
-    }
-  } else {
-    console.warn('[main.tsx] window.env not initialized');
   }
 };
 
@@ -91,6 +78,23 @@ const setupPreconnects = () => {
   });
 };
 
+// Check if Contentful credentials are properly loaded
+const checkCredentialsLoaded = () => {
+  if (typeof window !== 'undefined' && window.env) {
+    const hasCredentials = 
+      !!window.env.VITE_CONTENTFUL_SPACE_ID && 
+      !!window.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
+      
+    if (hasCredentials) {
+      console.log('[main.tsx] Contentful credentials found in window.env');
+    } else {
+      console.warn('[main.tsx] Contentful credentials missing from window.env');
+    }
+  } else {
+    console.warn('[main.tsx] window.env not initialized');
+  }
+};
+
 // Render application
 const renderApp = () => {
   // Setup performance optimizations
@@ -113,6 +117,12 @@ const renderApp = () => {
   
   // Register service worker after the app has loaded
   registerServiceWorker();
+  
+  // Setup offline detection
+  setupOfflineDetection(
+    () => toast.error('You are offline. Some features may be limited.'), 
+    () => toast.success('You are back online!')
+  );
   
   // Initialize web vitals reporting in production
   if (import.meta.env.PROD) {
