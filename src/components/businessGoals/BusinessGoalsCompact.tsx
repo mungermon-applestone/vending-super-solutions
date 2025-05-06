@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
 import { CMSBusinessGoal } from '@/types/cms';
+import { resolveSlug } from '@/services/cms/utils/slugMatching';
 
 interface BusinessGoalsCompactProps {
   goals: CMSBusinessGoal[];
@@ -27,12 +28,21 @@ const BusinessGoalsCompact: React.FC<BusinessGoalsCompactProps> = ({
     4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
   }[columnCount];
   
+  // Function to handle goal navigation with proper slug resolution
+  const handleGoalClick = (goal: CMSBusinessGoal) => {
+    if (!goal.slug) return;
+    
+    // Make sure we're using the resolved canonical slug
+    const canonicalSlug = resolveSlug(goal.slug);
+    navigate(`/business-goals/${canonicalSlug}`);
+  };
+  
   return (
     <div className={`grid ${gridColumnClass} gap-6`}>
       {goals.map((goal) => (
         <div 
           key={goal.id}
-          onClick={() => navigate(`/business-goals/${goal.slug}`)}
+          onClick={() => handleGoalClick(goal)}
           className="border border-gray-200 rounded-lg p-5 bg-white hover:shadow-md transition-shadow cursor-pointer"
         >
           <div className="flex items-center justify-between">

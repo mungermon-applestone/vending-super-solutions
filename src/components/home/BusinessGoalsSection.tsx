@@ -7,6 +7,7 @@ import BusinessGoalsCompact from '../businessGoals/BusinessGoalsCompact';
 import ContentfulConfigWarning from '../machines/ContentfulConfigWarning';
 import { isContentfulConfigured } from '@/config/cms';
 import { validateContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { CANONICAL_SLUG_MAP } from '@/services/cms/utils/slug/common';
 
 const BusinessGoalsSection = () => {
   const { data: homeContent, error, refetch } = useHomePageContent();
@@ -14,7 +15,7 @@ const BusinessGoalsSection = () => {
   
   console.log('[BusinessGoalsSection] Content:', homeContent);
   
-  // Using canonical URL slugs from our defined constants
+  // Using canonical URL slugs
   const businessGoals = [
     {
       icon: "vending",

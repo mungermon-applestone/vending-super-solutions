@@ -1,120 +1,98 @@
 
 /**
- * Common slug utilities
- * Contains shared functionality for slug normalization and mapping
+ * Common utilities for slug handling
  */
 
-// Define mapping of business goal slugs to their canonical forms
+// Define the canonical business goal slugs
 export const BUSINESS_GOAL_SLUG_MAP: Record<string, string> = {
-  'cost-reduction': 'reduce-costs',
-  'cost-efficiency': 'reduce-costs',
-  'save-money': 'reduce-costs',
-  'revenue-growth': 'increase-revenue',
-  'grow-revenue': 'increase-revenue',
-  'boost-sales': 'increase-revenue',
-  'customer-experience': 'improve-customer-experience',
-  'cx-improvement': 'improve-customer-experience',
-  'operational-efficiency': 'improve-operations',
-  'efficiency': 'improve-operations',
-  'streamline': 'improve-operations',
-  'sustainability': 'environmental-sustainability',
-  'eco-friendly': 'environmental-sustainability',
-  'green-initiatives': 'environmental-sustainability',
-  'data-insights': 'data-analytics',
-  'analytics': 'data-analytics',
-  'business-intelligence': 'data-analytics'
+  // Original slugs mapped to canonical versions
+  'marketing': 'marketing-and-promotions',
+  'marketing-promotions': 'marketing-and-promotions',
+  'marketing-&-promotions': 'marketing-and-promotions',
+  'data': 'data-analytics',
+  'data-&-analytics': 'data-analytics',
+  'bopis': 'bopis',
+  'pickup': 'bopis',
+  'buy-online-pickup': 'bopis',
+  'expand': 'expand-footprint',
+  'footprint': 'expand-footprint',
+  'fleet': 'fleet-management',
+  'fleet-mgmt': 'fleet-management',
+  'customer': 'customer-satisfaction',
+  'satisfaction': 'customer-satisfaction'
 };
 
-// Define a map of canonical slugs
+// Canonical slug map for all content types (can be expanded later)
 export const CANONICAL_SLUG_MAP: Record<string, string> = {
-  ...BUSINESS_GOAL_SLUG_MAP
+  ...BUSINESS_GOAL_SLUG_MAP,
 };
 
-// Common prefixes that might be added to slugs
+// Common URL prefixes to strip from slugs for normalization
 export const COMMON_PREFIXES = [
-  'vending-',
-  'vending-machine-',
-  'smart-',
-  'smart-vending-',
-  'automated-',
-  'automated-retail-',
-  'self-service-',
-  'unattended-',
-  'micro-market-',
-  'intelligent-'
+  'business-goals/',
+  'business/',
+  'goals/'
 ];
 
 /**
- * Normalize a slug by converting to lowercase, replacing spaces with hyphens,
- * and removing special characters
- * @param slug The original slug
- * @returns A normalized slug
+ * Normalizes a slug by converting to lowercase, replacing spaces with hyphens,
+ * and removing any special characters
  */
 export function normalizeSlug(slug: string): string {
   if (!slug) return '';
   
-  return slug
+  // Remove any URL path prefixes
+  let normalizedSlug = slug;
+  COMMON_PREFIXES.forEach(prefix => {
+    if (normalizedSlug.startsWith(prefix)) {
+      normalizedSlug = normalizedSlug.substring(prefix.length);
+    }
+  });
+  
+  // Basic normalization: lowercase, replace spaces with hyphens, remove special chars
+  normalizedSlug = normalizedSlug
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-')       // Replace spaces with hyphens
-    .replace(/[^\w\-]+/g, '')   // Remove all non-word chars except hyphens
-    .replace(/\-\-+/g, '-')     // Replace multiple hyphens with single
-    .replace(/^-+/, '')         // Trim hyphens from start of text
-    .replace(/-+$/, '');        // Trim hyphens from end of text
+    .replace(/\s+/g, '-')         // Replace spaces with hyphens
+    .replace(/[^\w\-]+/g, '')     // Remove all non-word chars except hyphens
+    .replace(/\-\-+/g, '-')       // Replace multiple hyphens with single hyphen
+    .replace(/^-+/, '')           // Trim hyphens from start
+    .replace(/-+$/, '');          // Trim hyphens from end
+    
+  return normalizedSlug;
 }
 
 /**
- * Get the canonical form of a slug if it exists in the mapping
- * @param slug The normalized slug to check
- * @returns The canonical form or the original slug if no mapping exists
+ * Gets the canonical version of a slug if it exists in the mapping
  */
-export function getCanonicalSlug(slug: string): string {
-  if (!slug) return '';
-  
-  // Check if the slug has a canonical form
-  return CANONICAL_SLUG_MAP[slug] || slug;
+export function getCanonicalSlug(normalizedSlug: string): string {
+  return CANONICAL_SLUG_MAP[normalizedSlug] || normalizedSlug;
 }
 
 /**
- * Generate basic variations of a slug
- * @param slug The original slug
- * @returns An array of basic slug variations
+ * Gets basic variations of a slug for fuzzy matching
  */
 export function getBasicVariations(slug: string): string[] {
-  if (!slug) return [];
-  
-  const variations: string[] = [];
-  
-  // Try replacing hyphens with underscores and vice versa
-  if (slug.includes('-')) {
-    variations.push(slug.replace(/-/g, '_'));
-  }
-  
-  if (slug.includes('_')) {
-    variations.push(slug.replace(/_/g, '-'));
-  }
-  
-  // Try with and without common prefixes
   const normalizedSlug = normalizeSlug(slug);
+  const variations = [normalizedSlug];
   
-  for (const prefix of COMMON_PREFIXES) {
-    if (normalizedSlug.startsWith(prefix)) {
-      // Try without the prefix
-      variations.push(normalizedSlug.substring(prefix.length));
-    } else {
-      // Try with the prefix
-      variations.push(prefix + normalizedSlug);
-    }
+  // Add variations with and without hyphens
+  if (normalizedSlug.includes('-')) {
+    variations.push(normalizedSlug.replace(/-/g, ''));
+  }
+  
+  // Add canonical version if it exists and is different
+  const canonicalSlug = getCanonicalSlug(normalizedSlug);
+  if (canonicalSlug !== normalizedSlug) {
+    variations.push(canonicalSlug);
   }
   
   return variations;
 }
 
 /**
- * Log a slug operation for debugging purposes
- * @param operation The operation being performed
- * @param details Additional details about the operation
+ * Log slug operations for debugging
  */
 export function logSlugOperation(operation: string, details: Record<string, any>): void {
-  console.log(`[SlugOperation:${operation}]`, details);
+  console.log(`[Slug ${operation}]`, details);
 }

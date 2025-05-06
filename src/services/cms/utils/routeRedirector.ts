@@ -12,10 +12,11 @@ export function redirectToCanonicalBusinessGoalIfNeeded(slug: string): boolean {
   
   console.log(`[redirectToCanonical] Checking if redirection needed for slug: ${slug}`);
   
+  const normalizedInputSlug = normalizeSlug(slug);
   const resolvedSlug = resolveSlug(slug);
   
   // If resolved slug is different from the normalized input, redirect
-  if (resolvedSlug && resolvedSlug !== normalizeSlug(slug)) {
+  if (resolvedSlug && resolvedSlug !== normalizedInputSlug) {
     console.log(`[redirectToCanonical] Redirecting from ${slug} to canonical slug ${resolvedSlug}`);
     navigate(`/business-goals/${resolvedSlug}`);
     return true;
