@@ -1,4 +1,3 @@
-
 import React, { useEffect, Suspense, lazy } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from './layout/Header';
@@ -10,6 +9,7 @@ import { Offline } from '@/components/common';
 import SiteMetadata from './seo/SiteMetadata';
 import { Spinner } from '@/components/ui/spinner';
 import { createDynamicComponent } from '@/utils/dynamicLoader';
+import CookieBanner from './common/CookieBanner';
 
 // Lazy load non-critical components
 const PreviewEnvironmentDetector = createDynamicComponent(
@@ -124,6 +124,9 @@ const RootLayout = () => {
 
           {/* Footer */}
           <Footer />
+          
+          {/* Cookie Banner */}
+          <CookieBanner />
         </div>
       </ContentfulPersistenceProvider>
     </ContentfulInitializer>
