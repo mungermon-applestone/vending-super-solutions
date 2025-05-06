@@ -8,10 +8,10 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import BlogHeroCard from "@/components/blog/BlogHeroCard";
 import Image from "@/components/common/Image";
-import InquiryForm from "@/components/machines/contact/InquiryForm";
 import ContentfulErrorBoundary from "@/components/common/ContentfulErrorBoundary";
 import ContentfulFallbackMessage from "@/components/common/ContentfulFallbackMessage";
 import ContentfulInitializer from "@/components/blog/ContentfulInitializer";
+import { SimpleContactCTA } from "@/components/common";
 
 const BlogPage: React.FC = () => {
   return (
@@ -140,7 +140,8 @@ const BlogPageContent: React.FC = () => {
           ) : null}
         </div>
 
-        <InquiryForm title="Ready to transform your vending operations?" />
+        {/* Replace InquiryForm with SimpleContactCTA */}
+        <SimpleContactCTA title="Ready to transform your vending operations?" />
       </div>
     </ContentfulErrorBoundary>
   );
