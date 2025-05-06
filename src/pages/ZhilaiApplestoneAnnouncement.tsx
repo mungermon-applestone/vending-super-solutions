@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
+import { SimpleContactCTA } from '@/components/common';
 
 // Interface for adjacent post navigation
 interface AdjacentBlogPost {
@@ -116,6 +117,7 @@ const AnnouncementContent: React.FC = () => {
           nextPost={adjacentPosts?.next}
         />
       </div>
+      <SimpleContactCTA />
     </div>
   );
 };

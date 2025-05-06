@@ -8,6 +8,7 @@ import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ProductFeaturesList from '@/components/products/ProductFeaturesList';
 import ProductExamples from '@/components/products/ProductExamples';
 import CTASection from '@/components/common/CTASection';
+import { SimpleContactCTA } from '@/components/common';
 import { useEffect } from 'react';
 
 /**
@@ -124,7 +125,8 @@ const ProductDetail = () => {
         </section>
       )}
 
-      {/* Call to Action */}
+      {/* Replace Call to Action with SimpleContactCTA */}
+      <SimpleContactCTA />
       <CTASection />
     </Layout>
   );

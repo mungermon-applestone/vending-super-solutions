@@ -6,13 +6,8 @@ interface MachineDetailInquiryProps {
   machineTitle: string;
 }
 
-const MachineDetailInquiry: React.FC<MachineDetailInquiryProps> = ({ machineTitle }) => {
-  return (
-    <SimpleContactCTA 
-      title="Ready to Get Started?"
-      description={`Fill out the form and we'll start you on your vending journey.`}
-    />
-  );
+const MachineDetailInquiry: React.FC<MachineDetailInquiryProps> = () => {
+  return <SimpleContactCTA />;
 };
 
 export default MachineDetailInquiry;

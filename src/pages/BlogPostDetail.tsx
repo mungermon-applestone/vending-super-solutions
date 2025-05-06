@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import BlogPostContent from '@/components/blog/BlogPostContent';
 import { useBlogPostBySlug, useAdjacentPosts } from '@/hooks/useBlogData';
+import { SimpleContactCTA } from '@/components/common';
 
 const BlogPostDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -34,11 +35,14 @@ const BlogPostDetail = () => {
             <p className="text-red-500">Something went wrong. Please try again later.</p>
           </div>
         ) : post ? (
-          <BlogPostContent 
-            post={post} 
-            previousPost={adjacentPosts?.previous} 
-            nextPost={adjacentPosts?.next} 
-          />
+          <>
+            <BlogPostContent 
+              post={post} 
+              previousPost={adjacentPosts?.previous} 
+              nextPost={adjacentPosts?.next} 
+            />
+            <SimpleContactCTA className="mt-12" />
+          </>
         ) : null}
       </div>
     </Layout>

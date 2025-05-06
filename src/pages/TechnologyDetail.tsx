@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -6,6 +5,7 @@ import TechnologyHeroSimple from '@/components/technology/TechnologyHeroSimple';
 import TechnologySections from '@/components/technology/TechnologySections';
 import { useTechnologyData } from '@/hooks/useTechnologyData';
 import CTASection from '@/components/common/CTASection';
+import { SimpleContactCTA } from '@/components/common';
 
 const TechnologyDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -51,6 +51,7 @@ const TechnologyDetail = () => {
         <TechnologySections sections={technology.sections} />
       )}
       
+      <SimpleContactCTA />
       <CTASection />
     </Layout>
   );

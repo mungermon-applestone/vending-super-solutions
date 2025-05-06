@@ -1,7 +1,6 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
-import InquiryForm from '@/components/machines/contact/InquiryForm';
+import { SimpleContactCTA } from '@/components/common';
 import TechnologyHeroSimple from '@/components/technology/TechnologyHeroSimple';
 import TechnologySections from '@/components/technology/TechnologySections';
 import { useTechnologySections } from '@/hooks/useTechnologySections';
@@ -100,8 +99,8 @@ const SimpleTechnologyPage = () => {
         </div>
       )}
 
-      {/* Contact Form */}
-      <InquiryForm title="Technology Solutions" />
+      {/* Replace InquiryForm with SimpleContactCTA */}
+      <SimpleContactCTA />
     </Layout>
   );
 };

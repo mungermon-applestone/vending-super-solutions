@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import SEO from '@/components/seo/SEO';
@@ -14,7 +13,7 @@ import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMes
 import PurposeStatement from '@/components/products/sections/PurposeStatement';
 import KeyFeaturesSection from '@/components/products/sections/KeyFeaturesSection';
 import ProductsHero from '@/components/products/sections/ProductsHero';
-import InquiryForm from '@/components/machines/contact/InquiryForm';
+import { SimpleContactCTA } from '@/components/common';
 import ProductGrid from '@/components/products/sections/ProductGrid';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Link } from 'react-router-dom';
@@ -250,9 +249,9 @@ const Products = () => {
           </section>
         )}
 
-        {/* Inquiry Form - Proper section */}
-        <section aria-labelledby="inquiry-form-title">
-          <InquiryForm title="Ready to transform your vending operations?" />
+        {/* Replace Inquiry Form with SimpleContactCTA */}
+        <section aria-labelledby="contact-section-title">
+          <SimpleContactCTA />
         </section>
       </ContentfulErrorBoundary>
     </Layout>

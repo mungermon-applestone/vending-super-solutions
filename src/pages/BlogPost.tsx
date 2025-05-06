@@ -6,6 +6,7 @@ import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbS
 import { useBreadcrumbs } from '@/context/BreadcrumbContext';
 import BlogSchemaData from '@/components/blog/BlogSchemaData';
 import SEO from '@/components/seo/SEO';
+import { SimpleContactCTA } from '@/components/common';
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -55,6 +56,10 @@ const BlogPost = () => {
 
         <h1 className="text-3xl font-bold mb-6">Blog Post: {slug}</h1>
         <p>The blog post content will appear here.</p>
+
+        <div className="mt-16">
+          <SimpleContactCTA />
+        </div>
       </div>
     </Layout>
   );

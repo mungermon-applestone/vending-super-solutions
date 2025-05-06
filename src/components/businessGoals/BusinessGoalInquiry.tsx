@@ -7,16 +7,8 @@ interface BusinessGoalInquiryProps {
   description?: string;
 }
 
-const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({
-  title,
-  description,
-}) => {
-  return (
-    <SimpleContactCTA
-      title={title || "Ready to Get Started?"}
-      description={description || "Fill out the form and we'll start you on your vending journey."}
-    />
-  );
+const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = () => {
+  return <SimpleContactCTA />;
 };
 
 export default BusinessGoalInquiry;

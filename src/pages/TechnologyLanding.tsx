@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useTechnologySections } from '@/hooks/useTechnologySections';
 import PageHero from '@/components/common/PageHero';
 import CTASection from '@/components/common/CTASection';
+import { SimpleContactCTA } from '@/components/common';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { ArrowRight, AlertCircle, ExternalLink, Wrench, FileQuestion, RefreshCcw, Database, BookOpen, Bug } from 'lucide-react';
@@ -298,6 +298,8 @@ const TechnologyLanding = () => {
         )}
       </div>
       
+      {/* Add SimpleContactCTA before CTASection */}
+      <SimpleContactCTA />
       <CTASection />
     </Layout>
   );

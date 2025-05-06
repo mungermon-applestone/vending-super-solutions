@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { CMSImage } from '@/types/cms';
+import { SimpleContactCTA } from '@/components/common';
 
 const getImageProps = (image: CMSImage | string | undefined) => {
   if (!image) return { url: '', alt: '' };
@@ -132,6 +133,8 @@ const TechnologyDetailPage = () => {
           </div>
         </div>
       )}
+      
+      <SimpleContactCTA />
     </Layout>
   );
 };
