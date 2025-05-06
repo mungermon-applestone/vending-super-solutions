@@ -33,8 +33,8 @@ export async function sendEmail(params: {
 
     // Prepare the email
     const msg = {
-      to: "admin@yourdomain.com", // Replace with your recipient email
-      from: "noreply@yourdomain.com", // Replace with your verified sender email
+      to: "your-recipient-email@yourdomain.com", // Replace with your actual recipient email address
+      from: "your-sender-email@yourdomain.com", // Replace with your verified sender email address
       subject: params.subject,
       text: params.message,
       html: `
