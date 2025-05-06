@@ -28,8 +28,8 @@ interface PrivacyPolicyEntry {
 }
 
 const TermsOfService = () => {
-  // Replace this with the ID of your Privacy Policy content that contains the terms of use
-  const entryId = '2GjwMxGSuH9Rw3jdtyvr5S'; // Privacy Policy entry ID
+  // Updated entry ID for the Privacy Policy content that contains terms of use
+  const entryId = '6CFu5Mtzq01sgCIc6Zh1Oi'; // Updated Privacy Policy entry ID
   
   const { data: privacyPolicy, isLoading, error, isContentReady } = useContentful<ContentfulResponse<PrivacyPolicyEntry>>({
     queryKey: ['privacy-policy', entryId],
