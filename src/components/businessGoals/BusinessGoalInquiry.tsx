@@ -1,6 +1,6 @@
 
 import React from 'react';
-import StandardContactForm from '@/components/contact/StandardContactForm';
+import ContactForm from '@/components/contact/ContactForm';
 
 interface BusinessGoalInquiryProps {
   title?: string;
@@ -25,13 +25,7 @@ const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({
                 <p className="text-gray-700">{description}</p>
               )}
             </div>
-            <div className="flex-1">
-              <StandardContactForm 
-                formTitle="Send Us a Message" 
-                formType="contact"
-                showSubject={true}
-              />
-            </div>
+            <ContactForm formSectionTitle="Send Us a Message" />
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import Layout from '@/components/layout/Layout';
 import ContactForm from '@/components/contact/ContactForm';
 import ContactCards from '@/components/contact/ContactCards';
 import FAQSection from '@/components/contact/FAQSection';
@@ -9,17 +10,17 @@ import ContactLoadingState from '@/components/contact/ContactLoadingState';
 import ContactFallback from '@/components/contact/ContactFallback';
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
 
-const Contact = () => {
+const ContactPage = () => {
   const navigate = useNavigate();
   
   return (
-    <div className="container mx-auto py-12">
+    <Layout>
       <ContentfulInitializer
         fallback={<ContactFallback />}
       >
         <ContactContent />
       </ContentfulInitializer>
-    </div>
+    </Layout>
   );
 };
 
@@ -52,7 +53,7 @@ const ContactContent = () => {
   } = processedData;
 
   return (
-    <div>
+    <div className="container mx-auto py-12">
       {/* Page Title & Description */}
       <div className="max-w-3xl mx-auto text-center mb-12">
         <h1 className="text-3xl font-bold mb-4">{introTitle || 'Contact Us'}</h1>
@@ -83,4 +84,4 @@ const ContactContent = () => {
   );
 };
 
-export default Contact;
+export default ContactPage;

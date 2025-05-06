@@ -1,6 +1,6 @@
 
 import React from 'react';
-import StandardContactForm from '@/components/contact/StandardContactForm';
+import { Button } from '@/components/ui/button';
 
 interface MachineDetailInquiryProps {
   machineTitle: string;
@@ -18,19 +18,74 @@ const MachineDetailInquiry: React.FC<MachineDetailInquiryProps> = ({ machineTitl
             <p className="text-gray-600 mb-6">
               Complete the form below and one of our specialists will contact you with pricing and availability.
             </p>
-            
-            <StandardContactForm
-              formTitle=""
-              formType="inquiry"
-              productInfo={{
-                name: machineTitle,
-                type: 'machine'
-              }}
-              showCompany={true}
-              showPhone={true}
-              submitButtonText="Submit Inquiry"
-              successMessage={`Thank you for your interest in the ${machineTitle}. We'll be in touch shortly.`}
-            />
+            <form className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
+                  Company
+                </label>
+                <input
+                  type="text"
+                  id="company"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
+                />
+              </div>
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
+                />
+              </div>
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                  Message
+                </label>
+                <textarea
+                  id="message"
+                  rows={4}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
+                  placeholder="Tell us about your needs, deployment location, and any questions you have."
+                ></textarea>
+              </div>
+              <div>
+                <Button className="w-full">Submit Inquiry</Button>
+              </div>
+            </form>
           </div>
         </div>
       </div>

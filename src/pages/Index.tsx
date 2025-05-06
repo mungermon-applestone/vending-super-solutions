@@ -6,7 +6,7 @@ import FeaturesSection from '@/components/home/FeaturesSection';
 import ProductTypesSection from '@/components/home/ProductTypesSection';
 import BusinessGoalsSection from '@/components/home/BusinessGoalsSection';
 import AvailableMachinesSection from '@/components/home/AvailableMachinesSection';
-import StandardContactForm from '@/components/contact/StandardContactForm';
+import ContactForm from '@/components/contact/ContactForm';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
 
 const Index = () => {
@@ -30,13 +30,7 @@ const Index = () => {
                 {homeContent?.ctaSectionDescription || "Get started with our platform today and see the difference in your operations."}
               </p>
             </div>
-            <div className="flex-1">
-              <StandardContactForm 
-                formTitle="Get in touch with us" 
-                formType="contact"
-                showSubject={true}
-              />
-            </div>
+            <ContactForm formSectionTitle="Get in touch with us" />
           </div>
         </div>
       </section>

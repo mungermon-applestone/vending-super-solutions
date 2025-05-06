@@ -1,6 +1,6 @@
 
 import React from 'react';
-import StandardContactForm from '@/components/contact/StandardContactForm';
+import ContactForm from '@/components/contact/ContactForm';
 
 const BusinessGoalsContactSection = () => {
   return (
@@ -14,13 +14,7 @@ const BusinessGoalsContactSection = () => {
                 Our team is ready to assist you with achieving your specific business goals using our vending solutions.
               </p>
             </div>
-            <div className="flex-1">
-              <StandardContactForm 
-                formTitle="Send Us a Message" 
-                formType="contact"
-                showSubject={true}
-              />
-            </div>
+            <ContactForm formSectionTitle="Send Us a Message" />
           </div>
         </div>
       </div>
