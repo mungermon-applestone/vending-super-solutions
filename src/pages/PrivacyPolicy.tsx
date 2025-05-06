@@ -19,7 +19,7 @@ interface PrivacyPolicyEntry {
     };
   };
   fields: {
-    'Privacy-main-text'?: Document;
+    privacyMainText?: Document;
     title?: string;
   };
   includes?: {
@@ -50,12 +50,37 @@ const PrivacyPolicy = () => {
     if (privacyContent) {
       console.log('Privacy content in component:', privacyContent);
       console.log('Has fields?', !!privacyContent.fields);
+      console.log('All field names:', privacyContent.fields ? Object.keys(privacyContent.fields) : []);
+      
       if (privacyContent.fields) {
-        console.log('Privacy-main-text exists?', 'Privacy-main-text' in privacyContent.fields);
-        console.log('Privacy-main-text value:', privacyContent.fields['Privacy-main-text']);
+        // Check for all possible variations of the field name
+        const possibleFieldNames = ['Privacy-main-text', 'privacyMainText', 'privacy_main_text', 'privacyMainText', 'privacyText', 'content', 'body'];
+        possibleFieldNames.forEach(fieldName => {
+          console.log(`Has ${fieldName}?`, fieldName in privacyContent.fields);
+        });
       }
     }
   }, [privacyContent]);
+
+  // Helper function to find the rich text content regardless of field name
+  const getRichTextContent = () => {
+    if (!privacyContent?.fields) return null;
+    
+    // Check for common field name variations
+    const fieldNames = Object.keys(privacyContent.fields);
+    console.log('Available fields:', fieldNames);
+    
+    // Try to find a rich text field (Document type)
+    for (const fieldName of fieldNames) {
+      const field = privacyContent.fields[fieldName];
+      if (field && typeof field === 'object' && 'content' in field && 'nodeType' in field) {
+        console.log(`Found rich text content in field: ${fieldName}`);
+        return field as Document;
+      }
+    }
+    
+    return null;
+  };
 
   return (
     <Layout>
@@ -84,26 +109,34 @@ const PrivacyPolicy = () => {
             />
           ) : isContentReady && privacyContent ? (
             <div className="prose prose-lg max-w-none">
-              {privacyContent.fields && privacyContent.fields['Privacy-main-text'] ? (
-                renderRichText(
-                  privacyContent.fields['Privacy-main-text'],
-                  { includedAssets: privacyContent.includes?.Asset || [] }
-                )
-              ) : (
-                <div>
-                  <p>No privacy policy content found with ID: {entryId}</p>
-                  <div className="mt-4 p-4 bg-gray-100 rounded-md text-sm">
-                    <p className="font-semibold">Debugging Info:</p>
-                    <pre className="whitespace-pre-wrap mt-2">
-                      {JSON.stringify({
-                        contentReceived: !!privacyContent,
-                        hasFields: privacyContent ? !!privacyContent.fields : false,
-                        hasPrivacyText: privacyContent?.fields ? 'Privacy-main-text' in privacyContent.fields : false
-                      }, null, 2)}
-                    </pre>
+              {(() => {
+                // Try to get rich text content from any field
+                const richTextContent = getRichTextContent();
+                
+                if (richTextContent) {
+                  return renderRichText(
+                    richTextContent,
+                    { includedAssets: privacyContent.includes?.Asset || [] }
+                  );
+                }
+                
+                return (
+                  <div>
+                    <p>No privacy policy content found with ID: {entryId}</p>
+                    <div className="mt-4 p-4 bg-gray-100 rounded-md text-sm">
+                      <p className="font-semibold">Debugging Info:</p>
+                      <pre className="whitespace-pre-wrap mt-2">
+                        {JSON.stringify({
+                          contentReceived: !!privacyContent,
+                          hasFields: privacyContent ? !!privacyContent.fields : false,
+                          availableFields: privacyContent?.fields ? Object.keys(privacyContent.fields) : [],
+                          entryType: privacyContent?.sys?.contentType?.sys?.id || 'unknown'
+                        }, null, 2)}
+                      </pre>
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           ) : (
             <p>No privacy policy content available.</p>
