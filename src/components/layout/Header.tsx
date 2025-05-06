@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import NotificationManager from '@/components/common/NotificationManager';
 
 const Header = () => {
   return (
@@ -21,6 +22,7 @@ const Header = () => {
             <NavLink href="/blog">Updates</NavLink>
             <NavLink href="/contact">Contact</NavLink>
           </nav>
+          <NotificationManager small className="ml-2" />
         </div>
       </div>
     </header>
