@@ -6,6 +6,10 @@ import './index.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { BreadcrumbProvider } from './context/BreadcrumbContext';
+import { registerServiceWorker } from './utils/serviceWorkerRegistration';
+
+// Register service worker for PWA support and caching
+registerServiceWorker();
 
 // Create a client
 const queryClient = new QueryClient({

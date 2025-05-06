@@ -7,6 +7,7 @@ import ContentfulPersistenceProvider from './providers/ContentfulPersistenceProv
 import ContentfulInitializer from './contentful/ContentfulInitializer';
 import PreviewEnvironmentDetector from './contentful/PreviewEnvironmentDetector';
 import { isPreviewEnvironment } from '@/config/cms';
+import { Offline } from '@/components/common';
 
 const RootLayout = () => {
   const isPreview = isPreviewEnvironment();
@@ -34,6 +35,9 @@ const RootLayout = () => {
       <ContentfulPersistenceProvider>
         <div className="flex min-h-screen flex-col">
           <Header />
+          
+          {/* Offline indicator */}
+          <Offline />
           
           {/* Show the preview environment detector if needed */}
           {isPreview && (
