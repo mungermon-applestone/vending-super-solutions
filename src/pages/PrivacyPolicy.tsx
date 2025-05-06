@@ -73,7 +73,7 @@ const PrivacyPolicy = () => {
             <div className="prose prose-lg max-w-none">
               {privacyContent.fields && privacyContent.fields['Privacy-main-text'] ? (
                 renderRichText(
-                  privacyContent.fields['Privacy-main-text'] as Document, 
+                  privacyContent.fields['Privacy-main-text'], 
                   { includedAssets: privacyContent.includes?.Asset || [] }
                 )
               ) : (
