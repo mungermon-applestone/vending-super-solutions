@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -127,7 +126,7 @@ const BusinessGoalsPage: React.FC = () => {
   const isLoading = goalsLoading || contentLoading || heroLoading;
   const error = goalsError || contentError;
 
-  // Detailed debug logging for business goals data and slugs
+  // Check if contentful is configured
   useEffect(() => {
     // Log for debugging purposes
     console.log('[BusinessGoalsPage] Contentful configuration status:', {
@@ -137,29 +136,11 @@ const BusinessGoalsPage: React.FC = () => {
       tokenConfigured: CONTENTFUL_CONFIG.DELIVERY_TOKEN?.length > 0
     });
     
-    // Log goals data with focus on slugs
-    if (businessGoals) {
-      console.log('[BusinessGoalsPage] Contentful business goals with slugs:', 
-        businessGoals.map(goal => ({
-          id: goal.id,
-          title: goal.title,
-          slug: goal.slug
-        }))
-      );
-    }
-    
-    console.log('[BusinessGoalsPage] Fallback business goals with slugs:', 
-      fallbackBusinessGoals.map(goal => ({
-        id: goal.id,
-        title: goal.title,
-        slug: goal.slug
-      }))
-    );
-    
-    // Log which data source we're using
-    console.log('[BusinessGoalsPage] Using data source:', 
-      isConfigured && businessGoals && businessGoals.length > 0 ? 'Contentful' : 'Fallback'
-    );
+    console.log('[BusinessGoalsPage] Business goals data:', {
+      businessGoals,
+      fallbackBusinessGoals,
+      displayGoals: isConfigured ? businessGoals : fallbackBusinessGoals
+    });
   }, [isConfigured, isPreview, businessGoals]);
   
   // Use fallback content if Contentful is not configured
@@ -223,7 +204,6 @@ const BusinessGoalsPage: React.FC = () => {
           content={pageContent}
           isLoading={contentLoading}
           error={contentError}
-          goals={displayGoals}
         />
       )}
     </Layout>

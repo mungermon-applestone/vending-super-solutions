@@ -22,21 +22,7 @@ export const BUSINESS_GOAL_SLUG_MAP: Record<string, string> = {
   'green-initiatives': 'environmental-sustainability',
   'data-insights': 'data-analytics',
   'analytics': 'data-analytics',
-  'business-intelligence': 'data-analytics',
-  
-  // Expanded entries for expand-footprint
-  'expand': 'expand-footprint',
-  'footprint': 'expand-footprint',
-  'expand-business': 'expand-footprint',
-  'growth-expansion': 'expand-footprint',
-  'expansion': 'expand-footprint',
-  'grow-footprint': 'expand-footprint',
-  'business-expansion': 'expand-footprint',
-  'market-expansion': 'expand-footprint',
-  'retail-expansion': 'expand-footprint',
-  'expand-locations': 'expand-footprint',
-  'expand-presence': 'expand-footprint',
-  'store-expansion': 'expand-footprint'
+  'business-intelligence': 'data-analytics'
 };
 
 // Define a map of canonical slugs
@@ -122,39 +108,6 @@ export function getBasicVariations(slug: string): string[] {
   }
   
   return variations;
-}
-
-/**
- * Special handling for hardcoded important slugs
- * This is a fallback for critical business goals that must be available
- * @param slug The slug to check
- * @returns The hardcoded slug if it's a known critical slug, otherwise the original
- */
-export function getHardcodedSlug(slug: string): string | null {
-  if (!slug) return null;
-  
-  // Convert to lowercase and clean up
-  const cleanSlug = normalizeSlug(slug);
-  
-  // Special case for expand-footprint
-  if (cleanSlug === 'expand-footprint' || 
-      cleanSlug.includes('expand') && cleanSlug.includes('footprint')) {
-    console.log(`[getHardcodedSlug] Converting "${slug}" to hardcoded "expand-footprint"`);
-    return 'expand-footprint';
-  }
-  
-  // Handle variations
-  if (cleanSlug === 'expand' || 
-      cleanSlug === 'footprint' || 
-      cleanSlug === 'growth' || 
-      cleanSlug === 'expansion') {
-    console.log(`[getHardcodedSlug] Converting "${slug}" to hardcoded "expand-footprint" (variation match)`);
-    return 'expand-footprint';
-  }
-  
-  // Add other critical business goals here
-  
-  return null;
 }
 
 /**

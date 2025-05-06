@@ -1,9 +1,9 @@
 
 import React, { useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Star, Check, Shield, Server, Settings, Bell, Battery, ClipboardCheck, RefreshCcw, TrendingUp, PieChart, Map, UserCheck } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
-import { useBusinessGoal } from '@/hooks/cms/useBusinessGoal';
+import { useContentfulBusinessGoal } from '@/hooks/cms/useContentfulBusinessGoals';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check as CheckIcon } from 'lucide-react';
@@ -52,7 +52,6 @@ const getIconComponent = (iconName: string | undefined): React.ReactNode => {
 
 const BusinessGoalDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
   
   // Add debug logs to track the slug processing
   console.log(`[BusinessGoalDetailPage] Received slug from URL params: "${slug}"`);
@@ -61,17 +60,13 @@ const BusinessGoalDetailPage = () => {
     console.log(`[BusinessGoalDetailPage] Normalized slug: "${normalizeSlug(slug)}"`);
   }
   
-  // Special handling for expand-footprint to ensure it works
+  // Add effect to redirect to canonical URL if needed
   useEffect(() => {
-    if (slug === 'expand-footprint') {
-      console.log('[BusinessGoalDetailPage] Special handling for expand-footprint route');
-      // We'll use our primary business goal implementation for this specific route
-      navigate(`/goals/expand-footprint`, { replace: true });
-    } else if (slug) {
+    if (slug) {
       const wasRedirected = redirectToCanonicalBusinessGoalIfNeeded(slug);
       console.log(`[BusinessGoalDetailPage] Was redirected: ${wasRedirected}`);
     }
-  }, [slug, navigate]);
+  }, [slug]);
   
   console.log('[BusinessGoalDetailPage] Current route path:', window.location.pathname);
   
@@ -101,7 +96,7 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
   // Add detailed debug logging
   console.log(`[BusinessGoalContent] Attempting to load content with slug: "${slug}"`);
   
-  const { data: businessGoal, isLoading, error, refetch } = useBusinessGoal(slug || '');
+  const { data: businessGoal, isLoading, error } = useContentfulBusinessGoal(slug || '');
   
   console.log('[BusinessGoalContent] Content data for slug:', slug, {
     isLoading,
@@ -136,49 +131,6 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
   
   if (error) {
     console.error('[BusinessGoalContent] Error loading business goal:', error);
-    // If we're on the expand-footprint page and have an error, show special handling
-    if (slug === 'expand-footprint') {
-      return (
-        <div className="container mx-auto py-12">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white p-8 rounded-lg shadow-md">
-              <h1 className="text-3xl font-bold mb-4">Expand Your Footprint</h1>
-              <p className="text-lg mb-6">Grow your retail presence with automated smart vending solutions.</p>
-              
-              <h2 className="text-xl font-semibold mt-8 mb-4">Key Benefits</h2>
-              <ul className="space-y-2 mb-8">
-                <li className="flex items-start">
-                  <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-1" />
-                  <span>Expand to new locations without traditional store overhead</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-1" />
-                  <span>Reach customers in high-traffic areas with minimal space requirements</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-1" />
-                  <span>Test new markets with lower investment risk</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-1" />
-                  <span>Scale your retail footprint faster than traditional stores</span>
-                </li>
-              </ul>
-              
-              <Button onClick={() => refetch()} className="mt-4">
-                Try Loading Content Again
-              </Button>
-              
-              <p className="text-sm text-gray-500 mt-4">
-                Note: We're having trouble loading the content from our CMS, but we're showing you 
-                the key information about this business goal in the meantime.
-              </p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    
     return (
       <div className="container mx-auto py-12">
         <div className="max-w-4xl mx-auto">
@@ -197,50 +149,6 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
   
   if (!businessGoal) {
     console.warn('[BusinessGoalContent] No business goal data returned for slug:', slug);
-    
-    // Special case for expand-footprint
-    if (slug === 'expand-footprint') {
-      return (
-        <div className="container mx-auto py-12">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white p-8 rounded-lg shadow-md">
-              <h1 className="text-3xl font-bold mb-4">Expand Your Footprint</h1>
-              <p className="text-lg mb-6">Grow your retail presence with automated smart vending solutions.</p>
-              
-              <h2 className="text-xl font-semibold mt-8 mb-4">Key Benefits</h2>
-              <ul className="space-y-2 mb-8">
-                <li className="flex items-start">
-                  <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-1" />
-                  <span>Expand to new locations without traditional store overhead</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-1" />
-                  <span>Reach customers in high-traffic areas with minimal space requirements</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-1" />
-                  <span>Test new markets with lower investment risk</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-1" />
-                  <span>Scale your retail footprint faster than traditional stores</span>
-                </li>
-              </ul>
-              
-              <Button onClick={() => refetch()} className="mt-4">
-                Try Loading Content Again
-              </Button>
-              
-              <p className="text-sm text-gray-500 mt-4">
-                Note: We're having trouble loading the content from our CMS, but we're showing you 
-                the key information about this business goal in the meantime.
-              </p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    
     return (
       <div className="container mx-auto py-12">
         <div className="max-w-4xl mx-auto">

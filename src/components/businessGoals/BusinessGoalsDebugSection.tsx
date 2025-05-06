@@ -1,116 +1,96 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Loader2 } from 'lucide-react';
-import { CMSBusinessGoal } from '@/types/cms';
+import { Button } from '@/components/ui/button';
+import { useQueryClient } from '@tanstack/react-query';
+import { BusinessGoalsPageContent } from '@/hooks/cms/useBusinessGoalsPageContent';
 
 interface BusinessGoalsDebugSectionProps {
-  content: any;
+  content: BusinessGoalsPageContent | null;
   isLoading: boolean;
-  error: any;
-  goals?: CMSBusinessGoal[];
+  error: unknown;
 }
 
-const BusinessGoalsDebugSection: React.FC<BusinessGoalsDebugSectionProps> = ({ 
+const BusinessGoalsDebugSection: React.FC<BusinessGoalsDebugSectionProps> = ({
   content,
   isLoading,
-  error,
-  goals
+  error
 }) => {
+  const queryClient = useQueryClient();
+  
+  // Check if we're in development/staging environment
+  const isDevelopment = import.meta.env.DEV || window.location.host.includes('staging') || window.location.host.includes('netlify') || window.location.host.includes('localhost');
+  
+  if (!isDevelopment) {
+    return null;
+  }
+  
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['contentful', 'businessGoalsPageContent'] });
+  };
+  
   return (
-    <div className="container py-12 border-t border-gray-200 mt-12">
-      <h2 className="text-xl font-semibold mb-4">Debug Information (Development Only)</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Page Content</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex items-center space-x-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Loading content...</span>
-              </div>
-            ) : error ? (
-              <div className="text-red-500">
-                <p>Error: {error.message}</p>
-              </div>
-            ) : !content ? (
-              <p>No content available.</p>
-            ) : (
-              <Accordion type="single" collapsible>
-                <AccordionItem value="content">
-                  <AccordionTrigger>Content Data</AccordionTrigger>
-                  <AccordionContent>
-                    <pre className="text-xs overflow-auto p-2 bg-gray-100 rounded max-h-96">
-                      {JSON.stringify(content, null, 2)}
-                    </pre>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            )}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Business Goals Data</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {!goals || goals.length === 0 ? (
-              <p>No business goals available.</p>
-            ) : (
-              <Accordion type="single" collapsible>
-                <AccordionItem value="goals">
-                  <AccordionTrigger>Goals Data ({goals.length} goals)</AccordionTrigger>
-                  <AccordionContent>
-                    <pre className="text-xs overflow-auto p-2 bg-gray-100 rounded max-h-96">
-                      {JSON.stringify(
-                        goals.map(g => ({
-                          id: g.id,
-                          title: g.title,
-                          slug: g.slug,
-                          link: `/business-goals/${g.slug}`
-                        })), 
-                        null, 
-                        2
-                      )}
-                    </pre>
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="slugMap">
-                  <AccordionTrigger>Slug Map</AccordionTrigger>
-                  <AccordionContent>
-                    <div className="bg-gray-100 p-3 rounded">
-                      <h4 className="font-medium mb-2">Goal URL Mappings:</h4>
-                      <ul className="space-y-2 text-sm">
-                        {goals.map(goal => (
-                          <li key={goal.id} className="border-b border-gray-200 pb-2">
-                            <strong>{goal.title}</strong><br/>
-                            <span className="text-gray-600">Slug: </span>{goal.slug}<br/>
-                            <span className="text-gray-600">URL: </span>
-                            <a 
-                              href={`/business-goals/${goal.slug}`} 
-                              className="text-blue-600 hover:underline"
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                            >
-                              /business-goals/{goal.slug}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            )}
-          </CardContent>
-        </Card>
+    <section className="py-8 bg-gray-100 border-t border-gray-200">
+      <div className="container mx-auto">
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Debug: Business Goals Page Content</h3>
+            <Button variant="outline" size="sm" onClick={handleRefresh}>
+              Refresh Content
+            </Button>
+          </div>
+          
+          {isLoading && (
+            <div className="p-4 bg-gray-50 rounded">
+              <p className="text-gray-600">Loading content...</p>
+            </div>
+          )}
+          
+          {error && (
+            <div className="p-4 bg-red-50 text-red-800 rounded">
+              <p className="font-semibold">Error loading content:</p>
+              <p>{error instanceof Error ? error.message : 'Unknown error'}</p>
+            </div>
+          )}
+          
+          {content && !isLoading && (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left">Field</th>
+                    <th className="px-4 py-2 text-left">Value</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {Object.entries(content).map(([key, value]) => (
+                    <tr key={key}>
+                      <td className="px-4 py-2 font-medium">{key}</td>
+                      <td className="px-4 py-2">
+                        {Array.isArray(value) ? (
+                          <ul className="list-disc pl-5">
+                            {value.map((item, i) => (
+                              <li key={i}>{String(item)}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          typeof value === 'object' ? JSON.stringify(value) : String(value || 'null')
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          
+          {!content && !isLoading && !error && (
+            <div className="p-4 bg-yellow-50 text-yellow-800 rounded">
+              <p>No content found. Please make sure you have created and published the BusinessGoalsPageContent in Contentful.</p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 

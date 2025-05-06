@@ -28,174 +28,87 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
     // Log search parameters for debugging
     logSlugSearch("business goal", slug);
     
-    // Special handling for expand-footprint
-    const expandFootprintPattern = /expand[-_]?footprint|footprint[-_]?expand/i;
-    const isExpandFootprint = expandFootprintPattern.test(slug);
+    // Resolve the slug using our centralized method
+    const resolvedSlug = resolveSlug(slug);
     
-    if (isExpandFootprint) {
-      console.log("[fetchBusinessGoalBySlug] Detected expand-footprint pattern, using direct slug query");
-    }
+    console.log(`[fetchBusinessGoalBySlug] Slug details:`, {
+      original: slug,
+      resolved: resolvedSlug
+    });
     
     // Try to fetch from Contentful
     try {
       const client = await getContentfulClient();
       
-      let entries;
+      // Step 1: Try with resolved slug
+      console.log(`[fetchBusinessGoalBySlug] Trying with resolved slug: "${resolvedSlug}"`);
+      let entries = await client.getEntries({
+        content_type: 'businessGoal',
+        'fields.slug': resolvedSlug,
+        include: 2,
+        limit: 1
+      });
       
-      // For expand-footprint, try multiple possible slug variations
-      if (isExpandFootprint) {
-        const possibleSlugs = [
-          'expand-footprint',
-          'expand_footprint',
-          'expandfootprint',
-          'footprint-expand'
-        ];
-        
-        // Try each possible slug variation
-        for (const possibleSlug of possibleSlugs) {
-          console.log(`[fetchBusinessGoalBySlug] Trying with explicit slug: "${possibleSlug}"`);
-          entries = await client.getEntries({
-            content_type: 'businessGoal',
-            'fields.slug': possibleSlug,
-            include: 3, // Increased include depth for features
-            limit: 1
-          });
-          
-          if (entries.items.length > 0) {
-            console.log(`[fetchBusinessGoalBySlug] Found match with slug: "${possibleSlug}"`);
-            break;
-          }
-        }
-      }
-      
-      // If not expand-footprint or no match found, use the standard approach
-      if (!entries || entries.items.length === 0) {
-        // Resolve the slug using our centralized method
-        const resolvedSlug = resolveSlug(slug);
-        
-        console.log(`[fetchBusinessGoalBySlug] Slug details:`, {
-          original: slug,
-          resolved: resolvedSlug
-        });
-        
-        // Step 1: Try with resolved slug
-        console.log(`[fetchBusinessGoalBySlug] Trying with resolved slug: "${resolvedSlug}"`);
+      // Step 2: If not found, try with original slug as fallback
+      if (entries.items.length === 0 && slug !== resolvedSlug) {
+        console.log(`[fetchBusinessGoalBySlug] Not found with resolved slug, trying original slug: "${slug}"`);
         entries = await client.getEntries({
           content_type: 'businessGoal',
-          'fields.slug': resolvedSlug,
-          include: 3,  // Increased include depth for nested references
+          'fields.slug': slug,
+          include: 2,
           limit: 1
         });
-        
-        // Step 2: If not found, try with original slug as fallback
-        if (entries.items.length === 0 && slug !== resolvedSlug) {
-          console.log(`[fetchBusinessGoalBySlug] Not found with resolved slug, trying original slug: "${slug}"`);
-          entries = await client.getEntries({
-            content_type: 'businessGoal',
-            'fields.slug': slug,
-            include: 3,  // Increased include depth for nested references
-            limit: 1
-          });
-        }
       }
       
-      // If still not found, try advanced matching
-      if (!entries || entries.items.length === 0) {
-        console.log(`[fetchBusinessGoalBySlug] No direct match found, trying to fetch all goals and match manually`);
+      // Step 3: If still not found, try advanced matching
+      if (entries.items.length === 0) {
+        console.log(`[fetchBusinessGoalBySlug] No direct match found, trying variations`);
         
         // Get all business goals to compare slugs
         const allGoalsQuery = await client.getEntries({
           content_type: 'businessGoal',
-          include: 3,  // Increased include depth for nested references
+          include: 2,
           limit: 100
         });
         
         if (allGoalsQuery.items.length > 0) {
-          // For expand-footprint, try a more lenient match
-          if (isExpandFootprint) {
-            console.log(`[fetchBusinessGoalBySlug] Searching through all entries for expand-footprint content`);
-            const expandMatch = allGoalsQuery.items.find(item => {
-              const itemSlug = item.fields.slug as string;
-              const itemTitle = item.fields.title as string;
-              
-              return itemSlug.includes('expand') || 
-                    itemSlug.includes('footprint') ||
-                    itemTitle.toLowerCase().includes('expand') ||
-                    itemTitle.toLowerCase().includes('footprint');
-            });
+          // Extract all available slugs
+          const allSlugs = allGoalsQuery.items.map(item => item.fields.slug as string);
+          console.log(`[fetchBusinessGoalBySlug] Available slugs:`, allSlugs);
+          
+          // Find best match using our centralized method
+          const bestMatch = resolveSlug(slug, allSlugs);
+          
+          if (bestMatch && bestMatch !== resolvedSlug) {
+            console.log(`[fetchBusinessGoalBySlug] Found best match: "${bestMatch}"`);
             
-            if (expandMatch) {
-              console.log(`[fetchBusinessGoalBySlug] Found expand-footprint via title/slug content match: ${expandMatch.fields.slug}`);
+            // Get the matching business goal
+            const matchedGoal = allGoalsQuery.items.find(item => 
+              (item.fields.slug as string) === bestMatch
+            );
+            
+            if (matchedGoal) {
               entries = {
-                items: [expandMatch],
+                items: [matchedGoal],
                 total: 1,
                 limit: 1,
                 skip: 0,
                 sys: { type: 'Array' }
               };
             }
-          } else {
-            // Extract all available slugs
-            const allSlugs = allGoalsQuery.items.map(item => item.fields.slug as string);
-            console.log(`[fetchBusinessGoalBySlug] Available slugs:`, allSlugs);
-            
-            // Find best match using our centralized method
-            const bestMatch = resolveSlug(slug, allSlugs);
-            
-            if (bestMatch) {
-              console.log(`[fetchBusinessGoalBySlug] Found best match: "${bestMatch}"`);
-              
-              // Get the matching business goal
-              const matchedGoal = allGoalsQuery.items.find(item => 
-                (item.fields.slug as string) === bestMatch
-              );
-              
-              if (matchedGoal) {
-                entries = {
-                  items: [matchedGoal],
-                  total: 1,
-                  limit: 1,
-                  skip: 0,
-                  sys: { type: 'Array' }
-                };
-              }
-            }
           }
         }
       }
       
       // If no entries found through any method, return null
-      if (!entries || entries.items.length === 0) {
-        logSlugResult("business goal", slug, slug, false);
-        console.log(`[fetchBusinessGoalBySlug] Business goal with slug "${slug}" not found after all attempts`);
+      if (entries.items.length === 0) {
+        logSlugResult("business goal", slug, resolvedSlug, false);
         return null;
       }
       
       // Process the found entry
       const entry = entries.items[0];
       logSlugResult("business goal", slug, entry.fields.slug as string, true);
-      
-      // Debug the found entry 
-      console.log(`[fetchBusinessGoalBySlug] Found business goal entry:`, {
-        id: entry.sys.id,
-        title: entry.fields.title,
-        slug: entry.fields.slug,
-        hasFeatures: Boolean(entry.fields.features && entry.fields.features.length > 0),
-        hasVideo: Boolean(entry.fields.video),
-        featureCount: entry.fields.features ? entry.fields.features.length : 0
-      });
-      
-      // If there are features, log some details about them
-      if (entry.fields.features && entry.fields.features.length > 0) {
-        console.log(`[fetchBusinessGoalBySlug] Feature references:`, 
-          entry.fields.features.map((feature: any) => ({
-            id: feature.sys?.id,
-            contentType: feature.sys?.contentType?.sys?.id || 'unknown',
-            hasFields: Boolean(feature.fields),
-            title: feature.fields?.title || 'No title'
-          }))
-        );
-      }
       
       // Map the Contentful data to our CMSBusinessGoal interface
       const businessGoal: CMSBusinessGoal = {
@@ -211,28 +124,13 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
         visible: entry.fields.visible as boolean ?? true,
         icon: entry.fields.icon as string,
         benefits: (entry.fields.benefits as string[]) || [],
-        features: (entry.fields.features || []).map((feature: any) => {
-          // Add detailed feature debugging
-          console.log(`[fetchBusinessGoalBySlug] Processing feature:`, {
-            id: feature.sys?.id,
-            hasFields: Boolean(feature.fields),
-            fieldKeys: feature.fields ? Object.keys(feature.fields) : [],
-            title: feature.fields?.title || 'No title'
-          });
-          
-          return {
-            id: feature.sys?.id,
-            title: feature.fields?.title || 'Untitled Feature',
-            description: feature.fields?.description || '',
-            icon: feature.fields?.icon || undefined,
-            display_order: feature.fields?.displayOrder || 0,
-            screenshot: feature.fields?.screenshot ? {
-              id: feature.fields.screenshot.sys?.id,
-              url: `https:${feature.fields.screenshot.fields?.file?.url}`,
-              alt: feature.fields.screenshot.fields?.title || feature.fields?.title || 'Feature Screenshot'
-            } : undefined
-          };
-        }),
+        features: (entry.fields.features || []).map((feature: any) => ({
+          id: feature.sys?.id,
+          title: feature.fields?.title,
+          description: feature.fields?.description,
+          icon: feature.fields?.icon,
+          display_order: feature.fields?.displayOrder || 0
+        })),
         video: entry.fields.video ? {
           id: (entry.fields.video as any).sys.id,
           url: `https:${(entry.fields.video as any).fields.file.url}`,
@@ -249,19 +147,6 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
           } : undefined
         }))
       };
-      
-      console.log(`[fetchBusinessGoalBySlug] Successfully processed business goal: ${businessGoal.title}`);
-      
-      // Final validation of processed goal
-      console.log(`[fetchBusinessGoalBySlug] Processed business goal:`, {
-        id: businessGoal.id,
-        title: businessGoal.title,
-        slug: businessGoal.slug,
-        hasFeatures: businessGoal.features && businessGoal.features.length > 0,
-        featureCount: businessGoal.features ? businessGoal.features.length : 0,
-        hasVideo: !!businessGoal.video,
-        hasBenefits: businessGoal.benefits && businessGoal.benefits.length > 0
-      });
       
       return businessGoal as T;
     } catch (contentfulError) {

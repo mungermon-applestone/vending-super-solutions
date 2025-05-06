@@ -14,7 +14,8 @@ import ProductDetailPage from '@/pages/ProductDetailPage';
 import MachinesPage from '@/pages/MachinesPage';
 import MachineDetailPage from '@/pages/MachineDetailPage';
 import BusinessGoalsPage from '@/pages/BusinessGoalsPage';
-import BusinessGoalDetail from '@/pages/BusinessGoalDetail'; 
+import BusinessGoalDetailPage from '@/pages/BusinessGoalDetailPage';
+import BusinessGoalDetail from '@/pages/BusinessGoalDetail'; // Old implementation
 import NotFound from '@/pages/NotFound';
 import TechnologyPage from '@/pages/TechnologyPage';
 import About from '@/pages/About';
@@ -23,7 +24,6 @@ import ContentfulBlogPostDetail from '@/pages/ContentfulBlogPostDetail';
 import Contact from '@/pages/Contact';
 import StrapiSetupPage from '@/pages/admin/StrapiSetupPage';
 import ZhilaiApplestoneAnnouncement from '@/pages/ZhilaiApplestoneAnnouncement';
-import { businessGoalRoutes } from '@/routes/businessGoalRoutes';
 
 const routes: RouteObject[] = [
   {
@@ -63,8 +63,18 @@ const routes: RouteObject[] = [
         path: 'business-goals',
         element: <BusinessGoalsPage />
       },
-      // Correctly spread the business goal routes array instead of trying to include the JSX element directly
-      ...businessGoalRoutes,
+      {
+        path: 'business-goals/:slug',
+        element: <BusinessGoalDetailPage />
+      },
+      {
+        path: 'goals/:slug',
+        element: <BusinessGoalDetail />
+      },
+      {
+        path: 'business/:slug',
+        element: <BusinessGoalDetailPage />
+      },
       {
         path: 'about',
         element: <About />

@@ -1,29 +1,17 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vending Solutions</title>
-  <script>
-    // Improved redirect for product routes to Next.js
-    if (window.location.pathname.startsWith('/products/')) {
-      const slug = window.location.pathname.split('/products/')[1];
-      // Redirect to the Next.js route
-      window.location.replace(`/products/${slug}`);
-    }
-    // Also handle the old format URLs that might be bookmarked
-    else if (window.location.pathname.endsWith('-vending') || 
-             window.location.pathname.includes('-vending/')) {
-      const path = window.location.pathname;
-      const slug = path.split('/').pop();
-      window.location.replace(`/products/${slug}`);
-    }
-  </script>
-</head>
-<body>
-  <div id="root"></div>
-  <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
-  <script type="module" src="/src/main.tsx"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lovable App</title>
+    <!-- Load environment configuration before other scripts -->
+    <script src="/env-config.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
