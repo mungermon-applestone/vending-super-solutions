@@ -25,13 +25,14 @@ const EmailLink = ({
 
   return (
     <Button 
-      as="a" 
-      href={mailtoLink}
+      asChild
       className={`flex items-center gap-2 ${className}`}
       {...props}
     >
-      {showIcon && <Mail className="h-4 w-4" />}
-      {buttonText}
+      <a href={mailtoLink}>
+        {showIcon && <Mail className="h-4 w-4" />}
+        {buttonText}
+      </a>
     </Button>
   );
 };
