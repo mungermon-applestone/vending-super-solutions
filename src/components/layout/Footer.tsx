@@ -14,7 +14,7 @@ const Footer: React.FC<FooterProps> = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center">
-              <span className="text-xl font-semibold">Vending Solutions</span>
+              <span className="text-xl font-semibold">Applestone Solutions</span>
             </Link>
             <p className="mt-3 text-gray-600 max-w-md">
               Advanced vending solutions for modern businesses. Automate your retail operations with smart vending machines and IoT technology.
@@ -24,18 +24,18 @@ const Footer: React.FC<FooterProps> = () => {
           <div>
             <h3 className="font-semibold text-gray-900 mb-3">Solutions</h3>
             <ul className="space-y-2">
-              <li><Link to="/products" className="text-gray-600 hover:text-vending-blue">Products</Link></li>
-              <li><Link to="/machines" className="text-gray-600 hover:text-vending-blue">Machines</Link></li>
-              <li><Link to="/technology" className="text-gray-600 hover:text-vending-blue">Technology</Link></li>
+              <li><Link to="/products" className="text-gray-600 hover:text-apple-blue">Products</Link></li>
+              <li><Link to="/machines" className="text-gray-600 hover:text-apple-blue">Machines</Link></li>
+              <li><Link to="/technology" className="text-gray-600 hover:text-apple-blue">Technology</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="font-semibold text-gray-900 mb-3">Company</h3>
             <ul className="space-y-2">
-              <li><Link to="/about" className="text-gray-600 hover:text-vending-blue">About Us</Link></li>
-              <li><Link to="/blog" className="text-gray-600 hover:text-vending-blue">Blog</Link></li>
-              <li><Link to="/contact" className="text-gray-600 hover:text-vending-blue">Contact</Link></li>
+              <li><Link to="/about" className="text-gray-600 hover:text-apple-blue">About Us</Link></li>
+              <li><Link to="/blog" className="text-gray-600 hover:text-apple-blue">Blog</Link></li>
+              <li><Link to="/contact" className="text-gray-600 hover:text-apple-blue">Contact</Link></li>
             </ul>
           </div>
         </div>
