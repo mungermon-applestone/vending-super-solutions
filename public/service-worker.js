@@ -1,3 +1,4 @@
+
 // Service Worker for Vending Solutions
 const CACHE_NAME = 'vendingsolutions-v1';
 
@@ -82,11 +83,25 @@ const isResponseExpired = (response) => {
   return parseInt(cacheExpires) < new Date().getTime();
 };
 
+// Don't cache requests with authorization headers
+const shouldNotCacheRequest = (request) => {
+  return (
+    request.headers.has('Authorization') || 
+    request.headers.has('authorization') ||
+    request.url.includes('env-config.js')
+  );
+};
+
 // Fetch event - stale-while-revalidate strategy
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests
+  // Skip cross-origin requests that aren't Contentful
   if (!event.request.url.startsWith(self.location.origin) && 
       !event.request.url.includes('contentful.com')) {
+    return;
+  }
+  
+  // Don't cache requests with credentials
+  if (shouldNotCacheRequest(event.request)) {
     return;
   }
   

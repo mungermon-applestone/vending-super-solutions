@@ -29,24 +29,87 @@
     );
   }
   
-  // Apply credentials immediately for preview or localhost environments
-  if (isPreviewEnvironment()) {
-    console.log('[env-config] Preview/development environment detected, applying preview credentials');
-    
-    window.env.VITE_CONTENTFUL_SPACE_ID = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
-    window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN;
-    window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_ENVIRONMENT_ID;
-    
-    // Also set legacy keys for backward compatibility
-    window.env.spaceId = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
-    window.env.deliveryToken = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN;
-    window.env.environmentId = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_ENVIRONMENT_ID;
-    
-    window._contentfulInitializedSource = 'preview-hardcoded';
-    
-    console.log('[env-config] Preview credentials applied');
-    
-    // Trigger event to notify app that environment variables are loaded
-    window.dispatchEvent(new Event('env-config-loaded'));
+  // Try to load credentials from localStorage if available
+  function loadCredentialsFromStorage() {
+    try {
+      const storedCredentials = localStorage.getItem('contentful_credentials');
+      if (storedCredentials) {
+        const credentials = JSON.parse(storedCredentials);
+        if (credentials.VITE_CONTENTFUL_SPACE_ID && credentials.VITE_CONTENTFUL_DELIVERY_TOKEN) {
+          console.log('[env-config] Loaded credentials from localStorage');
+          return credentials;
+        }
+      }
+    } catch (e) {
+      console.warn('[env-config] Failed to load credentials from localStorage:', e);
+    }
+    return null;
   }
+  
+  // Apply credentials based on environment
+  function applyCredentials() {
+    // First, check for production environment variables (set in deployment)
+    if (window.env.VITE_CONTENTFUL_SPACE_ID && window.env.VITE_CONTENTFUL_DELIVERY_TOKEN) {
+      console.log('[env-config] Using production environment variables');
+      window._contentfulInitializedSource = 'production-env';
+      return true;
+    }
+    
+    // Second, try localStorage for any saved credentials
+    const storedCreds = loadCredentialsFromStorage();
+    if (storedCreds) {
+      window.env.VITE_CONTENTFUL_SPACE_ID = storedCreds.VITE_CONTENTFUL_SPACE_ID;
+      window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = storedCreds.VITE_CONTENTFUL_DELIVERY_TOKEN;
+      window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = storedCreds.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+      
+      // Also set legacy keys for backward compatibility
+      window.env.spaceId = storedCreds.VITE_CONTENTFUL_SPACE_ID;
+      window.env.deliveryToken = storedCreds.VITE_CONTENTFUL_DELIVERY_TOKEN;
+      window.env.environmentId = storedCreds.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+      
+      window._contentfulInitializedSource = 'local-storage';
+      return true;
+    }
+    
+    // Third, use preview credentials for preview environments
+    if (isPreviewEnvironment()) {
+      console.log('[env-config] Preview/development environment detected, applying preview credentials');
+      
+      window.env.VITE_CONTENTFUL_SPACE_ID = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
+      window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN;
+      window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_ENVIRONMENT_ID;
+      
+      // Also set legacy keys for backward compatibility
+      window.env.spaceId = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
+      window.env.deliveryToken = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN;
+      window.env.environmentId = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_ENVIRONMENT_ID;
+      
+      window._contentfulInitializedSource = 'preview-hardcoded';
+      return true;
+    }
+    
+    console.warn('[env-config] No credentials found');
+    return false;
+  }
+  
+  // Apply credentials and trigger event
+  if (applyCredentials()) {
+    console.log('[env-config] Credentials applied successfully');
+    
+    // Save credentials to localStorage for future use if they weren't loaded from there
+    if (window._contentfulInitializedSource !== 'local-storage') {
+      try {
+        localStorage.setItem('contentful_credentials', JSON.stringify({
+          VITE_CONTENTFUL_SPACE_ID: window.env.VITE_CONTENTFUL_SPACE_ID,
+          VITE_CONTENTFUL_DELIVERY_TOKEN: window.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
+          VITE_CONTENTFUL_ENVIRONMENT_ID: window.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
+        }));
+      } catch (e) {
+        console.warn('[env-config] Failed to save credentials to localStorage:', e);
+      }
+    }
+  }
+  
+  // Always trigger event to notify app that environment initialization is complete
+  window.dispatchEvent(new Event('env-config-loaded'));
 })();
