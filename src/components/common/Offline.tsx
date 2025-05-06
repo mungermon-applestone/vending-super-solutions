@@ -1,78 +1,37 @@
 
-import React, { useEffect, useState } from 'react';
-import { Wifi, WifiOff } from 'lucide-react';
-import { checkOfflineStatus } from '@/utils/serviceWorkerRegistration';
+import React, { useState, useEffect } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
-interface OfflineProps {
-  onOfflineStatusChange?: (isOffline: boolean) => void;
-}
-
-const Offline: React.FC<OfflineProps> = ({ onOfflineStatusChange }) => {
-  const [isOffline, setIsOffline] = useState(checkOfflineStatus());
-  const [showBanner, setShowBanner] = useState(false);
+const Offline: React.FC = () => {
+  const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
-    const handleOnline = () => {
-      setIsOffline(false);
-      setShowBanner(true);
-      if (onOfflineStatusChange) onOfflineStatusChange(false);
-      
-      // Hide the "online" banner after 3 seconds
-      setTimeout(() => setShowBanner(false), 3000);
-    };
+    // Check initial connection status
+    setIsOffline(!navigator.onLine);
 
-    const handleOffline = () => {
-      setIsOffline(true);
-      setShowBanner(true);
-      if (onOfflineStatusChange) onOfflineStatusChange(true);
-    };
+    // Set up event listeners for online/offline events
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
-    // Update current status on mount
-    setIsOffline(checkOfflineStatus());
-    if (checkOfflineStatus()) {
-      setShowBanner(true);
-      if (onOfflineStatusChange) onOfflineStatusChange(true);
-    }
 
+    // Clean up event listeners
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [onOfflineStatusChange]);
+  }, []);
 
-  if (!showBanner) return null;
+  if (!isOffline) return null;
 
   return (
-    <div 
-      className={`fixed top-16 right-0 left-0 z-50 py-2 px-4 text-sm text-white transition-all ${
-        isOffline ? 'bg-amber-600' : 'bg-green-600'
-      }`}
-    >
-      <div className="container mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          {isOffline ? (
-            <>
-              <WifiOff size={16} />
-              <span>You're offline. Some content may not be available.</span>
-            </>
-          ) : (
-            <>
-              <Wifi size={16} />
-              <span>You're back online!</span>
-            </>
-          )}
-        </div>
-        {isOffline && (
-          <button 
-            onClick={() => setShowBanner(false)}
-            className="text-white hover:underline focus:outline-none"
-          >
-            Dismiss
-          </button>
-        )}
+    <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-4">
+      <div className="flex items-center">
+        <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2" />
+        <span className="text-yellow-800 font-medium">
+          You are currently offline. Some content may not be available.
+        </span>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
@@ -11,6 +11,17 @@ import { Offline } from '@/components/common';
 
 const RootLayout = () => {
   const isPreview = isPreviewEnvironment();
+  
+  // Log contentful configuration on mount for debugging
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      console.log('[RootLayout] Contentful configuration:', {
+        hasSpaceId: !!(window.env && window.env.VITE_CONTENTFUL_SPACE_ID),
+        hasToken: !!(window.env && window.env.VITE_CONTENTFUL_DELIVERY_TOKEN),
+        source: window._contentfulInitializedSource
+      });
+    }
+  }, []);
 
   return (
     <ContentfulInitializer

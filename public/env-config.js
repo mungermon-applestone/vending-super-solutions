@@ -24,13 +24,15 @@
       hostname.includes('staging') || 
       hostname.includes('lovable.app') ||
       hostname.includes('vercel.app') ||
-      hostname.includes('netlify.app')
+      hostname.includes('netlify.app') ||
+      hostname.includes('localhost') ||
+      hostname.includes('127.0.0.1')
     );
   }
   
-  // Apply credentials immediately for preview environments to avoid race conditions
+  // Apply credentials immediately for preview or localhost environments
   if (isPreviewEnvironment()) {
-    console.log('[env-config] Preview environment detected, applying preview credentials immediately');
+    console.log('[env-config] Preview/development environment detected, applying preview credentials immediately');
     
     window.env.VITE_CONTENTFUL_SPACE_ID = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
     window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN;
@@ -53,7 +55,7 @@
     // Trigger event to notify app that environment variables are loaded
     window.dispatchEvent(new Event('env-config-loaded'));
   }
-  // For non-preview environments (local dev), try to load from localStorage
+  // For non-preview environments (production), try to load from localStorage
   else {
     console.log('[env-config] Non-preview environment detected');
     

@@ -69,7 +69,9 @@ export function isPreviewEnvironment() {
     hostname.includes('staging') || 
     hostname.includes('lovable.app') ||
     hostname.includes('vercel.app') ||
-    hostname.includes('netlify.app')
+    hostname.includes('netlify.app') ||
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1'
   );
 }
 
@@ -88,6 +90,11 @@ export function checkContentfulConfig() {
 
 // Function to check if Contentful is configured
 export function isContentfulConfigured() {
+  // Special case for preview environments - always assume configured
+  if (isPreviewEnvironment()) {
+    return true;
+  }
+  
   const config = checkContentfulConfig();
   
   // Additional check for placeholder values

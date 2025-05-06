@@ -26,10 +26,16 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
       setIsLoading(true);
       try {
         console.log('[ContentfulInitializer] Starting initialization');
+        console.log('[ContentfulInitializer] Window env status:', {
+          exists: !!window.env,
+          hasSpaceId: !!(window.env && window.env.VITE_CONTENTFUL_SPACE_ID),
+          hasToken: !!(window.env && window.env.VITE_CONTENTFUL_DELIVERY_TOKEN),
+          source: window._contentfulInitializedSource
+        });
         
         // For preview environments, always use the hardcoded credentials
-        if (isPreview) {
-          console.log('[ContentfulInitializer] Preview environment detected, using hardcoded credentials');
+        if (isPreview || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+          console.log('[ContentfulInitializer] Preview/development environment detected, using hardcoded credentials');
           forceContentfulProvider();
           
           // Test the connection to verify credentials work
