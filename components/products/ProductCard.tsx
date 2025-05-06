@@ -10,28 +10,11 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  if (!product) {
-    return (
-      <article className="rounded-lg overflow-hidden shadow-md bg-white h-full flex flex-col">
-        <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
-          <span className="text-gray-400">Product data missing</span>
-        </div>
-        <div className="p-6">
-          <h3 className="text-xl font-semibold mb-3">Product Unavailable</h3>
-          <p className="text-gray-600 mb-4">This product could not be loaded.</p>
-        </div>
-      </article>
-    );
-  }
-  
+  // Use thumbnail if available, otherwise use main image or fallback to placeholder
   const imageToUse = product.thumbnail || product.image;
   
   return (
-    <article 
-      className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow h-full flex flex-col"
-      itemScope 
-      itemType="https://schema.org/Product"
-    >
+    <article className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow h-full flex flex-col">
       <div className="w-full h-48 overflow-hidden bg-gray-100 relative">
         {imageToUse ? (
           <Image 
@@ -40,7 +23,6 @@ export default function ProductCard({ product }: ProductCardProps) {
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            itemProp="image"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-50">
@@ -49,10 +31,10 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
       </div>
       <div className="p-6 flex flex-col flex-grow">
-        <h3 className="text-xl font-semibold mb-3" itemProp="name">
+        <h3 className="text-xl font-semibold mb-3">
           {product.title}
         </h3>
-        <p className="text-gray-600 mb-4 line-clamp-3 flex-grow" itemProp="description">
+        <p className="text-gray-600 mb-4 line-clamp-3 flex-grow">
           {product.description}
         </p>
         <Link 

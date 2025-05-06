@@ -2,7 +2,6 @@
 import { getProductTypeBySlug, getProductTypes } from '@/lib/contentful/products'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
-import ProductFeatures from '@/components/products/ProductFeatures'
 
 // Generate static params for common products at build time
 export async function generateStaticParams() {
@@ -85,11 +84,17 @@ export default async function ProductPage({ params }: { params: { slug: string }
           </div>
           
           {product.features && product.features.length > 0 && (
-            <ProductFeatures 
-              features={product.features}
-              sectionTitle="Product Features"
-              sectionDescription="Explore the features that make this product perfect for your business"
-            />
+            <section className="py-12 bg-gray-50 rounded-lg px-8">
+              <h2 className="text-3xl font-bold text-center mb-12">Features</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {product.features.map((feature) => (
+                  <div key={feature.id} className="bg-white rounded-lg p-6 shadow-md">
+                    <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+                    <p className="text-gray-600">{feature.description}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
           )}
         </div>
       </div>

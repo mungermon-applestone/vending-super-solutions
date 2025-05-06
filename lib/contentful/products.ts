@@ -1,132 +1,106 @@
 
 import { getContentfulClient } from './client';
-import { CMSProductType, CMSFeature, CMSImage } from '@/types/cms';
+import { CMSProductType } from '@/types/cms';
 
 /**
- * Get all product types from Contentful
+ * Fetch all product types from Contentful
  */
-export async function getProductTypes(): Promise<CMSProductType[]> {
+export async function getProductTypes() {
   try {
     const client = getContentfulClient();
     
     const entries = await client.getEntries({
       content_type: 'productType',
       include: 2,
-      limit: 100,
     });
     
-    return entries.items.map(entry => {
-      const fields = entry.fields;
-      
-      const product: CMSProductType = {
-        id: entry.sys.id,
-        title: fields.title as string,
-        slug: fields.slug as string,
-        description: fields.description as string,
-        visible: fields.visible as boolean ?? true,
-        benefits: Array.isArray(fields.benefits) ? fields.benefits as string[] : [],
-        
-        // Process main image if available
-        image: fields.image ? {
-          id: (fields.image as any).sys.id,
-          url: `https:${(fields.image as any).fields.file.url}`,
-          alt: (fields.image as any).fields.title || fields.title,
+    console.log(`[contentful/products] Found ${entries.items.length} products`);
+    
+    return entries.items.map((item) => {
+      return {
+        id: item.sys.id,
+        title: item.fields.title as string,
+        slug: item.fields.slug as string,
+        description: item.fields.description as string,
+        visible: item.fields.visible !== false, // default to true if not specified
+        benefits: Array.isArray(item.fields.benefits) ? item.fields.benefits as string[] : [],
+        features: Array.isArray(item.fields.features) 
+          ? (item.fields.features as any[]).map(feature => ({
+              id: feature.sys.id,
+              title: feature.fields.title,
+              description: feature.fields.description,
+              icon: feature.fields.icon || undefined
+            })) 
+          : [],
+        image: item.fields.image ? {
+          url: `https:${(item.fields.image as any).fields.file.url}`,
+          alt: (item.fields.image as any).fields.title || (item.fields.title as string)
         } : undefined,
-        
-        // Process thumbnail if available
-        thumbnail: fields.thumbnail ? {
-          id: (fields.thumbnail as any).sys.id,
-          url: `https:${(fields.thumbnail as any).fields.file.url}`,
-          alt: (fields.thumbnail as any).fields.title || fields.title,
+        thumbnail: item.fields.thumbnail ? {
+          url: `https:${(item.fields.thumbnail as any).fields.file.url}`,
+          alt: (item.fields.thumbnail as any).fields.title || (item.fields.title as string)
         } : undefined,
-        
-        // Process features
-        features: fields.features ? (fields.features as any[]).map(feature => ({
-          id: feature.sys.id,
-          title: feature.fields.title,
-          description: feature.fields.description,
-          icon: feature.fields.icon || undefined,
-          screenshot: feature.fields.screenshot ? {
-            id: feature.fields.screenshot.sys.id,
-            url: `https:${feature.fields.screenshot.fields.file.url}`,
-            alt: feature.fields.screenshot.fields.title || feature.fields.title
-          } : undefined
-        })) : []
-      };
-      
-      return product;
+      } as CMSProductType;
     });
   } catch (error) {
-    console.error('Error fetching product types:', error);
+    console.error('[contentful/products] Error fetching product types:', error);
     return [];
   }
 }
 
 /**
- * Get a product type by slug
+ * Fetch a single product type by slug
  */
-export async function getProductTypeBySlug(slug: string): Promise<CMSProductType | null> {
-  if (!slug || slug.trim() === '') {
-    return null;
-  }
-  
+export async function getProductTypeBySlug(slug: string) {
   try {
+    if (!slug) {
+      console.error('[contentful/products] No slug provided');
+      return null;
+    }
+    
+    console.log(`[contentful/products] Fetching product with slug: "${slug}"`);
+    
     const client = getContentfulClient();
     
     const entries = await client.getEntries({
       content_type: 'productType',
       'fields.slug': slug,
       include: 2,
-      limit: 1,
     });
     
-    if (!entries.items.length) {
-      console.log(`No product found with slug: "${slug}"`);
+    if (entries.items.length === 0) {
+      console.log(`[contentful/products] No product found with slug: "${slug}"`);
       return null;
     }
     
-    const entry = entries.items[0];
-    const fields = entry.fields;
+    const item = entries.items[0];
     
-    const product: CMSProductType = {
-      id: entry.sys.id,
-      title: fields.title as string,
-      slug: fields.slug as string,
-      description: fields.description as string,
-      visible: fields.visible as boolean ?? true,
-      benefits: Array.isArray(fields.benefits) ? fields.benefits as string[] : [],
-      
-      // Process main image if available
-      image: fields.image ? {
-        id: (fields.image as any).sys.id,
-        url: `https:${(fields.image as any).fields.file.url}`,
-        alt: (fields.image as any).fields.title || fields.title,
+    return {
+      id: item.sys.id,
+      title: item.fields.title as string,
+      slug: item.fields.slug as string,
+      description: item.fields.description as string,
+      visible: item.fields.visible !== false, // default to true if not specified
+      benefits: Array.isArray(item.fields.benefits) ? item.fields.benefits as string[] : [],
+      features: Array.isArray(item.fields.features) 
+        ? (item.fields.features as any[]).map(feature => ({
+            id: feature.sys.id,
+            title: feature.fields.title,
+            description: feature.fields.description,
+            icon: feature.fields.icon || undefined
+          })) 
+        : [],
+      image: item.fields.image ? {
+        url: `https:${(item.fields.image as any).fields.file.url}`,
+        alt: (item.fields.image as any).fields.title || (item.fields.title as string)
       } : undefined,
-      
-      // Process thumbnail if available
-      thumbnail: fields.thumbnail ? {
-        id: (fields.thumbnail as any).sys.id,
-        url: `https:${(fields.thumbnail as any).fields.file.url}`,
-        alt: (fields.thumbnail as any).fields.title || fields.title,
+      thumbnail: item.fields.thumbnail ? {
+        url: `https:${(item.fields.thumbnail as any).fields.file.url}`,
+        alt: (item.fields.thumbnail as any).fields.title || (item.fields.title as string)
       } : undefined,
-      
-      // Process features
-      features: fields.features ? (fields.features as any[]).map(feature => ({
-        id: feature.sys.id,
-        title: feature.fields.title,
-        description: feature.fields.description,
-        icon: feature.fields.icon || undefined,
-        screenshot: feature.fields.screenshot ? {
-          id: feature.fields.screenshot.sys.id,
-          url: `https:${feature.fields.screenshot.fields.file.url}`,
-          alt: feature.fields.screenshot.fields.title || feature.fields.title
-        } : undefined
-      })) : []
-    };
-    
-    return product;
+    } as CMSProductType;
   } catch (error) {
-    console.error(`Error fetching product type by slug "${slug}":`, error);
+    console.error(`[contentful/products] Error fetching product with slug "${slug}":`, error);
     return null;
   }
 }
