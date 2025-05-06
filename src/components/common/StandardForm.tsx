@@ -54,10 +54,10 @@ const StandardForm: React.FC<StandardFormProps> = ({
       // Send the email using EmailJS
       // You'll need to replace these values with your actual EmailJS service, template and user IDs
       await emailjs.send(
-        'YOUR_EMAILJS_SERVICE_ID',  // Service ID
-        'YOUR_EMAILJS_TEMPLATE_ID', // Template ID
+        'service_i018lbe',  // Service ID
+        'template_z05zxjq', // Template ID
         templateParams,
-        'YOUR_EMAILJS_USER_ID'      // User ID / Public Key
+        'GF7ahmvXoDxVofUpa'      // User ID / Public Key
       );
       
       // Show success message
