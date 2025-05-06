@@ -27,6 +27,15 @@ module.exports = {
           700: '#374151',
           800: '#1f2937',
           900: '#111827',
+        },
+        vending: {
+          'blue': '#0066B3',
+          'blue-dark': '#004B85',
+          'blue-light': '#EBF3FB',
+          'teal': '#00A0B0',
+          'teal-light': '#E6F7F9',
+          'gray': '#F8F9FA',
+          'gray-dark': '#4A5568',
         }
       },
       container: {

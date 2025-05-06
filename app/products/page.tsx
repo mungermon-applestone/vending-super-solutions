@@ -17,18 +17,18 @@ export default async function ProductsPage() {
   
   return (
     <main>
-      <section className="bg-white py-24">
+      <section className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light py-24">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h1 className="text-4xl font-bold mb-4">Our Products</h1>
-            <p className="text-xl text-gray-600">
+            <h1 className="text-4xl font-bold mb-4 text-[hsl(222_47%_11%)]">Our Products</h1>
+            <p className="text-xl text-[hsl(215_16%_47%)]">
               Discover our complete range of vending solutions for your business needs
             </p>
           </div>
           
           {visibleProducts.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">No products available at this time.</p>
+              <p className="text-[hsl(215_16%_47%)]">No products available at this time.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

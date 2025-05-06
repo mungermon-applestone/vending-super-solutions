@@ -14,7 +14,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const imageToUse = product.thumbnail || product.image;
   
   return (
-    <article className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow h-full flex flex-col">
+    <article className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow h-full flex flex-col card-hover">
       <div className="w-full h-48 overflow-hidden bg-gray-100 relative">
         {imageToUse ? (
           <Image 
@@ -31,15 +31,15 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
       </div>
       <div className="p-6 flex flex-col flex-grow">
-        <h3 className="text-xl font-semibold mb-3">
+        <h3 className="text-xl font-semibold mb-3 text-[hsl(222_47%_11%)]">
           {product.title}
         </h3>
-        <p className="text-gray-600 mb-4 line-clamp-3 flex-grow">
+        <p className="text-[hsl(215_16%_47%)] mb-4 line-clamp-3 flex-grow">
           {product.description}
         </p>
         <Link 
           href={`/products/${product.slug}`}
-          className="text-blue-600 hover:text-blue-800 font-medium flex items-center"
+          className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center"
         >
           Learn more
           <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
