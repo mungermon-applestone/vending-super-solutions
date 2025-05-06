@@ -1,35 +1,23 @@
 
-import React from 'react'
+import React from 'react';
 
 interface ContentfulDiagnosticsProps {
-  slug: string;
-  productId: string;
+  slug?: string;
+  productId?: string;
 }
 
 export default function ContentfulDiagnostics({ slug, productId }: ContentfulDiagnosticsProps) {
   return (
-    <div className="mb-4 border border-blue-100 rounded-md bg-blue-50">
-      <details className="text-blue-800">
-        <summary className="p-4 cursor-pointer font-medium flex items-center">
-          <span className="text-blue-600 mr-2">ℹ</span> Contentful Diagnostic Information
-        </summary>
-        <div className="p-4 pt-0 border-t border-blue-100 text-sm">
-          <details className="mb-2">
-            <summary className="cursor-pointer p-2 hover:bg-blue-100 rounded">Request Information</summary>
-            <div className="pl-4 pt-2 text-gray-600">
-              <p>Product Slug: {slug}</p>
-              <p>Product ID: {productId}</p>
-            </div>
-          </details>
-          <details>
-            <summary className="cursor-pointer p-2 hover:bg-blue-100 rounded">Contentful Configuration</summary>
-            <div className="pl-4 pt-2 text-gray-600">
-              <p>Space ID: {process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID}</p>
-              <p>Environment: {process.env.NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT || 'master'}</p>
-            </div>
-          </details>
-        </div>
-      </details>
+    <div className="text-xs bg-gray-100 p-4 rounded-md mb-4">
+      <h4 className="font-bold mb-1">Contentful Diagnostic Info</h4>
+      <div className="space-y-1">
+        <p><strong>Next.js Environment:</strong> {process.env.NODE_ENV}</p>
+        <p><strong>Space ID:</strong> {process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID || process.env.CONTENTFUL_SPACE_ID || 'Not set'}</p>
+        <p><strong>Environment:</strong> {process.env.NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT || process.env.CONTENTFUL_ENVIRONMENT || 'master'}</p>
+        <p><strong>Has Delivery Token:</strong> {(!!process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN || !!process.env.CONTENTFUL_DELIVERY_TOKEN) ? 'Yes' : 'No'}</p>
+        {slug && <p><strong>Current Slug:</strong> {slug}</p>}
+        {productId && <p><strong>Product ID:</strong> {productId}</p>}
+      </div>
     </div>
-  )
+  );
 }

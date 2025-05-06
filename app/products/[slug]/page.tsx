@@ -74,9 +74,12 @@ export default async function ProductPage({ params }: { params: { slug: string }
   
   let product;
   let usedFallback = false;
+  let error = null;
   
   try {
     product = await getProductTypeBySlug(params.slug)
+    
+    console.log('After getProductTypeBySlug:', product ? 'Product found' : 'Product not found');
     
     // Handle product not found, check fallbacks
     if (!product) {
@@ -94,8 +97,10 @@ export default async function ProductPage({ params }: { params: { slug: string }
       // Log when product is found from Contentful
       console.log('Product found in Contentful:', product.title, 'with slug:', product.slug);
     }
-  } catch (error) {
-    console.error('Error fetching product from Contentful:', error);
+  } catch (err) {
+    console.error('Error fetching product from Contentful:', err);
+    error = err instanceof Error ? err.message : 'Unknown error';
+    
     // Try fallback
     product = productFallbacks[params.slug];
     usedFallback = !!product;
@@ -128,17 +133,17 @@ export default async function ProductPage({ params }: { params: { slug: string }
           </Link>
         </div>
         
-        {/* Show notification if using fallback data */}
-        {usedFallback && (
-          <div className="mb-6 rounded-lg bg-blue-50 p-4 text-blue-800 border border-blue-200">
-            <p>Using locally cached product data. Connect to Contentful for the latest product information.</p>
+        {/* Contentful Diagnostic Information (only shown in development) */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-8">
+            <ContentfulDiagnostics slug={params.slug} productId={product.id} />
           </div>
         )}
         
-        {/* Contentful Diagnostic Information (only shown in development) */}
-        {!usedFallback && process.env.NODE_ENV === 'development' && (
-          <div className="mb-8">
-            <ContentfulDiagnostics slug={params.slug} productId={product.id} />
+        {/* Show notification if using fallback data */}
+        {usedFallback && (
+          <div className="mb-6 rounded-lg bg-blue-50 p-4 text-blue-800 border border-blue-200">
+            <p>Using locally cached product data. {error ? `Error: ${error}` : 'Could not connect to Contentful.'}</p>
           </div>
         )}
         

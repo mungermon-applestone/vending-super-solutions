@@ -9,15 +9,30 @@ export function getContentfulClient() {
     return contentfulClient;
   }
   
+  // Support both Next.js and React environment variable naming conventions
+  const spaceId = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID || process.env.CONTENTFUL_SPACE_ID;
+  const accessToken = process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN || process.env.CONTENTFUL_DELIVERY_TOKEN;
+  const environment = process.env.NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT || process.env.CONTENTFUL_ENVIRONMENT || 'master';
+  
   // Check if environment variables are set
-  if (!process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID || !process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN) {
+  if (!spaceId || !accessToken) {
+    console.error('Contentful environment variables missing:', { 
+      hasSpaceId: !!spaceId, 
+      hasAccessToken: !!accessToken 
+    });
     throw new Error('Contentful environment variables are not properly configured');
   }
   
+  console.log('Initializing Contentful client with:', { 
+    spaceId, 
+    hasAccessToken: !!accessToken, 
+    environment 
+  });
+  
   contentfulClient = createClient({
-    space: process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID,
-    accessToken: process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN,
-    environment: process.env.NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT || 'master',
+    space: spaceId,
+    accessToken: accessToken,
+    environment: environment,
   });
   
   return contentfulClient;
