@@ -1,6 +1,6 @@
 
 import React from 'react';
-import MainNav from './MainNav';
+import { MainNav } from './MainNav';
 import { Link } from 'react-router-dom';
 import NotificationManager from '@/components/common/NotificationManager';
 

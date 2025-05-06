@@ -141,7 +141,7 @@ function urlB64ToUint8Array(base64String: string): Uint8Array {
 }
 
 // Display a test notification using the Notification API
-export function showTestNotification(title: string, options: NotificationOptions = {}): void {
+export function showTestNotification(title: string, options: CustomNotificationOptions = {}): void {
   if (!areNotificationsSupported()) {
     toast.error('Notifications are not supported in this browser');
     return;
@@ -152,7 +152,7 @@ export function showTestNotification(title: string, options: NotificationOptions
     return;
   }
   
-  const defaultOptions: NotificationOptions = {
+  const defaultOptions: CustomNotificationOptions = {
     body: 'This is a test notification',
     icon: '/icons/icon-192x192.png',
     badge: '/icons/badge-96x96.png',
@@ -171,14 +171,14 @@ export function showTestNotification(title: string, options: NotificationOptions
 // Show a notification using the Service Worker
 export async function showServiceWorkerNotification(
   title: string, 
-  options: NotificationOptions = {}
+  options: CustomNotificationOptions = {}
 ): Promise<boolean> {
   if (!window._swRegistration) {
     toast.error('Service worker not registered');
     return false;
   }
   
-  const defaultOptions: NotificationOptions = {
+  const defaultOptions: CustomNotificationOptions = {
     body: 'Notification from Vending Solutions',
     icon: '/icons/icon-192x192.png',
     badge: '/icons/badge-96x96.png',
