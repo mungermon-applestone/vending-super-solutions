@@ -5,13 +5,9 @@ import routes from './routes';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
-import { initSendGrid } from './utils/sendgrid';
 
 // Create optimized router with performance monitoring
 const router = createBrowserRouter(routes);
-
-// Initialize SendGrid
-initSendGrid();
 
 // Loading fallback component
 const LoadingFallback = () => (

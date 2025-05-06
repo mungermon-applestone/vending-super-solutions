@@ -1,19 +1,12 @@
 
-import sgMail from '@sendgrid/mail';
+import { supabase } from '@/integrations/supabase/client';
 
-// Initialize SendGrid with your API key
+// Initialize SendGrid (not needed in the frontend anymore as we use the edge function)
 export const initSendGrid = () => {
-  try {
-    // Initialize using your existing SendGrid API key
-    // Your API key should be stored in environment variables for production
-    sgMail.setApiKey('GF7ahmvXoDxVofUpa');
-    console.log('SendGrid initialized successfully');
-  } catch (error) {
-    console.error('Failed to initialize SendGrid:', error);
-  }
+  console.log('Using Supabase Edge Function for email sending');
 };
 
-// Send email function
+// Send email function - now using the Supabase Edge Function
 export const sendEmail = async (params: {
   from_name: string;
   from_email: string;
@@ -23,29 +16,22 @@ export const sendEmail = async (params: {
   page_url?: string;
 }) => {
   try {
-    const msg = {
-      to: 'admin@yourdomain.com', // Replace with your recipient email
-      from: 'noreply@yourdomain.com', // Replace with your verified sender email
-      subject: params.subject,
-      text: params.message,
-      html: `
-        <div>
-          <h3>${params.subject}</h3>
-          <p><strong>From:</strong> ${params.from_name} (${params.from_email})</p>
-          <p><strong>Message:</strong></p>
-          <p>${params.message}</p>
-          ${params.form_type ? `<p><strong>Form Type:</strong> ${params.form_type}</p>` : ''}
-          ${params.page_url ? `<p><strong>Page URL:</strong> ${params.page_url}</p>` : ''}
-        </div>
-      `,
-    };
-
-    console.log('Sending email with SendGrid:', msg);
-    const response = await sgMail.send(msg);
-    console.log('SendGrid response:', response);
-    return response;
+    console.log('Sending email via Supabase Edge Function:', params);
+    
+    // Call the Supabase Edge Function
+    const { data, error } = await supabase.functions.invoke('send-email', {
+      body: params,
+    });
+    
+    if (error) {
+      console.error('Edge Function error:', error);
+      throw new Error(error.message || 'Failed to send email');
+    }
+    
+    console.log('Email sent successfully:', data);
+    return data;
   } catch (error) {
-    console.error('SendGrid error:', error);
+    console.error('Email sending error:', error);
     throw error;
   }
 };

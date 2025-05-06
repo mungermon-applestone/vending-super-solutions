@@ -75,10 +75,8 @@ const StandardForm: React.FC<StandardFormProps> = ({
       
       console.log('Sending email with params:', emailParams);
       
-      // Send the email using SendGrid
-      const response = await sendEmail(emailParams);
-      
-      console.log('SendGrid response:', response);
+      // Send the email using the Edge Function
+      await sendEmail(emailParams);
       
       // Show success message
       showSuccess("Thank you! Your message has been sent successfully.");
