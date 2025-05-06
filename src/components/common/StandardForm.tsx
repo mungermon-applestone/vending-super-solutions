@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -76,7 +77,8 @@ const StandardForm: React.FC<StandardFormProps> = ({
       console.log('Sending email with params:', emailParams);
       
       // Send the email using the Edge Function
-      await sendEmail(emailParams);
+      const result = await sendEmail(emailParams);
+      console.log('Email send result:', result);
       
       // Show success message
       showSuccess("Thank you! Your message has been sent successfully.");
@@ -181,6 +183,16 @@ const StandardForm: React.FC<StandardFormProps> = ({
           >
             {submitting ? 'Sending...' : buttonText}
           </Button>
+          
+          {formType === 'Test Form' && (
+            <div className="mt-4 p-4 bg-blue-50 text-blue-800 rounded-md">
+              <p className="text-sm">
+                <strong>Testing Notes:</strong> This form submission will attempt to send an email using 
+                the Supabase Edge Function. Make sure your SendGrid API key is set up correctly in Supabase 
+                secrets and your sender email is verified in SendGrid.
+              </p>
+            </div>
+          )}
         </form>
       ) : (
         <div className="text-center py-8">

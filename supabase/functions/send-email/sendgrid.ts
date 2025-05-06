@@ -33,8 +33,9 @@ export async function sendEmail(params: {
 
     // Prepare the email
     const msg = {
-      to: "hello@applestonesolutions.com", // Replace with your actual recipient email address
-      from: "hello@applestonesolutions.com", // Replace with your verified sender email address
+      // Update these email addresses with your actual verified email in SendGrid
+      to: "your-verified-email@example.com", // Change this to your recipient email
+      from: "your-verified-email@example.com", // Change this to your verified sender email in SendGrid
       subject: params.subject,
       text: params.message,
       html: `
