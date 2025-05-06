@@ -23,6 +23,11 @@ interface DynamicImportOptions {
    * Custom loading component
    */
   fallback?: React.ReactNode;
+
+  /**
+   * Whether to enable performance monitoring for this component
+   */
+  monitor?: boolean;
 }
 
 /**
@@ -35,7 +40,8 @@ export function createDynamicComponent<T extends ComponentType<any>>(
   const { 
     id = 'dynamic-component', 
     priority = 'medium',
-    fallback = <div className="flex justify-center items-center p-4"><Spinner size="md" /></div>
+    fallback = <div className="flex justify-center items-center p-4"><Spinner size="md" /></div>,
+    monitor = true
   } = options;
   
   // Create the lazy component
@@ -57,6 +63,22 @@ export function createDynamicComponent<T extends ComponentType<any>>(
   
   // Return a wrapper component that handles suspense
   return function DynamicComponent(props: any) {
+    // Monitor component load time if monitoring is enabled
+    React.useEffect(() => {
+      if (monitor && 'performance' in window) {
+        const markId = `dynamic-${id}-mounted`;
+        performance.mark(markId);
+        
+        return () => {
+          try {
+            performance.measure(`dynamic-${id}-lifecycle`, markId);
+          } catch (e) {
+            // Ignore measurement errors
+          }
+        };
+      }
+    }, []);
+    
     return (
       <Suspense fallback={fallback}>
         <LazyComponent {...props} />
