@@ -73,7 +73,7 @@ const RootLayout = () => {
             className="flex-1 bg-gray-50"
             style={{ 
               contentVisibility: 'auto', 
-              containIntrinsicSize: '0 500px' 
+              containIntrinsicSize: '0 800px' 
             }}
           >
             <Suspense fallback={

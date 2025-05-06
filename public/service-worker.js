@@ -11,7 +11,8 @@ const STATIC_CACHE_URLS = [
   '/manifest.json',
   '/robots.txt',
   '/sitemap.xml',
-  '/logo.png'
+  '/logo.png',
+  '/offline.html'
 ];
 
 // Cache duration settings (in milliseconds)
@@ -20,6 +21,10 @@ const CACHE_SETTINGS = {
   static: 24 * 60 * 60 * 1000, // 24 hours for static assets
   html: 1 * 60 * 60 * 1000 // 1 hour for HTML pages
 };
+
+// Offline fallback page
+const OFFLINE_PAGE = '/offline.html';
+const OFFLINE_IMAGE = '/offline-image.svg';
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
@@ -131,6 +136,19 @@ const shouldNotCacheRequest = (request) => {
   );
 };
 
+// Offline fallback for failed image requests
+const getOfflineImage = () => {
+  return caches.match(OFFLINE_IMAGE).then(response => {
+    if (response) {
+      return response;
+    }
+    return new Response(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100%" height="100%" fill="#eeeeee"/><path d="M30,40 L70,40 L70,60 L30,60 Z" fill="#cccccc"/><text x="50" y="55" font-family="Arial" font-size="12" text-anchor="middle" fill="#888888">Image</text></svg>',
+      { headers: { 'Content-Type': 'image/svg+xml' } }
+    );
+  });
+};
+
 // Network-first strategy for HTML and API requests
 const networkFirst = async (request) => {
   try {
@@ -143,7 +161,21 @@ const networkFirst = async (request) => {
   } catch (error) {
     console.log('Network request failed, falling back to cache', error);
     const cachedResponse = await caches.match(request);
-    return cachedResponse || Promise.reject('No cached response available');
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // If this is a navigation request, serve the offline page
+    if (request.mode === 'navigate') {
+      return caches.match(OFFLINE_PAGE) || caches.match('/');
+    }
+    
+    // If this is an image request, serve an offline image placeholder
+    if (request.destination === 'image') {
+      return getOfflineImage();
+    }
+    
+    return Promise.reject('No cached response available');
   }
 };
 
@@ -163,7 +195,16 @@ const cacheFirst = async (request) => {
     return networkResponse;
   } catch (error) {
     // If we got this far and still have a cached response, return it even if expired
-    return cachedResponse || Promise.reject('Resource not in cache and network unavailable');
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // If this is an image request, serve an offline image placeholder
+    if (request.destination === 'image') {
+      return getOfflineImage();
+    }
+    
+    return Promise.reject('Resource not in cache and network unavailable');
   }
 };
 
@@ -265,6 +306,174 @@ self.addEventListener('message', (event) => {
       }
     });
   }
+  
+  // Handle connection status check
+  if (event.data && event.data.type === 'CHECK_CONNECTIVITY') {
+    fetch(event.data.url || '/api/ping', { method: 'HEAD' })
+      .then(() => {
+        event.ports[0].postMessage({ online: true });
+      })
+      .catch(() => {
+        event.ports[0].postMessage({ online: false });
+      });
+  }
+});
+
+// Create a basic offline HTML fallback page
+const createOfflineFallback = async () => {
+  const cache = await caches.open(CACHE_NAME);
+  const offlineHtml = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>You're Offline - Applestone Solutions</title>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+          background-color: #f9fafb;
+        }
+        header {
+          background-color: #fff;
+          border-bottom: 1px solid #e5e7eb;
+          padding: 1rem;
+        }
+        main {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+        }
+        .container {
+          background-color: white;
+          border-radius: 0.5rem;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          padding: 2rem;
+          max-width: 28rem;
+          width: 100%;
+          text-align: center;
+        }
+        .icon {
+          background-color: #fef3c7;
+          color: #92400e;
+          width: 4rem;
+          height: 4rem;
+          border-radius: 9999px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 1.5rem;
+        }
+        h1 {
+          margin-top: 0;
+          color: #1f2937;
+          font-size: 1.5rem;
+        }
+        p {
+          margin: 1rem 0;
+          color: #4b5563;
+        }
+        .buttons {
+          margin-top: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        button {
+          padding: 0.5rem 1rem;
+          border-radius: 0.375rem;
+          cursor: pointer;
+        }
+        .primary {
+          background-color: #2563eb;
+          color: white;
+          border: none;
+        }
+        .secondary {
+          background-color: #ffffff;
+          color: #2563eb;
+          border: 1px solid #d1d5db;
+        }
+        footer {
+          padding: 1rem;
+          background-color: #fff;
+          border-top: 1px solid #e5e7eb;
+          text-align: center;
+          color: #6b7280;
+          font-size: 0.875rem;
+        }
+      </style>
+    </head>
+    <body>
+      <header>
+        <div style="font-weight: bold; font-size: 1.25rem;">Applestone Solutions</div>
+      </header>
+      <main>
+        <div class="container">
+          <div class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+              <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+              <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+              <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+              <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+              <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+              <line x1="12" y1="20" x2="12.01" y2="20"></line>
+            </svg>
+          </div>
+          <h1>You're offline</h1>
+          <p>The content you're trying to access isn't available offline. Please check your connection and try again.</p>
+          <div class="buttons">
+            <button class="primary" onclick="window.location.reload()">Retry Connection</button>
+            <button class="secondary" onclick="window.location.href='/'">Go to Homepage</button>
+          </div>
+        </div>
+      </main>
+      <footer>
+        <p>Applestone Solutions &copy; 2025</p>
+      </footer>
+    </body>
+    </html>
+  `;
+  
+  const response = new Response(offlineHtml, {
+    headers: { 'Content-Type': 'text/html' }
+  });
+  
+  await cache.put('/offline.html', response);
+};
+
+// Create offline image fallback
+const createOfflineImage = async () => {
+  const cache = await caches.open(CACHE_NAME);
+  const svgImage = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+      <rect width="400" height="300" fill="#f3f4f6" />
+      <text x="200" y="150" font-family="system-ui, sans-serif" font-size="24" text-anchor="middle" fill="#9ca3af">Image Unavailable</text>
+      <text x="200" y="180" font-family="system-ui, sans-serif" font-size="14" text-anchor="middle" fill="#9ca3af">You are currently offline</text>
+    </svg>
+  `;
+  
+  const response = new Response(svgImage, {
+    headers: { 'Content-Type': 'image/svg+xml' }
+  });
+  
+  await cache.put('/offline-image.svg', response);
+};
+
+// Create offline fallback assets when the service worker installs
+self.addEventListener('install', event => {
+  event.waitUntil(Promise.all([
+    createOfflineFallback(),
+    createOfflineImage()
+  ]));
 });
 
 // Handle push notifications

@@ -1,5 +1,4 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -99,6 +98,7 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', sans-serif;
+    font-display: swap;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -162,4 +162,60 @@
   .nav-link {
     @apply px-4 py-2 text-vending-gray-dark hover:text-vending-blue transition-colors duration-200;
   }
+}
+
+/* Critical CSS for above-the-fold content */
+.header-container {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  width: 100%;
+}
+
+.image-container {
+  position: relative;
+  overflow: hidden;
+  background-color: #f3f4f6;
+}
+
+/* Optimize font display */
+@supports (font-display: swap) {
+  @font-face {
+    font-family: 'Inter';
+    font-display: swap;
+  }
+}
+
+/* Layout stability optimization */
+img[loading="lazy"] {
+  background-color: #f3f4f6;
+  min-height: 1px;
+}
+
+/* Layout shift prevention */
+.image-aspect-container {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+}
+
+.image-aspect-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Reserved space for dynamic content */
+.content-placeholder {
+  min-height: 1.5rem;
+  content-visibility: auto;
+}
+
+/* Content visibility optimization for below-the-fold content */
+.optimize-visibility {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
 }

@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useHeroContent } from '@/hooks/cms/useHeroContent';
+import Image from '@/components/common/Image';
 
 const HeroSection = () => {
   const { data: heroContent, isLoading } = useHeroContent("home");
@@ -97,14 +98,13 @@ const HeroSection = () => {
           </div>
           <div className="relative flex justify-center">
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-              <img 
+              <Image 
                 src={imageUrl}
                 alt={imageAlt}
                 className="w-full h-auto object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = "https://images.unsplash.com/photo-1605810230434-7631ac76ec81";
-                  console.log("Image failed to load, using fallback");
-                }}
+                aspectRatio="16/9"
+                priority={true}
+                sizes="(min-width: 1024px) 50vw, 100vw"
               />
             </div>
             <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">

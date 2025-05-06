@@ -32,6 +32,7 @@ const injectCriticalCSS = () => {
       #root { display: flex; flex-direction: column; min-height: 100vh; }
       img { opacity: 1; transition: opacity 0.3s; }
       img.loading { opacity: 0; }
+      .header-container { position: sticky; top: 0; z-index: 30; width: 100%; background-color: white; }
       @media (prefers-reduced-motion: reduce) {
         *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
       }
@@ -61,6 +62,7 @@ const setupPreconnects = () => {
     'https://cdn.contentful.com',    // Contentful API
     'https://fonts.googleapis.com',  // Google Fonts
     'https://fonts.gstatic.com',     // Google Fonts
+    'https://images.unsplash.com',   // Unsplash (commonly used for images)
   ];
   
   domains.forEach(domain => {
@@ -75,6 +77,44 @@ const setupPreconnects = () => {
     dnsLink.rel = 'dns-prefetch';
     dnsLink.href = domain;
     document.head.appendChild(dnsLink);
+  });
+};
+
+// Prefetch key routes that users are likely to navigate to
+const prefetchCriticalRoutes = () => {
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(() => {
+      const routesToPrefetch = [
+        '/products',
+        '/technology',
+        '/contact'
+      ];
+      
+      routesToPrefetch.forEach(route => {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = route;
+        document.head.appendChild(link);
+      });
+    });
+  }
+};
+
+// Add preload for critical resources
+const preloadCriticalResources = () => {
+  // Preload logo or critical images
+  const criticalImages = [
+    // Add paths to important images like logos
+  ];
+  
+  criticalImages.forEach(imagePath => {
+    if (!imagePath) return;
+    
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.href = imagePath;
+    link.as = 'image';
+    document.head.appendChild(link);
   });
 };
 
@@ -100,6 +140,7 @@ const renderApp = () => {
   // Setup performance optimizations
   injectCriticalCSS();
   setupPreconnects();
+  preloadCriticalResources();
   
   checkCredentialsLoaded();
   
@@ -123,6 +164,9 @@ const renderApp = () => {
     () => toast.error('You are offline. Some features may be limited.'), 
     () => toast.success('You are back online!')
   );
+  
+  // Prefetch critical routes when browser is idle
+  prefetchCriticalRoutes();
   
   // Initialize web vitals reporting in production
   if (import.meta.env.PROD) {
