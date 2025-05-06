@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -10,6 +9,7 @@ import { reportWebVitals, sendToAnalytics } from './utils/webVitalsMonitoring';
 import { toast } from 'sonner';
 import { optimizeForBots, isBot } from './utils/botDetection';
 import { registerServiceWorker, setupOfflineDetection, prefetchCriticalAssets } from './utils/serviceWorkerRegistration';
+import { extractCriticalCSS, setupDeferredCSS } from './utils/criticalCss';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -22,42 +22,20 @@ const queryClient = new QueryClient({
   },
 });
 
-// Inject critical CSS
-const injectCriticalCSS = () => {
-  if (typeof window !== 'undefined') {
-    // Load critical styles for immediate rendering
-    const criticalCSS = `
-      /* Critical CSS for above-the-fold content */
-      body { display: block; }
-      .fade-in { animation-duration: 0.3s; }
-      #root { display: flex; flex-direction: column; min-height: 100vh; }
-      img { opacity: 1; transition: opacity 0.3s; }
-      img.loading { opacity: 0; }
-      .header-container { position: sticky; top: 0; z-index: 30; width: 100%; background-color: white; }
-      .hero-section { overflow: hidden; }
-      .hero-image-container { display: flex; align-items: center; justify-content: center; }
-      .hero-image { width: 100%; height: 100%; object-fit: contain; }
-      @media (prefers-reduced-motion: reduce) {
-        *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-      }
-    `;
-
-    // Create and insert style element
-    const style = document.createElement('style');
-    style.setAttribute('data-critical', 'true');
-    style.textContent = criticalCSS;
-    document.head.appendChild(style);
-    
-    // Remove critical CSS after full CSS has loaded
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        if (style.parentNode) {
-          style.parentNode.removeChild(style);
-        }
-      }, 1000);
-    });
-  }
-};
+// Setup performance optimizations
+const setupPerformanceOptimizations = () => {
+  // Inject critical CSS for faster initial render
+  extractCriticalCSS();
+  
+  // Setup deferred loading of non-critical CSS
+  setupDeferredCSS();
+  
+  // Preconnect to important domains
+  setupPreconnects();
+  
+  // Prefetch important resources
+  preloadCriticalResources();
+}
 
 // Preconnect to important domains
 const setupPreconnects = () => {
@@ -87,7 +65,7 @@ const setupPreconnects = () => {
 // Prefetch key routes that users are likely to navigate to
 const prefetchCriticalRoutes = () => {
   if ('requestIdleCallback' in window) {
-    window.requestIdleCallback(() => {
+    (window as any).requestIdleCallback(() => {
       const routesToPrefetch = [
         '/products',
         '/technology',
@@ -142,9 +120,7 @@ const checkCredentialsLoaded = () => {
 // Render application
 const renderApp = () => {
   // Setup performance optimizations
-  injectCriticalCSS();
-  setupPreconnects();
-  preloadCriticalResources();
+  setupPerformanceOptimizations();
   
   // Bot detection and optimization
   const detectedBot = isBot();

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import Image from '../common/Image';
+import OptimizedImage from '../common/OptimizedImage';
 
 interface HeroImageProps {
   imageUrl: string;
@@ -32,7 +32,7 @@ const HeroImage: React.FC<HeroImageProps> = ({ imageUrl, imageAlt }) => {
     <div className="relative">
       <div className="bg-white rounded-lg shadow-xl overflow-hidden">
         <div className="aspect-[16/9] w-full h-full" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Image 
+          <OptimizedImage 
             src={finalImageUrl}
             alt={imageAlt || "Vending Technology"}
             className="w-full h-full"
