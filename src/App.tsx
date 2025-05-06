@@ -1,46 +1,47 @@
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Index from '@/pages/Index';
+import ProductsPage from '@/pages/ProductsPage';
+import TechnologyPage from '@/pages/TechnologyPage';
+import ContactPage from '@/pages/ContactPage';
+import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage';
+import TermsOfServicePage from '@/pages/TermsOfServicePage';
+import BusinessGoalsPage from '@/pages/BusinessGoalsPage';
+import MachinesPage from '@/pages/MachinesPage';
+import MachineDetail from '@/pages/MachineDetail';
+import TechnologyDetail from '@/pages/TechnologyDetail';
+import BusinessGoalDetail from '@/pages/BusinessGoalDetail';
+import NotFoundPage from '@/pages/NotFoundPage';
+import BlogPage from '@/pages/BlogPage';
+import BlogPostDetail from '@/pages/BlogPostDetail';
+import AboutUsPage from '@/pages/AboutUsPage';
+import { Toaster } from "@/components/ui/toaster";
 
-import React, { lazy, Suspense } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import routes from './routes';
-import { HelmetProvider } from 'react-helmet-async';
-import { Toaster } from 'sonner';
-import { Spinner } from '@/components/ui/spinner';
-
-// Create optimized router with performance monitoring
-const router = createBrowserRouter(routes);
-
-// Loading fallback component
-const LoadingFallback = () => (
-  <div className="flex justify-center items-center min-h-screen">
-    <Spinner size="lg" />
-  </div>
-);
-
-const App: React.FC = () => {
-  // Monitor route changes for performance metrics
-  React.useEffect(() => {
-    const handleRouteChange = () => {
-      // Mark route change for performance monitoring
-      if ('performance' in window) {
-        performance.mark('route-change');
-      }
-    };
-    
-    window.addEventListener('popstate', handleRouteChange);
-    
-    return () => {
-      window.removeEventListener('popstate', handleRouteChange);
-    };
-  }, []);
-
+function App() {
   return (
-    <HelmetProvider>
-      <Suspense fallback={<LoadingFallback />}>
-        <RouterProvider router={router} />
-      </Suspense>
-      <Toaster position="top-right" />
-    </HelmetProvider>
+    <>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/technology" element={<TechnologyPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsOfServicePage />} />
+          <Route path="/business-goals" element={<BusinessGoalsPage />} />
+          <Route path="/machines" element={<MachinesPage />} />
+          <Route path="/machines/:machineType/:machineId" element={<MachineDetail />} />
+          <Route path="/technology/:slug" element={<TechnologyDetail />} />
+          <Route path="/business-goals/:slug" element={<BusinessGoalDetail />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogPostDetail />} />
+          <Route path="/about" element={<AboutUsPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Router>
+      <Toaster />
+    </>
   );
-};
+}
 
 export default App;
