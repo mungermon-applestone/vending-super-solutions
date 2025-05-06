@@ -1,4 +1,6 @@
 
+import React from 'react'
+
 interface ContentfulDiagnosticsProps {
   slug: string;
   productId: string;
@@ -6,7 +8,7 @@ interface ContentfulDiagnosticsProps {
 
 export default function ContentfulDiagnostics({ slug, productId }: ContentfulDiagnosticsProps) {
   return (
-    <div className="mb-8 border border-blue-100 rounded-md bg-blue-50">
+    <div className="mb-4 border border-blue-100 rounded-md bg-blue-50">
       <details className="text-blue-800">
         <summary className="p-4 cursor-pointer font-medium flex items-center">
           <span className="text-blue-600 mr-2">ℹ</span> Contentful Diagnostic Information
@@ -29,5 +31,5 @@ export default function ContentfulDiagnostics({ slug, productId }: ContentfulDia
         </div>
       </details>
     </div>
-  );
+  )
 }

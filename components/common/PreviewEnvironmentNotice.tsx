@@ -1,8 +1,9 @@
 
-import { Check } from 'lucide-react';
+import React from 'react'
+import { Check } from 'lucide-react'
 
 export default function PreviewEnvironmentNotice() {
-  const spaceId = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID;
+  const spaceId = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID
   
   return (
     <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-6 mx-4 mt-4">
@@ -23,5 +24,5 @@ export default function PreviewEnvironmentNotice() {
         </div>
       </div>
     </div>
-  );
+  )
 }
