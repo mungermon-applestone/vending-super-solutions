@@ -1,6 +1,6 @@
 
 import React, { useEffect, Suspense, lazy } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
 import ContentfulPersistenceProvider from './providers/ContentfulPersistenceProvider';
@@ -8,14 +8,16 @@ import ContentfulInitializer from './contentful/ContentfulInitializer';
 import { isPreviewEnvironment, logContentfulConfig } from '@/config/cms';
 import { Offline } from '@/components/common';
 import SiteMetadata from './seo/SiteMetadata';
+import { Spinner } from '@/components/ui/spinner';
 
 // Lazy load non-critical components
 const PreviewEnvironmentDetector = lazy(() => 
-  import('./contentful/PreviewEnvironmentDetector')
+  import(/* webpackChunkName: "preview-detector" */ './contentful/PreviewEnvironmentDetector')
 );
 
 const RootLayout = () => {
   const isPreview = isPreviewEnvironment();
+  const location = useLocation();
   
   // Log contentful configuration on mount for debugging
   useEffect(() => {
@@ -28,6 +30,39 @@ const RootLayout = () => {
       return () => clearTimeout(timer);
     }
   }, []);
+
+  // Monitor time to interactive
+  useEffect(() => {
+    if ('performance' in window) {
+      // Mark when the layout is mounted
+      performance.mark('root-layout-mount');
+      
+      // Wait a moment for interactivity
+      const timeout = setTimeout(() => {
+        performance.mark('time-to-interactive');
+        performance.measure('TTI', 'navigationStart', 'time-to-interactive');
+        
+        try {
+          const ttiMeasure = performance.getEntriesByName('TTI', 'measure')[0];
+          console.log('[Performance] Time to Interactive:', ttiMeasure.duration.toFixed(2) + 'ms');
+        } catch (e) {
+          // Ignore errors
+        }
+      }, 300);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, []);
+
+  // Track route changes for analytics
+  useEffect(() => {
+    if ('performance' in window) {
+      performance.mark(`route-${location.pathname}`);
+    }
+    
+    // Scroll to top on route change
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <ContentfulInitializer

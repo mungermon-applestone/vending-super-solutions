@@ -6,7 +6,7 @@ import './index.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { BreadcrumbProvider } from './context/BreadcrumbContext';
-import { registerServiceWorker, setupOfflineDetection } from './utils/serviceWorkerRegistration';
+import { registerServiceWorker, setupOfflineDetection, prefetchCriticalAssets, initServiceWorker } from './utils/serviceWorkerRegistration';
 import { reportWebVitals, sendToAnalytics } from './utils/webVitalsMonitoring';
 import { toast } from 'sonner';
 
@@ -138,12 +138,42 @@ const checkCredentialsLoaded = () => {
   }
 };
 
+// Check if the user is a bot/crawler
+const isBotOrCrawler = () => {
+  const botPatterns = [
+    'bot', 'crawler', 'spider', 'google', 'bing', 'yahoo', 'baidu',
+    'yandex', 'duckduckgo', 'slurp', 'bingbot', 'googlebot'
+  ];
+  
+  const userAgent = navigator.userAgent.toLowerCase();
+  return botPatterns.some(pattern => userAgent.includes(pattern));
+};
+
+// Optimize rendering for bots
+const optimizeForBots = () => {
+  if (isBotOrCrawler()) {
+    console.log('[main.tsx] Bot detected, optimizing rendering');
+    // Disable animations for bots
+    document.documentElement.classList.add('bot-detected');
+    
+    // Add meta tags for bots
+    const metaRobotsTag = document.createElement('meta');
+    metaRobotsTag.name = 'robots';
+    metaRobotsTag.content = 'index, follow';
+    document.head.appendChild(metaRobotsTag);
+    
+    return true;
+  }
+  return false;
+};
+
 // Render application
 const renderApp = () => {
   // Setup performance optimizations
   injectCriticalCSS();
   setupPreconnects();
   preloadCriticalResources();
+  const isBot = optimizeForBots();
   
   checkCredentialsLoaded();
   
@@ -159,17 +189,13 @@ const renderApp = () => {
     </React.StrictMode>
   );
   
-  // Register service worker after the app has loaded
-  registerServiceWorker();
-  
-  // Setup offline detection
-  setupOfflineDetection(
-    () => toast.error('You are offline. Some features may be limited.'), 
-    () => toast.success('You are back online!')
-  );
+  // Initialize service worker and offline capabilities
+  initServiceWorker();
   
   // Prefetch critical routes when browser is idle
-  prefetchCriticalRoutes();
+  if (!isBot) {
+    prefetchCriticalRoutes();
+  }
   
   // Initialize web vitals reporting in production
   if (import.meta.env.PROD) {

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -33,6 +33,10 @@ const Image: React.FC<ImageProps> = ({
   const [loadAttempts, setLoadAttempts] = useState(0);
   const maxAttempts = 2;
   
+  // Intersection observer for advanced lazy loading
+  const imgRef = useRef<HTMLImageElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  
   // Check if image URL is valid
   const isValidUrl = src && (src.startsWith('http') || src.startsWith('//') || src.startsWith('/'));
   
@@ -53,6 +57,47 @@ const Image: React.FC<ImageProps> = ({
   
   // Determine fetchPriority
   const fetchPriority = priority ? 'high' : propFetchPriority || (loading === 'eager' ? 'high' : 'auto');
+
+  // Advanced intersection observer for smarter lazy loading
+  useEffect(() => {
+    // Skip if image is priority or not lazy loaded
+    if (priority || !lazyLoad || !imgRef.current) return;
+    
+    const options = {
+      rootMargin: '200px 0px', // Start loading 200px before the image enters viewport
+      threshold: 0.01 // Trigger when 1% of the image is visible
+    };
+    
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && imgRef.current) {
+          // When image is about to enter viewport, set the src
+          const img = imgRef.current;
+          const optimizedSrc = optimizeUrl(imageUrl);
+          
+          if (img.dataset.src !== optimizedSrc) {
+            img.src = optimizedSrc;
+            img.dataset.src = optimizedSrc;
+          }
+          
+          // Disconnect after loading
+          if (observerRef.current) {
+            observerRef.current.disconnect();
+          }
+        }
+      });
+    };
+    
+    // Create observer
+    observerRef.current = new IntersectionObserver(handleIntersection, options);
+    observerRef.current.observe(imgRef.current);
+    
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [imageUrl, lazyLoad, priority]);
 
   // Optimize image loading based on service
   const optimizeUrl = (url: string) => {
@@ -104,7 +149,7 @@ const Image: React.FC<ImageProps> = ({
   // Generate srcset for responsive images
   const generateSrcSet = (url: string): string => {
     if (isContentfulImage) {
-      const widths = [640, 750, 828, 1080, 1200, 1920, 2048];
+      const widths = [320, 640, 768, 1024, 1280, 1536, 1920];
       return widths.map(w => {
         const optimizedUrl = url.includes('?') 
           ? `${url}&w=${w}` 
@@ -114,7 +159,7 @@ const Image: React.FC<ImageProps> = ({
     }
     
     if (isUnsplashImage) {
-      const widths = [640, 750, 828, 1080, 1200, 1920, 2048];
+      const widths = [320, 640, 768, 1024, 1280, 1536, 1920];
       return widths.map(w => {
         const optimizedUrl = url.includes('?') 
           ? `${url}&w=${w}` 
@@ -137,6 +182,30 @@ const Image: React.FC<ImageProps> = ({
     if (priority && 'PerformanceObserver' in window) {
       try {
         performance.mark(`image-loaded-${imageUrl.substring(0, 50)}`);
+
+        // Report to core web vitals if this might be the LCP
+        if ('PerformanceObserver' in window) {
+          const entryTypes = ['largest-contentful-paint'];
+          
+          const lcpObserver = new PerformanceObserver((entryList) => {
+            const entries = entryList.getEntries();
+            entries.forEach(entry => {
+              // Check if this image is the LCP
+              if (entry.element === e.target) {
+                console.log('[LCP] Image is the Largest Contentful Paint', { 
+                  image: imageUrl, 
+                  lcpTime: entry.startTime 
+                });
+              }
+            });
+          });
+          
+          try {
+            lcpObserver.observe({ entryTypes });
+          } catch (err) {
+            console.error('[LCP] Failed to observe LCP', err);
+          }
+        }
       } catch (err) {
         // Ignore errors
       }
@@ -161,7 +230,7 @@ const Image: React.FC<ImageProps> = ({
   
   return (
     <div 
-      className={`image-container ${!isLoaded ? 'bg-gray-100 animate-pulse' : ''}`} 
+      className={`image-container ${!isLoaded ? 'bg-gray-100' : ''}`} 
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -173,10 +242,12 @@ const Image: React.FC<ImageProps> = ({
         position: 'relative'
       }}
     >
+      {/* Native lazy loading with optional JavaScript enhancement */}
       <img 
+        ref={imgRef}
         src={optimizeUrl(imageUrl)} 
         alt={alt}
-        className={`${objectFitClass} ${className} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`${objectFitClass} ${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} will-change-opacity`}
         loading={loading}
         fetchPriority={fetchPriority as 'high' | 'low' | 'auto'}
         style={{
@@ -189,13 +260,16 @@ const Image: React.FC<ImageProps> = ({
         onError={handleError}
         srcSet={srcSet}
         sizes={sizes}
+        data-src={optimizeUrl(imageUrl)} // For custom lazy loading
         data-thumbnail={isThumbnail ? 'true' : undefined}
+        data-priority={priority ? 'true' : undefined}
         data-load-attempts={loadAttempts}
-        decoding="async"
+        decoding={priority ? 'sync' : 'async'}
         {...props}
       />
     </div>
   );
 };
 
+// Use memo to prevent unnecessary re-renders
 export default React.memo(Image);

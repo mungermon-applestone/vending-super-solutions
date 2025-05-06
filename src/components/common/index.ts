@@ -1,12 +1,11 @@
 
-import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
-import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
-import Image from '@/components/common/Image';
-import Offline from '@/components/common/Offline';
-
-export {
-  ContentfulErrorBoundary,
-  ContentfulFallbackMessage,
-  Image,
-  Offline
-};
+// Export all common components for easy import
+export { default as CTASection } from './CTASection';
+export { default as ContentfulErrorBoundary } from './ContentfulErrorBoundary';
+export { default as ContentfulFallbackMessage } from './ContentfulFallbackMessage';
+export { default as ErrorBoundary } from './ErrorBoundary';
+export { default as Image } from './Image';
+export { default as NotificationManager } from './NotificationManager';
+export { default as Offline } from './Offline';
+export { default as OfflineFallback } from './OfflineFallback';
+export { default as PageHero } from './PageHero';
