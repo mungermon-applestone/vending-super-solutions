@@ -3,7 +3,7 @@ import { getProductTypeBySlug, getProductTypes } from '@/lib/contentful/products
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft, Check } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import PreviewEnvironmentNotice from '@/components/common/PreviewEnvironmentNotice'
 import ContentfulDiagnostics from '@/components/common/ContentfulDiagnostics'
 import ProductBenefitsList from '@/components/products/ProductBenefitsList'
@@ -19,8 +19,7 @@ export async function generateStaticParams() {
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const { slug } = params
-  const product = await getProductTypeBySlug(slug)
+  const product = await getProductTypeBySlug(params.slug)
   
   if (!product) {
     return {
@@ -36,8 +35,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
-  const { slug } = params
-  const product = await getProductTypeBySlug(slug)
+  const product = await getProductTypeBySlug(params.slug)
   
   // Handle product not found
   if (!product) {
@@ -67,7 +65,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
         {/* Contentful Diagnostic Information (only shown in development) */}
         {process.env.NODE_ENV === 'development' && (
           <div className="mb-8">
-            <ContentfulDiagnostics slug={slug} productId={product.id} />
+            <ContentfulDiagnostics slug={params.slug} productId={product.id} />
           </div>
         )}
         
@@ -124,104 +122,10 @@ export default async function ProductPage({ params }: { params: { slug: string }
             </div>
           </div>
         </section>
-        
-        {/* Product Features */}
-        {product.features && product.features.length > 0 && (
-          <section className="mb-16 rounded-xl bg-white shadow-md overflow-hidden">
-            <div className="p-8 md:p-12">
-              <h2 className="text-3xl md:text-4xl font-semibold text-center mb-10 text-[hsl(222_47%_11%)]">Features</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {product.features.map((feature) => (
-                  <div key={feature.id} className="bg-[hsl(210_40%_96%)] rounded-lg p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                    <h3 className="text-xl font-semibold mb-3 text-[hsl(222_47%_11%)]">{feature.title}</h3>
-                    <p className="text-[hsl(215_16%_47%)]">{feature.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-        
-        {/* Recommended Machines Section */}
-        <section className="mb-16 rounded-xl bg-white shadow-md overflow-hidden">
-          <div className="p-8 md:p-12">
-            <h2 className="text-3xl md:text-4xl font-semibold text-center mb-10 text-[hsl(222_47%_11%)]">Recommended Machines</h2>
-            
-            {product.recommendedMachines && product.recommendedMachines.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {product.recommendedMachines.map((machine, index) => (
-                  <div key={`${machine.id}-${index}`} className="rounded-lg overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-white border border-[hsl(214_32%_91%)]">
-                    {machine.image ? (
-                      <div className="h-64 bg-gray-100 relative">
-                        <Image 
-                          src={machine.image.url} 
-                          alt={machine.image.alt || machine.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-64 bg-gray-100 flex items-center justify-center">
-                        <span className="text-gray-400">Machine Image</span>
-                      </div>
-                    )}
-                    <div className="p-6">
-                      <h3 className="text-xl font-semibold mb-2">{machine.title}</h3>
-                      <p className="text-[hsl(215_16%_47%)] mb-4 line-clamp-2">{machine.description}</p>
-                      <Link href={`/machines/${machine.slug}`} className="text-vending-blue hover:text-vending-blue-dark flex items-center font-medium">
-                        View details
-                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="rounded-lg overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-white border border-[hsl(214_32%_91%)]">
-                    <div className="h-64 bg-gray-100 flex items-center justify-center">
-                      <span className="text-gray-400">Machine Image</span>
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-semibold mb-2">Sample Machine {i}</h3>
-                      <p className="text-[hsl(215_16%_47%)] mb-4 line-clamp-2">This machine would be perfect for distributing {product.title.toLowerCase()} products.</p>
-                      <a href="#" className="text-vending-blue hover:text-vending-blue-dark flex items-center font-medium">
-                        View details
-                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-        
-        {/* Contact Section */}
-        <section id="request-demo" className="py-12 md:py-20 bg-white rounded-xl shadow-md mb-16 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 p-8 md:p-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-semibold mb-6 text-[hsl(222_47%_11%)]">Ready to transform your vending operations?</h2>
-              <p className="text-lg text-[hsl(215_16%_47%)] mb-8 leading-relaxed">
-                Let us show you how our {product.title.toLowerCase()} software can streamline your operations, increase sales, and improve customer satisfaction.
-              </p>
-              <ul className="space-y-4">
-                {['Compatible with multiple machine types', 'Easy to implement and use', 'Dedicated support team', 'Customizable to your specific needs'].map((item, i) => (
-                  <li key={i} className="flex items-start">
-                    <Check className="h-5 w-5 text-vending-teal mr-3 flex-shrink-0 mt-1" />
-                    <span className="text-[hsl(215_16%_47%)]">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <RequestDemoForm />
-          </div>
+
+        {/* Contact Form Section */}
+        <section id="request-demo" className="py-12">
+          <RequestDemoForm />
         </section>
       </div>
     </div>

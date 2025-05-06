@@ -6,18 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vending Solutions</title>
   <script>
-    // Check if the URL path starts with /products/ and redirect to Next.js version
+    // Redirect product routes to Next.js
     if (window.location.pathname.startsWith('/products/')) {
-      const pathParts = window.location.pathname.split('/');
-      if (pathParts.length >= 3) {
-        const productSlug = pathParts[2];
-        window.location.href = '/products/' + productSlug;
-      }
+      const nextPath = window.location.pathname;
+      window.location.replace(nextPath);
     }
   </script>
 </head>
 <body>
   <div id="root"></div>
+  <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
