@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useContentfulBlogPostBySlug } from '@/hooks/useContentfulBlogPostBySlug';
 import Layout from '@/components/layout/Layout';
@@ -109,15 +110,15 @@ const AnnouncementContent: React.FC = () => {
   );
 
   return (
-    <div className="container mx-auto py-8">        
-      <div className="mb-8">
+    <div className="flex flex-col min-h-screen">
+      <div className="container mx-auto py-8 flex-grow">        
         <ContentfulBlogPostContent 
           post={post} 
           previousPost={adjacentPosts?.previous}
           nextPost={adjacentPosts?.next}
         />
       </div>
-      <SimpleContactCTA />
+      <SimpleContactCTA className="w-full mt-auto" />
     </div>
   );
 };

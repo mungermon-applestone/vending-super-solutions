@@ -7,6 +7,7 @@ import ContentfulBlogPostContent from '@/components/blog/ContentfulBlogPostConte
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { Loader2 } from 'lucide-react';
+import { SimpleContactCTA } from '@/components/common';
 
 const ContentfulBlogPostDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -92,8 +93,11 @@ const BlogPostContent = ({ slug }: { slug: string | undefined }) => {
   }
 
   return (
-    <div className="container mx-auto py-12">
-      <ContentfulBlogPostContent post={post} />
+    <div className="flex flex-col min-h-screen">
+      <div className="container mx-auto py-12 flex-grow">
+        <ContentfulBlogPostContent post={post} />
+      </div>
+      <SimpleContactCTA className="w-full mt-auto" />
     </div>
   );
 };

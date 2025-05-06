@@ -25,25 +25,27 @@ const BlogPostDetail = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto py-12">
-        {isLoading ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-          </div>
-        ) : error ? (
-          <div className="text-center py-16">
-            <p className="text-red-500">Something went wrong. Please try again later.</p>
-          </div>
-        ) : post ? (
-          <>
+      <div className="flex flex-col min-h-screen">
+        <div className="container mx-auto py-12 flex-grow">
+          {isLoading ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <p className="text-red-500">Something went wrong. Please try again later.</p>
+            </div>
+          ) : post ? (
             <BlogPostContent 
               post={post} 
               previousPost={adjacentPosts?.previous} 
               nextPost={adjacentPosts?.next} 
             />
-            <SimpleContactCTA className="mt-12" />
-          </>
-        ) : null}
+          ) : null}
+        </div>
+        
+        {/* Full-width SimpleContactCTA at the bottom */}
+        <SimpleContactCTA className="w-full mt-auto" />
       </div>
     </Layout>
   );

@@ -78,70 +78,75 @@ const BlogPageContent: React.FC = () => {
 
   return (
     <ContentfulErrorBoundary contentType="blog">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-3xl mx-auto text-center mb-12">
-          <h1 className="text-4xl font-bold mb-5">Our Blog</h1>
-          <p className="text-lg text-gray-600">
-            Insights, news, and updates from our team.
-          </p>
-        </div>
-
-        {latestPost && (
-          <div className="mb-12">
-            <BlogHeroCard post={latestPost} />
+      <div className="flex flex-col min-h-screen">
+        <div className="container mx-auto px-4 py-12 flex-grow">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <h1 className="text-4xl font-bold mb-5">Our Blog</h1>
+            <p className="text-lg text-gray-600">
+              Insights, news, and updates from our team.
+            </p>
           </div>
-        )}
 
-        <div className="mb-20">
-          <h2 className="text-2xl font-bold mb-8">Latest Articles</h2>
-          
-          {olderPosts.length > 0 ? (
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {olderPosts.map((post) => (
-                <Card key={post.id} className="flex flex-col h-full shadow-md hover:shadow-lg transition-shadow">
-                  {post.featuredImage?.url && (
-                    <div className="relative w-full h-48 rounded-t-lg overflow-hidden">
-                      <Image
-                        src={post.featuredImage.url}
-                        alt={post.featuredImage.title || post.title}
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                  )}
-                  <CardHeader className="py-3 px-4">
-                    <CardTitle className="text-lg leading-tight mb-1">
-                      <Link to={`/blog/${post.slug}`} className="hover:underline">
-                        {post.title}
-                      </Link>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex-grow px-4 py-1">
-                    <p className="text-gray-600 text-sm line-clamp-3">
-                      {post.excerpt || 'Read more about this post...'}
-                    </p>
-                  </CardContent>
-                  {post.publishDate && (
-                    <CardFooter className="px-4 pb-3 pt-0 flex items-center gap-2 text-xs text-gray-500">
-                      <time dateTime={post.publishDate}>
-                        {format(new Date(post.publishDate), "MMM d, yyyy")}
-                      </time>
-                    </CardFooter>
-                  )}
-                </Card>
-              ))}
+          {latestPost && (
+            <div className="mb-12">
+              <BlogHeroCard post={latestPost} />
             </div>
-          ) : !latestPost ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500 mb-4">We're working on creating great content for you!</p>
-              <Button asChild variant="outline">
-                <Link to="/">Return to Homepage</Link>
-              </Button>
-            </div>
-          ) : null}
+          )}
+
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold mb-8">Latest Articles</h2>
+            
+            {olderPosts.length > 0 ? (
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {olderPosts.map((post) => (
+                  <Card key={post.id} className="flex flex-col h-full shadow-md hover:shadow-lg transition-shadow">
+                    {post.featuredImage?.url && (
+                      <div className="relative w-full h-48 rounded-t-lg overflow-hidden">
+                        <Image
+                          src={post.featuredImage.url}
+                          alt={post.featuredImage.title || post.title}
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                    )}
+                    <CardHeader className="py-3 px-4">
+                      <CardTitle className="text-lg leading-tight mb-1">
+                        <Link to={`/blog/${post.slug}`} className="hover:underline">
+                          {post.title}
+                        </Link>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow px-4 py-1">
+                      <p className="text-gray-600 text-sm line-clamp-3">
+                        {post.excerpt || 'Read more about this post...'}
+                      </p>
+                    </CardContent>
+                    {post.publishDate && (
+                      <CardFooter className="px-4 pb-3 pt-0 flex items-center gap-2 text-xs text-gray-500">
+                        <time dateTime={post.publishDate}>
+                          {format(new Date(post.publishDate), "MMM d, yyyy")}
+                        </time>
+                      </CardFooter>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            ) : !latestPost ? (
+              <div className="text-center py-16">
+                <p className="text-gray-500 mb-4">We're working on creating great content for you!</p>
+                <Button asChild variant="outline">
+                  <Link to="/">Return to Homepage</Link>
+                </Button>
+              </div>
+            ) : null}
+          </div>
         </div>
-
-        {/* Replace InquiryForm with SimpleContactCTA */}
-        <SimpleContactCTA title="Ready to transform your vending operations?" />
+        
+        {/* Full-width SimpleContactCTA placed outside the container */}
+        <SimpleContactCTA 
+          title="Ready to transform your vending operations?" 
+          className="w-full mt-auto"
+        />
       </div>
     </ContentfulErrorBoundary>
   );
