@@ -180,10 +180,8 @@ const Image: React.FC<ImageProps> = ({
         loading={loading}
         fetchPriority={fetchPriority as 'high' | 'low' | 'auto'}
         style={{
-          maxWidth: '100%',
-          maxHeight: '100%',
-          width: isThumbnail ? '100%' : 'auto',
-          height: isThumbnail ? '100%' : 'auto',
+          width: '100%',
+          height: '100%',
           transition: 'opacity 0.3s ease-in-out',
           ...props.style
         }}

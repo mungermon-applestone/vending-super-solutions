@@ -58,7 +58,7 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
       itemType="https://schema.org/Product"
       aria-labelledby={`product-title-${product.id}`}
     >
-      <div className="w-full h-48 overflow-hidden bg-gray-100 relative">
+      <div className="w-full h-48 overflow-hidden bg-gray-100 relative flex items-center justify-center">
         {imageToUse ? (
           <>
             {!imageLoaded && !imageError && (

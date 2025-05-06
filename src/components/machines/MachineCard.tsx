@@ -39,7 +39,7 @@ const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
   
   return (
     <Card key={machine.id} className="overflow-hidden flex flex-col h-full">
-      <div className="relative h-48 bg-gray-50">
+      <div className="relative h-48 bg-gray-50 flex items-center justify-center">
         {hasThumbnail ? (
           <Image 
             src={machine.thumbnail.url} 

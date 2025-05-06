@@ -31,7 +31,7 @@ const HeroImage: React.FC<HeroImageProps> = ({ imageUrl, imageAlt }) => {
   return (
     <div className="relative">
       <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-        <div className="aspect-[16/9] w-full" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="aspect-[16/9] w-full h-full" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Image 
             src={finalImageUrl}
             alt={imageAlt || "Vending Technology"}
