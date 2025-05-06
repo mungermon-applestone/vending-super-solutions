@@ -4,11 +4,9 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Applestone Solutions - Advanced vending solutions for modern businesses. Automate your retail operations with smart vending machines and IoT technology." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Advanced vending solutions for modern businesses" />
     <meta name="theme-color" content="#2563eb" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
     <title>Applestone Solutions</title>
@@ -17,11 +15,7 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" />
     <link rel="preload" href="https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
     
-    <!-- Preload critical assets -->
-    <link rel="preload" href="/logo.png" as="image" />
-    <link rel="preload" href="/icons/icon-192x192.png" as="image" />
-    
-    <!-- Performance optimization - only add the style once it's ready to display -->
+    <!-- Defer non-critical CSS -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
     
     <!-- Cache control -->
@@ -34,7 +28,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
     <noscript>
       <div style="padding: 2rem; text-align: center; font-family: system-ui, -apple-system, sans-serif;">
@@ -42,12 +35,5 @@
         <p>This website requires JavaScript to function properly. Please enable JavaScript in your browser settings.</p>
       </div>
     </noscript>
-    
-    <!-- Add basic analytics placeholder in production -->
-    <script>
-      if (window.location.hostname !== 'localhost') {
-        console.log('Analytics would load here in production environment');
-      }
-    </script>
   </body>
 </html>

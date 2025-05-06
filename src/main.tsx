@@ -46,7 +46,6 @@ const setupPreconnects = () => {
     'https://fonts.googleapis.com',  // Google Fonts
     'https://fonts.gstatic.com',     // Google Fonts
     'https://images.unsplash.com',   // Unsplash (commonly used for images)
-    'https://applestonesolutions.com', // Main domain
   ];
   
   domains.forEach(domain => {
@@ -71,10 +70,7 @@ const prefetchCriticalRoutes = () => {
       const routesToPrefetch = [
         '/products',
         '/technology',
-        '/contact',
-        '/machines',
-        '/business-goals',
-        '/about'
+        '/contact'
       ];
       
       routesToPrefetch.forEach(route => {
@@ -94,9 +90,7 @@ const preloadCriticalResources = () => {
     '/logo.png',
     '/og-image.jpg',
     '/icons/icon-192x192.png',
-    '/icons/badge-96x96.png',
-    '/icons/icon-512x512.png',
-    '/icons/apple-touch-icon.png'
+    '/icons/badge-96x96.png'
   ];
   
   criticalImages.forEach(imagePath => {
@@ -106,21 +100,6 @@ const preloadCriticalResources = () => {
     link.rel = 'preload';
     link.href = imagePath;
     link.as = 'image';
-    document.head.appendChild(link);
-  });
-  
-  // Preload critical fonts
-  const criticalFonts = [
-    'https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2' // Inter Regular
-  ];
-  
-  criticalFonts.forEach(fontUrl => {
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.href = fontUrl;
-    link.as = 'font';
-    link.type = 'font/woff2';
-    link.crossOrigin = 'anonymous';
     document.head.appendChild(link);
   });
 };

@@ -43,7 +43,7 @@ const SEO: React.FC<SEOProps> = ({
   language = 'en',
   alternateLanguages = []
 }) => {
-  const siteName = 'Applestone Solutions';
+  const siteName = 'Vending Solutions';
   const defaultDescription = 'Advanced vending solutions for modern businesses. Automate your retail operations with smart vending machines and IoT technology.';
   const defaultImage = '/og-image.jpg';
   const fullTitle = title ? `${title} | ${siteName}` : siteName;
@@ -83,15 +83,10 @@ const SEO: React.FC<SEOProps> = ({
 
       {/* Additional Meta Tags */}
       <meta name="format-detection" content="telephone=no" />
-      <meta name="theme-color" content="#2563eb" />
+      <meta name="theme-color" content="#ffffff" />
       {additionalMetaTags.map((tag, index) => (
         <meta key={index} name={tag.name} content={tag.content} />
       ))}
-
-      {/* Mobile App capability tags */}
-      <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-      <meta name="mobile-web-app-capable" content="yes" />
 
       {/* Structured Data */}
       {schema && (

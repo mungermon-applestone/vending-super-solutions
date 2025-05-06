@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { EmailLink } from '@/components/common';
+import ContactForm from '@/components/contact/ContactForm';
 
 interface BusinessGoalInquiryProps {
   title?: string;
@@ -8,13 +8,11 @@ interface BusinessGoalInquiryProps {
   bulletPoints?: string[];
   buttonText?: string;
   buttonUrl?: string;
-  goalName?: string;
 }
 
 const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({
   title = "Need a Custom Solution?",
   description,
-  goalName
 }) => {
   return (
     <section className="py-16 bg-vending-blue-light bg-opacity-10">
@@ -27,15 +25,7 @@ const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({
                 <p className="text-gray-700">{description}</p>
               )}
             </div>
-
-            <div>
-              <EmailLink 
-                title="Send Us a Message" 
-                subject={`Business Goal Inquiry: ${goalName || 'Custom Solution'}`}
-                buttonText="Contact Us"
-                description="We're here to help with your business goals. Click the button below to send us an email directly."
-              />
-            </div>
+            <ContactForm formSectionTitle="Send Us a Message" />
           </div>
         </div>
       </div>
