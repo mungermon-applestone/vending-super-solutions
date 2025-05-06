@@ -255,4 +255,78 @@ self.addEventListener('message', (event) => {
       });
     });
   }
+  
+  // Handle notification subscription requests
+  if (event.data && event.data.type === 'SUBSCRIBE_PUSH') {
+    self.registration.pushManager.getSubscription().then(subscription => {
+      if (subscription) {
+        // Already subscribed
+        event.ports[0].postMessage({ success: true, subscription, alreadySubscribed: true });
+      }
+    });
+  }
+});
+
+// Handle push notifications
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+  
+  try {
+    const data = event.data.json();
+    
+    // Default notification options
+    const title = data.title || 'Vending Solutions';
+    const options = {
+      body: data.body || 'New notification',
+      icon: data.icon || '/icons/icon-192x192.png',
+      badge: data.badge || '/icons/badge-96x96.png',
+      data: {
+        url: data.url || '/',
+        ...data.data
+      },
+      requireInteraction: data.requireInteraction || false,
+      tag: data.tag || 'default',
+      vibrate: data.vibrate || [100, 50, 100]
+    };
+    
+    event.waitUntil(
+      self.registration.showNotification(title, options)
+    );
+  } catch (error) {
+    console.error('Push notification error:', error);
+    
+    // Fallback to text notification if JSON parsing fails
+    const text = event.data.text();
+    event.waitUntil(
+      self.registration.showNotification('Vending Solutions', {
+        body: text,
+        icon: '/icons/icon-192x192.png'
+      })
+    );
+  }
+});
+
+// Handle notification click events
+self.addEventListener('notificationclick', (event) => {
+  const notification = event.notification;
+  notification.close();
+  
+  // Navigate to URL if provided in notification data
+  if (notification.data && notification.data.url) {
+    event.waitUntil(
+      clients.matchAll({ type: 'window' }).then(clientList => {
+        // Check if there's already a window/tab open with the target URL
+        for (const client of clientList) {
+          if (client.url === notification.data.url && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        
+        // If no window/tab is open with the URL, open a new one
+        if (clients.openWindow) {
+          return clients.openWindow(notification.data.url);
+        }
+      })
+    );
+  }
 });

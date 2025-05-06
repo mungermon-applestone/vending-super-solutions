@@ -1,44 +1,22 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import MainNav from './MainNav';
 import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
-import DesktopNavigation from './header/DesktopNavigation';
-import MobileNavigation from './header/MobileNavigation';
+import NotificationManager from '@/components/common/NotificationManager';
 
 const Header = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
-  const closeMobileMenu = () => setMobileMenuOpen(false);
-
   return (
-    <header className="sticky top-0 z-30 w-full border-b bg-background">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center">
-          <Link to="/" className="flex items-center">
-            <span className="text-xl font-semibold">Applestone Solutions</span>
-          </Link>
+    <header className="sticky top-0 z-30 w-full bg-white border-b border-gray-200 shadow-sm">
+      <div className="container mx-auto flex justify-between items-center py-4 px-4">
+        <Link to="/" className="flex items-center space-x-2">
+          <span className="text-xl font-bold text-blue-600">Vending Solutions</span>
+        </Link>
+        
+        <div className="flex items-center gap-4">
+          <NotificationManager small />
+          <MainNav />
         </div>
-
-        {/* Desktop Navigation */}
-        <DesktopNavigation />
-
-        {/* Mobile menu toggle */}
-        <button
-          className="md:hidden p-2 rounded-md hover:bg-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
-          onClick={toggleMobileMenu}
-        >
-          {mobileMenuOpen ? (
-            <X className="h-6 w-6" aria-hidden="true" />
-          ) : (
-            <Menu className="h-6 w-6" aria-hidden="true" />
-          )}
-          <span className="sr-only">Toggle menu</span>
-        </button>
       </div>
-
-      {/* Mobile Navigation */}
-      <MobileNavigation isOpen={mobileMenuOpen} onClose={closeMobileMenu} />
     </header>
   );
 };
