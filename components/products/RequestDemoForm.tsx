@@ -1,6 +1,9 @@
 
 import React, { useState } from 'react'
 import { Check } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 export default function RequestDemoForm() {
   const [formState, setFormState] = useState({
@@ -44,12 +47,13 @@ export default function RequestDemoForm() {
           <p className="text-gray-600 mb-4">
             Your demo request has been received. One of our representatives will contact you shortly.
           </p>
-          <button
+          <Button
             onClick={() => setIsSubmitted(false)}
-            className="text-blue-600 hover:text-blue-800 font-medium"
+            variant="outline"
+            className="text-vending-blue hover:text-white hover:bg-vending-blue"
           >
             Submit another request
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -60,11 +64,11 @@ export default function RequestDemoForm() {
       <h3 className="text-xl font-bold mb-6">Request a Demo</h3>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-          <input
+          <Label htmlFor="fullName" className="mb-1">Full Name *</Label>
+          <Input
             type="text"
             id="fullName"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="w-full"
             placeholder="John Doe"
             required
             value={formState.fullName}
@@ -72,11 +76,11 @@ export default function RequestDemoForm() {
           />
         </div>
         <div>
-          <label htmlFor="businessEmail" className="block text-sm font-medium text-gray-700 mb-1">Business Email *</label>
-          <input
+          <Label htmlFor="businessEmail" className="mb-1">Business Email *</Label>
+          <Input
             type="email"
             id="businessEmail"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="w-full"
             placeholder="john@company.com"
             required
             value={formState.businessEmail}
@@ -84,45 +88,45 @@ export default function RequestDemoForm() {
           />
         </div>
         <div>
-          <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
-          <input
+          <Label htmlFor="company" className="mb-1">Company Name</Label>
+          <Input
             type="text"
             id="company"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="w-full"
             placeholder="Acme Inc."
             value={formState.company}
             onChange={handleInputChange}
           />
         </div>
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-          <input
+          <Label htmlFor="phone" className="mb-1">Phone Number</Label>
+          <Input
             type="tel"
             id="phone"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="w-full"
             placeholder="(555) 555-5555"
             value={formState.phone}
             onChange={handleInputChange}
           />
         </div>
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+          <Label htmlFor="message" className="mb-1">Message</Label>
           <textarea
             id="message"
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
             placeholder="Tell us about your needs and any questions you have."
             value={formState.message}
             onChange={handleInputChange}
           ></textarea>
         </div>
-        <button
+        <Button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white font-medium"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Submitting...' : 'Request Demo'}
-        </button>
+        </Button>
       </form>
     </div>
   )
