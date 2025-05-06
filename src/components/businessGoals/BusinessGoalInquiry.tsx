@@ -1,5 +1,5 @@
+
 import React, { useState } from 'react';
-import ContactForm from '@/components/contact/ContactForm';
 import { Button } from '@/components/ui/button';
 import { showSuccess, showError } from '@/utils/notification';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,34 +38,11 @@ const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({
     setIsSubmitting(true);
     
     try {
-      // Debug environment information
-      console.log('Environment check (BusinessGoalInquiry):', {
-        isWindow: typeof window !== 'undefined',
-        hasEnv: typeof window !== 'undefined' && !!window.env,
-        envKeys: typeof window !== 'undefined' && window.env ? Object.keys(window.env) : []
-      });
-      
-      // Get environment configuration from window.env
-      const emailConfig = typeof window !== 'undefined' && window.env ? {
-        SENDGRID_API_KEY: window.env.SENDGRID_API_KEY,
-        EMAIL_TO: window.env.EMAIL_TO,
-        EMAIL_FROM: window.env.EMAIL_FROM
-      } : null;
-      
-      console.log('Email configuration detected:', 
-        emailConfig ? {
-          hasApiKey: !!emailConfig.SENDGRID_API_KEY,
-          emailTo: emailConfig.EMAIL_TO,
-          emailFrom: emailConfig.EMAIL_FROM
-        } : 'Not available'
-      );
-      
-      // Send data to our API endpoint
-      console.log('Submitting form to /api/send-email');
-      const response = await fetch('/api/send-email', {
+      // Submit to Formspree
+      const response = await fetch('https://formspree.io/f/moqgdqnk', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           name,
@@ -74,17 +51,12 @@ const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({
           phone,
           subject: `Business Goal Inquiry: ${goalName || 'Custom Solution'}`,
           message,
-          formType: 'Business Goal Inquiry',
-          config: emailConfig // Pass configuration to API handler
+          formType: 'Business Goal Inquiry'
         }),
       });
       
-      const data = await response.json();
-      console.log('API Response:', data);
-      
       if (!response.ok) {
-        console.error('Form submission error:', data);
-        throw new Error(data.error || data.details || 'Failed to send inquiry');
+        throw new Error('Network response was not ok');
       }
       
       // Show success message

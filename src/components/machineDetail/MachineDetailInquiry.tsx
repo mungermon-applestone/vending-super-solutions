@@ -29,11 +29,11 @@ const MachineDetailInquiry: React.FC<MachineDetailInquiryProps> = ({ machineTitl
     setIsSubmitting(true);
     
     try {
-      // Send data to our API endpoint
-      const response = await fetch('/api/send-email', {
+      // Submit form to Formspree
+      const response = await fetch('https://formspree.io/f/moqgdqnk', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           name: `${firstName} ${lastName}`,
@@ -46,10 +46,8 @@ const MachineDetailInquiry: React.FC<MachineDetailInquiryProps> = ({ machineTitl
         }),
       });
       
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to send inquiry');
+        throw new Error('Network response was not ok');
       }
       
       // Show success message
