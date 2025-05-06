@@ -178,7 +178,13 @@ const renderApp = () => {
   
   // Initialize service worker and offline capabilities
   registerServiceWorker();
-  setupOfflineDetection();
+  
+  // Fix: Pass the required parameters to setupOfflineDetection
+  // Using toast.error and toast.success as the notification handlers
+  setupOfflineDetection(
+    (message: string) => toast.error(message),
+    (message: string) => toast.success(message)
+  );
   
   // Prefetch critical routes when browser is idle
   if (!detectedBot) {
