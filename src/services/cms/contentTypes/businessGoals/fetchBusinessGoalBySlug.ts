@@ -83,7 +83,7 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
         entries = await client.getEntries({
           content_type: 'businessGoal',
           'fields.slug': resolvedSlug,
-          include: 2,
+          include: 3,  // Increased include depth for nested references
           limit: 1
         });
         
@@ -93,7 +93,7 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
           entries = await client.getEntries({
             content_type: 'businessGoal',
             'fields.slug': slug,
-            include: 2,
+            include: 3,  // Increased include depth for nested references
             limit: 1
           });
         }
@@ -106,7 +106,7 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
         // Get all business goals to compare slugs
         const allGoalsQuery = await client.getEntries({
           content_type: 'businessGoal',
-          include: 2,
+          include: 3,  // Increased include depth for nested references
           limit: 100
         });
         
@@ -175,6 +175,28 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
       const entry = entries.items[0];
       logSlugResult("business goal", slug, entry.fields.slug as string, true);
       
+      // Debug the found entry 
+      console.log(`[fetchBusinessGoalBySlug] Found business goal entry:`, {
+        id: entry.sys.id,
+        title: entry.fields.title,
+        slug: entry.fields.slug,
+        hasFeatures: Boolean(entry.fields.features && entry.fields.features.length > 0),
+        hasVideo: Boolean(entry.fields.video),
+        featureCount: entry.fields.features ? entry.fields.features.length : 0
+      });
+      
+      // If there are features, log some details about them
+      if (entry.fields.features && entry.fields.features.length > 0) {
+        console.log(`[fetchBusinessGoalBySlug] Feature references:`, 
+          entry.fields.features.map((feature: any) => ({
+            id: feature.sys?.id,
+            contentType: feature.sys?.contentType?.sys?.id || 'unknown',
+            hasFields: Boolean(feature.fields),
+            title: feature.fields?.title || 'No title'
+          }))
+        );
+      }
+      
       // Map the Contentful data to our CMSBusinessGoal interface
       const businessGoal: CMSBusinessGoal = {
         id: entry.sys.id,
@@ -189,13 +211,28 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
         visible: entry.fields.visible as boolean ?? true,
         icon: entry.fields.icon as string,
         benefits: (entry.fields.benefits as string[]) || [],
-        features: (entry.fields.features || []).map((feature: any) => ({
-          id: feature.sys?.id,
-          title: feature.fields?.title,
-          description: feature.fields?.description,
-          icon: feature.fields?.icon,
-          display_order: feature.fields?.displayOrder || 0
-        })),
+        features: (entry.fields.features || []).map((feature: any) => {
+          // Add detailed feature debugging
+          console.log(`[fetchBusinessGoalBySlug] Processing feature:`, {
+            id: feature.sys?.id,
+            hasFields: Boolean(feature.fields),
+            fieldKeys: feature.fields ? Object.keys(feature.fields) : [],
+            title: feature.fields?.title || 'No title'
+          });
+          
+          return {
+            id: feature.sys?.id,
+            title: feature.fields?.title || 'Untitled Feature',
+            description: feature.fields?.description || '',
+            icon: feature.fields?.icon || undefined,
+            display_order: feature.fields?.displayOrder || 0,
+            screenshot: feature.fields?.screenshot ? {
+              id: feature.fields.screenshot.sys?.id,
+              url: `https:${feature.fields.screenshot.fields?.file?.url}`,
+              alt: feature.fields.screenshot.fields?.title || feature.fields?.title || 'Feature Screenshot'
+            } : undefined
+          };
+        }),
         video: entry.fields.video ? {
           id: (entry.fields.video as any).sys.id,
           url: `https:${(entry.fields.video as any).fields.file.url}`,
@@ -214,6 +251,18 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
       };
       
       console.log(`[fetchBusinessGoalBySlug] Successfully processed business goal: ${businessGoal.title}`);
+      
+      // Final validation of processed goal
+      console.log(`[fetchBusinessGoalBySlug] Processed business goal:`, {
+        id: businessGoal.id,
+        title: businessGoal.title,
+        slug: businessGoal.slug,
+        hasFeatures: businessGoal.features && businessGoal.features.length > 0,
+        featureCount: businessGoal.features ? businessGoal.features.length : 0,
+        hasVideo: !!businessGoal.video,
+        hasBenefits: businessGoal.benefits && businessGoal.benefits.length > 0
+      });
+      
       return businessGoal as T;
     } catch (contentfulError) {
       console.error("[fetchBusinessGoalBySlug] Error fetching business goal from Contentful:", contentfulError);

@@ -42,6 +42,37 @@ export function useBusinessGoal(slug: string | undefined) {
         
         if (businessGoal) {
           console.log(`[useBusinessGoal] Successfully loaded business goal: ${businessGoal.title} with slug ${businessGoal.slug}`);
+          
+          // Add detailed feature logging
+          console.log(`[useBusinessGoal] Business goal features:`, 
+            Array.isArray(businessGoal.features) 
+              ? businessGoal.features.map(f => ({ 
+                  id: f.id, 
+                  title: f.title, 
+                  hasIcon: !!f.icon,
+                  hasScreenshot: !!f.screenshot 
+                })) 
+              : 'No features'
+          );
+          
+          // Add detailed debugging for video
+          if (businessGoal.video) {
+            console.log(`[useBusinessGoal] Business goal video details:`, {
+              id: businessGoal.video.id,
+              url: businessGoal.video.url,
+              title: businessGoal.video.title
+            });
+          } else {
+            console.log(`[useBusinessGoal] Business goal has no video`);
+          }
+          
+          // Add detailed debugging for recommended machines
+          if (businessGoal.recommendedMachines && businessGoal.recommendedMachines.length > 0) {
+            console.log(`[useBusinessGoal] Business goal has ${businessGoal.recommendedMachines.length} recommended machines`);
+          } else {
+            console.log(`[useBusinessGoal] Business goal has no recommended machines`);
+          }
+          
           return businessGoal;
         }
         
@@ -64,6 +95,44 @@ export function useBusinessGoal(slug: string | undefined) {
             console.log('[useBusinessGoal] Found expand-footprint goal in final attempt');
             return expandFootprintGoal;
           }
+          
+          // If all else fails for expand-footprint, create a fallback
+          console.log('[useBusinessGoal] All attempts failed, creating fallback for expand-footprint');
+          return {
+            id: 'expand-footprint-fallback',
+            slug: 'expand-footprint',
+            title: 'Expand Your Footprint',
+            description: 'Grow your retail presence with automated smart vending solutions.',
+            visible: true,
+            icon: 'map',
+            benefits: [
+              'Expand to new locations without traditional store overhead',
+              'Reach customers in high-traffic areas with minimal space requirements',
+              'Test new markets with lower investment risk',
+              'Scale your retail footprint faster than traditional stores',
+              'Operate 24/7 without additional staffing costs'
+            ],
+            features: [
+              {
+                id: 'expandf-1',
+                title: 'Lower Entry Costs',
+                description: 'Automated retail machines cost a fraction of traditional store openings',
+                icon: 'trending-up'
+              },
+              {
+                id: 'expandf-2',
+                title: 'Flexible Deployment',
+                description: 'Place machines in locations impossible for traditional retail',
+                icon: 'map'
+              },
+              {
+                id: 'expandf-3',
+                title: 'Rapid Market Testing',
+                description: 'Quickly test product offerings in new demographic areas',
+                icon: 'pie-chart'
+              }
+            ]
+          } as CMSBusinessGoal;
         }
         
         console.error(`[useBusinessGoal] No business goal found with any slug variation:`, {
