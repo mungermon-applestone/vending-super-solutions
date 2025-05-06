@@ -9,11 +9,17 @@
   // Function to fetch runtime config
   async function fetchRuntimeConfig() {
     try {
+      console.log('[env-config] Attempting to fetch runtime configuration...');
       const response = await fetch('/api/runtime-config');
       if (response.ok) {
         const config = await response.json();
-        console.log('[env-config] Successfully loaded runtime configuration');
+        console.log('[env-config] Successfully loaded runtime configuration', {
+          hasContentfulConfig: !!(config.VITE_CONTENTFUL_SPACE_ID && config.VITE_CONTENTFUL_DELIVERY_TOKEN),
+          hasEmailConfig: !!(config.SENDGRID_API_KEY && config.EMAIL_TO && config.EMAIL_FROM)
+        });
         return config;
+      } else {
+        console.warn('[env-config] Failed to fetch runtime config:', response.status, response.statusText);
       }
     } catch (error) {
       console.warn('[env-config] Failed to fetch runtime config:', error);
@@ -79,8 +85,8 @@
       window.env.VITE_CONTENTFUL_SPACE_ID = storedCreds.VITE_CONTENTFUL_SPACE_ID;
       window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = storedCreds.VITE_CONTENTFUL_DELIVERY_TOKEN;
       window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = storedCreds.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
-      window.env.EMAIL_TO = storedCreds.EMAIL_TO;
-      window.env.EMAIL_FROM = storedCreds.EMAIL_FROM;
+      window.env.EMAIL_TO = storedCreds.EMAIL_TO || 'hello@applestonesolutions.com';
+      window.env.EMAIL_FROM = storedCreds.EMAIL_FROM || 'support@applestonesolutions.com';
       window.env.SENDGRID_API_KEY = storedCreds.SENDGRID_API_KEY;
       
       // Also set legacy keys for backward compatibility
@@ -106,6 +112,13 @@
         window.env.spaceId = config.VITE_CONTENTFUL_SPACE_ID;
         window.env.deliveryToken = config.VITE_CONTENTFUL_DELIVERY_TOKEN;
         window.env.environmentId = config.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+        
+        // Explicitly log email configuration
+        console.log('[env-config] Email configuration from runtime-config:', {
+          SENDGRID_API_KEY: config.SENDGRID_API_KEY ? 'Present (hidden)' : 'Missing',
+          EMAIL_TO: config.EMAIL_TO || 'Missing',
+          EMAIL_FROM: config.EMAIL_FROM || 'Missing'
+        });
         
         // Save to localStorage for future use
         try {
@@ -134,6 +147,12 @@
       window.env.spaceId = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
       window.env.deliveryToken = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN;
       window.env.environmentId = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_ENVIRONMENT_ID;
+      
+      console.log('[env-config] Email configuration from preview credentials:', {
+        SENDGRID_API_KEY: PREVIEW_CREDENTIALS.SENDGRID_API_KEY ? 'Present (hidden)' : 'Missing',
+        EMAIL_TO: PREVIEW_CREDENTIALS.EMAIL_TO || 'Missing',
+        EMAIL_FROM: PREVIEW_CREDENTIALS.EMAIL_FROM || 'Missing'
+      });
       
       window._contentfulInitializedSource = 'preview-hardcoded';
       return true;

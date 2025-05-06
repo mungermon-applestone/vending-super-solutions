@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import ContactForm from '@/components/contact/ContactForm';
 import { Button } from '@/components/ui/button';
@@ -39,6 +38,13 @@ const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({
     setIsSubmitting(true);
     
     try {
+      // Debug environment information
+      console.log('Environment check (BusinessGoalInquiry):', {
+        isWindow: typeof window !== 'undefined',
+        hasEnv: typeof window !== 'undefined' && !!window.env,
+        envKeys: typeof window !== 'undefined' && window.env ? Object.keys(window.env) : []
+      });
+      
       // Get environment configuration from window.env
       const emailConfig = typeof window !== 'undefined' && window.env ? {
         SENDGRID_API_KEY: window.env.SENDGRID_API_KEY,
@@ -46,9 +52,16 @@ const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({
         EMAIL_FROM: window.env.EMAIL_FROM
       } : null;
       
-      console.log('Email configuration detected:', emailConfig ? 'Available' : 'Not available');
+      console.log('Email configuration detected:', 
+        emailConfig ? {
+          hasApiKey: !!emailConfig.SENDGRID_API_KEY,
+          emailTo: emailConfig.EMAIL_TO,
+          emailFrom: emailConfig.EMAIL_FROM
+        } : 'Not available'
+      );
       
       // Send data to our API endpoint
+      console.log('Submitting form to /api/send-email');
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
@@ -67,9 +80,11 @@ const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({
       });
       
       const data = await response.json();
+      console.log('API Response:', data);
       
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to send inquiry');
+        console.error('Form submission error:', data);
+        throw new Error(data.error || data.details || 'Failed to send inquiry');
       }
       
       // Show success message

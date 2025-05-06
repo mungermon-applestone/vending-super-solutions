@@ -31,6 +31,13 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
     setSubmitting(true);
     
     try {
+      // Debug environment information
+      console.log('Environment check:', {
+        isWindow: typeof window !== 'undefined',
+        hasEnv: typeof window !== 'undefined' && !!window.env,
+        envKeys: typeof window !== 'undefined' && window.env ? Object.keys(window.env) : []
+      });
+      
       // Get environment configuration from window.env
       const emailConfig = typeof window !== 'undefined' && window.env ? {
         SENDGRID_API_KEY: window.env.SENDGRID_API_KEY,
@@ -38,9 +45,16 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
         EMAIL_FROM: window.env.EMAIL_FROM
       } : null;
       
-      console.log('Email configuration detected:', emailConfig ? 'Available' : 'Not available');
+      console.log('Email configuration detected:', 
+        emailConfig ? {
+          hasApiKey: !!emailConfig.SENDGRID_API_KEY,
+          emailTo: emailConfig.EMAIL_TO,
+          emailFrom: emailConfig.EMAIL_FROM
+        } : 'Not available'
+      );
       
       // Send data to our API endpoint
+      console.log('Submitting form to /api/send-email');
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
@@ -57,10 +71,11 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
       });
       
       const data = await response.json();
+      console.log('API Response:', data);
       
       if (!response.ok) {
         console.error('Form submission error:', data);
-        throw new Error(data.error || 'Failed to send message');
+        throw new Error(data.error || data.details || 'Failed to send message');
       }
       
       // Show success message
@@ -69,6 +84,10 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
       
       // Reset form and show success state
       setSubmitted(true);
+      setName('');
+      setEmail('');
+      setSubject('');
+      setMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
       showError("There was a problem sending your message. Please try again.");

@@ -4,6 +4,6 @@
   "VITE_CONTENTFUL_DELIVERY_TOKEN": "fxpQth03vfdKzI4VNT_fYg8cD5BwoTiGaa6INIyYync",
   "VITE_CONTENTFUL_ENVIRONMENT_ID": "master",
   "SENDGRID_API_KEY": "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",
-  "EMAIL_TO": "hello@applestonesolutons.com",
+  "EMAIL_TO": "hello@applestonesolutions.com",
   "EMAIL_FROM": "support@applestonesolutions.com"
 }

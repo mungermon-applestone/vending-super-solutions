@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +31,13 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
     setSubmitting(true);
     
     try {
+      // Debug environment information
+      console.log('Environment check (InquiryForm):', {
+        isWindow: typeof window !== 'undefined',
+        hasEnv: typeof window !== 'undefined' && !!window.env,
+        envKeys: typeof window !== 'undefined' && window.env ? Object.keys(window.env) : []
+      });
+      
       // Get environment configuration from window.env
       const emailConfig = typeof window !== 'undefined' && window.env ? {
         SENDGRID_API_KEY: window.env.SENDGRID_API_KEY,
@@ -39,9 +45,16 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
         EMAIL_FROM: window.env.EMAIL_FROM
       } : null;
       
-      console.log('Email configuration detected:', emailConfig ? 'Available' : 'Not available');
+      console.log('Email configuration detected:', 
+        emailConfig ? {
+          hasApiKey: !!emailConfig.SENDGRID_API_KEY,
+          emailTo: emailConfig.EMAIL_TO,
+          emailFrom: emailConfig.EMAIL_FROM
+        } : 'Not available'
+      );
       
       // Send data to our API endpoint
+      console.log('Submitting form to /api/send-email');
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
@@ -59,9 +72,11 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
       });
       
       const data = await response.json();
+      console.log('API Response:', data);
       
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to send demo request');
+        console.error('Form submission error:', data);
+        throw new Error(data.error || data.details || 'Failed to send demo request');
       }
       
       // Show success message
@@ -69,6 +84,11 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
       
       // Reset form and show success state
       setSubmitted(true);
+      setFullName('');
+      setEmail('');
+      setCompany('');
+      setPhone('');
+      setMessage('');
     } catch (error) {
       console.error('Error submitting form:', error);
       showError("There was a problem sending your request. Please try again.");

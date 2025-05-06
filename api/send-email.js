@@ -9,15 +9,22 @@ export default async function handler(req, res) {
   try {
     const { name, email, subject, message, company, phone, formType, config } = req.body;
     
-    // Log the submission data (useful for debugging)
+    // Log the submission data and config (useful for debugging)
     console.log('Form submission received:', {
       formType,
       name: name || '',
       email: email || '',
       subject: subject || '',
-      message: message || '',
       company: company || '',
-      phone: phone || ''
+      phone: phone || '',
+      message: message ? message.substring(0, 20) + '...' : ''
+    });
+    
+    console.log('Email configuration:', {
+      hasConfig: !!config,
+      hasApiKey: config && !!config.SENDGRID_API_KEY,
+      emailTo: config?.EMAIL_TO || '(not provided)',
+      emailFrom: config?.EMAIL_FROM || '(not provided)'
     });
     
     // Basic validation
@@ -25,39 +32,30 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Email is required' });
     }
     
-    // Get email configuration - support both deployment methods
-    // For Lovable deployment, config will be passed from the client
-    // For Vercel deployment, process.env will be used
-    const sendgridApiKey = config?.SENDGRID_API_KEY || process.env.SENDGRID_API_KEY;
-    const emailTo = config?.EMAIL_TO || process.env.EMAIL_TO || 'munger@applestonesolutons.com';
-    const emailFrom = config?.EMAIL_FROM || process.env.EMAIL_FROM || 'noreply@applestonesolutions.com';
+    // Get email configuration - fully rely on the config passed from the client
+    // This is the correct approach for Lovable deployment
+    const sendgridApiKey = config?.SENDGRID_API_KEY;
+    const emailTo = config?.EMAIL_TO || 'hello@applestonesolutions.com';
+    const emailFrom = config?.EMAIL_FROM || 'support@applestonesolutions.com';
     
-    // Check if we're in development or if SendGrid API key is missing
-    if ((typeof window !== 'undefined' && window.location?.hostname === 'localhost') || !sendgridApiKey) {
-      console.log('Email would be sent in production with the following details:');
-      console.log('To:', emailTo);
-      console.log('Subject:', `New ${formType || 'Contact Form'} Submission: ${subject || ''}`);
-      console.log('Content:', {
-        name: name || '',
-        email: email || '',
-        company: company || '',
-        phone: phone || '',
-        subject: subject || '',
-        message: message || ''
-      });
-      
+    // Check if we have the required configuration
+    if (!sendgridApiKey) {
+      console.log('SendGrid API key missing, email cannot be sent');
       return res.status(200).json({ 
-        success: true, 
-        message: 'Form submission received. In development mode, email not actually sent.'
+        success: false, 
+        message: 'Email configuration incomplete. SendGrid API key missing.',
+        debug: true
       });
     }
     
-    // In production with SendGrid configured
+    // Try sending the email with SendGrid
     try {
-      // Import SendGrid - note this uses dynamic import since it might not be installed in dev
+      // Import SendGrid - note this uses dynamic import
+      console.log('Importing SendGrid...');
       const { default: sgMail } = await import('@sendgrid/mail');
       
       // Set API key
+      console.log('Setting SendGrid API key...');
       sgMail.setApiKey(sendgridApiKey);
       
       // Create email message
@@ -87,9 +85,12 @@ export default async function handler(req, res) {
         `,
       };
       
+      console.log('Sending email to:', emailTo);
+      
       // Send email
       await sgMail.send(msg);
       
+      console.log('Email sent successfully!');
       return res.status(200).json({ 
         success: true,
         message: 'Email sent successfully' 
@@ -98,7 +99,8 @@ export default async function handler(req, res) {
       console.error('SendGrid error:', emailError);
       return res.status(500).json({ 
         error: 'Failed to send email',
-        details: emailError.message
+        details: emailError.message,
+        stack: emailError.stack
       });
     }
     
@@ -106,7 +108,8 @@ export default async function handler(req, res) {
     console.error('Error processing form submission:', error);
     return res.status(500).json({ 
       error: 'Failed to process form submission',
-      details: error.message
+      details: error.message,
+      stack: error.stack
     });
   }
 }
