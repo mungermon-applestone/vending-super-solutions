@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -8,6 +8,9 @@ interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
   aspectRatio?: string;
   isThumbnail?: boolean;
+  lazyLoad?: boolean;
+  priority?: boolean;
+  sizes?: string;
 }
 
 const Image: React.FC<ImageProps> = ({ 
@@ -17,10 +20,19 @@ const Image: React.FC<ImageProps> = ({
   objectFit = 'cover',
   aspectRatio,
   isThumbnail = false,
-  loading = 'lazy',
-  fetchPriority,
+  lazyLoad = true,
+  priority = false,
+  sizes = '100vw',
+  loading: propLoading,
+  fetchPriority: propFetchPriority,
+  onLoad,
   ...props 
 }) => {
+  // State for tracking image load status
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [loadAttempts, setLoadAttempts] = useState(0);
+  const maxAttempts = 2;
+  
   // Apply object fit class based on the prop
   const objectFitClass = `object-${objectFit}`;
   
@@ -42,12 +54,13 @@ const Image: React.FC<ImageProps> = ({
   const isContentfulImage = imageUrl.includes('images.ctfassets.net');
   const isUnsplashImage = imageUrl.includes('unsplash.com');
   
-  // Keep track of load attempts to prevent infinite retry loops
-  const [loadAttempts, setLoadAttempts] = React.useState(0);
-  const maxAttempts = 2;
-
-  // Fix fetchPriority to use valid values only
-  const validatedFetchPriority = fetchPriority === 'high' || fetchPriority === 'low' ? fetchPriority : undefined;
+  // Determine loading strategy
+  // If priority is true, use eager loading; otherwise, use the prop value or default to lazy
+  const loading = priority ? 'eager' : propLoading || (lazyLoad ? 'lazy' : 'eager');
+  
+  // Determine fetchPriority
+  // If priority is true, use high; otherwise, use the prop value or default based on loading
+  const fetchPriority = priority ? 'high' : propFetchPriority || (loading === 'eager' ? 'high' : 'auto');
   
   // Optimize image loading based on service
   const optimizeUrl = (url: string) => {
@@ -59,14 +72,14 @@ const Image: React.FC<ImageProps> = ({
       
       // If it's a Contentful image without parameters, add optimization
       if (isContentfulImage) {
-        const width = isThumbnail ? 400 : 800;
+        const width = isThumbnail ? 400 : 1200;
         const fit = isThumbnail ? 'fill' : 'pad';
         return `${url}?w=${width}&q=80&fm=webp&fit=${fit}`;
       }
       
       // For Unsplash images, use their optimization API
       if (isUnsplashImage && !url.includes('&auto=format')) {
-        return `${url}${url.includes('?') ? '&' : '?'}auto=format&q=80&w=${isThumbnail ? '400' : '800'}&fit=max`;
+        return `${url}${url.includes('?') ? '&' : '?'}auto=format&q=80&w=${isThumbnail ? '400' : '1200'}&fit=max`;
       }
       
       // For other images, return as is
@@ -78,13 +91,15 @@ const Image: React.FC<ImageProps> = ({
   };
 
   // Handle prefetching important images
-  React.useEffect(() => {
-    if (validatedFetchPriority === 'high' && typeof window !== 'undefined') {
+  useEffect(() => {
+    if (priority && typeof window !== 'undefined') {
       try {
         const link = document.createElement('link');
         link.rel = 'preload';
         link.as = 'image';
         link.href = optimizeUrl(imageUrl);
+        link.imageSrcset = generateSrcSet(imageUrl);
+        link.imageSizes = sizes;
         document.head.appendChild(link);
         
         return () => {
@@ -94,7 +109,50 @@ const Image: React.FC<ImageProps> = ({
         console.error(`[Image] Error prefetching image: ${imageUrl}`, error);
       }
     }
-  }, [imageUrl, validatedFetchPriority]);
+  }, [imageUrl, priority, sizes]);
+
+  // Generate srcset for responsive images
+  const generateSrcSet = (url: string): string => {
+    if (isContentfulImage) {
+      const widths = [640, 750, 828, 1080, 1200, 1920, 2048];
+      return widths.map(w => {
+        const optimizedUrl = url.includes('?') 
+          ? `${url}&w=${w}` 
+          : `${url}?w=${w}&q=75&fm=webp`;
+        return `${optimizedUrl} ${w}w`;
+      }).join(', ');
+    }
+    
+    if (isUnsplashImage) {
+      const widths = [640, 750, 828, 1080, 1200, 1920, 2048];
+      return widths.map(w => {
+        const optimizedUrl = url.includes('?') 
+          ? `${url}&w=${w}` 
+          : `${url}?w=${w}&q=75&auto=format`;
+        return `${optimizedUrl} ${w}w`;
+      }).join(', ');
+    }
+    
+    return '';
+  };
+
+  // Handle load event
+  const handleLoad = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    setIsLoaded(true);
+    if (onLoad) {
+      onLoad(e);
+    }
+    
+    // Performance monitoring for LCP candidates
+    if (priority && 'PerformanceObserver' in window) {
+      // Try to mark this image load for performance tracking
+      try {
+        performance.mark(`image-loaded-${imageUrl.substring(0, 50)}`);
+      } catch (err) {
+        // Ignore errors
+      }
+    }
+  };
 
   // Handle error event
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -109,23 +167,32 @@ const Image: React.FC<ImageProps> = ({
     }
   };
 
+  // Generate srcSet only for images that would benefit from it
+  const srcSet = (isContentfulImage || isUnsplashImage) ? generateSrcSet(imageUrl) : undefined;
+
   return (
-    <img 
-      src={optimizeUrl(imageUrl)} 
-      alt={alt}
-      className={`${objectFitClass} ${className}`}
-      loading={loading}
-      fetchPriority={validatedFetchPriority}
-      style={{
-        ...aspectRatioStyle,
-        ...props.style
-      }}
-      data-thumbnail={isThumbnail ? 'true' : undefined}
-      data-load-attempts={loadAttempts}
-      decoding="async" 
-      onError={handleError}
-      {...props}
-    />
+    <div className={`image-container ${!isLoaded ? 'bg-gray-100 animate-pulse' : ''}`} style={aspectRatioStyle}>
+      <img 
+        src={optimizeUrl(imageUrl)} 
+        alt={alt}
+        className={`${objectFitClass} ${className} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        loading={loading}
+        fetchPriority={fetchPriority as 'high' | 'low' | 'auto'}
+        style={{
+          ...aspectRatioStyle,
+          ...props.style,
+          transition: 'opacity 0.3s ease-in-out'
+        }}
+        onLoad={handleLoad}
+        onError={handleError}
+        srcSet={srcSet}
+        sizes={sizes}
+        data-thumbnail={isThumbnail ? 'true' : undefined}
+        data-load-attempts={loadAttempts}
+        decoding="async"
+        {...props}
+      />
+    </div>
   );
 };
 

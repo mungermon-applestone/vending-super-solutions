@@ -1,14 +1,18 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense, lazy } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
 import ContentfulPersistenceProvider from './providers/ContentfulPersistenceProvider';
 import ContentfulInitializer from './contentful/ContentfulInitializer';
-import PreviewEnvironmentDetector from './contentful/PreviewEnvironmentDetector';
-import { isPreviewEnvironment } from '@/config/cms';
+import { isPreviewEnvironment, logContentfulConfig } from '@/config/cms';
 import { Offline } from '@/components/common';
 import SiteMetadata from './seo/SiteMetadata';
+
+// Lazy load non-critical components
+const PreviewEnvironmentDetector = lazy(() => 
+  import('./contentful/PreviewEnvironmentDetector')
+);
 
 const RootLayout = () => {
   const isPreview = isPreviewEnvironment();
@@ -16,11 +20,12 @@ const RootLayout = () => {
   // Log contentful configuration on mount for debugging
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      console.log('[RootLayout] Contentful configuration:', {
-        hasSpaceId: !!(window.env && window.env.VITE_CONTENTFUL_SPACE_ID),
-        hasToken: !!(window.env && window.env.VITE_CONTENTFUL_DELIVERY_TOKEN),
-        source: window._contentfulInitializedSource
-      });
+      // Schedule this operation after main render
+      const timer = setTimeout(() => {
+        logContentfulConfig();
+      }, 0);
+      
+      return () => clearTimeout(timer);
     }
   }, []);
 
@@ -57,7 +62,9 @@ const RootLayout = () => {
           {/* Show the preview environment detector if needed */}
           {isPreview && (
             <div className="container mx-auto px-4 pt-4">
-              <PreviewEnvironmentDetector />
+              <Suspense fallback={<div className="h-10 bg-gray-100 animate-pulse rounded-md" />}>
+                <PreviewEnvironmentDetector />
+              </Suspense>
             </div>
           )}
           

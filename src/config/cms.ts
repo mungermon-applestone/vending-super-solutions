@@ -16,8 +16,8 @@ function getEnvVariable(key: string): string {
     return window.env[key];
   }
   
-  // Finally check localStorage (lowest priority, development only)
-  if (typeof window !== 'undefined' && window.localStorage) {
+  // Only check localStorage in development mode (lowest priority and only for development)
+  if (typeof window !== 'undefined' && window.localStorage && import.meta.env.DEV) {
     try {
       const storedVars = window.localStorage.getItem(ENV_STORAGE_KEY);
       if (storedVars) {
@@ -67,12 +67,16 @@ export function isPreviewEnvironment() {
   // List of production domains
   const productionDomains = [
     'applestonesolutions.com',
-    'www.applestonesolutions.com'
+    'www.applestonesolutions.com',
+    'localhost', // Remove this for production
+    '127.0.0.1' // Remove this for production
   ];
   
   // Check if current hostname matches a production domain
-  if (productionDomains.includes(hostname)) {
-    return false; // Not a preview environment
+  for (const domain of productionDomains) {
+    if (hostname === domain || hostname.endsWith('.' + domain)) {
+      return false; // Not a preview environment
+    }
   }
   
   // Otherwise treat as preview if it matches known patterns
@@ -81,9 +85,7 @@ export function isPreviewEnvironment() {
     hostname.includes('staging') || 
     hostname.includes('lovable.app') ||
     hostname.includes('vercel.app') ||
-    hostname.includes('netlify.app') ||
-    hostname === 'localhost' ||
-    hostname === '127.0.0.1'
+    hostname.includes('netlify.app')
   );
 }
 

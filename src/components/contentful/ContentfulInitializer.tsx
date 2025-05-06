@@ -22,8 +22,12 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
   const [initAttempted, setInitAttempted] = useState(false);
   
   useEffect(() => {
+    let isMounted = true;
+    
     // Function to initialize Contentful
     const initializeContentful = async () => {
+      if (!isMounted) return;
+      
       setIsLoading(true);
       try {
         console.log('[ContentfulInitializer] Starting initialization');
@@ -51,9 +55,11 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
           
           // Mark as initialized regardless of test result
           // In production, we always show content even if credentials test fails
-          setIsInitialized(true);
-          window._contentfulInitialized = true;
-          window._contentfulInitializedSource = 'production-env';
+          if (isMounted) {
+            setIsInitialized(true);
+            window._contentfulInitialized = true;
+            window._contentfulInitializedSource = 'production-env';
+          }
         } 
         // For preview environments or development, try multiple credential sources
         else {
@@ -64,32 +70,46 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
           const testResult = await testContentfulConnection();
           if (testResult.success) {
             console.log('[ContentfulInitializer] Preview credentials verified successfully');
-            setIsInitialized(true);
-            window._contentfulInitialized = true;
-            window._contentfulInitializedSource = 'preview-env';
+            if (isMounted) {
+              setIsInitialized(true);
+              window._contentfulInitialized = true;
+              window._contentfulInitializedSource = 'preview-env';
+            }
           } else {
             throw new Error(`Preview credentials failed: ${testResult.message}`);
           }
         }
       } catch (error) {
         console.error('[ContentfulInitializer] Initialization error:', error);
-        setError(error instanceof Error ? error : new Error('Unknown initialization error'));
-        
-        // In preview environments, still force provider to use fallbacks
-        if (isPreview) {
-          forceContentfulProvider();
-          setIsInitialized(true); // Still initialized but will use fallbacks
-          window._contentfulInitializedSource = 'fallback-after-error';
+        if (isMounted) {
+          setError(error instanceof Error ? error : new Error('Unknown initialization error'));
+          
+          // In preview environments, still force provider to use fallbacks
+          if (isPreview) {
+            forceContentfulProvider();
+            setIsInitialized(true); // Still initialized but will use fallbacks
+            window._contentfulInitializedSource = 'fallback-after-error';
+          }
         }
       } finally {
-        setIsLoading(false);
-        setInitAttempted(true);
-        console.log('[ContentfulInitializer] Initialization completed');
+        if (isMounted) {
+          setIsLoading(false);
+          setInitAttempted(true);
+          console.log('[ContentfulInitializer] Initialization completed');
+        }
       }
     };
     
-    // Run the initialization
-    initializeContentful();
+    // Add a small delay to prevent blocking the main thread during initial page load
+    const timer = setTimeout(() => {
+      initializeContentful();
+    }, 10);
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, [isPreview]);
   
   // Enhanced error handling strategy:

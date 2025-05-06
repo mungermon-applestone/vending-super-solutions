@@ -1,5 +1,6 @@
 
 import React from 'react';
+import Image from '../common/Image';
 
 interface HeroImageProps {
   imageUrl: string;
@@ -26,30 +27,17 @@ const HeroImage: React.FC<HeroImageProps> = ({ imageUrl, imageAlt }) => {
   // Extract the final image URL, ensuring it has proper protocol
   let finalImageUrl = validImageUrl ? imageUrl : 
     "https://images.unsplash.com/photo-1562184552-997c461abbe6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1740&q=80";
-    
-  // Add https: if the URL starts with // (protocol-relative URL)
-  if (finalImageUrl.startsWith('//')) {
-    finalImageUrl = 'https:' + finalImageUrl;
-    console.log('[HeroImage] Added https protocol to URL:', finalImageUrl);
-  }
-
-  // Log the final URL we're using
-  React.useEffect(() => {
-    console.log('[HeroImage] Using final image URL:', finalImageUrl);
-  }, [finalImageUrl]);
 
   return (
     <div className="relative">
       <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-        <img 
+        <Image 
           src={finalImageUrl}
           alt={imageAlt || "Vending Technology"}
           className="w-full h-auto object-cover"
-          onLoad={() => console.log('[HeroImage] Successfully loaded image:', finalImageUrl)}
-          onError={(e) => {
-            console.error('[HeroImage] Failed to load image:', finalImageUrl);
-            e.currentTarget.src = "https://images.unsplash.com/photo-1562184552-997c461abbe6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1740&q=80";
-          }}
+          priority={true} // This is a hero image, so it's important to load quickly
+          sizes="(min-width: 1280px) 1200px, (min-width: 768px) 768px, 100vw"
+          objectFit="cover"
         />
       </div>
     </div>
