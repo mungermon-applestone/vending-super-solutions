@@ -12,7 +12,7 @@ export default function ProductBenefitsList({ benefits }: ProductBenefitsListPro
     <ul className="space-y-3">
       {benefits.map((benefit, index) => (
         <li key={index} className="flex items-start">
-          <div className="flex-shrink-0 mt-1">
+          <div className="flex-shrink-0 mt-0.5">
             <div className="h-5 w-5 rounded-full bg-teal-500 flex items-center justify-center">
               <Check className="h-3 w-3 text-white" />
             </div>
