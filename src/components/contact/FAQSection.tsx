@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { Document } from '@contentful/rich-text-types';
 import { ContentfulRichTextDocument } from '@/types/contentful';
+import { sanitizeInput } from '@/utils/securityUtils';
 
 interface FAQItem {
   id: string;
@@ -17,7 +17,7 @@ interface FAQSectionProps {
 }
 
 const FAQSection = ({ faqSectionTitle, faqItems }: FAQSectionProps) => {
-  // Helper function to render the answer content properly
+  // Helper function to render the answer content properly with security measures
   const renderAnswer = (answer: string | Document | ContentfulRichTextDocument) => {
     // Check if the answer is a rich text document
     if (typeof answer === 'object' && answer !== null && 'nodeType' in answer) {
@@ -30,8 +30,10 @@ const FAQSection = ({ faqSectionTitle, faqItems }: FAQSectionProps) => {
       }
     }
     
-    // Otherwise render as regular text
-    return <p className="text-gray-600 whitespace-pre-line">{answer as string}</p>;
+    // Otherwise render as regular text with sanitization
+    return <p className="text-gray-600 whitespace-pre-line text-sm">
+      {typeof answer === 'string' ? sanitizeInput(answer) : ''}
+    </p>;
   };
   
   return (
@@ -43,25 +45,25 @@ const FAQSection = ({ faqSectionTitle, faqItems }: FAQSectionProps) => {
       {/* Render FAQ items as accordions */}
       <div className="max-w-3xl mx-auto">
         {faqItems && faqItems.length > 0 ? (
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion type="single" collapsible className="w-full" defaultValue={faqItems[0]?.id || 'faq-0'}>
             {faqItems.map((faq, index) => (
               <AccordionItem key={faq.id || `faq-${index}`} value={faq.id || `faq-${index}`}>
                 <AccordionTrigger className="text-left font-medium text-base">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent>
+                <AccordionContent className="text-sm">
                   {renderAnswer(faq.answer)}
                 </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
         ) : (
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion type="single" collapsible className="w-full" defaultValue="faq-1">
             <AccordionItem value="faq-1">
               <AccordionTrigger className="text-left font-medium text-base">
                 What types of businesses use your vending solutions?
               </AccordionTrigger>
-              <AccordionContent>
+              <AccordionContent className="text-sm">
                 <p className="text-gray-600">Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.</p>
               </AccordionContent>
             </AccordionItem>
@@ -69,7 +71,7 @@ const FAQSection = ({ faqSectionTitle, faqItems }: FAQSectionProps) => {
               <AccordionTrigger className="text-left font-medium text-base">
                 How quickly can your solutions be deployed?
               </AccordionTrigger>
-              <AccordionContent>
+              <AccordionContent className="text-sm">
                 <p className="text-gray-600">Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.</p>
               </AccordionContent>
             </AccordionItem>
@@ -77,7 +79,7 @@ const FAQSection = ({ faqSectionTitle, faqItems }: FAQSectionProps) => {
               <AccordionTrigger className="text-left font-medium text-base">
                 Do you offer installation and maintenance services?
               </AccordionTrigger>
-              <AccordionContent>
+              <AccordionContent className="text-sm">
                 <p className="text-gray-600">Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.</p>
               </AccordionContent>
             </AccordionItem>
@@ -85,7 +87,7 @@ const FAQSection = ({ faqSectionTitle, faqItems }: FAQSectionProps) => {
               <AccordionTrigger className="text-left font-medium text-base">
                 Can your vending machines be customized?
               </AccordionTrigger>
-              <AccordionContent>
+              <AccordionContent className="text-sm">
                 <p className="text-gray-600">Absolutely! We offer customization options for branding, product selection, payment methods, and technology integration based on your business needs.</p>
               </AccordionContent>
             </AccordionItem>

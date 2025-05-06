@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 import { optimizeForBots, isBot } from './utils/botDetection';
 import { registerServiceWorker, setupOfflineDetection, prefetchCriticalAssets } from './utils/serviceWorkerRegistration';
 import { extractCriticalCSS, setupDeferredCSS } from './utils/criticalCss';
+import { HelmetProvider } from 'react-helmet-async';
+import { performSecurityCheck } from './utils/securityUtils';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -36,7 +38,13 @@ const setupPerformanceOptimizations = () => {
   
   // Prefetch important resources
   preloadCriticalResources();
-}
+  
+  // Run security check
+  const securityCheckResult = performSecurityCheck();
+  if (!securityCheckResult.passed) {
+    console.warn('Security check failed:', securityCheckResult.issues);
+  }
+};
 
 // Preconnect to important domains
 const setupPreconnects = () => {
@@ -141,13 +149,15 @@ const renderApp = () => {
   
   ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <BreadcrumbProvider>
-            <App />
-          </BreadcrumbProvider>
-        </AuthProvider>
-      </QueryClientProvider>
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <BreadcrumbProvider>
+              <App />
+            </BreadcrumbProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </HelmetProvider>
     </React.StrictMode>
   );
   
