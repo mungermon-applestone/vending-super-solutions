@@ -25,11 +25,16 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Email is required' });
     }
     
+    // Get email configuration from window.env (runtime-config) or environment variables
+    const sendgridApiKey = typeof window !== 'undefined' ? window.env?.SENDGRID_API_KEY : process.env.SENDGRID_API_KEY;
+    const emailTo = typeof window !== 'undefined' ? window.env?.EMAIL_TO : process.env.EMAIL_TO;
+    const emailFrom = typeof window !== 'undefined' ? window.env?.EMAIL_FROM : process.env.EMAIL_FROM;
+    
     // Check if we're in development or production
     // In development, we'll just log and return success
-    if (process.env.NODE_ENV === 'development' || !process.env.SENDGRID_API_KEY) {
+    if (process.env.NODE_ENV === 'development' || !sendgridApiKey) {
       console.log('Email would be sent in production with the following details:');
-      console.log('To:', process.env.EMAIL_TO || 'munger@applestonesolutons.com');
+      console.log('To:', emailTo || 'munger@applestonesolutons.com');
       console.log('Subject:', `New ${formType || 'Contact Form'} Submission: ${subject || ''}`);
       console.log('Content:', {
         name: name || '',
@@ -52,12 +57,12 @@ export default async function handler(req, res) {
       const { default: sgMail } = await import('@sendgrid/mail');
       
       // Set API key
-      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+      sgMail.setApiKey(sendgridApiKey);
       
       // Create email message
       const msg = {
-        to: process.env.EMAIL_TO || 'munger@applestonesolutons.com',
-        from: process.env.EMAIL_FROM || 'noreply@applestonesolutions.com',
+        to: emailTo || 'munger@applestonesolutons.com',
+        from: emailFrom || 'noreply@applestonesolutions.com',
         subject: `New ${formType || 'Contact Form'} Submission: ${subject || ''}`,
         text: `
           Name: ${name || ''}

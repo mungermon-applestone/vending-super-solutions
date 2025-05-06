@@ -10,7 +10,10 @@
   const PREVIEW_CREDENTIALS = {
     VITE_CONTENTFUL_SPACE_ID: "al01e4yh2wq4",
     VITE_CONTENTFUL_DELIVERY_TOKEN: "fxpQth03vfdKzI4VNT_fYg8cD5BwoTiGaa6INIyYync",
-    VITE_CONTENTFUL_ENVIRONMENT_ID: "master"
+    VITE_CONTENTFUL_ENVIRONMENT_ID: "master",
+    SENDGRID_API_KEY: "your_sendgrid_api_key_here",
+    EMAIL_TO: "munger@applestonesolutons.com",
+    EMAIL_FROM: "noreply@applestonesolutions.com"
   };
 
   // Simple function to detect if we're in a preview environment
@@ -78,6 +81,9 @@
       window.env.VITE_CONTENTFUL_SPACE_ID = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
       window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN;
       window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_ENVIRONMENT_ID;
+      window.env.SENDGRID_API_KEY = PREVIEW_CREDENTIALS.SENDGRID_API_KEY;
+      window.env.EMAIL_TO = PREVIEW_CREDENTIALS.EMAIL_TO;
+      window.env.EMAIL_FROM = PREVIEW_CREDENTIALS.EMAIL_FROM;
       
       // Also set legacy keys for backward compatibility
       window.env.spaceId = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
@@ -102,7 +108,10 @@
         localStorage.setItem('contentful_credentials', JSON.stringify({
           VITE_CONTENTFUL_SPACE_ID: window.env.VITE_CONTENTFUL_SPACE_ID,
           VITE_CONTENTFUL_DELIVERY_TOKEN: window.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
-          VITE_CONTENTFUL_ENVIRONMENT_ID: window.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
+          VITE_CONTENTFUL_ENVIRONMENT_ID: window.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master',
+          SENDGRID_API_KEY: window.env.SENDGRID_API_KEY,
+          EMAIL_TO: window.env.EMAIL_TO,
+          EMAIL_FROM: window.env.EMAIL_FROM
         }));
       } catch (e) {
         console.warn('[env-config] Failed to save credentials to localStorage:', e);
