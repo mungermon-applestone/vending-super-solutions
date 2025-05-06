@@ -10,7 +10,7 @@ import { Offline } from '@/components/common';
 import SiteMetadata from './seo/SiteMetadata';
 import { Spinner } from '@/components/ui/spinner';
 import { createDynamicComponent } from '@/utils/dynamicLoader';
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 
 // Lazy load non-critical components
 const PreviewEnvironmentDetector = createDynamicComponent(

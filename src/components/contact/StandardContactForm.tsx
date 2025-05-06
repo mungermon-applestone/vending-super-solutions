@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Check, Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface StandardContactFormProps {
   formTitle?: string;
@@ -35,8 +34,6 @@ const StandardContactForm: React.FC<StandardContactFormProps> = ({
   showSubject = false,
   className = '',
 }) => {
-  const { toast } = useToast();
-  
   // Form state
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -68,11 +65,7 @@ const StandardContactForm: React.FC<StandardContactFormProps> = ({
     
     // Basic validation
     if ((!fullName && !hideFields.includes('name')) || !email || (!message && !hideFields.includes('message'))) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
+      toast.error("Please fill in all required fields");
       return;
     }
     
@@ -116,20 +109,13 @@ const StandardContactForm: React.FC<StandardContactFormProps> = ({
       }
       
       // Show success message
-      toast({
-        title: "Message sent!",
-        description: successMessage,
-      });
+      toast.success(successMessage);
       
       // Show success state
       setSubmitted(true);
     } catch (error) {
       console.error('Error sending message:', error);
-      toast({
-        title: "Error",
-        description: "There was a problem sending your message. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("There was a problem sending your message. Please try again.");
     } finally {
       setSubmitting(false);
     }
