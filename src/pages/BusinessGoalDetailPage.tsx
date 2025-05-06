@@ -17,6 +17,15 @@ import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMes
 import { redirectToCanonicalBusinessGoalIfNeeded } from '@/services/cms/utils/routeRedirector';
 import { normalizeSlug } from '@/services/cms/utils/slug/common';
 
+// Helper function to safely check for features array
+const hasValidFeatures = (businessGoal: any) => {
+  return businessGoal && 
+         businessGoal.features && 
+         Array.isArray(businessGoal.features) && 
+         businessGoal.features.length > 0 &&
+         businessGoal.features.some(f => f && f.title);
+};
+
 const getIconComponent = (iconName: string | undefined): React.ReactNode => {
   if (!iconName) return <Star className="h-6 w-6" />;
   
@@ -177,6 +186,16 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
   
   const showDebugInfo = false; // Set to true to show debug info in production
   
+  // Check for valid features to display
+  const validFeatures = hasValidFeatures(businessGoal);
+  if (validFeatures) {
+    console.log('[BusinessGoalContent] Valid features found:', 
+      businessGoal.features.map(f => ({ id: f.id, title: f.title }))
+    );
+  } else {
+    console.log('[BusinessGoalContent] No valid features found for this goal');
+  }
+  
   return (
     <>
       <BusinessGoalHero
@@ -232,30 +251,34 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
         </section>
       )}
       
-      {businessGoal?.features && businessGoal.features.length > 0 && (
+      {/* Only render the features section if there are valid features */}
+      {validFeatures && (
         <section className="py-16 bg-white">
           <div className="container mx-auto">
             <div className="max-w-6xl mx-auto">
               <h2 className="text-3xl font-bold text-center mb-12">Key Features</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {businessGoal.features.map((feature) => (
-                  <div key={feature.id} className="bg-gray-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-                    {feature.icon && (
-                      <div className="mb-4 text-vending-blue">
-                        {getIconComponent(typeof feature.icon === 'string' ? feature.icon : undefined)}
-                      </div>
-                    )}
-                    <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                    <p className="text-gray-600">{feature.description}</p>
-                  </div>
-                ))}
+                {businessGoal.features
+                  .filter(feature => feature && feature.title) // Filter out invalid features
+                  .map((feature) => (
+                    <div key={feature.id || Math.random().toString()} className="bg-gray-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+                      {feature.icon && (
+                        <div className="mb-4 text-vending-blue">
+                          {getIconComponent(typeof feature.icon === 'string' ? feature.icon : undefined)}
+                        </div>
+                      )}
+                      <h3 className="text-xl font-semibold mb-3">{feature.title || 'Unnamed Feature'}</h3>
+                      <p className="text-gray-600">{feature.description || ''}</p>
+                    </div>
+                  ))
+              }
               </div>
             </div>
           </div>
         </section>
       )}
       
-      {businessGoal?.video && (
+      {businessGoal?.video && businessGoal.video.url && (
         <BusinessGoalVideoSection 
           video={businessGoal.video}
           title={`See how ${businessGoal.title} works`}
@@ -263,7 +286,7 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
         />
       )}
       
-      {!businessGoal.video && (
+      {(!businessGoal.video || !businessGoal.video.url) && (
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto">
             <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
@@ -282,8 +305,9 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
         </section>
       )}
       
-      {businessGoal?.recommendedMachines && businessGoal.recommendedMachines.length > 0 && (
-        <RecommendedMachines machines={businessGoal.recommendedMachines} />
+      {businessGoal?.recommendedMachines && businessGoal.recommendedMachines.length > 0 && 
+       businessGoal.recommendedMachines.some(m => m && m.title) && (
+        <RecommendedMachines machines={businessGoal.recommendedMachines.filter(m => m && m.title)} />
       )}
       
       <InquiryForm title={`Ready to learn more about ${businessGoal?.title || 'achieving your business goals'}?`} />

@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { CMSBusinessGoal } from '@/types/cms';
@@ -68,17 +69,31 @@ export function useContentfulBusinessGoals(options?: {
               alt: entry.fields.image.fields?.title || entry.fields.title
             } : undefined,
             benefits: (entry.fields.benefits || []).map(benefit => String(benefit)),
-            features: (entry.fields.features || []).map((feature: any) => ({
-              id: feature.sys?.id,
-              title: feature.fields?.title,
-              description: feature.fields?.description,
-              icon: feature.fields?.icon,
-              screenshot: feature.fields?.screenshot ? {
-                id: feature.fields.screenshot.sys?.id,
-                url: `https:${feature.fields.screenshot.fields?.file?.url}`,
-                alt: feature.fields.screenshot.fields?.title
-              } : undefined
-            })),
+            features: (entry.fields.features || []).map((feature: any) => {
+              // Add null checks to prevent undefined errors
+              if (!feature || !feature.fields) {
+                console.warn(`[useContentfulBusinessGoals] Invalid feature found in ${entry.fields.title}`);
+                return {
+                  id: 'invalid-feature',
+                  title: 'Unavailable Feature',
+                  description: 'This feature is not available',
+                  icon: undefined,
+                  screenshot: undefined
+                };
+              }
+              
+              return {
+                id: feature.sys?.id || `feature-${Math.random().toString(36).substring(7)}`,
+                title: feature.fields?.title || 'Unnamed Feature',
+                description: feature.fields?.description || '',
+                icon: feature.fields?.icon,
+                screenshot: feature.fields?.screenshot ? {
+                  id: feature.fields.screenshot.sys?.id,
+                  url: `https:${feature.fields.screenshot.fields?.file?.url}`,
+                  alt: feature.fields.screenshot.fields?.title
+                } : undefined
+              };
+            }),
             // Enhanced video mapping
             video: entry.fields.video ? {
               id: entry.fields.video.sys?.id,
@@ -87,16 +102,30 @@ export function useContentfulBusinessGoals(options?: {
                 : null,
               title: entry.fields.video.fields?.title || entry.fields.title || 'Business Goal Video'
             } : undefined,
-            recommendedMachines: (entry.fields.recommendedMachines || []).map((machine: any) => ({
-              id: machine.sys.id,
-              slug: machine.fields.slug,
-              title: machine.fields.title,
-              description: machine.fields.description,
-              image: machine.fields.images?.[0] ? {
-                url: `https:${machine.fields.images[0].fields.file.url}`,
-                alt: machine.fields.images[0].fields.title || machine.fields.title
-              } : undefined
-            }))
+            recommendedMachines: (entry.fields.recommendedMachines || []).map((machine: any) => {
+              // Add null checks for machines too
+              if (!machine || !machine.fields) {
+                console.warn(`[useContentfulBusinessGoals] Invalid machine found in ${entry.fields.title}`);
+                return {
+                  id: 'invalid-machine',
+                  slug: 'unavailable',
+                  title: 'Unavailable Machine',
+                  description: 'This machine is not available',
+                  image: undefined
+                };
+              }
+              
+              return {
+                id: machine.sys?.id || `machine-${Math.random().toString(36).substring(7)}`,
+                slug: machine.fields.slug || 'unavailable',
+                title: machine.fields.title || 'Unnamed Machine',
+                description: machine.fields.description || '',
+                image: machine.fields.images?.[0] ? {
+                  url: `https:${machine.fields.images[0].fields.file.url}`,
+                  alt: machine.fields.images[0].fields.title || machine.fields.title
+                } : undefined
+              };
+            })
           };
         }) as CMSBusinessGoal[];
         
@@ -161,7 +190,7 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
           console.log('[useContentfulBusinessGoal] No video data found in entry');
         }
         
-        // Map the entry to our CMS model
+        // Map the entry to our CMS model with improved error handling
         const mappedEntry: CMSBusinessGoal = {
           id: entry.sys?.id,
           title: entry.fields.title,
@@ -175,17 +204,36 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
             alt: entry.fields.image.fields?.title || entry.fields.title
           } : undefined,
           benefits: entry.fields.benefits?.map(benefit => String(benefit)) || [],
-          features: entry.fields.features?.map(feature => ({
-            id: feature.sys?.id,
-            title: feature.fields?.title,
-            description: feature.fields?.description,
-            icon: feature.fields?.icon,
-            screenshot: feature.fields?.screenshot ? {
-              id: feature.fields.screenshot.sys?.id,
-              url: `https:${feature.fields.screenshot.fields?.file?.url}`,
-              alt: feature.fields.screenshot.fields?.title
-            } : undefined
-          })) || [],
+          
+          // Improved features mapping with null checks
+          features: entry.fields.features && Array.isArray(entry.fields.features) 
+            ? entry.fields.features.map(feature => {
+                if (!feature || !feature.fields) {
+                  console.warn(`[useContentfulBusinessGoal] Invalid feature found in ${entry.fields.title}`);
+                  return {
+                    id: 'invalid-feature',
+                    title: 'Unavailable Feature',
+                    description: 'This feature information is not available',
+                    icon: undefined,
+                    screenshot: undefined
+                  };
+                }
+                
+                return {
+                  id: feature.sys?.id || `feature-${Math.random().toString(36).substring(7)}`,
+                  title: feature.fields?.title || 'Unnamed Feature',
+                  description: feature.fields?.description || '',
+                  icon: feature.fields?.icon,
+                  screenshot: feature.fields?.screenshot && feature.fields.screenshot.fields
+                    ? {
+                        id: feature.fields.screenshot.sys?.id,
+                        url: `https:${feature.fields.screenshot.fields.file?.url}`,
+                        alt: feature.fields.screenshot.fields.title
+                      }
+                    : undefined
+                };
+              })
+            : [],
           
           // Enhanced video extraction with thorough null checking
           video: entry.fields.video && entry.fields.video.fields && entry.fields.video.fields.file ? {
@@ -196,16 +244,34 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
             title: entry.fields.video.fields.title || entry.fields.title || 'Business Goal Video'
           } : undefined,
           
-          recommendedMachines: entry.fields.recommendedMachines?.map(machine => ({
-            id: machine.sys.id,
-            slug: machine.fields.slug,
-            title: machine.fields.title,
-            description: machine.fields.description,
-            image: machine.fields.images?.[0] ? {
-              url: `https:${machine.fields.images[0].fields.file.url}`,
-              alt: machine.fields.images[0].fields.title || machine.fields.title
-            } : undefined
-          })) || []
+          // Improved machine mapping with null checks
+          recommendedMachines: entry.fields.recommendedMachines && Array.isArray(entry.fields.recommendedMachines)
+            ? entry.fields.recommendedMachines.map(machine => {
+                if (!machine || !machine.fields) {
+                  console.warn(`[useContentfulBusinessGoal] Invalid recommended machine in ${entry.fields.title}`);
+                  return {
+                    id: 'invalid-machine',
+                    slug: 'unavailable',
+                    title: 'Unavailable Machine',
+                    description: 'This machine information is not available',
+                    image: undefined
+                  };
+                }
+                
+                return {
+                  id: machine.sys?.id || `machine-${Math.random().toString(36).substring(7)}`,
+                  slug: machine.fields.slug || 'unavailable',
+                  title: machine.fields.title || 'Unnamed Machine',
+                  description: machine.fields.description || '',
+                  image: machine.fields.images && Array.isArray(machine.fields.images) && machine.fields.images[0]
+                    ? {
+                        url: `https:${machine.fields.images[0].fields.file.url}`,
+                        alt: machine.fields.images[0].fields.title || machine.fields.title
+                      }
+                    : undefined
+                };
+              })
+            : []
         };
 
         // Log the mapped entry for debugging
@@ -214,7 +280,9 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
           title: mappedEntry.title,
           slug: mappedEntry.slug, 
           hasVideo: !!mappedEntry.video,
-          videoDetails: mappedEntry.video
+          videoDetails: mappedEntry.video,
+          featuresCount: mappedEntry.features?.length || 0,
+          recommendedMachinesCount: mappedEntry.recommendedMachines?.length || 0
         });
         
         return mappedEntry;

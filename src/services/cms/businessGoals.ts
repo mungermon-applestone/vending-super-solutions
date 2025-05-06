@@ -28,10 +28,21 @@ export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGo
     console.log(`[businessGoals.ts] Using resolved slug for lookup: "${resolvedSlug}"`);
     
     // Use the direct method to get a business goal by slug
-    const businessGoal = await businessGoalOperations.fetchBySlug(resolvedSlug);
+    let businessGoal = await businessGoalOperations.fetchBySlug(resolvedSlug);
     
     if (businessGoal) {
       console.log(`[businessGoals.ts] Successfully retrieved business goal: ${businessGoal.title}`);
+      
+      // Additional check for feature data integrity
+      if (businessGoal.features && Array.isArray(businessGoal.features)) {
+        // Filter out any invalid features that don't have a title
+        businessGoal.features = businessGoal.features.filter(feature => 
+          feature && feature.title && typeof feature.title === 'string'
+        );
+        
+        console.log(`[businessGoals.ts] Verified ${businessGoal.features.length} valid features`);
+      }
+      
       return businessGoal;
     }
     
@@ -41,6 +52,13 @@ export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGo
       const businessGoalOriginal = await businessGoalOperations.fetchBySlug(normalizeSlug(slug));
       
       if (businessGoalOriginal) {
+        // Also verify feature integrity here
+        if (businessGoalOriginal.features && Array.isArray(businessGoalOriginal.features)) {
+          businessGoalOriginal.features = businessGoalOriginal.features.filter(feature => 
+            feature && feature.title && typeof feature.title === 'string'
+          );
+        }
+        
         return businessGoalOriginal;
       }
     }
@@ -52,6 +70,13 @@ export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGo
     if (goals.length === 0 && resolvedSlug !== normalizeSlug(slug)) {
       // Try with original slug if resolved didn't work
       goals = await fetchFromCMS<CMSBusinessGoal>('business-goals', { slug: normalizeSlug(slug) });
+    }
+    
+    // Verify feature integrity in the fallback result
+    if (goals.length > 0 && goals[0].features && Array.isArray(goals[0].features)) {
+      goals[0].features = goals[0].features.filter(feature => 
+        feature && feature.title && typeof feature.title === 'string'
+      );
     }
     
     return goals.length > 0 ? goals[0] : null;
