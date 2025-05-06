@@ -24,6 +24,7 @@ import ContentfulBlogPostDetail from '@/pages/ContentfulBlogPostDetail';
 import Contact from '@/pages/Contact';
 import StrapiSetupPage from '@/pages/admin/StrapiSetupPage';
 import ZhilaiApplestoneAnnouncement from '@/pages/ZhilaiApplestoneAnnouncement';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
 
 const routes: RouteObject[] = [
   {
@@ -94,6 +95,10 @@ const routes: RouteObject[] = [
       {
         path: 'contact',
         element: <Contact />
+      },
+      {
+        path: 'privacy',
+        element: <PrivacyPolicy />
       },
       {
         path: '*',
