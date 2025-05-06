@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import routes from './routes';
 import './index.css';
-import 'sonner/dist/sonner.css'; // Import sonner styles
+import '@/components/ui/sonner.css'; // Use local CSS instead of package import
 
 const router = createBrowserRouter(routes);
 
