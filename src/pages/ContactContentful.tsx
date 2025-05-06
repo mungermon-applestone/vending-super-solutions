@@ -103,11 +103,11 @@ const ContactContentful = () => {
                 <Accordion type="single" collapsible className="w-full">
                   {processedData.faqItems.map((faq, index) => (
                     <AccordionItem key={faq.id || `faq-${index}`} value={faq.id || `faq-${index}`}>
-                      <AccordionTrigger className="text-left">
+                      <AccordionTrigger className="text-left text-base">
                         {faq.question}
                       </AccordionTrigger>
                       <AccordionContent>
-                        {renderRichText(faq.answer)}
+                        <div className="text-sm">{renderRichText(faq.answer)}</div>
                       </AccordionContent>
                     </AccordionItem>
                   ))}
@@ -115,27 +115,27 @@ const ContactContentful = () => {
               ) : (
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="faq-1">
-                    <AccordionTrigger className="text-left">
+                    <AccordionTrigger className="text-left text-base">
                       What types of businesses use your vending solutions?
                     </AccordionTrigger>
                     <AccordionContent>
-                      <p className="text-gray-600">Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.</p>
+                      <div className="text-sm">Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.</div>
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="faq-2">
-                    <AccordionTrigger className="text-left">
+                    <AccordionTrigger className="text-left text-base">
                       How quickly can your solutions be deployed?
                     </AccordionTrigger>
                     <AccordionContent>
-                      <p className="text-gray-600">Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.</p>
+                      <div className="text-sm">Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.</div>
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="faq-3">
-                    <AccordionTrigger className="text-left">
+                    <AccordionTrigger className="text-left text-base">
                       Do you offer installation and maintenance services?
                     </AccordionTrigger>
                     <AccordionContent>
-                      <p className="text-gray-600">Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.</p>
+                      <div className="text-sm">Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.</div>
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>

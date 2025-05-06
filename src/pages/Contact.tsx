@@ -89,11 +89,11 @@ const ContactContent = () => {
               <Accordion type="single" collapsible className="w-full">
                 {faqItems.map((faq, index) => (
                   <AccordionItem key={faq.id || `faq-${index}`} value={faq.id || `faq-${index}`}>
-                    <AccordionTrigger className="text-left">
+                    <AccordionTrigger className="text-left text-base">
                       {faq.question}
                     </AccordionTrigger>
                     <AccordionContent>
-                      {renderRichText(faq.answer)}
+                      <div className="text-sm">{renderRichText(faq.answer)}</div>
                     </AccordionContent>
                   </AccordionItem>
                 ))}
@@ -101,35 +101,35 @@ const ContactContent = () => {
             ) : (
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="faq-1">
-                  <AccordionTrigger className="text-left">
+                  <AccordionTrigger className="text-left text-base">
                     What types of businesses use your vending solutions?
                   </AccordionTrigger>
                   <AccordionContent>
-                    Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.
+                    <div className="text-sm">Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.</div>
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="faq-2">
-                  <AccordionTrigger className="text-left">
+                  <AccordionTrigger className="text-left text-base">
                     How quickly can your solutions be deployed?
                   </AccordionTrigger>
                   <AccordionContent>
-                    Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.
+                    <div className="text-sm">Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.</div>
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="faq-3">
-                  <AccordionTrigger className="text-left">
+                  <AccordionTrigger className="text-left text-base">
                     Do you offer installation and maintenance services?
                   </AccordionTrigger>
                   <AccordionContent>
-                    Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.
+                    <div className="text-sm">Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.</div>
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="faq-4">
-                  <AccordionTrigger className="text-left">
+                  <AccordionTrigger className="text-left text-base">
                     Can your vending machines be customized?
                   </AccordionTrigger>
                   <AccordionContent>
-                    Absolutely! We offer customization options for branding, product selection, payment methods, and technology integration based on your business needs.
+                    <div className="text-sm">Absolutely! We offer customization options for branding, product selection, payment methods, and technology integration based on your business needs.</div>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
