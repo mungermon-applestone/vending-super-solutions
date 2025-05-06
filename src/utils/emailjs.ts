@@ -3,6 +3,9 @@ import { init } from 'emailjs-com';
 
 // Initialize EmailJS with your user ID / public key
 export const initEmailJS = () => {
-  // Replace 'YOUR_EMAILJS_USER_ID' with your actual EmailJS User ID / Public Key
+  // Your EmailJS User ID / Public Key is already set
   init('GF7ahmvXoDxVofUpa');
+  
+  // Log initialization success
+  console.log('EmailJS initialized successfully with public key');
 };

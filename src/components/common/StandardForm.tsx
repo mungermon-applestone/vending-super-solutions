@@ -30,16 +30,38 @@ const StandardForm: React.FC<StandardFormProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  // Email validation function
+  const isEmailValid = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!name || !email || !message) {
-      showError("Please fill in all required fields");
+    // Enhanced validation
+    if (!name.trim()) {
+      showError("Please enter your name");
+      return;
+    }
+    
+    if (!email.trim()) {
+      showError("Please enter your email address");
+      return;
+    }
+    
+    if (!isEmailValid(email)) {
+      showError("Please enter a valid email address");
+      return;
+    }
+    
+    if (!message.trim()) {
+      showError("Please enter your message");
       return;
     }
     
     setSubmitting(true);
+    console.log(`Submitting form: ${formType} from ${window.location.pathname}`);
     
     try {
       // Create template parameters for EmailJS
@@ -49,16 +71,20 @@ const StandardForm: React.FC<StandardFormProps> = ({
         subject: subject || `${formType} Submission`,
         message: message,
         form_type: formType,
+        page_url: window.location.href
       };
       
+      console.log('Sending email with params:', templateParams);
+      
       // Send the email using EmailJS
-      // You'll need to replace these values with your actual EmailJS service, template and user IDs
-      await emailjs.send(
+      const response = await emailjs.send(
         'service_i018lbe',  // Service ID
         'template_z05zxjq', // Template ID
         templateParams,
-        'GF7ahmvXoDxVofUpa'      // User ID / Public Key
+        'GF7ahmvXoDxVofUpa'  // User ID / Public Key
       );
+      
+      console.log('EmailJS response:', response);
       
       // Show success message
       showSuccess("Thank you! Your message has been sent successfully.");
