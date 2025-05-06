@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Check, Mail, User, MessageSquare } from 'lucide-react';
 import { showSuccess, showError } from '@/utils/notification';
-import emailjs from 'emailjs-com';
+import { sendEmail } from '@/utils/sendgrid';
 
 interface StandardFormProps {
   title?: string;
@@ -64,8 +63,8 @@ const StandardForm: React.FC<StandardFormProps> = ({
     console.log(`Submitting form: ${formType} from ${window.location.pathname}`);
     
     try {
-      // Create template parameters for EmailJS
-      const templateParams = {
+      // Create parameters for SendGrid
+      const emailParams = {
         from_name: name,
         from_email: email,
         subject: subject || `${formType} Submission`,
@@ -74,17 +73,12 @@ const StandardForm: React.FC<StandardFormProps> = ({
         page_url: window.location.href
       };
       
-      console.log('Sending email with params:', templateParams);
+      console.log('Sending email with params:', emailParams);
       
-      // Send the email using EmailJS
-      const response = await emailjs.send(
-        'service_i018lbe',  // Service ID
-        'template_z05zxjq', // Template ID
-        templateParams,
-        'GF7ahmvXoDxVofUpa'  // User ID / Public Key
-      );
+      // Send the email using SendGrid
+      const response = await sendEmail(emailParams);
       
-      console.log('EmailJS response:', response);
+      console.log('SendGrid response:', response);
       
       // Show success message
       showSuccess("Thank you! Your message has been sent successfully.");
