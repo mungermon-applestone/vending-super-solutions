@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
+import { EmailLink } from '@/components/common';
 
 interface MachineDetailInquiryProps {
   machineTitle: string;
@@ -16,76 +16,40 @@ const MachineDetailInquiry: React.FC<MachineDetailInquiryProps> = ({ machineTitl
               Interested in this machine?
             </h2>
             <p className="text-gray-600 mb-6">
-              Complete the form below and one of our specialists will contact you with pricing and availability.
+              Contact us today and one of our specialists will get back to you with pricing and availability.
             </p>
-            <form className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
-                  />
+                  <h3 className="text-lg font-semibold mb-3">Machine Specifications</h3>
+                  <ul className="space-y-2 text-gray-600">
+                    <li>• Custom configurations available</li>
+                    <li>• Comprehensive warranty included</li>
+                    <li>• Professional installation service</li>
+                    <li>• Ongoing maintenance options</li>
+                  </ul>
                 </div>
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
-                  />
+                  <h3 className="text-lg font-semibold mb-3">Why Choose Us</h3>
+                  <ul className="space-y-2 text-gray-600">
+                    <li>• Industry-leading technology</li>
+                    <li>• Exceptional customer support</li>
+                    <li>• Flexible financing options</li>
+                    <li>• Proven track record</li>
+                  </ul>
                 </div>
               </div>
-              <div>
-                <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
-                  Company
-                </label>
-                <input
-                  type="text"
-                  id="company"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
+              
+              <div className="pt-4">
+                <EmailLink 
+                  subject={`Machine Inquiry: ${machineTitle}`}
+                  body={`I'm interested in learning more about the ${machineTitle} machine. Please provide information about pricing, availability, and specifications.\n\nThank you.`}
+                  buttonText="Request Information About This Machine" 
+                  className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white font-semibold py-3"
                 />
               </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
-                />
-              </div>
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
-                />
-              </div>
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
-                  placeholder="Tell us about your needs, deployment location, and any questions you have."
-                ></textarea>
-              </div>
-              <div>
-                <Button className="w-full">Submit Inquiry</Button>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
