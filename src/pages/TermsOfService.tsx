@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import Layout from "@/components/layout/Layout";
 import { useContentful } from '@/hooks/useContentful';
 import { fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
@@ -10,7 +10,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { ContentfulResponse } from '@/types/contentful';
 import SEO from '@/components/seo/SEO';
 
-interface TermsOfServiceEntry {
+interface PrivacyPolicyEntry {
   sys: {
     id: string;
     contentType?: {
@@ -20,8 +20,7 @@ interface TermsOfServiceEntry {
     };
   };
   fields: {
-    termsContent?: Document;
-    title?: string;
+    termsOfUse?: Document;
   };
   includes?: {
     Asset?: any[];
@@ -29,57 +28,39 @@ interface TermsOfServiceEntry {
 }
 
 const TermsOfService = () => {
-  // You'll need to create this entry in Contentful and replace this ID
-  const entryId = '7FtGs9k2P3jQsR4mN8p2Vx';
+  // Replace this with the ID of your Privacy Policy content that contains the terms of use
+  const entryId = '2GjwMxGSuH9Rw3jdtyvr5S'; // Privacy Policy entry ID
   
-  const { data: termsContent, isLoading, error, isContentReady } = useContentful<ContentfulResponse<TermsOfServiceEntry>>({
-    queryKey: ['terms-of-service', entryId],
+  const { data: privacyPolicy, isLoading, error, isContentReady } = useContentful<ContentfulResponse<PrivacyPolicyEntry>>({
+    queryKey: ['privacy-policy', entryId],
     queryFn: async () => {
       try {
-        const entry = await fetchContentfulEntry<ContentfulResponse<TermsOfServiceEntry>>(entryId);
-        console.log('Terms of service content fetched:', JSON.stringify(entry, null, 2));
+        const entry = await fetchContentfulEntry<ContentfulResponse<PrivacyPolicyEntry>>(entryId);
+        console.log('Privacy policy content fetched for terms of use:', entry);
         return entry;
       } catch (error) {
-        console.error('Error fetching terms of service:', error);
+        console.error('Error fetching privacy policy for terms of use:', error);
         throw error;
       }
     }
   });
 
-  // Helper function to find the rich text content regardless of field name
-  const getRichTextContent = () => {
-    if (!termsContent?.fields) return null;
-    
-    // Check for common field name variations
-    const fieldNames = Object.keys(termsContent.fields);
-    
-    // Try to find a rich text field (Document type)
-    for (const fieldName of fieldNames) {
-      const field = termsContent.fields[fieldName];
-      if (field && typeof field === 'object' && 'content' in field && 'nodeType' in field) {
-        return field as Document;
-      }
-    }
-    
-    return null;
-  };
-
   return (
     <Layout>
       <SEO 
-        title="Terms of Service"
+        title="Terms of Use"
         description="Terms and conditions for using our services"
         type="article"
       />
       <div className="container-wide py-12">
-        <h1 className="text-4xl font-bold text-vending-blue mb-8">Terms of Service</h1>
+        <h1 className="text-4xl font-bold text-vending-blue mb-8">Terms of Use</h1>
         
         <ContentfulErrorBoundary 
-          contentType="Terms of Service" 
+          contentType="Terms of Use" 
           fallback={
             <ContentfulFallbackMessage 
-              message="There was an error displaying the terms of service." 
-              contentType="Terms of Service"
+              message="There was an error displaying the terms of use." 
+              contentType="Terms of Use"
               showRefresh={true}
             />
           }
@@ -90,42 +71,27 @@ const TermsOfService = () => {
             </div>
           ) : error ? (
             <ContentfulFallbackMessage 
-              message={`Error loading terms of service: ${error.message}`} 
-              contentType="Terms of Service"
+              message={`Error loading terms of use: ${error.message}`} 
+              contentType="Terms of Use"
               showRefresh={true}
             />
-          ) : isContentReady && termsContent ? (
+          ) : isContentReady && privacyPolicy?.fields?.termsOfUse ? (
             <div className="prose prose-lg max-w-none">
-              {(() => {
-                const richTextContent = getRichTextContent();
-                
-                if (richTextContent) {
-                  return renderRichText(
-                    richTextContent,
-                    { includedAssets: termsContent.includes?.Asset || [] }
-                  );
-                }
-                
-                return (
-                  <div>
-                    <p>No terms of service content found with ID: {entryId}</p>
-                    <div className="mt-4 p-4 bg-gray-100 rounded-md text-sm">
-                      <p className="font-semibold">Debugging Info:</p>
-                      <pre className="whitespace-pre-wrap mt-2">
-                        {JSON.stringify({
-                          contentReceived: !!termsContent,
-                          hasFields: termsContent ? !!termsContent.fields : false,
-                          availableFields: termsContent?.fields ? Object.keys(termsContent.fields) : [],
-                          entryType: termsContent?.sys?.contentType?.sys?.id || 'unknown'
-                        }, null, 2)}
-                      </pre>
-                    </div>
-                  </div>
-                );
-              })()}
+              {renderRichText(
+                privacyPolicy.fields.termsOfUse,
+                { includedAssets: privacyPolicy.includes?.Asset || [] }
+              )}
             </div>
           ) : (
-            <p>No terms of service content available.</p>
+            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
+              <h2 className="text-yellow-800 text-lg font-medium">Content Not Available</h2>
+              <p className="text-yellow-700 mt-1">
+                The Terms of Use content could not be loaded. Please check that the content has been published in Contentful.
+              </p>
+              <p className="text-sm text-yellow-600 mt-2">
+                Looking for field "termsOfUse" in Privacy Policy content (ID: {entryId})
+              </p>
+            </div>
           )}
         </ContentfulErrorBoundary>
       </div>
