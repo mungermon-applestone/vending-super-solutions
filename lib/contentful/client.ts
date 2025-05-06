@@ -77,32 +77,35 @@ function getEnvironmentVariable(key: string): string | undefined {
 }
 
 export function getContentfulClient() {
-  if (contentfulClient) {
-    return contentfulClient;
-  }
-  
-  console.log('[contentful/client] Creating new Contentful client');
-  
-  // ALWAYS use hardcoded credentials for maximum compatibility
+  // ALWAYS use hardcoded credentials to ensure compatibility
   const spaceId = HARDCODED_CREDENTIALS.SPACE_ID;
   const accessToken = HARDCODED_CREDENTIALS.DELIVERY_TOKEN;
   const environment = HARDCODED_CREDENTIALS.ENVIRONMENT;
   
-  // Log what we're using
-  console.log('[contentful/client] Using Contentful credentials:', {
-    spaceId: spaceId.substring(0, 3) + '...',
-    hasToken: !!accessToken,
-    environment: environment
-  });
+  // If we already have a client with these credentials, return it
+  if (contentfulClient) {
+    console.log('[contentful/client] Returning existing Contentful client');
+    return contentfulClient;
+  }
   
-  // Create the Contentful client
-  contentfulClient = createClient({
-    space: spaceId,
-    accessToken: accessToken,
-    environment: environment,
-  });
+  console.log('[contentful/client] Creating new Contentful client with hardcoded credentials:');
+  console.log('[contentful/client] Space ID:', spaceId.substring(0, 3) + '...');
+  console.log('[contentful/client] Environment:', environment);
+  console.log('[contentful/client] Has Token:', !!accessToken);
   
-  return contentfulClient;
+  try {
+    // Create the Contentful client with hardcoded credentials
+    contentfulClient = createClient({
+      space: spaceId,
+      accessToken: accessToken,
+      environment: environment,
+    });
+    
+    return contentfulClient;
+  } catch (error) {
+    console.error('[contentful/client] Error creating Contentful client:', error);
+    throw error;
+  }
 }
 
 // Function to test contentful connection
