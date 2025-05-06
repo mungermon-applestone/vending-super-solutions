@@ -82,19 +82,20 @@ export function setupDeferredCSS() {
   
   // Load stylesheets when browser is idle
   if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(() => {
+    // Cast window to proper type to resolve TypeScript error
+    const windowWithIdleCallback = window as Window & typeof globalThis & { requestIdleCallback: (callback: () => void) => void };
+    windowWithIdleCallback.requestIdleCallback(() => {
       deferredStylesheets.forEach(loadStylesheet);
     });
   } else {
     // Fallback for browsers without requestIdleCallback
-    // Fix: Explicitly handle the window type to avoid 'never' type error
-    if (typeof window !== 'undefined') {  // Redundant but helps TypeScript understand
-      window.addEventListener('load', () => {
-        setTimeout(() => {
-          deferredStylesheets.forEach(loadStylesheet);
-        }, 200);
-      });
-    }
+    // Use a separate variable that's properly typed to avoid the 'never' type issue
+    const win = window;
+    win.addEventListener('load', () => {
+      setTimeout(() => {
+        deferredStylesheets.forEach(loadStylesheet);
+      }, 200);
+    });
   }
 }
 
