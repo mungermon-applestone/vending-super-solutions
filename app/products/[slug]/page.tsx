@@ -35,12 +35,18 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
+  console.log('Next.js product page rendering for slug:', params.slug);
+  
   const product = await getProductTypeBySlug(params.slug)
   
   // Handle product not found
   if (!product) {
+    console.log('Product not found for slug:', params.slug);
     notFound()
   }
+
+  // Log when product is found for debugging
+  console.log('Product found:', product.title, 'with slug:', product.slug);
 
   // Check if in preview environment
   const isPreviewEnvironment = process.env.CONTENTFUL_ENVIRONMENT === 'preview'

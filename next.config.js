@@ -17,13 +17,12 @@ const nextConfig = {
     CONTENTFUL_PREVIEW_TOKEN: process.env.CONTENTFUL_PREVIEW_TOKEN,
     CONTENTFUL_ENVIRONMENT: process.env.CONTENTFUL_ENVIRONMENT || 'master',
   },
-  // Updated rewrites to ensure all product routes go to Next.js
+  // Enhanced rewrites to ensure all product routes go to Next.js
   async rewrites() {
     return [
       {
-        source: '/products/:path*',
-        destination: '/products/:path*',
-        permanent: true
+        source: '/products/:slug*',
+        destination: '/products/:slug*',
       }
     ];
   },

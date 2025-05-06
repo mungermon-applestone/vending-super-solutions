@@ -9,8 +9,14 @@ export const metadata = {
 }
 
 export default async function ProductsPage() {
+  console.log('[Next.js] Products page rendering');
+  
   // Server-side data fetching
   const products = await getProductTypes()
+  
+  // Log products for debugging
+  console.log(`[Next.js] Fetched ${products.length} products`);
+  products.forEach(p => console.log(`- ${p.title} (slug: ${p.slug})`));
   
   // Filter visible products
   const visibleProducts = products.filter(product => product.visible !== false)

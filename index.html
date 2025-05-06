@@ -6,10 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vending Solutions</title>
   <script>
-    // Redirect product routes to Next.js
+    // Improved redirect for product routes to Next.js
     if (window.location.pathname.startsWith('/products/')) {
-      const nextPath = window.location.pathname;
-      window.location.replace(nextPath);
+      const slug = window.location.pathname.split('/products/')[1];
+      // Redirect to the Next.js route
+      window.location.replace(`/products/${slug}`);
     }
   </script>
 </head>
