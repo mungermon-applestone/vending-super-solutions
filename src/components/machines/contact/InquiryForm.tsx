@@ -4,15 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Check } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
+import { showSuccess, showError } from '@/utils/notification';
 
 interface InquiryFormProps {
   title: string;
 }
 
 const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
-  const { toast } = useToast();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
@@ -26,11 +25,7 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
     
     // Form validation
     if (!fullName || !email) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
+      showError("Please fill in all required fields.");
       return;
     }
     
@@ -60,20 +55,13 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
       }
       
       // Show success message
-      toast({
-        title: "Success!",
-        description: "Thank you for your interest. We'll be in touch soon.",
-      });
+      showSuccess("Thank you for your interest. We'll be in touch soon.");
       
       // Reset form and show success state
       setSubmitted(true);
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast({
-        title: "Error",
-        description: "There was a problem sending your request. Please try again.",
-        variant: "destructive",
-      });
+      showError("There was a problem sending your request. Please try again.");
     } finally {
       setSubmitting(false);
     }
