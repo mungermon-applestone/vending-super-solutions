@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { Document } from '@contentful/rich-text-types';
 import { ContentfulRichTextDocument } from '@/types/contentful';
@@ -16,14 +17,10 @@ interface FAQSectionProps {
 }
 
 const FAQSection = ({ faqSectionTitle, faqItems }: FAQSectionProps) => {
-  // Debug: Log what we received
-  console.log('FAQ Section received items:', faqItems?.length || 0);
-  
   // Helper function to render the answer content properly
   const renderAnswer = (answer: string | Document | ContentfulRichTextDocument) => {
     // Check if the answer is a rich text document
     if (typeof answer === 'object' && answer !== null && 'nodeType' in answer) {
-      console.log('Rendering answer as rich text document');
       try {
         // Cast to Document for the documentToReactComponents function
         return documentToReactComponents(answer as Document);
@@ -37,53 +34,64 @@ const FAQSection = ({ faqSectionTitle, faqItems }: FAQSectionProps) => {
     return <p className="text-gray-600 whitespace-pre-line">{answer as string}</p>;
   };
   
-  // Display the FAQ section only if we have a title or items
   return (
     <div className="py-16 container max-w-7xl mx-auto">
       {faqSectionTitle && (
         <h2 className="text-3xl font-bold text-center mb-12">{faqSectionTitle}</h2>
       )}
       
-      {/* Render dynamic FAQ items if present */}
-      {faqItems && faqItems.length > 0 ? (
-        <>
-          <div className="grid md:grid-cols-2 gap-8">
-            {faqItems.map((faq) => (
-              <div key={faq.id} className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="font-bold text-xl mb-2">{faq.question}</h3>
-                {renderAnswer(faq.answer)}
-              </div>
+      {/* Render FAQ items as accordions */}
+      <div className="max-w-3xl mx-auto">
+        {faqItems && faqItems.length > 0 ? (
+          <Accordion type="single" collapsible className="w-full">
+            {faqItems.map((faq, index) => (
+              <AccordionItem key={faq.id || `faq-${index}`} value={faq.id || `faq-${index}`}>
+                <AccordionTrigger className="text-left font-medium text-lg">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent>
+                  {renderAnswer(faq.answer)}
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </div>
-          
-          {/* Debug info - will be visible in UI but helpful for troubleshooting */}
-          {faqItems.length === 0 && (
-            <div className="bg-yellow-50 p-4 rounded-md text-sm text-yellow-800">
-              <p>FAQ items array is present but empty.</p>
-            </div>
-          )}
-        </>
-      ) : (
-        /* Fallback static FAQ if none from CMS */
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="font-bold text-xl mb-2">What types of businesses use your vending solutions?</h3>
-            <p className="text-gray-600">Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="font-bold text-xl mb-2">How quickly can your solutions be deployed?</h3>
-            <p className="text-gray-600">Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="font-bold text-xl mb-2">Do you offer installation and maintenance services?</h3>
-            <p className="text-gray-600">Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="font-bold text-xl mb-2">Can your vending machines be customized?</h3>
-            <p className="text-gray-600">Absolutely! We offer customization options for branding, product selection, payment methods, and technology integration based on your business needs.</p>
-          </div>
-        </div>
-      )}
+          </Accordion>
+        ) : (
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="faq-1">
+              <AccordionTrigger className="text-left font-medium text-lg">
+                What types of businesses use your vending solutions?
+              </AccordionTrigger>
+              <AccordionContent>
+                <p className="text-gray-600">Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.</p>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="faq-2">
+              <AccordionTrigger className="text-left font-medium text-lg">
+                How quickly can your solutions be deployed?
+              </AccordionTrigger>
+              <AccordionContent>
+                <p className="text-gray-600">Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.</p>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="faq-3">
+              <AccordionTrigger className="text-left font-medium text-lg">
+                Do you offer installation and maintenance services?
+              </AccordionTrigger>
+              <AccordionContent>
+                <p className="text-gray-600">Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.</p>
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="faq-4">
+              <AccordionTrigger className="text-left font-medium text-lg">
+                Can your vending machines be customized?
+              </AccordionTrigger>
+              <AccordionContent>
+                <p className="text-gray-600">Absolutely! We offer customization options for branding, product selection, payment methods, and technology integration based on your business needs.</p>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
+      </div>
     </div>
   );
 };

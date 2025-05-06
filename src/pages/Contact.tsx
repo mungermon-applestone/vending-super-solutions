@@ -3,12 +3,15 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import ContactCards from '@/components/contact/ContactCards';
-import FAQSection from '@/components/contact/FAQSection';
 import { useContactFAQ } from '@/hooks/useContactFAQ';
 import ContactLoadingState from '@/components/contact/ContactLoadingState';
 import ContactFallback from '@/components/contact/ContactFallback';
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
-import { EmailLink } from '@/components/common';
+import { SimpleContactCTA } from '@/components/common';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
+import { Document } from '@contentful/rich-text-types';
+import { ContentfulRichTextDocument } from '@/types/contentful';
 
 const ContactPage = () => {
   const navigate = useNavigate();
@@ -49,8 +52,20 @@ const ContactContent = () => {
     introDescription,
     faqItems = [],
     faqSectionTitle,
-    formSectionTitle
   } = processedData;
+  
+  // Helper function to render rich text content
+  const renderRichText = (content: string | Document | ContentfulRichTextDocument) => {
+    if (typeof content === 'object' && content !== null && 'nodeType' in content) {
+      try {
+        return documentToReactComponents(content as Document);
+      } catch (error) {
+        console.error('Error rendering rich text:', error);
+        return <p className="text-red-500">Error rendering content</p>;
+      }
+    }
+    return <p className="text-gray-600 whitespace-pre-line">{content as string}</p>;
+  };
 
   return (
     <div className="container mx-auto py-12">
@@ -58,77 +73,77 @@ const ContactContent = () => {
       <div className="max-w-3xl mx-auto text-center mb-12">
         <h1 className="text-3xl font-bold mb-4">{introTitle || 'Contact Us'}</h1>
         <p className="text-lg text-gray-600 mb-8">{introDescription || "We'd love to hear from you. Send us a message and we'll respond as soon as possible."}</p>
-        <div className="flex justify-center">
-          <EmailLink
-            subject="Website Contact Inquiry"
-            buttonText="Email Us Now"
-            className="bg-vending-blue hover:bg-vending-blue-dark text-white px-8 py-3 text-lg"
-          />
-        </div>
       </div>
       
       <div className="grid md:grid-cols-2 gap-12 mb-16">
-        {/* Contact Cards */}
+        {/* Contact Cards on the left */}
         <div>
           <ContactCards data={processedData} />
         </div>
         
-        {/* Email Contact Information */}
+        {/* FAQ Accordion on the right */}
         <div>
-          <h2 className="text-2xl font-semibold mb-6">{formSectionTitle || 'Get In Touch'}</h2>
+          <h2 className="text-2xl font-semibold mb-6">{faqSectionTitle || 'Frequently Asked Questions'}</h2>
           <div className="bg-white shadow-md rounded-lg p-6">
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-medium mb-2">General Inquiries</h3>
-                <EmailLink
-                  emailAddress="info@applestonesolutions.com"
-                  subject="General Inquiry"
-                  buttonText="Send General Inquiry"
-                  className="w-full"
-                />
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-medium mb-2">Sales Department</h3>
-                <EmailLink
-                  emailAddress="sales@applestonesolutions.com"
-                  subject="Sales Inquiry"
-                  buttonText="Contact Sales Team"
-                  className="w-full"
-                />
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-medium mb-2">Technical Support</h3>
-                <EmailLink
-                  emailAddress="support@applestonesolutions.com"
-                  subject="Support Request"
-                  buttonText="Contact Technical Support"
-                  className="w-full"
-                />
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-medium mb-2">Business Development</h3>
-                <EmailLink
-                  emailAddress="business@applestonesolutions.com"
-                  subject="Business Development Inquiry"
-                  buttonText="Contact Business Development"
-                  className="w-full"
-                />
-              </div>
-            </div>
+            {faqItems && faqItems.length > 0 ? (
+              <Accordion type="single" collapsible className="w-full">
+                {faqItems.map((faq, index) => (
+                  <AccordionItem key={faq.id || `faq-${index}`} value={faq.id || `faq-${index}`}>
+                    <AccordionTrigger className="text-left">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      {renderRichText(faq.answer)}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            ) : (
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="faq-1">
+                  <AccordionTrigger className="text-left">
+                    What types of businesses use your vending solutions?
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="faq-2">
+                  <AccordionTrigger className="text-left">
+                    How quickly can your solutions be deployed?
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="faq-3">
+                  <AccordionTrigger className="text-left">
+                    Do you offer installation and maintenance services?
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="faq-4">
+                  <AccordionTrigger className="text-left">
+                    Can your vending machines be customized?
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    Absolutely! We offer customization options for branding, product selection, payment methods, and technology integration based on your business needs.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            )}
           </div>
         </div>
       </div>
       
-      {/* FAQ Section */}
-      {faqItems && faqItems.length > 0 && (
-        <FAQSection 
-          faqSectionTitle={faqSectionTitle || 'Frequently Asked Questions'} 
-          faqItems={faqItems} 
-        />
-      )}
+      {/* Simple Contact CTA at the bottom */}
+      <SimpleContactCTA 
+        title="Ready to Get Started?" 
+        description="Our team is ready to help you find the perfect vending solution for your business."
+        className="w-full"
+      />
     </div>
   );
 };
