@@ -57,7 +57,7 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
           entries = await client.getEntries({
             content_type: 'businessGoal',
             'fields.slug': possibleSlug,
-            include: 2,
+            include: 3, // Increased include depth for features
             limit: 1
           });
           

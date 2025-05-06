@@ -7,6 +7,10 @@ interface Feature {
   title: string;
   description: string;
   icon?: string | ReactNode;
+  screenshot?: {
+    url: string;
+    alt?: string;
+  };
 }
 
 interface BusinessGoalFeaturesProps {
@@ -67,6 +71,9 @@ const BusinessGoalFeatures = ({
     }))
   );
   
+  // Additional debugging
+  console.log('[BusinessGoalFeatures] Raw features data:', JSON.stringify(features, null, 2));
+  
   return (
     <section className="py-16 bg-white">
       <div className="container-wide">
@@ -89,6 +96,14 @@ const BusinessGoalFeatures = ({
               iconElement = <Star className="h-6 w-6" />;
             }
             
+            // Log individual feature for debugging
+            console.log(`[BusinessGoalFeatures] Processing feature ${index}:`, {
+              title: feature.title,
+              hasIcon: !!feature.icon,
+              iconType: typeof feature.icon,
+              hasScreenshot: !!feature.screenshot
+            });
+            
             return (
               <div 
                 key={('id' in feature && feature.id) || `feature-${index}`} 
@@ -101,7 +116,7 @@ const BusinessGoalFeatures = ({
                 <p className="text-gray-600">{feature.description}</p>
                 
                 {/* Display screenshot if available */}
-                {'screenshot' in feature && feature.screenshot && (
+                {feature.screenshot && (
                   <div className="mt-4">
                     <img 
                       src={feature.screenshot.url} 

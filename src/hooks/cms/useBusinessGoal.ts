@@ -55,6 +55,11 @@ export function useBusinessGoal(slug: string | undefined) {
               : 'No features'
           );
           
+          // More verbose feature debugging
+          if (businessGoal.features && businessGoal.features.length > 0) {
+            console.log('[useBusinessGoal] Raw features data:', JSON.stringify(businessGoal.features, null, 2));
+          }
+          
           // Add detailed debugging for video
           if (businessGoal.video) {
             console.log(`[useBusinessGoal] Business goal video details:`, {
