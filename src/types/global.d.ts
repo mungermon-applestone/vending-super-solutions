@@ -12,4 +12,5 @@ interface Window {
   };
   _contentfulInitialized?: boolean | string;
   _contentfulInitializedSource?: string;
+  _swRegistration?: ServiceWorkerRegistration;
 }
