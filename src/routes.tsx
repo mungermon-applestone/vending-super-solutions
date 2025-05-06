@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 import ErrorPage from '@/components/ErrorPage';
@@ -26,7 +25,6 @@ const StrapiSetupPage = lazy(() => import('@/pages/admin/StrapiSetupPage'));
 const ZhilaiApplestoneAnnouncement = lazy(() => import('@/pages/ZhilaiApplestoneAnnouncement'));
 const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
-const CookiePolicy = lazy(() => import('@/pages/CookiePolicy'));
 const AdminPage = lazy(() => import('@/pages/AdminPage'));
 const ContentfulConfigurationPage = lazy(() => import('@/pages/ContentfulConfigurationPage'));
 const EnvironmentVariablesPage = lazy(() => import('@/pages/admin/EnvironmentVariablesPage'));
@@ -185,14 +183,6 @@ const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<PageLoading />}>
             <TermsOfService />
-          </Suspense>
-        )
-      },
-      {
-        path: 'cookie-policy',
-        element: (
-          <Suspense fallback={<PageLoading />}>
-            <CookiePolicy />
           </Suspense>
         )
       },

@@ -12,9 +12,6 @@ const FooterLinks = () => {
         <Link to="/terms" className="hover:text-vending-blue transition-colors">
           Terms of Service
         </Link>
-        <Link to="/cookie-policy" className="hover:text-vending-blue transition-colors">
-          Cookie Policy
-        </Link>
         <Link to="/contact" className="hover:text-vending-blue transition-colors">
           Contact Us
         </Link>
