@@ -38,19 +38,19 @@ export default function RequestDemoForm() {
 
   if (isSubmitted) {
     return (
-      <div className="bg-white p-8 rounded-lg shadow-sm">
+      <div className="bg-white p-8 rounded-lg shadow-sm border border-[hsl(214_32%_91%)]">
         <div className="text-center py-6">
           <div className="mx-auto flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-4">
             <Check className="h-6 w-6 text-green-600" />
           </div>
-          <h3 className="text-xl font-bold mb-2 text-gray-800">Thank You!</h3>
-          <p className="text-gray-600 mb-4">
+          <h3 className="text-xl font-bold mb-2 text-[hsl(222_47%_11%)]">Thank You!</h3>
+          <p className="text-[hsl(215_16%_47%)] mb-6">
             Your demo request has been received. One of our representatives will contact you shortly.
           </p>
           <Button
             onClick={() => setIsSubmitted(false)}
             variant="outline"
-            className="text-vending-blue hover:text-white hover:bg-vending-blue"
+            className="text-vending-blue hover:text-white hover:bg-vending-blue border-vending-blue"
           >
             Submit another request
           </Button>
@@ -60,15 +60,15 @@ export default function RequestDemoForm() {
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm">
-      <h3 className="text-xl font-bold mb-6">Request a Demo</h3>
-      <form className="space-y-4" onSubmit={handleSubmit}>
+    <div className="bg-white p-8 rounded-lg shadow-sm border border-[hsl(214_32%_91%)]">
+      <h3 className="text-xl font-bold mb-6 text-[hsl(222_47%_11%)]">Request a Demo</h3>
+      <form className="space-y-5" onSubmit={handleSubmit}>
         <div>
-          <Label htmlFor="fullName" className="mb-1">Full Name *</Label>
+          <Label htmlFor="fullName" className="mb-1 block text-[hsl(222_47%_11%)]">Full Name *</Label>
           <Input
             type="text"
             id="fullName"
-            className="w-full"
+            className="w-full h-10 rounded-md border border-[hsl(214_32%_91%)] px-3 py-2"
             placeholder="John Doe"
             required
             value={formState.fullName}
@@ -76,11 +76,11 @@ export default function RequestDemoForm() {
           />
         </div>
         <div>
-          <Label htmlFor="businessEmail" className="mb-1">Business Email *</Label>
+          <Label htmlFor="businessEmail" className="mb-1 block text-[hsl(222_47%_11%)]">Business Email *</Label>
           <Input
             type="email"
             id="businessEmail"
-            className="w-full"
+            className="w-full h-10 rounded-md border border-[hsl(214_32%_91%)] px-3 py-2"
             placeholder="john@company.com"
             required
             value={formState.businessEmail}
@@ -88,33 +88,33 @@ export default function RequestDemoForm() {
           />
         </div>
         <div>
-          <Label htmlFor="company" className="mb-1">Company Name</Label>
+          <Label htmlFor="company" className="mb-1 block text-[hsl(222_47%_11%)]">Company Name</Label>
           <Input
             type="text"
             id="company"
-            className="w-full"
+            className="w-full h-10 rounded-md border border-[hsl(214_32%_91%)] px-3 py-2"
             placeholder="Acme Inc."
             value={formState.company}
             onChange={handleInputChange}
           />
         </div>
         <div>
-          <Label htmlFor="phone" className="mb-1">Phone Number</Label>
+          <Label htmlFor="phone" className="mb-1 block text-[hsl(222_47%_11%)]">Phone Number</Label>
           <Input
             type="tel"
             id="phone"
-            className="w-full"
+            className="w-full h-10 rounded-md border border-[hsl(214_32%_91%)] px-3 py-2"
             placeholder="(555) 555-5555"
             value={formState.phone}
             onChange={handleInputChange}
           />
         </div>
         <div>
-          <Label htmlFor="message" className="mb-1">Message</Label>
+          <Label htmlFor="message" className="mb-1 block text-[hsl(222_47%_11%)]">Message</Label>
           <textarea
             id="message"
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-vending-blue focus:border-vending-blue"
+            className="w-full px-3 py-2 border border-[hsl(214_32%_91%)] rounded-md focus:ring-vending-blue focus:border-vending-blue"
             placeholder="Tell us about your needs and any questions you have."
             value={formState.message}
             onChange={handleInputChange}
@@ -122,7 +122,7 @@ export default function RequestDemoForm() {
         </div>
         <Button
           type="submit"
-          className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white font-medium"
+          className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white font-medium px-6 py-3 rounded-md"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Submitting...' : 'Request Demo'}

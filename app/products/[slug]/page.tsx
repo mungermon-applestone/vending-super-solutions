@@ -48,7 +48,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
   const isPreviewEnvironment = process.env.CONTENTFUL_ENVIRONMENT === 'preview'
   
   return (
-    <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light min-h-screen">
+    <div className="min-h-screen bg-[hsl(210_50%_98%)]">
       {/* Preview Environment Notice */}
       {isPreviewEnvironment && <PreviewEnvironmentNotice />}
       
@@ -57,7 +57,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
         <div className="py-6">
           <Link 
             href="/products" 
-            className="inline-flex items-center text-vending-blue hover:text-vending-blue-dark transition-colors"
+            className="inline-flex items-center text-vending-blue hover:text-vending-blue-dark transition-colors font-medium"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Products
@@ -72,17 +72,18 @@ export default async function ProductPage({ params }: { params: { slug: string }
         )}
         
         {/* Product Hero Section */}
-        <section className="py-12 md:py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <section className="mb-16 overflow-hidden rounded-xl bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light shadow-md">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center p-8 md:p-12">
             <div>
-              <h1 className="text-4xl md:text-5xl font-semibold mb-6 text-gray-800">{product.title}</h1>
-              <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+              <h1 className="text-4xl md:text-5xl font-semibold mb-6 text-[hsl(222_47%_11%)]">{product.title}</h1>
+              <div className="text-lg text-vending-gray-dark mb-8 leading-relaxed">
                 {product.description}
-              </p>
+              </div>
               
               {/* Benefits List */}
               {product.benefits && product.benefits.length > 0 && (
-                <div className="mb-8">
+                <div className="mb-8 bg-white/50 rounded-lg p-6 shadow-sm">
+                  <h3 className="text-xl font-semibold mb-4">Key Benefits</h3>
                   <ProductBenefitsList benefits={product.benefits} />
                 </div>
               )}
@@ -104,9 +105,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
               </div>
             </div>
             
-            <div className="relative">
+            <div>
               {product.image ? (
-                <div className="relative h-[400px] rounded-lg overflow-hidden shadow-lg">
+                <div className="relative h-[400px] rounded-lg overflow-hidden shadow-lg transform hover:scale-[1.02] transition-transform duration-300">
                   <Image 
                     src={product.image.url} 
                     alt={product.image.alt || product.title}
@@ -126,14 +127,14 @@ export default async function ProductPage({ params }: { params: { slug: string }
         
         {/* Product Features */}
         {product.features && product.features.length > 0 && (
-          <section className="py-12 md:py-20 bg-white rounded-lg shadow-sm mb-16">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6">
-              <h2 className="text-3xl md:text-4xl font-semibold text-center mb-12">Features</h2>
+          <section className="mb-16 rounded-xl bg-white shadow-md overflow-hidden">
+            <div className="p-8 md:p-12">
+              <h2 className="text-3xl md:text-4xl font-semibold text-center mb-10 text-[hsl(222_47%_11%)]">Features</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {product.features.map((feature) => (
-                  <div key={feature.id} className="bg-gray-50 rounded-lg p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                    <h3 className="text-xl font-semibold mb-3 text-gray-800">{feature.title}</h3>
-                    <p className="text-gray-600">{feature.description}</p>
+                  <div key={feature.id} className="bg-[hsl(210_40%_96%)] rounded-lg p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+                    <h3 className="text-xl font-semibold mb-3 text-[hsl(222_47%_11%)]">{feature.title}</h3>
+                    <p className="text-[hsl(215_16%_47%)]">{feature.description}</p>
                   </div>
                 ))}
               </div>
@@ -142,45 +143,78 @@ export default async function ProductPage({ params }: { params: { slug: string }
         )}
         
         {/* Recommended Machines Section */}
-        <section className="py-12 md:py-20 mb-16">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-semibold text-center mb-8">Recommended Machines</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* This would ideally be populated with actual related machines from the API */}
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-lg overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                  <div className="h-64 bg-gray-100 flex items-center justify-center">
-                    <span className="text-gray-400">Machine Image</span>
+        <section className="mb-16 rounded-xl bg-white shadow-md overflow-hidden">
+          <div className="p-8 md:p-12">
+            <h2 className="text-3xl md:text-4xl font-semibold text-center mb-10 text-[hsl(222_47%_11%)]">Recommended Machines</h2>
+            
+            {product.recommendedMachines && product.recommendedMachines.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {product.recommendedMachines.map((machine, index) => (
+                  <div key={`${machine.id}-${index}`} className="rounded-lg overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-white border border-[hsl(214_32%_91%)]">
+                    {machine.image ? (
+                      <div className="h-64 bg-gray-100 relative">
+                        <Image 
+                          src={machine.image.url} 
+                          alt={machine.image.alt || machine.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-64 bg-gray-100 flex items-center justify-center">
+                        <span className="text-gray-400">Machine Image</span>
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <h3 className="text-xl font-semibold mb-2">{machine.title}</h3>
+                      <p className="text-[hsl(215_16%_47%)] mb-4 line-clamp-2">{machine.description}</p>
+                      <Link href={`/machines/${machine.slug}`} className="text-vending-blue hover:text-vending-blue-dark flex items-center font-medium">
+                        View details
+                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      </Link>
+                    </div>
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-2">Sample Machine {i}</h3>
-                    <p className="text-gray-600 mb-4 line-clamp-2">This machine would be perfect for distributing {product.title.toLowerCase()} products.</p>
-                    <a href="#" className="text-vending-blue hover:text-vending-blue-dark flex items-center font-medium">
-                      View details
-                      <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                    </a>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="rounded-lg overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-white border border-[hsl(214_32%_91%)]">
+                    <div className="h-64 bg-gray-100 flex items-center justify-center">
+                      <span className="text-gray-400">Machine Image</span>
+                    </div>
+                    <div className="p-6">
+                      <h3 className="text-xl font-semibold mb-2">Sample Machine {i}</h3>
+                      <p className="text-[hsl(215_16%_47%)] mb-4 line-clamp-2">This machine would be perfect for distributing {product.title.toLowerCase()} products.</p>
+                      <a href="#" className="text-vending-blue hover:text-vending-blue-dark flex items-center font-medium">
+                        View details
+                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      </a>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
         
         {/* Contact Section */}
-        <section id="request-demo" className="py-12 md:py-20 bg-white rounded-lg shadow-sm mb-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto px-4 sm:px-6">
+        <section id="request-demo" className="py-12 md:py-20 bg-white rounded-xl shadow-md mb-16 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 p-8 md:p-12">
             <div>
-              <h2 className="text-3xl md:text-4xl font-semibold mb-6">Ready to transform your vending operations?</h2>
-              <p className="text-lg text-gray-700 mb-8 leading-relaxed">
-                Let us show you how our software can streamline your operations, increase sales, and improve customer satisfaction.
+              <h2 className="text-3xl md:text-4xl font-semibold mb-6 text-[hsl(222_47%_11%)]">Ready to transform your vending operations?</h2>
+              <p className="text-lg text-[hsl(215_16%_47%)] mb-8 leading-relaxed">
+                Let us show you how our {product.title.toLowerCase()} software can streamline your operations, increase sales, and improve customer satisfaction.
               </p>
               <ul className="space-y-4">
                 {['Compatible with multiple machine types', 'Easy to implement and use', 'Dedicated support team', 'Customizable to your specific needs'].map((item, i) => (
                   <li key={i} className="flex items-start">
                     <Check className="h-5 w-5 text-vending-teal mr-3 flex-shrink-0 mt-1" />
-                    <span className="text-gray-700">{item}</span>
+                    <span className="text-[hsl(215_16%_47%)]">{item}</span>
                   </li>
                 ))}
               </ul>
