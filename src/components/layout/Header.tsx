@@ -16,9 +16,7 @@ const Header = () => {
             <NavLink href="/products">Products</NavLink>
             <NavLink href="/technology">Technology</NavLink>
             <NavLink href="/machines">Machines</NavLink>
-            <Button asChild variant="default" className="bg-blue-600 hover:bg-blue-700">
-              <Link to="/business-goals">Business Goals</Link>
-            </Button>
+            <NavLink href="/business-goals">Business Goals</NavLink>
             <NavLink href="/about">About</NavLink>
             <NavLink href="/blog">Updates</NavLink>
             <NavLink href="/contact">Contact</NavLink>
