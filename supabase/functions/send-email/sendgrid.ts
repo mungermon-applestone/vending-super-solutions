@@ -21,7 +21,7 @@ export async function sendEmail(params: {
     const { data, error } = await supabaseClient
       .from("secrets")
       .select("value")
-      .eq("name", "SENDGRID_API_KEY")
+      .eq("name", "lKDm5XiLTi2mX7YmHjWu")
       .single();
 
     if (error || !data) {
@@ -33,8 +33,8 @@ export async function sendEmail(params: {
 
     // Prepare the email
     const msg = {
-      to: "your-recipient-email@yourdomain.com", // Replace with your actual recipient email address
-      from: "your-sender-email@yourdomain.com", // Replace with your verified sender email address
+      to: "hello@applestonesolutions.com", // Replace with your actual recipient email address
+      from: "hello@applestonesolutions.com", // Replace with your verified sender email address
       subject: params.subject,
       text: params.message,
       html: `
