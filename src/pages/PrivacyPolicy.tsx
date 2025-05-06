@@ -8,14 +8,33 @@ import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMes
 import { renderRichText } from '@/utils/contentful/richTextRenderer';
 import { Document } from '@contentful/rich-text-types';
 import { Spinner } from '@/components/ui/spinner';
+import { ContentfulResponse } from '@/types/contentful';
+
+interface PrivacyPolicyEntry {
+  sys: {
+    id: string;
+    contentType?: {
+      sys: {
+        id: string;
+      };
+    };
+  };
+  fields: {
+    'Privacy-main-text'?: Document;
+    title?: string;
+  };
+  includes?: {
+    Asset?: any[];
+  };
+}
 
 const PrivacyPolicy = () => {
-  const { data: privacyContent, isLoading, error, isContentReady } = useContentful({
+  const { data: privacyContent, isLoading, error, isContentReady } = useContentful<ContentfulResponse<PrivacyPolicyEntry>>({
     queryKey: ['privacy-policy', '4SiOG2H5N7dLSnWbvZN5GW'],
     queryFn: async () => {
       try {
         // Fetch the specific privacy policy entry by ID
-        const entry = await fetchContentfulEntry('4SiOG2H5N7dLSnWbvZN5GW');
+        const entry = await fetchContentfulEntry<ContentfulResponse<PrivacyPolicyEntry>>('4SiOG2H5N7dLSnWbvZN5GW');
         console.log('Privacy policy content fetched:', entry);
         return entry;
       } catch (error) {
