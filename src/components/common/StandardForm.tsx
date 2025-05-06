@@ -41,27 +41,17 @@ const StandardForm: React.FC<StandardFormProps> = ({
     setSubmitting(true);
     
     try {
-      // Replace the URL below with your actual Formspree endpoint
-      const response = await fetch('YOUR_FORMSPREE_ENDPOINT', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          subject,
-          message,
-          formType
-        }),
-      });
+      // Create a mailto link with the form data
+      const mailtoSubject = encodeURIComponent(`${formType}: ${subject || 'No subject'}`);
+      const mailtoBody = encodeURIComponent(
+        `Name: ${name}\nEmail: ${email}\nMessage: ${message}\n\nThis message was sent from the ${formType} on your website.`
+      );
       
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+      // Open the user's email client with the pre-filled information
+      window.location.href = `mailto:your-email@example.com?subject=${mailtoSubject}&body=${mailtoBody}`;
       
       // Show success message
-      showSuccess("Thank you for your message. We'll respond as soon as possible.");
+      showSuccess("Your email client should be opening. If it doesn't, please contact us directly.");
       
       // Reset form and show success state
       setSubmitted(true);
@@ -74,8 +64,8 @@ const StandardForm: React.FC<StandardFormProps> = ({
         onSuccess();
       }
     } catch (error) {
-      console.error('Error sending message:', error);
-      showError("There was a problem sending your message. Please try again.");
+      console.error('Error processing form:', error);
+      showError("There was a problem processing your request. Please try contacting us directly.");
     } finally {
       setSubmitting(false);
     }
@@ -161,7 +151,7 @@ const StandardForm: React.FC<StandardFormProps> = ({
             className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white font-semibold py-3"
             disabled={submitting}
           >
-            {submitting ? 'Sending...' : buttonText}
+            {submitting ? 'Processing...' : buttonText}
           </Button>
         </form>
       ) : (
@@ -169,9 +159,9 @@ const StandardForm: React.FC<StandardFormProps> = ({
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 mb-4">
             <Check className="h-6 w-6 text-green-600" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">Message Sent!</h3>
+          <h3 className="text-lg font-semibold mb-2">Form Submitted!</h3>
           <p className="text-gray-600 mb-6">
-            Thank you for reaching out. We'll get back to you as soon as possible.
+            Thank you for reaching out. Your email client should have opened with your message details.
           </p>
           <Button 
             variant="outline" 
