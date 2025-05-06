@@ -3,7 +3,7 @@
   "VITE_CONTENTFUL_SPACE_ID": "al01e4yh2wq4",
   "VITE_CONTENTFUL_DELIVERY_TOKEN": "fxpQth03vfdKzI4VNT_fYg8cD5BwoTiGaa6INIyYync",
   "VITE_CONTENTFUL_ENVIRONMENT_ID": "master",
-  "SENDGRID_API_KEY": "your_sendgrid_api_key_here",
-  "EMAIL_TO": "munger@applestonesolutons.com",
-  "EMAIL_FROM": "noreply@applestonesolutions.com"
+  "SENDGRID_API_KEY": "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",
+  "EMAIL_TO": "hello@applestonesolutons.com",
+  "EMAIL_FROM": "support@applestonesolutions.com"
 }
