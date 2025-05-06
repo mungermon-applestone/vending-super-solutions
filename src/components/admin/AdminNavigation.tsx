@@ -13,7 +13,8 @@ import {
   BarChartBig,
   Aperture,
   Axe,
-  FileJson
+  FileJson,
+  LineChart
 } from 'lucide-react';
 
 interface NavItem {
@@ -60,6 +61,11 @@ const AdminNavigation: React.FC = () => {
       title: "Regression Tests",
       icon: <Axe className="h-5 w-5" />,
       href: "/admin/regression-tests",
+    },
+    {
+      title: "Performance",
+      icon: <LineChart className="h-5 w-5" />,
+      href: "/admin/performance-testing",
     },
     {
       title: "Data Management",

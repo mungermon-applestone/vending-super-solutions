@@ -1,3 +1,4 @@
+
 import { RouteObject } from "react-router-dom";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminMachines from "@/pages/admin/AdminMachines";
@@ -8,6 +9,7 @@ import AdminCaseStudies from "@/pages/admin/AdminCaseStudies";
 import AdminLandingPages from "@/pages/admin/AdminLandingPages";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import ContentfulManagement from '@/pages/admin/ContentfulManagement';
+import PerformanceTesting from '@/pages/admin/PerformanceTesting';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -70,9 +72,12 @@ export const adminRoutes: RouteObject[] = [
     path: "landing-pages/:landingPageKey",
     element: <AdminLandingPages />, // Using same component with a parameter
   },
-  
   {
     path: "contentful",
     element: <ContentfulManagement />
   },
+  {
+    path: "performance-testing",
+    element: <PerformanceTesting />
+  }
 ];

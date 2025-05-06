@@ -6,9 +6,10 @@ import './index.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { BreadcrumbProvider } from './context/BreadcrumbContext';
-import { registerServiceWorker, setupOfflineDetection, prefetchCriticalAssets, initServiceWorker } from './utils/serviceWorkerRegistration';
 import { reportWebVitals, sendToAnalytics } from './utils/webVitalsMonitoring';
 import { toast } from 'sonner';
+import { optimizeForBots, isBot } from './utils/botDetection';
+import { registerServiceWorker, setupOfflineDetection, prefetchCriticalAssets } from './utils/serviceWorkerRegistration';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -138,44 +139,25 @@ const checkCredentialsLoaded = () => {
   }
 };
 
-// Check if the user is a bot/crawler
-const isBotOrCrawler = () => {
-  const botPatterns = [
-    'bot', 'crawler', 'spider', 'google', 'bing', 'yahoo', 'baidu',
-    'yandex', 'duckduckgo', 'slurp', 'bingbot', 'googlebot'
-  ];
-  
-  const userAgent = navigator.userAgent.toLowerCase();
-  return botPatterns.some(pattern => userAgent.includes(pattern));
-};
-
-// Optimize rendering for bots
-const optimizeForBots = () => {
-  if (isBotOrCrawler()) {
-    console.log('[main.tsx] Bot detected, optimizing rendering');
-    // Disable animations for bots
-    document.documentElement.classList.add('bot-detected');
-    
-    // Add meta tags for bots
-    const metaRobotsTag = document.createElement('meta');
-    metaRobotsTag.name = 'robots';
-    metaRobotsTag.content = 'index, follow';
-    document.head.appendChild(metaRobotsTag);
-    
-    return true;
-  }
-  return false;
-};
-
 // Render application
 const renderApp = () => {
   // Setup performance optimizations
   injectCriticalCSS();
   setupPreconnects();
   preloadCriticalResources();
-  const isBot = optimizeForBots();
+  
+  // Bot detection and optimization
+  const detectedBot = isBot();
+  if (detectedBot) {
+    optimizeForBots();
+  }
   
   checkCredentialsLoaded();
+  
+  // Create performance markers for initial load
+  if ('performance' in window) {
+    performance.mark('app-render-start');
+  }
   
   ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
@@ -189,12 +171,19 @@ const renderApp = () => {
     </React.StrictMode>
   );
   
+  if ('performance' in window) {
+    performance.mark('app-render-end');
+    performance.measure('app-render-time', 'app-render-start', 'app-render-end');
+  }
+  
   // Initialize service worker and offline capabilities
-  initServiceWorker();
+  registerServiceWorker();
+  setupOfflineDetection();
   
   // Prefetch critical routes when browser is idle
-  if (!isBot) {
+  if (!detectedBot) {
     prefetchCriticalRoutes();
+    prefetchCriticalAssets();
   }
   
   // Initialize web vitals reporting in production
