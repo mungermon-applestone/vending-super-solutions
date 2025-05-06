@@ -14,7 +14,7 @@ You'll need an email service provider to send emails. Here are some popular opti
 
 There are two ways to set up your email configuration:
 
-### Option 1: Using the runtime-config file (Recommended for Development)
+### Option 1: Using the runtime-config file (For Development Only)
 
 For local development and testing before deployment, update the email settings in the `public/api/runtime-config` file:
 
@@ -23,11 +23,12 @@ For local development and testing before deployment, update the email settings i
   "VITE_CONTENTFUL_SPACE_ID": "your_space_id",
   "VITE_CONTENTFUL_DELIVERY_TOKEN": "your_token",
   "VITE_CONTENTFUL_ENVIRONMENT_ID": "master",
-  "SENDGRID_API_KEY": "your_sendgrid_api_key",
   "EMAIL_TO": "recipient@example.com",
   "EMAIL_FROM": "sender@example.com"
 }
 ```
+
+**Important Note:** The `SENDGRID_API_KEY` should NOT be included in the runtime-config file for production deployments. It is shown here for development purposes only.
 
 ### Option 2: Setting Environment Variables in Vercel (For Production)
 
@@ -55,6 +56,15 @@ npm install @sendgrid/mail
 1. Fill out and submit one of the contact forms
 2. Check if you receive the email at the specified address
 3. If you encounter issues, check the console logs for error messages
+
+## For Troubleshooting Email Issues
+
+If emails are not being sent properly:
+
+1. **Check Server Logs**: In Vercel, visit the Function Logs for your deployment to see any errors
+2. **Verify Environment Variables**: Ensure your API keys and email addresses are correctly set in Vercel
+3. **Test in Development**: Use the console.log output in development mode to verify form data
+4. **Check Email Provider**: Verify your SendGrid account status and API key validity
 
 ## Additional Notes
 

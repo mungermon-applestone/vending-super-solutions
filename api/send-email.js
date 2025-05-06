@@ -25,16 +25,16 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Email is required' });
     }
     
-    // Get email configuration from window.env (runtime-config) or environment variables
-    const sendgridApiKey = typeof window !== 'undefined' ? window.env?.SENDGRID_API_KEY : process.env.SENDGRID_API_KEY;
-    const emailTo = typeof window !== 'undefined' ? window.env?.EMAIL_TO : process.env.EMAIL_TO;
-    const emailFrom = typeof window !== 'undefined' ? window.env?.EMAIL_FROM : process.env.EMAIL_FROM;
+    // Get email configuration from environment variables
+    // Note: In server context we can only use process.env, not window.env
+    const sendgridApiKey = process.env.SENDGRID_API_KEY;
+    const emailTo = process.env.EMAIL_TO || 'munger@applestonesolutons.com';
+    const emailFrom = process.env.EMAIL_FROM || 'noreply@applestonesolutions.com';
     
-    // Check if we're in development or production
-    // In development, we'll just log and return success
+    // Check if we're in development or if SendGrid API key is missing
     if (process.env.NODE_ENV === 'development' || !sendgridApiKey) {
       console.log('Email would be sent in production with the following details:');
-      console.log('To:', emailTo || 'munger@applestonesolutons.com');
+      console.log('To:', emailTo);
       console.log('Subject:', `New ${formType || 'Contact Form'} Submission: ${subject || ''}`);
       console.log('Content:', {
         name: name || '',
@@ -61,8 +61,8 @@ export default async function handler(req, res) {
       
       // Create email message
       const msg = {
-        to: emailTo || 'munger@applestonesolutons.com',
-        from: emailFrom || 'noreply@applestonesolutions.com',
+        to: emailTo,
+        from: emailFrom,
         subject: `New ${formType || 'Contact Form'} Submission: ${subject || ''}`,
         text: `
           Name: ${name || ''}
@@ -97,7 +97,7 @@ export default async function handler(req, res) {
       console.error('SendGrid error:', emailError);
       return res.status(500).json({ 
         error: 'Failed to send email',
-        details: process.env.NODE_ENV === 'development' ? emailError.message : undefined 
+        details: process.env.NODE_ENV === 'development' ? emailError.message : 'Email service error'
       });
     }
     
@@ -105,7 +105,7 @@ export default async function handler(req, res) {
     console.error('Error processing form submission:', error);
     return res.status(500).json({ 
       error: 'Failed to process form submission',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      details: process.env.NODE_ENV === 'development' ? error.message : 'Server error'
     });
   }
 }

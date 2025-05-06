@@ -6,12 +6,27 @@
   // Initialize window.env if it doesn't exist
   window.env = window.env || {};
   
+  // Function to fetch runtime config
+  async function fetchRuntimeConfig() {
+    try {
+      const response = await fetch('/api/runtime-config');
+      if (response.ok) {
+        const config = await response.json();
+        console.log('[env-config] Successfully loaded runtime configuration');
+        return config;
+      }
+    } catch (error) {
+      console.warn('[env-config] Failed to fetch runtime config:', error);
+    }
+    return null;
+  }
+  
   // Hardcoded credentials for preview environments - these are known to work
   const PREVIEW_CREDENTIALS = {
     VITE_CONTENTFUL_SPACE_ID: "al01e4yh2wq4",
     VITE_CONTENTFUL_DELIVERY_TOKEN: "fxpQth03vfdKzI4VNT_fYg8cD5BwoTiGaa6INIyYync",
     VITE_CONTENTFUL_ENVIRONMENT_ID: "master",
-    SENDGRID_API_KEY: "your_sendgrid_api_key_here",
+    // We don't include SendGrid API key here as it should be set in server environment variables
     EMAIL_TO: "munger@applestonesolutons.com",
     EMAIL_FROM: "noreply@applestonesolutions.com"
   };
@@ -64,6 +79,8 @@
       window.env.VITE_CONTENTFUL_SPACE_ID = storedCreds.VITE_CONTENTFUL_SPACE_ID;
       window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = storedCreds.VITE_CONTENTFUL_DELIVERY_TOKEN;
       window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = storedCreds.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+      window.env.EMAIL_TO = storedCreds.EMAIL_TO;
+      window.env.EMAIL_FROM = storedCreds.EMAIL_FROM;
       
       // Also set legacy keys for backward compatibility
       window.env.spaceId = storedCreds.VITE_CONTENTFUL_SPACE_ID;
@@ -81,7 +98,6 @@
       window.env.VITE_CONTENTFUL_SPACE_ID = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
       window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN;
       window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_ENVIRONMENT_ID;
-      window.env.SENDGRID_API_KEY = PREVIEW_CREDENTIALS.SENDGRID_API_KEY;
       window.env.EMAIL_TO = PREVIEW_CREDENTIALS.EMAIL_TO;
       window.env.EMAIL_FROM = PREVIEW_CREDENTIALS.EMAIL_FROM;
       
@@ -109,7 +125,6 @@
           VITE_CONTENTFUL_SPACE_ID: window.env.VITE_CONTENTFUL_SPACE_ID,
           VITE_CONTENTFUL_DELIVERY_TOKEN: window.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
           VITE_CONTENTFUL_ENVIRONMENT_ID: window.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master',
-          SENDGRID_API_KEY: window.env.SENDGRID_API_KEY,
           EMAIL_TO: window.env.EMAIL_TO,
           EMAIL_FROM: window.env.EMAIL_FROM
         }));

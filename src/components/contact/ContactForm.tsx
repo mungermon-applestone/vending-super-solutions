@@ -49,11 +49,13 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
       const data = await response.json();
       
       if (!response.ok) {
+        console.error('Form submission error:', data);
         throw new Error(data.error || 'Failed to send message');
       }
       
       // Show success message
       showSuccess("Thank you for your message. We'll respond as soon as possible.");
+      console.log('Contact form submitted successfully:', data);
       
       // Reset form and show success state
       setSubmitted(true);
