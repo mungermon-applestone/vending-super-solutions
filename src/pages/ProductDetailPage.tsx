@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -9,7 +8,7 @@ import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import DiagnosticInfo from '@/components/products/sections/DiagnosticInfo';
 import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
-import InquiryForm from '@/components/machines/contact/InquiryForm';
+import { SimpleContactCTA } from '@/components/common';
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { toast } from 'sonner';
@@ -163,7 +162,7 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
             <RecommendedMachines machines={product.recommendedMachines} />
           )}
 
-          <InquiryForm title={`Ready to learn more about ${product.title}?`} />
+          <SimpleContactCTA />
         </>
       )}
     </ContentfulErrorBoundary>

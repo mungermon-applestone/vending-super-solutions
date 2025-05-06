@@ -10,3 +10,4 @@ export { default as NotificationManager } from './NotificationManager';
 export { default as Offline } from './Offline';
 export { default as OfflineFallback } from './OfflineFallback';
 export { default as PageHero } from './PageHero';
+export { default as SimpleContactCTA } from './SimpleContactCTA';
