@@ -52,20 +52,29 @@ export default async function ProductsPage() {
             </p>
           </div>
           
-          {/* Diagnostic information - shown in all environments temporarily */}
+          {/* Diagnostic information - helpful for troubleshooting */}
           <div className="max-w-3xl mx-auto mb-8">
             <ContentfulDiagnostics />
           </div>
           
           {/* Show notification if using fallback data */}
           {usedFallback && (
-            <div className="mb-8 rounded-lg bg-blue-50 p-4 text-blue-800 border border-blue-200 max-w-3xl mx-auto">
-              <p>Using local product data. {error ? `Error: ${error}` : 'Unable to connect to Contentful.'}</p>
+            <div className="mb-8 rounded-lg bg-blue-50 p-6 text-blue-800 border border-blue-200 max-w-3xl mx-auto">
+              <h3 className="text-lg font-semibold mb-2">Using Demo Product Data</h3>
+              <p className="mb-2">
+                {error ? `Error connecting to Contentful: ${error}` : 'Unable to connect to Contentful content management system.'}
+              </p>
+              <p className="text-sm">
+                To display your own products, make sure your Contentful Space ID and API key are configured correctly.
+              </p>
+              <div className="mt-4 pt-2 border-t border-blue-200">
+                <p className="text-xs">These example products are being used for demonstration purposes only.</p>
+              </div>
             </div>
           )}
           
           {visibleProducts.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12 bg-white rounded-lg shadow-sm">
               <p className="text-[hsl(215_16%_47%)]">No products available at this time.</p>
             </div>
           ) : (
