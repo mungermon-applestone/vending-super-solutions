@@ -10,7 +10,7 @@ import ContactLoadingState from '@/components/contact/ContactLoadingState';
 import ContactFallback from '@/components/contact/ContactFallback';
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
 
-const ContactPage = () => {
+const Contact = () => {
   const navigate = useNavigate();
   
   return (
@@ -84,4 +84,4 @@ const ContactContent = () => {
   );
 };
 
-export default ContactPage;
+export default Contact;

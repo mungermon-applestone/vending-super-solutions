@@ -5,13 +5,12 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-// This component is modified to not add another header or footer since RootLayout already has them
+// This component is designed to be used within pages when RootLayout is already providing the header/footer
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header removed to prevent duplication */}
+      {/* Main content only - Header and Footer are provided by RootLayout */}
       <main className="flex-grow">{children}</main>
-      {/* Footer removed to prevent duplication */}
     </div>
   );
 };
