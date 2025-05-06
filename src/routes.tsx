@@ -2,7 +2,7 @@
 import React, { lazy, Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 import { Spinner } from '@/components/ui/spinner';
-import { ErrorBoundary } from 'react-error-boundary';
+import { ErrorBoundary } from '@/components/common';
 
 // Eagerly load critical components
 import ErrorPage from '@/components/ErrorPage';
@@ -60,7 +60,21 @@ const StrapiSetupPage = lazy(() => import(/* webpackChunkName: "admin-strapi" */
 
 // Enhanced wrapper for lazy-loaded components with error boundary
 const LazyPageWithBoundary = ({ component: Component }) => (
-  <ErrorBoundary FallbackComponent={ErrorFallback}>
+  <ErrorBoundary
+    fallback={
+      <div className="flex flex-col items-center justify-center min-h-[50vh]">
+        <h2 className="text-lg font-semibold text-red-800 mb-2">Something went wrong</h2>
+        <p className="text-red-700 mb-3">An unexpected error occurred</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    }
+    contentType="page"
+  >
     <Suspense fallback={<PageLoading />}>
       <Component />
     </Suspense>

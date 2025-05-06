@@ -190,8 +190,9 @@ const Image: React.FC<ImageProps> = ({
           const lcpObserver = new PerformanceObserver((entryList) => {
             const entries = entryList.getEntries();
             entries.forEach(entry => {
-              // Check if this image is the LCP
-              if (entry.element === e.target) {
+              // Check if this image is the LCP - safely use type assertion
+              const lcpEntry = entry as any; // Use type assertion for safety
+              if (lcpEntry.element && lcpEntry.element === e.target) {
                 console.log('[LCP] Image is the Largest Contentful Paint', { 
                   image: imageUrl, 
                   lcpTime: entry.startTime 
