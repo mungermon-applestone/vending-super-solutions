@@ -3,14 +3,25 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 255, 255, 255;
-}
+@layer base {
+  * {
+    @apply border-border;
+  }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
+  :root {
+    --foreground-rgb: 0, 0, 0;
+    --background-rgb: 255, 255, 255;
+    
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 84% 5%;
+    --radius: 0.5rem;
+  }
+  
+  body {
+    color: rgb(var(--foreground-rgb));
+    background: rgb(var(--background-rgb));
+  }
 }
 
 @layer components {
