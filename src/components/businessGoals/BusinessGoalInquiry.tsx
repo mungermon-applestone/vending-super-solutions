@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { StandardForm } from '@/components/common';
+import { EmailLink } from '@/components/common';
 
 interface BusinessGoalInquiryProps {
   title?: string;
@@ -29,10 +29,11 @@ const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({
             </div>
 
             <div>
-              <StandardForm 
+              <EmailLink 
                 title="Send Us a Message" 
-                formType={`Business Goal Inquiry: ${goalName || 'Custom Solution'}`}
-                buttonText="Send Message"
+                subject={`Business Goal Inquiry: ${goalName || 'Custom Solution'}`}
+                buttonText="Contact Us"
+                description="We're here to help with your business goals. Click the button below to send us an email directly."
               />
             </div>
           </div>

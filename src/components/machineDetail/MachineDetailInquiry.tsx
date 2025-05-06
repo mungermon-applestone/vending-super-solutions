@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { StandardForm } from '@/components/common';
+import { EmailLink } from '@/components/common';
 
 interface MachineDetailInquiryProps {
   machineTitle: string;
@@ -16,13 +16,14 @@ const MachineDetailInquiry: React.FC<MachineDetailInquiryProps> = ({ machineTitl
               Interested in this machine?
             </h2>
             <p className="text-gray-600 mb-6">
-              Complete the form below and one of our specialists will contact you with pricing and availability.
+              Click the button below to send us an email about this machine. One of our specialists will contact you with pricing and availability.
             </p>
             
-            <StandardForm 
+            <EmailLink 
               title={`Inquiry about ${machineTitle}`}
-              formType={`Machine Inquiry: ${machineTitle}`}
-              buttonText="Submit Inquiry"
+              subject={`Machine Inquiry: ${machineTitle}`}
+              buttonText="Send Inquiry Email"
+              description={`I'm interested in learning more about the ${machineTitle} machine. Please provide information about pricing, availability, and specifications.`}
             />
           </div>
         </div>

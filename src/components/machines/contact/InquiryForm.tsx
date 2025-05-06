@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Check } from 'lucide-react';
-import { StandardForm } from '@/components/common';
+import { EmailLink } from '@/components/common';
 
 interface InquiryFormProps {
   title: string;
@@ -40,10 +40,11 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
           </div>
           
           <div>
-            <StandardForm
+            <EmailLink
               title="Request a Demo"
-              formType="Demo Request"
+              subject="Demo Request"
               buttonText="Request Demo"
+              description="Interested in seeing our software in action? Click below to send us an email request for a demo."
             />
           </div>
         </div>
