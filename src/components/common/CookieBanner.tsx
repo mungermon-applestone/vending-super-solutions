@@ -34,7 +34,7 @@ const CookieBanner: React.FC = () => {
     >
       <div className="text-sm text-gray-600 mr-4">
         This website uses cookies to improve your experience. By continuing to use this site, you consent to our use of cookies.
-        <a href="/privacy-policy" className="text-blue-600 hover:underline ml-1">Privacy Policy</a>
+        <a href="/privacy" className="text-blue-600 hover:underline ml-1">Privacy Policy</a>
       </div>
       <div className="flex items-center space-x-2 flex-shrink-0">
         <Button 
