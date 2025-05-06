@@ -62,6 +62,13 @@ export function extractCriticalCSS() {
 }
 
 /**
+ * Safely handle browser-only APIs with proper TypeScript typing
+ */
+function isBrowser(): boolean {
+  return typeof window !== 'undefined';
+}
+
+/**
  * Setup dynamic loading of non-critical CSS
  */
 export function setupDeferredCSS() {
@@ -70,7 +77,8 @@ export function setupDeferredCSS() {
     // Example: '/path/to/non-critical.css'
   ];
   
-  if (typeof window === 'undefined' || deferredStylesheets.length === 0) return;
+  // Early return if not in browser or no stylesheets to load
+  if (!isBrowser() || deferredStylesheets.length === 0) return;
   
   // Function to load a stylesheet
   const loadStylesheet = (href: string) => {
@@ -82,20 +90,25 @@ export function setupDeferredCSS() {
   
   // Load stylesheets when browser is idle
   if ('requestIdleCallback' in window) {
-    // Cast window to proper type to resolve TypeScript error
-    const windowWithIdleCallback = window as Window & typeof globalThis & { requestIdleCallback: (callback: () => void) => void };
-    windowWithIdleCallback.requestIdleCallback(() => {
+    // Use a type assertion with a specific interface
+    interface WindowWithIdleCallback extends Window {
+      requestIdleCallback: (callback: () => void) => number;
+    }
+    // Apply the type assertion
+    const win = window as WindowWithIdleCallback;
+    win.requestIdleCallback(() => {
       deferredStylesheets.forEach(loadStylesheet);
     });
   } else {
-    // Fallback for browsers without requestIdleCallback
-    // Use a separate variable that's properly typed to avoid the 'never' type issue
-    const win = window;
-    win.addEventListener('load', () => {
+    // Safe approach for handling window in TypeScript
+    const handleLoad = () => {
       setTimeout(() => {
         deferredStylesheets.forEach(loadStylesheet);
       }, 200);
-    });
+    };
+    
+    // Add event listener safely
+    window.addEventListener('load', handleLoad);
   }
 }
 
