@@ -1,13 +1,16 @@
-
 import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import routes from './routes';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
+import { initEmailJS } from './utils/emailjs';
 
 // Create optimized router with performance monitoring
 const router = createBrowserRouter(routes);
+
+// Initialize EmailJS
+initEmailJS();
 
 // Loading fallback component
 const LoadingFallback = () => (

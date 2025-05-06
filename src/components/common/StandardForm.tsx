@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Check, Mail, User, MessageSquare } from 'lucide-react';
 import { showSuccess, showError } from '@/utils/notification';
+import emailjs from 'emailjs-com';
 
 interface StandardFormProps {
   title?: string;
@@ -41,17 +42,26 @@ const StandardForm: React.FC<StandardFormProps> = ({
     setSubmitting(true);
     
     try {
-      // Create a mailto link with the form data
-      const mailtoSubject = encodeURIComponent(`${formType}: ${subject || 'No subject'}`);
-      const mailtoBody = encodeURIComponent(
-        `Name: ${name}\nEmail: ${email}\nMessage: ${message}\n\nThis message was sent from the ${formType} on your website.`
+      // Create template parameters for EmailJS
+      const templateParams = {
+        from_name: name,
+        from_email: email,
+        subject: subject || `${formType} Submission`,
+        message: message,
+        form_type: formType,
+      };
+      
+      // Send the email using EmailJS
+      // You'll need to replace these values with your actual EmailJS service, template and user IDs
+      await emailjs.send(
+        'YOUR_EMAILJS_SERVICE_ID',  // Service ID
+        'YOUR_EMAILJS_TEMPLATE_ID', // Template ID
+        templateParams,
+        'YOUR_EMAILJS_USER_ID'      // User ID / Public Key
       );
       
-      // Open the user's email client with the pre-filled information
-      window.location.href = `mailto:your-email@example.com?subject=${mailtoSubject}&body=${mailtoBody}`;
-      
       // Show success message
-      showSuccess("Your email client should be opening. If it doesn't, please contact us directly.");
+      showSuccess("Thank you! Your message has been sent successfully.");
       
       // Reset form and show success state
       setSubmitted(true);
@@ -64,8 +74,8 @@ const StandardForm: React.FC<StandardFormProps> = ({
         onSuccess();
       }
     } catch (error) {
-      console.error('Error processing form:', error);
-      showError("There was a problem processing your request. Please try contacting us directly.");
+      console.error('Error sending message:', error);
+      showError("There was a problem sending your message. Please try again or contact us directly.");
     } finally {
       setSubmitting(false);
     }
@@ -151,7 +161,7 @@ const StandardForm: React.FC<StandardFormProps> = ({
             className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white font-semibold py-3"
             disabled={submitting}
           >
-            {submitting ? 'Processing...' : buttonText}
+            {submitting ? 'Sending...' : buttonText}
           </Button>
         </form>
       ) : (
@@ -159,9 +169,9 @@ const StandardForm: React.FC<StandardFormProps> = ({
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 mb-4">
             <Check className="h-6 w-6 text-green-600" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">Form Submitted!</h3>
+          <h3 className="text-lg font-semibold mb-2">Message Sent!</h3>
           <p className="text-gray-600 mb-6">
-            Thank you for reaching out. Your email client should have opened with your message details.
+            Thank you for reaching out. We'll get back to you as soon as possible.
           </p>
           <Button 
             variant="outline" 
