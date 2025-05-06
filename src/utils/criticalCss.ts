@@ -117,9 +117,9 @@ export function setupDeferredCSS() {
       }, 200);
     };
     
-    // Only add event listener if we're in a browser environment
-    if (typeof window !== 'undefined') {
-      window.addEventListener('load', handleLoad);
+    // Explicitly assert window as Window to fix the type error
+    if (isBrowser()) {
+      (window as Window).addEventListener('load', handleLoad);
     }
   }
 }
