@@ -97,8 +97,8 @@ const HeroSection = () => {
             </div>
           </div>
           <div className="relative flex justify-center">
-            <div className="bg-white rounded-lg shadow-xl overflow-hidden w-full" style={{ maxHeight: '500px' }}>
-              <div className="aspect-[16/9] w-full h-full flex items-center justify-center">
+            <div className="bg-white rounded-lg shadow-xl overflow-hidden w-full" style={{ maxHeight: '600px' }}>
+              <div className="aspect-[3/4] w-full h-full flex items-center justify-center">
                 <Image 
                   src={imageUrl}
                   alt={imageAlt}
