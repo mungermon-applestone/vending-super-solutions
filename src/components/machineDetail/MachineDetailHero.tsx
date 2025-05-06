@@ -46,14 +46,16 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
             <div className="bg-white rounded-lg shadow-xl p-8 overflow-hidden">
               {machine.images && machine.images[0] ? (
                 <div className="aspect-square w-full flex items-center justify-center">
-                  <Image 
-                    src={machine.images[0].url} 
-                    alt={machine.images[0].alt || machine.title} 
-                    className="max-w-full max-h-full"
-                    objectFit="contain"
-                    isThumbnail={false}
-                    priority={true}
-                  />
+                  <div className="w-full h-full">
+                    <Image 
+                      src={machine.images[0].url} 
+                      alt={machine.images[0].alt || machine.title} 
+                      className="w-full h-full"
+                      objectFit="contain"
+                      isThumbnail={false}
+                      priority={true}
+                    />
+                  </div>
                 </div>
               ) : (
                 <div className="aspect-square bg-gray-100 flex items-center justify-center">

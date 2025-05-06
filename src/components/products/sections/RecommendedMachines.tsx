@@ -43,13 +43,15 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
               <div key={machine.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="aspect-video w-full overflow-hidden bg-white flex items-center justify-center">
                   {imageToUse ? (
-                    <Image
-                      src={imageToUse.url}
-                      alt={imageToUse.alt || machine.title}
-                      className="w-full h-full"
-                      objectFit="contain"
-                      isThumbnail={!!machine.thumbnail}
-                    />
+                    <div className="w-full h-full">
+                      <Image
+                        src={imageToUse.url}
+                        alt={imageToUse.alt || machine.title}
+                        className="w-full h-full"
+                        objectFit="contain"
+                        isThumbnail={!!machine.thumbnail}
+                      />
+                    </div>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gray-100">
                       <span className="text-gray-400">No image available</span>

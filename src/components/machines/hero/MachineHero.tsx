@@ -2,6 +2,7 @@
 import React from 'react';
 import { Server, HardDrive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Image from '@/components/common/Image';
 
 interface MachineHeroProps {
   machine: {
@@ -51,11 +52,14 @@ const MachineHero: React.FC<MachineHeroProps> = ({ machine }) => {
           </div>
           <div className="relative">
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-              <img 
-                src={machine.images[0]?.url} 
-                alt={machine.images[0]?.alt || machine.title} 
-                className="w-full h-auto object-cover"
-              />
+              <div className="aspect-[4/3] w-full flex items-center justify-center">
+                <Image 
+                  src={machine.images[0]?.url} 
+                  alt={machine.images[0]?.alt || machine.title} 
+                  className="w-full h-full"
+                  objectFit="contain"
+                />
+              </div>
             </div>
           </div>
         </div>

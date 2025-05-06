@@ -1,6 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import Image from '@/components/common/Image';
 
 interface ProductHeroSectionProps {
   productType: string;
@@ -63,11 +64,14 @@ const ProductHeroSection = ({
           </div>
           <div className="relative">
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-              <img 
-                src={image} 
-                alt={`${productType}`} 
-                className="w-full h-auto object-cover"
-              />
+              <div className="aspect-[4/3] w-full flex items-center justify-center">
+                <Image 
+                  src={image} 
+                  alt={`${productType}`} 
+                  className="w-full h-full"
+                  objectFit="contain"
+                />
+              </div>
             </div>
           </div>
         </div>

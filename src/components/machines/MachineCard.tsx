@@ -21,7 +21,7 @@ interface MachineCardProps {
     thumbnail?: {
       url: string;
       alt?: string;
-    };
+    }>;
   };
 }
 
@@ -39,7 +39,7 @@ const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
   
   return (
     <Card key={machine.id} className="overflow-hidden flex flex-col h-full">
-      <div className="relative h-48 bg-gray-50 flex items-center justify-center">
+      <div className="relative h-48 bg-gray-50">
         {hasThumbnail ? (
           <Image 
             src={machine.thumbnail.url} 

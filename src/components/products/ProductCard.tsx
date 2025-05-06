@@ -38,9 +38,6 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
   
   // Determine which image to use - thumbnail has priority over main image
   const imageToUse = product.thumbnail || product.image;
-  
-  // Use object-contain if no specific thumbnail is provided
-  const objectFit = product.thumbnail ? 'cover' : 'contain';
 
   // Handle the navigation to product detail page
   const handleProductNavigation = (e: React.MouseEvent) => {
@@ -61,7 +58,7 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
       itemType="https://schema.org/Product"
       aria-labelledby={`product-title-${product.id}`}
     >
-      <div className="w-full h-48 overflow-hidden bg-gray-100 relative flex items-center justify-center">
+      <div className="w-full h-48 overflow-hidden bg-gray-100 relative">
         {imageToUse ? (
           <>
             {!imageLoaded && !imageError && (
@@ -69,21 +66,23 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
                 <Skeleton className="w-full h-full absolute" />
               </div>
             )}
-            <Image 
-              src={imageToUse.url} 
-              alt={imageToUse.alt || product.title}
-              className="w-full h-full"
-              objectFit="contain"
-              isThumbnail={!!product.thumbnail}
-              itemProp="image"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => {
-                console.error(`[ProductCard] Failed to load image for: ${product.title}`);
-                setImageError(true);
-              }}
-              loading="lazy"
-              fetchPriority={isVisible ? "high" : "low"}
-            />
+            <div className="w-full h-full flex items-center justify-center">
+              <Image 
+                src={imageToUse.url} 
+                alt={imageToUse.alt || product.title}
+                className="w-full h-full"
+                objectFit="contain"
+                isThumbnail={!!product.thumbnail}
+                itemProp="image"
+                onLoad={() => setImageLoaded(true)}
+                onError={() => {
+                  console.error(`[ProductCard] Failed to load image for: ${product.title}`);
+                  setImageError(true);
+                }}
+                loading="lazy"
+                fetchPriority={isVisible ? "high" : "low"}
+              />
+            </div>
             {imageError && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
                 <span className="text-gray-400">Image not available</span>

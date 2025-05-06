@@ -33,9 +33,6 @@ const Image: React.FC<ImageProps> = ({
   const [loadAttempts, setLoadAttempts] = useState(0);
   const maxAttempts = 2;
   
-  // Apply object fit class based on the prop
-  const objectFitClass = `object-${objectFit}`;
-  
   // Check if image URL is valid
   const isValidUrl = src && (src.startsWith('http') || src.startsWith('//') || src.startsWith('/'));
   
@@ -47,21 +44,16 @@ const Image: React.FC<ImageProps> = ({
     imageUrl = 'https:' + imageUrl;
   }
   
-  // Apply aspect ratio style if provided
-  const aspectRatioStyle = aspectRatio ? { aspectRatio } : {};
-  
   // Detect image service type (Contentful, etc)
   const isContentfulImage = imageUrl.includes('images.ctfassets.net');
   const isUnsplashImage = imageUrl.includes('unsplash.com');
   
   // Determine loading strategy
-  // If priority is true, use eager loading; otherwise, use the prop value or default to lazy
   const loading = priority ? 'eager' : propLoading || (lazyLoad ? 'lazy' : 'eager');
   
   // Determine fetchPriority
-  // If priority is true, use high; otherwise, use the prop value or default based on loading
   const fetchPriority = priority ? 'high' : propFetchPriority || (loading === 'eager' ? 'high' : 'auto');
-  
+
   // Optimize image loading based on service
   const optimizeUrl = (url: string) => {
     try {
@@ -73,8 +65,7 @@ const Image: React.FC<ImageProps> = ({
       // If it's a Contentful image without parameters, add optimization
       if (isContentfulImage) {
         const width = isThumbnail ? 400 : 1200;
-        const fit = isThumbnail ? 'fill' : 'pad';
-        return `${url}?w=${width}&q=80&fm=webp&fit=${fit}`;
+        return `${url}?w=${width}&q=80&fm=webp&fit=pad`;
       }
       
       // For Unsplash images, use their optimization API
@@ -82,11 +73,10 @@ const Image: React.FC<ImageProps> = ({
         return `${url}${url.includes('?') ? '&' : '?'}auto=format&q=80&w=${isThumbnail ? '400' : '1200'}&fit=max`;
       }
       
-      // For other images, return as is
       return url;
     } catch (error) {
       console.error(`[Image] Error optimizing URL: ${url}`, error);
-      return url; // Return original URL if optimization fails
+      return url;
     }
   };
 
@@ -145,7 +135,6 @@ const Image: React.FC<ImageProps> = ({
     
     // Performance monitoring for LCP candidates
     if (priority && 'PerformanceObserver' in window) {
-      // Try to mark this image load for performance tracking
       try {
         performance.mark(`image-loaded-${imageUrl.substring(0, 50)}`);
       } catch (err) {
@@ -157,11 +146,8 @@ const Image: React.FC<ImageProps> = ({
   // Handle error event
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     console.error(`[Image] Failed to load image (attempt ${loadAttempts + 1}): ${src}`);
-    
-    // Increment attempts counter
     setLoadAttempts(prev => prev + 1);
     
-    // Call the onError callback if provided
     if (props.onError) {
       props.onError(e);
     }
@@ -170,30 +156,22 @@ const Image: React.FC<ImageProps> = ({
   // Generate srcSet only for images that would benefit from it
   const srcSet = (isContentfulImage || isUnsplashImage) ? generateSrcSet(imageUrl) : undefined;
 
-  // Apply additional container styles for thumbnail vs regular images
-  const containerStyle = {
-    ...aspectRatioStyle,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    width: '100%',
-    height: isThumbnail ? '100%' : 'auto',
-  };
-
-  // Determine specific image styles based on thumbnail status
-  const imageStyle = {
-    ...props.style,
-    transition: 'opacity 0.3s ease-in-out',
-    maxWidth: '100%',
-    // For thumbnails we want to ensure they're fully contained without stretching
-    ...(isThumbnail && objectFit === 'contain' ? { maxHeight: '100%' } : {})
-  };
-
+  // Apply object fit class based on the prop
+  const objectFitClass = `object-${objectFit}`;
+  
   return (
     <div 
       className={`image-container ${!isLoaded ? 'bg-gray-100 animate-pulse' : ''}`} 
-      style={containerStyle}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        width: '100%',
+        height: '100%',
+        aspectRatio: aspectRatio || undefined,
+        position: 'relative'
+      }}
     >
       <img 
         src={optimizeUrl(imageUrl)} 
@@ -201,7 +179,14 @@ const Image: React.FC<ImageProps> = ({
         className={`${objectFitClass} ${className} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         loading={loading}
         fetchPriority={fetchPriority as 'high' | 'low' | 'auto'}
-        style={imageStyle}
+        style={{
+          maxWidth: '100%',
+          maxHeight: '100%',
+          width: isThumbnail ? '100%' : 'auto',
+          height: isThumbnail ? '100%' : 'auto',
+          transition: 'opacity 0.3s ease-in-out',
+          ...props.style
+        }}
         onLoad={handleLoad}
         onError={handleError}
         srcSet={srcSet}
