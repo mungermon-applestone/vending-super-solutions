@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { BreadcrumbProvider } from './context/BreadcrumbContext';
 import { registerServiceWorker } from './utils/serviceWorkerRegistration';
+import { reportWebVitals, sendToAnalytics } from './utils/webVitalsMonitoring';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -54,6 +55,11 @@ const renderApp = () => {
   
   // Register service worker after the app has loaded
   registerServiceWorker();
+  
+  // Initialize web vitals reporting in production
+  if (import.meta.env.PROD) {
+    reportWebVitals(sendToAnalytics);
+  }
 };
 
 // Wait for window.env to be populated before rendering app

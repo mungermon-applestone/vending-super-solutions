@@ -8,6 +8,7 @@ import ContentfulInitializer from './contentful/ContentfulInitializer';
 import PreviewEnvironmentDetector from './contentful/PreviewEnvironmentDetector';
 import { isPreviewEnvironment } from '@/config/cms';
 import { Offline } from '@/components/common';
+import SiteMetadata from './seo/SiteMetadata';
 
 const RootLayout = () => {
   const isPreview = isPreviewEnvironment();
@@ -44,6 +45,9 @@ const RootLayout = () => {
       }
     >
       <ContentfulPersistenceProvider>
+        {/* Site-wide metadata and structured data */}
+        <SiteMetadata />
+        
         <div className="flex min-h-screen flex-col">
           <Header />
           

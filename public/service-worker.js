@@ -10,8 +10,16 @@ const STATIC_CACHE_URLS = [
   '/og-image.jpg',
   '/manifest.json',
   '/robots.txt',
-  '/sitemap.xml'
+  '/sitemap.xml',
+  '/logo.png'
 ];
+
+// Cache duration settings (in milliseconds)
+const CACHE_SETTINGS = {
+  contentful: 30 * 60 * 1000, // 30 minutes for Contentful content
+  static: 24 * 60 * 60 * 1000, // 24 hours for static assets
+  html: 1 * 60 * 60 * 1000 // 1 hour for HTML pages
+};
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
@@ -43,18 +51,48 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Cache Contentful responses for 30 minutes
-const contentfulCache = (request, response) => {
+// Determine if the current request is from a bot/crawler
+const isBot = (request) => {
+  const userAgent = request.headers.get('User-Agent') || '';
+  return userAgent.toLowerCase().includes('bot') || 
+         userAgent.toLowerCase().includes('crawler') || 
+         userAgent.toLowerCase().includes('spider');
+};
+
+// Determine cache duration based on resource type
+const getCacheDuration = (url, resourceType) => {
+  if (url.includes('contentful.com')) {
+    return CACHE_SETTINGS.contentful;
+  }
+  
+  if (resourceType === 'document') {
+    return CACHE_SETTINGS.html;
+  }
+  
+  // Static assets get longer cache time
+  if (url.match(/\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$/)) {
+    return CACHE_SETTINGS.static;
+  }
+  
+  // Default to shorter cache time for other resources
+  return CACHE_SETTINGS.html;
+};
+
+// Cache responses with the appropriate headers
+const cacheResponse = (request, response, cacheKey) => {
   // Clone the response as it can only be consumed once
   const responseToCache = response.clone();
+  const url = new URL(request.url);
+  const resourceType = response.headers.get('Content-Type') || '';
+  
+  // Get the appropriate cache duration
+  const cacheDuration = getCacheDuration(url.href, resourceType);
   
   caches.open(CACHE_NAME).then(cache => {
-    const cacheKey = request.url;
-    
-    // Cache for 30 minutes
+    // Add expiration headers
     const headers = new Headers(responseToCache.headers);
     headers.append('sw-fetched-on', new Date().getTime());
-    headers.append('sw-cache-expires', new Date().getTime() + (30 * 60 * 1000));
+    headers.append('sw-cache-expires', new Date().getTime() + cacheDuration);
     
     const cachedResponse = new Response(
       responseToCache.body, 
@@ -83,84 +121,126 @@ const isResponseExpired = (response) => {
   return parseInt(cacheExpires) < new Date().getTime();
 };
 
-// Don't cache requests with authorization headers
+// Don't cache requests with authorization headers, crawler requests, or env config
 const shouldNotCacheRequest = (request) => {
   return (
     request.headers.has('Authorization') || 
     request.headers.has('authorization') ||
-    request.url.includes('env-config.js')
+    request.url.includes('env-config.js') ||
+    isBot(request)
   );
 };
 
-// Fetch event - stale-while-revalidate strategy
+// Network-first strategy for HTML and API requests
+const networkFirst = async (request) => {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      // Cache the successful response
+      return cacheResponse(request, response, request);
+    }
+    throw new Error('Network response was not ok');
+  } catch (error) {
+    console.log('Network request failed, falling back to cache', error);
+    const cachedResponse = await caches.match(request);
+    return cachedResponse || Promise.reject('No cached response available');
+  }
+};
+
+// Cache-first strategy for static assets
+const cacheFirst = async (request) => {
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse && !isResponseExpired(cachedResponse)) {
+    return cachedResponse;
+  }
+  
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      // Cache the new response
+      return cacheResponse(request, networkResponse, request);
+    }
+    return networkResponse;
+  } catch (error) {
+    // If we got this far and still have a cached response, return it even if expired
+    return cachedResponse || Promise.reject('Resource not in cache and network unavailable');
+  }
+};
+
+// Stale-while-revalidate strategy for Contentful content
+const staleWhileRevalidate = async (request) => {
+  const cachedResponse = await caches.match(request);
+  
+  // Start network fetch regardless of whether we have a cached response
+  const networkPromise = fetch(request).then(response => {
+    if (response.ok) {
+      // Cache the new response
+      cacheResponse(request, response.clone(), request);
+    }
+    return response;
+  }).catch(err => {
+    console.error('Fetch failed in stale-while-revalidate:', err);
+    // This will be caught by the Promise.race below
+    throw err;
+  });
+  
+  // If we have a cached response, return it immediately
+  if (cachedResponse && !isResponseExpired(cachedResponse)) {
+    // Still do the network request in the background to update cache
+    networkPromise.catch(() => console.log('Background update failed'));
+    return cachedResponse;
+  }
+  
+  // If we have a stale cached response, race it with the network
+  if (cachedResponse) {
+    return Promise.race([
+      networkPromise,
+      // Small delay to prefer network if it's quick
+      new Promise(resolve => setTimeout(() => resolve(cachedResponse), 100))
+    ]).catch(() => cachedResponse); // Fall back to cache if network fails
+  }
+  
+  // No cached response, must use network
+  return networkPromise;
+};
+
+// Fetch event - apply different strategies based on request type
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests that aren't Contentful
+  // Skip cross-origin requests that aren't critical
   if (!event.request.url.startsWith(self.location.origin) && 
       !event.request.url.includes('contentful.com')) {
     return;
   }
   
-  // Don't cache requests with credentials
+  // Don't cache requests with credentials or from bots
   if (shouldNotCacheRequest(event.request)) {
     return;
   }
+
+  const url = new URL(event.request.url);
   
-  // Special handling for Contentful API requests
-  if (event.request.url.includes('contentful.com')) {
-    event.respondWith(
-      caches.match(event.request).then(cachedResponse => {
-        // If we have a cached response that's not expired, use it
-        if (cachedResponse && !isResponseExpired(cachedResponse)) {
-          return cachedResponse;
-        }
-        
-        // Otherwise fetch from network
-        return fetch(event.request)
-          .then(response => {
-            // Cache the network response for future use
-            if (response.ok) {
-              return contentfulCache(event.request, response);
-            }
-            return response;
-          })
-          .catch(error => {
-            // If we have any cached response, use it as fallback
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            throw error;
-          });
-      })
-    );
+  // For HTML pages - Network first for freshness
+  if (event.request.mode === 'navigate' || 
+      (event.request.method === 'GET' && 
+       (event.request.headers.get('accept') || '').includes('text/html'))) {
+    event.respondWith(networkFirst(event.request));
     return;
   }
   
-  // Standard stale-while-revalidate for other requests
-  event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      const networkFetch = fetch(event.request).then(response => {
-        // Don't cache non-GET requests or failed responses
-        if (event.request.method !== 'GET' || !response.ok) {
-          return response;
-        }
-        
-        // Clone the response to cache it for later
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseToCache);
-        });
-        
-        return response;
-      }).catch(error => {
-        console.error('Fetch failed:', error);
-        // Try to serve from cache if network fails
-        return cachedResponse;
-      });
-      
-      // Return the cached response if we have one, otherwise wait for network
-      return cachedResponse || networkFetch;
-    })
-  );
+  // For Contentful API requests - Stale-while-revalidate
+  if (event.request.url.includes('contentful.com')) {
+    event.respondWith(staleWhileRevalidate(event.request));
+    return;
+  }
+  
+  // For static assets - Cache first
+  if (url.pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$/)) {
+    event.respondWith(cacheFirst(event.request));
+    return;
+  }
+  
+  // Default to network-first for other requests
+  event.respondWith(networkFirst(event.request));
 });
 
 // Listen for messages (e.g., to clear cache)
