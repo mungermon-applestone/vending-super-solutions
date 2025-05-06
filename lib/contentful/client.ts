@@ -4,15 +4,38 @@ import { createClient } from 'contentful';
 // Create a cached client to avoid unnecessary re-instantiation
 let contentfulClient: ReturnType<typeof createClient>;
 
+// Function to get environment variables with robust fallbacks
+function getEnvironmentVariable(key: string): string | undefined {
+  // Check browser environment variables first (for client-side)
+  if (typeof window !== 'undefined' && window.env && window.env[key]) {
+    return window.env[key];
+  }
+  
+  // Then check process.env (for server-side)
+  return process.env[key];
+}
+
 export function getContentfulClient() {
   if (contentfulClient) {
     return contentfulClient;
   }
   
-  // Support both Next.js and React environment variable naming conventions
-  const spaceId = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID || process.env.CONTENTFUL_SPACE_ID;
-  const accessToken = process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN || process.env.CONTENTFUL_DELIVERY_TOKEN;
-  const environment = process.env.NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT || process.env.CONTENTFUL_ENVIRONMENT || 'master';
+  // Try all possible environment variable names for maximum compatibility
+  const spaceId = 
+    getEnvironmentVariable('NEXT_PUBLIC_CONTENTFUL_SPACE_ID') || 
+    getEnvironmentVariable('CONTENTFUL_SPACE_ID') ||
+    getEnvironmentVariable('VITE_CONTENTFUL_SPACE_ID');
+  
+  const accessToken = 
+    getEnvironmentVariable('NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN') || 
+    getEnvironmentVariable('CONTENTFUL_DELIVERY_TOKEN') ||
+    getEnvironmentVariable('VITE_CONTENTFUL_DELIVERY_TOKEN');
+  
+  const environment = 
+    getEnvironmentVariable('NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT') || 
+    getEnvironmentVariable('CONTENTFUL_ENVIRONMENT') || 
+    getEnvironmentVariable('VITE_CONTENTFUL_ENVIRONMENT') || 
+    'master';
   
   // Check if environment variables are set
   if (!spaceId || !accessToken) {

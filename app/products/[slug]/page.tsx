@@ -1,4 +1,3 @@
-
 import { getProductTypeBySlug, getProductTypes } from '@/lib/contentful/products'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
@@ -133,12 +132,10 @@ export default async function ProductPage({ params }: { params: { slug: string }
           </Link>
         </div>
         
-        {/* Contentful Diagnostic Information (only shown in development) */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-8">
-            <ContentfulDiagnostics slug={params.slug} productId={product.id} />
-          </div>
-        )}
+        {/* Contentful Diagnostic Information (shown in all environments temporarily) */}
+        <div className="mb-8">
+          <ContentfulDiagnostics slug={params.slug} productId={product.id} />
+        </div>
         
         {/* Show notification if using fallback data */}
         {usedFallback && (

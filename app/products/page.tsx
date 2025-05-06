@@ -23,7 +23,6 @@ export default async function ProductsPage() {
     
     // Log products for debugging
     console.log(`[Next.js] Fetched ${products.length} products from Contentful`);
-    products.forEach(p => console.log(`- ${p.title} (slug: ${p.slug})`));
     
     if (products.length === 0) {
       console.warn('[Next.js] No products returned from Contentful, using fallbacks');
@@ -53,12 +52,10 @@ export default async function ProductsPage() {
             </p>
           </div>
           
-          {/* Diagnostic information - only shown in development */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="max-w-3xl mx-auto mb-8">
-              <ContentfulDiagnostics />
-            </div>
-          )}
+          {/* Diagnostic information - shown in all environments temporarily */}
+          <div className="max-w-3xl mx-auto mb-8">
+            <ContentfulDiagnostics />
+          </div>
           
           {/* Show notification if using fallback data */}
           {usedFallback && (
