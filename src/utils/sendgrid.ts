@@ -1,12 +1,16 @@
 
-import * as sgMail from '@sendgrid/mail';
+import sgMail from '@sendgrid/mail';
 
 // Initialize SendGrid with your API key
 export const initSendGrid = () => {
-  // Initialize using your existing SendGrid API key
-  // Your API key should be stored in environment variables for production
-  sgMail.setApiKey('GF7ahmvXoDxVofUpa');
-  console.log('SendGrid initialized successfully');
+  try {
+    // Initialize using your existing SendGrid API key
+    // Your API key should be stored in environment variables for production
+    sgMail.setApiKey('GF7ahmvXoDxVofUpa');
+    console.log('SendGrid initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize SendGrid:', error);
+  }
 };
 
 // Send email function
