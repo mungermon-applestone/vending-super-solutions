@@ -1,4 +1,3 @@
-
 // CMS Configuration
 const ENV_STORAGE_KEY = 'vending-cms-env-variables';
 
@@ -64,6 +63,19 @@ export function isPreviewEnvironment() {
   if (typeof window === 'undefined') return false;
   
   const hostname = window.location.hostname;
+  
+  // List of production domains
+  const productionDomains = [
+    'applestonesolutions.com',
+    'www.applestonesolutions.com'
+  ];
+  
+  // Check if current hostname matches a production domain
+  if (productionDomains.includes(hostname)) {
+    return false; // Not a preview environment
+  }
+  
+  // Otherwise treat as preview if it matches known patterns
   return (
     hostname.includes('preview') || 
     hostname.includes('staging') || 

@@ -1,8 +1,8 @@
 
-import { ReportHandler } from 'web-vitals';
+import { type Metric } from 'web-vitals';
 
 // Function to collect and report Core Web Vitals
-export function reportWebVitals(onPerfEntry?: ReportHandler): void {
+export function reportWebVitals(onPerfEntry?: (metric: Metric) => void): void {
   // Only run in production, avoid overhead during development
   if (import.meta.env.PROD && onPerfEntry && onPerfEntry instanceof Function) {
     import('web-vitals').then(({ onCLS, onFID, onFCP, onLCP, onTTFB }) => {
@@ -25,7 +25,7 @@ export function logWebVitals(): void {
 }
 
 // Function to send metrics to an analytics endpoint
-export function sendToAnalytics(metric: any): void {
+export function sendToAnalytics(metric: Metric): void {
   // Here you would typically send to your analytics service
   // This is a placeholder implementation
   const body = JSON.stringify({

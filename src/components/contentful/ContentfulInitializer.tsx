@@ -19,6 +19,7 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const isPreview = isPreviewEnvironment();
+  const [initAttempted, setInitAttempted] = useState(false);
   
   useEffect(() => {
     // Function to initialize Contentful
@@ -26,16 +27,37 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
       setIsLoading(true);
       try {
         console.log('[ContentfulInitializer] Starting initialization');
-        console.log('[ContentfulInitializer] Window env status:', {
-          exists: !!window.env,
-          hasSpaceId: !!(window.env && window.env.VITE_CONTENTFUL_SPACE_ID),
-          hasToken: !!(window.env && window.env.VITE_CONTENTFUL_DELIVERY_TOKEN),
-          source: window._contentfulInitializedSource
-        });
         
-        // For preview environments, always use the hardcoded credentials
-        if (isPreview || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-          console.log('[ContentfulInitializer] Preview/development environment detected, using hardcoded credentials');
+        // For non-preview environments (production), always use server-side environment variables
+        // Skip checking localStorage for production environments to avoid credential issues
+        if (!isPreview) {
+          console.log('[ContentfulInitializer] Production environment detected, using server-side credentials only');
+          
+          // Force provider initialization with server-side variables only
+          forceContentfulProvider();
+          
+          // Test the connection - but continue even if it fails
+          // This helps avoid showing error states in production when server-side credentials exist
+          try {
+            const testResult = await testContentfulConnection();
+            if (testResult.success) {
+              console.log('[ContentfulInitializer] Production credentials verified successfully');
+            } else {
+              console.warn('[ContentfulInitializer] Production credentials test failed, but continuing');
+            }
+          } catch (testError) {
+            console.warn('[ContentfulInitializer] Error testing production credentials, but continuing:', testError);
+          }
+          
+          // Mark as initialized regardless of test result
+          // In production, we always show content even if credentials test fails
+          setIsInitialized(true);
+          window._contentfulInitialized = true;
+          window._contentfulInitializedSource = 'production-env';
+        } 
+        // For preview environments or development, try multiple credential sources
+        else {
+          console.log('[ContentfulInitializer] Preview/development environment detected');
           forceContentfulProvider();
           
           // Test the connection to verify credentials work
@@ -44,40 +66,24 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
             console.log('[ContentfulInitializer] Preview credentials verified successfully');
             setIsInitialized(true);
             window._contentfulInitialized = true;
+            window._contentfulInitializedSource = 'preview-env';
           } else {
             throw new Error(`Preview credentials failed: ${testResult.message}`);
           }
-        } 
-        // For non-preview environments, check configuration
-        else if (isContentfulConfigured()) {
-          console.log('[ContentfulInitializer] Non-preview environment with config detected');
-          forceContentfulProvider();
-          
-          // Test the connection
-          const testResult = await testContentfulConnection();
-          if (testResult.success) {
-            console.log('[ContentfulInitializer] Credentials verified successfully');
-            setIsInitialized(true);
-            window._contentfulInitialized = true;
-          } else {
-            throw new Error(`Credentials failed: ${testResult.message}`);
-          }
-        } 
-        // If no configuration in non-preview environment
-        else {
-          console.log('[ContentfulInitializer] No Contentful configuration found in non-preview environment');
-          forceContentfulProvider(); // Force provider with null config for fallbacks
-          setIsInitialized(true); // Still initialized but will use fallbacks
         }
       } catch (error) {
         console.error('[ContentfulInitializer] Initialization error:', error);
         setError(error instanceof Error ? error : new Error('Unknown initialization error'));
         
-        // Even with error, force provider to use fallbacks
-        forceContentfulProvider();
-        setIsInitialized(true); // Still initialized but will use fallbacks
+        // In preview environments, still force provider to use fallbacks
+        if (isPreview) {
+          forceContentfulProvider();
+          setIsInitialized(true); // Still initialized but will use fallbacks
+          window._contentfulInitializedSource = 'fallback-after-error';
+        }
       } finally {
         setIsLoading(false);
+        setInitAttempted(true);
         console.log('[ContentfulInitializer] Initialization completed');
       }
     };
@@ -85,6 +91,10 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
     // Run the initialization
     initializeContentful();
   }, [isPreview]);
+  
+  // Enhanced error handling strategy:
+  // In production environments, we prioritize showing content even with errors
+  const shouldShowChildren = isInitialized || (!isPreview && initAttempted);
   
   // Show loading state
   if (isLoading) {
@@ -96,8 +106,8 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
     );
   }
   
-  // Show error state
-  if (error && !isInitialized) {
+  // Show error state - only in preview/development environments
+  if (error && !shouldShowChildren) {
     return fallback || (
       <div className="p-4 border border-red-300 bg-red-50 rounded-md">
         <h3 className="text-red-800 font-medium">Content System Error</h3>
@@ -106,8 +116,8 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
     );
   }
   
-  // Render children when initialized
-  return isInitialized ? <>{children}</> : null;
+  // Render children when initialized or in production (regardless of initialization)
+  return shouldShowChildren ? <>{children}</> : null;
 };
 
 export default ContentfulInitializer;
