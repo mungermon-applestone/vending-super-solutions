@@ -15,13 +15,13 @@ interface SiteMetadataProps {
  * Global site metadata component that adds structured data for the website and organization
  */
 const SiteMetadata: React.FC<SiteMetadataProps> = ({
-  siteUrl = 'https://applestonesolutions.com',
+  siteUrl = 'https://vendingsolutions.com',
   organization = {
-    name: 'Applestone Solutions',
-    logo: 'https://applestonesolutions.com/logo.png',
+    name: 'Vending Solutions',
+    logo: 'https://vendingsolutions.com/logo.png',
     sameAs: [
-      'https://www.linkedin.com/company/applestone-solutions',
-      'https://twitter.com/applestonesols'
+      'https://www.linkedin.com/company/vending-solutions',
+      'https://twitter.com/vendingsols'
     ]
   }
 }) => {

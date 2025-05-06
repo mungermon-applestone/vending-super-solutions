@@ -14,7 +14,7 @@ const Footer: React.FC<FooterProps> = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center">
-              <span className="text-xl font-semibold">Applestone Solutions</span>
+              <span className="text-xl font-semibold">Vending Solutions</span>
             </Link>
             <p className="mt-3 text-gray-600 max-w-md">
               Advanced vending solutions for modern businesses. Automate your retail operations with smart vending machines and IoT technology.

@@ -18,7 +18,7 @@ const FooterLinks = () => {
       </div>
       
       <p className="text-center mt-4 text-xs text-gray-500">
-        © {new Date().getFullYear()} Applestone Solutions. All rights reserved.
+        © {new Date().getFullYear()} Vending Solutions. All rights reserved.
       </p>
     </div>
   );

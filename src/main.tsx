@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -86,7 +87,10 @@ const prefetchCriticalRoutes = () => {
 const preloadCriticalResources = () => {
   // Preload logo or critical images
   const criticalImages = [
-    // Add paths to important images like logos
+    '/logo.png',
+    '/og-image.jpg',
+    '/icons/icon-192x192.png',
+    '/icons/badge-96x96.png'
   ];
   
   criticalImages.forEach(imagePath => {

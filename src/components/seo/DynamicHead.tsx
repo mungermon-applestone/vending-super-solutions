@@ -13,7 +13,7 @@ interface DynamicHeadProps {
 }
 
 const DynamicHead: React.FC<DynamicHeadProps> = ({
-  title = 'Applestone Solutions',
+  title = 'Vending Solutions',
   description = 'Advanced vending solutions for modern businesses. Automate your retail operations with smart vending machines and IoT technology.',
   image = '/og-image.jpg',
   type = 'website',
@@ -21,7 +21,7 @@ const DynamicHead: React.FC<DynamicHeadProps> = ({
   structuredData
 }) => {
   const location = useLocation();
-  const domain = 'https://applestonesolutions.com';
+  const domain = 'https://vendingsolutions.com';
   const path = location.pathname;
   const url = canonicalUrl || `${domain}${path}`;
 
@@ -36,7 +36,7 @@ const DynamicHead: React.FC<DynamicHeadProps> = ({
     const websiteData = {
       '@context': 'https://schema.org',
       '@type': 'WebSite',
-      'name': 'Applestone Solutions',
+      'name': 'Vending Solutions',
       'url': domain,
       'potentialAction': {
         '@type': 'SearchAction',
@@ -52,7 +52,7 @@ const DynamicHead: React.FC<DynamicHeadProps> = ({
     const organizationData = {
       '@context': 'https://schema.org',
       '@type': 'Organization',
-      'name': 'Applestone Solutions',
+      'name': 'Vending Solutions',
       'url': domain,
       'logo': `${domain}/logo.png`,
       'contactPoint': {
@@ -76,7 +76,7 @@ const DynamicHead: React.FC<DynamicHeadProps> = ({
         'image': image.startsWith('http') ? image : `${domain}${image}`,
         'brand': {
           '@type': 'Brand',
-          'name': 'Applestone Solutions'
+          'name': 'Vending Solutions'
         }
       };
     }
@@ -91,11 +91,11 @@ const DynamicHead: React.FC<DynamicHeadProps> = ({
         'dateModified': new Date().toISOString(),
         'author': {
           '@type': 'Organization',
-          'name': 'Applestone Solutions'
+          'name': 'Vending Solutions'
         },
         'publisher': {
           '@type': 'Organization',
-          'name': 'Applestone Solutions',
+          'name': 'Vending Solutions',
           'logo': {
             '@type': 'ImageObject',
             'url': `${domain}/logo.png`
@@ -125,7 +125,7 @@ const DynamicHead: React.FC<DynamicHeadProps> = ({
       <meta property="og:type" content={type} />
       <meta property="og:url" content={url} />
       <meta property="og:image" content={image.startsWith('http') ? image : `${domain}${image}`} />
-      <meta property="og:site_name" content="Applestone Solutions" />
+      <meta property="og:site_name" content="Vending Solutions" />
       
       {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
