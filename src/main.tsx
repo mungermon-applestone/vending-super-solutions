@@ -33,6 +33,9 @@ const injectCriticalCSS = () => {
       img { opacity: 1; transition: opacity 0.3s; }
       img.loading { opacity: 0; }
       .header-container { position: sticky; top: 0; z-index: 30; width: 100%; background-color: white; }
+      .hero-section { overflow: hidden; }
+      .hero-image-container { display: flex; align-items: center; justify-content: center; }
+      .hero-image { width: 100%; height: 100%; object-fit: contain; }
       @media (prefers-reduced-motion: reduce) {
         *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
       }
