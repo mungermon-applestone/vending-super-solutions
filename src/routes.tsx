@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 import { Spinner } from '@/components/ui/spinner';
@@ -73,7 +72,6 @@ const LazyPageWithBoundary = ({ component: Component }) => (
         </button>
       </div>
     }
-    contentType="page"
   >
     <Suspense fallback={<PageLoading />}>
       <Component />
