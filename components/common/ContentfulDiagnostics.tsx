@@ -8,70 +8,30 @@ interface ContentfulDiagnosticsProps {
 }
 
 export default function ContentfulDiagnostics({ slug, productId }: ContentfulDiagnosticsProps) {
-  const [connectionStatus, setConnectionStatus] = useState<{success: boolean, message: string, details?: string} | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<{success: boolean, message: string} | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [environmentVariables, setEnvironmentVariables] = useState<{
-    spaceId?: string;
-    accessToken?: string;
-    environment?: string;
-  }>({});
   
-  // Get environment variables for display
-  useEffect(() => {
-    const getEnvSafely = (key: string, isSecret = false) => {
-      let value;
-      
-      // Check window.env first (runtime config)
-      if (typeof window !== 'undefined' && window.env && window.env[key]) {
-        value = window.env[key];
-      } 
-      // Then check process.env
-      else if (process.env[`NEXT_PUBLIC_${key}`]) {
-        value = process.env[`NEXT_PUBLIC_${key}`];
-      } else if (process.env[key]) {
-        value = process.env[key];
-      }
-      
-      if (!value) return 'Not set';
-      
-      // Mask secrets for security
-      if (isSecret) return 'Set (hidden)';
-      
-      // Mask IDs for display (show first 4 chars and last 2)
-      if (value.length <= 6) return '******';
-      return `${value.slice(0, 4)}****${value.slice(-2)}`;
-    };
-
-    setEnvironmentVariables({
-      spaceId: getEnvSafely('CONTENTFUL_SPACE_ID'),
-      accessToken: getEnvSafely('CONTENTFUL_DELIVERY_TOKEN', true),
-      environment: getEnvSafely('CONTENTFUL_ENVIRONMENT') === 'Not set' ? 'master' : getEnvSafely('CONTENTFUL_ENVIRONMENT')
-    });
-    
-    // Debug information for troubleshooting
-    console.log('ContentfulDiagnostics: Environment variables check', {
-      windowEnvExists: typeof window !== 'undefined' && !!window.env,
-      windowEnvKeys: typeof window !== 'undefined' && window.env ? Object.keys(window.env) : [],
-      hardcodedSpaceId: "p8y13tvmv0uj",
-      hardcodedTokenExists: true
-    });
-  }, []);
+  // Hardcoded credentials for display
+  const credentials = {
+    spaceId: "p8y13tvmv0uj", 
+    accessToken: "fyVJxmu9K8jX3kcWHa0yEFIsvdzY5U-gkOcxU0JNxtU",
+    environment: "master"
+  };
   
   // Test the connection when the component mounts
   useEffect(() => {
     const testConnection = async () => {
       setIsLoading(true);
       try {
-        console.log('ContentfulDiagnostics: Testing connection');
+        console.log('[ContentfulDiagnostics] Testing connection');
         const result = await testContentfulConnection();
-        console.log('ContentfulDiagnostics: Connection test result', result);
+        console.log('[ContentfulDiagnostics] Connection test result', result);
         setConnectionStatus(result);
       } catch (error) {
-        console.error('ContentfulDiagnostics: Connection test error', error);
+        console.error('[ContentfulDiagnostics] Connection test error', error);
         setConnectionStatus({ 
           success: false, 
-          message: error instanceof Error ? error.message : 'Unknown error',
-          details: 'Check console for more information'
+          message: error instanceof Error ? error.message : 'Unknown error'
         });
       } finally {
         setIsLoading(false);
@@ -86,14 +46,9 @@ export default function ContentfulDiagnostics({ slug, productId }: ContentfulDia
       <h4 className="font-bold mb-2 text-sm">Contentful Diagnostic Info</h4>
       <div className="space-y-2">
         <p><strong>Next.js Environment:</strong> {process.env.NODE_ENV}</p>
-        <p><strong>Space ID:</strong> {environmentVariables.spaceId}</p>
-        <p><strong>Environment:</strong> {environmentVariables.environment}</p>
-        <p><strong>Has Delivery Token:</strong> {environmentVariables.accessToken !== 'Not set' ? 'Yes' : 'No'}</p>
+        <p><strong>Space ID:</strong> {credentials.spaceId.substring(0, 4)}...{credentials.spaceId.substring(credentials.spaceId.length-2)}</p>
+        <p><strong>Environment:</strong> {credentials.environment}</p>
         <p><strong>Using Hardcoded Credentials:</strong> Yes</p>
-        <p><strong>Window.env Available:</strong> {typeof window !== 'undefined' && !!window.env ? 'Yes' : 'No'}</p>
-        {typeof window !== 'undefined' && window.env && (
-          <p><strong>Window.env Keys:</strong> {Object.keys(window.env).join(', ')}</p>
-        )}
         {slug && <p><strong>Current Slug:</strong> {slug}</p>}
         {productId && <p><strong>Product ID:</strong> {productId}</p>}
         
@@ -108,9 +63,6 @@ export default function ContentfulDiagnostics({ slug, productId }: ContentfulDia
           {connectionStatus && (
             <div>
               <p className="text-xs mt-1">{connectionStatus.message}</p>
-              {connectionStatus.details && (
-                <p className="text-xs mt-1 text-red-600">{connectionStatus.details}</p>
-              )}
             </div>
           )}
         </div>

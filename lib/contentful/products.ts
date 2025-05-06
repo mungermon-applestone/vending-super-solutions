@@ -63,33 +63,15 @@ export async function getProductTypeBySlug(slug: string) {
     
     const client = getContentfulClient();
     
-    // Try different approaches to find the product
-    // 1. Exact match
-    let entries = await client.getEntries({
+    const entries = await client.getEntries({
       content_type: 'productType',
       'fields.slug': slug,
       include: 2,
     });
     
-    // 2. If no exact match, try slug variations
     if (entries.items.length === 0) {
-      console.log(`[contentful/products] No exact match for "${slug}", trying variations`);
-      
-      // Try with/without -vending suffix
-      const altSlug = slug.endsWith('-vending') 
-        ? slug.substring(0, slug.length - 8) 
-        : `${slug}-vending`;
-      
-      entries = await client.getEntries({
-        content_type: 'productType',
-        'fields.slug': altSlug,
-        include: 2,
-      });
-      
-      if (entries.items.length === 0) {
-        console.log(`[contentful/products] No product found with slug "${slug}" or variations`);
-        return null;
-      }
+      console.log(`[contentful/products] No product found with slug "${slug}"`);
+      return null;
     }
     
     const item = entries.items[0];
