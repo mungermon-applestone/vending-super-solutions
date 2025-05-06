@@ -6,7 +6,6 @@ import MachineDetailSpecifications from './MachineDetailSpecifications';
 import MachineDetailFeatures from './MachineDetailFeatures';
 import MachineDetailDeployments from './MachineDetailDeployments';
 import MachineDetailGallery from './MachineDetailGallery';
-import MachineDetailInquiry from './MachineDetailInquiry';
 import CTASection from '@/components/common/CTASection';
 
 interface MachineDetailProps {
@@ -32,7 +31,6 @@ const MachineDetail: React.FC<MachineDetailProps> = ({ machine }) => {
         <MachineDetailFeatures features={machine.features} />
         <MachineDetailDeployments deploymentExamples={machine.deploymentExamples} />
         <MachineDetailGallery title={machine.title} images={machine.images} />
-        <MachineDetailInquiry machineTitle={machine.title} />
       </div>
       
       <CTASection />

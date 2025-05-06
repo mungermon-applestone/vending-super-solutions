@@ -9,9 +9,9 @@ import MachineDetailSpecifications from '@/components/machineDetail/MachineDetai
 import MachineDetailFeatures from '@/components/machineDetail/MachineDetailFeatures';
 import MachineDetailDeployments from '@/components/machineDetail/MachineDetailDeployments';
 import MachineDetailGallery from '@/components/machineDetail/MachineDetailGallery';
-import MachineDetailInquiry from '@/components/machineDetail/MachineDetailInquiry';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
 import { Loader2 } from 'lucide-react';
+import { SimpleContactCTA } from '@/components/common';
 
 const MachineDetail = () => {
   const { machineId, machineType } = useParams<{ machineType: string, machineId: string }>();
@@ -67,7 +67,7 @@ const MachineDetail = () => {
       <MachineDetailFeatures features={machine.features} />
       <MachineDetailDeployments deploymentExamples={machine.deploymentExamples} />
       <MachineDetailGallery title={machine.title} images={machine.images} />
-      <MachineDetailInquiry machineTitle={machine.title} />
+      <SimpleContactCTA />
       <CTASection />
     </Layout>
   );
