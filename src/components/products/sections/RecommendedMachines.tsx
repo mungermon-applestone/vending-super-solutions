@@ -27,6 +27,15 @@ interface RecommendedMachinesProps {
 const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
   if (!machines?.length) return null;
 
+  // Log the machines data for debugging purposes
+  console.log('[RecommendedMachines] Rendering machines:', machines.map(m => ({
+    title: m.title,
+    hasImage: !!m.image,
+    hasThumbnail: !!m.thumbnail,
+    imageUrl: m.image?.url,
+    thumbnailUrl: m.thumbnail?.url
+  })));
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto">

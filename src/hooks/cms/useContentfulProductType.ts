@@ -154,6 +154,17 @@ export function useContentfulProductType(slug: string) {
         };
       }
       
+      // Check if recommended machines exist and log for debugging
+      if (fields.recommendedMachines) {
+        console.log('[useContentfulProductType] Found recommended machines:', 
+          fields.recommendedMachines.map((m: any) => ({
+            title: m.fields?.title,
+            hasImage: !!m.fields?.image,
+            hasThumbnail: !!m.fields?.thumbnail
+          }))
+        );
+      }
+
       // Transform the Contentful data into our app's format
       const product: CMSProductType = {
         id: entry.sys.id,
@@ -190,16 +201,33 @@ export function useContentfulProductType(slug: string) {
         } : undefined,
         visible: !!fields.visible,
         recommendedMachines: fields.recommendedMachines ? 
-          (fields.recommendedMachines as any[]).map(machine => ({
-            id: machine.sys.id,
-            slug: machine.fields.slug,
-            title: machine.fields.title,
-            description: machine.fields.description,
-            image: machine.fields.image ? {
-              url: `https:${machine.fields.image.fields.file.url}`,
-              alt: machine.fields.image.fields.title || machine.fields.title
-            } : undefined
-          })) : []
+          (fields.recommendedMachines as any[]).map(machine => {
+            // Log each machine's structure for debugging
+            console.log(`[useContentfulProductType] Processing recommended machine: ${machine.fields?.title}`, {
+              hasImage: !!machine.fields?.image,
+              hasThumbnail: !!machine.fields?.thumbnail,
+              thumbnailDetails: machine.fields?.thumbnail ? {
+                hasFields: !!machine.fields.thumbnail.fields,
+                hasFile: !!machine.fields.thumbnail.fields?.file,
+                hasUrl: !!machine.fields.thumbnail.fields?.file?.url
+              } : 'No thumbnail'
+            });
+            
+            return {
+              id: machine.sys.id,
+              slug: machine.fields.slug,
+              title: machine.fields.title,
+              description: machine.fields.description,
+              image: machine.fields.image ? {
+                url: `https:${machine.fields.image.fields.file.url}`,
+                alt: machine.fields.image.fields.title || machine.fields.title
+              } : undefined,
+              thumbnail: machine.fields.thumbnail ? {
+                url: `https:${machine.fields.thumbnail.fields.file.url}`,
+                alt: machine.fields.thumbnail.fields.title || machine.fields.title
+              } : undefined
+            };
+          }) : []
       };
       
       console.log(`[useContentfulProductType] Successfully processed product:`, {
@@ -208,8 +236,11 @@ export function useContentfulProductType(slug: string) {
         hasVideo: !!product.video,
         videoTitle: product.videoTitle,
         hasVideoDescription: !!product.videoDescription,
-        hasVideoThumbnail: !!product.videoThumbnail
+        hasVideoThumbnail: !!product.videoThumbnail,
+        recommendedMachinesCount: product.recommendedMachines?.length || 0,
+        machinesWithThumbnails: product.recommendedMachines?.filter(m => m.thumbnail).length || 0
       });
+      
       return product;
     },
     enabled: !!slug,
