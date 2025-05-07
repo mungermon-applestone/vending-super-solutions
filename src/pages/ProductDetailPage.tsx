@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -6,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
-import DiagnosticInfo from '@/components/products/sections/DiagnosticInfo';
 import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
 import { SimpleContactCTA } from '@/components/common';
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
@@ -75,8 +75,6 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
     features: Array.isArray(data.features) ? data.features : [],
     recommendedMachines: Array.isArray(data.recommendedMachines) ? data.recommendedMachines : []
   } : null;
-  
-  const diagnosticInfo = data?.diagnosticInfo;
 
   return (
     <ContentfulErrorBoundary contentType="Product Details">
@@ -89,14 +87,7 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
         </div>
       </div>
 
-      {/* Always show diagnostic info at the top of the page */}
-      <div className="container mx-auto py-4">
-        <DiagnosticInfo 
-          slug={slug || ''} 
-          error={error instanceof Error ? error : null}
-          diagnosticInfo={diagnosticInfo}
-        />
-      </div>
+      {/* DiagnosticInfo component has been removed from here */}
 
       {isLoading ? (
         <div className="container py-12 text-center">

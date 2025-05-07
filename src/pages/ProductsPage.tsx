@@ -7,7 +7,6 @@ import { useProductsPageContent } from '@/hooks/cms/useProductsPageContent';
 import { isContentfulConfigured, logContentfulConfig, CONTENTFUL_CONFIG } from '@/config/cms';
 import { toast } from 'sonner';
 import { refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
-import ContentfulDebug from '@/components/debug/ContentfulDebug';
 import ContentfulConfigVerifier from '@/components/debug/ContentfulConfigVerifier';
 import PurposeStatement from '@/components/products/sections/PurposeStatement';
 import KeyFeaturesSection from '@/components/products/sections/KeyFeaturesSection';
@@ -118,8 +117,6 @@ const ProductsPage = () => {
               </div>
             </AlertDescription>
           </Alert>
-          
-          <ContentfulDebug />
         </div>
       </Layout>
     );
@@ -127,7 +124,7 @@ const ProductsPage = () => {
 
   return (
     <Layout>
-      {/* Add configuration verifier at the top for easy debugging */}
+      {/* ContentfulConfigVerifier only shown in development environment */}
       {import.meta.env.DEV && <ContentfulConfigVerifier />}
       
       {/* Hero/Purpose Statement Section */}
@@ -179,7 +176,7 @@ const ProductsPage = () => {
         />
       )}
       
-      {/* Debug section - conditionally render based on a query param or dev mode */}
+      {/* Debug section - only shown in development mode */}
       {import.meta.env.DEV && (
         <div className="container mx-auto py-8 px-4">
           <details className="bg-gray-100 p-4 rounded-lg mb-4">
@@ -220,8 +217,6 @@ const ProductsPage = () => {
           </details>
         </div>
       )}
-      
-      <ContentfulDebug />
     </Layout>
   );
 };
