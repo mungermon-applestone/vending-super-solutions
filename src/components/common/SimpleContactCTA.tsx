@@ -2,7 +2,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import EmailLink from './EmailLink';
+import { ArrowRight } from 'lucide-react';
+import { useHomePageContent } from '@/hooks/useHomePageContent';
 
 interface SimpleContactCTAProps {
   title?: string;
@@ -10,31 +11,38 @@ interface SimpleContactCTAProps {
   className?: string;
 }
 
-const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({
-  title = "Ready to Get Started?",
-  description = "Get in touch and we'll start you on your vending journey",
-  className = "",
+export const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({ 
+  title, 
+  description,
+  className = "" 
 }) => {
+  const { data: homeContent } = useHomePageContent();
+  
+  // Use provided props or fallback to CMS content
+  const displayTitle = title || homeContent?.ctaSectionTitle || "Ready to Transform Your Vending Operations?";
+  const displayDescription = description || homeContent?.ctaSectionDescription || 
+    "Get started with our solution today and see the difference in your operations.";
+  const primaryButtonText = homeContent?.ctaPrimaryButtonText || "Request a Demo";
+  const primaryButtonUrl = homeContent?.ctaPrimaryButtonUrl || "/contact";
+  const secondaryButtonText = homeContent?.ctaSecondaryButtonText || "Learn More";
+  const secondaryButtonUrl = homeContent?.ctaSecondaryButtonUrl || "/products";
+
   return (
-    <section className={`py-12 bg-blue-50 ${className}`}>
+    <section className={`bg-vending-blue-light py-16 ${className}`}>
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">
-            {title}
-          </h2>
-          <p className="text-gray-700 mb-8">
-            {description}
-          </p>
-          
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">{displayTitle}</h2>
+          <p className="text-lg text-gray-600 mb-8">{displayDescription}</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <EmailLink 
-              emailAddress="hello@applestonesolutions.com"
-              subject="Demo Request"
-              buttonText="Schedule a Demo"
-              className="bg-vending-blue hover:bg-vending-blue-dark text-white"
-            />
-            <Button asChild variant="outline" className="border-vending-blue text-vending-blue hover:bg-vending-blue-50">
-              <Link to="/machines">Check out Machines</Link>
+            <Button asChild size="lg">
+              <Link to={primaryButtonUrl}>
+                {primaryButtonText} <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link to={secondaryButtonUrl}>
+                {secondaryButtonText}
+              </Link>
             </Button>
           </div>
         </div>
@@ -42,5 +50,3 @@ const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({
     </section>
   );
 };
-
-export default SimpleContactCTA;
