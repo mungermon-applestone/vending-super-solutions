@@ -12,6 +12,7 @@ import { SimpleContactCTA } from '@/components/common';
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { toast } from 'sonner';
+import ProductVideoSection from '@/components/products/ProductVideoSection';
 
 const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -73,7 +74,8 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
     benefits: Array.isArray(data.benefits) ? data.benefits : [],
     image: data.image || null,
     features: Array.isArray(data.features) ? data.features : [],
-    recommendedMachines: Array.isArray(data.recommendedMachines) ? data.recommendedMachines : []
+    recommendedMachines: Array.isArray(data.recommendedMachines) ? data.recommendedMachines : [],
+    video: data.video
   } : null;
 
   return (
@@ -128,6 +130,16 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
             image={product.image?.url || '/placeholder.svg'}
             benefits={product.benefits || []}
           />
+
+          {/* Display video section if product has video */}
+          {product.video && (
+            <ProductVideoSection
+              title={product.video.title || "See Our Solution in Action"}
+              description={product.video.description || "Watch how our solution can transform your business"}
+              videoId={product.video.youtubeId}
+              thumbnailImage={product.video.thumbnailImage?.url || product.image?.url || '/placeholder.svg'}
+            />
+          )}
 
           {product.features && product.features.length > 0 && (
             <section className="py-16 bg-gray-50">

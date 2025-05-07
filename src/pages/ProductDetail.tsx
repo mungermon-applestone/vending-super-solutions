@@ -10,6 +10,7 @@ import ProductExamples from '@/components/products/ProductExamples';
 import CTASection from '@/components/common/CTASection';
 import { SimpleContactCTA } from '@/components/common';
 import { useEffect } from 'react';
+import ProductVideoSection from '@/components/products/ProductVideoSection';
 
 /**
  * Product detail page that displays detailed information about a specific product
@@ -104,6 +105,16 @@ const ProductDetail = () => {
         image={heroImage}
         benefits={benefits}
       />
+
+      {/* Video Section */}
+      {product.video && (
+        <ProductVideoSection
+          title={product.video.title || "See Our Solution in Action"}
+          description={product.video.description || "Watch how our solution can transform your business"}
+          videoId={product.video.youtubeId}
+          thumbnailImage={product.video.thumbnailImage?.url || heroImage}
+        />
+      )}
 
       {/* Features Section */}
       {product.features && product.features.length > 0 && (

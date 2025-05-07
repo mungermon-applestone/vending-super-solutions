@@ -1,3 +1,4 @@
+
 import { CMSProductType } from "@/types/cms";
 import { ProductAdapter, ProductCreateInput, ProductUpdateInput } from "./types";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
@@ -59,7 +60,23 @@ export const contentfulProductAdapter: ProductAdapter = {
               url: `https:${machine.fields.image.fields.file.url}`,
               alt: machine.fields.image.fields.title || machine.fields.title
             } : undefined
-          })) : []
+          })) : [],
+          // Add video support
+          video: fields.video ? {
+            title: fields.videoTitle as string || 'Product Demo',
+            description: fields.videoDescription as string || 'See our solution in action',
+            thumbnailImage: fields.videoThumbnail ? {
+              id: (fields.videoThumbnail as any).sys.id,
+              url: `https:${(fields.videoThumbnail as any).fields.file.url}`,
+              alt: (fields.videoThumbnail as any).fields.title || 'Video thumbnail',
+            } : {
+              id: 'default-thumbnail',
+              url: fields.image ? `https:${(fields.image as any).fields.file.url}` : '/placeholder.svg',
+              alt: 'Video thumbnail',
+            },
+            url: fields.video.fields?.file?.url ? `https:${fields.video.fields.file.url}` : undefined,
+            youtubeId: fields.youtubeVideoId as string || undefined
+          } : undefined
         } as CMSProductType;
       });
     } catch (error) {
@@ -129,7 +146,23 @@ export const contentfulProductAdapter: ProductAdapter = {
             url: `https:${machine.fields.image.fields.file.url}`,
             alt: machine.fields.image.fields.title || machine.fields.title
           } : undefined
-        })) : []
+        })) : [],
+        // Add video support to getById method
+        video: fields.video ? {
+          title: fields.videoTitle as string || 'Product Demo',
+          description: fields.videoDescription as string || 'See our solution in action',
+          thumbnailImage: fields.videoThumbnail ? {
+            id: (fields.videoThumbnail as any).sys.id,
+            url: `https:${(fields.videoThumbnail as any).fields.file.url}`,
+            alt: (fields.videoThumbnail as any).fields.title || 'Video thumbnail',
+          } : {
+            id: 'default-thumbnail',
+            url: fields.image ? `https:${(fields.image as any).fields.file.url}` : '/placeholder.svg',
+            alt: 'Video thumbnail',
+          },
+          url: fields.video.fields?.file?.url ? `https:${fields.video.fields.file.url}` : undefined,
+          youtubeId: fields.youtubeVideoId as string || undefined
+        } : undefined
       } as CMSProductType;
     } catch (error) {
       console.error(`[contentfulProductAdapter] Error in getById for ID ${id}:`, error);

@@ -175,7 +175,8 @@ export function useContentfulProductType(slug: string) {
         console.log(`[useContentfulProductType] Found product type:`, {
           id: entry.sys.id,
           title: entry.fields.title || 'No title',
-          slug: entry.fields.slug || 'No slug'
+          slug: entry.fields.slug || 'No slug',
+          hasVideo: !!entry.fields.video || !!entry.fields.youtubeVideoId 
         });
         
         const fields = entry.fields;
@@ -213,7 +214,27 @@ export function useContentfulProductType(slug: string) {
                 url: `https:${machine.fields.images[0].fields?.file?.url || ''}`,
                 alt: machine.fields.images[0].fields?.title || machine.fields?.title || ''
               } : undefined
-            })).filter(machine => machine.slug && machine.title) : []
+            })).filter(machine => machine.slug && machine.title) : [],
+          // Add video support
+          video: (fields.video || fields.youtubeVideoId) ? {
+            title: fields.videoTitle ? String(fields.videoTitle) : 'Product Demo',
+            description: fields.videoDescription ? String(fields.videoDescription) : 'See our solution in action',
+            thumbnailImage: fields.videoThumbnail ? {
+              id: fields.videoThumbnail.sys?.id || 'thumbnail-id',
+              url: fields.videoThumbnail.fields?.file?.url ? `https:${fields.videoThumbnail.fields.file.url}` : '',
+              alt: fields.videoThumbnail.fields?.title || 'Video thumbnail'
+            } : fields.image ? {
+              id: fields.image.sys?.id || 'image-as-thumbnail',
+              url: fields.image.fields?.file?.url ? `https:${fields.image.fields.file.url}` : '',
+              alt: fields.image.fields?.title || fields.title || 'Video thumbnail'
+            } : {
+              id: 'default-thumbnail',
+              url: '/placeholder.svg',
+              alt: 'Video thumbnail'
+            },
+            url: fields.video?.fields?.file?.url ? `https:${fields.video.fields.file.url}` : undefined,
+            youtubeId: fields.youtubeVideoId ? String(fields.youtubeVideoId) : undefined
+          } : undefined
         };
         
         return {
