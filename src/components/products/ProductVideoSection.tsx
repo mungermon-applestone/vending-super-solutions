@@ -5,6 +5,7 @@ interface ProductVideoSectionProps {
   title: string;
   description: string;
   videoId?: string;
+  videoUrl?: string;
   thumbnailImage: string;
 }
 
@@ -12,6 +13,7 @@ const ProductVideoSection = ({
   title,
   description,
   videoId,
+  videoUrl,
   thumbnailImage
 }: ProductVideoSectionProps) => {
   return (
@@ -32,6 +34,17 @@ const ProductVideoSection = ({
                 allowFullScreen
                 className="w-full h-full rounded-lg shadow-lg"
               ></iframe>
+            </div>
+          ) : videoUrl ? (
+            <div className="aspect-w-16 aspect-h-9">
+              <video 
+                src={videoUrl}
+                controls
+                poster={thumbnailImage}
+                className="w-full h-full rounded-lg shadow-lg object-cover"
+              >
+                Your browser does not support the video tag.
+              </video>
             </div>
           ) : (
             <div className="relative rounded-lg overflow-hidden shadow-lg">

@@ -106,13 +106,14 @@ const ProductDetail = () => {
         benefits={benefits}
       />
 
-      {/* Video Section */}
+      {/* Video Section - Modified to handle both YouTube and direct video URLs */}
       {product.video && (
         <ProductVideoSection
           title={product.video.title || "See Our Solution in Action"}
           description={product.video.description || "Watch how our solution can transform your business"}
-          videoId={product.video.youtubeId}
+          videoId={product.video.youtubeId || undefined}
           thumbnailImage={product.video.thumbnailImage?.url || heroImage}
+          videoUrl={product.video.url || undefined}
         />
       )}
 
