@@ -20,6 +20,8 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
   const [error, setError] = useState<Error | null>(null);
   const isPreview = isPreviewEnvironment();
   const [initAttempted, setInitAttempted] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
   
   useEffect(() => {
     let isMounted = true;
@@ -32,6 +34,18 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
       try {
         console.log('[ContentfulInitializer] Starting initialization');
         
+        // Check if Contentful is already configured
+        if (!isContentfulConfigured()) {
+          console.log('[ContentfulInitializer] Contentful not configured, checking hardcoded values');
+          // Try to use hardcoded values from env-config.js
+          if (typeof window !== 'undefined' && window.env && window.env.VITE_CONTENTFUL_SPACE_ID) {
+            console.log('[ContentfulInitializer] Found hardcoded values in window.env');
+          } else {
+            console.warn('[ContentfulInitializer] No Contentful credentials found in environment');
+            throw new Error('Contentful is not configured and no fallback credentials are available');
+          }
+        }
+        
         // Force provider initialization
         forceContentfulProvider();
         
@@ -41,6 +55,15 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
         
         if (!testResult.success) {
           console.warn('[ContentfulInitializer] Connection test failed, but will try to continue:', testResult.message);
+          
+          // Try refreshing the client once more
+          await refreshContentfulClient();
+          
+          // Try the test again
+          const retryTest = await testContentfulConnection();
+          if (!retryTest.success) {
+            throw new Error(`Connection test failed: ${retryTest.message}`);
+          }
         }
         
         // Mark as initialized regardless of test result to attempt showing content
@@ -55,8 +78,22 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
         if (isMounted) {
           setError(error instanceof Error ? error : new Error('Unknown initialization error'));
           
-          // In preview environments, still force provider to use fallbacks
-          if (isPreview) {
+          // If we still have retries left, try again
+          if (retryCount < MAX_RETRIES) {
+            console.log(`[ContentfulInitializer] Retry attempt ${retryCount + 1} of ${MAX_RETRIES}`);
+            setRetryCount(prev => prev + 1);
+            
+            // Use timeout to avoid immediate retry
+            setTimeout(() => {
+              if (isMounted) {
+                initializeContentful();
+              }
+            }, 1000 * Math.pow(2, retryCount)); // Exponential backoff
+            return;
+          }
+          
+          // In preview environments or after all retries, still force provider to use fallbacks
+          if (isPreview || retryCount >= MAX_RETRIES) {
             forceContentfulProvider();
             setIsInitialized(true); // Still initialized but will use fallbacks
             window._contentfulInitializedSource = 'fallback-after-error';
@@ -81,7 +118,7 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [isPreview]);
+  }, [isPreview, retryCount]);
   
   // Enhanced display strategy:
   // Always attempt to show content unless we're in a loading state
@@ -92,7 +129,7 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
     return (
       <div className="flex justify-center items-center min-h-[200px]">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600 mr-2" />
-        <span>Initializing content...</span>
+        <span>Initializing content{retryCount > 0 ? ` (Retry ${retryCount}/${MAX_RETRIES})` : ''}...</span>
       </div>
     );
   }

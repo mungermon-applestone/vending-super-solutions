@@ -30,7 +30,12 @@
       
       // Pre-populate from public api/runtime-config if available
       fetch('/api/runtime-config')
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to load runtime config: ${response.status}`);
+          }
+          return response.json();
+        })
         .then(config => {
           console.log('Loaded runtime config:', config);
           window._runtimeConfig = config;
@@ -40,11 +45,21 @@
           for (const key in config) {
             window.env[key] = config[key];
           }
+          
+          // Refresh Contentful client with new config
+          if (window._refreshContentfulAfterConfig) {
+            window._refreshContentfulAfterConfig()
+              .catch(err => console.warn('Failed to refresh Contentful after config update:', err));
+          }
         })
         .catch(err => {
           console.warn('Failed to load runtime config, using default values:', err);
+          // Will fall back to env-config.js values
         });
     </script>
+    
+    <!-- Environment configuration script -->
+    <script src="/env-config.js"></script>
   </head>
   <body>
     <div id="root"></div>

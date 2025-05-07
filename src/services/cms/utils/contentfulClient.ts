@@ -28,23 +28,60 @@ export const getContentfulClient = async (forceRefresh = false) => {
     console.log('[contentfulClient] Creating new client');
     logContentfulConfig();
     
+    // Extra check to ensure we have credentials
     if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
       console.error('[contentfulClient] Missing Contentful configuration');
-      throw new Error('Contentful is not configured. Please set your Space ID and Delivery Token in the environment variables.');
+      
+      // Check if we have window.env credentials
+      if (typeof window !== 'undefined' && window.env) {
+        console.log('[contentfulClient] Trying window.env credentials');
+        if (!window.env.VITE_CONTENTFUL_SPACE_ID || !window.env.VITE_CONTENTFUL_DELIVERY_TOKEN) {
+          throw new Error('Contentful is not configured. Please set your Space ID and Delivery Token in the environment variables.');
+        }
+        
+        // Create client with window.env credentials
+        contentfulClient = createClient({
+          space: window.env.VITE_CONTENTFUL_SPACE_ID,
+          accessToken: window.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
+          environment: window.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master',
+          retryOnError: true,
+        });
+      } else {
+        throw new Error('Contentful is not configured. Please set your Space ID and Delivery Token in the environment variables.');
+      }
+    } else {
+      // Create client with CONTENTFUL_CONFIG
+      contentfulClient = createClient({
+        space: CONTENTFUL_CONFIG.SPACE_ID,
+        accessToken: CONTENTFUL_CONFIG.DELIVERY_TOKEN,
+        environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master',
+        retryOnError: true,
+      });
     }
-
-    contentfulClient = createClient({
-      space: CONTENTFUL_CONFIG.SPACE_ID,
-      accessToken: CONTENTFUL_CONFIG.DELIVERY_TOKEN,
-      environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master',
-      retryOnError: true,
-    });
 
     // Reset connection attempts on successful creation
     connectionAttempts = 0;
     lastClientCreationTime = Date.now();
     
     console.log('[contentfulClient] Client created successfully');
+    
+    // Save working credentials to localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        const credentialsToSave = {
+          VITE_CONTENTFUL_SPACE_ID: CONTENTFUL_CONFIG.SPACE_ID || window.env?.VITE_CONTENTFUL_SPACE_ID,
+          VITE_CONTENTFUL_DELIVERY_TOKEN: CONTENTFUL_CONFIG.DELIVERY_TOKEN || window.env?.VITE_CONTENTFUL_DELIVERY_TOKEN,
+          VITE_CONTENTFUL_ENVIRONMENT_ID: CONTENTFUL_CONFIG.ENVIRONMENT_ID || window.env?.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
+        };
+        
+        if (credentialsToSave.VITE_CONTENTFUL_SPACE_ID && credentialsToSave.VITE_CONTENTFUL_DELIVERY_TOKEN) {
+          localStorage.setItem('contentful_credentials', JSON.stringify(credentialsToSave));
+          console.log('[contentfulClient] Saved working credentials to localStorage');
+        }
+      } catch (storageError) {
+        console.warn('[contentfulClient] Could not save credentials to localStorage:', storageError);
+      }
+    }
     
     return contentfulClient;
   } catch (error) {

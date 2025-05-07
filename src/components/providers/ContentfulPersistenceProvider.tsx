@@ -20,8 +20,10 @@ const ContentfulPersistenceProvider: React.FC<{ children: React.ReactNode }> = (
         try {
           await refreshContentfulClient();
           console.log('[ContentfulPersistenceProvider] Successfully refreshed client');
+          return Promise.resolve();
         } catch (error) {
           console.error('[ContentfulPersistenceProvider] Error refreshing client:', error);
+          return Promise.reject(error);
         }
       };
     }
@@ -40,6 +42,16 @@ const ContentfulPersistenceProvider: React.FC<{ children: React.ReactNode }> = (
         await refreshContentfulClient();
       } catch (error) {
         console.error('[ContentfulPersistenceProvider] Initial refresh error:', error);
+        
+        // If refresh fails, try again after a delay (helps with race conditions)
+        setTimeout(async () => {
+          try {
+            console.log('[ContentfulPersistenceProvider] Retry refresh after initial failure');
+            await refreshContentfulClient();
+          } catch (retryError) {
+            console.error('[ContentfulPersistenceProvider] Retry refresh also failed:', retryError);
+          }
+        }, 2000);
       }
     };
     

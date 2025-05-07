@@ -13,20 +13,28 @@
     VITE_CONTENTFUL_ENVIRONMENT_ID: "master"
   };
 
-  // Simple function to detect if we're in a preview environment
+  // Enhanced detection function for preview environments
   function isPreviewEnvironment() {
     if (typeof window === 'undefined') return false;
     
     const hostname = window.location.hostname;
-    return (
-      hostname.includes('preview') || 
-      hostname.includes('staging') || 
-      hostname.includes('lovable.app') ||
-      hostname.includes('vercel.app') ||
-      hostname.includes('netlify.app') ||
-      hostname === 'localhost' ||
-      hostname === '127.0.0.1'
-    );
+    
+    // List of production domains (adjust these according to your actual production domains)
+    const productionDomains = [
+      'applestonesolutions.com',
+      'www.applestonesolutions.com'
+      // Add other production domains here if needed
+    ];
+    
+    // Check if current hostname is a production domain
+    for (const domain of productionDomains) {
+      if (hostname === domain || hostname.endsWith('.' + domain)) {
+        return false; // Not a preview environment
+      }
+    }
+    
+    // If not explicitly production, treat as preview
+    return true;
   }
   
   // Try to load credentials from localStorage if available
@@ -46,7 +54,7 @@
     return null;
   }
   
-  // Apply credentials based on environment
+  // Apply credentials based on environment with enhanced fallback logic
   function applyCredentials() {
     // First, check for production environment variables (set in deployment)
     if (window.env.VITE_CONTENTFUL_SPACE_ID && window.env.VITE_CONTENTFUL_DELIVERY_TOKEN) {
@@ -71,9 +79,9 @@
       return true;
     }
     
-    // Third, use preview credentials for preview environments
-    if (isPreviewEnvironment()) {
-      console.log('[env-config] Preview/development environment detected, applying preview credentials');
+    // Third, use preview credentials for preview environments or as fallback
+    if (isPreviewEnvironment() || !window.env.VITE_CONTENTFUL_SPACE_ID) {
+      console.log('[env-config] Applying preview/fallback credentials');
       
       window.env.VITE_CONTENTFUL_SPACE_ID = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
       window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN;

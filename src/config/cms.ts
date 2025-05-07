@@ -1,4 +1,3 @@
-
 // CMS Configuration
 const ENV_STORAGE_KEY = 'vending-cms-env-variables';
 
@@ -75,17 +74,21 @@ function getEnvVariable(key: string): string {
 if (typeof window !== 'undefined' && !window._runtimeConfigLoaded) {
   try {
     console.log('[cms.ts] Attempting to load runtime config from /api/runtime-config');
-    window._runtimeConfigLoaded = true;
     
     fetch('/api/runtime-config')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+        return response.json();
+      })
       .then(config => {
         console.log('[cms.ts] Successfully loaded runtime config:', config);
         window._runtimeConfig = config;
+        window._runtimeConfigLoaded = true;
         
         // Force refresh of Contentful if we just loaded new config
         if (typeof window._refreshContentfulAfterConfig === 'function') {
-          window._refreshContentfulAfterConfig();
+          window._refreshContentfulAfterConfig()
+            .catch(err => console.warn('[cms.ts] Error refreshing Contentful after config update:', err));
         }
       })
       .catch(err => {
@@ -127,16 +130,8 @@ export function isPreviewEnvironment() {
     }
   }
   
-  // Otherwise treat as preview if it matches known patterns
-  return (
-    hostname.includes('preview') || 
-    hostname.includes('staging') || 
-    hostname.includes('lovable.app') ||
-    hostname.includes('vercel.app') ||
-    hostname.includes('netlify.app') ||
-    hostname === 'localhost' ||
-    hostname === '127.0.0.1'
-  );
+  // Otherwise treat as preview if it matches known patterns or default to preview for safety
+  return true;
 }
 
 export function checkContentfulConfig() {
