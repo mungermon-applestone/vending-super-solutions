@@ -30,7 +30,7 @@ const Home = () => {
       <TestimonialsSection />
       <SimpleContactCTA 
         title="Ready to Transform Your Vending Operations?" 
-        description="Get started with our platform today and see the difference in your operations."
+        description="Get in touch and we'll start you on your vending journey."
         className="w-full"
       />
       <ContentfulDebug />
