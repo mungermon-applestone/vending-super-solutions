@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -25,6 +25,7 @@ interface RecommendedMachinesProps {
 }
 
 const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
+  // Early return if no machines
   if (!machines?.length) return null;
 
   // Log the machines data for debugging purposes
@@ -36,6 +37,18 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
     thumbnailUrl: m.thumbnail?.url
   })));
 
+  // Add effect to log when the component mounts
+  useEffect(() => {
+    console.log('[RecommendedMachines] Component mounted with', machines.length, 'machines');
+    console.log('[RecommendedMachines] First machine details:', machines[0] ? {
+      title: machines[0].title,
+      hasThumbnail: !!machines[0].thumbnail,
+      hasImage: !!machines[0].image,
+      thumbnailUrl: machines[0].thumbnail?.url || 'none',
+      imageUrl: machines[0].image?.url || 'none'
+    } : 'No machines');
+  }, [machines]);
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto">
@@ -46,7 +59,12 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
             const imageToUse = machine.thumbnail || machine.image;
             
             // Log which image we're using for debugging
-            console.log(`[RecommendedMachines] Machine ${machine.title}: Using ${machine.thumbnail ? 'thumbnail' : 'regular image'}`);
+            console.log(`[RecommendedMachines] Machine ${machine.title}:`, {
+              hasThumbnail: !!machine.thumbnail,
+              hasImage: !!machine.image, 
+              usingThumbnail: !!machine.thumbnail,
+              imageUrl: imageToUse?.url || 'none'
+            });
             
             return (
               <div key={machine.id} className="bg-white rounded-lg shadow-md overflow-hidden">
