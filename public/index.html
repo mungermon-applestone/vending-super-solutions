@@ -16,6 +16,10 @@
     <script>
       window._runtimeConfigLoaded = false;
       window._runtimeConfig = {};
+      window._refreshContentfulAfterConfig = function() {
+        console.log('Refresh Contentful function initialized');
+        return Promise.resolve();
+      };
       window.env = {};
     </script>
     
@@ -30,6 +34,7 @@
         .then(config => {
           console.log('Loaded runtime config:', config);
           window._runtimeConfig = config;
+          window._runtimeConfigLoaded = true;
           
           // Copy values to window.env
           for (const key in config) {
