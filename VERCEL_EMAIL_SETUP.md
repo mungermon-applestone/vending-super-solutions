@@ -17,7 +17,7 @@ You'll need an email service provider to send emails. Here are some popular opti
 3. Add the following environment variables:
 
 ```
-EMAIL_TO=munger@applestonesolutons.com
+EMAIL_TO=munger@applestonesolutions.com
 EMAIL_FROM=noreply@yourdomain.com  # Replace with a verified sender email
 ```
 

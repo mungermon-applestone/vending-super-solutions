@@ -42,7 +42,8 @@ export default async function handler(req, res) {
       
       return res.status(200).json({ 
         success: true, 
-        message: 'Form submission received. In development mode, email not actually sent.'
+        message: 'Form submission received successfully. In development mode, email not actually sent.',
+        developmentMode: true
       });
     }
     

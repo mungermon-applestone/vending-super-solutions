@@ -46,6 +46,10 @@
             window.env[key] = config[key];
           }
           
+          // Email variables for forms
+          window.env.EMAIL_TO = window.env.EMAIL_TO || 'munger@applestonesolutions.com';
+          window.env.EMAIL_FROM = window.env.EMAIL_FROM || 'noreply@applestonesolutions.com';
+          
           // Refresh Contentful client with new config
           if (window._refreshContentfulAfterConfig) {
             window._refreshContentfulAfterConfig()
