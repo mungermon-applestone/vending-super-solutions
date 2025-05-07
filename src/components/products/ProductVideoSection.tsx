@@ -67,6 +67,9 @@ const ProductVideoSection = ({
     ? "md:w-1/2 w-full md:text-left text-center"
     : "max-w-2xl w-full text-center mt-6";
 
+  // Custom height control for vertical videos
+  const videoHeightStyle = isVertical ? { maxHeight: '450px' } : {};
+
   return (
     <section className="py-16 bg-white">
       <div className="container-wide">
@@ -74,7 +77,7 @@ const ProductVideoSection = ({
           {/* Video Container */}
           <div className={videoContainerClass}>
             {videoId ? (
-              <div className={`aspect-w-16 aspect-h-9 ${isVertical ? 'md:aspect-w-9 md:aspect-h-16' : ''}`}>
+              <div className={`relative rounded-lg overflow-hidden shadow-lg ${isVertical ? 'md:aspect-w-9 md:aspect-h-16 h-full' : 'aspect-w-16 aspect-h-9'}`}>
                 <iframe 
                   ref={iframeRef}
                   src={`https://www.youtube.com/embed/${videoId}`}
@@ -82,10 +85,11 @@ const ProductVideoSection = ({
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className="w-full h-full rounded-lg shadow-lg"
+                  style={isVertical ? videoHeightStyle : {}}
                 ></iframe>
               </div>
             ) : videoUrl ? (
-              <div className={`aspect-w-16 aspect-h-9 ${isVertical ? 'md:aspect-w-9 md:aspect-h-16' : ''}`}>
+              <div className={`relative rounded-lg overflow-hidden shadow-lg ${isVertical ? 'md:aspect-w-9 md:aspect-h-16' : 'aspect-w-16 aspect-h-9'}`}>
                 <video 
                   ref={videoRef}
                   src={videoUrl}
@@ -93,6 +97,7 @@ const ProductVideoSection = ({
                   poster={thumbnailImage}
                   className="w-full h-full rounded-lg shadow-lg object-cover"
                   onLoadedMetadata={handleVideoMetadataLoaded}
+                  style={isVertical ? videoHeightStyle : {}}
                 >
                   Your browser does not support the video tag.
                 </video>
@@ -103,6 +108,7 @@ const ProductVideoSection = ({
                   src={thumbnailImage} 
                   alt="Video thumbnail" 
                   className="w-full h-auto"
+                  style={isVertical ? videoHeightStyle : {}}
                   onLoad={(e) => {
                     const img = e.currentTarget;
                     setIsVertical(img.naturalHeight > img.naturalWidth);
@@ -121,10 +127,7 @@ const ProductVideoSection = ({
           {/* Description Container */}
           <div className={descriptionContainerClass}>
             <h2 className="text-3xl font-bold mb-4 text-vending-blue-dark">{title}</h2>
-            <p className="subtitle">{description}</p>
-            <p className="text-sm text-gray-500 mt-4">
-              See our vending solution in action
-            </p>
+            <p className="text-gray-700">{description}</p>
           </div>
         </div>
       </div>
