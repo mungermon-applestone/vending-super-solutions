@@ -12,7 +12,7 @@ interface SimpleContactCTAProps {
 
 const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({
   title = "Ready to Get Started?",
-  description = "Fill out the form and we'll start you on your vending journey.",
+  description = "Get in touch and we'll start you on your vending journey",
   className = "",
 }) => {
   return (
