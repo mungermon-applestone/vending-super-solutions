@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import {
   NavigationMenuItem,
@@ -17,8 +17,10 @@ const TechnologyDropdown: React.FC<TechnologyDropdownProps> = ({ isActive }) => 
       <NavigationMenuLink 
         asChild
         className={cn(
-          "inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50",
-          isActive && "bg-accent text-accent-foreground"
+          "inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors",
+          isActive 
+            ? "bg-vending-blue text-white border border-vending-blue" 
+            : "bg-gray-50 text-gray-900 hover:bg-gray-100 border border-transparent"
         )}
       >
         <Link to="/technology">Technology</Link>
