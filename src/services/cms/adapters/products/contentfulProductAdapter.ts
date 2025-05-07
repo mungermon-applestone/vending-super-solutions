@@ -34,6 +34,17 @@ export const contentfulProductAdapter: ProductAdapter = {
       // Transform Contentful entries to CMSProductType
       return entries.items.map(entry => {
         const fields = entry.fields;
+        
+        // Log recommended machines data if present
+        if (fields.recommendedMachines) {
+          console.log(`[contentfulProductAdapter] Product ${fields.title} has ${(fields.recommendedMachines as any[]).length} recommended machines`);
+          console.log('[contentfulProductAdapter] First recommended machine data:', {
+            title: (fields.recommendedMachines as any[])[0]?.fields?.title,
+            hasImage: !!(fields.recommendedMachines as any[])[0]?.fields?.image,
+            hasThumbnail: !!(fields.recommendedMachines as any[])[0]?.fields?.thumbnail
+          });
+        }
+        
         return {
           id: entry.sys.id,
           title: fields.title as string,
@@ -51,16 +62,31 @@ export const contentfulProductAdapter: ProductAdapter = {
             description: feature.fields.description,
             icon: feature.fields.icon || undefined
           })) : [],
-          recommendedMachines: fields.recommendedMachines ? (fields.recommendedMachines as any[]).map(machine => ({
-            id: machine.sys.id,
-            title: machine.fields.title,
-            slug: machine.fields.slug,
-            description: machine.fields.description,
-            image: machine.fields.image ? {
-              url: `https:${machine.fields.image.fields.file.url}`,
-              alt: machine.fields.image.fields.title || machine.fields.title
-            } : undefined
-          })) : [],
+          recommendedMachines: fields.recommendedMachines ? (fields.recommendedMachines as any[]).map(machine => {
+            // Debug log for each machine's thumbnail data
+            const hasThumbnail = !!machine.fields.thumbnail;
+            if (hasThumbnail) {
+              console.log(`[contentfulProductAdapter] Machine ${machine.fields.title} has thumbnail:`, {
+                url: machine.fields.thumbnail.fields?.file?.url ? `https:${machine.fields.thumbnail.fields.file.url}` : 'No URL',
+                title: machine.fields.thumbnail.fields?.title
+              });
+            }
+            
+            return {
+              id: machine.sys.id,
+              title: machine.fields.title,
+              slug: machine.fields.slug,
+              description: machine.fields.description,
+              image: machine.fields.image ? {
+                url: `https:${machine.fields.image.fields.file.url}`,
+                alt: machine.fields.image.fields.title || machine.fields.title
+              } : undefined,
+              thumbnail: machine.fields.thumbnail ? {
+                url: `https:${machine.fields.thumbnail.fields.file.url}`,
+                alt: machine.fields.thumbnail.fields.title || machine.fields.title
+              } : undefined
+            };
+          }) : [],
           // Add video support
           video: fields.video ? {
             title: fields.videoTitle as string || 'Product Demo',
@@ -120,6 +146,18 @@ export const contentfulProductAdapter: ProductAdapter = {
       
       const fields = entry.fields;
       
+      // Log recommended machines data for debugging
+      if (fields.recommendedMachines) {
+        console.log(`[contentfulProductAdapter:getById] Product ${fields.title} has ${(fields.recommendedMachines as any[]).length} recommended machines`);
+        
+        // Check for thumbnails in recommended machines
+        const machinesWithThumbnails = (fields.recommendedMachines as any[])
+          .filter(machine => !!machine.fields.thumbnail)
+          .length;
+          
+        console.log(`[contentfulProductAdapter:getById] Found ${machinesWithThumbnails} machines with thumbnails`);
+      }
+      
       return {
         id: entry.sys.id,
         title: fields.title as string,
@@ -137,16 +175,27 @@ export const contentfulProductAdapter: ProductAdapter = {
           description: feature.fields.description,
           icon: feature.fields.icon || undefined
         })) : [],
-        recommendedMachines: fields.recommendedMachines ? (fields.recommendedMachines as any[]).map(machine => ({
-          id: machine.sys.id,
-          title: machine.fields.title,
-          slug: machine.fields.slug,
-          description: machine.fields.description,
-          image: machine.fields.image ? {
-            url: `https:${machine.fields.image.fields.file.url}`,
-            alt: machine.fields.image.fields.title || machine.fields.title
-          } : undefined
-        })) : [],
+        recommendedMachines: fields.recommendedMachines ? (fields.recommendedMachines as any[]).map(machine => {
+          // Log each recommended machine's thumbnail data
+          if (machine.fields.thumbnail) {
+            console.log(`[contentfulProductAdapter:getById] Machine ${machine.fields.title} has thumbnail`);
+          }
+          
+          return {
+            id: machine.sys.id,
+            title: machine.fields.title,
+            slug: machine.fields.slug,
+            description: machine.fields.description,
+            image: machine.fields.image ? {
+              url: `https:${machine.fields.image.fields.file.url}`,
+              alt: machine.fields.image.fields.title || machine.fields.title
+            } : undefined,
+            thumbnail: machine.fields.thumbnail ? {
+              url: `https:${machine.fields.thumbnail.fields.file.url}`,
+              alt: machine.fields.thumbnail.fields.title || machine.fields.title
+            } : undefined
+          };
+        }) : [],
         // Add video support to getById method
         video: fields.video ? {
           title: fields.videoTitle as string || 'Product Demo',
