@@ -18,7 +18,7 @@ const DesktopNavigation = () => {
   const isAboutActive = location.pathname === '/about';
   
   return (
-    <div className="hidden md:flex items-center space-x-2">
+    <nav className="hidden md:flex items-center space-x-2">
       <NavigationMenu>
         <NavigationMenuList>
           <ProductsDropdown isActive={isProductsActive} />
@@ -28,7 +28,7 @@ const DesktopNavigation = () => {
       
       {/* Additional navigation links */}
       <AdditionalNavLinks isAboutActive={isAboutActive} />
-    </div>
+    </nav>
   );
 };
 

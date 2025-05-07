@@ -1,9 +1,20 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Menu } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import MobileNavigation from './header/MobileNavigation';
+import DesktopNavigation from './header/DesktopNavigation';
 
 const Header = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
+  
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
     <header className="header-container sticky top-0 z-30 w-full bg-white border-b border-gray-200 shadow-sm">
       <div className="container mx-auto flex justify-between items-center py-4 px-4">
@@ -12,17 +23,21 @@ const Header = () => {
         </Link>
         
         <div className="flex items-center gap-4">
-          <nav className="hidden md:flex items-center space-x-1">
-            <NavLink href="/products">Products</NavLink>
-            <NavLink href="/technology">Technology</NavLink>
-            <NavLink href="/machines">Machines</NavLink>
-            <NavLink href="/business-goals">Business Goals</NavLink>
-            <NavLink href="/about">About</NavLink>
-            <NavLink href="/blog">Updates</NavLink>
-            <NavLink href="/contact">Contact</NavLink>
-          </nav>
+          {isMobile ? (
+            <button 
+              onClick={toggleMobileMenu} 
+              className="p-2 text-gray-600 hover:text-gray-900 focus:outline-none"
+              aria-label="Toggle mobile menu"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+          ) : (
+            <DesktopNavigation />
+          )}
         </div>
       </div>
+      
+      <MobileNavigation isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
     </header>
   );
 };
