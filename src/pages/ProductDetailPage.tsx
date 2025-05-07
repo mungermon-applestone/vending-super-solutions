@@ -137,6 +137,7 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
               title={product.video.title || "See Our Solution in Action"}
               description={product.video.description || "Watch how our solution can transform your business"}
               videoId={product.video.youtubeId}
+              videoUrl={product.video.url}
               thumbnailImage={product.video.thumbnailImage?.url || product.image?.url || '/placeholder.svg'}
             />
           )}

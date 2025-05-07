@@ -24,6 +24,7 @@ export interface CMSProductType {
     description: string;
     thumbnailImage: CMSImage;
     url?: string;
+    youtubeId?: string;
   };
   visible?: boolean;
   displayOrder?: number;

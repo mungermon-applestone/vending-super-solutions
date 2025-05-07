@@ -111,9 +111,9 @@ const ProductDetail = () => {
         <ProductVideoSection
           title={product.video.title || "See Our Solution in Action"}
           description={product.video.description || "Watch how our solution can transform your business"}
-          videoId={product.video.youtubeId || undefined}
+          videoId={product.video.youtubeId}
+          videoUrl={product.video.url}
           thumbnailImage={product.video.thumbnailImage?.url || heroImage}
-          videoUrl={product.video.url || undefined}
         />
       )}
 
