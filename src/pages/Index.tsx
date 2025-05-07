@@ -21,7 +21,7 @@ const Index = () => {
       <AvailableMachinesSection />
       <SimpleContactCTA 
         title={homeContent?.ctaSectionTitle || "Ready to Transform Your Vending Operations?"}
-        description={homeContent?.ctaSectionDescription || "Get started with our platform today and see the difference in your operations."}
+        description={homeContent?.ctaSectionDescription || "Get in touch and we'll start you on your vending journey."}
         className="w-full"
       />
     </Layout>
