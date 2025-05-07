@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
+import EmailLink from './EmailLink';
 
 interface SimpleContactCTAProps {
   title?: string;
@@ -23,7 +24,6 @@ const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({
   const displayDescription = description || homeContent?.ctaSectionDescription || 
     "Get started with our solution today and see the difference in your operations.";
   const primaryButtonText = homeContent?.ctaPrimaryButtonText || "Request a Demo";
-  const primaryButtonUrl = homeContent?.ctaPrimaryButtonUrl || "/contact";
   const secondaryButtonText = homeContent?.ctaSecondaryButtonText || "Learn More";
   const secondaryButtonUrl = homeContent?.ctaSecondaryButtonUrl || "/products";
 
@@ -34,11 +34,15 @@ const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({
           <h2 className="text-3xl font-bold text-gray-900 mb-4">{displayTitle}</h2>
           <p className="text-lg text-gray-600 mb-8">{displayDescription}</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button asChild size="lg">
-              <Link to={primaryButtonUrl}>
-                {primaryButtonText} <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
+            <EmailLink 
+              emailAddress="hello@applestonesolutions.com"
+              subject="Demo Request"
+              buttonText={primaryButtonText}
+              size="lg"
+              className="flex items-center"
+            >
+              {primaryButtonText} <ArrowRight className="ml-2 h-5 w-5" />
+            </EmailLink>
             <Button asChild variant="outline" size="lg">
               <Link to={secondaryButtonUrl}>
                 {secondaryButtonText}
