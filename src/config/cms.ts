@@ -1,3 +1,4 @@
+
 // CMS Configuration
 const ENV_STORAGE_KEY = 'vending-cms-env-variables';
 
@@ -6,36 +7,58 @@ const ENV_STORAGE_KEY = 'vending-cms-env-variables';
 // 2. window.env (runtime environment variables from env-config.js)
 // 3. localStorage (fallback for development only)
 function getEnvVariable(key: string): string {
-  // Check import.meta.env first (highest priority)
-  if (import.meta.env && import.meta.env[key]) {
-    return import.meta.env[key];
-  }
+  console.log(`[getEnvVariable] Looking for ${key}`);
   
-  // Then check window.env (second priority)
+  // First check for runtime environment variables from window.env
   if (typeof window !== 'undefined' && window.env && window.env[key]) {
+    console.log(`[getEnvVariable] Found ${key} in window.env`);
     return window.env[key];
   }
   
-  // Only check localStorage in development mode (lowest priority and only for development)
+  // Then check import.meta.env
+  if (import.meta.env && import.meta.env[key]) {
+    console.log(`[getEnvVariable] Found ${key} in import.meta.env`);
+    return import.meta.env[key];
+  }
+  
+  // Check for publicly available runtime config
+  if (typeof window !== 'undefined') {
+    try {
+      if (window._runtimeConfig && window._runtimeConfig[key]) {
+        console.log(`[getEnvVariable] Found ${key} in window._runtimeConfig`);
+        return window._runtimeConfig[key];
+      }
+    } catch (e) {
+      console.warn('[getEnvVariable] Error accessing runtime config:', e);
+    }
+  }
+  
+  // Finally check localStorage in development mode
   if (typeof window !== 'undefined' && window.localStorage && import.meta.env.DEV) {
     try {
       const storedVars = window.localStorage.getItem(ENV_STORAGE_KEY);
       if (storedVars) {
         const parsedVars = JSON.parse(storedVars);
         
+        // Check direct key match
         if (parsedVars[key]) {
+          console.log(`[getEnvVariable] Found ${key} in localStorage`);
           return parsedVars[key];
         }
         
-        // Also check key names mapping
+        // Check key names mapping
         if (parsedVars.keyNames && parsedVars.keyNames[key]) {
           const mappedKey = parsedVars.keyNames[key];
-          return parsedVars[mappedKey] || '';
+          if (parsedVars[mappedKey]) {
+            console.log(`[getEnvVariable] Found ${key} via mapping in localStorage`);
+            return parsedVars[mappedKey];
+          }
         }
         
-        // Finally check for legacy keys without VITE_ prefix
+        // Check for legacy keys without VITE_ prefix
         const legacyKey = key.replace('VITE_', '');
         if (parsedVars[legacyKey]) {
+          console.log(`[getEnvVariable] Found ${key} via legacy key in localStorage`);
           return parsedVars[legacyKey];
         }
       }
@@ -44,7 +67,33 @@ function getEnvVariable(key: string): string {
     }
   }
   
+  console.log(`[getEnvVariable] Could not find ${key} in any source`);
   return '';
+}
+
+// Try to load runtime config from /api/runtime-config on component mount
+if (typeof window !== 'undefined' && !window._runtimeConfigLoaded) {
+  try {
+    console.log('[cms.ts] Attempting to load runtime config from /api/runtime-config');
+    window._runtimeConfigLoaded = true;
+    
+    fetch('/api/runtime-config')
+      .then(response => response.json())
+      .then(config => {
+        console.log('[cms.ts] Successfully loaded runtime config:', config);
+        window._runtimeConfig = config;
+        
+        // Force refresh of Contentful if we just loaded new config
+        if (typeof window._refreshContentfulAfterConfig === 'function') {
+          window._refreshContentfulAfterConfig();
+        }
+      })
+      .catch(err => {
+        console.warn('[cms.ts] Failed to load runtime config:', err);
+      });
+  } catch (e) {
+    console.warn('[cms.ts] Error setting up runtime config loader:', e);
+  }
 }
 
 // Contentful Configuration
@@ -67,9 +116,8 @@ export function isPreviewEnvironment() {
   // List of production domains
   const productionDomains = [
     'applestonesolutions.com',
-    'www.applestonesolutions.com',
-    'localhost', // Remove this for production
-    '127.0.0.1' // Remove this for production
+    'www.applestonesolutions.com'
+    // removed localhost and 127.0.0.1 from production domains
   ];
   
   // Check if current hostname matches a production domain
@@ -85,7 +133,9 @@ export function isPreviewEnvironment() {
     hostname.includes('staging') || 
     hostname.includes('lovable.app') ||
     hostname.includes('vercel.app') ||
-    hostname.includes('netlify.app')
+    hostname.includes('netlify.app') ||
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1'
   );
 }
 

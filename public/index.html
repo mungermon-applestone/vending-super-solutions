@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Applestone Solutions</title>
+    <meta name="description" content="Advanced vending solutions by Applestone" />
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.contentful.com" crossorigin />
+    
+    <!-- Runtime config script -->
+    <script>
+      window._runtimeConfigLoaded = false;
+      window._runtimeConfig = {};
+      window.env = {};
+    </script>
+    
+    <!-- Contentful environment variables -->
+    <script>
+      // Initialize env object if not exists
+      if (!window.env) window.env = {};
+      
+      // Pre-populate from public api/runtime-config if available
+      fetch('/api/runtime-config')
+        .then(response => response.json())
+        .then(config => {
+          console.log('Loaded runtime config:', config);
+          window._runtimeConfig = config;
+          
+          // Copy values to window.env
+          for (const key in config) {
+            window.env[key] = config[key];
+          }
+        })
+        .catch(err => {
+          console.warn('Failed to load runtime config, using default values:', err);
+        });
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

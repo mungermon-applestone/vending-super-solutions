@@ -12,11 +12,42 @@ const ContentfulPersistenceProvider: React.FC<{ children: React.ReactNode }> = (
   const location = useLocation();
   const isPreview = isPreviewEnvironment();
   
-  // Periodic heartbeat check (every 2 minutes)
+  // Store the refreshContentful function in window for access from config
   useEffect(() => {
-    // Only run heartbeats if Contentful is configured
-    if (!isContentfulConfigured() && !isPreview) return;
+    if (typeof window !== 'undefined') {
+      window._refreshContentfulAfterConfig = async () => {
+        console.log('[ContentfulPersistenceProvider] Refreshing Contentful client after config update');
+        try {
+          await refreshContentfulClient();
+          console.log('[ContentfulPersistenceProvider] Successfully refreshed client');
+        } catch (error) {
+          console.error('[ContentfulPersistenceProvider] Error refreshing client:', error);
+        }
+      };
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window._refreshContentfulAfterConfig = undefined;
+      }
+    };
+  }, []);
+  
+  // Force refresh on first load
+  useEffect(() => {
+    const refreshOnLoad = async () => {
+      console.log('[ContentfulPersistenceProvider] Initial refresh of Contentful client');
+      try {
+        await refreshContentfulClient();
+      } catch (error) {
+        console.error('[ContentfulPersistenceProvider] Initial refresh error:', error);
+      }
+    };
     
+    refreshOnLoad();
+  }, []);
+  
+  // Periodic heartbeat check (every 60 seconds)
+  useEffect(() => {
     console.log('[ContentfulPersistenceProvider] Setting up connection heartbeat');
     
     // Check connection on route changes
@@ -40,22 +71,14 @@ const ContentfulPersistenceProvider: React.FC<{ children: React.ReactNode }> = (
     const heartbeatInterval = setInterval(() => {
       console.log('[ContentfulPersistenceProvider] Running heartbeat check');
       checkConnection();
-    }, 120000); // 2 minutes
+    }, 60000); // 1 minute
     
     return () => clearInterval(heartbeatInterval);
-  }, [isPreview]);
+  }, []);
 
-  // Check connection on route changes (but only every 30 seconds max)
+  // Check connection on route changes
   useEffect(() => {
-    const lastCheckedRef = { time: Date.now() };
-    
     const handleRouteChange = async () => {
-      // Skip if checked recently (within 30 seconds)
-      const now = Date.now();
-      if (now - lastCheckedRef.time < 30000) return;
-      
-      lastCheckedRef.time = now;
-      
       try {
         console.log('[ContentfulPersistenceProvider] Checking connection after route change');
         const result = await testContentfulConnection(true); // silent mode
@@ -70,10 +93,8 @@ const ContentfulPersistenceProvider: React.FC<{ children: React.ReactNode }> = (
     };
     
     // Check connection when route changes
-    if (isContentfulConfigured() || isPreview) {
-      handleRouteChange();
-    }
-  }, [location.pathname, isPreview]);
+    handleRouteChange();
+  }, [location.pathname]);
 
   // The provider doesn't render anything additional
   return <>{children}</>;
