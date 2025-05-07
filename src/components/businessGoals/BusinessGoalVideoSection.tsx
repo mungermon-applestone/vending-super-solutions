@@ -145,16 +145,6 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
             />
           </div>
         )}
-        
-        <div className="mt-4 p-4 border border-gray-200 rounded bg-gray-50 max-w-4xl mx-auto text-xs">
-          <p><strong>Video Diagnostics:</strong></p>
-          <p>Video ID: {video.id || 'Not provided'}</p>
-          <p>Original Video URL: {video.url}</p>
-          <p>Processed Video URL: {videoUrl}</p>
-          <p>Video Title: {video.title || 'Not provided'}</p>
-          <p>Error State: {videoError ? 'Yes' : 'No'}</p>
-          <p>Loading State: {videoLoading ? 'Yes' : 'No'}</p>
-        </div>
       </div>
     </section>
   );
