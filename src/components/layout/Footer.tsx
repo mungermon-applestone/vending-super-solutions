@@ -39,8 +39,8 @@ const Footer: React.FC<FooterProps> = () => {
   return (
     <footer className="bg-white border-t border-gray-200">
       <div className="container mx-auto p-6 md:p-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="col-span-1 md:col-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
+          <div className="flex justify-center">
             <Link to="/" className="block">
               {logoUrl ? (
                 <img 
@@ -54,7 +54,7 @@ const Footer: React.FC<FooterProps> = () => {
             </Link>
           </div>
           
-          <div>
+          <div className="text-center">
             <h3 className="font-semibold text-gray-900 mb-3">Solutions</h3>
             <ul className="space-y-2">
               <li><Link to="/products" className="text-gray-600 hover:text-apple-blue">Products</Link></li>
@@ -63,7 +63,7 @@ const Footer: React.FC<FooterProps> = () => {
             </ul>
           </div>
           
-          <div>
+          <div className="text-center">
             <h3 className="font-semibold text-gray-900 mb-3">Company</h3>
             <ul className="space-y-2">
               <li><Link to="/about" className="text-gray-600 hover:text-apple-blue">About Us</Link></li>
