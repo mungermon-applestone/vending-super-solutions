@@ -22,7 +22,7 @@ const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({
   // Use provided props or fallback to CMS content
   const displayTitle = title || homeContent?.ctaSectionTitle || "Ready to Transform Your Vending Operations?";
   const displayDescription = description || homeContent?.ctaSectionDescription || 
-    "Get started with our solution today and see the difference in your operations.";
+    "Get in touch and we'll start you on your vending journey.";
   const primaryButtonText = homeContent?.ctaPrimaryButtonText || "Request a Demo";
   const secondaryButtonText = homeContent?.ctaSecondaryButtonText || "Learn More";
   const secondaryButtonUrl = homeContent?.ctaSecondaryButtonUrl || "/products";
