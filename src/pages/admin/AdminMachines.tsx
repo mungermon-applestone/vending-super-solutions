@@ -95,6 +95,9 @@ const AdminMachines = () => {
     });
   };
 
+  // Admin pages should have access to the refresh functionality
+  // regardless of environment as they're only accessible to authenticated users
+
   return (
     <Layout>
       <div className="container mx-auto py-8">

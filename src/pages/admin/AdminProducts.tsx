@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import RunRegressionTest from '@/components/admin/testing/RunRegressionTest';
@@ -78,6 +77,8 @@ const AdminProducts: React.FC = () => {
   const handleEditProduct = (slug: string) => {
     navigate(`/admin/products/edit/${slug}`);
   };
+
+  // Admin pages should always show refresh controls regardless of environment
 
   return (
     <Layout>

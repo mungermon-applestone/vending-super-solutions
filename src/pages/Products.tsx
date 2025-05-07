@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import SEO from '@/components/seo/SEO';
@@ -18,6 +19,7 @@ import ProductGrid from '@/components/products/sections/ProductGrid';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Link } from 'react-router-dom';
 import ProductsLoadingState from '@/components/products/sections/ProductsLoadingState';
+import { isPreviewEnvironment } from '@/config/cms';
 
 const Products = () => {
   // Optimized data fetching with React Query
@@ -78,6 +80,9 @@ const Products = () => {
     queryClient.invalidateQueries({ queryKey: ['contentful', 'products'] });
     queryClient.invalidateQueries({ queryKey: ['contentful', 'productsPageContent'] });
   };
+  
+  // Check if we're in a development or preview environment
+  const showDevTools = import.meta.env.DEV || isPreviewEnvironment();
   
   return (
     <Layout>
@@ -157,22 +162,26 @@ const Products = () => {
                 </p>
               )}
             </div>
-            <div className="flex gap-4 mt-4 md:mt-0">
-              <Button 
-                onClick={handleRefresh} 
-                variant="outline" 
-                className="flex items-center"
-                aria-label="Refresh content"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                ) : (
-                  <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
-                )}
-                Refresh Content
-              </Button>
-            </div>
+            
+            {/* Only show refresh button in development or preview environments */}
+            {showDevTools && (
+              <div className="flex gap-4 mt-4 md:mt-0">
+                <Button 
+                  onClick={handleRefresh} 
+                  variant="outline" 
+                  className="flex items-center"
+                  aria-label="Refresh content"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
+                  )}
+                  Refresh Content
+                </Button>
+              </div>
+            )}
           </div>
 
           {isLoading ? (

@@ -18,8 +18,10 @@ const PreviewEnvironmentDetector = () => {
     source: ''
   });
   
-  // Only show in preview environments
-  if (!isPreviewEnvironment()) return null;
+  // Only show in preview environments and development
+  const showAlert = isPreviewEnvironment() || import.meta.env.DEV;
+  
+  if (!showAlert) return null;
   
   useEffect(() => {
     // Collect configuration information
