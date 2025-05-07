@@ -40,13 +40,13 @@ const Footer: React.FC<FooterProps> = () => {
     <footer className="bg-white border-t border-gray-200">
       <div className="container mx-auto p-6 md:p-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
-          <div className="flex justify-center">
+          <div className="flex items-center justify-center">
             <Link to="/" className="block">
               {logoUrl ? (
                 <img 
                   src={logoUrl} 
                   alt="Applestone Solutions" 
-                  className="max-h-24 w-auto" 
+                  className="h-auto w-auto max-h-32" 
                 />
               ) : (
                 <div className="h-16 w-48 bg-gray-100 animate-pulse rounded"></div>
