@@ -1,271 +1,225 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { CMSProductType } from '@/types/cms';
 import { toast } from 'sonner';
-import { CONTENTFUL_CONFIG } from '@/config/cms';
-import { forceContentfulProvider } from '@/services/cms/cmsInit';
-
-interface DiagnosticInfo {
-  contentfulConfig?: {
-    spaceId?: string;
-    environment?: string;
-    hasToken: boolean;
-  };
-  contentType?: string;
-  endpoint?: string;
-  query?: any;
-  errorDetails?: string;
-  responseData?: any;
-  slugVariations?: string[];
-  fetchedOn?: string;
-}
+import { productFallbacks } from '@/data/productFallbacks';
+import { Document } from '@contentful/rich-text-types';
 
 export function useContentfulProductType(slug: string) {
-  forceContentfulProvider();
-  
   return useQuery({
     queryKey: ['contentful', 'productType', slug],
     queryFn: async () => {
-      let diagnosticInfo: DiagnosticInfo = {
-        contentfulConfig: {
-          spaceId: CONTENTFUL_CONFIG.SPACE_ID,
-          environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID,
-          hasToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN
-        },
-        contentType: 'productType',
-        fetchedOn: new Date().toISOString()
-      };
-
       if (!slug) {
         console.error('[useContentfulProductType] No slug provided');
-        const error = new Error('Product type slug is required');
-        throw Object.assign(error, { diagnosticInfo });
+        throw new Error('Product slug is required');
       }
       
-      console.log(`[useContentfulProductType] Fetching product type with slug: "${slug}"`);
+      console.log(`[useContentfulProductType] Fetching product with slug: "${slug}"`);
       
       let client;
       try {
         client = await getContentfulClient();
       } catch (clientError) {
         console.error('[useContentfulProductType] Failed to initialize Contentful client, trying refresh', clientError);
-        diagnosticInfo.errorDetails = clientError instanceof Error 
-          ? clientError.stack || clientError.message
-          : JSON.stringify(clientError);
-
+        // Try refreshing the client
         try {
           client = await refreshContentfulClient();
         } catch (refreshError) {
           console.error('[useContentfulProductType] Failed to refresh Contentful client', refreshError);
-          diagnosticInfo.errorDetails = refreshError instanceof Error 
-            ? refreshError.stack || refreshError.message
-            : JSON.stringify(refreshError);
-          throw Object.assign(
-            new Error(`Failed to initialize Contentful client: ${refreshError instanceof Error ? refreshError.message : 'Unknown error'}`),
-            { diagnosticInfo }
-          );
+          throw new Error(`Failed to initialize Contentful client: ${refreshError instanceof Error ? refreshError.message : 'Unknown error'}`);
         }
       }
-
-      const queryParams = {
-        content_type: 'productType',
-        'fields.slug': slug,
-        include: 2
+      
+      if (!client) {
+        console.error('[useContentfulProductType] Failed to initialize Contentful client');
+        throw new Error('Failed to initialize Contentful client');
+      }
+      
+      // Try different slug variations if needed
+      const slugVariations = [slug, `${slug}-vending`, slug.replace('-vending', '')];
+      let entries;
+      let currentSlug = slug;
+      
+      console.log(`[useContentfulProductType] Will try these slug variations:`, slugVariations);
+      
+      for (const slugVariation of slugVariations) {
+        try {
+          console.log(`[useContentfulProductType] Querying Contentful for product with slug: "${slugVariation}"`);
+          entries = await client.getEntries({
+            content_type: 'productType',
+            'fields.slug': slugVariation,
+            include: 2
+          });
+          
+          if (entries.items.length > 0) {
+            console.log(`[useContentfulProductType] Found product with slug: "${slugVariation}"`);
+            currentSlug = slugVariation;
+            break;
+          }
+        } catch (error) {
+          console.error(`[useContentfulProductType] Error querying for slug "${slugVariation}":`, error);
+        }
+      }
+      
+      if (!entries || !entries.items.length) {
+        console.error(`[useContentfulProductType] No product found with any slug variations: ${slugVariations.join(', ')}`);
+        
+        // Check if we have a fallback for this product
+        if (productFallbacks[slug]) {
+          console.warn(`[useContentfulProductType] Using fallback data for slug: ${slug}`);
+          throw new Error(`Product not found in Contentful: ${slug}`);
+        }
+        
+        throw new Error(`Product not found in Contentful: ${slug}`);
+      }
+      
+      console.log(`[useContentfulProductType] Query returned ${entries.items.length} items for slug "${currentSlug}"`);
+      
+      const entry = entries.items[0];
+      // Log the raw entry data to help with debugging
+      console.log(`[useContentfulProductType] Raw entry for slug "${currentSlug}":`, {
+        id: entry.sys.id,
+        contentType: entry.sys.contentType?.sys?.id,
+        fields: Object.keys(entry.fields),
+        hasTitle: !!entry.fields.title,
+        hasDescription: !!entry.fields.description,
+        hasImage: !!entry.fields.image,
+        hasVideo: !!entry.fields.video,
+        hasVideoTitle: !!entry.fields.videoTitle,
+        hasVideoDescription: !!entry.fields.videoDescription,
+        hasVideoThumbnail: !!entry.fields.videoThumbnail
+      });
+      
+      const fields = entry.fields;
+      
+      // Process video data
+      let videoData = {
+        url: undefined,
+        youtubeId: undefined,
+        title: undefined,
+        description: undefined,
+        thumbnailImage: undefined
       };
       
-      diagnosticInfo.query = queryParams;
-      diagnosticInfo.endpoint = `spaces/${CONTENTFUL_CONFIG.SPACE_ID}/environments/${CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master'}/entries`;
-
-      try {
-        console.log(`[useContentfulProductType] Executing query with params:`, queryParams);
+      // Extract video asset data if present
+      if (fields.video) {
+        const videoAsset = fields.video;
+        console.log('[useContentfulProductType] Processing video asset:', videoAsset);
         
-        const entries = await client.getEntries(queryParams);
-        
-        console.log(`[useContentfulProductType] Query response:`, {
-          total: entries.total,
-          limit: entries.limit,
-          skip: entries.skip,
-          itemCount: entries.items.length
-        });
-        
-        diagnosticInfo.responseData = {
-          total: entries.total,
-          limit: entries.limit,
-          skip: entries.skip,
-          itemCount: entries.items.length
-        };
-
-        if (!entries.items.length) {
-          console.error(`[useContentfulProductType] No product type found with slug: ${slug}`);
+        // Get URL from video asset
+        if (videoAsset.fields && videoAsset.fields.file && videoAsset.fields.file.url) {
+          videoData.url = `https:${videoAsset.fields.file.url}`;
           
-          // Try alternative formatting of the slug (often helps with URL vs DB format differences)
-          const alternativeSlug = slug.replace(/-/g, '_');
-          let entriesAlt;
-          
-          // Try a second query with the alternative slug format
-          if (alternativeSlug !== slug) {
-            try {
-              console.log(`[useContentfulProductType] Trying alternative slug format: ${alternativeSlug}`);
-              entriesAlt = await client.getEntries({
-                content_type: 'productType',
-                'fields.slug': alternativeSlug,
-                include: 2
-              });
-              
-              if (entriesAlt.items.length > 0) {
-                console.log(`[useContentfulProductType] Found product with alternative slug: ${alternativeSlug}`);
-                entries.items = entriesAlt.items;
-              }
-            } catch (e) {
-              console.error(`[useContentfulProductType] Error trying alternative slug: ${e}`);
+          // Check if it's a YouTube video by looking at the URL or file name
+          const fileUrl = videoAsset.fields.file.url.toLowerCase();
+          if (fileUrl.includes('youtube.com') || fileUrl.includes('youtu.be')) {
+            // Extract YouTube ID from URL
+            const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+            const match = fileUrl.match(youtubeRegex);
+            if (match && match[1]) {
+              videoData.youtubeId = match[1];
             }
           }
-          
-          // If still not found, try a fallback query with a broader search
-          if (!entries.items.length) {
-            const fallbackQuery = await client.getEntries({
-              content_type: 'productType',
-              limit: 5
-            });
-            
-            console.log(`[useContentfulProductType] Fallback found ${fallbackQuery.total} productTypes:`, 
-              fallbackQuery.items.map(item => ({
-                id: item.sys.id,
-                title: item.fields?.title || 'No title',
-                slug: item.fields?.slug || 'No slug'
-              }))
-            );
-            
-            diagnosticInfo.responseData = {
-              ...diagnosticInfo.responseData,
-              fallbackResults: fallbackQuery.items.map(item => ({
-                id: item.sys.id,
-                title: item.fields?.title || 'No title',
-                slug: item.fields?.slug || 'No slug'
-              }))
-            };
-            
-            throw Object.assign(
-              new Error(`Product type not found: ${slug}`),
-              { diagnosticInfo }
-            );
-          }
         }
-
-        const entry = entries.items[0];
-        
-        // Safety check for the entry
-        if (!entry) {
-          console.error(`[useContentfulProductType] Entry is undefined for slug: ${slug}`);
-          throw Object.assign(
-            new Error(`No product data available for: ${slug}`),
-            { diagnosticInfo }
-          );
-        }
-        
-        // Safety check for entry.fields
-        if (!entry.fields) {
-          console.error(`[useContentfulProductType] Entry.fields is undefined for slug: ${slug}`);
-          throw Object.assign(
-            new Error(`Invalid product data for slug: ${slug} (missing fields)`),
-            { diagnosticInfo }
-          );
-        }
-        
-        console.log(`[useContentfulProductType] Found product type:`, {
-          id: entry.sys.id,
-          title: entry.fields.title || 'No title',
-          slug: entry.fields.slug || 'No slug',
-          hasVideo: !!entry.fields.video || !!entry.fields.youtubeVideoId 
-        });
-        
-        const fields = entry.fields;
-        
-        // Create a safe product object with all fields validated
-        const productType = {
-          id: entry.sys.id,
-          title: String(fields.title || ''),
-          slug: String(fields.slug || ''),
-          description: fields.description ? String(fields.description) : '',
-          benefits: Array.isArray(fields.benefits) ? fields.benefits.map(String) : [],
-          image: fields.image ? {
-            id: fields.image.sys?.id || 'unknown',
-            url: fields.image.fields?.file?.url ? `https:${fields.image.fields.file.url}` : '',
-            alt: fields.image.fields?.title || fields.title || '',
-          } : null,
-          thumbnail: fields.thumbnail ? {
-            id: fields.thumbnail.sys?.id || 'unknown',
-            url: fields.thumbnail.fields?.file?.url ? `https:${fields.thumbnail.fields.file.url}` : '',
-            alt: fields.thumbnail.fields?.title || fields.title || '',
-          } : null,
-          features: Array.isArray(fields.features) ? fields.features.map(feature => ({
-            id: feature.sys?.id || `feature-${Math.random().toString(36).substring(2, 11)}`,
-            title: feature.fields?.title || '',
-            description: feature.fields?.description || '',
-            icon: feature.fields?.icon || undefined
-          })) : [],
-          recommendedMachines: Array.isArray(fields.recommendedMachines) ? 
-            fields.recommendedMachines.map(machine => ({
-              id: machine.sys?.id || `machine-${Math.random().toString(36).substring(2, 11)}`,
-              slug: machine.fields?.slug || '',
-              title: machine.fields?.title || '',
-              description: machine.fields?.description || '',
-              image: machine.fields?.images && machine.fields.images[0] ? {
-                url: `https:${machine.fields.images[0].fields?.file?.url || ''}`,
-                alt: machine.fields.images[0].fields?.title || machine.fields?.title || ''
-              } : undefined
-            })).filter(machine => machine.slug && machine.title) : [],
-          // Add video support
-          video: (fields.video || fields.youtubeVideoId) ? {
-            title: fields.videoTitle ? String(fields.videoTitle) : 'Product Demo',
-            description: fields.videoDescription ? String(fields.videoDescription) : 'See our solution in action',
-            thumbnailImage: fields.videoThumbnail ? {
-              id: fields.videoThumbnail.sys?.id || 'thumbnail-id',
-              url: fields.videoThumbnail.fields?.file?.url ? `https:${fields.videoThumbnail.fields.file.url}` : '',
-              alt: fields.videoThumbnail.fields?.title || 'Video thumbnail'
-            } : fields.image ? {
-              id: fields.image.sys?.id || 'image-as-thumbnail',
-              url: fields.image.fields?.file?.url ? `https:${fields.image.fields.file.url}` : '',
-              alt: fields.image.fields?.title || fields.title || 'Video thumbnail'
-            } : {
-              id: 'default-thumbnail',
-              url: '/placeholder.svg',
-              alt: 'Video thumbnail'
-            },
-            url: fields.video?.fields?.file?.url ? `https:${fields.video.fields.file.url}` : undefined,
-            youtubeId: fields.youtubeVideoId ? String(fields.youtubeVideoId) : undefined
-          } : undefined
-        };
-        
-        return {
-          ...productType,
-          diagnosticInfo
-        };
-      } catch (error) {
-        console.error('[useContentfulProductType] Error:', error);
-        
-        // Enhance the error with diagnostic information
-        diagnosticInfo.errorDetails = error instanceof Error 
-          ? error.stack || error.message
-          : JSON.stringify(error);
-          
-        throw Object.assign(
-          new Error(`Error loading product type: ${error instanceof Error ? error.message : 'Unknown error'}`),
-          { diagnosticInfo }
-        );
       }
+      
+      // Get video title from dedicated field or fall back to asset title
+      if (fields.videoTitle) {
+        videoData.title = fields.videoTitle;
+      } else if (fields.video && fields.video.fields && fields.video.fields.title) {
+        videoData.title = fields.video.fields.title;
+      }
+      
+      // Get video description from dedicated field or fall back to asset description
+      if (fields.videoDescription) {
+        videoData.description = fields.videoDescription;
+      } else if (fields.video && fields.video.fields && fields.video.fields.description) {
+        videoData.description = fields.video.fields.description;
+      }
+      
+      // Get video thumbnail from dedicated field or fall back to video asset thumbnail
+      if (fields.videoThumbnail) {
+        videoData.thumbnailImage = {
+          id: fields.videoThumbnail.sys.id,
+          url: `https:${fields.videoThumbnail.fields.file.url}`,
+          alt: fields.videoThumbnail.fields.title || 'Video thumbnail',
+        };
+      } else if (fields.video && fields.video.fields && fields.video.fields.file && fields.video.fields.file.details && fields.video.fields.file.details.image) {
+        // Some video assets have a poster frame we can use
+        videoData.thumbnailImage = {
+          id: fields.video.sys.id,
+          url: `https:${fields.video.fields.file.url}`,
+          alt: fields.video.fields.title || 'Video preview',
+        };
+      }
+      
+      // Transform the Contentful data into our app's format
+      const product: CMSProductType = {
+        id: entry.sys.id,
+        title: fields.title as string,
+        slug: fields.slug as string,
+        description: fields.description as string,
+        benefits: Array.isArray(fields.benefits) ? fields.benefits as string[] : [],
+        image: fields.image ? {
+          id: fields.image.sys.id,
+          url: `https:${fields.image.fields.file.url}`,
+          alt: fields.image.fields.title || fields.title,
+        } : undefined,
+        features: fields.features ? (fields.features as any[]).map(feature => ({
+          id: feature.sys.id,
+          title: feature.fields.title,
+          description: feature.fields.description,
+          icon: feature.fields.icon || undefined
+        })) : [],
+        // Add the video data
+        video: videoData.url || videoData.youtubeId ? {
+          title: videoData.title,
+          description: videoData.description,
+          thumbnailImage: videoData.thumbnailImage,
+          url: videoData.url,
+          youtubeId: videoData.youtubeId
+        } : undefined,
+        // Also include the new dedicated fields
+        videoTitle: fields.videoTitle as string,
+        videoDescription: fields.videoDescription as Document,
+        videoThumbnail: fields.videoThumbnail ? {
+          id: fields.videoThumbnail.sys.id,
+          url: `https:${fields.videoThumbnail.fields.file.url}`,
+          alt: fields.videoThumbnail.fields.title || 'Video thumbnail'
+        } : undefined,
+        visible: !!fields.visible,
+        recommendedMachines: fields.recommendedMachines ? 
+          (fields.recommendedMachines as any[]).map(machine => ({
+            id: machine.sys.id,
+            slug: machine.fields.slug,
+            title: machine.fields.title,
+            description: machine.fields.description,
+            image: machine.fields.image ? {
+              url: `https:${machine.fields.image.fields.file.url}`,
+              alt: machine.fields.image.fields.title || machine.fields.title
+            } : undefined
+          })) : []
+      };
+      
+      console.log(`[useContentfulProductType] Successfully processed product:`, {
+        title: product.title,
+        slug: product.slug,
+        hasVideo: !!product.video,
+        videoTitle: product.videoTitle,
+        hasVideoDescription: !!product.videoDescription,
+        hasVideoThumbnail: !!product.videoThumbnail
+      });
+      return product;
     },
-    retry: 1,
+    enabled: !!slug,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     meta: {
-      onError: (error: Error & { diagnosticInfo?: DiagnosticInfo }) => {
-        toast.error(`Error loading product type: ${error.message}`);
+      onError: (error: Error) => {
+        toast.error(`Error loading product from Contentful: ${error.message}`);
         console.error('[useContentfulProductType] Error:', error);
-        
-        if (error.diagnosticInfo) {
-          console.error('[useContentfulProductType] Diagnostic info:', error.diagnosticInfo);
-        }
       }
-    },
-    enabled: !!slug
+    }
   });
 }

@@ -86,6 +86,18 @@ const ProductDetail = () => {
   // Prepare benefits list (ensure it's an array)
   const benefits = Array.isArray(product.benefits) ? product.benefits : [];
 
+  // Create a video object with all available video data from the product
+  const videoData = {
+    title: product.videoTitle || (product.video?.title || "See Our Solution in Action"),
+    description: product.videoDescription || (product.video?.description || "Watch how our solution can transform your business"),
+    thumbnailImage: product.videoThumbnail || product.video?.thumbnailImage,
+    url: product.video?.url,
+    youtubeId: product.video?.youtubeId
+  };
+
+  // Only show video section if we have either a video URL or a YouTube ID
+  const hasVideo = !!(product.video?.url || product.video?.youtubeId);
+
   return (
     <Layout>
       {/* Back Navigation */}
@@ -106,14 +118,14 @@ const ProductDetail = () => {
         benefits={benefits}
       />
 
-      {/* Video Section - Now passing the actual title and description from the video object */}
-      {product.video && (
+      {/* Video Section - Using the combined video data from product fields */}
+      {hasVideo && (
         <ProductVideoSection
-          title={product.video.title || "See Our Solution in Action"}
-          description={product.video.description || "Watch how our solution can transform your business"}
-          videoId={product.video.youtubeId}
-          videoUrl={product.video.url}
-          thumbnailImage={product.video.thumbnailImage?.url || heroImage}
+          title={videoData.title}
+          description={videoData.description}
+          videoId={videoData.youtubeId}
+          videoUrl={videoData.url}
+          thumbnailImage={videoData.thumbnailImage?.url || heroImage}
         />
       )}
 

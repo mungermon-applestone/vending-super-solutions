@@ -20,12 +20,15 @@ export interface CMSProductType {
   features?: CMSFeature[];
   examples?: CMSExample[];
   video?: {
-    title: string;
-    description: string;
-    thumbnailImage: CMSImage;
+    title?: string;
+    description?: string;
+    thumbnailImage?: CMSImage;
     url?: string;
     youtubeId?: string;
   };
+  videoTitle?: string;
+  videoDescription?: any; // Using 'any' for Rich Text content
+  videoThumbnail?: CMSImage;
   visible?: boolean;
   displayOrder?: number;
   showOnHomepage?: boolean;

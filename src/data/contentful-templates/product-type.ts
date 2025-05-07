@@ -71,6 +71,46 @@ export const productTypeTemplate: ContentTypeTemplate = {
         localized: false,
       },
       {
+        id: 'video',
+        name: 'Video',
+        type: 'Link',
+        linkType: 'Asset',
+        required: false,
+        localized: false,
+        validations: [
+          {
+            linkMimetypeGroup: ['video']
+          }
+        ]
+      },
+      {
+        id: 'videoTitle',
+        name: 'Video Title',
+        type: 'Symbol',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'videoDescription',
+        name: 'Video Description',
+        type: 'RichText',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'videoThumbnail',
+        name: 'Video Thumbnail',
+        type: 'Link',
+        linkType: 'Asset',
+        required: false,
+        localized: false,
+        validations: [
+          {
+            linkMimetypeGroup: ['image']
+          }
+        ]
+      },
+      {
         id: 'visible',
         name: 'Visible',
         type: 'Boolean',
