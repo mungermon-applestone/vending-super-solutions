@@ -11,7 +11,7 @@ interface SimpleContactCTAProps {
   className?: string;
 }
 
-export const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({ 
+const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({ 
   title, 
   description,
   className = "" 
@@ -50,3 +50,5 @@ export const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({
     </section>
   );
 };
+
+export default SimpleContactCTA;
