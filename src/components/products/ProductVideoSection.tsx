@@ -67,8 +67,15 @@ const ProductVideoSection = ({
     ? "md:w-1/2 w-full md:text-left text-center"
     : "max-w-2xl w-full text-center mt-6";
 
-  // Custom height control for vertical videos
-  const videoHeightStyle = isVertical ? { maxHeight: '450px' } : {};
+  // Custom styles for vertical videos to ensure proper containment
+  const videoHeightStyle = isVertical 
+    ? { maxHeight: '450px', objectFit: 'contain' as const } 
+    : {};
+
+  // Custom container style for vertical videos
+  const containerStyle = isVertical 
+    ? { height: '450px' } 
+    : {};
 
   return (
     <section className="py-16 bg-white">
@@ -77,38 +84,43 @@ const ProductVideoSection = ({
           {/* Video Container */}
           <div className={videoContainerClass}>
             {videoId ? (
-              <div className={`relative rounded-lg overflow-hidden shadow-lg ${isVertical ? 'md:aspect-w-9 md:aspect-h-16 h-full' : 'aspect-w-16 aspect-h-9'}`}>
+              <div 
+                className={`relative rounded-lg overflow-hidden shadow-lg ${isVertical ? 'h-full flex justify-center' : 'aspect-w-16 aspect-h-9'}`} 
+                style={isVertical ? containerStyle : {}}
+              >
                 <iframe 
                   ref={iframeRef}
                   src={`https://www.youtube.com/embed/${videoId}`}
                   title="Product video"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  className="w-full h-full rounded-lg shadow-lg"
-                  style={isVertical ? videoHeightStyle : {}}
+                  className={`rounded-lg shadow-lg ${isVertical ? 'w-auto h-full object-contain' : 'w-full h-full'}`}
+                  style={isVertical ? { maxWidth: '100%' } : {}}
                 ></iframe>
               </div>
             ) : videoUrl ? (
-              <div className={`relative rounded-lg overflow-hidden shadow-lg ${isVertical ? 'md:aspect-w-9 md:aspect-h-16' : 'aspect-w-16 aspect-h-9'}`}>
+              <div 
+                className={`relative rounded-lg overflow-hidden shadow-lg ${isVertical ? 'h-full flex justify-center' : 'aspect-w-16 aspect-h-9'}`}
+                style={isVertical ? containerStyle : {}}
+              >
                 <video 
                   ref={videoRef}
                   src={videoUrl}
                   controls
                   poster={thumbnailImage}
-                  className="w-full h-full rounded-lg shadow-lg object-cover"
+                  className={`rounded-lg shadow-lg ${isVertical ? 'w-auto h-full object-contain' : 'w-full h-full object-cover'}`}
                   onLoadedMetadata={handleVideoMetadataLoaded}
-                  style={isVertical ? videoHeightStyle : {}}
-                >
-                  Your browser does not support the video tag.
-                </video>
+                ></video>
               </div>
             ) : (
-              <div className="relative rounded-lg overflow-hidden shadow-lg">
+              <div 
+                className="relative rounded-lg overflow-hidden shadow-lg" 
+                style={isVertical ? containerStyle : {}}
+              >
                 <img 
                   src={thumbnailImage} 
                   alt="Video thumbnail" 
-                  className="w-full h-auto"
-                  style={isVertical ? videoHeightStyle : {}}
+                  className={`${isVertical ? 'h-full w-auto mx-auto object-contain' : 'w-full h-auto'}`}
                   onLoad={(e) => {
                     const img = e.currentTarget;
                     setIsVertical(img.naturalHeight > img.naturalWidth);
