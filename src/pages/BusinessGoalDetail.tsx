@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -196,6 +197,7 @@ const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDe
             />
           )}
 
+          {/* Use standard CTA without dynamic business goal name */}
           <SimpleContactCTA />
         </>
       )}

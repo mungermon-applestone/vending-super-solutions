@@ -295,8 +295,8 @@ const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
         <RecommendedMachines machines={businessGoal.recommendedMachines.filter(m => m && m.title)} />
       )}
       
-      {/* Replace InquiryForm with SimpleContactCTA */}
-      <SimpleContactCTA title={`Ready to learn more about ${businessGoal?.title || 'achieving your business goals'}?`} />
+      {/* Use standard CTA without dynamic title */}
+      <SimpleContactCTA />
     </>
   );
 };

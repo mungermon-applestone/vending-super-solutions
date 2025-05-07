@@ -6,8 +6,9 @@ interface MachineDetailInquiryProps {
   machineTitle?: string;
 }
 
-const MachineDetailInquiry: React.FC<MachineDetailInquiryProps> = ({ machineTitle }) => {
-  return <SimpleContactCTA title={machineTitle ? `Interested in the ${machineTitle}?` : undefined} />;
+const MachineDetailInquiry: React.FC<MachineDetailInquiryProps> = () => {
+  // Use standard CTA without custom title
+  return <SimpleContactCTA />;
 };
 
 export default MachineDetailInquiry;
