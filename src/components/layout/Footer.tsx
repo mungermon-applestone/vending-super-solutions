@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import FooterLinks from './FooterLinks';
 
@@ -8,17 +8,50 @@ interface FooterProps {
 }
 
 const Footer: React.FC<FooterProps> = () => {
+  const [logoUrl, setLogoUrl] = useState<string>("");
+  
+  // Fetch the logo from Contentful
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        // Using the asset ID provided
+        const assetId = "5BbotmmDZslyyhDHUtTYN3";
+        const response = await fetch(`https://cdn.contentful.com/spaces/${import.meta.env.VITE_CONTENTFUL_SPACE_ID}/environments/${import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'}/assets/${assetId}?access_token=${import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch logo');
+        }
+        
+        const data = await response.json();
+        if (data && data.fields && data.fields.file) {
+          setLogoUrl(`https:${data.fields.file.url}`);
+        }
+      } catch (error) {
+        console.error('Error fetching logo:', error);
+        // Fallback to the uploaded image if Contentful fetch fails
+        setLogoUrl('/lovable-uploads/4896dccb-5a9a-4a9f-96c3-f5874eb272fd.png');
+      }
+    };
+    
+    fetchLogo();
+  }, []);
+
   return (
     <footer className="bg-white border-t border-gray-200">
       <div className="container mx-auto p-6 md:p-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
-            <Link to="/" className="flex items-center">
-              <span className="text-xl font-semibold">Applestone Solutions</span>
+            <Link to="/" className="block">
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt="Applestone Solutions" 
+                  className="max-h-24 w-auto" 
+                />
+              ) : (
+                <div className="h-16 w-48 bg-gray-100 animate-pulse rounded"></div>
+              )}
             </Link>
-            <p className="mt-3 text-gray-600 max-w-md">
-              Advanced vending solutions for modern businesses. Automate your retail operations with smart vending machines and IoT technology.
-            </p>
           </div>
           
           <div>
