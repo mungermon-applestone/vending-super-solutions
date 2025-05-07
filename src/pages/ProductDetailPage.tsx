@@ -87,8 +87,6 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
         </div>
       </div>
 
-      {/* DiagnosticInfo component has been removed from here */}
-
       {isLoading ? (
         <div className="container py-12 text-center">
           <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />

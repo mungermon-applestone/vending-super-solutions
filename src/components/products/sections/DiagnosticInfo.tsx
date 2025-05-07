@@ -33,6 +33,9 @@ interface DiagnosticInfoProps {
 }
 
 const DiagnosticInfo = ({ slug, compact = false, error, diagnosticInfo }: DiagnosticInfoProps) => {
+  // Only render in development mode
+  if (import.meta.env.PROD) return null;
+  
   const [showFullDiagnostics, setShowFullDiagnostics] = React.useState(false);
   
   const testContentfulConnection = async () => {
