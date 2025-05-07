@@ -91,7 +91,7 @@ const ProductVideoSection = ({
                 <iframe 
                   ref={iframeRef}
                   src={`https://www.youtube.com/embed/${videoId}`}
-                  title="Product video"
+                  title={title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className={`rounded-lg shadow-lg ${isVertical ? 'w-auto h-full object-contain' : 'w-full h-full'}`}

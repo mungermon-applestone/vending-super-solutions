@@ -106,7 +106,7 @@ const ProductDetail = () => {
         benefits={benefits}
       />
 
-      {/* Video Section - Modified to handle both YouTube and direct video URLs */}
+      {/* Video Section - Now passing the actual title and description from the video object */}
       {product.video && (
         <ProductVideoSection
           title={product.video.title || "See Our Solution in Action"}
