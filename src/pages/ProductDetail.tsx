@@ -11,6 +11,7 @@ import CTASection from '@/components/common/CTASection';
 import { SimpleContactCTA } from '@/components/common';
 import { useEffect } from 'react';
 import ProductVideoSection from '@/components/products/ProductVideoSection';
+import { Document } from '@contentful/rich-text-types';
 
 /**
  * Product detail page that displays detailed information about a specific product
@@ -23,6 +24,9 @@ const ProductDetail = () => {
   useEffect(() => {
     if (product) {
       console.log('[ProductDetail] Loaded product data:', product);
+      if (product.videoDescription) {
+        console.log('[ProductDetail] Video description type:', typeof product.videoDescription);
+      }
     } else if (!isLoading) {
       console.log('[ProductDetail] No product data found for slug:', productSlug);
     }
@@ -87,6 +91,7 @@ const ProductDetail = () => {
   const benefits = Array.isArray(product.benefits) ? product.benefits : [];
 
   // Create a video object with all available video data from the product
+  // We need to handle both string and Rich Text for videoDescription
   const videoData = {
     title: product.videoTitle || (product.video?.title || "See Our Solution in Action"),
     description: product.videoDescription || (product.video?.description || "Watch how our solution can transform your business"),

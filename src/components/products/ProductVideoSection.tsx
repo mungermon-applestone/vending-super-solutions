@@ -1,10 +1,12 @@
 
 import { Play } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { Document } from '@contentful/rich-text-types';
+import { renderRichText } from '@/utils/contentful/richTextRenderer';
 
 interface ProductVideoSectionProps {
   title: string;
-  description: string;
+  description: string | Document;
   videoId?: string;
   videoUrl?: string;
   thumbnailImage: string;
@@ -77,6 +79,20 @@ const ProductVideoSection = ({
     ? { height: '450px' } 
     : {};
 
+  // Handle rendering description as either rich text or plain text
+  const renderDescription = () => {
+    if (typeof description === 'string') {
+      return <p className="text-gray-700">{description}</p>;
+    } else if (description) {
+      return (
+        <div className="text-gray-700 rich-text-content">
+          {renderRichText(description, { includedAssets: [] })}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <section className="py-16 bg-white">
       <div className="container-wide">
@@ -139,7 +155,7 @@ const ProductVideoSection = ({
           {/* Description Container */}
           <div className={descriptionContainerClass}>
             <h2 className="text-3xl font-bold mb-4 text-vending-blue-dark">{title}</h2>
-            <p className="text-gray-700">{description}</p>
+            {renderDescription()}
           </div>
         </div>
       </div>

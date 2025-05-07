@@ -1,4 +1,6 @@
 
+import { Document } from '@contentful/rich-text-types';
+
 export interface CMSImage {
   id: string;
   url: string;
@@ -27,7 +29,7 @@ export interface CMSProductType {
     youtubeId?: string;
   };
   videoTitle?: string;
-  videoDescription?: any; // Using 'any' for Rich Text content
+  videoDescription?: Document | string; // Updated to support both Rich Text Document and string
   videoThumbnail?: CMSImage;
   visible?: boolean;
   displayOrder?: number;
