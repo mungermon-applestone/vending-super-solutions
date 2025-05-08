@@ -7,7 +7,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { name, email, subject, message, company, phone, formType } = req.body;
+    const { 
+      name, 
+      email, 
+      subject, 
+      message, 
+      company, 
+      phone, 
+      formType = 'Contact Form',
+      location
+    } = req.body;
     
     // Log the submission data (useful for debugging)
     console.log('Form submission received:', {
@@ -17,7 +26,8 @@ export default async function handler(req, res) {
       subject: subject || '',
       message: message || '',
       company: company || '',
-      phone: phone || ''
+      phone: phone || '',
+      location: location || req.headers.referer || 'unknown'
     });
     
     // Basic validation
@@ -30,14 +40,15 @@ export default async function handler(req, res) {
     if (process.env.NODE_ENV === 'development' || !process.env.SENDGRID_API_KEY) {
       console.log('Email would be sent in production with the following details:');
       console.log('To:', process.env.EMAIL_TO || 'munger@applestonesolutons.com');
-      console.log('Subject:', `New ${formType || 'Contact Form'} Submission: ${subject || ''}`);
+      console.log('Subject:', `New ${formType} Submission: ${subject || ''}`);
       console.log('Content:', {
         name: name || '',
         email: email || '',
         company: company || '',
         phone: phone || '',
         subject: subject || '',
-        message: message || ''
+        message: message || '',
+        location: location || req.headers.referer || 'unknown'
       });
       
       return res.status(200).json({ 
@@ -55,12 +66,21 @@ export default async function handler(req, res) {
       // Set API key
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
       
+      // Customize email content based on form type
+      let emailSubject = `New ${formType} Submission`;
+      if (subject) {
+        emailSubject += `: ${subject}`;
+      }
+      
       // Create email message
       const msg = {
         to: process.env.EMAIL_TO || 'munger@applestonesolutons.com',
         from: process.env.EMAIL_FROM || 'noreply@applestonesolutions.com',
-        subject: `New ${formType || 'Contact Form'} Submission: ${subject || ''}`,
+        subject: emailSubject,
         text: `
+          Form Type: ${formType}
+          Submitted From: ${location || req.headers.referer || 'unknown'}
+          
           Name: ${name || ''}
           Email: ${email || ''}
           ${company ? `Company: ${company}\n` : ''}
@@ -71,7 +91,8 @@ export default async function handler(req, res) {
           ${message || ''}
         `,
         html: `
-          <h3>New ${formType || 'Contact Form'} Submission</h3>
+          <h3>New ${formType} Submission</h3>
+          <p><strong>Submitted From:</strong> ${location || req.headers.referer || 'unknown'}</p>
           <p><strong>Name:</strong> ${name || ''}</p>
           <p><strong>Email:</strong> ${email || ''}</p>
           ${company ? `<p><strong>Company:</strong> ${company}</p>` : ''}

@@ -10,6 +10,14 @@
  * - Maintain consistent console logging patterns for debugging
  * - Always check for gtag existence before calling methods
  * - Preserve the error handling in each method
+ * 
+ * Form Tracking Events:
+ * - form_view: When a form becomes visible
+ * - form_submit: When a form is submitted
+ * - form_submit_success: When a form is successfully submitted
+ * - form_submit_error: When a form submission fails
+ * - cta_clicked: When a CTA button is clicked
+ * - cta_form_toggled: When a CTA toggles to show a form
  */
 
 // Declare gtag as a global function
@@ -62,6 +70,63 @@ export const trackEvent = (eventName: string, params?: Record<string, any>): voi
   if (process.env.NODE_ENV === 'development') {
     console.log(`[Analytics] Event tracked: ${eventName}`, params);
   }
+};
+
+/**
+ * Track form views (when a form becomes visible)
+ * 
+ * @param formType - The type of form (contact, newsletter, etc.)
+ * @param formLocation - Where the form appears (page path or component)
+ */
+export const trackFormView = (formType: string, formLocation?: string): void => {
+  trackEvent('form_view', {
+    form_type: formType,
+    form_location: formLocation || window.location.pathname
+  });
+};
+
+/**
+ * Track form submissions (when a user attempts to submit)
+ * 
+ * @param formType - The type of form (contact, newsletter, etc.)
+ * @param formLocation - Where the form appears (page path or component)
+ */
+export const trackFormSubmit = (formType: string, formLocation?: string): void => {
+  trackEvent('form_submit', {
+    form_type: formType,
+    form_location: formLocation || window.location.pathname,
+    timestamp: new Date().toISOString()
+  });
+};
+
+/**
+ * Track successful form submissions
+ * 
+ * @param formType - The type of form (contact, newsletter, etc.)
+ * @param formLocation - Where the form appears (page path or component)
+ */
+export const trackFormSuccess = (formType: string, formLocation?: string): void => {
+  trackEvent('form_submit_success', {
+    form_type: formType,
+    form_location: formLocation || window.location.pathname,
+    timestamp: new Date().toISOString()
+  });
+};
+
+/**
+ * Track form submission errors
+ * 
+ * @param formType - The type of form (contact, newsletter, etc.)
+ * @param errorMessage - Description of the error
+ * @param formLocation - Where the form appears (page path or component)
+ */
+export const trackFormError = (formType: string, errorMessage: string, formLocation?: string): void => {
+  trackEvent('form_submit_error', {
+    form_type: formType,
+    error_message: errorMessage,
+    form_location: formLocation || window.location.pathname,
+    timestamp: new Date().toISOString()
+  });
 };
 
 /**
