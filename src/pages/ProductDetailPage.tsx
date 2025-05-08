@@ -77,8 +77,10 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
     recommendedMachines: Array.isArray(data.recommendedMachines) ? data.recommendedMachines : [],
     video: data.video ? {
       ...data.video,
-      // Ensure orientation is defined, default to 'horizontal' if missing
-      orientation: data.video.orientation || 'horizontal'
+      // Check if orientation exists on the object before trying to access it
+      orientation: typeof data.video === 'object' && 'orientation' in data.video 
+        ? data.video.orientation 
+        : 'horizontal'  // Default to horizontal if missing
     } : null
   } : null;
 
