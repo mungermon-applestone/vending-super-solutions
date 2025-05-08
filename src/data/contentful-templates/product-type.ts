@@ -123,7 +123,7 @@ export const productTypeTemplate: ContentTypeTemplate = {
         id: 'videoOrientation',
         name: 'Video Orientation',
         type: 'Symbol',
-        required: false,
+        required: true,
         localized: false,
         validations: [
           {

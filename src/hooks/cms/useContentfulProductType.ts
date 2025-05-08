@@ -224,7 +224,7 @@ export function useContentfulProductType(slug: string) {
         }
         
         // Extract and normalize video orientation from Contentful
-        let videoOrientation = 'horizontal'; // Default orientation
+        let videoOrientation;
         if (fields.videoOrientation) {
           // Handle if videoOrientation is a string
           if (typeof fields.videoOrientation === 'string') {
@@ -286,7 +286,7 @@ export function useContentfulProductType(slug: string) {
             } : null,
             url: fields.video?.fields?.file?.url ? `https:${fields.video.fields.file.url}` : undefined,
             youtubeId: fields.youtubeVideoId ? String(fields.youtubeVideoId) : undefined,
-            orientation: videoOrientation // Use the extracted and normalized orientation
+            orientation: videoOrientation // Use the extracted and normalized orientation without default
           } : null
         };
         
