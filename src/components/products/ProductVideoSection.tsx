@@ -57,7 +57,7 @@ const ProductVideoSection = ({
             <div className="w-full lg:w-1/2 flex justify-center">
               <VideoPlayer 
                 video={videoSource} 
-                className="max-w-xs sm:max-w-sm"
+                className="w-full max-w-md" // Restored wider container for vertical video
                 aspectRatio={9/16} // Vertical video aspect ratio
               />
             </div>
