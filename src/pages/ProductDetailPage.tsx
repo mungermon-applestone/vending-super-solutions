@@ -14,6 +14,10 @@ import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMes
 import { toast } from 'sonner';
 import ProductVideoSection from '@/components/products/ProductVideoSection';
 
+// Type guard to validate orientation values
+const isValidOrientation = (value: unknown): value is 'horizontal' | 'vertical' => 
+  value === 'horizontal' || value === 'vertical';
+
 const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   
@@ -77,9 +81,11 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
     recommendedMachines: Array.isArray(data.recommendedMachines) ? data.recommendedMachines : [],
     video: data.video ? {
       ...data.video,
-      // Check if orientation exists on the object before trying to access it
+      // Apply the type guard to ensure orientation is a valid value
       orientation: typeof data.video === 'object' && 'orientation' in data.video 
-        ? data.video.orientation 
+        ? (isValidOrientation(data.video.orientation) 
+            ? data.video.orientation 
+            : 'horizontal') // Default to horizontal if invalid value
         : 'horizontal'  // Default to horizontal if missing
     } : null
   } : null;
@@ -158,7 +164,7 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
               videoId={product.video.youtubeId}
               videoUrl={product.video.url}
               thumbnailImage={product.video.thumbnailImage?.url || product.image?.url || '/placeholder.svg'}
-              orientation={product.video.orientation || 'horizontal'}
+              orientation={product.video.orientation}
             />
           )}
 
