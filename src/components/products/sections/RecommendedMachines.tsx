@@ -18,6 +18,10 @@ interface Machine {
     url: string;
     alt?: string;
   };
+  machineThumbnail?: {
+    url: string;
+    alt?: string;
+  };
 }
 
 interface RecommendedMachinesProps {
@@ -33,17 +37,22 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
         <h2 className="text-3xl font-bold text-center mb-12">Recommended Machines</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {machines.map((machine) => {
-            // Determine which image to use - thumbnail has priority
-            const imageToUse = machine.thumbnail || machine.image;
+            // Determine image priority: machineThumbnail > thumbnail > image
+            const imageToUse = machine.machineThumbnail || machine.thumbnail || machine.image;
             
-            // Log which image we're using for debugging
-            console.log(`[RecommendedMachines] Machine ${machine.title}: Using ${machine.thumbnail ? 'thumbnail' : 'regular image'}`, {
+            // Enhanced logging for debugging
+            console.log(`[RecommendedMachines] Machine ${machine.title}: Image selection`, {
               machineId: machine.id,
               machineSlug: machine.slug,
+              hasMachineThumbnail: !!machine.machineThumbnail,
+              machineThumbnailUrl: machine.machineThumbnail?.url,
               hasThumbnail: !!machine.thumbnail,
               thumbnailUrl: machine.thumbnail?.url,
               hasImage: !!machine.image,
-              imageUrl: machine.image?.url
+              imageUrl: machine.image?.url,
+              selectedImageSource: machine.machineThumbnail ? 'machineThumbnail' : 
+                                  (machine.thumbnail ? 'thumbnail' : 
+                                  (machine.image ? 'image' : 'none'))
             });
             
             return (
@@ -56,11 +65,13 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
                         alt={imageToUse.alt || machine.title}
                         className="w-full h-full"
                         objectFit="contain"
-                        isThumbnail={!!machine.thumbnail}
+                        isThumbnail={!!machine.machineThumbnail || !!machine.thumbnail}
                         onError={(e) => {
                           console.error(`[RecommendedMachines] Failed to load image for machine ${machine.title}:`, {
                             url: imageToUse.url,
-                            error: e
+                            error: e,
+                            imageSource: machine.machineThumbnail ? 'machineThumbnail' : 
+                                         (machine.thumbnail ? 'thumbnail' : 'regular image')
                           });
                           // Fallback to placeholder
                           (e.target as HTMLImageElement).src = '/placeholder.svg';

@@ -163,6 +163,27 @@ export const machineTemplate: ContentTypeTemplate = {
         type: 'Boolean',
         required: false,
         localized: false,
+      },
+      {
+        id: 'displayOrder',
+        name: 'Display Order',
+        type: 'Integer',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'showOnHomepage',
+        name: 'Show On Homepage',
+        type: 'Boolean',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'homepageOrder',
+        name: 'Homepage Order',
+        type: 'Integer',
+        required: false,
+        localized: false,
       }
     ]
   }
