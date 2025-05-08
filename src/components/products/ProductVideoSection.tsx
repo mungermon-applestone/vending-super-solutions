@@ -48,28 +48,34 @@ const ProductVideoSection = ({
   
   console.log('[ProductVideoSection] Video layout:', isVertical ? 'vertical' : 'horizontal');
   
-  // DO NOT MODIFY THE VIDEO LAYOUT STRUCTURE WITHOUT EXPLICIT INSTRUCTIONS
-  // This component has been carefully designed to support both vertical and horizontal
-  // video layouts while maintaining the machine thumbnail display functionality elsewhere
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto">
         {isVertical ? (
-          // Vertical video layout - video on left, content on right
-          <div className="flex flex-col lg:flex-row items-start gap-8">
-            <div className="w-full lg:w-1/2">
-              <VideoPlayer 
-                video={videoSource} 
-                className="max-w-md mx-auto lg:mx-0"
-                aspectRatio={9/16} // Vertical video aspect ratio
-              />
-            </div>
-            <div className="w-full lg:w-1/2">
+          // Vertical video layout - centered as a pair with content to the right
+          <div className="flex flex-col items-center">
+            <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-4 text-vending-blue-dark">{title}</h2>
-              <p className="text-gray-600 text-lg">{description}</p>
-              <p className="text-sm text-gray-500 mt-4">
-                See our vending solution in action
-              </p>
+              <p className="text-gray-600 text-lg max-w-3xl mx-auto">{description}</p>
+            </div>
+            
+            <div className="flex flex-col md:flex-row items-center justify-center gap-8 max-w-4xl mx-auto">
+              {/* Video player - sized for vertical video */}
+              <div className="w-full md:w-auto">
+                <VideoPlayer 
+                  video={videoSource} 
+                  className="mx-auto"
+                  aspectRatio={9/16} // Vertical video aspect ratio
+                />
+              </div>
+              
+              {/* Video information - to the right on desktop */}
+              <div className="w-full md:w-1/2">
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <h3 className="text-xl font-medium mb-2 text-vending-blue-dark">In this video</h3>
+                  <p className="text-gray-600">See our vending solution in action and learn how we address common business challenges.</p>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
