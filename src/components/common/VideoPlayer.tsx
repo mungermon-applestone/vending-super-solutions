@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Play } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
@@ -28,6 +28,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [thumbnailLoaded, setThumbnailLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   
   // Determine if it's vertical or horizontal video
@@ -35,6 +36,17 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   
   // Calculate aspect ratio based on orientation if not explicitly provided
   const videoAspectRatio = aspectRatio || (isVertical ? 9/16 : 16/9);
+
+  // Log video properties on mount for debugging
+  useEffect(() => {
+    console.log('[VideoPlayer] Props:', {
+      orientation: video.orientation,
+      isVertical,
+      aspectRatio: videoAspectRatio,
+      thumbnailUrl: video.thumbnailImage?.url,
+      title: video.title
+    });
+  }, [video, isVertical, videoAspectRatio]);
   
   const handlePlayClick = () => {
     setIsPlaying(true);
@@ -59,6 +71,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   
   const handleVideoLoaded = () => {
     setIsLoading(false);
+  };
+  
+  const handleThumbnailLoaded = () => {
+    setThumbnailLoaded(true);
+  };
+  
+  const handleThumbnailError = () => {
+    console.error('[VideoPlayer] Thumbnail failed to load:', video.thumbnailImage?.url);
+    setThumbnailLoaded(false);
   };
 
   return (
@@ -101,11 +122,20 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
           // Thumbnail view with play button
           <div className="absolute inset-0">
             {video.thumbnailImage?.url ? (
-              <img 
-                src={video.thumbnailImage.url} 
-                alt={video.thumbnailImage.alt || video.title || "Video thumbnail"}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
+              <>
+                <img 
+                  src={video.thumbnailImage.url} 
+                  alt={video.thumbnailImage.alt || video.title || "Video thumbnail"}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onLoad={handleThumbnailLoaded}
+                  onError={handleThumbnailError}
+                />
+                {!thumbnailLoaded && (
+                  <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
+                    <p className="text-gray-500">Loading thumbnail...</p>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
                 <p className="text-gray-500">No thumbnail available</p>

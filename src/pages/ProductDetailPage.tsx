@@ -81,6 +81,8 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
     recommendedMachines: Array.isArray(data.recommendedMachines) ? data.recommendedMachines : [],
     video: data.video ? {
       ...data.video,
+      title: data.video.title || "See Our Solution in Action",
+      description: data.video.description || "Watch how our solution can transform your business",
       // Apply the type guard to ensure orientation is a valid value
       orientation: typeof data.video === 'object' && 'orientation' in data.video 
         ? (isValidOrientation(data.video.orientation) 
@@ -95,10 +97,12 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
     if (product?.video) {
       console.log("[ProductContent] Video information:", {
         title: product.video.title,
+        description: product.video.description,
         hasUrl: !!product.video.url,
         hasYouTubeId: !!product.video.youtubeId,
         hasThumbnail: !!product.video.thumbnailImage,
-        orientation: product.video.orientation || 'horizontal'
+        orientation: product.video.orientation || 'horizontal',
+        thumbnailUrl: product.video.thumbnailImage?.url
       });
     }
   }, [product]);
@@ -159,8 +163,8 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
           {/* Display video section if product has video */}
           {product.video && (
             <ProductVideoSection
-              title={product.video.title || "See Our Solution in Action"}
-              description={product.video.description || "Watch how our solution can transform your business"}
+              title={product.video.title}
+              description={product.video.description}
               videoId={product.video.youtubeId}
               videoUrl={product.video.url}
               thumbnailImage={product.video.thumbnailImage?.url || product.image?.url || '/placeholder.svg'}

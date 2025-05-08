@@ -39,7 +39,7 @@ const ProductVideoSection = ({
   // video layouts while maintaining the machine thumbnail display functionality elsewhere
   return (
     <section className="py-16 bg-white">
-      <div className="container-wide">
+      <div className="container mx-auto">
         {isVertical ? (
           // Vertical video layout - video on left, content on right
           <div className="flex flex-col lg:flex-row items-start gap-8">
@@ -52,7 +52,7 @@ const ProductVideoSection = ({
             </div>
             <div className="w-full lg:w-1/2">
               <h2 className="text-3xl font-bold mb-4 text-vending-blue-dark">{title}</h2>
-              <p className="subtitle">{description}</p>
+              <p className="text-gray-600 text-lg">{description}</p>
               <p className="text-sm text-gray-500 mt-4">
                 See our vending solution in action
               </p>
@@ -63,7 +63,7 @@ const ProductVideoSection = ({
           <div className="flex flex-col items-center">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4 text-vending-blue-dark">{title}</h2>
-              <p className="subtitle mx-auto">{description}</p>
+              <p className="text-gray-600 text-lg max-w-3xl mx-auto">{description}</p>
             </div>
             
             <div className="max-w-4xl w-full mx-auto">
