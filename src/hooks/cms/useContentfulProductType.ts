@@ -172,14 +172,24 @@ export function useContentfulProductType(slug: string) {
           );
         }
         
-        console.log(`[useContentfulProductType] Found product type:`, {
-          id: entry.sys.id,
-          title: entry.fields.title || 'No title',
-          slug: entry.fields.slug || 'No slug',
-          hasVideo: !!entry.fields.video || !!entry.fields.youtubeVideoId 
-        });
-        
         const fields = entry.fields;
+        
+        // Log video-related fields for debugging
+        console.log(`[useContentfulProductType] Video-related fields:`, {
+          hasVideo: !!fields.video,
+          hasYoutubeVideoId: !!fields.youtubeVideoId,
+          hasVideoTitle: !!fields.videoTitle,
+          hasVideoPreviewImage: !!fields.videoPreviewImage,
+          hasVideoDescription: !!fields.videoDescription
+        });
+
+        if (fields.videoPreviewImage) {
+          console.log('[useContentfulProductType] Video preview image details:', {
+            id: fields.videoPreviewImage.sys?.id,
+            url: fields.videoPreviewImage.fields?.file?.url,
+            title: fields.videoPreviewImage.fields?.title
+          });
+        }
         
         // Create a safe product object with all fields validated
         const productType = {
@@ -215,27 +225,37 @@ export function useContentfulProductType(slug: string) {
                 alt: machine.fields.images[0].fields?.title || machine.fields?.title || ''
               } : undefined
             })).filter(machine => machine.slug && machine.title) : [],
-          // Add video support
+          // Enhanced video support with better handling
           video: (fields.video || fields.youtubeVideoId) ? {
             title: fields.videoTitle ? String(fields.videoTitle) : 'Product Demo',
             description: fields.videoDescription ? String(fields.videoDescription) : 'See our solution in action',
-            thumbnailImage: fields.videoThumbnail ? {
-              id: fields.videoThumbnail.sys?.id || 'thumbnail-id',
-              url: fields.videoThumbnail.fields?.file?.url ? `https:${fields.videoThumbnail.fields.file.url}` : '',
-              alt: fields.videoThumbnail.fields?.title || 'Video thumbnail'
+            // Improved thumbnail handling
+            thumbnailImage: fields.videoPreviewImage ? {
+              id: fields.videoPreviewImage.sys?.id || 'thumbnail-id',
+              url: fields.videoPreviewImage.fields?.file?.url ? `https:${fields.videoPreviewImage.fields.file.url}` : '',
+              alt: fields.videoPreviewImage.fields?.title || 'Video thumbnail'
             } : fields.image ? {
               id: fields.image.sys?.id || 'image-as-thumbnail',
               url: fields.image.fields?.file?.url ? `https:${fields.image.fields.file.url}` : '',
               alt: fields.image.fields?.title || fields.title || 'Video thumbnail'
-            } : {
-              id: 'default-thumbnail',
-              url: '/placeholder.svg',
-              alt: 'Video thumbnail'
-            },
+            } : null,
             url: fields.video?.fields?.file?.url ? `https:${fields.video.fields.file.url}` : undefined,
-            youtubeId: fields.youtubeVideoId ? String(fields.youtubeVideoId) : undefined
+            youtubeId: fields.youtubeVideoId ? String(fields.youtubeVideoId) : undefined,
+            // Determine orientation from video dimensions or default to vertical for TikTok-style videos
+            orientation: 'vertical' // Default to vertical for mobile-first approach
           } : undefined
         };
+        
+        // Log the processed video object
+        if (productType.video) {
+          console.log('[useContentfulProductType] Processed video object:', {
+            title: productType.video.title,
+            description: productType.video.description,
+            hasThumbnail: !!productType.video.thumbnailImage,
+            thumbnailUrl: productType.video.thumbnailImage?.url,
+            orientation: productType.video.orientation
+          });
+        }
         
         return {
           ...productType,

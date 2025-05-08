@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -84,15 +83,11 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
       title: data.video.title || "See Our Solution in Action",
       description: data.video.description || "Watch how our solution can transform your business",
       // Apply the type guard to ensure orientation is a valid value
-      orientation: typeof data.video === 'object' && 'orientation' in data.video 
-        ? (isValidOrientation(data.video.orientation) 
-            ? data.video.orientation 
-            : 'horizontal') // Default to horizontal if invalid value
-        : 'horizontal'  // Default to horizontal if missing
+      orientation: isValidOrientation(data.video.orientation) ? data.video.orientation : 'vertical'
     } : null
   } : null;
 
-  // Log video information for debugging
+  // Enhanced video logging
   useEffect(() => {
     if (product?.video) {
       console.log("[ProductContent] Video information:", {
@@ -101,9 +96,20 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
         hasUrl: !!product.video.url,
         hasYouTubeId: !!product.video.youtubeId,
         hasThumbnail: !!product.video.thumbnailImage,
-        orientation: product.video.orientation || 'horizontal',
+        orientation: product.video.orientation,
         thumbnailUrl: product.video.thumbnailImage?.url
       });
+
+      // Log detailed information about thumbnail
+      if (product.video.thumbnailImage) {
+        console.log("[ProductContent] Thumbnail details:", {
+          id: product.video.thumbnailImage.id,
+          url: product.video.thumbnailImage.url,
+          alt: product.video.thumbnailImage.alt
+        });
+      } else {
+        console.warn("[ProductContent] No thumbnail image available for video");
+      }
     }
   }, [product]);
 

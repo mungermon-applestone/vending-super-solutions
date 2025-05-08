@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import VideoPlayer, { VideoSource } from '@/components/common/VideoPlayer';
 
 interface ProductVideoSectionProps {
@@ -19,7 +19,19 @@ const ProductVideoSection = ({
   thumbnailImage,
   orientation = 'horizontal'
 }: ProductVideoSectionProps) => {
-  // Prepare video source object
+  // Log props for debugging
+  useEffect(() => {
+    console.log('[ProductVideoSection] Rendering with props:', {
+      title,
+      description,
+      videoId,
+      videoUrl,
+      thumbnailImage,
+      orientation
+    });
+  }, [title, description, videoId, videoUrl, thumbnailImage, orientation]);
+
+  // Prepare video source object with proper thumbnail
   const videoSource: VideoSource = {
     youtubeId: videoId,
     url: videoUrl,
@@ -33,6 +45,8 @@ const ProductVideoSection = ({
 
   // Determine if video is vertical
   const isVertical = orientation === 'vertical';
+  
+  console.log('[ProductVideoSection] Video layout:', isVertical ? 'vertical' : 'horizontal');
   
   // DO NOT MODIFY THE VIDEO LAYOUT STRUCTURE WITHOUT EXPLICIT INSTRUCTIONS
   // This component has been carefully designed to support both vertical and horizontal

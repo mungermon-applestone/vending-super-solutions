@@ -46,6 +46,27 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       thumbnailUrl: video.thumbnailImage?.url,
       title: video.title
     });
+    
+    // Additional debugging for thumbnail issues
+    if (video.thumbnailImage) {
+      console.log('[VideoPlayer] Thumbnail image URL:', video.thumbnailImage.url);
+      
+      // Preload image to check if it loads correctly
+      const img = new Image();
+      img.onload = () => {
+        console.log('[VideoPlayer] Thumbnail image loaded successfully:', {
+          width: img.width,
+          height: img.height,
+          src: img.src
+        });
+      };
+      img.onerror = (e) => {
+        console.error('[VideoPlayer] Error loading thumbnail image:', e);
+      };
+      img.src = video.thumbnailImage.url;
+    } else {
+      console.warn('[VideoPlayer] No thumbnail image provided');
+    }
   }, [video, isVertical, videoAspectRatio]);
   
   const handlePlayClick = () => {
@@ -74,6 +95,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
   
   const handleThumbnailLoaded = () => {
+    console.log('[VideoPlayer] Thumbnail loaded successfully');
     setThumbnailLoaded(true);
   };
   
@@ -126,7 +148,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 <img 
                   src={video.thumbnailImage.url} 
                   alt={video.thumbnailImage.alt || video.title || "Video thumbnail"}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className={`absolute inset-0 w-full h-full ${isVertical ? 'object-contain' : 'object-cover'}`}
                   onLoad={handleThumbnailLoaded}
                   onError={handleThumbnailError}
                 />
