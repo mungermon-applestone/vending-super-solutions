@@ -75,7 +75,11 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
     image: data.image || null,
     features: Array.isArray(data.features) ? data.features : [],
     recommendedMachines: Array.isArray(data.recommendedMachines) ? data.recommendedMachines : [],
-    video: data.video
+    video: data.video ? {
+      ...data.video,
+      // Ensure orientation is defined, default to 'horizontal' if missing
+      orientation: data.video.orientation || 'horizontal'
+    } : null
   } : null;
 
   // Log video information for debugging
