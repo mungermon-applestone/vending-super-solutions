@@ -1,6 +1,4 @@
 
-import { Document } from '@contentful/rich-text-types';
-
 export interface CMSImage {
   id: string;
   url: string;
@@ -22,15 +20,12 @@ export interface CMSProductType {
   features?: CMSFeature[];
   examples?: CMSExample[];
   video?: {
-    title?: string;
-    description?: string;
-    thumbnailImage?: CMSImage;
+    title: string;
+    description: string;
+    thumbnailImage: CMSImage;
     url?: string;
     youtubeId?: string;
   };
-  videoTitle?: string;
-  videoDescription?: Document | string; // Updated to support both Rich Text Document and string
-  videoThumbnail?: CMSImage;
   visible?: boolean;
   displayOrder?: number;
   showOnHomepage?: boolean;

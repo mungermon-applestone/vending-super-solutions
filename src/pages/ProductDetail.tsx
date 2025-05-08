@@ -11,7 +11,6 @@ import CTASection from '@/components/common/CTASection';
 import { SimpleContactCTA } from '@/components/common';
 import { useEffect } from 'react';
 import ProductVideoSection from '@/components/products/ProductVideoSection';
-import { Document } from '@contentful/rich-text-types';
 
 /**
  * Product detail page that displays detailed information about a specific product
@@ -24,9 +23,6 @@ const ProductDetail = () => {
   useEffect(() => {
     if (product) {
       console.log('[ProductDetail] Loaded product data:', product);
-      if (product.videoDescription) {
-        console.log('[ProductDetail] Video description type:', typeof product.videoDescription);
-      }
     } else if (!isLoading) {
       console.log('[ProductDetail] No product data found for slug:', productSlug);
     }
@@ -90,19 +86,6 @@ const ProductDetail = () => {
   // Prepare benefits list (ensure it's an array)
   const benefits = Array.isArray(product.benefits) ? product.benefits : [];
 
-  // Create a video object with all available video data from the product
-  // We need to handle both string and Rich Text for videoDescription
-  const videoData = {
-    title: product.videoTitle || (product.video?.title || "See Our Solution in Action"),
-    description: product.videoDescription || (product.video?.description || "Watch how our solution can transform your business"),
-    thumbnailImage: product.videoThumbnail || product.video?.thumbnailImage,
-    url: product.video?.url,
-    youtubeId: product.video?.youtubeId
-  };
-
-  // Only show video section if we have either a video URL or a YouTube ID
-  const hasVideo = !!(product.video?.url || product.video?.youtubeId);
-
   return (
     <Layout>
       {/* Back Navigation */}
@@ -123,14 +106,14 @@ const ProductDetail = () => {
         benefits={benefits}
       />
 
-      {/* Video Section - Using the combined video data from product fields */}
-      {hasVideo && (
+      {/* Video Section - Modified to handle both YouTube and direct video URLs */}
+      {product.video && (
         <ProductVideoSection
-          title={videoData.title}
-          description={videoData.description}
-          videoId={videoData.youtubeId}
-          videoUrl={videoData.url}
-          thumbnailImage={videoData.thumbnailImage?.url || heroImage}
+          title={product.video.title || "See Our Solution in Action"}
+          description={product.video.description || "Watch how our solution can transform your business"}
+          videoId={product.video.youtubeId}
+          videoUrl={product.video.url}
+          thumbnailImage={product.video.thumbnailImage?.url || heroImage}
         />
       )}
 
