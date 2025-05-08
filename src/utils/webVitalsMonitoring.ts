@@ -1,5 +1,6 @@
 
 import { type Metric } from 'web-vitals';
+import { trackWebVital } from './analytics';
 
 // Function to collect and report Core Web Vitals
 export function reportWebVitals(onPerfEntry?: (metric: Metric) => void): void {
@@ -27,6 +28,13 @@ export function logWebVitals(): void {
 
 // Function to send metrics to an analytics endpoint
 export function sendToAnalytics(metric: Metric): void {
+  // Track the web vital metric using our analytics utility
+  trackWebVital({
+    name: metric.name,
+    id: metric.id,
+    value: metric.value
+  });
+  
   const body = JSON.stringify({
     name: metric.name,
     value: metric.value,

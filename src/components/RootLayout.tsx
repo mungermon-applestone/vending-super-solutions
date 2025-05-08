@@ -11,6 +11,7 @@ import SiteMetadata from './seo/SiteMetadata';
 import { Spinner } from '@/components/ui/spinner';
 import { createDynamicComponent } from '@/utils/dynamicLoader';
 import CookieBanner from './common/CookieBanner';
+import { trackPageView } from '@/utils/analytics';
 
 // Lazy load non-critical components
 const PreviewEnvironmentDetector = createDynamicComponent(
@@ -62,6 +63,9 @@ const RootLayout = () => {
     if ('performance' in window) {
       performance.mark(`route-${location.pathname}`);
     }
+    
+    // Track page view in Google Analytics
+    trackPageView(location.pathname, document.title);
     
     // Scroll to top on route change
     window.scrollTo(0, 0);
