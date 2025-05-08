@@ -11,6 +11,27 @@ interface ProductVideoSectionProps {
   orientation?: 'vertical' | 'horizontal';
 }
 
+/**
+ * ProductVideoSection Component
+ * 
+ * This component displays a video player alongside product information with two layout options:
+ * 
+ * 1. Vertical Video Layout (orientation="vertical"):
+ *    - Uses a side-by-side layout on larger screens (flex-row on lg+)
+ *    - Video appears on the left (lg:w-1/2) with text content on the right
+ *    - Video uses 9/16 aspect ratio optimized for vertical/portrait content
+ *    - The video container uses "w-full max-w-md" to maintain proper sizing
+ * 
+ * 2. Horizontal Video Layout (orientation="horizontal" or default):
+ *    - Uses a stacked layout (flex-col)
+ *    - Title and description appear above the video
+ *    - Video is centered with max-w-4xl constraint
+ *    - Video uses standard 16/9 aspect ratio
+ * 
+ * IMPORTANT: The video container width/sizing is critical for both layouts:
+ * - For vertical videos: Use sufficient width (max-w-md) to prevent squishing
+ * - For horizontal videos: The container should be wider (max-w-4xl)
+ */
 const ProductVideoSection = ({
   title,
   description,

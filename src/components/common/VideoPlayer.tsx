@@ -20,6 +20,33 @@ interface VideoPlayerProps {
   aspectRatio?: number; // Default aspect ratio can be overridden
 }
 
+/**
+ * VideoPlayer Component
+ * 
+ * This component handles displaying videos in both vertical and horizontal orientations.
+ * Key implementation details:
+ * 
+ * 1. Aspect Ratio:
+ *    - For vertical videos: Uses 9/16 aspect ratio by default
+ *    - For horizontal videos: Uses 16/9 aspect ratio by default
+ *    - Can be explicitly overridden via the aspectRatio prop
+ * 
+ * 2. Thumbnail Display:
+ *    - For vertical videos: Uses object-contain to preserve aspect ratio without cropping
+ *    - For horizontal videos: Uses object-cover for a more immersive appearance
+ * 
+ * 3. Container Sizing:
+ *    - The component respects the className prop which controls container width/sizing
+ *    - For vertical videos: A wider container (e.g., max-w-md) helps prevent squishing
+ *    - For horizontal videos: A full-width container with max-width constraint works best
+ * 
+ * 4. Video Sources:
+ *    - Supports both direct video URLs and YouTube embeds via youtubeId
+ *    - Falls back gracefully when sources are unavailable
+ * 
+ * NOTE: When updating styles or layouts, be careful to test both orientations
+ * as they have different optimal display characteristics.
+ */
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ 
   video, 
   className = '',
