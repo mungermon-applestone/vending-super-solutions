@@ -53,22 +53,17 @@ const ProductVideoSection = ({
       <div className="container mx-auto">
         {isVertical ? (
           // Vertical video layout - video on left, content on right
-          <div className="flex flex-col lg:flex-row items-start gap-8">
-            <div className="w-full lg:w-1/2">
-              <h2 className="text-3xl font-bold mb-4 text-vending-blue-dark">{title}</h2>
-              <p className="text-gray-600 text-lg mb-6">{description}</p>
-              
+          <div className="flex flex-col lg:flex-row items-center justify-center gap-8 max-w-5xl mx-auto">
+            <div className="w-full lg:w-1/2 flex justify-center">
               <VideoPlayer 
                 video={videoSource} 
-                className="max-w-md mx-auto lg:mx-0"
+                className="max-w-xs sm:max-w-sm"
                 aspectRatio={9/16} // Vertical video aspect ratio
               />
             </div>
             <div className="w-full lg:w-1/2">
-              <div className="bg-gray-50 p-6 rounded-lg mt-8 lg:mt-16">
-                <h3 className="text-xl font-medium mb-2 text-vending-blue-dark">In this video</h3>
-                <p className="text-gray-600">See our vending solution in action and learn how we address common business challenges.</p>
-              </div>
+              <h2 className="text-3xl font-bold mb-4 text-vending-blue-dark">{title}</h2>
+              <p className="text-gray-600 text-lg">{description}</p>
             </div>
           </div>
         ) : (
