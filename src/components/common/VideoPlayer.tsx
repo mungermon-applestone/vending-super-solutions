@@ -24,28 +24,31 @@ interface VideoPlayerProps {
  * VideoPlayer Component
  * 
  * This component handles displaying videos in both vertical and horizontal orientations.
- * Key implementation details:
  * 
+ * IMPORTANT REGRESSION PREVENTION NOTES:
+ * - This component supports both direct video URLs and YouTube embeds
+ * - Handles two distinct orientation modes with different aspect ratios:
+ *   1. Vertical (9/16): For portrait/vertical videos
+ *   2. Horizontal (16/9): For landscape/horizontal videos (default)
+ * - Container sizing is critical for proper display:
+ *   - For vertical: Use sufficient width (max-w-md) to prevent squishing
+ *   - For horizontal: Container should be wider (max-w-4xl)
+ * - Preserves play/pause functionality and loading states
+ * - Maintains thumbnail display with proper aspect ratio and fallbacks
+ * 
+ * Implementation details:
  * 1. Aspect Ratio:
- *    - For vertical videos: Uses 9/16 aspect ratio by default
- *    - For horizontal videos: Uses 16/9 aspect ratio by default
+ *    - Vertical: Uses 9/16 aspect ratio by default
+ *    - Horizontal: Uses 16/9 aspect ratio by default
  *    - Can be explicitly overridden via the aspectRatio prop
  * 
  * 2. Thumbnail Display:
- *    - For vertical videos: Uses object-contain to preserve aspect ratio without cropping
- *    - For horizontal videos: Uses object-cover for a more immersive appearance
+ *    - Vertical: Uses object-contain to preserve aspect ratio
+ *    - Horizontal: Uses object-cover for more immersive appearance
  * 
- * 3. Container Sizing:
- *    - The component respects the className prop which controls container width/sizing
- *    - For vertical videos: A wider container (e.g., max-w-md) helps prevent squishing
- *    - For horizontal videos: A full-width container with max-width constraint works best
+ * 3. Error handling and loading states must be preserved
  * 
- * 4. Video Sources:
- *    - Supports both direct video URLs and YouTube embeds via youtubeId
- *    - Falls back gracefully when sources are unavailable
- * 
- * NOTE: When updating styles or layouts, be careful to test both orientations
- * as they have different optimal display characteristics.
+ * @returns React component
  */
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ 
   video, 

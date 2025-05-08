@@ -4,6 +4,12 @@
  * 
  * This utility provides a typed interface to work with Google Analytics 4.
  * It offers methods for page views, events, and custom user properties.
+ * 
+ * IMPORTANT REGRESSION PREVENTION NOTES:
+ * - Do not remove the window.gtag type declaration
+ * - Maintain consistent console logging patterns for debugging
+ * - Always check for gtag existence before calling methods
+ * - Preserve the error handling in each method
  */
 
 // Declare gtag as a global function

@@ -2,6 +2,16 @@
 import { type Metric } from 'web-vitals';
 import { trackWebVital } from './analytics';
 
+/**
+ * Web Vitals Monitoring System
+ * 
+ * IMPORTANT REGRESSION PREVENTION NOTES:
+ * - This module is critical for performance monitoring
+ * - Always maintain integration with analytics tracking
+ * - Only run reporting in production to avoid development overhead
+ * - Preserve the classification thresholds for consistent reporting
+ */
+
 // Function to collect and report Core Web Vitals
 export function reportWebVitals(onPerfEntry?: (metric: Metric) => void): void {
   // Only run in production, avoid overhead during development
@@ -26,7 +36,11 @@ export function logWebVitals(): void {
   });
 }
 
-// Function to send metrics to an analytics endpoint
+/**
+ * Send metrics to analytics tracking
+ * 
+ * @param metric - The web vital metric to track
+ */
 export function sendToAnalytics(metric: Metric): void {
   // Track the web vital metric using our analytics utility
   trackWebVital({
@@ -67,7 +81,16 @@ export function sendToAnalytics(metric: Metric): void {
   }
 }
 
-// Helper to classify performance score
+/**
+ * Classify performance score based on Core Web Vitals thresholds
+ * 
+ * IMPORTANT: These thresholds are based on Google's recommendations
+ * and should not be modified without careful consideration
+ * 
+ * @param value - The metric value
+ * @param metric - The metric name
+ * @returns Classification as 'good', 'needs-improvement', or 'poor'
+ */
 export function classifyPerformanceScore(value: number, metric: string): 'good' | 'needs-improvement' | 'poor' {
   // Thresholds based on Core Web Vitals
   const thresholds: Record<string, [number, number]> = {
@@ -92,7 +115,10 @@ function getNavigationType(): string {
   return navigation?.type || 'navigate';
 }
 
-// Capture First Input Delay for additional monitoring
+/**
+ * Capture First Input Delay for additional monitoring
+ * This is separate from web-vitals to ensure we catch every first interaction
+ */
 export function captureFirstInputDelay(): void {
   let firstInput = false;
   
@@ -115,7 +141,10 @@ export function captureFirstInputDelay(): void {
   document.addEventListener('touchstart', onFirstInput);
 }
 
-// Initialize all performance monitoring
+/**
+ * Initialize all performance monitoring
+ * Call this function at the application entry point
+ */
 export function initPerformanceMonitoring(): void {
   if (import.meta.env.PROD) {
     reportWebVitals(sendToAnalytics);

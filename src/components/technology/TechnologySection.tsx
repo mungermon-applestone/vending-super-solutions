@@ -3,6 +3,25 @@ import React, { useEffect } from 'react';
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
+/**
+ * TechnologySection Component
+ * 
+ * IMPORTANT REGRESSION PREVENTION NOTES:
+ * - This component displays technology information with an alternating layout pattern
+ * - The layout alternates between image-left/text-right and text-left/image-right 
+ *   based on the index prop (even indices have image on left, odd indices have image on right)
+ * - Maintains consistent spacing, typography, and image handling
+ * - Includes proper fallback handling for missing images and loading states
+ * 
+ * Layout specifications:
+ * - Uses flex-row/flex-row-reverse based on index for desktop layout
+ * - Uses 50/50 width split between image and text (md:w-1/2)
+ * - Stacked layout on mobile (flex-col)
+ * - Image container has consistent aspect ratio and shadow styling
+ * 
+ * @param props Component properties
+ * @returns React component
+ */
 interface TechnologySectionProps {
   id: string;
   title: string;
@@ -74,8 +93,9 @@ const TechnologySection = ({
   return (
     <section id={id} className={cn("py-16 bg-gradient-to-b from-white to-gray-50", className)}>
       <div className="container max-w-7xl mx-auto px-4">
+        {/* Alternating layout based on index - critical for design consistency */}
         <div className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 items-center`}>
-          {/* Image Section */}
+          {/* Image Section - width and styling must be maintained */}
           <div className="w-full md:w-1/2">
             <div className="relative aspect-[4/3] rounded-lg overflow-hidden shadow-xl">
               {!imageLoaded && !imageError && (
@@ -99,7 +119,7 @@ const TechnologySection = ({
             </div>
           </div>
 
-          {/* Content Section */}
+          {/* Content Section - typography and spacing must be maintained */}
           <div className="w-full md:w-1/2 space-y-6">
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tight">{title || "Technology Section"}</h2>
@@ -110,6 +130,7 @@ const TechnologySection = ({
                 </p>
               )}
               
+              {/* Bullet points with consistent styling */}
               {bulletPoints && bulletPoints.length > 0 && (
                 <ul className="space-y-3 mt-6">
                   {bulletPoints.map((point, i) => (

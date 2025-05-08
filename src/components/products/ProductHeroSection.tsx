@@ -3,6 +3,25 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import Image from '@/components/common/Image';
 
+/**
+ * Product Hero Section Component
+ * 
+ * IMPORTANT REGRESSION PREVENTION NOTES:
+ * - This component is used across all product type pages
+ * - Maintains consistent layout with left text, right image on desktop 
+ * - Benefits list is crucial for product marketing and must maintain checkmark styling
+ * - CTA buttons (primary/secondary) maintain consistent hierarchy and styling
+ * 
+ * Layout specifications:
+ * - Uses grid layout with 2 columns on desktop (lg:grid-cols-2)
+ * - Text content on left, image on right
+ * - Stacked layout on mobile (grid-cols-1)
+ * - Specific background gradient must be maintained for brand consistency
+ * - Image uses specific shadow and rounding (rounded-lg shadow-xl)
+ * 
+ * @param {ProductHeroSectionProps} props - Component properties 
+ * @returns React component
+ */
 interface ProductHeroSectionProps {
   productType: string;
   description: string;
@@ -40,6 +59,7 @@ const ProductHeroSection = ({
     <section className="py-12 md:py-16 bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
       <div className="container-wide">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Text content area - Must remain on left */}
           <div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-vending-blue-dark">
               {productType}
@@ -47,6 +67,8 @@ const ProductHeroSection = ({
             <p className="text-lg text-gray-700 mb-8">
               {description}
             </p>
+            
+            {/* Benefits list - Critical marketing content */}
             <div className="space-y-4 mb-8">
               {uniqueBenefits.map((benefit, index) => (
                 <div key={index} className="flex items-start gap-2">
@@ -57,11 +79,15 @@ const ProductHeroSection = ({
                 </div>
               ))}
             </div>
+            
+            {/* CTA buttons - Maintain hierarchy */}
             <div className="flex flex-col sm:flex-row gap-4">
               {primaryAction || defaultPrimaryAction}
               {secondaryAction || defaultSecondaryAction}
             </div>
           </div>
+          
+          {/* Image area - Must remain on right */}
           <div className="relative">
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
               <div className="aspect-[4/3] w-full flex items-center justify-center">

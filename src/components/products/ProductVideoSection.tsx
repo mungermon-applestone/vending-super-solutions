@@ -14,13 +14,14 @@ interface ProductVideoSectionProps {
 /**
  * ProductVideoSection Component
  * 
- * This component displays a video player alongside product information with two layout options:
- * 
+ * IMPORTANT REGRESSION PREVENTION NOTES:
+ * - This component displays a video player alongside product information with TWO distinct layouts:
+ *
  * 1. Vertical Video Layout (orientation="vertical"):
  *    - Uses a side-by-side layout on larger screens (flex-row on lg+)
  *    - Video appears on the left (lg:w-1/2) with text content on the right
  *    - Video uses 9/16 aspect ratio optimized for vertical/portrait content
- *    - The video container uses "w-full max-w-md" to maintain proper sizing
+ *    - Video container uses "w-full max-w-md" to maintain proper sizing
  * 
  * 2. Horizontal Video Layout (orientation="horizontal" or default):
  *    - Uses a stacked layout (flex-col)
@@ -28,9 +29,11 @@ interface ProductVideoSectionProps {
  *    - Video is centered with max-w-4xl constraint
  *    - Video uses standard 16/9 aspect ratio
  * 
- * IMPORTANT: The video container width/sizing is critical for both layouts:
+ * CRITICAL: The video container width/sizing must be preserved for both layouts:
  * - For vertical videos: Use sufficient width (max-w-md) to prevent squishing
  * - For horizontal videos: The container should be wider (max-w-4xl)
+ * 
+ * @returns React component
  */
 const ProductVideoSection = ({
   title,
@@ -78,7 +81,7 @@ const ProductVideoSection = ({
             <div className="w-full lg:w-1/2 flex justify-center">
               <VideoPlayer 
                 video={videoSource} 
-                className="w-full max-w-md" // Restored wider container for vertical video
+                className="w-full max-w-md" // Critical width for vertical video
                 aspectRatio={9/16} // Vertical video aspect ratio
               />
             </div>

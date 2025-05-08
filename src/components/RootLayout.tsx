@@ -13,6 +13,23 @@ import { createDynamicComponent } from '@/utils/dynamicLoader';
 import CookieBanner from './common/CookieBanner';
 import { trackPageView } from '@/utils/analytics';
 
+/**
+ * RootLayout Component
+ * 
+ * IMPORTANT REGRESSION PREVENTION NOTES:
+ * - This component is the main layout wrapper for the entire application
+ * - Maintains critical layout structure with Header, Outlet (for routes), and Footer
+ * - Initializes analytics tracking and performance monitoring
+ * - Handles Contentful CMS integration and preview environment detection
+ * - Implements performance optimization techniques (lazy loading, Suspense)
+ * 
+ * Structure:
+ * - Header (fixed navigation)
+ * - Main content area (flexible height, renders current route)
+ * - Footer (consistent across all pages)
+ * - Various providers and utility components
+ */
+
 // Lazy load non-critical components
 const PreviewEnvironmentDetector = createDynamicComponent(
   () => import(/* webpackChunkName: "preview-detector" */ './contentful/PreviewEnvironmentDetector'),
@@ -58,7 +75,12 @@ const RootLayout = () => {
     }
   }, []);
 
-  // Track route changes for analytics
+  /**
+   * Track route changes for analytics
+   * 
+   * CRITICAL: This effect must be maintained to ensure proper analytics tracking
+   * of page views throughout the application.
+   */
   useEffect(() => {
     if ('performance' in window) {
       performance.mark(`route-${location.pathname}`);

@@ -12,6 +12,24 @@ interface Testimonial {
   stars: number;
 }
 
+/**
+ * TestimonialsSection Component
+ * 
+ * IMPORTANT REGRESSION PREVENTION NOTES:
+ * - This component displays client testimonials in a carousel format
+ * - Maintains specific styling for testimonial cards with quotes, ratings, and author info
+ * - Includes pagination dots and navigation arrows that must maintain accessibility
+ * 
+ * Layout specifications:
+ * - Card uses consistent white background with shadow and rounded corners
+ * - Star rating system must maintain yellow-500 color for filled stars
+ * - Navigation arrows positioned at sides with consistent styling
+ * - Pagination dots at bottom with active indicator in brand blue color
+ * - Quote styling includes large quotation mark decoration in top left
+ * - Author info consistently centered with optional circular image
+ * 
+ * @returns React component
+ */
 const TestimonialsSection = () => {
   const testimonials: Testimonial[] = [
     {
@@ -53,6 +71,7 @@ const TestimonialsSection = () => {
   return (
     <section className="py-16 md:py-24">
       <div className="container-wide">
+        {/* Section header with consistent styling */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
             Trusted by Industry Leaders
@@ -62,16 +81,17 @@ const TestimonialsSection = () => {
           </p>
         </div>
         
+        {/* Testimonial card with consistent styling */}
         <div className="max-w-4xl mx-auto">
           <div className="relative bg-white rounded-xl p-8 md:p-12 shadow-lg">
-            {/* Quote mark decoration */}
+            {/* Quote mark decoration - position must be maintained */}
             <div className="absolute top-6 left-6 text-6xl text-vending-blue-light leading-none font-serif opacity-40">
               "
             </div>
             
-            {/* Testimonial content */}
+            {/* Testimonial content area */}
             <div className="relative">
-              {/* Stars */}
+              {/* Star rating - maintain consistent styling */}
               <div className="flex mb-6 justify-center">
                 {Array.from({ length: testimonials[activeIndex].stars }).map((_, i) => (
                   <Star key={i} className="h-5 w-5 text-yellow-500 fill-yellow-500" />
@@ -81,12 +101,12 @@ const TestimonialsSection = () => {
                 ))}
               </div>
               
-              {/* Quote */}
+              {/* Quote text with consistent styling */}
               <blockquote className="text-xl md:text-2xl text-center font-medium text-gray-700 mb-8">
                 "{testimonials[activeIndex].quote}"
               </blockquote>
               
-              {/* Author info */}
+              {/* Author information with consistent styling */}
               <div className="text-center">
                 {testimonials[activeIndex].image && (
                   <img 
@@ -102,7 +122,7 @@ const TestimonialsSection = () => {
               </div>
             </div>
             
-            {/* Navigation arrows */}
+            {/* Navigation arrows - position and styling must be maintained */}
             <button 
               onClick={prevTestimonial} 
               className="absolute top-1/2 left-4 -translate-y-1/2 bg-white rounded-full p-2 shadow-md hover:bg-gray-50"
@@ -119,7 +139,7 @@ const TestimonialsSection = () => {
             </button>
           </div>
           
-          {/* Pagination dots */}
+          {/* Pagination dots with active indicator */}
           <div className="flex justify-center mt-6 space-x-2">
             {testimonials.map((_, index) => (
               <button

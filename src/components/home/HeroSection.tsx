@@ -7,6 +7,25 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useHeroContent } from '@/hooks/cms/useHeroContent';
 import Image from '@/components/common/Image';
 
+/**
+ * Hero Section Component
+ * 
+ * IMPORTANT REGRESSION PREVENTION NOTES:
+ * - This is the primary hero component displayed on the homepage
+ * - Maintains specific layout: text content on left, image on right
+ * - Responsive design includes stacked layout on mobile (col) and side-by-side on desktop (grid)
+ * - Contains primary and secondary CTA buttons that must remain prominent
+ * - Feature list with checkmarks must have consistent styling and alignment
+ * - Background uses a gradient that should be preserved for brand consistency
+ * 
+ * Design specifications:
+ * - Text/Image ratio is approximately 1:1 on desktop (lg:grid-cols-2)
+ * - Maintains specific padding/spacing rhythm (py-16 md:py-24)
+ * - CTA buttons maintain consistent styling and hierarchy
+ * - Feature highlights are displayed in a 2x2 grid on desktop
+ * 
+ * @returns React component
+ */
 const HeroSection = () => {
   const { data: heroContent, isLoading } = useHeroContent("home");
   
@@ -58,6 +77,7 @@ const HeroSection = () => {
     <div className={backgroundClass}>
       <div className="container-wide py-16 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Text content section - Must remain on left on desktop */}
           <div className="space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-vending-blue-dark">
               {title}
@@ -65,6 +85,7 @@ const HeroSection = () => {
             <p className="text-xl text-gray-700 max-w-2xl">
               {subtitle}
             </p>
+            {/* CTA buttons - Maintain hierarchy with primary button first */}
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <Button asChild className="btn-primary" size="lg">
                 <Link to={primaryButtonUrl}>
@@ -77,6 +98,7 @@ const HeroSection = () => {
                 </Link>
               </Button>
             </div>
+            {/* Feature grid - 2x2 on desktop, stacked on mobile */}
             <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex items-center gap-2">
                 <CheckCircle className="text-vending-teal h-5 w-5" />
@@ -96,6 +118,8 @@ const HeroSection = () => {
               </div>
             </div>
           </div>
+          
+          {/* Image section - Must remain on right on desktop */}
           <div className="relative flex justify-center">
             <div className="bg-white rounded-lg shadow-xl overflow-hidden w-full" style={{ maxHeight: '600px' }}>
               <div className="aspect-[3/4] w-full h-full flex items-center justify-center">
@@ -109,6 +133,7 @@ const HeroSection = () => {
                 />
               </div>
             </div>
+            {/* Badge overlay - Desktop only */}
             <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
               <p className="font-bold">Works with multiple machine models</p>
             </div>

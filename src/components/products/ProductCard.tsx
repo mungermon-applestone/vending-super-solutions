@@ -12,6 +12,26 @@ interface ProductCardProps {
   isVisible?: boolean;
 }
 
+/**
+ * ProductCard Component
+ * 
+ * IMPORTANT REGRESSION PREVENTION NOTES:
+ * - This card is used throughout the site to display product types consistently
+ * - Maintains fixed height with proportional image area (h-48) and content area
+ * - Contains structured data markup (Schema.org) for SEO which must be preserved
+ * - Image handling includes loading states, error states, and lazy loading
+ * - Consistent hover effects and shadow styling must be maintained
+ * 
+ * Layout specifications:
+ * - Card uses consistent rounded corners (rounded-lg) 
+ * - Shadow styling that enhances on hover (shadow-md hover:shadow-lg)
+ * - Image area maintains fixed height (h-48) with object-contain styling
+ * - Content area has consistent padding (p-6) and spacing
+ * - "Learn more" CTA with consistent styling and arrow icon
+ * 
+ * @param props Component properties
+ * @returns React component with Schema.org structured data
+ */
 const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = React.useState(false);
@@ -58,6 +78,7 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
       itemType="https://schema.org/Product"
       aria-labelledby={`product-title-${product.id}`}
     >
+      {/* Image area - fixed height and consistent styling */}
       <div className="w-full h-48 overflow-hidden bg-gray-100 relative flex items-center justify-center">
         {imageToUse ? (
           <>
@@ -95,6 +116,8 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
           </div>
         )}
       </div>
+      
+      {/* Content area - consistent padding and spacing */}
       <div className="p-6 flex flex-col flex-grow">
         <h3 
           id={`product-title-${product.id}`}
@@ -109,8 +132,12 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
         >
           {product.description}
         </p>
+        
+        {/* SEO structured data that must be preserved */}
         <meta itemProp="brand" content="Vending Solutions" />
         <meta itemProp="category" content="Vending Machine Products" />
+        
+        {/* CTA button with consistent styling */}
         <Button 
           variant="ghost" 
           className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
