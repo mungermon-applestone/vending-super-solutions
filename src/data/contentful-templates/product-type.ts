@@ -113,6 +113,26 @@ export const productTypeTemplate: ContentTypeTemplate = {
         localized: false,
       },
       {
+        id: 'videoOrientation',
+        name: 'Video Orientation',
+        type: 'Symbol',
+        required: false,
+        localized: false,
+        validations: [
+          {
+            in: ['horizontal', 'vertical'],
+            message: 'Orientation must be either horizontal or vertical'
+          }
+        ]
+      },
+      {
+        id: 'youtubeVideoId',
+        name: 'YouTube Video ID',
+        type: 'Symbol',
+        required: false,
+        localized: false,
+      },
+      {
         id: 'recommendedMachines',
         name: 'Recommended Machines',
         type: 'Array',

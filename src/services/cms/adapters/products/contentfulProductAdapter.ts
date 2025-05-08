@@ -1,4 +1,3 @@
-
 import { CMSProductType } from "@/types/cms";
 import { ProductAdapter, ProductCreateInput, ProductUpdateInput } from "./types";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
@@ -34,6 +33,21 @@ export const contentfulProductAdapter: ProductAdapter = {
       // Transform Contentful entries to CMSProductType
       return entries.items.map(entry => {
         const fields = entry.fields;
+        
+        // Determine video orientation based on video asset metadata (if available)
+        let videoOrientation: 'vertical' | 'horizontal' = 'horizontal';
+        if (fields.video && fields.video.fields?.file?.details?.image) {
+          const videoDetails = fields.video.fields.file.details.image;
+          if (videoDetails.width && videoDetails.height) {
+            // If height is greater than width, it's a vertical video
+            videoOrientation = videoDetails.height > videoDetails.width ? 'vertical' : 'horizontal';
+            console.log(`[contentfulProductAdapter] Detected video orientation for ${fields.title}: ${videoOrientation}`);
+          }
+        } else if (fields.videoOrientation) {
+          // If orientation is explicitly set in the content model, use that
+          videoOrientation = fields.videoOrientation as 'vertical' | 'horizontal';
+        }
+        
         return {
           id: entry.sys.id,
           title: fields.title as string,
@@ -71,22 +85,27 @@ export const contentfulProductAdapter: ProductAdapter = {
               thumbnail: machine.fields.machineThumbnail ? {
                 url: `https:${machine.fields.machineThumbnail.fields.file.url}`,
                 alt: machine.fields.machineThumbnail.fields.title || machine.fields.title
+              } : undefined,
+              machineThumbnail: machine.fields.machineThumbnail ? {
+                url: `https:${machine.fields.machineThumbnail.fields.file.url}`,
+                alt: machine.fields.machineThumbnail.fields.title || machine.fields.title
               } : undefined
             };
           }) : [],
-          // Add video support - now using videoPreviewImage instead of videoThumbnail
+          // Add video support with orientation information
           video: fields.video ? {
             title: fields.videoTitle as string || 'Product Demo',
             description: fields.videoDescription as string || 'See our solution in action',
+            orientation: videoOrientation,
             thumbnailImage: fields.videoPreviewImage ? {
               id: (fields.videoPreviewImage as any).sys.id,
               url: `https:${(fields.videoPreviewImage as any).fields.file.url}`,
               alt: (fields.videoPreviewImage as any).fields.title || 'Video thumbnail',
-            } : {
+            } : fields.image ? {
               id: 'default-thumbnail',
-              url: fields.image ? `https:${(fields.image as any).fields.file.url}` : '/placeholder.svg',
+              url: `https:${(fields.image as any).fields.file.url}`,
               alt: 'Video thumbnail',
-            },
+            } : undefined,
             url: fields.video.fields?.file?.url ? `https:${fields.video.fields.file.url}` : undefined,
             youtubeId: fields.youtubeVideoId as string || undefined
           } : undefined
@@ -133,6 +152,20 @@ export const contentfulProductAdapter: ProductAdapter = {
       
       const fields = entry.fields;
       
+      // Determine video orientation based on video asset metadata (if available)
+      let videoOrientation: 'vertical' | 'horizontal' = 'horizontal';
+      if (fields.video && fields.video.fields?.file?.details?.image) {
+        const videoDetails = fields.video.fields.file.details.image;
+        if (videoDetails.width && videoDetails.height) {
+          // If height is greater than width, it's a vertical video
+          videoOrientation = videoDetails.height > videoDetails.width ? 'vertical' : 'horizontal';
+          console.log(`[contentfulProductAdapter] Detected video orientation for ${fields.title}: ${videoOrientation}`);
+        }
+      } else if (fields.videoOrientation) {
+        // If orientation is explicitly set in the content model, use that
+        videoOrientation = fields.videoOrientation as 'vertical' | 'horizontal';
+      }
+      
       return {
         id: entry.sys.id,
         title: fields.title as string,
@@ -170,22 +203,27 @@ export const contentfulProductAdapter: ProductAdapter = {
             thumbnail: machine.fields.machineThumbnail ? {
               url: `https:${machine.fields.machineThumbnail.fields.file.url}`,
               alt: machine.fields.machineThumbnail.fields.title || machine.fields.title
+            } : undefined,
+            machineThumbnail: machine.fields.machineThumbnail ? {
+              url: `https:${machine.fields.machineThumbnail.fields.file.url}`,
+              alt: machine.fields.machineThumbnail.fields.title || machine.fields.title
             } : undefined
           };
         }) : [],
-        // Add video support to getById method - use videoPreviewImage instead of videoThumbnail
+        // Add video support with orientation information
         video: fields.video ? {
           title: fields.videoTitle as string || 'Product Demo',
           description: fields.videoDescription as string || 'See our solution in action',
+          orientation: videoOrientation,
           thumbnailImage: fields.videoPreviewImage ? {
             id: (fields.videoPreviewImage as any).sys.id,
             url: `https:${(fields.videoPreviewImage as any).fields.file.url}`,
             alt: (fields.videoPreviewImage as any).fields.title || 'Video thumbnail',
-          } : {
+          } : fields.image ? {
             id: 'default-thumbnail',
-            url: fields.image ? `https:${(fields.image as any).fields.file.url}` : '/placeholder.svg',
+            url: `https:${(fields.image as any).fields.file.url}`,
             alt: 'Video thumbnail',
-          },
+          } : undefined,
           url: fields.video.fields?.file?.url ? `https:${fields.video.fields.file.url}` : undefined,
           youtubeId: fields.youtubeVideoId as string || undefined
         } : undefined

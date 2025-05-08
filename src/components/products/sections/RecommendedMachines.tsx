@@ -28,6 +28,14 @@ interface RecommendedMachinesProps {
   machines: Machine[];
 }
 
+/**
+ * IMPORTANT: DO NOT MODIFY THIS COMPONENT'S IMAGE SELECTION LOGIC
+ * WITHOUT EXPLICIT INSTRUCTIONS
+ * 
+ * This component has been specifically designed to handle machine thumbnails 
+ * in a particular way with fallbacks to prevent machine images from disappearing.
+ * The image selection logic prioritizes machineThumbnail > thumbnail > image.
+ */
 const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
   if (!machines?.length) return null;
 

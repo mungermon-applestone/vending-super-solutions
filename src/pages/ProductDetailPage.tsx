@@ -78,6 +78,19 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
     video: data.video
   } : null;
 
+  // Log video information for debugging
+  useEffect(() => {
+    if (product?.video) {
+      console.log("[ProductContent] Video information:", {
+        title: product.video.title,
+        hasUrl: !!product.video.url,
+        hasYouTubeId: !!product.video.youtubeId,
+        hasThumbnail: !!product.video.thumbnailImage,
+        orientation: product.video.orientation || 'horizontal'
+      });
+    }
+  }, [product]);
+
   return (
     <ContentfulErrorBoundary contentType="Product Details">
       <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
@@ -139,6 +152,7 @@ const ProductContent = ({ slug }: { slug: string | undefined }) => {
               videoId={product.video.youtubeId}
               videoUrl={product.video.url}
               thumbnailImage={product.video.thumbnailImage?.url || product.image?.url || '/placeholder.svg'}
+              orientation={product.video.orientation || 'horizontal'}
             />
           )}
 
