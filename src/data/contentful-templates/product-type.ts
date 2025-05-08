@@ -127,8 +127,8 @@ export const productTypeTemplate: ContentTypeTemplate = {
         localized: false,
         validations: [
           {
-            in: ['horizontal', 'vertical'],
-            message: 'Orientation must be either horizontal or vertical'
+            in: ['Horizontal', 'Vertical'],
+            message: 'Orientation must be either Horizontal or Vertical'
           }
         ]
       },

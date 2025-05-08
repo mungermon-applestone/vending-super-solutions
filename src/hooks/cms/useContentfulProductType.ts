@@ -182,7 +182,9 @@ export function useContentfulProductType(slug: string) {
           hasVideoDescription: !!fields.videoDescription,
           videoTitle: fields.videoTitle,
           videoDescription: fields.videoDescription ? 'Present' : 'Missing',
-          hasVideoPreviewImage: !!fields.videoPreviewImage
+          hasVideoPreviewImage: !!fields.videoPreviewImage,
+          hasVideoOrientation: !!fields.videoOrientation,
+          videoOrientation: fields.videoOrientation
         });
 
         if (fields.videoPreviewImage) {
@@ -219,6 +221,19 @@ export function useContentfulProductType(slug: string) {
               plainVideoDescription = 'See our product in action';
             }
           }
+        }
+        
+        // Extract and normalize video orientation from Contentful
+        let videoOrientation = 'horizontal'; // Default orientation
+        if (fields.videoOrientation) {
+          // Handle if videoOrientation is a string
+          if (typeof fields.videoOrientation === 'string') {
+            // Normalize to lowercase for consistent comparison
+            videoOrientation = fields.videoOrientation.toLowerCase();
+            console.log(`[useContentfulProductType] Video orientation from string: ${videoOrientation}`);
+          }
+          // Log the extracted orientation
+          console.log(`[useContentfulProductType] Using video orientation: ${videoOrientation}`);
         }
         
         // Create a safe product object with all fields validated
@@ -271,7 +286,7 @@ export function useContentfulProductType(slug: string) {
             } : null,
             url: fields.video?.fields?.file?.url ? `https:${fields.video.fields.file.url}` : undefined,
             youtubeId: fields.youtubeVideoId ? String(fields.youtubeVideoId) : undefined,
-            orientation: 'horizontal' // Default to horizontal for standard video
+            orientation: videoOrientation // Use the extracted and normalized orientation
           } : null
         };
         
