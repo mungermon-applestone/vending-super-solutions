@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import Image from '@/components/common/Image';
+import ImageFallback from '@/components/common/ImageFallback';
 
 interface Machine {
   id: string;
@@ -30,6 +30,7 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
 
   // Log the machines data for debugging purposes
   console.log('[RecommendedMachines] Rendering machines:', machines.map(m => ({
+    id: m.id,
     title: m.title,
     hasImage: !!m.image,
     hasThumbnail: !!m.thumbnail,
@@ -41,6 +42,7 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
   useEffect(() => {
     console.log('[RecommendedMachines] Component mounted with', machines.length, 'machines');
     console.log('[RecommendedMachines] First machine details:', machines[0] ? {
+      id: machines[0].id,
       title: machines[0].title,
       hasThumbnail: !!machines[0].thumbnail,
       hasImage: !!machines[0].image,
@@ -58,8 +60,11 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
             // Determine which image to use - thumbnail has priority
             const imageToUse = machine.thumbnail || machine.image;
             
+            // Generate a unique key using both ID and slug to ensure uniqueness
+            const uniqueKey = `${machine.id}-${machine.slug}`;
+            
             // Log which image we're using for debugging
-            console.log(`[RecommendedMachines] Machine ${machine.title}:`, {
+            console.log(`[RecommendedMachines] Machine ${machine.title} (${uniqueKey}):`, {
               hasThumbnail: !!machine.thumbnail,
               hasImage: !!machine.image, 
               usingThumbnail: !!machine.thumbnail,
@@ -67,11 +72,11 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
             });
             
             return (
-              <div key={machine.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div key={uniqueKey} className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="aspect-video w-full overflow-hidden bg-white flex items-center justify-center">
                   {imageToUse ? (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Image
+                      <ImageFallback
                         src={imageToUse.url}
                         alt={imageToUse.alt || machine.title}
                         className="w-full h-full"
