@@ -76,6 +76,65 @@ export const productTypeTemplate: ContentTypeTemplate = {
         type: 'Boolean',
         required: false,
         localized: false,
+      },
+      {
+        id: 'video',
+        name: 'Video',
+        type: 'Link',
+        linkType: 'Asset',
+        validations: [
+          {
+            linkMimetypeGroup: ['video']
+          }
+        ],
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'videoTitle',
+        name: 'Video Title',
+        type: 'Symbol',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'videoPreviewImage',
+        name: 'Video Preview Image',
+        type: 'Link',
+        linkType: 'Asset',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'videoDescription',
+        name: 'Video Description',
+        type: 'Text',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'recommendedMachines',
+        name: 'Recommended Machines',
+        type: 'Array',
+        items: {
+          type: 'Link',
+          linkType: 'Entry',
+          validations: [
+            {
+              linkContentType: ['machine']
+            }
+          ]
+        },
+        required: false,
+        localized: false,
+        validations: [
+          {
+            size: {
+              min: 0,
+              max: 3
+            }
+          }
+        ]
       }
     ]
   }

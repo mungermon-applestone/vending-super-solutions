@@ -89,6 +89,19 @@ export const machineTemplate: ContentTypeTemplate = {
         localized: false,
       },
       {
+        id: 'machineThumbnail',
+        name: 'Machine Thumbnail',
+        type: 'Link',
+        linkType: 'Asset',
+        required: false,
+        localized: false,
+        validations: [
+          {
+            linkMimetypeGroup: ['image']
+          }
+        ]
+      },
+      {
         id: 'dimensions',
         name: 'Dimensions',
         type: 'Symbol',

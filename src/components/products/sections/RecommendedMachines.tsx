@@ -37,7 +37,14 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
             const imageToUse = machine.thumbnail || machine.image;
             
             // Log which image we're using for debugging
-            console.log(`[RecommendedMachines] Machine ${machine.title}: Using ${machine.thumbnail ? 'thumbnail' : 'regular image'}`);
+            console.log(`[RecommendedMachines] Machine ${machine.title}: Using ${machine.thumbnail ? 'thumbnail' : 'regular image'}`, {
+              machineId: machine.id,
+              machineSlug: machine.slug,
+              hasThumbnail: !!machine.thumbnail,
+              thumbnailUrl: machine.thumbnail?.url,
+              hasImage: !!machine.image,
+              imageUrl: machine.image?.url
+            });
             
             return (
               <div key={machine.id} className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -50,6 +57,14 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
                         className="w-full h-full"
                         objectFit="contain"
                         isThumbnail={!!machine.thumbnail}
+                        onError={(e) => {
+                          console.error(`[RecommendedMachines] Failed to load image for machine ${machine.title}:`, {
+                            url: imageToUse.url,
+                            error: e
+                          });
+                          // Fallback to placeholder
+                          (e.target as HTMLImageElement).src = '/placeholder.svg';
+                        }}
                       />
                     </div>
                   ) : (

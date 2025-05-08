@@ -51,24 +51,37 @@ export const contentfulProductAdapter: ProductAdapter = {
             description: feature.fields.description,
             icon: feature.fields.icon || undefined
           })) : [],
-          recommendedMachines: fields.recommendedMachines ? (fields.recommendedMachines as any[]).map(machine => ({
-            id: machine.sys.id,
-            title: machine.fields.title,
-            slug: machine.fields.slug,
-            description: machine.fields.description,
-            image: machine.fields.image ? {
-              url: `https:${machine.fields.image.fields.file.url}`,
-              alt: machine.fields.image.fields.title || machine.fields.title
-            } : undefined
-          })) : [],
-          // Add video support
+          recommendedMachines: fields.recommendedMachines ? (fields.recommendedMachines as any[]).map(machine => {
+            // Log machine data to help with debugging
+            console.log(`[contentfulProductAdapter] Processing machine ${machine.fields?.title || 'unknown'}:`, {
+              hasImage: !!machine.fields?.image,
+              hasMachineThumbnail: !!machine.fields?.machineThumbnail
+            });
+            
+            return {
+              id: machine.sys.id,
+              title: machine.fields.title,
+              slug: machine.fields.slug,
+              description: machine.fields.description,
+              image: machine.fields.image ? {
+                url: `https:${machine.fields.image.fields.file.url}`,
+                alt: machine.fields.image.fields.title || machine.fields.title
+              } : undefined,
+              // Use machineThumbnail instead of thumbnail
+              thumbnail: machine.fields.machineThumbnail ? {
+                url: `https:${machine.fields.machineThumbnail.fields.file.url}`,
+                alt: machine.fields.machineThumbnail.fields.title || machine.fields.title
+              } : undefined
+            };
+          }) : [],
+          // Add video support - now using videoPreviewImage instead of videoThumbnail
           video: fields.video ? {
             title: fields.videoTitle as string || 'Product Demo',
             description: fields.videoDescription as string || 'See our solution in action',
-            thumbnailImage: fields.videoThumbnail ? {
-              id: (fields.videoThumbnail as any).sys.id,
-              url: `https:${(fields.videoThumbnail as any).fields.file.url}`,
-              alt: (fields.videoThumbnail as any).fields.title || 'Video thumbnail',
+            thumbnailImage: fields.videoPreviewImage ? {
+              id: (fields.videoPreviewImage as any).sys.id,
+              url: `https:${(fields.videoPreviewImage as any).fields.file.url}`,
+              alt: (fields.videoPreviewImage as any).fields.title || 'Video thumbnail',
             } : {
               id: 'default-thumbnail',
               url: fields.image ? `https:${(fields.image as any).fields.file.url}` : '/placeholder.svg',
@@ -137,24 +150,37 @@ export const contentfulProductAdapter: ProductAdapter = {
           description: feature.fields.description,
           icon: feature.fields.icon || undefined
         })) : [],
-        recommendedMachines: fields.recommendedMachines ? (fields.recommendedMachines as any[]).map(machine => ({
-          id: machine.sys.id,
-          title: machine.fields.title,
-          slug: machine.fields.slug,
-          description: machine.fields.description,
-          image: machine.fields.image ? {
-            url: `https:${machine.fields.image.fields.file.url}`,
-            alt: machine.fields.image.fields.title || machine.fields.title
-          } : undefined
-        })) : [],
-        // Add video support to getById method
+        recommendedMachines: fields.recommendedMachines ? (fields.recommendedMachines as any[]).map(machine => {
+          // Log machine data for debugging
+          console.log(`[contentfulProductAdapter] Processing machine ${machine.fields?.title || 'unknown'} in getById:`, {
+            hasImage: !!machine.fields?.image,
+            hasMachineThumbnail: !!machine.fields?.machineThumbnail
+          });
+          
+          return {
+            id: machine.sys.id,
+            title: machine.fields.title,
+            slug: machine.fields.slug,
+            description: machine.fields.description,
+            image: machine.fields.image ? {
+              url: `https:${machine.fields.image.fields.file.url}`,
+              alt: machine.fields.image.fields.title || machine.fields.title
+            } : undefined,
+            // Use machineThumbnail instead of thumbnail
+            thumbnail: machine.fields.machineThumbnail ? {
+              url: `https:${machine.fields.machineThumbnail.fields.file.url}`,
+              alt: machine.fields.machineThumbnail.fields.title || machine.fields.title
+            } : undefined
+          };
+        }) : [],
+        // Add video support to getById method - use videoPreviewImage instead of videoThumbnail
         video: fields.video ? {
           title: fields.videoTitle as string || 'Product Demo',
           description: fields.videoDescription as string || 'See our solution in action',
-          thumbnailImage: fields.videoThumbnail ? {
-            id: (fields.videoThumbnail as any).sys.id,
-            url: `https:${(fields.videoThumbnail as any).fields.file.url}`,
-            alt: (fields.videoThumbnail as any).fields.title || 'Video thumbnail',
+          thumbnailImage: fields.videoPreviewImage ? {
+            id: (fields.videoPreviewImage as any).sys.id,
+            url: `https:${(fields.videoPreviewImage as any).fields.file.url}`,
+            alt: (fields.videoPreviewImage as any).fields.title || 'Video thumbnail',
           } : {
             id: 'default-thumbnail',
             url: fields.image ? `https:${(fields.image as any).fields.file.url}` : '/placeholder.svg',
