@@ -179,8 +179,10 @@ export function useContentfulProductType(slug: string) {
           hasVideo: !!fields.video,
           hasYoutubeVideoId: !!fields.youtubeVideoId,
           hasVideoTitle: !!fields.videoTitle,
-          hasVideoPreviewImage: !!fields.videoPreviewImage,
-          hasVideoDescription: !!fields.videoDescription
+          hasVideoDescription: !!fields.videoDescription,
+          videoTitle: fields.videoTitle,
+          videoDescription: fields.videoDescription ? 'Present' : 'Missing',
+          hasVideoPreviewImage: !!fields.videoPreviewImage
         });
 
         if (fields.videoPreviewImage) {
@@ -189,6 +191,34 @@ export function useContentfulProductType(slug: string) {
             url: fields.videoPreviewImage.fields?.file?.url,
             title: fields.videoPreviewImage.fields?.title
           });
+        }
+        
+        // Extract text from rich text video description if available
+        let plainVideoDescription = '';
+        if (fields.videoDescription) {
+          if (typeof fields.videoDescription === 'string') {
+            plainVideoDescription = fields.videoDescription;
+          } else if (fields.videoDescription.content && Array.isArray(fields.videoDescription.content)) {
+            // Handle structured Rich Text format
+            try {
+              // Attempt to extract text from the first paragraph
+              const firstParagraph = fields.videoDescription.content.find(item => 
+                item.nodeType === 'paragraph' && item.content && Array.isArray(item.content)
+              );
+              
+              if (firstParagraph) {
+                plainVideoDescription = firstParagraph.content
+                  .filter(node => node.nodeType === 'text')
+                  .map(node => node.value)
+                  .join('');
+              }
+              
+              console.log('[useContentfulProductType] Extracted video description:', plainVideoDescription);
+            } catch (e) {
+              console.error('[useContentfulProductType] Error extracting rich text description:', e);
+              plainVideoDescription = 'See our product in action';
+            }
+          }
         }
         
         // Create a safe product object with all fields validated
@@ -228,7 +258,7 @@ export function useContentfulProductType(slug: string) {
           // Enhanced video support with better handling
           video: (fields.video || fields.youtubeVideoId) ? {
             title: fields.videoTitle ? String(fields.videoTitle) : 'Product Demo',
-            description: fields.videoDescription ? String(fields.videoDescription) : 'See our solution in action',
+            description: plainVideoDescription || 'See our solution in action',
             // Improved thumbnail handling
             thumbnailImage: fields.videoPreviewImage ? {
               id: fields.videoPreviewImage.sys?.id || 'thumbnail-id',
@@ -241,9 +271,8 @@ export function useContentfulProductType(slug: string) {
             } : null,
             url: fields.video?.fields?.file?.url ? `https:${fields.video.fields.file.url}` : undefined,
             youtubeId: fields.youtubeVideoId ? String(fields.youtubeVideoId) : undefined,
-            // Determine orientation from video dimensions or default to vertical for TikTok-style videos
-            orientation: 'vertical' // Default to vertical for mobile-first approach
-          } : undefined
+            orientation: 'horizontal' // Default to horizontal for standard video
+          } : null
         };
         
         // Log the processed video object

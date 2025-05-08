@@ -113,6 +113,13 @@ export const productTypeTemplate: ContentTypeTemplate = {
         localized: false,
       },
       {
+        id: 'youtubeVideoId',
+        name: 'YouTube Video ID',
+        type: 'Symbol',
+        required: false,
+        localized: false,
+      },
+      {
         id: 'videoOrientation',
         name: 'Video Orientation',
         type: 'Symbol',
@@ -124,13 +131,6 @@ export const productTypeTemplate: ContentTypeTemplate = {
             message: 'Orientation must be either horizontal or vertical'
           }
         ]
-      },
-      {
-        id: 'youtubeVideoId',
-        name: 'YouTube Video ID',
-        type: 'Symbol',
-        required: false,
-        localized: false,
       },
       {
         id: 'recommendedMachines',
