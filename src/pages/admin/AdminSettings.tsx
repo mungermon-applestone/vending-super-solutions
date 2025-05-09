@@ -7,12 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { AlertTriangle, CheckCircle2, RefreshCw, Settings } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, RefreshCw, Settings, Mail } from 'lucide-react';
 import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
 import CMSConnectionTest from '@/components/admin/cms/CMSConnectionTest';
 import CMSProviderDisplay from '@/components/admin/cms/CMSProviderDisplay';
 import { supabase } from '@/integrations/supabase/client';
 import { resetContentfulClient } from '@/services/cms/utils/contentfulClient';
+import EmailServiceTester from '@/components/admin/email/EmailServiceTester';
+import { emailConfig, getEmailEnvironment } from '@/services/email/emailConfig';
+import { getSendGridConfigStatus } from '@/services/email/sendGridService';
 
 const AdminSettings: React.FC = () => {
   const { toast } = useToast();
@@ -30,6 +33,10 @@ const AdminSettings: React.FC = () => {
   const [managementToken, setManagementToken] = useState('');
   const [deliveryToken, setDeliveryToken] = useState('');
   const [configId, setConfigId] = useState<string | null>(null);
+  
+  // Email configuration state
+  const emailEnv = getEmailEnvironment();
+  const emailConfigStatus = getSendGridConfigStatus();
 
   useEffect(() => {
     fetchContentfulConfig();
@@ -207,6 +214,7 @@ const AdminSettings: React.FC = () => {
           <TabsList className="mb-8">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="cms">CMS Configuration</TabsTrigger>
+            <TabsTrigger value="email">Email</TabsTrigger>
             <TabsTrigger value="api">API Keys</TabsTrigger>
           </TabsList>
           
@@ -455,6 +463,148 @@ const AdminSettings: React.FC = () => {
                         </div>
                     </CardContent>
                 </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="email">
+            <div className="grid gap-6">
+              {/* Email Configuration Status */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Mail className="h-5 w-5" />
+                    Email Configuration
+                  </CardTitle>
+                  <CardDescription>
+                    Current email configuration status and settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="text-md font-semibold mb-2">Provider Settings</h3>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">Provider:</span>
+                            <span className="font-medium">{emailConfig.provider}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">Environment:</span>
+                            <span className="font-medium">{emailEnv.isDevelopment ? 'Development' : 'Production'}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">Log Emails:</span>
+                            <span className="font-medium">{emailEnv.logEmails ? 'Yes' : 'No'}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-md font-semibold mb-2">Email Addresses</h3>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">From:</span>
+                            <span className="font-medium">{emailEnv.senderEmail}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm">To:</span>
+                            <span className="font-medium">{emailEnv.recipientEmail}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Configuration Status */}
+                    {emailConfig.provider === 'SENDGRID' && (
+                      <Alert variant={emailConfigStatus.isConfigured ? "default" : "destructive"}>
+                        {emailConfigStatus.isConfigured ? (
+                          <CheckCircle2 className="h-4 w-4" />
+                        ) : (
+                          <AlertTriangle className="h-4 w-4" />
+                        )}
+                        <AlertTitle>
+                          SendGrid {emailConfigStatus.isConfigured ? 'is properly configured' : 'is not fully configured'}
+                        </AlertTitle>
+                        <AlertDescription>
+                          {emailConfigStatus.isConfigured ? (
+                            <p>All required environment variables are set.</p>
+                          ) : (
+                            <>
+                              <p>Missing environment variables:</p>
+                              <ul className="list-disc list-inside mt-2">
+                                {emailConfigStatus.missingEnvVars.map(envVar => (
+                                  <li key={envVar}>{envVar}</li>
+                                ))}
+                              </ul>
+                              <p className="mt-2">
+                                Set these environment variables in your project's environment settings.
+                              </p>
+                            </>
+                          )}
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    {/* Environment Variables Info */}
+                    <Alert>
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertTitle>Environment Configuration</AlertTitle>
+                      <AlertDescription>
+                        <p className="mb-2">Email functionality requires the following environment variables:</p>
+                        <div className="bg-gray-50 p-3 rounded-md">
+                          <pre className="text-sm whitespace-pre-wrap">
+                            <code>
+                              SENDGRID_API_KEY=your_sendgrid_api_key{"\n"}
+                              EMAIL_TO=recipient@example.com{"\n"}
+                              EMAIL_FROM=sender@example.com
+                            </code>
+                          </pre>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Email Service Tester */}
+              <EmailServiceTester />
+              
+              {/* Documentation */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Email Implementation Documentation</CardTitle>
+                  <CardDescription>
+                    How to configure and use email services in your application
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="prose max-w-none">
+                  <h2>Email Configuration Guide</h2>
+                  <p>
+                    The application uses a flexible email system with support for SendGrid integration.
+                    To set up email functionality, follow these steps:
+                  </p>
+                  
+                  <h3>Step 1: Set Environment Variables</h3>
+                  <p>Add the following environment variables to your deployment platform:</p>
+                  <ul>
+                    <li><strong>SENDGRID_API_KEY</strong>: Your SendGrid API key</li>
+                    <li><strong>EMAIL_TO</strong>: Recipient email address (where form submissions will be sent)</li>
+                    <li><strong>EMAIL_FROM</strong>: Sender email address (must be verified in SendGrid)</li>
+                  </ul>
+                  
+                  <h3>Step 2: Verify Your Sender Email</h3>
+                  <p>
+                    Make sure to verify your sender email address in SendGrid to avoid delivery issues.
+                    This is a requirement from SendGrid to prevent spam.
+                  </p>
+                  
+                  <h3>Development vs Production</h3>
+                  <p>
+                    In development mode, emails are logged to the console instead of being sent.
+                    This behavior can be configured in <code>src/services/email/emailConfig.ts</code>.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
           

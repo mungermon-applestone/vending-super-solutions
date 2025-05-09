@@ -14,8 +14,7 @@ import {
   Image,
   Settings,
   Database,
-  BarChart,
-  Mail
+  BarChart
 } from 'lucide-react';
 
 interface NavigationItem {
@@ -38,7 +37,6 @@ const navigation: NavigationItem[] = [
 
 const secondaryNavigation: NavigationItem[] = [
   { name: 'Settings', href: '/admin/settings', icon: Settings },
-  { name: 'Email Settings', href: '/admin/email-settings', icon: Mail },
   { name: 'Content Management', href: '/admin/contentful', icon: Database },
   { name: 'Performance', href: '/admin/performance-testing', icon: BarChart },
 ];

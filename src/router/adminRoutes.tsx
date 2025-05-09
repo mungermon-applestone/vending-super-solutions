@@ -26,7 +26,6 @@ import LandingPageEditor from '@/pages/admin/LandingPageEditor';
 import CaseStudyEditor from '@/pages/admin/CaseStudyEditor';
 import StrapiSetupPage from '@/pages/admin/StrapiSetupPage';
 import StrapiConnectionDebug from '@/pages/admin/StrapiConnectionDebug';
-import EmailSettings from '@/pages/admin/EmailSettings';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -160,10 +159,6 @@ export const adminRoutes: RouteObject[] = [
   {
     path: "/admin/strapi-debug",
     element: <StrapiConnectionDebug />
-  },
-  {
-    path: "/admin/email-settings",
-    element: <EmailSettings />
   }
 ];
 
