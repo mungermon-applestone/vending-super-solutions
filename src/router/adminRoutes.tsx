@@ -1,83 +1,170 @@
 
-import { RouteObject } from "react-router-dom";
-import AdminDashboard from "@/pages/admin/AdminDashboard";
-import AdminMachines from "@/pages/admin/AdminMachines";
-import AdminProducts from "@/pages/admin/AdminProducts";
-import AdminBusinessGoals from "@/pages/admin/AdminBusinessGoals";
-import AdminTechnology from "@/pages/admin/AdminTechnology";
-import AdminCaseStudies from "@/pages/admin/AdminCaseStudies";
-import AdminLandingPages from "@/pages/admin/AdminLandingPages";
-import AdminSettings from "@/pages/admin/AdminSettings";
+import React from 'react';
+import { Navigate, RouteObject } from 'react-router-dom';
+import AdminDashboard from '@/pages/admin/AdminDashboard';
+import AdminProducts from '@/pages/admin/AdminProducts';
+import AdminMachines from '@/pages/admin/AdminMachines';
+import AdminTechnology from '@/pages/admin/AdminTechnology';
+import AdminBusinessGoals from '@/pages/admin/AdminBusinessGoals';
+import AdminLandingPages from '@/pages/admin/AdminLandingPages';
+import AdminBlog from '@/pages/admin/AdminBlog';
+import AdminCaseStudies from '@/pages/admin/AdminCaseStudies';
+import AdminMedia from '@/pages/admin/AdminMedia';
+import AdminSettings from '@/pages/admin/AdminSettings';
+import SignIn from '@/pages/admin/SignIn';
 import ContentfulManagement from '@/pages/admin/ContentfulManagement';
 import PerformanceTesting from '@/pages/admin/PerformanceTesting';
+import MigrateMachinesData from '@/pages/admin/MigrateMachinesData';
+import MigrateBusinessGoalData from '@/pages/admin/MigrateBusinessGoalData';
+import MigrateTechnologyData from '@/pages/admin/MigrateTechnologyData';
+import ProductEditor from '@/pages/ProductEditor';
+import MachineEditor from '@/pages/MachineEditor';
+import TechnologyEditor from '@/pages/TechnologyEditor';
+import BusinessGoalEditor from '@/pages/admin/BusinessGoalEditor';
+import BlogEditor from '@/pages/admin/BlogEditor';
+import LandingPageEditor from '@/pages/admin/LandingPageEditor';
+import CaseStudyEditor from '@/pages/admin/CaseStudyEditor';
+import StrapiSetupPage from '@/pages/admin/StrapiSetupPage';
+import StrapiConnectionDebug from '@/pages/admin/StrapiConnectionDebug';
+import EmailSettings from '@/pages/admin/EmailSettings';
 
 export const adminRoutes: RouteObject[] = [
   {
-    path: "",
-    element: <AdminDashboard />,
+    path: "/admin",
+    element: <Navigate to="/admin/dashboard" replace />
   },
   {
-    path: "machines",
-    element: <AdminMachines />,
+    path: "/admin/dashboard",
+    element: <AdminDashboard />
   },
   {
-    path: "machines/:machineSlug",
-    element: <AdminMachines />, // Using same component with a parameter
+    path: "/admin/products",
+    element: <AdminProducts />
   },
   {
-    path: "product-types",
-    element: <AdminProducts />, // Using the admin products page for product types
+    path: "/admin/products/new",
+    element: <ProductEditor />
   },
   {
-    path: "product-types/:productTypeSlug",
-    element: <AdminProducts />, // Using same component with a parameter
+    path: "/admin/products/edit/:id",
+    element: <ProductEditor />
   },
   {
-    path: "business-goals",
-    element: <AdminBusinessGoals />,
+    path: "/admin/machines",
+    element: <AdminMachines />
   },
   {
-    path: "business-goals/:businessGoalSlug",
-    element: <AdminBusinessGoals />, // Using same component with a parameter
+    path: "/admin/machines/new",
+    element: <MachineEditor />
   },
   {
-    path: "technologies",
-    element: <AdminTechnology />,
+    path: "/admin/machines/edit/:id",
+    element: <MachineEditor />
   },
   {
-    path: "technologies/:technologySlug",
-    element: <AdminTechnology />, // Using same component with a parameter
+    path: "/admin/technology",
+    element: <AdminTechnology />
   },
   {
-    path: "case-studies",
-    element: <AdminCaseStudies />,
+    path: "/admin/technology/new",
+    element: <TechnologyEditor />
   },
   {
-    path: "case-studies/:caseStudySlug",
-    element: <AdminCaseStudies />, // Using same component with a parameter
+    path: "/admin/technology/edit/:id",
+    element: <TechnologyEditor />
   },
   {
-    path: "testimonials",
-    element: <AdminDashboard />, // Using dashboard as fallback since Testimonials page isn't available
+    path: "/admin/business-goals",
+    element: <AdminBusinessGoals />
   },
   {
-    path: "settings",
-    element: <AdminSettings />,
+    path: "/admin/business-goals/new",
+    element: <BusinessGoalEditor />
   },
   {
-    path: "landing-pages",
-    element: <AdminLandingPages />,
+    path: "/admin/business-goals/edit/:id",
+    element: <BusinessGoalEditor />
   },
   {
-    path: "landing-pages/:landingPageKey",
-    element: <AdminLandingPages />, // Using same component with a parameter
+    path: "/admin/landing-pages",
+    element: <AdminLandingPages />
   },
   {
-    path: "contentful",
+    path: "/admin/landing-pages/new",
+    element: <LandingPageEditor />
+  },
+  {
+    path: "/admin/landing-pages/edit/:id",
+    element: <LandingPageEditor />
+  },
+  {
+    path: "/admin/blog",
+    element: <AdminBlog />
+  },
+  {
+    path: "/admin/blog/new",
+    element: <BlogEditor />
+  },
+  {
+    path: "/admin/blog/edit/:id",
+    element: <BlogEditor />
+  },
+  {
+    path: "/admin/case-studies",
+    element: <AdminCaseStudies />
+  },
+  {
+    path: "/admin/case-studies/new",
+    element: <CaseStudyEditor />
+  },
+  {
+    path: "/admin/case-studies/edit/:id",
+    element: <CaseStudyEditor />
+  },
+  {
+    path: "/admin/media",
+    element: <AdminMedia />
+  },
+  {
+    path: "/admin/settings",
+    element: <AdminSettings />
+  },
+  {
+    path: "/admin/sign-in",
+    element: <SignIn />
+  },
+  {
+    path: "/admin/contentful",
     element: <ContentfulManagement />
   },
   {
-    path: "performance-testing",
+    path: "/admin/migrate-machines",
+    element: <MigrateMachinesData />
+  },
+  {
+    path: "/admin/migrate-business-goals",
+    element: <MigrateBusinessGoalData />
+  },
+  {
+    path: "/admin/migrate-technology",
+    element: <MigrateTechnologyData />
+  },
+  {
+    path: "/admin/performance-testing",
     element: <PerformanceTesting />
+  },
+  {
+    path: "/admin/strapi-setup",
+    element: <StrapiSetupPage />
+  },
+  {
+    path: "/admin/strapi-debug",
+    element: <StrapiConnectionDebug />
+  },
+  {
+    path: "/admin/email-settings",
+    element: <EmailSettings />
   }
 ];
+
+export default adminRoutes;

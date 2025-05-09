@@ -36,8 +36,8 @@ The email functionality can be configured in `src/services/email/emailConfig.ts`
 ```typescript
 export const emailConfig = {
   provider: 'SENDGRID', // 'SENDGRID' | 'ADAPTER'
-  defaultRecipient: 'munger@applestonesolutions.com',
-  defaultSender: 'noreply@applestonesolutions.com',
+  defaultRecipient: 'your-email@example.com',
+  defaultSender: 'noreply@yourcompany.com',
   developmentMode: {
     logEmails: true,
     forceDevelopmentMode: false
@@ -58,14 +58,33 @@ EMAIL_TO=recipient@example.com
 EMAIL_FROM=sender@example.com
 ```
 
+## Setting Up Environment Variables in Lovable
+
+To configure your email settings in Lovable:
+
+1. Go to Project Settings
+2. Navigate to Environment Variables
+3. Add the following variables:
+   - `SENDGRID_API_KEY` - Your SendGrid API key
+   - `EMAIL_TO` - The email where form submissions will be sent
+   - `EMAIL_FROM` - The email address shown as the sender
+
 ## Testing Email Functionality
 
 To test the email functionality:
 
 1. In development, emails are not actually sent but logged to the console
-2. For production testing, verify that the SendGrid API key is correctly configured
+2. Use the `EmailServiceTester` component in the admin panel to verify configuration
 3. Submit a test form and check if the success message appears
-4. Use the `EmailServiceTester` component to verify configuration
+4. For production testing, verify that the SendGrid API key is correctly configured
+
+## Admin Panel
+
+An email settings admin panel is available at `/admin/email-settings` which provides:
+
+1. Current configuration status
+2. Email testing functionality
+3. Documentation and implementation details
 
 ## Development vs Production Behavior
 

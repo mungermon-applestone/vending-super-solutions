@@ -1,112 +1,92 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
-import {
-  HomeIcon,
-  LayoutDashboard,
-  Settings,
+import { NavLink } from 'react-router-dom';
+import { LucideIcon } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  Package, 
+  Monitor, 
+  CircuitBoard, 
+  Target, 
+  FileText, 
+  BookOpen, 
+  BriefcaseBusiness,
   Image,
-  ListOrdered,
-  DatabaseIcon,
-  ServerCog,
-  BarChartBig,
-  Aperture,
-  Axe,
-  FileJson,
-  LineChart
+  Settings,
+  Database,
+  BarChart,
+  Mail
 } from 'lucide-react';
 
-interface NavItem {
-  title: string;
+interface NavigationItem {
+  name: string;
   href: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
 }
 
-const AdminNavigation: React.FC = () => {
-  const location = useLocation();
-  
-  const navigationItems: NavItem[] = [
-    {
-      title: "Dashboard",
-      icon: <LayoutDashboard className="h-5 w-5" />,
-      href: "/admin",
-    },
-    {
-      title: "Products",
-      icon: <ListOrdered className="h-5 w-5" />,
-      href: "/admin/products",
-    },
-    {
-      title: "Media",
-      icon: <Image className="h-5 w-5" />,
-      href: "/admin/media",
-    },
-    {
-      title: "Machines",
-      icon: <Aperture className="h-5 w-5" />,
-      href: "/admin/machines",
-    },
-    {
-      title: "Technologies",
-      icon: <ServerCog className="h-5 w-5" />,
-      href: "/admin/technologies",
-    },
-    {
-      title: "Business Goals",
-      icon: <BarChartBig className="h-5 w-5" />,
-      href: "/admin/business-goals",
-    },
-    {
-      title: "Regression Tests",
-      icon: <Axe className="h-5 w-5" />,
-      href: "/admin/regression-tests",
-    },
-    {
-      title: "Performance",
-      icon: <LineChart className="h-5 w-5" />,
-      href: "/admin/performance-testing",
-    },
-    {
-      title: "Data Management",
-      icon: <DatabaseIcon className="h-5 w-5" />,
-      href: "/admin/data-purge",
-    },
-    {
-      title: "Contentful",
-      icon: <FileJson className="h-5 w-5" />,
-      href: "/admin/contentful",
-    },
-    {
-      title: "Settings",
-      icon: <Settings className="h-5 w-5" />,
-      href: "/admin/settings",
-    },
-  ];
-  
-  return (
-    <aside className="w-64 bg-gray-50 border-r border-gray-200 h-full py-8 px-4">
-      <div className="mb-8">
-        <Link to="/" className="flex items-center space-x-2 font-bold text-lg text-gray-800">
-          <HomeIcon className="h-6 w-6" />
-          <span>Admin Panel</span>
-        </Link>
-      </div>
-      
-      <nav className="space-y-2">
-        {navigationItems.map((item) => (
-          <Link
-            key={item.title}
-            to={item.href}
-            className={`flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors duration-200 ${location.pathname === item.href ? 'bg-gray-100 font-medium' : 'text-gray-600'}`}
-          >
-            {item.icon}
-            <span>{item.title}</span>
-          </Link>
-        ))}
-      </nav>
-    </aside>
-  );
-};
+const navigation: NavigationItem[] = [
+  { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'Products', href: '/admin/products', icon: Package },
+  { name: 'Machines', href: '/admin/machines', icon: Monitor },
+  { name: 'Technology', href: '/admin/technology', icon: CircuitBoard },
+  { name: 'Business Goals', href: '/admin/business-goals', icon: Target },
+  { name: 'Landing Pages', href: '/admin/landing-pages', icon: FileText },
+  { name: 'Blog', href: '/admin/blog', icon: BookOpen },
+  { name: 'Case Studies', href: '/admin/case-studies', icon: BriefcaseBusiness },
+  { name: 'Media', href: '/admin/media', icon: Image },
+];
 
-export default AdminNavigation;
+const secondaryNavigation: NavigationItem[] = [
+  { name: 'Settings', href: '/admin/settings', icon: Settings },
+  { name: 'Email Settings', href: '/admin/email-settings', icon: Mail },
+  { name: 'Content Management', href: '/admin/contentful', icon: Database },
+  { name: 'Performance', href: '/admin/performance-testing', icon: BarChart },
+];
+
+export default function AdminNavigation() {
+  return (
+    <nav className="mt-6">
+      <div className="space-y-1">
+        {navigation.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.href}
+            className={({ isActive }) =>
+              `flex items-center py-2 px-4 text-sm font-medium rounded-md ${
+                isActive
+                  ? "bg-gray-100 text-gray-900"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              }`
+            }
+          >
+            <item.icon className="mr-3 h-5 w-5 flex-shrink-0 text-gray-500" aria-hidden="true" />
+            {item.name}
+          </NavLink>
+        ))}
+      </div>
+      <div className="mt-8">
+        <h3 className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          Administration
+        </h3>
+        <div className="mt-2 space-y-1">
+          {secondaryNavigation.map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.href}
+              className={({ isActive }) =>
+                `flex items-center py-2 px-4 text-sm font-medium rounded-md ${
+                  isActive
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`
+              }
+            >
+              <item.icon className="mr-3 h-5 w-5 flex-shrink-0 text-gray-500" aria-hidden="true" />
+              {item.name}
+            </NavLink>
+          ))}
+        </div>
+      </div>
+    </nav>
+  );
+}
