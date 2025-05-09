@@ -2,11 +2,11 @@
 /**
  * Email Configuration
  * 
- * This file contains a simplified configuration for email services.
+ * Basic configuration for email functionality.
  */
 
 /**
- * Email service configuration
+ * Email configuration
  */
 export const emailConfig = {
   /**
@@ -17,31 +17,17 @@ export const emailConfig = {
   /**
    * Default sender email address (for display purposes)
    */
-  defaultSender: 'noreply@applestonesolutions.com',
-  
-  /**
-   * Email service provider
-   */
-  provider: 'MAILTO',
-  
-  /**
-   * Development mode settings
-   */
-  developmentMode: {
-    logEmails: true,
-    forceDevelopmentMode: false
-  }
+  defaultSender: 'noreply@applestonesolutions.com'
 };
 
 /**
  * Get the email environment configuration
- * Simplified version that just provides basic information for UI display
+ * Simplified version that provides basic information for UI display
  */
 export function getEmailEnvironment() {
   return {
     recipientEmail: emailConfig.defaultRecipient,
     senderEmail: emailConfig.defaultSender,
-    isDevelopment: process.env.NODE_ENV === 'development',
-    logEmails: emailConfig.developmentMode.logEmails
+    isDevelopment: process.env.NODE_ENV === 'development'
   };
 }

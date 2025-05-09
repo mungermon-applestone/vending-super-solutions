@@ -43,4 +43,3 @@ If you want to implement a more sophisticated email solution in the future, cons
 1. Using a service like SendGrid or Mailgun
 2. Setting up a server endpoint to handle form submissions
 3. Implementing email templates for consistent formatting
-

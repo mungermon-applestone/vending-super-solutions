@@ -6,7 +6,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { emailConfig, getEmailEnvironment } from '@/services/email/emailConfig';
+import { getEmailEnvironment } from '@/services/email/emailConfig';
+import { createMailtoLink, formatEmailBody } from '@/services/email/emailService';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 
@@ -30,22 +31,23 @@ const EmailServiceTester: React.FC = () => {
     setTestResult(null);
     
     try {
-      // Prepare email content for mailto link
+      // Format the email body
+      const formData = {
+        name,
+        email,
+        message
+      };
+      
+      const metadata = {
+        'Sent from': 'Email Service Tester',
+        'Date': new Date().toLocaleString()
+      };
+      
+      const emailBody = formatEmailBody(formData, metadata);
       const emailSubject = `Email Service Test: ${subject}`;
-      const emailBody = `
-Name: ${name}
-Email: ${email}
-
-Message:
-${message}
-
-Sent from: Email Service Tester
-      `;
       
-      // Create mailto link
-      const mailtoLink = `mailto:${env.recipientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-      
-      // Open email client
+      // Create and open mailto link
+      const mailtoLink = createMailtoLink(emailSubject, emailBody, env.recipientEmail);
       window.location.href = mailtoLink;
       
       setTestResult({

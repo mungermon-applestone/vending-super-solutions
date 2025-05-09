@@ -15,7 +15,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { resetContentfulClient } from '@/services/cms/utils/contentfulClient';
 import EmailServiceTester from '@/components/admin/email/EmailServiceTester';
 import { emailConfig, getEmailEnvironment } from '@/services/email/emailConfig';
-import { getSendGridConfigStatus } from '@/services/email/sendGridService';
 
 const AdminSettings: React.FC = () => {
   const { toast } = useToast();
@@ -36,7 +35,6 @@ const AdminSettings: React.FC = () => {
   
   // Email configuration state
   const emailEnv = getEmailEnvironment();
-  const emailConfigStatus = getSendGridConfigStatus();
 
   useEffect(() => {
     fetchContentfulConfig();
@@ -483,19 +481,15 @@ const AdminSettings: React.FC = () => {
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <h3 className="text-md font-semibold mb-2">Provider Settings</h3>
+                        <h3 className="text-md font-semibold mb-2">Current Configuration</h3>
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
-                            <span className="text-sm">Provider:</span>
-                            <span className="font-medium">{emailConfig.provider}</span>
+                            <span className="text-sm">Method:</span>
+                            <span className="font-medium">mailto links (client-side)</span>
                           </div>
                           <div className="flex justify-between items-center">
                             <span className="text-sm">Environment:</span>
                             <span className="font-medium">{emailEnv.isDevelopment ? 'Development' : 'Production'}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm">Log Emails:</span>
-                            <span className="font-medium">{emailEnv.logEmails ? 'Yes' : 'No'}</span>
                           </div>
                         </div>
                       </div>
@@ -503,63 +497,24 @@ const AdminSettings: React.FC = () => {
                         <h3 className="text-md font-semibold mb-2">Email Addresses</h3>
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
-                            <span className="text-sm">From:</span>
-                            <span className="font-medium">{emailEnv.senderEmail}</span>
+                            <span className="text-sm">Default recipient:</span>
+                            <span className="font-medium">{emailEnv.recipientEmail}</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-sm">To:</span>
-                            <span className="font-medium">{emailEnv.recipientEmail}</span>
+                            <span className="text-sm">Default sender:</span>
+                            <span className="font-medium">{emailEnv.senderEmail}</span>
                           </div>
                         </div>
                       </div>
                     </div>
                     
-                    {/* Configuration Status */}
-                    {emailConfig.provider === 'SENDGRID' && (
-                      <Alert variant={emailConfigStatus.isConfigured ? "default" : "destructive"}>
-                        {emailConfigStatus.isConfigured ? (
-                          <CheckCircle2 className="h-4 w-4" />
-                        ) : (
-                          <AlertTriangle className="h-4 w-4" />
-                        )}
-                        <AlertTitle>
-                          SendGrid {emailConfigStatus.isConfigured ? 'is properly configured' : 'is not fully configured'}
-                        </AlertTitle>
-                        <AlertDescription>
-                          {emailConfigStatus.isConfigured ? (
-                            <p>All required environment variables are set.</p>
-                          ) : (
-                            <>
-                              <p>Missing environment variables:</p>
-                              <ul className="list-disc list-inside mt-2">
-                                {emailConfigStatus.missingEnvVars.map(envVar => (
-                                  <li key={envVar}>{envVar}</li>
-                                ))}
-                              </ul>
-                              <p className="mt-2">
-                                Set these environment variables in your project's environment settings.
-                              </p>
-                            </>
-                          )}
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                    
-                    {/* Environment Variables Info */}
+                    {/* Current Implementation Info */}
                     <Alert>
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertTitle>Environment Configuration</AlertTitle>
+                      <Info className="h-4 w-4" />
+                      <AlertTitle>Current Implementation</AlertTitle>
                       <AlertDescription>
-                        <p className="mb-2">Email functionality requires the following environment variables:</p>
-                        <div className="bg-gray-50 p-3 rounded-md">
-                          <pre className="text-sm whitespace-pre-wrap">
-                            <code>
-                              SENDGRID_API_KEY=your_sendgrid_api_key{"\n"}
-                              EMAIL_TO=recipient@example.com{"\n"}
-                              EMAIL_FROM=sender@example.com
-                            </code>
-                          </pre>
-                        </div>
+                        <p className="mb-2">The application currently uses "mailto:" links to open the user's email client with pre-filled form data.</p>
+                        <p>To update the default recipient email, edit the <code>src/services/email/emailConfig.ts</code> file.</p>
                       </AlertDescription>
                     </Alert>
                   </div>
@@ -578,31 +533,29 @@ const AdminSettings: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="prose max-w-none">
-                  <h2>Email Configuration Guide</h2>
+                  <h2>Email Functionality Guide</h2>
                   <p>
-                    The application uses a flexible email system with support for SendGrid integration.
-                    To set up email functionality, follow these steps:
+                    The application currently uses a client-side approach to handle email forms:
                   </p>
                   
-                  <h3>Step 1: Set Environment Variables</h3>
-                  <p>Add the following environment variables to your deployment platform:</p>
-                  <ul>
-                    <li><strong>SENDGRID_API_KEY</strong>: Your SendGrid API key</li>
-                    <li><strong>EMAIL_TO</strong>: Recipient email address (where form submissions will be sent)</li>
-                    <li><strong>EMAIL_FROM</strong>: Sender email address (must be verified in SendGrid)</li>
-                  </ul>
+                  <h3>How It Works</h3>
+                  <ol>
+                    <li>User fills out a contact form on the website</li>
+                    <li>On submission, a "mailto:" link is generated with the form data</li>
+                    <li>The user's default email client opens with a pre-filled message</li>
+                    <li>The user can review and send the email from their own account</li>
+                  </ol>
                   
-                  <h3>Step 2: Verify Your Sender Email</h3>
+                  <h3>Implementing Server-Side Email</h3>
                   <p>
-                    Make sure to verify your sender email address in SendGrid to avoid delivery issues.
-                    This is a requirement from SendGrid to prevent spam.
+                    To implement server-side email sending:
                   </p>
-                  
-                  <h3>Development vs Production</h3>
-                  <p>
-                    In development mode, emails are logged to the console instead of being sent.
-                    This behavior can be configured in <code>src/services/email/emailConfig.ts</code>.
-                  </p>
+                  <ol>
+                    <li>Create an API endpoint to handle form submissions</li>
+                    <li>Update the form components to use fetch/axios instead of mailto</li>
+                    <li>Choose an email service provider (SendGrid, AWS SES, etc.)</li>
+                    <li>Add proper validation, rate limiting, and spam protection</li>
+                  </ol>
                 </CardContent>
               </Card>
             </div>

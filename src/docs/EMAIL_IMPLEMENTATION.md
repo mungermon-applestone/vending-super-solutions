@@ -5,18 +5,22 @@ This document outlines how email functionality is implemented in the application
 
 ## Current Implementation
 
-The application uses SendGrid's API to handle email functionality:
+The application uses a simple "mailto:" approach to handle contact forms:
 
-1. **Client-side components** use the `sendEmail` function from `src/services/email/emailAdapter.ts`
-2. **The adapter** sends emails directly to SendGrid's API
-3. **In development mode**, emails are logged to the console instead of being sent
+1. **Form data is collected** from the user input
+2. **A "mailto:" link is generated** with the subject and body populated
+3. **The user's default email client opens** with a pre-filled email message
+4. **The user can review and send** the email from their own email account
 
 ## Form Components
 
 The following components use the email functionality:
 
-- `EmbeddedContactForm` - A configurable form with multiple variants (compact, full, inline)
+- `ContactFormNew` - The core implementation used by all contact forms
+- `SimpleForm` - A compact form wrapper around ContactFormNew
 - `ContactForm` - The main form used on the Contact page
+- `EmbeddedContactForm` - A configurable form that can be embedded anywhere
+- `ContactFormToggle` - A component that toggles between a CTA and a form
 - `InquiryForm` - Used for demo requests and product inquiries
 
 ## Analytics Tracking
@@ -34,53 +38,26 @@ The email functionality can be configured in `src/services/email/emailConfig.ts`
 
 ```typescript
 export const emailConfig = {
-  developmentMode: {
-    logEmails: true,
-    forceDevelopmentMode: false
-  },
-  sendGrid: {
-    endpoint: 'https://api.sendgrid.com/v3/mail/send'
-  }
+  defaultRecipient: 'contact@example.com',
+  defaultSender: 'noreply@example.com'
 };
 ```
 
-## Environment Variables
+## Future Implementation Notes
 
-For SendGrid integration, the following environment variables are needed:
+To implement a server-side email sending solution:
 
-```
-SENDGRID_API_KEY=your_sendgrid_api_key
-EMAIL_TO=recipient@example.com
-EMAIL_FROM=sender@example.com
-```
-
-## Setting Up Environment Variables in Lovable
-
-To configure your email settings in Lovable:
-
-1. Go to Project Settings
-2. Navigate to Environment Variables
-3. Add the following variables:
-   - `SENDGRID_API_KEY` - Your SendGrid API key
-   - `EMAIL_TO` - The email where form submissions will be sent
-   - `EMAIL_FROM` - The email address shown as the sender
+1. Create an API endpoint to handle form submissions
+2. Update the ContactFormNew component to use fetch/axios instead of mailto
+3. Add proper error handling and success states
+4. Consider using a service like SendGrid, AWS SES, or other email providers
+5. Add rate limiting and spam protection
 
 ## Testing Email Functionality
 
 To test the email functionality:
 
-1. In development, emails are not actually sent but logged to the console
-2. Use the `EmailServiceTester` component in the admin panel to verify configuration
-3. Submit a test form and check if the success message appears
-4. For production testing, verify that the SendGrid API key is correctly configured
-
-## Development vs Production Behavior
-
-In development mode:
-- Emails are logged to the console instead of being sent
-- The `logEmails` configuration option can be toggled to control this behavior
-- You can force development mode with the `forceDevelopmentMode` option
-
-In production:
-- Emails are sent using the SendGrid API
-- SendGrid API key must be properly set in environment variables
+1. Fill out any contact form on the site
+2. Submit the form
+3. Verify that your email client opens with the pre-filled message
+4. For future server-side implementation, use the EmailServiceTester component in the admin panel

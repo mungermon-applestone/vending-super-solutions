@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Check } from 'lucide-react';
 import { trackEvent } from '@/utils/analytics';
+import { createMailtoLink, formatEmailBody } from '@/services/email/emailService';
+import { emailConfig } from '@/services/email/emailConfig';
 
 export interface ContactFormNewProps {
   /** Form title */
@@ -91,24 +92,27 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
         location: window.location.pathname
       });
       
-      // Prepare email content for mailto link
+      // Prepare email data
       const emailSubject = `${formType}: ${subject || 'Website Inquiry'}`;
-      const emailBody = `
-Name: ${name}
-Email: ${email}
-${phone ? `Phone: ${phone}\n` : ''}
-${company ? `Company: ${company}\n` : ''}
-
-Message:
-${message}
-
-Sent from: ${window.location.href}
-Form type: ${formType}
-      `;
       
-      // Create mailto link
-      const recipientEmail = 'munger@applestonesolutions.com'; // Default recipient
-      const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+      const formData = {
+        name,
+        email,
+        ...(phone ? { phone } : {}),
+        ...(company ? { company } : {}),
+        message
+      };
+      
+      const metadata = {
+        'Sent from': window.location.href,
+        'Form type': formType
+      };
+      
+      const emailBody = formatEmailBody(formData, metadata);
+      
+      // Create and open mailto link
+      const recipientEmail = emailConfig.defaultRecipient;
+      const mailtoLink = createMailtoLink(emailSubject, emailBody, recipientEmail);
       
       // Open email client
       window.location.href = mailtoLink;
