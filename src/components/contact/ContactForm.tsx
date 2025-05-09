@@ -6,6 +6,8 @@ import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/
 import { useToast } from '@/hooks/use-toast';
 import { Check } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { trackEvent, trackFormView } from '@/utils/analytics';
+import { sendEmail } from '@/services/email/emailAdapter';
 
 interface ContactFormProps {
   formSectionTitle?: string;
@@ -19,6 +21,11 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  // Track form view when component mounts
+  React.useEffect(() => {
+    trackFormView('Contact Form', window.location.pathname);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,25 +43,18 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
     setSubmitting(true);
     
     try {
-      // Send data to our API endpoint
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          subject,
-          message,
-          formType: 'Contact Form'
-        }),
+      // Use our new email adapter
+      const result = await sendEmail({
+        name,
+        email,
+        subject,
+        message,
+        formType: 'Contact Form',
+        location: window.location.pathname
       });
       
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to send message');
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to send message');
       }
       
       // Show success message

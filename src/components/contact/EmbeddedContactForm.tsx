@@ -1,11 +1,11 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { trackEvent } from '@/utils/analytics';
+import { trackEvent, trackFormView } from '@/utils/analytics';
+import { sendEmail, useNewEmailService } from '@/services/email/emailAdapter';
 
 /**
  * EmbeddedContactForm Component
@@ -70,6 +70,11 @@ const EmbeddedContactForm: React.FC<EmbeddedContactFormProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  // Track form view when the component mounts
+  React.useEffect(() => {
+    trackFormView(formType, window.location.pathname);
+  }, [formType]);
+
   const isFullVariant = variant === 'full';
   const isInlineVariant = variant === 'inline';
 
@@ -89,40 +94,21 @@ const EmbeddedContactForm: React.FC<EmbeddedContactFormProps> = ({
     setSubmitting(true);
     
     try {
-      // Track the event in analytics
-      trackEvent('form_submit', {
-        form_type: formType,
+      // Use our email adapter to send the form data
+      const result = await sendEmail({
+        name,
+        email,
+        phone: phone || undefined,
+        company: company || undefined,
+        subject: subject || `New ${formType} Submission`,
+        message,
+        formType,
         location: window.location.pathname
       });
       
-      // Send data to our API endpoint
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          phone: phone || undefined,
-          company: company || undefined,
-          subject: subject || `New ${formType} Submission`,
-          message,
-          formType
-        }),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to send message');
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to send message');
       }
-      
-      // Track successful submission
-      trackEvent('form_submit_success', {
-        form_type: formType,
-        location: window.location.pathname
-      });
       
       // Show success message
       toast({
@@ -145,13 +131,6 @@ const EmbeddedContactForm: React.FC<EmbeddedContactFormProps> = ({
     } catch (error) {
       console.error('Error sending message:', error);
       
-      // Track failed submission
-      trackEvent('form_submit_error', {
-        form_type: formType,
-        location: window.location.pathname,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      
       toast({
         title: "Error",
         description: "There was a problem sending your message. Please try again.",
@@ -172,12 +151,12 @@ const EmbeddedContactForm: React.FC<EmbeddedContactFormProps> = ({
     setSubmitted(false);
   };
   
-  // Define form layout based on variant
+  // Keep existing code for form layout classes
   const formLayoutClass = isInlineVariant 
     ? 'flex flex-col md:flex-row gap-4 items-end' 
     : 'space-y-6';
   
-  // Define field layout based on variant
+  // Keep existing code for field layout classes
   const fieldLayoutClass = isInlineVariant
     ? 'flex-1'
     : '';

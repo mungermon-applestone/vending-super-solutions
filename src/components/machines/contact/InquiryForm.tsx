@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
+import { trackEvent, trackFormView } from '@/utils/analytics';
+import { sendEmail } from '@/services/email/emailAdapter';
 
 interface InquiryFormProps {
   title: string;
@@ -20,6 +22,11 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Track form view when component mounts
+  React.useEffect(() => {
+    trackFormView('Demo Request', window.location.pathname);
+  }, []);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,26 +44,19 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
     setSubmitting(true);
     
     try {
-      // Send data to our API endpoint
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: fullName,
-          email,
-          company,
-          phone,
-          message,
-          formType: 'Demo Request'
-        }),
+      // Use our new email adapter
+      const result = await sendEmail({
+        name: fullName,
+        email,
+        company,
+        phone,
+        message,
+        formType: 'Demo Request',
+        location: window.location.pathname
       });
       
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to send demo request');
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to send demo request');
       }
       
       // Show success message
