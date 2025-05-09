@@ -5,11 +5,12 @@ This document outlines how email functionality is implemented in the application
 
 ## Current Implementation
 
-The application uses a transitional approach to handle email functionality:
+The application uses a configurable approach to handle email functionality:
 
 1. **Client-side components** use the `sendEmail` function from `src/services/email/emailAdapter.ts`
-2. **The adapter** currently routes requests to the legacy API endpoint (`/api/send-email`)
-3. **Future implementation** will use direct integration with SendGrid or a similar email service
+2. **The adapter** decides which implementation to use based on the configuration in `emailConfig.ts`:
+   - `SENDGRID`: Direct integration with SendGrid's API (recommended)
+   - `ADAPTER`: The legacy implementation using a proxy API endpoint
 
 ## Form Components
 
@@ -28,13 +29,20 @@ All form interactions are tracked using the analytics service:
 - `form_submit_success` - When a form is successfully submitted
 - `form_submit_error` - When a form submission fails
 
-## Future Implementation
+## Configuration Options
 
-In the future, we will:
+The email functionality can be configured in `src/services/email/emailConfig.ts`:
 
-1. Implement direct SendGrid integration in `sendGridService.ts`
-2. Update the `emailAdapter.ts` to use the direct integration
-3. Remove the legacy Vercel API route
+```typescript
+export const emailConfig = {
+  provider: 'SENDGRID', // 'SENDGRID' | 'ADAPTER'
+  defaultRecipient: 'munger@applestonesolutions.com',
+  defaultSender: 'noreply@applestonesolutions.com',
+  developmentMode: {
+    logEmails: true,
+  },
+};
+```
 
 ## Environment Variables
 
@@ -52,5 +60,4 @@ To test the email functionality:
 
 1. In development, emails are not actually sent but logged to the console
 2. For production testing, verify that the SendGrid API key is correctly configured
-3. Submit a test form and check if the success message appears and email is received
-
+3. Submit a test form and check if the success message appears

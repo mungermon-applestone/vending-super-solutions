@@ -3,7 +3,6 @@
  * Email Configuration
  * 
  * This file contains configuration settings for email services.
- * It will be expanded in the future to support direct SendGrid integration.
  */
 
 /**
@@ -12,10 +11,11 @@
 export const emailConfig = {
   /**
    * The email service provider to use
-   * Currently we're using a transitional approach with the adapter
-   * In the future, we'll update this to use SENDGRID directly
+   * Options: 'SENDGRID' | 'ADAPTER'
+   * - ADAPTER: Uses the legacy API endpoint (transitional)
+   * - SENDGRID: Uses direct SendGrid integration
    */
-  provider: 'ADAPTER', // 'ADAPTER' | 'SENDGRID'
+  provider: 'SENDGRID', // Changed from 'ADAPTER' to 'SENDGRID'
   
   /**
    * Default recipient email address

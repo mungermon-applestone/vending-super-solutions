@@ -1,5 +1,6 @@
 
 import { trackEvent, trackFormSuccess, trackFormError } from '@/utils/analytics';
+import { emailConfig } from './emailConfig';
 
 // Type definitions for form submission data
 export interface FormSubmissionData {
@@ -29,7 +30,7 @@ export async function sendContactEmail(data: FormSubmissionData): Promise<{ succ
     });
     
     // In development mode, just log the email data
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development' && emailConfig.developmentMode.logEmails) {
       console.log('Email would be sent in production with the following details:');
       console.log('Form Type:', data.formType);
       console.log('Content:', {
@@ -49,8 +50,7 @@ export async function sendContactEmail(data: FormSubmissionData): Promise<{ succ
       };
     }
     
-    // In production, send the email through a proxy endpoint that connects to SendGrid
-    // This is a temporary adapter that maintains compatibility with existing code
+    // In production, send the email through the legacy API endpoint
     const response = await fetch('/api/send-email', {
       method: 'POST',
       headers: {
