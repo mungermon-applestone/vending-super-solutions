@@ -11,7 +11,6 @@ import { emailConfig, getEmailEnvironment } from '@/services/email/emailConfig';
 import EmailServiceTester from '@/components/admin/email/EmailServiceTester';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Info, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { getSendGridConfigStatus } from '@/services/email/sendGridService';
 
 const EmailSettings: React.FC = () => {
