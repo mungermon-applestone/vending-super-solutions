@@ -7,6 +7,8 @@ import { Check } from 'lucide-react';
 import { trackEvent } from '@/utils/analytics';
 import { createMailtoLink, formatEmailBody } from '@/services/email/emailService';
 import { emailConfig } from '@/services/email/emailConfig';
+import { supabase } from "@/integrations/supabase/client";
+import { Spinner } from '@/components/ui/spinner';
 
 export interface ContactFormNewProps {
   /** Form title */
@@ -37,8 +39,8 @@ export interface ContactFormNewProps {
 /**
  * ContactFormNew Component
  * 
- * A simple, standalone contact form without dependencies on legacy email services.
- * This form opens the user's email client with a pre-filled message.
+ * A contact form that uses a Supabase Edge Function to send emails via SendGrid,
+ * with fallback to mailto links if the API call fails.
  */
 const ContactFormNew: React.FC<ContactFormNewProps> = ({
   formTitle = "Send us a message",
@@ -59,6 +61,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
   const [message, setMessage] = useState(initialValues.message || '');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const isFullVariant = variant === 'full';
 
@@ -84,6 +87,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
     }
     
     setSubmitting(true);
+    setSubmitError(null);
     
     try {
       // Track submission attempt
@@ -92,6 +96,96 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
         location: window.location.pathname
       });
       
+      // Prepare form data
+      const formData = {
+        name,
+        email,
+        phone,
+        company,
+        subject,
+        message,
+        formType,
+        location: window.location.href
+      };
+      
+      // Call the Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+        body: formData
+      });
+      
+      if (error || (data && !data.success)) {
+        console.error('Error submitting form:', error || data.error);
+        
+        // Track submission error
+        trackEvent('form_submit_error', {
+          form_type: formType,
+          location: window.location.pathname,
+          error: error?.message || (data?.error || 'Unknown error')
+        });
+        
+        // If the error indicates we should fallback to mailto, do that
+        if (data?.fallback) {
+          handleMailtoFallback();
+          return;
+        }
+        
+        // Otherwise show a general error
+        toast({
+          title: "Error",
+          description: "There was a problem sending your message. Please try again or contact us directly.",
+          variant: "destructive",
+        });
+        
+        setSubmitError("Failed to send message. Please try again or contact us directly.");
+        return;
+      }
+      
+      // If we got here, the submission was successful
+      toast({
+        title: "Message sent!",
+        description: "Thank you for your message. We'll get back to you soon.",
+      });
+      
+      // Track successful submission
+      trackEvent('form_submit_success', {
+        form_type: formType,
+        location: window.location.pathname
+      });
+      
+      // Set form to submitted state
+      setSubmitted(true);
+      
+      // Call success callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
+      
+      // Redirect if URL provided
+      if (redirectUrl) {
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      
+      // Track submission error
+      trackEvent('form_submit_error', {
+        form_type: formType,
+        location: window.location.pathname,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      
+      // Fallback to mailto if API call fails
+      handleMailtoFallback();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Fallback to mailto if API call fails
+  const handleMailtoFallback = () => {
+    try {
       // Prepare email data
       const emailSubject = `${formType}: ${subject || 'Website Inquiry'}`;
       
@@ -126,7 +220,8 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
       // Track successful opening of email client
       trackEvent('form_submit_success', {
         form_type: formType,
-        location: window.location.pathname
+        location: window.location.pathname,
+        method: 'mailto'
       });
       
       // Set form to submitted state
@@ -143,23 +238,16 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
           window.location.href = redirectUrl;
         }, 2000);
       }
-    } catch (error) {
-      console.error('Error preparing email:', error);
+    } catch (mailtoError) {
+      console.error('Error preparing mailto fallback:', mailtoError);
       
-      // Track submission error
-      trackEvent('form_submit_error', {
-        form_type: formType,
-        location: window.location.pathname,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+      setSubmitError("We couldn't send your message or open your email client. Please contact us directly at " + emailConfig.defaultRecipient);
       
       toast({
         title: "Error",
-        description: "There was a problem preparing your message. Please try again or contact us directly.",
+        description: "We couldn't send your message or open your email client. Please contact us directly.",
         variant: "destructive",
       });
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -171,6 +259,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
     setSubject('');
     setMessage('');
     setSubmitted(false);
+    setSubmitError(null);
   };
 
   return (
@@ -195,6 +284,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required 
+                    disabled={submitting}
                   />
                 </div>
                 <div>
@@ -209,6 +299,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required 
+                    disabled={submitting}
                   />
                 </div>
               </div>
@@ -226,6 +317,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required 
+                    disabled={submitting}
                   />
                 </div>
                 <div>
@@ -240,6 +332,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required 
+                    disabled={submitting}
                   />
                 </div>
               </>
@@ -259,6 +352,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
                       placeholder="(555) 555-5555" 
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
+                      disabled={submitting}
                     />
                   </div>
                   <div>
@@ -272,6 +366,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
                       placeholder="Acme Inc." 
                       value={company}
                       onChange={(e) => setCompany(e.target.value)}
+                      disabled={submitting}
                     />
                   </div>
                 </div>
@@ -286,6 +381,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
                     placeholder="How can we help?" 
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
+                    disabled={submitting}
                   />
                 </div>
               </>
@@ -303,15 +399,27 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 required 
+                disabled={submitting}
               />
             </div>
+            
+            {submitError && (
+              <div className="bg-red-50 border border-red-200 text-red-800 rounded-md p-3 text-sm">
+                {submitError}
+              </div>
+            )}
             
             <Button 
               type="submit" 
               className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white font-semibold py-3"
               disabled={submitting}
             >
-              {submitting ? 'Preparing Email...' : 'Send Message'}
+              {submitting ? (
+                <span className="flex items-center justify-center">
+                  <Spinner size="sm" className="mr-2" />
+                  Sending Message...
+                </span>
+              ) : 'Send Message'}
             </Button>
           </form>
         ) : (
@@ -319,9 +427,9 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 mb-4">
               <Check className="h-6 w-6 text-green-600" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Message Prepared!</h3>
+            <h3 className="text-lg font-semibold mb-2">Message Sent!</h3>
             <p className="text-gray-600 mb-6">
-              Your email client has been opened with the message. Please send the email to complete your inquiry.
+              Thank you for your message. We'll get back to you as soon as possible.
             </p>
             <Button 
               variant="outline" 
