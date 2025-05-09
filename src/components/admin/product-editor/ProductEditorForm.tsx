@@ -43,7 +43,13 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
     const subscription = form.watch((value) => {
       console.log('[ProductEditorForm] Form values changed:', value);
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      if (subscription && typeof subscription === 'function') {
+        subscription();
+      } else if (subscription && typeof subscription === 'object' && 'unsubscribe' in subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, [form]);
 
   // Force re-render the form when product changes
@@ -117,7 +123,10 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
 
       <Form {...form}>
         <form 
-          onSubmit={handleFormSubmit} 
+          onSubmit={form.handleSubmit((data) => {
+            console.log('[ProductEditorForm] Form submitted with data:', data);
+            onSubmit(data);
+          })} 
           className="space-y-8"
           key={`${formKey}-${productSlug || 'new'}`}
         >
@@ -134,7 +143,31 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
               <Button
                 type="button"
                 variant="outline"
-                onClick={handleCloneProduct}
+                onClick={() => {
+                  if (!productId) return;
+                  
+                  setIsCloning(true);
+                  cloneProductMutation.mutateAsync(productId).then(
+                    (clonedProduct) => {
+                      toast.toast({
+                        title: "Product cloned",
+                        description: `Product has been cloned successfully.`
+                      });
+                      
+                      navigate(`/admin/products/edit/${clonedProduct.slug}`);
+                    },
+                    (error) => {
+                      console.error("Error cloning product:", error);
+                      toast.toast({
+                        title: "Error",
+                        description: error instanceof Error ? error.message : "Failed to clone product. Please try again.",
+                        variant: "destructive",
+                      });
+                    }
+                  ).finally(() => {
+                    setIsCloning(false);
+                  });
+                }}
                 disabled={isLoading || isCloning}
                 className="gap-2 mr-auto"
               >

@@ -17,7 +17,20 @@ export const emailConfig = {
   /**
    * Default sender email address (for display purposes)
    */
-  defaultSender: 'noreply@applestonesolutions.com'
+  defaultSender: 'noreply@applestonesolutions.com',
+  
+  /**
+   * Email service provider
+   */
+  provider: 'MAILTO',
+  
+  /**
+   * Development mode settings
+   */
+  developmentMode: {
+    logEmails: true,
+    forceDevelopmentMode: false
+  }
 };
 
 /**
@@ -28,6 +41,7 @@ export function getEmailEnvironment() {
   return {
     recipientEmail: emailConfig.defaultRecipient,
     senderEmail: emailConfig.defaultSender,
-    isDevelopment: process.env.NODE_ENV === 'development'
+    isDevelopment: process.env.NODE_ENV === 'development',
+    logEmails: emailConfig.developmentMode.logEmails
   };
 }
