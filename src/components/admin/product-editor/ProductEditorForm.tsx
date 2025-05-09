@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -44,11 +43,8 @@ const ProductEditorForm = ({ productSlug, uuid, isEditMode }: ProductEditorFormP
       console.log('[ProductEditorForm] Form values changed:', value);
     });
     return () => {
-      if (subscription && typeof subscription === 'function') {
-        subscription();
-      } else if (subscription && typeof subscription === 'object' && 'unsubscribe' in subscription) {
-        subscription.unsubscribe();
-      }
+      // Proper cleanup for the subscription
+      subscription.unsubscribe();
     };
   }, [form]);
 

@@ -100,11 +100,8 @@ const ProductBenefits = ({ form }: ProductBenefitsProps) => {
     });
 
     return () => {
-      if (subscription && typeof subscription === 'function') {
-        subscription();
-      } else if (subscription && typeof subscription === 'object' && 'unsubscribe' in subscription) {
-        subscription.unsubscribe();
-      }
+      // Proper cleanup for the subscription
+      subscription.unsubscribe();
     };
   }, [form]);
 
