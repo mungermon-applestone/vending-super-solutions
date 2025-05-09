@@ -7,9 +7,11 @@ interface BusinessGoalInquiryProps {
   description?: string;
 }
 
-const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({ title, description }) => {
-  // Use the standard SimpleContactCTA without passing custom title
-  return <SimpleContactCTA description={description} />;
+const BusinessGoalInquiry: React.FC<BusinessGoalInquiryProps> = ({ 
+  title = "Interested in achieving this business goal?", 
+  description = "Contact us to learn how our vending solutions can help you meet this goal."
+}) => {
+  return <SimpleContactCTA title={title} description={description} />;
 };
 
 export default BusinessGoalInquiry;

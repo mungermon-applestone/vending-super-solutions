@@ -3,9 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { useHomePageContent } from '@/hooks/useHomePageContent';
 import { trackEvent } from '@/utils/analytics';
-import ContactFormToggle from '@/components/contact/ContactFormToggle';
 
 interface SimpleContactCTAProps {
   title?: string;
@@ -21,106 +19,57 @@ interface SimpleContactCTAProps {
   secondaryButtonText?: string;
   /** Optional callback when CTA button is clicked */
   onCtaClick?: () => void;
-  /** Form variant (compact, full, inline) */
-  formVariant?: 'compact' | 'full' | 'inline';
-  /** Initial values for the form fields */
-  initialValues?: {
-    name?: string;
-    email?: string;
-    phone?: string;
-    company?: string;
-    subject?: string;
-    message?: string;
-  };
-  /** URL to redirect after successful form submission */
-  redirectUrl?: string;
 }
 
 /**
  * SimpleContactCTA Component
  * 
- * IMPORTANT REGRESSION PREVENTION NOTES:
- * - This component provides a consistent call-to-action section across pages
- * - Background color is always bg-vending-blue-light for visual consistency
- * - Text alignment is centered with controlled width for readability
- * - Button styling and order is critical for conversion rate optimization
- * - Maintains consistent padding (py-16) across all pages
- * 
- * @param {SimpleContactCTAProps} props - Component properties
- * @returns React component
+ * A simple call-to-action section with buttons that direct users to contact pages
  */
 const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({ 
-  title, 
-  description,
+  title = "Ready to Transform Your Vending Operations?", 
+  description = "Get in touch and we'll start you on your vending journey.",
   className = "",
   formType = "CTA Form",
-  primaryButtonText,
-  secondaryButtonUrl,
-  secondaryButtonText,
-  onCtaClick,
-  formVariant = "compact",
-  initialValues,
-  redirectUrl
+  primaryButtonText = "Request a Demo",
+  secondaryButtonUrl = "/products",
+  secondaryButtonText = "Learn More",
+  onCtaClick
 }) => {
-  const { data: homeContent } = useHomePageContent();
-  const [showContactForm, setShowContactForm] = React.useState(false);
-  
-  // Use provided props or fallback to CMS content
-  const displayTitle = title || homeContent?.ctaSectionTitle || "Ready to Transform Your Vending Operations?";
-  const displayDescription = description || homeContent?.ctaSectionDescription || 
-    "Get in touch and we'll start you on your vending journey.";
-  const displayPrimaryButtonText = primaryButtonText || homeContent?.ctaPrimaryButtonText || "Request a Demo";
-  const displaySecondaryButtonText = secondaryButtonText || homeContent?.ctaSecondaryButtonText || "Learn More";
-  const displaySecondaryButtonUrl = secondaryButtonUrl || homeContent?.ctaSecondaryButtonUrl || "/products";
-
   // Handle CTA click with tracking
   const handlePrimaryClick = () => {
     trackEvent('cta_clicked', {
-      cta_text: displayPrimaryButtonText,
+      cta_text: primaryButtonText,
       cta_location: window.location.pathname,
       cta_type: 'primary'
     });
     
-    // Use custom callback if provided
+    // Navigate to contact page or use custom callback
     if (onCtaClick) {
       onCtaClick();
     } else {
-      setShowContactForm(true);
+      // By default, direct to contact page
+      window.location.href = "/contact";
     }
   };
-
-  if (showContactForm) {
-    return (
-      <ContactFormToggle
-        showFormByDefault={true}
-        title={displayTitle}
-        description={displayDescription}
-        formVariant={formVariant}
-        className={`bg-vending-blue-light py-16 ${className}`}
-        formType={formType}
-        initialValues={initialValues}
-        redirectUrl={redirectUrl}
-      />
-    );
-  }
 
   return (
     <section className={`bg-vending-blue-light py-16 ${className}`}>
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">{displayTitle}</h2>
-          <p className="text-lg text-gray-600 mb-8">{displayDescription}</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">{title}</h2>
+          <p className="text-lg text-gray-600 mb-8">{description}</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button 
               size="lg"
               className="flex items-center"
               onClick={handlePrimaryClick}
             >
-              {displayPrimaryButtonText} <ArrowRight className="ml-2 h-5 w-5" />
+              {primaryButtonText} <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link to={displaySecondaryButtonUrl}>
-                {displaySecondaryButtonText}
+              <Link to={secondaryButtonUrl}>
+                {secondaryButtonText}
               </Link>
             </Button>
           </div>

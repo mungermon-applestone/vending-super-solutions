@@ -1,27 +1,28 @@
 
 import { FormSubmissionData } from './emailService';
-import { sendWithSendGrid } from './sendGridService';
-import { emailConfig } from './emailConfig';
 
 /**
- * This adapter maintains the same API for components while allowing us
- * to switch between the legacy implementation and the new direct SendGrid
- * implementation based on configuration.
+ * This is a simplified version of the email adapter that just logs data.
+ * Actual email sending is now handled directly in the form components using Formspree.
  * 
  * @param data Form submission data
  * @returns Promise with the API response
  */
 export async function sendEmail(data: FormSubmissionData): Promise<{ success: boolean; message: string }> {
+  console.log('Email adapter called with data:', data);
+  console.log('NOTE: This adapter is deprecated. Forms now use direct Formspree submission.');
+  
   try {
-    // Use direct SendGrid integration
-    return await sendWithSendGrid(data);
+    // Just return success since this is just a stub
+    return {
+      success: true,
+      message: "Form submission logged. Please note that the email service has been migrated to Formspree."
+    };
   } catch (error) {
-    console.error("Email sending failed:", error);
+    console.error("Email adapter called:", error);
     return {
       success: false,
-      message: error instanceof Error 
-        ? `Failed to send email: ${error.message}`
-        : "An unexpected error occurred while sending the email. Please try again later."
+      message: "This email service has been deprecated. Forms now use Formspree."
     };
   }
 }

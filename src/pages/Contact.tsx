@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -11,7 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { Document } from '@contentful/rich-text-types';
 import { ContentfulRichTextDocument } from '@/types/contentful';
-import ContactForm from '@/components/contact/ContactForm';
+import SimpleForm from '@/components/contact/SimpleForm';
 
 const ContactPage = () => {
   const navigate = useNavigate();
@@ -82,7 +83,7 @@ const ContactContent = () => {
         </div>
         
         {/* Contact Form on the right */}
-        <ContactForm formSectionTitle="Send Us a Message" />
+        <SimpleForm formTitle="Send Us a Message" formType="Contact Page Form" />
       </div>
       
       {/* FAQ Accordion Section */}
