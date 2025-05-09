@@ -12,6 +12,16 @@ import { emailConfig } from './emailConfig';
  * @returns Promise with the API response
  */
 export async function sendEmail(data: FormSubmissionData): Promise<{ success: boolean; message: string }> {
-  // Use direct SendGrid integration
-  return sendWithSendGrid(data);
+  try {
+    // Use direct SendGrid integration
+    return await sendWithSendGrid(data);
+  } catch (error) {
+    console.error("Email sending failed:", error);
+    return {
+      success: false,
+      message: error instanceof Error 
+        ? `Failed to send email: ${error.message}`
+        : "An unexpected error occurred while sending the email. Please try again later."
+    };
+  }
 }

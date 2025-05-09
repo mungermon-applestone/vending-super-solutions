@@ -54,6 +54,21 @@
     return null;
   }
   
+  // Load runtime config from API if available
+  async function loadRuntimeConfig() {
+    try {
+      const response = await fetch('/api/runtime-config');
+      if (response.ok) {
+        const config = await response.json();
+        console.log('[env-config] Loaded runtime config from API');
+        return config;
+      }
+    } catch (e) {
+      console.warn('[env-config] Failed to load runtime config from API:', e);
+    }
+    return null;
+  }
+  
   // Apply credentials based on environment with enhanced fallback logic
   function applyCredentials() {
     // First, check for production environment variables (set in deployment)
@@ -74,6 +89,17 @@
       window.env.spaceId = storedCreds.VITE_CONTENTFUL_SPACE_ID;
       window.env.deliveryToken = storedCreds.VITE_CONTENTFUL_DELIVERY_TOKEN;
       window.env.environmentId = storedCreds.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+      
+      // Check for email related credentials
+      if (storedCreds.SENDGRID_API_KEY) {
+        window.env.SENDGRID_API_KEY = storedCreds.SENDGRID_API_KEY;
+      }
+      if (storedCreds.EMAIL_TO) {
+        window.env.EMAIL_TO = storedCreds.EMAIL_TO;
+      }
+      if (storedCreds.EMAIL_FROM) {
+        window.env.EMAIL_FROM = storedCreds.EMAIL_FROM;
+      }
       
       window._contentfulInitializedSource = 'local-storage';
       return true;
@@ -100,9 +126,28 @@
     return false;
   }
   
+  // Initialize email configuration with default values
+  function initializeEmailConfig() {
+    // Set default email configuration if not already set
+    window.env.SENDGRID_API_KEY = window.env.SENDGRID_API_KEY || '';
+    window.env.EMAIL_TO = window.env.EMAIL_TO || 'munger@applestonesolutions.com';
+    window.env.EMAIL_FROM = window.env.EMAIL_FROM || 'noreply@applestonesolutions.com';
+    
+    // In development, we can use testing keys
+    if (window.location.hostname === 'localhost' || 
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname.includes('.lovable.app')) {
+      console.log('[env-config] Development environment detected for email');
+      // These are intentionally left empty for development - emails will be logged to console
+    }
+  }
+  
   // Apply credentials and trigger event
   if (applyCredentials()) {
     console.log('[env-config] Credentials applied successfully');
+    
+    // Initialize email configuration
+    initializeEmailConfig();
     
     // Save credentials to localStorage for future use if they weren't loaded from there
     if (window._contentfulInitializedSource !== 'local-storage') {

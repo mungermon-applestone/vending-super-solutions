@@ -65,17 +65,22 @@ export const emailConfig = {
  */
 export function getEmailEnvironment() {
   // Check if we're in development mode or if it's forced
-  const isDevelopment = process.env.NODE_ENV === 'development' || emailConfig.developmentMode.forceDevelopmentMode;
+  const isDevelopment = 
+    (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') || 
+    emailConfig.developmentMode.forceDevelopmentMode;
+  
+  // Get API keys from window.env if available (runtime) or process.env (build time)
+  const env = typeof window !== 'undefined' && window.env ? window.env : {};
   
   return {
     // API key for SendGrid
-    sendGridApiKey: process.env.SENDGRID_API_KEY || '',
+    sendGridApiKey: env.SENDGRID_API_KEY || '',
     
     // Recipient email address (where to send form submissions)
-    recipientEmail: process.env.EMAIL_TO || emailConfig.defaultRecipient,
+    recipientEmail: env.EMAIL_TO || emailConfig.defaultRecipient,
     
     // Sender email address (from address for emails)
-    senderEmail: process.env.EMAIL_FROM || emailConfig.defaultSender,
+    senderEmail: env.EMAIL_FROM || emailConfig.defaultSender,
     
     // Whether we're in development mode
     isDevelopment,

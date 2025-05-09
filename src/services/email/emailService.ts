@@ -1,6 +1,7 @@
 
 import { trackEvent, trackFormSuccess, trackFormError } from '@/utils/analytics';
-import { emailConfig } from './emailConfig';
+import { emailConfig, getEmailEnvironment } from './emailConfig';
+import { sendWithSendGrid } from './sendGridService';
 
 // Type definitions for form submission data
 export interface FormSubmissionData {
@@ -16,7 +17,7 @@ export interface FormSubmissionData {
 
 /**
  * Sends an email with the form submission data
- * This service can be configured to use SendGrid or other email providers
+ * This service now directly uses the SendGrid integration
  * 
  * @param data Form submission data
  * @returns Promise that resolves with success message or rejects with error
@@ -30,7 +31,8 @@ export async function sendContactEmail(data: FormSubmissionData): Promise<{ succ
     });
     
     // In development mode, just log the email data
-    if (process.env.NODE_ENV === 'development' && emailConfig.developmentMode.logEmails) {
+    const env = getEmailEnvironment();
+    if (env.logEmails) {
       console.log('Email would be sent in production with the following details:');
       console.log('Form Type:', data.formType);
       console.log('Content:', {
@@ -44,34 +46,29 @@ export async function sendContactEmail(data: FormSubmissionData): Promise<{ succ
       });
       
       // Simulate success in development
+      trackFormSuccess(data.formType, data.location || window.location.pathname);
       return { 
         success: true, 
         message: 'Form submission received successfully. In development mode, email not actually sent.' 
       };
     }
     
-    // In production, send the email through the legacy API endpoint
-    const response = await fetch('/api/send-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+    // Use SendGrid service to send the email
+    const result = await sendWithSendGrid(data);
     
-    const responseData = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(responseData.error || 'Failed to send message');
+    if (result.success) {
+      // Track successful submission
+      trackFormSuccess(data.formType, data.location || window.location.pathname);
+    } else {
+      // Track submission error
+      trackFormError(
+        data.formType, 
+        result.message || 'Unknown error',
+        data.location || window.location.pathname
+      );
     }
     
-    // Track successful submission
-    trackFormSuccess(data.formType, data.location || window.location.pathname);
-    
-    return {
-      success: true,
-      message: responseData.message || 'Email sent successfully'
-    };
+    return result;
   } catch (error) {
     console.error('Error sending email:', error);
     

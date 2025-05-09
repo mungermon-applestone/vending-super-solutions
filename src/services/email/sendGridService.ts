@@ -35,10 +35,10 @@ export async function sendWithSendGrid(data: FormSubmissionData): Promise<{ succ
     
     // Validate SendGrid API key
     if (!env.sendGridApiKey) {
-      console.warn('SendGrid API key not found. Please set the SENDGRID_API_KEY environment variable.');
+      console.warn('SendGrid API key not found. Please check your environment variables.');
       return {
         success: false,
-        message: 'SendGrid API key not configured'
+        message: 'Unable to send email: SendGrid API key not configured. Please contact the administrator.'
       };
     }
     
@@ -63,7 +63,15 @@ export async function sendWithSendGrid(data: FormSubmissionData): Promise<{ succ
     });
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorText = await response.text().catch(() => 'Unknown error');
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { message: errorText };
+      }
+      
+      console.error('SendGrid API error:', errorData);
       throw new Error(errorData.message || `SendGrid API returned ${response.status}`);
     }
     
@@ -75,7 +83,9 @@ export async function sendWithSendGrid(data: FormSubmissionData): Promise<{ succ
     console.error('SendGrid error:', error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Failed to send email through SendGrid'
+      message: error instanceof Error 
+        ? `Failed to send email: ${error.message}` 
+        : 'Failed to send email through SendGrid. Please try again later.'
     };
   }
 }

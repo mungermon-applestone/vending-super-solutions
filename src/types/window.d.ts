@@ -4,6 +4,10 @@ interface Window {
     VITE_CONTENTFUL_SPACE_ID?: string;
     VITE_CONTENTFUL_DELIVERY_TOKEN?: string;
     VITE_CONTENTFUL_ENVIRONMENT_ID?: string;
+    // Email configuration variables
+    SENDGRID_API_KEY?: string;
+    EMAIL_TO?: string;
+    EMAIL_FROM?: string;
     // Legacy keys for backward compatibility
     spaceId?: string;
     deliveryToken?: string;
