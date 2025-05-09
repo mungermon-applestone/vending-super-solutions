@@ -19,6 +19,17 @@ interface SimpleContactCTAProps {
   secondaryButtonText?: string;
   /** Optional callback when CTA button is clicked */
   onCtaClick?: () => void;
+  /** Form variant style - added for compatibility with new forms */
+  formVariant?: string;
+  /** Initial values for form fields - added for compatibility with new forms */
+  initialValues?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    company?: string;
+    subject?: string;
+    message?: string;
+  };
 }
 
 /**
@@ -34,7 +45,10 @@ const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({
   primaryButtonText = "Request a Demo",
   secondaryButtonUrl = "/products",
   secondaryButtonText = "Learn More",
-  onCtaClick
+  onCtaClick,
+  // We're not using these props directly in this component but they're included for compatibility
+  formVariant,
+  initialValues
 }) => {
   // Handle CTA click with tracking
   const handlePrimaryClick = () => {

@@ -21,6 +21,12 @@ export const emailConfig = {
    * This is used for display purposes only - actual emails go through Formspree
    */
   defaultSender: 'noreply@applestonesolutions.com',
+  
+  /**
+   * Email service provider
+   * Current implementation uses Formspree, previously used SendGrid
+   */
+  provider: 'Formspree'
 };
 
 /**
