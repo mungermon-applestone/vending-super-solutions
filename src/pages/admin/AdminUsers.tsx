@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
@@ -54,14 +53,15 @@ const AdminUsers: React.FC = () => {
         throw error;
       }
       
-      // Get emails for each admin user
+      // Process the data to retrieve user information
       const adminUsersWithEmail = await Promise.all(
         data.map(async (adminUser) => {
           try {
-            const { data: userData } = await supabase.auth.admin.getUserById(adminUser.user_id);
+            // Try to get user details if possible
+            const userResponse = await supabase.auth.admin.getUserById(adminUser.user_id);
             return {
               ...adminUser,
-              email: userData?.user?.email,
+              email: userResponse?.data?.user?.email,
             };
           } catch (error) {
             console.error('Error fetching user details:', error);
@@ -211,7 +211,7 @@ const AdminUsers: React.FC = () => {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="••••••���•"
                   value={newUserPassword}
                   onChange={(e) => setNewUserPassword(e.target.value)}
                 />

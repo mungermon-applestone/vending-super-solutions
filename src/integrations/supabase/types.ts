@@ -9,6 +9,135 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      business_goals: {
+        Row: {
+          created_at: string
+          id: string
+          slug: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          slug: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          slug?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      contentful_config: {
+        Row: {
+          created_at: string
+          delivery_token: string
+          environment_id: string | null
+          id: string
+          management_token: string | null
+          space_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_token: string
+          environment_id?: string | null
+          id?: string
+          management_token?: string | null
+          space_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          delivery_token?: string
+          environment_id?: string | null
+          id?: string
+          management_token?: string | null
+          space_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      machines: {
+        Row: {
+          created_at: string
+          id: string
+          slug: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          slug: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          slug?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      product_types: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          homepage_order: number | null
+          id: string
+          show_on_homepage: boolean | null
+          slug: string
+          title: string
+          updated_at: string
+          visible: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          homepage_order?: number | null
+          id?: string
+          show_on_homepage?: boolean | null
+          slug: string
+          title: string
+          updated_at?: string
+          visible?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          homepage_order?: number | null
+          id?: string
+          show_on_homepage?: boolean | null
+          slug?: string
+          title?: string
+          updated_at?: string
+          visible?: boolean | null
+        }
+        Relationships: []
+      }
       Secrets: {
         Row: {
           name: string
@@ -24,12 +153,36 @@ export type Database = {
         }
         Relationships: []
       }
+      technologies: {
+        Row: {
+          created_at: string
+          id: string
+          slug: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          slug: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          slug?: string
+          title?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: { uid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

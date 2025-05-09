@@ -70,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const checkAdminStatus = async (userId: string) => {
     try {
       console.log('Checking admin status for user:', userId);
+      // Use RPC function instead of direct table query
       const { data, error } = await supabase.rpc('is_admin', { uid: userId });
       
       if (error) {

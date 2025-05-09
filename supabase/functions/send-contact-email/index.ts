@@ -11,6 +11,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Email validation regex
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
 // Main request handler
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -22,6 +25,13 @@ serve(async (req) => {
     // Parse form data from request
     const formData = await req.json();
     const { name, email, phone, company, subject, message, formType, location } = formData;
+
+    console.log('Received form submission:', {
+      name,
+      email,
+      subject,
+      formType
+    });
 
     if (!name || !email || !message) {
       return new Response(
@@ -36,16 +46,63 @@ serve(async (req) => {
       );
     }
 
+    // Validate email format
+    if (!emailRegex.test(email)) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid email format' 
+        }),
+        { 
+          status: 400, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
     // Get recipient and sender from env variables
     const emailTo = Deno.env.get('EMAIL_TO');
     const emailFrom = Deno.env.get('EMAIL_FROM');
 
+    console.log('Using email configuration:', { emailTo, emailFrom });
+
     if (!emailTo || !emailFrom) {
-      console.error('Missing email configuration');
+      console.error('Missing email configuration. EMAIL_TO:', emailTo, 'EMAIL_FROM:', emailFrom);
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Server configuration error', 
+          error: 'Server configuration error: Missing email configuration', 
+          fallback: true 
+        }),
+        { 
+          status: 500, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
+    // Validate email addresses
+    if (!emailRegex.test(emailTo)) {
+      console.error('Invalid EMAIL_TO format:', emailTo);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Server configuration error: Invalid recipient email format', 
+          fallback: true 
+        }),
+        { 
+          status: 500, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
+    if (!emailRegex.test(emailFrom)) {
+      console.error('Invalid EMAIL_FROM format:', emailFrom);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Server configuration error: Invalid sender email format', 
           fallback: true 
         }),
         { 
@@ -108,19 +165,36 @@ serve(async (req) => {
       replyTo: email
     });
 
-    const response = await sgMail.send(msg);
-    console.log('SendGrid response:', response);
+    try {
+      const response = await sgMail.send(msg);
+      console.log('SendGrid response:', JSON.stringify(response));
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { 
-        status: 200, 
-        headers: { 'Content-Type': 'application/json', ...corsHeaders } 
-      }
-    );
+      return new Response(
+        JSON.stringify({ success: true }),
+        { 
+          status: 200, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    } catch (sendError) {
+      console.error('SendGrid error details:', JSON.stringify(sendError, null, 2));
+      
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: sendError instanceof Error ? sendError.message : 'Error sending email',
+          details: sendError,
+          fallback: true 
+        }),
+        { 
+          status: 500, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
 
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error in send-contact-email function:', error);
     
     return new Response(
       JSON.stringify({ 
