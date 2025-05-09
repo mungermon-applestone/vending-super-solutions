@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -5,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { runCMSDiagnostics, getCMSDiagnosticsReport } from '@/services/cms/utils/diagnostics';
 import { AlertTriangle, CheckCircle, Info, XCircle, RefreshCw, Database } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { USE_SUPABASE_CMS } from '@/config/featureFlags';
 
 const CMSDiagnostics: React.FC = () => {
   const [diagnostics, setDiagnostics] = useState<any>(null);
@@ -23,6 +25,16 @@ const CMSDiagnostics: React.FC = () => {
     }
   }>({});
 
+  // Define the list of tables we know exist in the Supabase schema
+  const existingTables = [
+    'admin_users',
+    'business_goals',
+    'contentful_config', 
+    'machines', 
+    'product_types',
+    'technologies'
+  ];
+
   const runDiagnostics = async () => {
     setIsRunning(true);
     try {
@@ -32,13 +44,26 @@ const CMSDiagnostics: React.FC = () => {
       const report = await getCMSDiagnosticsReport();
       setDetailedReport(report);
       
-      const tables = ['product_types', 'business_goals', 'technologies', 'machines'];
       const tableChecks: any = {};
-      
-      for (const table of tables) {
+
+      // Only check tables that we know exist in the schema
+      // Skip checking CMS tables if they are disabled
+      for (const table of existingTables) {
+        // Skip checking Supabase CMS tables if they are disabled
+        if (!USE_SUPABASE_CMS && ['business_goals'].includes(table)) {
+          tableChecks[table] = {
+            exists: false,
+            rowCount: 0
+          };
+          continue;
+        }
+
         try {
+          // Use as const to tell TypeScript this is a valid string literal
+          const tableAsLiteral = table as const;
+          
           const { data, error, count } = await supabase
-            .from(table)
+            .from(tableAsLiteral)
             .select('*', { count: 'exact' })
             .range(0, 0);
             
@@ -57,16 +82,24 @@ const CMSDiagnostics: React.FC = () => {
       
       setTablesCheck(tableChecks);
       
-      const { data, error, count } = await supabase
-        .from('product_types')
-        .select('*', { count: 'exact' })
-        .range(0, 0);
-      
-      setProductTypeCheck({
-        exists: !error,
-        rowCount: count || 0,
-        firstRow: data?.[0]
-      });
+      // Only check product_types if Supabase CMS is enabled
+      if (USE_SUPABASE_CMS) {
+        const { data, error, count } = await supabase
+          .from('product_types')
+          .select('*', { count: 'exact' })
+          .range(0, 0);
+        
+        setProductTypeCheck({
+          exists: !error,
+          rowCount: count || 0,
+          firstRow: data?.[0]
+        });
+      } else {
+        setProductTypeCheck({
+          exists: false,
+          rowCount: 0
+        });
+      }
     } catch (error) {
       console.error("Diagnostics error:", error);
     } finally {
@@ -108,6 +141,11 @@ const CMSDiagnostics: React.FC = () => {
                   <AlertTitle>Supabase CMS Status</AlertTitle>
                   <AlertDescription>
                     Overall Status: {diagnostics.status.toUpperCase()}
+                    {!USE_SUPABASE_CMS && (
+                      <div className="mt-1 text-yellow-600 font-medium">
+                        Note: Supabase CMS is disabled via feature flag
+                      </div>
+                    )}
                   </AlertDescription>
                 </Alert>
               )}
@@ -119,9 +157,9 @@ const CMSDiagnostics: React.FC = () => {
                 {Object.entries(tablesCheck).map(([table, status]) => (
                   <Alert 
                     key={table}
-                    variant={status.exists && status.rowCount > 0 ? 'default' : 'destructive'}
+                    variant={(status.exists && status.rowCount > 0) || !USE_SUPABASE_CMS ? 'default' : 'destructive'}
                   >
-                    {status.exists && status.rowCount > 0 ? (
+                    {(status.exists && status.rowCount > 0) || !USE_SUPABASE_CMS ? (
                       <CheckCircle className="h-4 w-4 text-green-600" />
                     ) : status.exists ? (
                       <AlertTriangle className="h-4 w-4 text-yellow-600" />
@@ -133,6 +171,11 @@ const CMSDiagnostics: React.FC = () => {
                       {status.exists 
                         ? `Table exists with ${status.rowCount} rows` 
                         : 'Table is missing or inaccessible'}
+                      {['business_goals'].includes(table) && !USE_SUPABASE_CMS && (
+                        <div className="mt-1 text-yellow-600">
+                          Note: This table check is skipped (Supabase CMS disabled)
+                        </div>
+                      )}
                     </AlertDescription>
                   </Alert>
                 ))}

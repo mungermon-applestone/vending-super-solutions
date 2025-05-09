@@ -163,7 +163,10 @@ const AdminUsers: React.FC = () => {
                 <TableBody>
                   {adminUsers.map((adminUser) => (
                     <TableRow key={adminUser.id}>
-                      <TableCell>{adminUser.email || 'Unknown email'}</TableCell>
+                      <TableCell>
+                        {/* Use optional chaining to check if email exists */}
+                        {adminUser.email || 'Unknown email'}
+                      </TableCell>
                       <TableCell>
                         {new Date(adminUser.created_at).toLocaleDateString()}
                       </TableCell>

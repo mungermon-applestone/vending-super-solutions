@@ -2,6 +2,7 @@
 import { CMSBusinessGoal, CMSFeature } from '@/types/cms';
 import { BusinessGoalAdapter, BusinessGoalCreateInput, BusinessGoalUpdateInput } from './types';
 import { cloneBusinessGoal } from '../../contentTypes/businessGoals/cloneBusinessGoal';
+import { USE_SUPABASE_CMS } from '@/config/featureFlags';
 
 /**
  * Implementation of the Business Goal Adapter for Supabase
@@ -9,6 +10,11 @@ import { cloneBusinessGoal } from '../../contentTypes/businessGoals/cloneBusines
 export const supabaseBusinessGoalAdapter: BusinessGoalAdapter = {
   getAll: async (): Promise<CMSBusinessGoal[]> => {
     console.log('[supabaseBusinessGoalAdapter] Fetching all business goals');
+    
+    if (!USE_SUPABASE_CMS) {
+      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning empty array');
+      return [];
+    }
     
     // Use the existing business goal service
     const { fetchBusinessGoals } = await import('../../contentTypes/businessGoals');
@@ -18,6 +24,11 @@ export const supabaseBusinessGoalAdapter: BusinessGoalAdapter = {
   getBySlug: async (slug: string): Promise<CMSBusinessGoal | null> => {
     console.log(`[supabaseBusinessGoalAdapter] Fetching business goal with slug: ${slug}`);
     
+    if (!USE_SUPABASE_CMS) {
+      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning null');
+      return null;
+    }
+    
     // Use the existing business goal service
     const { fetchBusinessGoalBySlug } = await import('../../contentTypes/businessGoals');
     return await fetchBusinessGoalBySlug(slug);
@@ -26,6 +37,11 @@ export const supabaseBusinessGoalAdapter: BusinessGoalAdapter = {
   getById: async (id: string): Promise<CMSBusinessGoal | null> => {
     console.log(`[supabaseBusinessGoalAdapter] Fetching business goal with ID: ${id}`);
     
+    if (!USE_SUPABASE_CMS) {
+      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning null');
+      return null;
+    }
+    
     // Get all business goals and filter by ID
     const businessGoals = await supabaseBusinessGoalAdapter.getAll();
     return businessGoals.find(goal => goal.id === id) || null;
@@ -33,6 +49,20 @@ export const supabaseBusinessGoalAdapter: BusinessGoalAdapter = {
   
   create: async (data: BusinessGoalCreateInput): Promise<CMSBusinessGoal> => {
     console.log('[supabaseBusinessGoalAdapter] Creating new business goal:', data);
+    
+    if (!USE_SUPABASE_CMS) {
+      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning mock data');
+      return {
+        id: 'mock-id',
+        title: data.title,
+        slug: data.slug,
+        description: data.description || '',
+        visible: data.visible || true,
+        icon: data.icon || '',
+        benefits: data.benefits || [],
+        features: []
+      };
+    }
     
     // Transform input data to match the format expected by createBusinessGoal
     const { createBusinessGoal } = await import('../../contentTypes/businessGoals');
@@ -83,6 +113,20 @@ export const supabaseBusinessGoalAdapter: BusinessGoalAdapter = {
   
   update: async (id: string, data: BusinessGoalUpdateInput): Promise<CMSBusinessGoal> => {
     console.log(`[supabaseBusinessGoalAdapter] Updating business goal with ID: ${id}`, data);
+    
+    if (!USE_SUPABASE_CMS) {
+      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning mock data');
+      return {
+        id: id,
+        title: data.title,
+        slug: data.slug,
+        description: data.description || '',
+        visible: data.visible || true,
+        icon: data.icon || '',
+        benefits: data.benefits || [],
+        features: []
+      };
+    }
     
     // Transform input data to match the format expected by updateBusinessGoal
     const { updateBusinessGoal } = await import('../../contentTypes/businessGoals');
@@ -139,6 +183,11 @@ export const supabaseBusinessGoalAdapter: BusinessGoalAdapter = {
   delete: async (id: string): Promise<boolean> => {
     console.log(`[supabaseBusinessGoalAdapter] Deleting business goal with ID: ${id}`);
     
+    if (!USE_SUPABASE_CMS) {
+      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning true');
+      return true;
+    }
+    
     // Use the existing business goal service
     const { deleteBusinessGoal } = await import('../../contentTypes/businessGoals');
     return await deleteBusinessGoal(id);
@@ -146,6 +195,20 @@ export const supabaseBusinessGoalAdapter: BusinessGoalAdapter = {
   
   clone: async (id: string): Promise<CMSBusinessGoal> => {
     console.log(`[supabaseBusinessGoalAdapter] Cloning business goal with ID: ${id}`);
+    
+    if (!USE_SUPABASE_CMS) {
+      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning mock data');
+      return {
+        id: 'mock-id',
+        title: 'Cloned Goal',
+        slug: 'cloned-goal',
+        description: '',
+        visible: true,
+        icon: '',
+        benefits: [],
+        features: []
+      };
+    }
     
     // Use the existing clone function
     return await cloneBusinessGoal(id);
