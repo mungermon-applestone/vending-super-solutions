@@ -1,10 +1,9 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { SendGridClient } from 'npm:@sendgrid/mail';
+import sgMail from 'npm:@sendgrid/mail';
 
 // Initialize SendGrid
-const sendgrid = new SendGridClient();
-sendgrid.setApiKey(Deno.env.get('SENDGRID_API_KEY') || '');
+sgMail.setApiKey(Deno.env.get('SENDGRID_API_KEY') || '');
 
 // Set up CORS headers for browser requests
 const corsHeaders = {
@@ -109,7 +108,7 @@ serve(async (req) => {
       replyTo: email
     });
 
-    const response = await sendgrid.send(msg);
+    const response = await sgMail.send(msg);
     console.log('SendGrid response:', response);
 
     return new Response(
