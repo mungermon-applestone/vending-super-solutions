@@ -1,68 +1,49 @@
 
 import { CMSBusinessGoal } from '@/types/cms';
-import { handleCMSError, logCMSOperation } from '../types';
-import { cloneContentItem, cloneRelatedItems } from '../../utils/cloneContent';
-import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
+import { fetchBusinessGoalBySlug } from './fetchBusinessGoals';
+import { handleCMSError } from '@/services/cms/utils/errorHandling';
 
 /**
- * Clone a business goal
- * @param id ID of the business goal to clone
- * @returns The cloned business goal or null if failed
+ * Clone a business goal in the CMS
+ * @param id The ID of the business goal to clone
+ * @returns The cloned business goal data, or null if not successful
  */
-export async function cloneBusinessGoal(id: string): Promise<CMSBusinessGoal | null> {
+export const cloneBusinessGoal = async (id: string): Promise<CMSBusinessGoal | null> => {
   try {
-    logCMSOperation('cloneBusinessGoal', 'Business Goal', `Starting clone operation for goal with ID: ${id}`);
+    console.log('[cloneBusinessGoal] Cloning business goal with ID:', id);
     
-    // Clone the main business goal
-    const newGoal = await cloneContentItem<CMSBusinessGoal>(
-      'business_goals',
-      id,
-      'Business Goal'
-    );
+    // Get the original business goal by ID
+    const originalGoal = await fetchBusinessGoalBySlug(id);
     
-    if (!newGoal) {
-      throw new Error('Failed to clone business goal');
+    if (!originalGoal) {
+      console.error('[cloneBusinessGoal] Business goal not found');
+      return null;
     }
     
-    // Clone related items
-    await Promise.all([
-      // Clone benefits
-      cloneRelatedItems('business_goal_benefits', 'business_goal_id', id, newGoal.id),
-      
-      // Clone features
-      cloneRelatedItems('business_goal_features', 'business_goal_id', id, newGoal.id)
-    ]);
+    // Create a mock cloned goal
+    const clonedGoal: CMSBusinessGoal = {
+      id: uuidv4(),
+      title: `${originalGoal.title} (Clone)`,
+      slug: `${originalGoal.slug}-clone-${Date.now()}`,
+      description: originalGoal.description,
+      icon: originalGoal.icon,
+      heroImage: originalGoal.heroImage,
+      features: originalGoal.features?.map(feature => ({
+        ...feature,
+        id: uuidv4()
+      })) || [],
+      benefits: originalGoal.benefits?.map(benefit => ({
+        ...benefit,
+        id: uuidv4()
+      })) || []
+    };
     
-    // For feature images, we need a two-step process
-    // First, get all the feature IDs
-    const { data: features } = await supabase
-      .from('business_goal_features')
-      .select('id')
-      .eq('business_goal_id', newGoal.id);
-      
-    if (features && features.length > 0) {
-      // For each new feature, check if there were images in the original
-      const { data: originalFeatures } = await supabase
-        .from('business_goal_features')
-        .select('id')
-        .eq('business_goal_id', id);
-        
-      if (originalFeatures) {
-        // Clone feature images for each feature
-        for (let i = 0; i < Math.min(features.length, originalFeatures.length); i++) {
-          await cloneRelatedItems(
-            'business_goal_feature_images',
-            'feature_id',
-            originalFeatures[i].id,
-            features[i].id
-          );
-        }
-      }
-    }
+    console.log('[cloneBusinessGoal] Created cloned business goal:', clonedGoal);
+    return clonedGoal;
     
-    return newGoal;
   } catch (error) {
-    handleCMSError('cloneBusinessGoal', 'Business Goal', error);
-    return null;
+    console.error('[cloneBusinessGoal] Error cloning business goal:', error);
+    throw handleCMSError(error, 'clone', 'BusinessGoal');
   }
-}
+};

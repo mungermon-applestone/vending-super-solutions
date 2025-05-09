@@ -13,9 +13,6 @@ import AdminMedia from '@/pages/admin/AdminMedia';
 import SignIn from '@/pages/admin/SignIn';
 import ContentfulManagement from '@/pages/admin/ContentfulManagement';
 import PerformanceTesting from '@/pages/admin/PerformanceTesting';
-import MigrateMachinesData from '@/pages/admin/MigrateMachinesData';
-import MigrateBusinessGoalData from '@/pages/admin/MigrateBusinessGoalData';
-import MigrateTechnologyData from '@/pages/admin/MigrateTechnologyData';
 import ProductEditor from '@/pages/ProductEditor';
 import MachineEditor from '@/pages/MachineEditor';
 import TechnologyEditor from '@/pages/TechnologyEditor';
@@ -130,18 +127,6 @@ export const adminRoutes: RouteObject[] = [
   {
     path: "/admin/contentful",
     element: <ContentfulManagement />
-  },
-  {
-    path: "/admin/migrate-machines",
-    element: <MigrateMachinesData />
-  },
-  {
-    path: "/admin/migrate-business-goals",
-    element: <MigrateBusinessGoalData />
-  },
-  {
-    path: "/admin/migrate-technology",
-    element: <MigrateTechnologyData />
   },
   {
     path: "/admin/performance-testing",
