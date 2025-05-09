@@ -12,7 +12,6 @@ import {
   BookOpen, 
   BriefcaseBusiness,
   Image,
-  Settings,
   Database,
   BarChart
 } from 'lucide-react';
@@ -36,7 +35,6 @@ const navigation: NavigationItem[] = [
 ];
 
 const secondaryNavigation: NavigationItem[] = [
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
   { name: 'Content Management', href: '/admin/contentful', icon: Database },
   { name: 'Performance', href: '/admin/performance-testing', icon: BarChart },
 ];

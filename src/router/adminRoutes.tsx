@@ -10,7 +10,6 @@ import AdminLandingPages from '@/pages/admin/AdminLandingPages';
 import AdminBlog from '@/pages/admin/AdminBlog';
 import AdminCaseStudies from '@/pages/admin/AdminCaseStudies';
 import AdminMedia from '@/pages/admin/AdminMedia';
-import AdminSettings from '@/pages/admin/AdminSettings';
 import SignIn from '@/pages/admin/SignIn';
 import ContentfulManagement from '@/pages/admin/ContentfulManagement';
 import PerformanceTesting from '@/pages/admin/PerformanceTesting';
@@ -123,10 +122,6 @@ export const adminRoutes: RouteObject[] = [
   {
     path: "/admin/media",
     element: <AdminMedia />
-  },
-  {
-    path: "/admin/settings",
-    element: <AdminSettings />
   },
   {
     path: "/admin/sign-in",
