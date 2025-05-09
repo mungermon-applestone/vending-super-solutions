@@ -1,9 +1,10 @@
+
 import { ContentProviderConfig, ContentProviderType } from '../types';
 import { TechnologyAdapter } from './types';
 import { contentfulTechnologyAdapter } from './contentfulTechnologyAdapter';
-import { supabaseTechnologyAdapter } from './supabase';
 import { handleCMSError } from '@/services/cms/utils/errorHandling';
 import { USE_SUPABASE_CMS } from '@/config/featureFlags';
+import { improvedTechnologyAdapter } from './improvedTechnologyAdapter';
 
 /**
  * Factory function to get the appropriate technology adapter based on the CMS provider
@@ -22,7 +23,7 @@ export function getTechnologyAdapter(config: ContentProviderConfig): TechnologyA
     switch (config.type) {
       case ContentProviderType.SUPABASE:
         console.log('[technologyAdapterFactory] Using Supabase technology adapter');
-        return supabaseTechnologyAdapter;
+        return improvedTechnologyAdapter;
       case ContentProviderType.CONTENTFUL:
       default:
         console.log('[technologyAdapterFactory] Using Contentful technology adapter');

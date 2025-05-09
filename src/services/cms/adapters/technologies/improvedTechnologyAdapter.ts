@@ -1,13 +1,11 @@
 
 import { CMSTechnology, QueryOptions } from '@/types/cms';
 import { TechnologyAdapter, TechnologyCreateInput, TechnologyUpdateInput } from './types';
-import { BaseCmsAdapter, createBaseCmsAdapter } from '../baseCmsAdapter';
 import { ContentProviderConfig, ContentProviderType } from '../types';
 
 /**
  * Mock implementation of the improved technology adapter
  * This is a placeholder that returns mock data instead of trying to access Supabase tables
- * that don't exist in our schema
  */
 export class ImprovedTechnologyAdapter implements TechnologyAdapter {
   private config: ContentProviderConfig;
