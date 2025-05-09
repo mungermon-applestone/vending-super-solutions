@@ -43,13 +43,13 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
     setSubmitting(true);
     
     try {
-      // Use our new email adapter
+      // Use our email adapter
       const result = await sendEmail({
         name,
         email,
         subject,
         message,
-        formType: 'Contact Form',
+        formType: 'Contact Page Form',
         location: window.location.pathname
       });
       
@@ -63,10 +63,24 @@ const ContactForm = ({ formSectionTitle }: ContactFormProps) => {
         description: "Thank you for your message. We'll respond as soon as possible.",
       });
       
+      // Track successful submission
+      trackEvent('form_submit_success', {
+        form_type: 'Contact Page Form',
+        location: window.location.pathname
+      });
+      
       // Reset form and show success state
       setSubmitted(true);
     } catch (error) {
       console.error('Error sending message:', error);
+      
+      // Track failed submission
+      trackEvent('form_submit_error', {
+        form_type: 'Contact Page Form',
+        location: window.location.pathname,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      
       toast({
         title: "Error",
         description: "There was a problem sending your message. Please try again.",

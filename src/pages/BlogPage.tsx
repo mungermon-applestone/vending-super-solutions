@@ -1,4 +1,3 @@
-
 import React from "react";
 import Layout from "@/components/layout/Layout";
 import { useContentfulBlogPosts } from "@/hooks/useContentfulBlogPosts";
@@ -144,8 +143,11 @@ const BlogPageContent: React.FC = () => {
         
         {/* Full-width SimpleContactCTA placed outside the container */}
         <SimpleContactCTA 
-          title="Ready to transform your vending operations?" 
+          title="Want to learn more about our vending solutions?" 
+          description="Subscribe to our newsletter or reach out directly with your questions."
           className="w-full mt-auto"
+          formType="Blog Page Inquiry"
+          formVariant="inline"
         />
       </div>
     </ContentfulErrorBoundary>

@@ -45,7 +45,15 @@ const BlogPostDetail = () => {
         </div>
         
         {/* Full-width SimpleContactCTA at the bottom */}
-        <SimpleContactCTA className="w-full mt-auto" />
+        <SimpleContactCTA 
+          className="w-full mt-auto"
+          title="Have Questions About This Article?"
+          description="Our team is ready to help you implement these insights in your business."
+          formType={`Blog Post: ${post?.title || slug}`}
+          initialValues={{
+            subject: `Question about: ${post?.title || slug}`
+          }}
+        />
       </div>
     </Layout>
   );

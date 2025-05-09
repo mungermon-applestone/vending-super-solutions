@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -197,8 +196,16 @@ const BusinessGoalContent = ({ slug, showDebug = false }: { slug: string, showDe
             />
           )}
 
-          {/* Use standard CTA without dynamic business goal name */}
-          <SimpleContactCTA />
+          {/* Replace standard CTA with a contact form specific to this business goal */}
+          <SimpleContactCTA 
+            title={`Achieve Your ${businessGoal.title} Goals`}
+            description="Contact our team to learn how our vending solutions can help you meet this business objective."
+            formType={`Business Goal: ${businessGoal.title}`}
+            initialValues={{
+              subject: `Inquiry about ${businessGoal.title} solutions`,
+              message: `I'm interested in learning more about how your solutions can help with ${businessGoal.title}.`
+            }}
+          />
         </>
       )}
     </>

@@ -32,6 +32,8 @@ const Home = () => {
         title="Ready to Transform Your Vending Operations?" 
         description="Get in touch and we'll start you on your vending journey."
         className="w-full"
+        formType="Home Page Inquiry"
+        primaryButtonText="Get Started Today"
       />
       <ContentfulDebug />
     </Layout>

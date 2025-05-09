@@ -29,6 +29,19 @@ interface ContactFormToggleProps {
   className?: string;
   /** Form type for analytics and email templates */
   formType?: string;
+  /** Initial values for the form fields */
+  initialValues?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    company?: string;
+    subject?: string;
+    message?: string;
+  };
+  /** URL to redirect after successful form submission */
+  redirectUrl?: string;
+  /** Callback function when form is submitted successfully */
+  onSuccess?: () => void;
 }
 
 const ContactFormToggle: React.FC<ContactFormToggleProps> = ({
@@ -37,7 +50,10 @@ const ContactFormToggle: React.FC<ContactFormToggleProps> = ({
   description,
   formVariant = 'compact',
   className = '',
-  formType = 'CTA Toggle Form'
+  formType = 'CTA Toggle Form',
+  initialValues,
+  redirectUrl,
+  onSuccess
 }) => {
   const [showForm, setShowForm] = useState(showFormByDefault);
   
@@ -48,6 +64,19 @@ const ContactFormToggle: React.FC<ContactFormToggleProps> = ({
       form_type: formType,
       location: window.location.pathname
     });
+  };
+  
+  const handleFormSuccess = () => {
+    if (onSuccess) {
+      onSuccess();
+    }
+    
+    // Reset to CTA view after 5 seconds if redirect isn't specified
+    if (!redirectUrl) {
+      setTimeout(() => {
+        setShowForm(false);
+      }, 5000);
+    }
   };
   
   return (
@@ -61,6 +90,9 @@ const ContactFormToggle: React.FC<ContactFormToggleProps> = ({
                 title={title}
                 description={description}
                 formType={formType}
+                initialValues={initialValues}
+                redirectUrl={redirectUrl}
+                onSuccess={handleFormSuccess}
               />
             </div>
           </div>

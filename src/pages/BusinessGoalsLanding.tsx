@@ -145,7 +145,13 @@ const BusinessGoalsLanding = () => {
         )}
 
         {/* Inquiry Form */}
-        <InquiryForm title="Ready to achieve your business goals?" />
+        <InquiryForm 
+          title="Ready to achieve your business goals?" 
+          formType="Business Goals Page Inquiry"
+          initialValues={{
+            subject: "Business Goals Solutions Inquiry"
+          }}
+        />
       </ContentfulErrorBoundary>
     </Layout>
   );

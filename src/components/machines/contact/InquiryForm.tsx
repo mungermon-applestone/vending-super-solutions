@@ -2,40 +2,56 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Textarea } from '@/components/ui/textarea';
 import { trackEvent, trackFormView } from '@/utils/analytics';
 import { sendEmail } from '@/services/email/emailAdapter';
 
 interface InquiryFormProps {
-  title: string;
+  title?: string;
+  description?: string;
+  machineType?: string;
+  formType?: string;
+  initialValues?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    company?: string;
+    subject?: string;
+    message?: string;
+  }
 }
 
-const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
+const InquiryForm = ({ 
+  title = "Request a Demo", 
+  description = "Fill out the form below, and one of our representatives will contact you to arrange a personalized demo of our vending solutions.",
+  machineType,
+  formType = "Demo Request",
+  initialValues = {}
+}: InquiryFormProps) => {
   const { toast } = useToast();
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [company, setCompany] = useState('');
-  const [phone, setPhone] = useState('');
-  const [message, setMessage] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [name, setName] = useState(initialValues.name || '');
+  const [email, setEmail] = useState(initialValues.email || '');
+  const [phone, setPhone] = useState(initialValues.phone || '');
+  const [company, setCompany] = useState(initialValues.company || '');
+  const [message, setMessage] = useState(initialValues.message || '');
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   // Track form view when component mounts
   React.useEffect(() => {
-    trackFormView('Demo Request', window.location.pathname);
-  }, []);
-  
+    trackFormView(formType, window.location.pathname);
+  }, [formType]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Form validation
-    if (!fullName || !email) {
+    // Basic validation
+    if (!name || !email) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields.",
+        title: "Missing information",
+        description: "Please fill in all required fields",
         variant: "destructive",
       });
       return;
@@ -44,34 +60,53 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
     setSubmitting(true);
     
     try {
-      // Use our new email adapter
+      // Use our email adapter
+      const subject = initialValues.subject || `${formType}${machineType ? ` - ${machineType}` : ''}`;
+      
       const result = await sendEmail({
-        name: fullName,
+        name,
         email,
-        company,
         phone,
+        company,
+        subject,
         message,
-        formType: 'Demo Request',
+        formType,
         location: window.location.pathname
       });
       
       if (!result.success) {
-        throw new Error(result.message || 'Failed to send demo request');
+        throw new Error(result.message || 'Failed to send message');
       }
       
       // Show success message
       toast({
-        title: "Success!",
-        description: "Thank you for your interest. We'll be in touch soon.",
+        title: "Request submitted!",
+        description: "Thank you for your inquiry. We'll be in touch shortly.",
+      });
+      
+      // Track successful submission
+      trackEvent('form_submit_success', {
+        form_type: formType,
+        machine_type: machineType,
+        location: window.location.pathname
       });
       
       // Reset form and show success state
       setSubmitted(true);
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Error sending message:', error);
+      
+      // Track failed submission
+      trackEvent('form_submit_error', {
+        form_type: formType,
+        machine_type: machineType,
+        location: window.location.pathname,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      
       toast({
         title: "Error",
-        description: "There was a problem sending your request. Please try again.",
+        description: "There was a problem sending your message. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -79,130 +114,126 @@ const InquiryForm: React.FC<InquiryFormProps> = ({ title }) => {
     }
   };
 
+  const handleReset = () => {
+    setName('');
+    setEmail('');
+    setPhone('');
+    setCompany('');
+    setMessage('');
+    setSubmitted(false);
+  };
+
   return (
-    <section className="py-12 bg-vending-blue-light">
-      <div className="container max-w-6xl mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-6">
-              Ready to transform your vending operations?
-            </h2>
-            <p className="text-lg mb-8 text-gray-700">
-              Let us show you how our software can streamline your operations, increase sales, and improve customer satisfaction.
-            </p>
-            <div className="space-y-4 mb-8">
-              <div className="flex items-center gap-3">
-                <Check className="text-vending-teal h-5 w-5" />
-                <span className="text-gray-700">Compatible with multiple machine types</span>
+    <section className="bg-vending-blue-light py-16">
+      <div className="container mx-auto px-4">
+        <div className="max-w-3xl mx-auto">
+          {!submitted ? (
+            <>
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 mb-3">{title}</h2>
+                <p className="text-lg text-gray-600">{description}</p>
               </div>
-              <div className="flex items-center gap-3">
-                <Check className="text-vending-teal h-5 w-5" />
-                <span className="text-gray-700">Easy to implement and use</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Check className="text-vending-teal h-5 w-5" />
-                <span className="text-gray-700">Dedicated support team</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Check className="text-vending-teal h-5 w-5" />
-                <span className="text-gray-700">Customizable to your specific needs</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            {!submitted ? (
-              <>
-                <h3 className="text-2xl font-bold mb-6">Request a Demo</h3>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="fullName">Full Name *</Label>
-                    <Input 
-                      id="fullName" 
-                      value={fullName} 
-                      onChange={(e) => setFullName(e.target.value)} 
-                      className="mt-1" 
-                      placeholder="John Doe" 
-                      required
-                    />
+              
+              <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                        Your Name*
+                      </label>
+                      <Input 
+                        id="name" 
+                        type="text" 
+                        className="w-full" 
+                        placeholder="John Doe" 
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required 
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                        Email Address*
+                      </label>
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        className="w-full" 
+                        placeholder="john@example.com" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                        Phone Number
+                      </label>
+                      <Input 
+                        id="phone" 
+                        type="tel" 
+                        className="w-full" 
+                        placeholder="(555) 555-5555" 
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
+                        Company
+                      </label>
+                      <Input 
+                        id="company" 
+                        type="text" 
+                        className="w-full" 
+                        placeholder="Acme Inc." 
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
+                      />
+                    </div>
                   </div>
                   <div>
-                    <Label htmlFor="email">Business Email *</Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      value={email} 
-                      onChange={(e) => setEmail(e.target.value)} 
-                      className="mt-1" 
-                      placeholder="john@company.com" 
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="company">Company Name</Label>
-                    <Input 
-                      id="company" 
-                      value={company} 
-                      onChange={(e) => setCompany(e.target.value)} 
-                      className="mt-1" 
-                      placeholder="Acme Inc." 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input 
-                      id="phone" 
-                      value={phone} 
-                      onChange={(e) => setPhone(e.target.value)} 
-                      className="mt-1" 
-                      placeholder="(555) 555-5555" 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="message">Message</Label>
-                    <Textarea
-                      id="message"
-                      rows={4}
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                      Message
+                    </label>
+                    <Textarea 
+                      id="message" 
+                      rows={4} 
+                      className="w-full" 
+                      placeholder="Tell us about your specific requirements or questions..." 
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      className="w-full"
-                      placeholder="Tell us about your needs and any questions you have."
                     />
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white"
+                    className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white font-semibold py-3"
                     disabled={submitting}
                   >
-                    {submitting ? 'Sending...' : 'Request Demo'}
+                    {submitting ? 'Sending...' : 'Submit Request'}
                   </Button>
                 </form>
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-green-100">
-                  <Check className="h-8 w-8 text-green-600" />
-                </div>
-                <h3 className="text-2xl font-bold mb-2">Thank You!</h3>
-                <p className="text-gray-600 mb-6">
-                  We've received your demo request and will be in touch shortly.
-                </p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setSubmitted(false);
-                    setFullName('');
-                    setEmail('');
-                    setCompany('');
-                    setPhone('');
-                    setMessage('');
-                  }}
-                >
-                  Submit Another Request
-                </Button>
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="text-center bg-white rounded-lg shadow-lg p-8">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 mb-4">
+                <Check className="h-6 w-6 text-green-600" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-2">Request Received!</h3>
+              <p className="text-lg text-gray-600 mb-6">
+                Thank you for your interest. One of our representatives will contact you shortly at {email}.
+              </p>
+              <Button 
+                variant="outline" 
+                onClick={handleReset}
+              >
+                Submit Another Request
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </section>

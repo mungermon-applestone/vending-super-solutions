@@ -23,6 +23,7 @@ const Index = () => {
         title={homeContent?.ctaSectionTitle || "Ready to Transform Your Vending Operations?"}
         description={homeContent?.ctaSectionDescription || "Get in touch and we'll start you on your vending journey."}
         className="w-full"
+        formType="Home Page Inquiry"
       />
     </Layout>
   );
