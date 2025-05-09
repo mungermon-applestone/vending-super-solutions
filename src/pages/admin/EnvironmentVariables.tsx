@@ -44,7 +44,7 @@ const EnvironmentVariables = () => {
               <h3>For Production Deployment</h3>
               <p>
                 When deploying to production, you'll need to set these same environment variables 
-                in your hosting platform (e.g., Vercel, Netlify, etc.).
+                in your hosting platform via the Lovable project settings.
               </p>
             </div>
           </TabsContent>

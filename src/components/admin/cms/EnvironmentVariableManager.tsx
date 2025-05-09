@@ -171,7 +171,7 @@ export const EnvironmentVariableManager = () => {
             <AlertDescription>
               <p>You're currently in a preview environment. For production deployments, you should:</p>
               <ol className="list-decimal ml-5 mt-2">
-                <li>Add environment variables to your hosting platform (Vercel, Netlify, etc.)</li>
+                <li>Add environment variables to your Lovable project settings</li>
                 <li>Make sure your build process includes these variables</li>
                 <li>The values set here will be stored in browser localStorage and only work for this browser session</li>
               </ol>
@@ -267,7 +267,7 @@ export const EnvironmentVariableManager = () => {
               
               <h4>Preview & Production Environments</h4>
               <p>
-                For preview and production environments, you should set environment variables in your hosting platform:
+                For preview and production environments, you should set environment variables in your Lovable project settings:
               </p>
               <ul>
                 <li><code>VITE_CONTENTFUL_SPACE_ID</code> - Your Contentful space ID</li>

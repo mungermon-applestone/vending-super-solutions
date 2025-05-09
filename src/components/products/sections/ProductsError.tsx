@@ -31,7 +31,7 @@ const ProductsError = ({ error, debugInfo, onRetry }: ProductsErrorProps) => {
             <li>Delivery Token: {debugInfo.hasToken ? '✓ Set' : '✗ Missing'}</li>
           </ul>
           <p className="text-xs text-gray-600">
-            Note: Make sure these variables are correctly set in your Vercel environment settings.
+            Note: Make sure these variables are correctly set in your Lovable environment settings.
           </p>
         </div>
         
