@@ -19,23 +19,22 @@ export function useBusinessGoals(options?: {
         // Dynamically import to avoid circular dependencies
         const { fetchBusinessGoals } = await import('@/services/cms/contentTypes/businessGoals');
         
-        const filters: Record<string, any> = {};
+        // Now we call fetchBusinessGoals without any parameter since it doesn't expect one
+        const businessGoals = await fetchBusinessGoals();
+        
+        // Apply client-side filtering based on options if needed
+        let filteredGoals = businessGoals;
         
         if (options?.visibleOnly) {
-          filters.visible = true;
+          filteredGoals = filteredGoals.filter(goal => goal.visible);
         }
         
         if (options?.showOnHomepageOnly) {
-          filters.showOnHomepage = true;
+          filteredGoals = filteredGoals.filter(goal => goal.showOnHomepage);
         }
         
-        const businessGoals = await fetchBusinessGoals({ 
-          filters,
-          sort: options?.showOnHomepageOnly ? 'homepage_order' : 'display_order'
-        });
-        
-        console.log(`[useBusinessGoals] Successfully fetched ${businessGoals.length} business goals`);
-        return businessGoals;
+        console.log(`[useBusinessGoals] Successfully fetched ${filteredGoals.length} business goals`);
+        return filteredGoals;
       } catch (error) {
         console.error('[useBusinessGoals] Error fetching business goals:', error);
         throw error;

@@ -9,17 +9,9 @@ import { handleCMSError } from '@/services/cms/utils/errorHandling';
  */
 export const getProductAdapter = (config?: ContentProviderConfig): ProductAdapter => {
   try {
-    // Default to Contentful if no config provided
-    const providerType = config?.type || ContentProviderType.CONTENTFUL;
-    
-    switch (providerType) {
-      case ContentProviderType.CONTENTFUL:
-        console.log('[productAdapterFactory] Using Contentful product adapter');
-        return contentfulProductAdapter;
-      default:
-        console.log('[productAdapterFactory] No specific adapter found, using Contentful as default');
-        return contentfulProductAdapter;
-    }
+    // Always use Contentful adapter regardless of config
+    console.log('[productAdapterFactory] Using Contentful product adapter');
+    return contentfulProductAdapter;
   } catch (error) {
     console.error('[productAdapterFactory] Error creating product adapter:', error);
     throw handleCMSError(error, 'initialize', 'ProductAdapter');

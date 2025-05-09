@@ -1,29 +1,28 @@
 
 import { TechnologyAdapter, TechnologyCreateInput, TechnologyUpdateInput } from './types';
-import { CMSTechnology, QueryOptions } from '@/types/cms';
-import { USE_SUPABASE_CMS } from '@/config/featureFlags';
+import { CMSTechnology } from '@/types/cms';
 
 /**
- * Implementation of the Technology Adapter for Supabase
+ * Mock implementation of the Technology Adapter for Supabase
  */
 export const supabaseTechnologyAdapter: TechnologyAdapter = {
-  getAll: async (options?: QueryOptions): Promise<CMSTechnology[]> => {
-    console.log('[supabaseTechnologyAdapter] Supabase CMS is disabled, returning empty array');
+  getAll: async (): Promise<CMSTechnology[]> => {
+    console.log('[supabaseTechnologyAdapter] Returning empty array');
     return [];
   },
   
   getBySlug: async (slug: string): Promise<CMSTechnology | null> => {
-    console.log(`[supabaseTechnologyAdapter] Supabase CMS is disabled, returning null`);
+    console.log(`[supabaseTechnologyAdapter] Returning null`);
     return null;
   },
   
   getById: async (id: string): Promise<CMSTechnology | null> => {
-    console.log(`[supabaseTechnologyAdapter] Supabase CMS is disabled, returning null`);
+    console.log(`[supabaseTechnologyAdapter] Returning null`);
     return null;
   },
   
   create: async (technology: TechnologyCreateInput): Promise<CMSTechnology> => {
-    console.log(`[supabaseTechnologyAdapter] Supabase CMS is disabled, returning mock data`);
+    console.log(`[supabaseTechnologyAdapter] Returning mock data`);
     return {
       id: 'mock-id-' + Date.now(),
       title: technology.title,
@@ -35,7 +34,7 @@ export const supabaseTechnologyAdapter: TechnologyAdapter = {
   },
   
   update: async (id: string, technology: TechnologyUpdateInput): Promise<CMSTechnology> => {
-    console.log(`[supabaseTechnologyAdapter] Supabase CMS is disabled, returning mock data`);
+    console.log(`[supabaseTechnologyAdapter] Returning mock data`);
     return {
       id: id,
       title: technology.title,
@@ -47,12 +46,12 @@ export const supabaseTechnologyAdapter: TechnologyAdapter = {
   },
   
   delete: async (id: string): Promise<boolean> => {
-    console.log(`[supabaseTechnologyAdapter] Supabase CMS is disabled, returning true`);
+    console.log(`[supabaseTechnologyAdapter] Returning true`);
     return true;
   },
   
   clone: async (id: string): Promise<CMSTechnology | null> => {
-    console.log(`[supabaseTechnologyAdapter] Supabase CMS is disabled, returning mock data`);
+    console.log(`[supabaseTechnologyAdapter] Returning mock data`);
     return {
       id: 'cloned-' + id,
       title: 'Cloned Technology',
