@@ -19,6 +19,21 @@ interface SimpleContactCTAProps {
   secondaryButtonUrl?: string;
   /** Custom button text for the secondary CTA */
   secondaryButtonText?: string;
+  /** Optional callback when CTA button is clicked */
+  onCtaClick?: () => void;
+  /** Form variant (compact, full, inline) */
+  formVariant?: 'compact' | 'full' | 'inline';
+  /** Initial values for the form fields */
+  initialValues?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    company?: string;
+    subject?: string;
+    message?: string;
+  };
+  /** URL to redirect after successful form submission */
+  redirectUrl?: string;
 }
 
 /**
@@ -41,7 +56,11 @@ const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({
   formType = "CTA Form",
   primaryButtonText,
   secondaryButtonUrl,
-  secondaryButtonText
+  secondaryButtonText,
+  onCtaClick,
+  formVariant = "compact",
+  initialValues,
+  redirectUrl
 }) => {
   const { data: homeContent } = useHomePageContent();
   const [showContactForm, setShowContactForm] = React.useState(false);
@@ -62,7 +81,12 @@ const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({
       cta_type: 'primary'
     });
     
-    setShowContactForm(true);
+    // Use custom callback if provided
+    if (onCtaClick) {
+      onCtaClick();
+    } else {
+      setShowContactForm(true);
+    }
   };
 
   if (showContactForm) {
@@ -71,9 +95,11 @@ const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({
         showFormByDefault={true}
         title={displayTitle}
         description={displayDescription}
-        formVariant="compact"
+        formVariant={formVariant}
         className={`bg-vending-blue-light py-16 ${className}`}
         formType={formType}
+        initialValues={initialValues}
+        redirectUrl={redirectUrl}
       />
     );
   }
