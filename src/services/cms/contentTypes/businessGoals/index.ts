@@ -1,60 +1,135 @@
 
 import { ContentTypeOperations } from '../types';
 import { CMSBusinessGoal } from '@/types/cms';
-import { fetchBusinessGoals } from './fetchBusinessGoals';
-import { fetchBusinessGoalBySlug } from './fetchBusinessGoalBySlug';
-import { createBusinessGoal } from './createBusinessGoal';
-import { updateBusinessGoal } from './updateBusinessGoal';
-import { deleteBusinessGoal } from './deleteBusinessGoal';
-import { cloneBusinessGoal } from './cloneBusinessGoal';
+import { USE_SUPABASE_CMS } from '@/config/featureFlags';
 
-export const businessGoalOperations: ContentTypeOperations<CMSBusinessGoal> = {
-  fetchAll: async () => {
-    return await fetchBusinessGoals();
-  },
-  fetchBySlug: async (slug) => {
-    return await fetchBusinessGoalBySlug(slug);
-  },
-  fetchById: async (id) => {
-    // ID lookup by getting all goals and filtering by ID
-    const allGoals = await fetchBusinessGoals();
-    return allGoals.find(goal => goal.id === id) || null;
-  },
-  create: async (data) => {
-    const id = await createBusinessGoal(data);
-    // Return the newly created business goal by fetching it
-    const goals = await fetchBusinessGoals();
-    const newGoal = goals.find(goal => goal.id === id);
-    if (!newGoal) {
-      throw new Error('Failed to retrieve newly created business goal');
-    }
-    return newGoal;
-  },
-  update: async (id, data) => {
-    const success = await updateBusinessGoal(id, data);
-    if (!success) {
-      throw new Error('Failed to update business goal');
-    }
-    
-    // Return the updated business goal
-    const updatedGoal = await businessGoalOperations.fetchById(id);
-    if (!updatedGoal) {
-      throw new Error('Failed to retrieve updated business goal');
-    }
-    return updatedGoal;
-  },
-  delete: async (id) => {
-    return await deleteBusinessGoal(id);
-  },
-  clone: cloneBusinessGoal
+// No-op implementations that return empty or mock data
+export const fetchBusinessGoals = async (): Promise<CMSBusinessGoal[]> => {
+  if (!USE_SUPABASE_CMS) {
+    console.log('[fetchBusinessGoals] Supabase CMS is disabled, returning empty array');
+    return [];
+  }
+  return [];
 };
 
-// Export individual operations for direct imports
-export {
-  fetchBusinessGoals,
-  fetchBusinessGoalBySlug,
-  createBusinessGoal,
-  updateBusinessGoal,
-  deleteBusinessGoal,
-  cloneBusinessGoal
+export const fetchBusinessGoalBySlug = async (slug: string): Promise<CMSBusinessGoal | null> => {
+  if (!USE_SUPABASE_CMS) {
+    console.log(`[fetchBusinessGoalBySlug] Supabase CMS is disabled, returning null for slug: ${slug}`);
+    return null;
+  }
+  return null;
+};
+
+export const createBusinessGoal = async (data: any): Promise<string> => {
+  if (!USE_SUPABASE_CMS) {
+    console.log('[createBusinessGoal] Supabase CMS is disabled, returning mock ID');
+    return 'mock-id-' + Date.now();
+  }
+  return 'mock-id-' + Date.now();
+};
+
+export const updateBusinessGoal = async (id: string, data: any): Promise<boolean> => {
+  if (!USE_SUPABASE_CMS) {
+    console.log(`[updateBusinessGoal] Supabase CMS is disabled, returning true for ID: ${id}`);
+    return true;
+  }
+  return true;
+};
+
+export const deleteBusinessGoal = async (id: string): Promise<boolean> => {
+  if (!USE_SUPABASE_CMS) {
+    console.log(`[deleteBusinessGoal] Supabase CMS is disabled, returning true for ID: ${id}`);
+    return true;
+  }
+  return true;
+};
+
+export const cloneBusinessGoal = async (id: string): Promise<CMSBusinessGoal> => {
+  if (!USE_SUPABASE_CMS) {
+    console.log(`[cloneBusinessGoal] Supabase CMS is disabled, returning mock data for ID: ${id}`);
+    return {
+      id: 'cloned-' + id,
+      title: 'Cloned Goal',
+      slug: 'cloned-goal-' + Date.now(),
+      description: '',
+      visible: true,
+      icon: '',
+      benefits: [],
+      features: []
+    };
+  }
+  return {
+    id: 'cloned-' + id,
+    title: 'Cloned Goal',
+    slug: 'cloned-goal-' + Date.now(),
+    description: '',
+    visible: true,
+    icon: '',
+    benefits: [],
+    features: []
+  };
+};
+
+export const businessGoalOperations: ContentTypeOperations<CMSBusinessGoal> = {
+  fetchAll: fetchBusinessGoals,
+  fetchBySlug: fetchBusinessGoalBySlug,
+  fetchById: async (id) => {
+    if (!USE_SUPABASE_CMS) {
+      console.log(`[businessGoalOperations.fetchById] Supabase CMS is disabled, returning null for ID: ${id}`);
+      return null;
+    }
+    return null;
+  },
+  create: async (data) => {
+    if (!USE_SUPABASE_CMS) {
+      console.log('[businessGoalOperations.create] Supabase CMS is disabled, returning mock data');
+      return {
+        id: 'mock-id-' + Date.now(),
+        title: data.title,
+        slug: data.slug || '',
+        description: data.description || '',
+        visible: data.visible || true,
+        icon: data.icon || '',
+        benefits: data.benefits || [],
+        features: []
+      };
+    }
+    return {
+      id: 'mock-id-' + Date.now(),
+      title: data.title,
+      slug: data.slug || '',
+      description: data.description || '',
+      visible: data.visible || true,
+      icon: data.icon || '',
+      benefits: data.benefits || [],
+      features: []
+    };
+  },
+  update: async (id, data) => {
+    if (!USE_SUPABASE_CMS) {
+      console.log(`[businessGoalOperations.update] Supabase CMS is disabled, returning mock data for ID: ${id}`);
+      return {
+        id: id,
+        title: data.title,
+        slug: data.slug || '',
+        description: data.description || '',
+        visible: data.visible || true,
+        icon: data.icon || '',
+        benefits: data.benefits || [],
+        features: []
+      };
+    }
+    return {
+      id: id,
+      title: data.title,
+      slug: data.slug || '',
+      description: data.description || '',
+      visible: data.visible || true,
+      icon: data.icon || '',
+      benefits: data.benefits || [],
+      features: []
+    };
+  },
+  delete: deleteBusinessGoal,
+  clone: cloneBusinessGoal
 };

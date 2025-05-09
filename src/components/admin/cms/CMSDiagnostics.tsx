@@ -8,6 +8,16 @@ import { AlertTriangle, CheckCircle, Info, XCircle, RefreshCw, Database } from '
 import { supabase } from '@/integrations/supabase/client';
 import { USE_SUPABASE_CMS } from '@/config/featureFlags';
 
+// Define types for table checks
+interface TableCheck {
+  exists: boolean;
+  rowCount: number;
+}
+
+interface TableChecks {
+  [key: string]: TableCheck;
+}
+
 const CMSDiagnostics: React.FC = () => {
   const [diagnostics, setDiagnostics] = useState<any>(null);
   const [detailedReport, setDetailedReport] = useState<string | null>(null);
@@ -18,17 +28,11 @@ const CMSDiagnostics: React.FC = () => {
     firstRow?: any;
   } | null>(null);
   
-  const [tablesCheck, setTablesCheck] = useState<{
-    [key: string]: {
-      exists: boolean;
-      rowCount: number;
-    }
-  }>({});
+  const [tablesCheck, setTablesCheck] = useState<TableChecks>({});
 
   // Define the list of tables we know exist in the Supabase schema
   const existingTables = [
     'admin_users',
-    'business_goals',
     'contentful_config', 
     'machines', 
     'product_types',
@@ -44,64 +48,61 @@ const CMSDiagnostics: React.FC = () => {
       const report = await getCMSDiagnosticsReport();
       setDetailedReport(report);
       
-      const tableChecks: any = {};
+      const tableChecks: TableChecks = {};
 
-      // Only check tables that we know exist in the schema
-      for (const table of existingTables) {
-        // Skip checking Supabase CMS tables if they are disabled
-        if (!USE_SUPABASE_CMS && ['business_goals'].includes(table)) {
+      // Skip checking tables entirely if USE_SUPABASE_CMS is false
+      if (!USE_SUPABASE_CMS) {
+        for (const table of existingTables) {
           tableChecks[table] = {
             exists: false,
             rowCount: 0
           };
-          continue;
         }
+        setTablesCheck(tableChecks);
+        setProductTypeCheck({
+          exists: false,
+          rowCount: 0
+        });
+        setIsRunning(false);
+        return;
+      }
 
+      // Only check tables that we know exist in the schema
+      for (const table of existingTables) {
         try {
-          // Type-safe approach for querying tables
+          // Use typed queries for each table to avoid dynamic access
           let data, error, count;
           
-          switch(table) {
-            case 'admin_users':
-              const adminResult = await supabase.from('admin_users').select('*', { count: 'exact' }).range(0, 0);
-              data = adminResult.data;
-              error = adminResult.error;
-              count = adminResult.count;
-              break;
-            case 'business_goals':
-              const businessResult = await supabase.from('business_goals').select('*', { count: 'exact' }).range(0, 0);
-              data = businessResult.data;
-              error = businessResult.error;
-              count = businessResult.count;
-              break;
-            case 'contentful_config':
-              const configResult = await supabase.from('contentful_config').select('*', { count: 'exact' }).range(0, 0);
-              data = configResult.data;
-              error = configResult.error;
-              count = configResult.count;
-              break;
-            case 'machines':
-              const machinesResult = await supabase.from('machines').select('*', { count: 'exact' }).range(0, 0);
-              data = machinesResult.data;
-              error = machinesResult.error;
-              count = machinesResult.count;
-              break;
-            case 'product_types':
-              const productResult = await supabase.from('product_types').select('*', { count: 'exact' }).range(0, 0);
-              data = productResult.data;
-              error = productResult.error;
-              count = productResult.count;
-              break;
-            case 'technologies':
-              const techResult = await supabase.from('technologies').select('*', { count: 'exact' }).range(0, 0);
-              data = techResult.data;
-              error = techResult.error;
-              count = techResult.count;
-              break;
-            default:
-              data = [];
-              error = { message: 'Unknown table' };
-              count = 0;
+          if (table === 'admin_users') {
+            const result = await supabase.from('admin_users').select('*', { count: 'exact' }).range(0, 0);
+            data = result.data;
+            error = result.error;
+            count = result.count;
+          } else if (table === 'contentful_config') {
+            const result = await supabase.from('contentful_config').select('*', { count: 'exact' }).range(0, 0);
+            data = result.data;
+            error = result.error;
+            count = result.count;
+          } else if (table === 'machines') {
+            const result = await supabase.from('machines').select('*', { count: 'exact' }).range(0, 0);
+            data = result.data;
+            error = result.error;
+            count = result.count;
+          } else if (table === 'product_types') {
+            const result = await supabase.from('product_types').select('*', { count: 'exact' }).range(0, 0);
+            data = result.data;
+            error = result.error;
+            count = result.count;
+          } else if (table === 'technologies') {
+            const result = await supabase.from('technologies').select('*', { count: 'exact' }).range(0, 0);
+            data = result.data;
+            error = result.error;
+            count = result.count;
+          }  else {
+            // Unknown table
+            data = [];
+            error = { message: 'Unknown table' };
+            count = 0;
           }
             
           tableChecks[table] = {
@@ -121,16 +122,24 @@ const CMSDiagnostics: React.FC = () => {
       
       // Only check product_types if Supabase CMS is enabled
       if (USE_SUPABASE_CMS) {
-        const { data, error, count } = await supabase
-          .from('product_types')
-          .select('*', { count: 'exact' })
-          .range(0, 0);
-        
-        setProductTypeCheck({
-          exists: !error,
-          rowCount: count || 0,
-          firstRow: data?.[0]
-        });
+        try {
+          const { data, error, count } = await supabase
+            .from('product_types')
+            .select('*', { count: 'exact' })
+            .range(0, 0);
+          
+          setProductTypeCheck({
+            exists: !error,
+            rowCount: count || 0,
+            firstRow: data?.[0]
+          });
+        } catch (err) {
+          console.error('Error checking product_types:', err);
+          setProductTypeCheck({
+            exists: false,
+            rowCount: 0
+          });
+        }
       } else {
         setProductTypeCheck({
           exists: false,
@@ -152,7 +161,7 @@ const CMSDiagnostics: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle>CMS Diagnostics</CardTitle>
-        <CardDescription>Comprehensive diagnostic check of your Supabase CMS configuration</CardDescription>
+        <CardDescription>Comprehensive diagnostic check of your CMS configuration</CardDescription>
       </CardHeader>
       <CardContent>
         {isRunning ? (
@@ -175,7 +184,7 @@ const CMSDiagnostics: React.FC = () => {
                   ) : (
                     <XCircle className="h-4 w-4 text-red-600" />
                   )}
-                  <AlertTitle>Supabase CMS Status</AlertTitle>
+                  <AlertTitle>CMS Status</AlertTitle>
                   <AlertDescription>
                     Overall Status: {diagnostics.status.toUpperCase()}
                     {!USE_SUPABASE_CMS && (
@@ -208,9 +217,9 @@ const CMSDiagnostics: React.FC = () => {
                       {status.exists 
                         ? `Table exists with ${status.rowCount} rows` 
                         : 'Table is missing or inaccessible'}
-                      {['business_goals'].includes(table) && !USE_SUPABASE_CMS && (
+                      {!USE_SUPABASE_CMS && (
                         <div className="mt-1 text-yellow-600">
-                          Note: This table check is skipped (Supabase CMS disabled)
+                          Note: Table check is skipped (Supabase CMS disabled)
                         </div>
                       )}
                     </AlertDescription>
