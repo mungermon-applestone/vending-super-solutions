@@ -6,12 +6,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { getSendGridConfigStatus } from '@/services/email/sendGridService';
-import { sendEmail } from '@/services/email/emailAdapter';
 import { emailConfig, getEmailEnvironment } from '@/services/email/emailConfig';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, CheckCircle2, Info } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
+import { Info } from 'lucide-react';
 
 const EmailServiceTester: React.FC = () => {
   const { toast } = useToast();
@@ -25,9 +22,7 @@ const EmailServiceTester: React.FC = () => {
     message: string;
   } | null>(null);
 
-  const configStatus = getSendGridConfigStatus();
   const env = getEmailEnvironment();
-  const isUsingDirectSendGrid = emailConfig.provider === 'SENDGRID';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,21 +30,32 @@ const EmailServiceTester: React.FC = () => {
     setTestResult(null);
     
     try {
-      const result = await sendEmail({
-        name,
-        email,
-        subject,
-        message,
-        formType: 'Email Service Test',
-        location: 'Email Service Tester'
+      // Prepare email content for mailto link
+      const emailSubject = `Email Service Test: ${subject}`;
+      const emailBody = `
+Name: ${name}
+Email: ${email}
+
+Message:
+${message}
+
+Sent from: Email Service Tester
+      `;
+      
+      // Create mailto link
+      const mailtoLink = `mailto:${env.recipientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+      
+      // Open email client
+      window.location.href = mailtoLink;
+      
+      setTestResult({
+        success: true,
+        message: "Email client has been opened. Please send the email to complete the test."
       });
       
-      setTestResult(result);
-      
       toast({
-        title: result.success ? 'Test successful' : 'Test failed',
-        description: result.message,
-        variant: result.success ? 'default' : 'destructive',
+        title: 'Test successful',
+        description: 'Email client has been opened with test message',
       });
     } catch (error) {
       console.error('Error testing email service:', error);
@@ -82,62 +88,24 @@ const EmailServiceTester: React.FC = () => {
         <div className="rounded-md border p-4">
           <div className="font-medium mb-2">Current configuration:</div>
           <ul className="space-y-1 text-sm">
-            <li><span className="font-semibold">Email Provider:</span> {emailConfig.provider}</li>
             <li><span className="font-semibold">Environment:</span> {env.isDevelopment ? 'Development' : 'Production'}</li>
-            <li><span className="font-semibold">Log Emails:</span> {env.logEmails ? 'Yes' : 'No'}</li>
             <li><span className="font-semibold">Recipient:</span> {env.recipientEmail}</li>
             <li><span className="font-semibold">Sender:</span> {env.senderEmail}</li>
           </ul>
         </div>
 
-        {/* SendGrid Configuration Status */}
-        {isUsingDirectSendGrid && (
-          <Alert variant={configStatus.isConfigured ? "default" : "destructive"}>
-            {configStatus.isConfigured ? (
-              <CheckCircle2 className="h-4 w-4" />
-            ) : (
-              <AlertCircle className="h-4 w-4" />
-            )}
-            <AlertTitle>
-              SendGrid {configStatus.isConfigured ? 'is properly configured' : 'is not fully configured'}
-            </AlertTitle>
-            <AlertDescription>
-              {configStatus.isConfigured ? (
-                <p>All required environment variables are set.</p>
-              ) : (
-                <>
-                  <p>Missing environment variables:</p>
-                  <ul className="list-disc list-inside mt-2">
-                    {configStatus.missingEnvVars.map(envVar => (
-                      <li key={envVar}>{envVar}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {/* Development Mode Warning */}
-        {env.isDevelopment && (
-          <Alert variant="default" className="bg-amber-50">
-            <Info className="h-4 w-4" />
-            <AlertTitle>Development Mode Active</AlertTitle>
-            <AlertDescription>
-              <p>In development mode, emails are logged to the console instead of being sent.</p>
-              <p className="mt-2">Check your browser console after submitting the test form.</p>
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* Development Mode Info */}
+        <Alert variant="default" className="bg-amber-50">
+          <Info className="h-4 w-4" />
+          <AlertTitle>Email Functionality</AlertTitle>
+          <AlertDescription>
+            <p>This application uses your default email client to send messages. When you click "Send Test Email", your email client will open with a pre-filled message.</p>
+          </AlertDescription>
+        </Alert>
         
         {/* Test Result */}
         {testResult && (
           <Alert variant={testResult.success ? "default" : "destructive"}>
-            {testResult.success ? (
-              <CheckCircle2 className="h-4 w-4" />
-            ) : (
-              <AlertCircle className="h-4 w-4" />
-            )}
             <AlertTitle>
               {testResult.success ? 'Test Successful' : 'Test Failed'}
             </AlertTitle>
@@ -199,7 +167,7 @@ const EmailServiceTester: React.FC = () => {
       
       <CardFooter>
         <Button onClick={handleSubmit} disabled={isSending} className="w-full">
-          {isSending ? 'Sending...' : 'Send Test Email'}
+          {isSending ? 'Opening Email Client...' : 'Send Test Email'}
         </Button>
       </CardFooter>
     </Card>

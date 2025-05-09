@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import EmbeddedContactForm from './EmbeddedContactForm';
+import ContactFormNew from './ContactFormNew';
 import { SimpleContactCTA } from '@/components/common';
 import { trackEvent } from '@/utils/analytics';
 
@@ -85,9 +85,9 @@ const ContactFormToggle: React.FC<ContactFormToggleProps> = ({
         <div className="bg-vending-blue-light py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto">
-              <EmbeddedContactForm
-                variant={formVariant}
-                title={title}
+              <ContactFormNew
+                variant={formVariant === 'inline' ? 'compact' : formVariant}
+                formTitle={title}
                 description={description}
                 formType={formType}
                 initialValues={initialValues}

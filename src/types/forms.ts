@@ -1,45 +1,19 @@
 
-import { ReactNode } from 'react';
+/**
+ * Form submission data types
+ */
 
-// Product form types
-export interface ProductFormData {
-  title: string;
-  slug: string;
-  description: string;
-  image: {
-    url: string;
-    alt: string;
-  };
-  benefits: string[];
-  features: ProductFeature[];
-}
-
-export interface ProductFeature {
-  title: string;
-  description: string;
-  icon: string;
-  screenshotUrl: string;
-  screenshotAlt: string;
-}
-
-// Business Goal form types
-export interface BusinessGoalFormData {
-  title: string;
-  slug: string;
-  description: string;
-  icon?: string;
-  image?: {
-    url: string;
-    alt: string;
-  };
-  benefits: string[];
-  features: BusinessGoalFeature[];
-}
-
-export interface BusinessGoalFeature {
-  title: string;
-  description: string;
-  icon: string;
-  screenshotUrl: string;
-  screenshotAlt: string;
+/**
+ * Form submission data interface
+ * Kept for backward compatibility with existing code
+ */
+export interface FormSubmissionData {
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  subject?: string;
+  message?: string;
+  formType: string;
+  location?: string;
 }

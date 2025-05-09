@@ -1,118 +1,46 @@
 
-# Setting up Email Functionality in Vercel
+# Email Functionality in the Application
 
-This document explains how to configure the email functionality for the contact forms when deploying to Vercel.
+This document explains how email functionality works in this application.
 
-## Step 1: Choose an Email Service Provider
+## How Email Works in This Application
 
-You'll need an email service provider to send emails. Here are some popular options:
-- [SendGrid](https://sendgrid.com/) (recommended)
-- [Mailgun](https://www.mailgun.com/)
-- [AWS SES](https://aws.amazon.com/ses/)
+The application uses a simple "mailto:" link approach to handle contact forms. When a user submits a form:
 
-## Step 2: Set up Environment Variables in Vercel
+1. The form data is collected and formatted
+2. A "mailto:" link is generated with the form data
+3. The user's default email client opens with a pre-filled email
+4. The user can review and send the email
 
-1. Go to your Vercel project dashboard
-2. Navigate to "Settings" > "Environment Variables"
-3. Add the following environment variables:
+## Configuration
 
-```
-EMAIL_TO=munger@applestonesolutions.com
-EMAIL_FROM=noreply@yourdomain.com  # Replace with a verified sender email
-```
+The email recipient is configured in `src/services/email/emailConfig.ts`. You can update this file to change the default recipient email address.
 
-For SendGrid:
-```
-SENDGRID_API_KEY=your_sendgrid_api_key
+```typescript
+export const emailConfig = {
+  defaultRecipient: 'your-email@example.com',
+  defaultSender: 'noreply@yourdomain.com'
+};
 ```
 
-For Mailgun:
-```
-MAILGUN_API_KEY=your_mailgun_api_key
-MAILGUN_DOMAIN=your_mailgun_domain
-```
+## Advantages of This Approach
 
-## Step 3: Install Required Dependencies
+- No server-side code required
+- Works without API keys or paid services
+- User can review the email before sending
+- Email appears to come from the user's own address, improving deliverability
 
-Depending on which email provider you choose, you'll need to install the corresponding package:
+## Limitations
 
-For SendGrid:
-```
-npm install @sendgrid/mail
-```
+- Requires the user to have a configured email client
+- Mobile users may have a less seamless experience
+- Cannot track if the email was actually sent
 
-For Mailgun:
-```
-npm install mailgun.js
-```
+## Future Improvements
 
-## Step 4: Update the API Endpoint
+If you want to implement a more sophisticated email solution in the future, consider:
 
-Once you've chosen your email provider, update the `/api/send-email.js` file to uncomment and modify the email sending code for your chosen provider.
+1. Using a service like SendGrid or Mailgun
+2. Setting up a server endpoint to handle form submissions
+3. Implementing email templates for consistent formatting
 
-### Example with SendGrid
-
-```javascript
-import sgMail from '@sendgrid/mail';
-
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  try {
-    const { name, email, subject, message, company, phone, formType } = req.body;
-    
-    // Set API key
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    
-    // Create email message
-    const msg = {
-      to: process.env.EMAIL_TO || 'munger@applestonesolutons.com',
-      from: process.env.EMAIL_FROM || 'noreply@yourdomain.com',
-      subject: `New ${formType || 'Contact Form'} Submission: ${subject || ''}`,
-      text: `
-        Name: ${name || ''}
-        Email: ${email || ''}
-        ${company ? `Company: ${company}\n` : ''}
-        ${phone ? `Phone: ${phone}\n` : ''}
-        ${subject ? `Subject: ${subject}\n` : ''}
-        
-        Message:
-        ${message || ''}
-      `,
-      html: `
-        <h3>New ${formType || 'Contact Form'} Submission</h3>
-        <p><strong>Name:</strong> ${name || ''}</p>
-        <p><strong>Email:</strong> ${email || ''}</p>
-        ${company ? `<p><strong>Company:</strong> ${company}</p>` : ''}
-        ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
-        ${subject ? `<p><strong>Subject:</strong> ${subject}</p>` : ''}
-        <p><strong>Message:</strong></p>
-        <p>${message?.replace(/\n/g, '<br>') || ''}</p>
-      `,
-    };
-    
-    // Send email
-    await sgMail.send(msg);
-    
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error('Error sending email:', error);
-    return res.status(500).json({ error: 'Failed to send email' });
-  }
-}
-```
-
-## Testing Your Setup
-
-1. Deploy your project to Vercel
-2. Fill out and submit one of the contact forms
-3. Check if you receive the email at the specified address
-4. If you encounter issues, check the Vercel Function Logs in your Vercel dashboard
-
-## Additional Notes
-
-- Make sure to verify your sender email address with your email service provider
-- For production use, consider implementing rate limiting to prevent abuse
-- Consider adding CAPTCHA to prevent spam submissions
