@@ -1,6 +1,6 @@
 
 import { FormSubmissionData } from './emailService';
-import { emailConfig } from './emailConfig';
+import { emailConfig, getEmailEnvironment } from './emailConfig';
 
 /**
  * SendGrid Email Service
@@ -17,8 +17,10 @@ import { emailConfig } from './emailConfig';
  */
 export async function sendWithSendGrid(data: FormSubmissionData): Promise<{ success: boolean, message: string }> {
   try {
-    // Check if we're in development mode
-    if (process.env.NODE_ENV === 'development' && emailConfig.developmentMode.logEmails) {
+    const env = getEmailEnvironment();
+    
+    // Check if we should log instead of sending
+    if (env.logEmails) {
       console.log('SendGrid would send email in production with:', data);
       return {
         success: true,
@@ -28,15 +30,24 @@ export async function sendWithSendGrid(data: FormSubmissionData): Promise<{ succ
     
     // Prepare email content
     const emailSubject = data.subject || `New ${data.formType} Submission`;
-    const recipient = process.env.EMAIL_TO || emailConfig.defaultRecipient;
-    const sender = process.env.EMAIL_FROM || emailConfig.defaultSender;
+    const recipient = env.recipientEmail;
+    const sender = env.senderEmail;
+    
+    // Validate SendGrid API key
+    if (!env.sendGridApiKey) {
+      console.warn('SendGrid API key not found. Please set the SENDGRID_API_KEY environment variable.');
+      return {
+        success: false,
+        message: 'SendGrid API key not configured'
+      };
+    }
     
     // Create the request to SendGrid's public API endpoint
-    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+    const response = await fetch(emailConfig.sendGrid.endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SENDGRID_API_KEY || ''}`,
+        'Authorization': `Bearer ${env.sendGridApiKey}`,
       },
       body: JSON.stringify({
         personalizations: [{
@@ -106,10 +117,12 @@ export function getSendGridConfigStatus(): {
   provider: string;
   missingEnvVars: string[];
 } {
+  const env = getEmailEnvironment();
+  
   // Check if we have the necessary environment variables for SendGrid
-  const hasSendGridKey = Boolean(process.env.SENDGRID_API_KEY);
-  const hasEmailTo = Boolean(process.env.EMAIL_TO);
-  const hasEmailFrom = Boolean(process.env.EMAIL_FROM);
+  const hasSendGridKey = Boolean(env.sendGridApiKey);
+  const hasEmailTo = Boolean(env.recipientEmail);
+  const hasEmailFrom = Boolean(env.senderEmail);
   
   const missingEnvVars = [];
   if (!hasSendGridKey) missingEnvVars.push('SENDGRID_API_KEY');
@@ -117,7 +130,7 @@ export function getSendGridConfigStatus(): {
   if (!hasEmailFrom) missingEnvVars.push('EMAIL_FROM');
   
   return {
-    isConfigured: hasSendGridKey && hasEmailTo && hasEmailFrom,
+    isConfigured: hasSendGridKey,
     provider: 'SendGrid',
     missingEnvVars
   };

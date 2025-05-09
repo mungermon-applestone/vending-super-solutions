@@ -40,7 +40,11 @@ export const emailConfig = {
   defaultSender: 'noreply@applestonesolutions.com',
   developmentMode: {
     logEmails: true,
+    forceDevelopmentMode: false
   },
+  sendGrid: {
+    endpoint: 'https://api.sendgrid.com/v3/mail/send'
+  }
 };
 ```
 
@@ -61,3 +65,15 @@ To test the email functionality:
 1. In development, emails are not actually sent but logged to the console
 2. For production testing, verify that the SendGrid API key is correctly configured
 3. Submit a test form and check if the success message appears
+4. Use the `EmailServiceTester` component to verify configuration
+
+## Development vs Production Behavior
+
+In development mode:
+- Emails are logged to the console instead of being sent
+- The `logEmails` configuration option can be toggled to control this behavior
+- You can force development mode with the `forceDevelopmentMode` option
+
+In production:
+- Emails are sent using the configured provider
+- SendGrid API key must be properly set

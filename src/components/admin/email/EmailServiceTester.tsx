@@ -8,9 +8,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { getSendGridConfigStatus } from '@/services/email/sendGridService';
 import { sendEmail } from '@/services/email/emailAdapter';
-import { emailConfig } from '@/services/email/emailConfig';
+import { emailConfig, getEmailEnvironment } from '@/services/email/emailConfig';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Info } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 
 const EmailServiceTester: React.FC = () => {
   const { toast } = useToast();
@@ -25,6 +26,7 @@ const EmailServiceTester: React.FC = () => {
   } | null>(null);
 
   const configStatus = getSendGridConfigStatus();
+  const env = getEmailEnvironment();
   const isUsingDirectSendGrid = emailConfig.provider === 'SENDGRID';
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,11 +80,13 @@ const EmailServiceTester: React.FC = () => {
       <CardContent className="space-y-6">
         {/* Configuration Status */}
         <div className="rounded-md border p-4">
-          <div className="font-medium">Current configuration:</div>
-          <ul className="mt-2 list-disc list-inside space-y-1">
-            <li>Email Provider: <span className="font-mono">{emailConfig.provider}</span></li>
-            <li>Default Recipient: <span className="font-mono">{emailConfig.defaultRecipient}</span></li>
-            <li>Environment: <span className="font-mono">{process.env.NODE_ENV}</span></li>
+          <div className="font-medium mb-2">Current configuration:</div>
+          <ul className="space-y-1 text-sm">
+            <li><span className="font-semibold">Email Provider:</span> {emailConfig.provider}</li>
+            <li><span className="font-semibold">Environment:</span> {env.isDevelopment ? 'Development' : 'Production'}</li>
+            <li><span className="font-semibold">Log Emails:</span> {env.logEmails ? 'Yes' : 'No'}</li>
+            <li><span className="font-semibold">Recipient:</span> {env.recipientEmail}</li>
+            <li><span className="font-semibold">Sender:</span> {env.senderEmail}</li>
           </ul>
         </div>
 
@@ -110,6 +114,18 @@ const EmailServiceTester: React.FC = () => {
                   </ul>
                 </>
               )}
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {/* Development Mode Warning */}
+        {env.isDevelopment && (
+          <Alert variant="default" className="bg-amber-50">
+            <Info className="h-4 w-4" />
+            <AlertTitle>Development Mode Active</AlertTitle>
+            <AlertDescription>
+              <p>In development mode, emails are logged to the console instead of being sent.</p>
+              <p className="mt-2">Check your browser console after submitting the test form.</p>
             </AlertDescription>
           </Alert>
         )}

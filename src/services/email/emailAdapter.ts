@@ -17,14 +17,14 @@ export async function sendEmail(data: FormSubmissionData): Promise<{ success: bo
     // Use direct SendGrid integration
     return sendWithSendGrid(data);
   } else {
-    // Use legacy approach (Vercel API route)
+    // Use legacy approach (API route)
     return sendContactEmail(data);
   }
 }
 
 /**
  * Feature flag to control whether to use the new email service
- * This can be used to gradually roll out the new implementation
- * or roll back in case of issues
+ * This is kept for backward compatibility but will be removed in future versions
+ * @deprecated Use emailConfig.provider instead
  */
-export const useNewEmailService = true;
+export const useNewEmailService = emailConfig.provider === 'SENDGRID';
