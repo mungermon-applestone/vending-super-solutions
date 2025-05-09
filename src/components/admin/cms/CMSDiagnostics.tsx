@@ -47,7 +47,6 @@ const CMSDiagnostics: React.FC = () => {
       const tableChecks: any = {};
 
       // Only check tables that we know exist in the schema
-      // Skip checking CMS tables if they are disabled
       for (const table of existingTables) {
         // Skip checking Supabase CMS tables if they are disabled
         if (!USE_SUPABASE_CMS && ['business_goals'].includes(table)) {
@@ -59,13 +58,51 @@ const CMSDiagnostics: React.FC = () => {
         }
 
         try {
-          // Use as const to tell TypeScript this is a valid string literal
-          const tableAsLiteral = table as const;
+          // Type-safe approach for querying tables
+          let data, error, count;
           
-          const { data, error, count } = await supabase
-            .from(tableAsLiteral)
-            .select('*', { count: 'exact' })
-            .range(0, 0);
+          switch(table) {
+            case 'admin_users':
+              const adminResult = await supabase.from('admin_users').select('*', { count: 'exact' }).range(0, 0);
+              data = adminResult.data;
+              error = adminResult.error;
+              count = adminResult.count;
+              break;
+            case 'business_goals':
+              const businessResult = await supabase.from('business_goals').select('*', { count: 'exact' }).range(0, 0);
+              data = businessResult.data;
+              error = businessResult.error;
+              count = businessResult.count;
+              break;
+            case 'contentful_config':
+              const configResult = await supabase.from('contentful_config').select('*', { count: 'exact' }).range(0, 0);
+              data = configResult.data;
+              error = configResult.error;
+              count = configResult.count;
+              break;
+            case 'machines':
+              const machinesResult = await supabase.from('machines').select('*', { count: 'exact' }).range(0, 0);
+              data = machinesResult.data;
+              error = machinesResult.error;
+              count = machinesResult.count;
+              break;
+            case 'product_types':
+              const productResult = await supabase.from('product_types').select('*', { count: 'exact' }).range(0, 0);
+              data = productResult.data;
+              error = productResult.error;
+              count = productResult.count;
+              break;
+            case 'technologies':
+              const techResult = await supabase.from('technologies').select('*', { count: 'exact' }).range(0, 0);
+              data = techResult.data;
+              error = techResult.error;
+              count = techResult.count;
+              break;
+            default:
+              data = [];
+              error = { message: 'Unknown table' };
+              count = 0;
+          }
             
           tableChecks[table] = {
             exists: !error,

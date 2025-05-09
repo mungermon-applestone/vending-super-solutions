@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
@@ -132,6 +133,11 @@ const AdminUsers: React.FC = () => {
     }
   };
 
+  // Type guard function to check if the user has an email property
+  const hasEmail = (user: any): user is { email: string } => {
+    return !!user.email;
+  };
+
   return (
     <Layout>
       <div className="container py-10">
@@ -164,8 +170,7 @@ const AdminUsers: React.FC = () => {
                   {adminUsers.map((adminUser) => (
                     <TableRow key={adminUser.id}>
                       <TableCell>
-                        {/* Use optional chaining to check if email exists */}
-                        {adminUser.email || 'Unknown email'}
+                        {hasEmail(adminUser) ? adminUser.email : 'Unknown email'}
                       </TableCell>
                       <TableCell>
                         {new Date(adminUser.created_at).toLocaleDateString()}
@@ -214,7 +219,7 @@ const AdminUsers: React.FC = () => {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••���•"
+                  placeholder="••••••••"
                   value={newUserPassword}
                   onChange={(e) => setNewUserPassword(e.target.value)}
                 />
