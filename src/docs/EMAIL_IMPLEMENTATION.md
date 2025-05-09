@@ -5,12 +5,11 @@ This document outlines how email functionality is implemented in the application
 
 ## Current Implementation
 
-The application uses a configurable approach to handle email functionality:
+The application uses SendGrid's API to handle email functionality:
 
 1. **Client-side components** use the `sendEmail` function from `src/services/email/emailAdapter.ts`
-2. **The adapter** decides which implementation to use based on the configuration in `emailConfig.ts`:
-   - `SENDGRID`: Direct integration with SendGrid's API (recommended)
-   - `ADAPTER`: The legacy implementation using a proxy API endpoint
+2. **The adapter** sends emails directly to SendGrid's API
+3. **In development mode**, emails are logged to the console instead of being sent
 
 ## Form Components
 
@@ -35,9 +34,6 @@ The email functionality can be configured in `src/services/email/emailConfig.ts`
 
 ```typescript
 export const emailConfig = {
-  provider: 'SENDGRID', // 'SENDGRID' | 'ADAPTER'
-  defaultRecipient: 'your-email@example.com',
-  defaultSender: 'noreply@yourcompany.com',
   developmentMode: {
     logEmails: true,
     forceDevelopmentMode: false
@@ -78,14 +74,6 @@ To test the email functionality:
 3. Submit a test form and check if the success message appears
 4. For production testing, verify that the SendGrid API key is correctly configured
 
-## Admin Panel
-
-An email settings admin panel is available at `/admin/email-settings` which provides:
-
-1. Current configuration status
-2. Email testing functionality
-3. Documentation and implementation details
-
 ## Development vs Production Behavior
 
 In development mode:
@@ -94,5 +82,5 @@ In development mode:
 - You can force development mode with the `forceDevelopmentMode` option
 
 In production:
-- Emails are sent using the configured provider
-- SendGrid API key must be properly set
+- Emails are sent using the SendGrid API
+- SendGrid API key must be properly set in environment variables

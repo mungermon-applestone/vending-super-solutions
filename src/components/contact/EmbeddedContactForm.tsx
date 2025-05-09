@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -5,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { trackEvent, trackFormView } from '@/utils/analytics';
-import { sendEmail, useNewEmailService } from '@/services/email/emailAdapter';
+import { sendEmail } from '@/services/email/emailAdapter';
 
 /**
  * EmbeddedContactForm Component

@@ -1,5 +1,5 @@
 
-import { sendContactEmail, FormSubmissionData } from './emailService';
+import { FormSubmissionData } from './emailService';
 import { sendWithSendGrid } from './sendGridService';
 import { emailConfig } from './emailConfig';
 
@@ -12,19 +12,6 @@ import { emailConfig } from './emailConfig';
  * @returns Promise with the API response
  */
 export async function sendEmail(data: FormSubmissionData): Promise<{ success: boolean; message: string }> {
-  // Determine which provider to use based on config
-  if (emailConfig.provider === 'SENDGRID') {
-    // Use direct SendGrid integration
-    return sendWithSendGrid(data);
-  } else {
-    // Use legacy approach (API route)
-    return sendContactEmail(data);
-  }
+  // Use direct SendGrid integration
+  return sendWithSendGrid(data);
 }
-
-/**
- * Feature flag to control whether to use the new email service
- * This is kept for backward compatibility but will be removed in future versions
- * @deprecated Use emailConfig.provider instead
- */
-export const useNewEmailService = emailConfig.provider === 'SENDGRID';
