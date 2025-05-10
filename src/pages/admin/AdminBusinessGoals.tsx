@@ -1,127 +1,247 @@
-
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { useBusinessGoals } from '@/hooks/useCMSData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { fetchBusinessGoals } from '@/services/cms/contentTypes/businessGoals';
+import { Plus, Edit, Eye, Trash2, Loader2, AlertTriangle } from 'lucide-react';
+import Layout from '@/components/layout/Layout';
+import { useToast } from '@/hooks/use-toast';
+import { deleteBusinessGoal } from '@/services/businessGoal';
+import { useCloneBusinessGoal } from '@/hooks/cms/useCloneCMS';
+import { CMSBusinessGoal } from '@/types/cms';
+import CloneButton from '@/components/admin/common/CloneButton';
+import DeprecatedInterfaceWarning from '@/components/admin/DeprecatedInterfaceWarning';
 import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, ChevronRight } from 'lucide-react';
-import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
-import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const AdminBusinessGoals = () => {
+  const { data: businessGoals, isLoading, error } = useBusinessGoals();
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
-  // Log deprecation of this admin page
-  React.useEffect(() => {
-    logDeprecationWarning(
-      "AdminBusinessGoals",
-      "The Business Goals admin interface is deprecated and will be removed in a future version.",
-      "Please use Contentful to manage business goal content."
-    );
-  }, []);
-  
-  // Fetch business goals - updated to use TanStack Query v5 API pattern
-  const { data, isLoading } = useQuery({
-    queryKey: ['businessGoals'],
-    queryFn: async () => {
-      return await fetchBusinessGoals();
+  // State for delete dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [goalToDelete, setGoalToDelete] = useState<{ id: string; title: string; slug: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // For cloning functionality
+  const cloneBusinessGoalMutation = useCloneBusinessGoal();
+  const [cloningGoalId, setCloningGoalId] = useState<string | null>(null);
+
+  const filteredGoals = searchTerm && businessGoals
+    ? businessGoals.filter(goal => 
+        goal.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        goal.slug.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : businessGoals;
+
+  const handleDeleteClick = (goal: CMSBusinessGoal) => {
+    setGoalToDelete({
+      id: goal.id,
+      title: goal.title,
+      slug: goal.slug
+    });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!goalToDelete) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteBusinessGoal(goalToDelete.slug);
+      
+      toast({
+        title: "Goal deleted",
+        description: `${goalToDelete.title} has been deleted successfully.`
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['businessGoals'] });
+      
+      setDeleteDialogOpen(false);
+      setGoalToDelete(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete goal. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
     }
-  });
-  
-  // Make sure data is always an array
-  const businessGoals = Array.isArray(data) ? data : [];
+  };
+
+  const handleCloneBusinessGoal = async (goal: CMSBusinessGoal) => {
+    try {
+      setCloningGoalId(goal.id);
+      const clonedGoal = await cloneBusinessGoalMutation.mutateAsync(goal.id);
+      
+      if (clonedGoal) {
+        toast({
+          title: "Business goal cloned",
+          description: `${goal.title} has been cloned successfully.`
+        });
+      }
+    } catch (error) {
+      console.error('Error cloning business goal:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to clone business goal. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCloningGoalId(null);
+    }
+  };
 
   return (
-    <DeprecatedAdminLayout
-      title="Business Goals Management"
-      description="View all business goals (read-only)"
-      contentType="Business Goal"
-      backPath="/admin/dashboard"
-    >
-      <div className="flex justify-between mb-6">
-        <div></div>
-        <Button 
-          onClick={() => window.open('https://app.contentful.com/', '_blank')}
-          className="flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Add New Business Goal in Contentful
-        </Button>
-      </div>
+    <Layout>
+      <div className="container py-10">
+        <DeprecatedInterfaceWarning 
+          contentType="Business Goals Administration"
+          message="This business goals administration interface is being phased out. Please use Contentful directly to manage business goals content."
+        />
 
-      <Card className="shadow-sm">
-        <CardContent className="pt-6">
-          {isLoading ? (
-            <div className="text-center py-10">Loading business goals...</div>
-          ) : businessGoals.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-muted-foreground mb-4">No business goals found</p>
-              <Button onClick={() => window.open('https://app.contentful.com/', '_blank')}>
-                Create Your First Business Goal
-              </Button>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <h1 className="text-3xl font-bold">Business Goals Admin</h1>
+          <Button asChild>
+            <Link to="/admin/business-goals/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Business Goal
+            </Link>
+          </Button>
+        </div>
+
+        <Card className="mb-8">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="w-full md:w-1/3">
+                <input
+                  type="text"
+                  placeholder="Search goals..."
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div>
+                <p className="text-muted-foreground">
+                  {filteredGoals ? filteredGoals.length : '0'} business goals found
+                </p>
+              </div>
             </div>
-          ) : (
-            <Table>
-              <TableCaption>A list of all business goals (read-only view).</TableCaption>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {businessGoals.map((goal) => (
-                  <TableRow key={goal.id}>
-                    <TableCell className="font-medium">{goal.title}</TableCell>
-                    <TableCell>{goal.category || 'N/A'}</TableCell>
-                    <TableCell>
-                      <Badge variant={goal.visible ? "default" : "outline"}>
-                        {goal.visible ? 'Published' : 'Draft'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => window.open('https://app.contentful.com/', '_blank')}
-                          className="h-8 px-2 w-8"
-                          title="Edit business goal in Contentful"
-                        >
-                          <Edit size={16} />
+          </CardContent>
+        </Card>
+
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-center">
+                    <div className="space-y-2">
+                      <div className="h-6 w-64 bg-gray-200 rounded-md"></div>
+                      <div className="h-4 w-32 bg-gray-200 rounded-md"></div>
+                    </div>
+                    <div className="h-10 w-32 bg-gray-200 rounded-md"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : error ? (
+          <Card>
+            <CardContent className="p-6">
+              <p className="text-red-500">Error loading business goals: {error.message}</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {filteredGoals?.length === 0 ? (
+              <Card>
+                <CardContent className="p-6">
+                  <p className="text-center text-muted-foreground">
+                    No business goals found. Create one to get started!
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              filteredGoals?.map((goal) => (
+                <Card key={goal.id}>
+                  <CardContent className="p-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                      <div>
+                        <h2 className="text-xl font-semibold">{goal.title}</h2>
+                        <p className="text-muted-foreground">/{goal.slug}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={() => navigate(`/goals/${goal.slug}`)}>
+                          <Eye className="h-4 w-4" /> View
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/business-goals/${goal.slug}`)}
-                          className="h-8 px-2 w-8"
-                          title="View business goal"
+                        <Button variant="outline" size="sm" className="flex items-center gap-1" onClick={() => navigate(`/admin/business-goals/edit/${goal.slug}`)}>
+                          <Edit className="h-4 w-4" /> Edit
+                        </Button>
+                        <CloneButton
+                          onClone={() => handleCloneBusinessGoal(goal)}
+                          itemName={goal.title}
+                          isCloning={cloningGoalId === goal.id}
+                        />
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex items-center gap-1 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => handleDeleteClick(goal)}
                         >
-                          <ChevronRight size={16} />
+                          <Trash2 className="h-4 w-4" /> Delete
                         </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-    </DeprecatedAdminLayout>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the business goal "{goalToDelete?.title}". This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              className="bg-red-600 hover:bg-red-700"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Layout>
   );
 };
 

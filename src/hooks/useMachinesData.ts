@@ -1,142 +1,151 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  fetchMachines,
-  fetchMachineBySlug,
-  fetchMachineById,
-  createMachine,
-  updateMachine,
-  deleteMachine,
-  cloneMachine as cloneMachineApi
-} from '@/services/cms/contentTypes/machines';
+import { fetchMachines, fetchMachineById } from '@/services/cms/contentTypes/machines';
+import { useToast } from '@/hooks/use-toast';
 import { CMSMachine } from '@/types/cms';
-import { useToast } from './use-toast';
+import { createMachine } from '@/services/cms/contentTypes/machines/create';
+import { updateMachine } from '@/services/cms/contentTypes/machines/update';
+import { deleteMachine } from '@/services/cms/contentTypes/machines/delete';
+import { MachineFormValues } from '@/utils/machineMigration/types';
+import { useContentfulMachines, useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 
-// Hook for fetching all machines
-export const useMachines = (filters?: { 
-  type?: string;
-  temperature?: string;
-  limit?: number;
-  offset?: number;
-}) => {
-  return useQuery({
-    queryKey: ['machines', filters],
-    queryFn: async () => fetchMachines(filters || {}),
+/**
+ * Hook to fetch machines data
+ */
+export const useMachines = () => {
+  // Use the Contentful machines hook to ensure consistent data source
+  const contentfulMachines = useContentfulMachines();
+  
+  console.log('[useMachines] Contentful machines data:', {
+    count: contentfulMachines.data?.length || 0,
+    machinesWithThumbnails: contentfulMachines.data?.filter(m => !!m.thumbnail).length || 0
   });
+  
+  return {
+    ...contentfulMachines,
+    data: contentfulMachines.data || []
+  };
 };
 
-// Hook for fetching a single machine by slug
-export const useMachineBySlug = (slug: string | undefined) => {
-  return useQuery({
-    queryKey: ['machine', slug],
-    queryFn: async () => slug ? fetchMachineBySlug(slug) : null,
-    enabled: !!slug,
-  });
-};
-
-// Hook for fetching a single machine by ID
+/**
+ * Hook to fetch a specific machine by ID
+ */
 export const useMachineById = (id: string | undefined) => {
+  // Use the Contentful machine hook to ensure consistent data source
+  const contentfulMachine = useContentfulMachine(id);
+  
+  return {
+    ...contentfulMachine,
+    data: contentfulMachine.data
+  };
+};
+
+/**
+ * Hook to fetch a machine by slug
+ */
+export const useMachineBySlug = (type: string | undefined, slug: string | undefined) => {
   return useQuery({
-    queryKey: ['machine', id],
-    queryFn: async () => id ? fetchMachineById(id) : null,
-    enabled: !!id,
+    queryKey: ['machine', type, slug],
+    queryFn: async () => {
+      // For now, we'll use the existing machines function and filter by type and slug
+      const machines = await fetchMachines({ type, slug });
+      
+      if (machines.length > 0) {
+        // Log machine data to help diagnose thumbnail issues
+        console.log('[useMachineBySlug] Found machine:', {
+          id: machines[0].id,
+          title: machines[0].title,
+          hasThumbnail: !!machines[0].thumbnail,
+          thumbnailUrl: machines[0].thumbnail?.url || 'none'
+        });
+      }
+      
+      return machines.length > 0 ? machines[0] : null;
+    },
+    enabled: !!type && !!slug,
   });
 };
 
-// Hook for creating a machine
+/**
+ * Hook to create a new machine
+ */
 export const useCreateMachine = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
   return useMutation({
-    mutationFn: async (machineData: Partial<CMSMachine>) => createMachine(machineData),
+    mutationFn: (machineData: MachineFormValues) => {
+      return createMachine(machineData);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['machines'] });
       toast({
-        title: "Success",
-        description: "Machine created successfully",
+        title: "Machine created",
+        description: "Machine has been created successfully."
       });
+      queryClient.invalidateQueries({ queryKey: ['machines'] });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to create machine: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create machine. Please try again."
       });
     }
   });
 };
 
-// Hook for updating a machine
+/**
+ * Hook to update an existing machine
+ */
 export const useUpdateMachine = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<CMSMachine> }) => 
-      updateMachine(id, data),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['machines'] });
-      queryClient.invalidateQueries({ queryKey: ['machine', data.id] });
-      queryClient.invalidateQueries({ queryKey: ['machine', data.slug] });
+    mutationFn: ({ id, machineData }: { id: string, machineData: MachineFormValues }) => {
+      return updateMachine(id, machineData);
+    },
+    onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Machine updated successfully",
+        title: "Machine updated",
+        description: "Machine has been updated successfully."
       });
+      queryClient.invalidateQueries({ queryKey: ['machines'] });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to update machine: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update machine. Please try again."
       });
     }
   });
 };
 
-// Hook for deleting a machine
+/**
+ * Hook to delete a machine
+ */
 export const useDeleteMachine = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
   return useMutation({
-    mutationFn: async (id: string) => deleteMachine(id),
+    mutationFn: async (id: string) => {
+      return await deleteMachine(id);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['machines'] });
       toast({
-        title: "Success",
-        description: "Machine deleted successfully",
+        title: "Machine deleted",
+        description: "Machine has been deleted successfully."
       });
+      queryClient.invalidateQueries({ queryKey: ['machines'] });
     },
     onError: (error) => {
+      console.error('[useDeleteMachine] Error:', error);
       toast({
-        title: "Error",
-        description: `Failed to delete machine: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
-      });
-    }
-  });
-};
-
-// Hook for cloning a machine
-export const useCloneMachine = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-  
-  return useMutation({
-    mutationFn: async (id: string) => cloneMachineApi(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['machines'] });
-      toast({
-        title: "Success",
-        description: "Machine cloned successfully",
-      });
-    },
-    onError: (error) => {
-      toast({
         title: "Error",
-        description: `Failed to clone machine: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        variant: "destructive",
+        description: error instanceof Error ? error.message : "Failed to delete machine. Please try again."
       });
     }
   });

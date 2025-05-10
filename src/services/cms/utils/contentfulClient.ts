@@ -1,5 +1,5 @@
 import { createClient } from 'contentful';
-import { CONTENTFUL_CONFIG } from '@/config/cms';
+import { CONTENTFUL_CONFIG, logContentfulConfig } from '@/config/cms';
 import { toast } from 'sonner';
 
 let contentfulClient: any = null;
@@ -26,11 +26,7 @@ export const getContentfulClient = async (forceRefresh = false) => {
 
   try {
     console.log('[contentfulClient] Creating new client');
-    console.log('[contentfulClient] Configuration:', {
-      spaceId: CONTENTFUL_CONFIG.SPACE_ID ? 'Set' : 'Not set',
-      environmentId: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master',
-      hasDeliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN
-    });
+    logContentfulConfig();
     
     // Extra check to ensure we have credentials
     if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {

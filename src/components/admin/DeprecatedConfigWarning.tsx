@@ -1,44 +1,47 @@
 
 import React from 'react';
-import { AlertTriangle, ExternalLink } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import ContentfulButton from './ContentfulButton';
 
 interface DeprecatedConfigWarningProps {
   service: string;
-  contentType: string;
+  contentType?: string;
   showContentfulButton?: boolean;
+  contentfulSpaceId?: string;
+  contentfulEnvironmentId?: string;
 }
 
+/**
+ * Component to display a consistent warning about deprecated configuration/services
+ */
 const DeprecatedConfigWarning: React.FC<DeprecatedConfigWarningProps> = ({
   service,
   contentType,
-  showContentfulButton = false
+  showContentfulButton = true,
+  contentfulSpaceId,
+  contentfulEnvironmentId
 }) => {
-  const openContentful = () => {
-    window.open('https://app.contentful.com/', '_blank');
-  };
-  
   return (
-    <Alert variant="warning" className="mb-4">
-      <AlertTriangle className="h-5 w-5" />
-      <AlertTitle>{service} Integration Deprecated</AlertTitle>
-      <AlertDescription className="flex flex-col gap-2">
-        <p>
-          The {service} {contentType} integration has been deprecated. 
-          All content management has been migrated to Contentful CMS.
+    <Alert variant="warning" className="mb-6">
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle>{service} Configuration Deprecated</AlertTitle>
+      <AlertDescription className="mt-2">
+        <p className="mb-3">
+          {service} integration is being deprecated in favor of Contentful CMS.
+          {contentType && ` Please use Contentful to manage ${contentType.toLowerCase()} content.`}
         </p>
         
         {showContentfulButton && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="w-fit bg-white"
-            onClick={openContentful}
-          >
-            <ExternalLink className="mr-2 h-4 w-4" />
-            Open Contentful
-          </Button>
+          <div className="mt-4">
+            <ContentfulButton
+              variant="outline"
+              size="sm"
+              contentfulSpaceId={contentfulSpaceId}
+              contentfulEnvironmentId={contentfulEnvironmentId}
+              contentType={contentType}
+            />
+          </div>
         )}
       </AlertDescription>
     </Alert>
