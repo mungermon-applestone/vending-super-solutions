@@ -17,7 +17,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, ChevronRight } from 'lucide-react';
 import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
-import { CaseStudyWithRelations } from '@/types/caseStudy';
 import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
 
 const AdminCaseStudies = () => {
@@ -32,15 +31,20 @@ const AdminCaseStudies = () => {
     );
   }, []);
   
-  // Fetch all case studies
-  const { data: caseStudies = [], isLoading } = useQuery<CaseStudyWithRelations[]>({
+  // Fetch case studies - updated to use TanStack Query v5 API pattern
+  const { data, isLoading } = useQuery({
     queryKey: ['caseStudies'],
-    queryFn: fetchCaseStudies
+    queryFn: async () => {
+      return await fetchCaseStudies();
+    }
   });
+  
+  // Make sure data is always an array
+  const caseStudies = Array.isArray(data) ? data : [];
 
   return (
     <DeprecatedAdminLayout
-      title="Case Study Management"
+      title="Case Studies Management"
       description="View all case studies (read-only)"
       contentType="Case Study"
       backPath="/admin/dashboard"
@@ -73,8 +77,8 @@ const AdminCaseStudies = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Title</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Featured</TableHead>
+                  <TableHead>Industry</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -84,8 +88,8 @@ const AdminCaseStudies = () => {
                     <TableCell className="font-medium">{study.title}</TableCell>
                     <TableCell>{study.industry || 'N/A'}</TableCell>
                     <TableCell>
-                      <Badge variant={study.visible ? "default" : "outline"}>
-                        {study.visible ? 'Featured' : 'Standard'}
+                      <Badge variant={study.published ? "default" : "outline"}>
+                        {study.published ? 'Published' : 'Draft'}
                       </Badge>
                     </TableCell>
                     <TableCell>

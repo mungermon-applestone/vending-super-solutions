@@ -33,11 +33,16 @@ const AdminBlog = () => {
     );
   }, []);
   
-  // Fetch all blog posts
-  const { data: blogPosts = [], isLoading } = useQuery<BlogPost[]>({
+  // Fetch all blog posts - updated to use the new TanStack Query v5 API pattern
+  const { data, isLoading } = useQuery({
     queryKey: ['blogPosts'],
-    queryFn: fetchBlogPosts
+    queryFn: async () => {
+      return await fetchBlogPosts();
+    }
   });
+  
+  // Make sure data is always an array
+  const blogPosts: BlogPost[] = Array.isArray(data) ? data : [];
 
   return (
     <DeprecatedAdminLayout

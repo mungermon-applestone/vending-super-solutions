@@ -20,7 +20,7 @@ export const useBlogPosts = (filters?: {
 }) => {
   return useQuery({
     queryKey: ['blog-posts', filters],
-    queryFn: () => fetchBlogPosts(filters || {}),
+    queryFn: async () => fetchBlogPosts(filters || {}),
   });
 };
 
@@ -28,7 +28,7 @@ export const useBlogPosts = (filters?: {
 export const useBlogPostBySlug = (slug: string | undefined) => {
   return useQuery({
     queryKey: ['blog-post', slug],
-    queryFn: () => slug ? fetchBlogPostBySlug(slug) : null,
+    queryFn: async () => slug ? fetchBlogPostBySlug(slug) : null,
     enabled: !!slug,
   });
 };
@@ -37,7 +37,7 @@ export const useBlogPostBySlug = (slug: string | undefined) => {
 export const useAdjacentPosts = (slug: string | undefined) => {
   return useQuery({
     queryKey: ['adjacent-posts', slug],
-    queryFn: () => slug ? getAdjacentPosts(slug) : { previous: null, next: null },
+    queryFn: async () => slug ? getAdjacentPosts(slug) : { previous: null, next: null },
     enabled: !!slug,
   });
 };
@@ -47,7 +47,7 @@ export const useCreateBlogPost = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (postData: BlogPostFormData) => createBlogPost(postData),
+    mutationFn: async (postData: BlogPostFormData) => createBlogPost(postData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
     },
@@ -59,7 +59,7 @@ export const useUpdateBlogPost = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, postData }: { id: string; postData: BlogPostFormData }) => 
+    mutationFn: async ({ id, postData }: { id: string; postData: BlogPostFormData }) => 
       updateBlogPost(id, postData),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
@@ -74,7 +74,7 @@ export const useDeleteBlogPost = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => deleteBlogPost(id),
+    mutationFn: async (id: string) => deleteBlogPost(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
       queryClient.invalidateQueries({ queryKey: ['adjacent-posts'] });
@@ -87,7 +87,7 @@ export const useCloneBlogPost = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => cloneBlogPost(id),
+    mutationFn: async (id: string) => cloneBlogPost(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
     },
