@@ -107,7 +107,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/landing-pages/new",
-    element: <LandingPageEditor />
+    element: <ContentfulRedirector
+      contentType="Landing Page"
+      title="Create New Landing Page"
+      description="Landing page creation has been moved to Contentful CMS. Please use Contentful to create and manage landing pages."
+      backPath="/admin/landing-pages"
+    />
   },
   {
     path: "/admin/landing-pages/edit/:id",
@@ -119,7 +124,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/blog/new",
-    element: <BlogEditor />
+    element: <ContentfulRedirector
+      contentType="Blog Post"
+      title="Create New Blog Post"
+      description="Blog post creation has been moved to Contentful CMS. Please use Contentful to create and manage blog posts."
+      backPath="/admin/blog"
+    />
   },
   {
     path: "/admin/blog/edit/:id",
@@ -131,7 +141,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/case-studies/new",
-    element: <CaseStudyEditor />
+    element: <ContentfulRedirector
+      contentType="Case Study"
+      title="Create New Case Study"
+      description="Case study creation has been moved to Contentful CMS. Please use Contentful to create and manage case studies."
+      backPath="/admin/case-studies"
+    />
   },
   {
     path: "/admin/case-studies/edit/:id",

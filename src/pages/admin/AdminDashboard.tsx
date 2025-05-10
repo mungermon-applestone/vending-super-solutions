@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -115,7 +116,7 @@ const AdminDashboard = () => {
       toast({
         title: "Content Management Migration",
         description: "All content management has moved to Contentful CMS. This admin interface is being phased out.",
-        variant: "warning",
+        variant: "default", // Changed from "warning" to "default" to fix the type error
       });
     }
   }, [isAdmin, toast]);
