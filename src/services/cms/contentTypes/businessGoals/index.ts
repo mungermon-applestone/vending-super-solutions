@@ -11,6 +11,7 @@ const mockBusinessGoals: CMSBusinessGoal[] = [
     slug: 'increase-sales',
     description: 'Boost your revenue with advanced retail solutions',
     icon: 'trending-up',
+    visible: true,
     features: [
       {
         id: 'feat-001',
@@ -24,11 +25,9 @@ const mockBusinessGoals: CMSBusinessGoal[] = [
       }
     ],
     benefits: [
-      {
-        id: 'ben-001',
-        title: 'Higher Conversion Rate',
-        description: 'Convert more browsers into buyers'
-      }
+      'Higher Conversion Rate',
+      'Increased Customer Satisfaction',
+      'Better Inventory Management'
     ]
   },
   {
@@ -37,6 +36,7 @@ const mockBusinessGoals: CMSBusinessGoal[] = [
     slug: 'optimize-operations',
     description: 'Streamline your business processes',
     icon: 'settings',
+    visible: true,
     features: [
       {
         id: 'feat-003',
@@ -45,11 +45,9 @@ const mockBusinessGoals: CMSBusinessGoal[] = [
       }
     ],
     benefits: [
-      {
-        id: 'ben-002',
-        title: 'Reduced Costs',
-        description: 'Lower operational expenses'
-      }
+      'Reduced Costs',
+      'Improved Efficiency',
+      'Better Resource Allocation'
     ]
   }
 ];
@@ -99,7 +97,7 @@ const cloneBusinessGoal = async (id: string): Promise<CMSBusinessGoal | null> =>
     console.log('[cloneBusinessGoal] Mock cloning business goal with ID:', id);
     
     // Get the original goal by ID
-    const originalGoal = await fetchBusinessGoalBySlug(id);
+    const originalGoal = mockBusinessGoals.find(goal => goal.id === id);
     
     if (!originalGoal) {
       console.error('[cloneBusinessGoal] Business goal not found');
@@ -113,16 +111,9 @@ const cloneBusinessGoal = async (id: string): Promise<CMSBusinessGoal | null> =>
       slug: `${originalGoal.slug}-clone-${Date.now()}`,
       description: originalGoal.description,
       icon: originalGoal.icon,
-      features: originalGoal.features ? originalGoal.features.map(feature => ({
-        id: uuidv4(),
-        title: feature.title,
-        description: feature.description || ''
-      })) : [],
-      benefits: originalGoal.benefits ? originalGoal.benefits.map(benefit => ({
-        id: uuidv4(),
-        title: benefit.title,
-        description: benefit.description || ''
-      })) : []
+      visible: true,
+      features: originalGoal.features ? [...originalGoal.features] : [],
+      benefits: originalGoal.benefits ? [...originalGoal.benefits] : []
     };
     
     console.log('[cloneBusinessGoal] Created cloned business goal:', clonedGoal);
@@ -142,6 +133,7 @@ const createBusinessGoal = async (data: Partial<CMSBusinessGoal>): Promise<CMSBu
     slug: data.slug || 'new-business-goal',
     description: data.description || '',
     icon: data.icon || 'activity',
+    visible: true,
     features: data.features || [],
     benefits: data.benefits || []
   };
@@ -156,6 +148,7 @@ const updateBusinessGoal = async (id: string, data: Partial<CMSBusinessGoal>): P
     slug: data.slug || 'updated-business-goal',
     description: data.description || '',
     icon: data.icon || 'activity',
+    visible: true,
     features: data.features || [],
     benefits: data.benefits || []
   };
@@ -169,7 +162,7 @@ const deleteBusinessGoal = async (id: string): Promise<boolean> => {
 
 // Mock fetchById function
 const fetchBusinessGoalById = async (id: string): Promise<CMSBusinessGoal | null> => {
-  return fetchBusinessGoalBySlug(id);
+  return mockBusinessGoals.find(goal => goal.id === id) || null;
 };
 
 // Export all business goal operations

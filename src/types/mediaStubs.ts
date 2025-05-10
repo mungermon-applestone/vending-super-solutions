@@ -52,8 +52,8 @@ export const fetchMediaFileById = async (id: string): Promise<MediaFile | null> 
   return null;
 };
 
-export const uploadMedia = async (): Promise<MediaFile> => {
-  console.log('[uploadMedia] Mock: Would upload media file');
+export const uploadMedia = async (params?: MediaUploadParams): Promise<MediaFile> => {
+  console.log('[uploadMedia] Mock: Would upload media file', params);
   return {
     id: 'mock-id',
     storage_path: 'mock-path',
@@ -65,20 +65,23 @@ export const uploadMedia = async (): Promise<MediaFile> => {
   };
 };
 
-export const updateMediaMetadata = async (): Promise<MediaFile> => {
-  console.log('[updateMediaMetadata] Mock: Would update media metadata');
+export const updateMediaMetadata = async (params?: MediaUpdateParams): Promise<MediaFile> => {
+  console.log('[updateMediaMetadata] Mock: Would update media metadata', params);
   return {
-    id: 'mock-id',
+    id: params?.id || 'mock-id',
     storage_path: 'mock-path',
     filename: 'mock-file.jpg',
     file_type: 'image/jpeg',
     file_size: 0,
+    alt_text: params?.alt_text,
+    title: params?.title,
+    description: params?.description,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   };
 };
 
-export const deleteMedia = async (): Promise<boolean> => {
-  console.log('[deleteMedia] Mock: Would delete media');
+export const deleteMedia = async (id: string): Promise<boolean> => {
+  console.log('[deleteMedia] Mock: Would delete media with ID:', id);
   return true;
 };

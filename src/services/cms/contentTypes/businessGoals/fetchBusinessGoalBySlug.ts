@@ -12,6 +12,7 @@ import {
   logSlugSearch,
   logSlugResult
 } from '@/services/cms/utils/slugMatching';
+import { businessGoalOperations } from './index';
 
 /**
  * Fetches a single business goal by its slug.
@@ -116,12 +117,12 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
         slug: entry.fields.slug as string,
         title: entry.fields.title as string,
         description: entry.fields.description as string,
+        visible: entry.fields.visible as boolean ?? true,
         image: entry.fields.image ? {
           id: (entry.fields.image as any).sys.id,
           url: `https:${(entry.fields.image as any).fields.file.url}`,
           alt: (entry.fields.image as any).fields.title || entry.fields.title
         } : undefined,
-        visible: entry.fields.visible as boolean ?? true,
         icon: entry.fields.icon as string,
         benefits: (entry.fields.benefits as string[]) || [],
         features: (entry.fields.features || []).map((feature: any) => ({
@@ -157,8 +158,8 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
     if (IS_DEVELOPMENT && useMockData) {
       console.log("[fetchBusinessGoalBySlug] Attempting to use mock data");
       try {
-        const { fetchBusinessGoals } = await import('./fetchBusinessGoals');
-        const goals = await fetchBusinessGoals();
+        // Use the mock data from businessGoalOperations instead
+        const goals = await businessGoalOperations.fetchAll();
         
         // Try to find a match using our slug matching function
         for (const goal of goals) {

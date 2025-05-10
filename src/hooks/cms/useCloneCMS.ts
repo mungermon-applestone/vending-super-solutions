@@ -12,7 +12,8 @@ const mockCloneProductType = async (id: string): Promise<CMSProductType | null> 
     id: `cloned-${Date.now()}`,
     title: 'Cloned Product Type',
     slug: 'cloned-product-type',
-    description: 'This is a cloned product type'
+    description: 'This is a cloned product type',
+    visible: true
   };
 };
 
@@ -22,7 +23,8 @@ const mockCloneTechnology = async (id: string): Promise<CMSTechnology | null> =>
     id: `cloned-${Date.now()}`,
     title: 'Cloned Technology',
     slug: 'cloned-technology',
-    description: 'This is a cloned technology'
+    description: 'This is a cloned technology',
+    visible: true
   };
 };
 

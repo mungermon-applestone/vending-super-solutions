@@ -34,7 +34,7 @@ export const useUploadMedia = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: () => uploadMedia(),
+    mutationFn: (params: MediaUploadParams) => uploadMedia(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['media-files'] });
     },
@@ -46,7 +46,7 @@ export const useUpdateMediaMetadata = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: () => updateMediaMetadata(),
+    mutationFn: (params: MediaUpdateParams) => updateMediaMetadata(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['media-files'] });
     },
@@ -58,7 +58,7 @@ export const useDeleteMedia = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: () => deleteMedia(),
+    mutationFn: (id: string) => deleteMedia(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['media-files'] });
     },
