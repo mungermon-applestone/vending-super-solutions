@@ -88,8 +88,8 @@ const AdminCaseStudies = () => {
                     <TableCell className="font-medium">{study.title}</TableCell>
                     <TableCell>{study.industry || 'N/A'}</TableCell>
                     <TableCell>
-                      <Badge variant={study.published ? "default" : "outline"}>
-                        {study.published ? 'Published' : 'Draft'}
+                      <Badge variant={study.visible ? "default" : "outline"}>
+                        {study.visible ? 'Published' : 'Draft'}
                       </Badge>
                     </TableCell>
                     <TableCell>
