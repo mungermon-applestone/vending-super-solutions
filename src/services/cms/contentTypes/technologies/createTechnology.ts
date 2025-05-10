@@ -39,6 +39,44 @@ export const createTechnology = async (data: CreateTechnologyData): Promise<CMST
     // Mock implementation that doesn't touch Supabase
     const mockId = uuidv4();
     
+    // Transform sections to ensure they have the required properties
+    const processedSections = data.sections ? 
+      data.sections.map((section, index) => {
+        const sectionId = uuidv4();
+        return {
+          id: sectionId,
+          technology_id: mockId,
+          title: section.title,
+          description: section.description || '',
+          section_type: section.section_type || 'feature',
+          display_order: section.display_order || index,
+          features: section.features ? section.features.map((feature, fIndex) => {
+            const featureId = uuidv4();
+            return {
+              id: featureId,
+              section_id: sectionId,
+              title: feature.title,
+              description: feature.description || '',
+              icon: feature.icon || 'check',
+              display_order: feature.display_order || fIndex,
+              items: feature.items ? feature.items.map((item, iIndex) => ({
+                id: uuidv4(),
+                feature_id: featureId,
+                text: item.text,
+                display_order: item.display_order || iIndex,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              })) : [],
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+          }) : [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+      })
+      : [];
+    
     // Create a full CMSTechnology object
     const newTechnology: CMSTechnology = {
       id: mockId,
@@ -48,7 +86,7 @@ export const createTechnology = async (data: CreateTechnologyData): Promise<CMST
       visible: data.visible || false,
       image_url: data.image_url,
       image_alt: data.image_alt,
-      sections: data.sections || [],
+      sections: processedSections,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
