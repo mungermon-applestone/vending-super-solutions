@@ -28,7 +28,6 @@ export const cloneBusinessGoal = async (id: string): Promise<CMSBusinessGoal | n
       slug: `${originalGoal.slug}-clone-${Date.now()}`,
       description: originalGoal.description,
       icon: originalGoal.icon,
-      heroImage: originalGoal.heroImage,
       features: originalGoal.features?.map(feature => ({
         ...feature,
         id: uuidv4()

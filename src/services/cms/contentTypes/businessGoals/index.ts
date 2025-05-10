@@ -37,10 +37,16 @@ const deleteBusinessGoal = async (id: string): Promise<boolean> => {
   return true;
 };
 
+// Mock fetchById function
+const fetchBusinessGoalById = async (id: string): Promise<CMSBusinessGoal | null> => {
+  return fetchBusinessGoalBySlug(id);
+};
+
 // Export all business goal operations
 export const businessGoalOperations = {
   fetchAll: fetchBusinessGoals,
   fetchBySlug: fetchBusinessGoalBySlug,
+  fetchById: fetchBusinessGoalById,
   create: createBusinessGoal,
   update: updateBusinessGoal,
   delete: deleteBusinessGoal,
@@ -51,6 +57,7 @@ export const businessGoalOperations = {
 export {
   fetchBusinessGoals,
   fetchBusinessGoalBySlug,
+  fetchBusinessGoalById,
   createBusinessGoal,
   updateBusinessGoal,
   deleteBusinessGoal,
