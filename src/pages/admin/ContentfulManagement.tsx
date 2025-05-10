@@ -1,144 +1,138 @@
 
 import React from 'react';
 import Layout from '@/components/layout/Layout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import CMSConnectionTest from '@/components/admin/cms/CMSConnectionTest';
-import ContentfulTypeCreator from '@/components/admin/cms/ContentfulTypeCreator';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Info, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import ContentfulButton from '@/components/admin/ContentfulButton';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ExternalLink, Settings, Database, Server } from 'lucide-react';
 
-interface ContentTypeMigrationStatus {
-  name: string;
-  status: 'complete' | 'in-progress' | 'not-started';
-  contentfulType: string;
-}
-
-const ContentfulManagement: React.FC = () => {
-  const migrationStatuses: ContentTypeMigrationStatus[] = [
-    { name: "Products", status: "complete", contentfulType: "product" },
-    { name: "Business Goals", status: "complete", contentfulType: "businessGoal" },
-    { name: "Technologies", status: "complete", contentfulType: "technology" },
-    { name: "Machines", status: "complete", contentfulType: "machine" },
-    { name: "Blog Posts", status: "complete", contentfulType: "blogPost" },
-    { name: "Case Studies", status: "complete", contentfulType: "caseStudy" },
-    { name: "Landing Pages", status: "complete", contentfulType: "landingPage" },
-    { name: "Testimonials", status: "complete", contentfulType: "testimonial" },
-  ];
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "complete":
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-      case "in-progress":
-        return <AlertCircle className="h-5 w-5 text-amber-500" />;
-      case "not-started":
-        return <Info className="h-5 w-5 text-gray-400" />;
-      default:
-        return <Info className="h-5 w-5 text-gray-400" />;
-    }
+const ContentfulManagement = () => {
+  const navigate = useNavigate();
+  
+  const handleOpenContentful = () => {
+    window.open('https://app.contentful.com/', '_blank');
   };
+  
+  const contentTypes = [
+    { name: 'Products', description: 'Manage product catalog and details' },
+    { name: 'Machines', description: 'Configure vending machines and lockers' },
+    { name: 'Business Goals', description: 'Define and track business objectives' },
+    { name: 'Technologies', description: 'Showcase technology capabilities' },
+    { name: 'Blog Posts', description: 'Create and publish blog content' },
+    { name: 'Case Studies', description: 'Document customer success stories' },
+    { name: 'Landing Pages', description: 'Design conversion-focused pages' },
+    { name: 'Media Library', description: 'Manage images and other media assets' }
+  ];
 
   return (
     <Layout>
-      <div className="container py-10">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Contentful Management</h1>
-            <p className="text-muted-foreground">
-              Create and manage Contentful content types and entries
-            </p>
-          </div>
+      <div className="container mx-auto py-8">
+        <div className="mb-8">
           <Button 
-            variant="outline" 
-            onClick={() => window.open("https://app.contentful.com/", "_blank")}
-            className="flex items-center gap-2"
+            variant="ghost" 
+            size="sm"
+            onClick={() => navigate('/admin/dashboard')}
+            className="mb-4"
           >
-            Open Contentful <ArrowRight className="h-4 w-4" />
+            <span className="mr-2">&larr;</span>
+            Back to Admin
           </Button>
+          
+          <h1 className="text-3xl font-bold">Contentful CMS Management</h1>
+          <p className="mt-2 text-muted-foreground">
+            Manage all website content through the Contentful CMS
+          </p>
         </div>
         
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Contentful Migration Status</CardTitle>
-            <CardDescription>
-              All content types have been migrated to Contentful. Legacy admin interfaces will be removed in future updates.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {migrationStatuses.map((item) => (
-                <Card key={item.name} className="overflow-hidden">
-                  <div className={`px-4 py-2 flex justify-between items-center border-b ${
-                    item.status === 'complete' ? 'bg-green-50 border-green-100' : 
-                    item.status === 'in-progress' ? 'bg-amber-50 border-amber-100' : 
-                    'bg-gray-50 border-gray-100'
-                  }`}>
-                    <h3 className="font-medium">{item.name}</h3>
-                    {getStatusIcon(item.status)}
-                  </div>
-                  <CardContent className="p-4">
-                    <p className={`text-sm mb-3 ${
-                      item.status === 'complete' ? 'text-green-700' : 
-                      item.status === 'in-progress' ? 'text-amber-700' : 
-                      'text-gray-500'
-                    }`}>
-                      {item.status === 'complete' ? 'Migration Complete' : 
-                       item.status === 'in-progress' ? 'Migration In Progress' : 
-                       'Migration Not Started'}
-                    </p>
-                    <ContentfulButton 
-                      contentType={item.contentfulType}
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                    />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 gap-6 mb-8">
+          <Card className="border-blue-200 shadow-md">
+            <CardHeader className="bg-blue-50 border-b border-blue-200">
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-blue-600" />
+                Contentful CMS
+              </CardTitle>
+              <CardDescription>
+                Centralized content management platform
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <p className="mb-4">
+                All content management operations are now handled through Contentful CMS.
+                Use the Contentful web interface to create, edit, and manage all your content.
+              </p>
+              <Button 
+                onClick={handleOpenContentful} 
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Open Contentful
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
         
-        <Alert className="mb-6">
-          <Info className="h-4 w-4" />
-          <AlertTitle>About Content Type Management</AlertTitle>
-          <AlertDescription>
-            <p className="mb-2">
-              This tool currently supports creating predefined content types in your Contentful space. 
-              To modify existing content types, you'll need to:
-            </p>
-            <ol className="list-decimal ml-5 space-y-1">
-              <li>Delete the existing content type from Contentful</li>
-              <li>Create a new content type with the updated definition</li>
-            </ol>
-            <p className="mt-2">
-              Note: Deleting a content type will also delete any entries of that type in Contentful.
-              Make sure to back up your content before deleting content types.
-            </p>
-          </AlertDescription>
-        </Alert>
+        <h2 className="text-xl font-semibold mb-4">Content Types</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {contentTypes.map((type) => (
+            <Card key={type.name} className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">{type.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500">{type.description}</p>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleOpenContentful}
+                  className="w-full"
+                >
+                  Manage in Contentful
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
         
-        <Tabs defaultValue="connection">
-          <TabsList className="mb-8">
-            <TabsTrigger value="connection">Connection</TabsTrigger>
-            <TabsTrigger value="content-types">Content Types</TabsTrigger>
-          </TabsList>
+        <h2 className="text-xl font-semibold mb-4">Configuration</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Settings className="h-5 w-5" /> API Configuration
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-500 mb-4">
+                Configure Contentful API keys, environment settings, and integration parameters.
+              </p>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" size="sm" className="w-full">
+                Manage API Settings
+              </Button>
+            </CardFooter>
+          </Card>
           
-          <TabsContent value="connection">
-            <div className="grid gap-6">
-              <CMSConnectionTest />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="content-types">
-            <div className="grid gap-6">
-              <ContentfulTypeCreator />
-            </div>
-          </TabsContent>
-        </Tabs>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Server className="h-5 w-5" /> Preview Environment
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-500 mb-4">
+                Configure preview environment settings to test content changes before publishing.
+              </p>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" size="sm" className="w-full">
+                Configure Preview
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
     </Layout>
   );
