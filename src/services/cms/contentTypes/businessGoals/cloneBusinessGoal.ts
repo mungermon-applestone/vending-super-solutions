@@ -28,14 +28,14 @@ export const cloneBusinessGoal = async (id: string): Promise<CMSBusinessGoal | n
       slug: `${originalGoal.slug}-clone-${Date.now()}`,
       description: originalGoal.description,
       icon: originalGoal.icon,
-      features: originalGoal.features?.map(feature => ({
+      features: originalGoal.features ? originalGoal.features.map(feature => ({
         ...feature,
         id: uuidv4()
-      })) || [],
-      benefits: originalGoal.benefits?.map(benefit => ({
+      })) : [],
+      benefits: originalGoal.benefits ? originalGoal.benefits.map(benefit => ({
         ...benefit,
         id: uuidv4()
-      })) || []
+      })) : []
     };
     
     console.log('[cloneBusinessGoal] Created cloned business goal:', clonedGoal);

@@ -1,9 +1,8 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchProductTypes } from '@/services/cms/contentTypes/productTypes/fetchProductTypes';
-import { fetchMachines } from '@/services/cms/contentTypes/machines/api';
 import { fetchBusinessGoals } from '@/services/cms/contentTypes/businessGoals/fetchBusinessGoals';
-import { CMSBusinessGoal, CMSMachine, CMSProductType } from '@/types/cms';
+import { fetchMachines } from '@/services/cms/contentTypes/machines/api';
+import { CMSBusinessGoal, CMSMachine } from '@/types/cms';
 
 /**
  * Hook to fetch items for homepage display
@@ -17,13 +16,9 @@ export function useHomepageItems() {
   } = useQuery({
     queryKey: ['homepage', 'products'],
     queryFn: async () => {
-      const products = await fetchProductTypes({
-        showOnHomepage: true,
-        sort: 'fields.homepageOrder'
-      });
-      
-      console.log(`[useHomepageItems] Fetched ${products.length} featured products`);
-      return products;
+      // For mock implementation, just return an empty array
+      console.log(`[useHomepageItems] Mock: Would fetch featured products`);
+      return [];
     }
   });
   
@@ -35,10 +30,7 @@ export function useHomepageItems() {
   } = useQuery({
     queryKey: ['homepage', 'machines'],
     queryFn: async () => {
-      const machines = await fetchMachines({
-        showOnHomepage: true,
-        sort: 'homepage_order'
-      });
+      const machines = await fetchMachines();
       
       console.log(`[useHomepageItems] Fetched ${machines.length} featured machines`);
       return machines as CMSMachine[];
@@ -76,33 +68,9 @@ export function useFeaturedProducts() {
   return useQuery({
     queryKey: ['homepage', 'products'],
     queryFn: async () => {
-      console.log('[useFeaturedProducts] Fetching featured products for homepage');
-      
-      const products = await fetchProductTypes({
-        showOnHomepage: true,
-        sort: 'fields.homepageOrder'
-      });
-      
-      // Sort products by homepageOrder if available
-      const sortedProducts = [...products].sort((a, b) => {
-        const orderA = a.homepageOrder !== undefined ? a.homepageOrder : 999;
-        const orderB = b.homepageOrder !== undefined ? b.homepageOrder : 999;
-        return orderA - orderB;
-      });
-      
-      console.log(`[useFeaturedProducts] Fetched ${sortedProducts.length} products for homepage`);
-      
-      if (sortedProducts.length > 0) {
-        console.log('[useFeaturedProducts] First product:', {
-          title: sortedProducts[0]?.title,
-          slug: sortedProducts[0]?.slug,
-          homepageOrder: sortedProducts[0]?.homepageOrder
-        });
-      } else {
-        console.log('[useFeaturedProducts] No featured products found');
-      }
-      
-      return sortedProducts;
+      console.log('[useFeaturedProducts] Mock: Would fetch featured products');
+      // Return empty array for mock implementation
+      return [];
     },
     staleTime: 60000, // 1 minute before refetching
     meta: {
@@ -121,8 +89,7 @@ export function useFeaturedMachines() {
     queryKey: ['homepage', 'machines'],
     queryFn: async () => {
       const machines = await fetchMachines({
-        showOnHomepage: true,
-        sort: 'homepage_order'
+        // We would filter by showOnHomepage in a real implementation
       });
       return machines as CMSMachine[];
     }

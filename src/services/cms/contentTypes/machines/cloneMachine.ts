@@ -2,10 +2,9 @@
 import { CMSMachine } from '@/types/cms';
 import { handleCMSError, logCMSOperation } from '../types';
 import { cloneContentItem, cloneRelatedItems } from '../../utils/cloneContent';
-import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Clone a machine
+ * Clone a machine - mock implementation
  * @param id ID of the machine to clone
  * @returns The cloned machine or null if failed
  */
@@ -13,9 +12,9 @@ export async function cloneMachine(id: string): Promise<CMSMachine | null> {
   try {
     logCMSOperation('cloneMachine', 'Machine', `Starting clone operation for machine with ID: ${id}`);
     
-    // Clone the main machine
+    // Clone the main machine using our mock implementation
     const newMachine = await cloneContentItem<CMSMachine>(
-      'machines',
+      'machines', // This is just a label now, not an actual table
       id,
       'Machine'
     );
@@ -24,7 +23,7 @@ export async function cloneMachine(id: string): Promise<CMSMachine | null> {
       throw new Error('Failed to clone machine');
     }
     
-    // Clone related items
+    // Clone related items (just logs, no actual operations)
     await Promise.all([
       // Clone images
       cloneRelatedItems('machine_images', 'machine_id', id, newMachine.id),
