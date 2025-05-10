@@ -5,6 +5,11 @@
  * This file now re-exports the legacy types.
  */
 
-import { MachinePlaceholder, MigrationResult } from '@/legacy/cms/machineMigration';
+import type { 
+  MachinePlaceholder, 
+  MigrationResult, 
+  MachineFormValues, 
+  MachineData 
+} from '@/legacy/cms/machineMigration';
 
-export type { MachinePlaceholder, MigrationResult };
+export type { MachinePlaceholder, MigrationResult, MachineFormValues, MachineData };

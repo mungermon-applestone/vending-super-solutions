@@ -5,10 +5,7 @@
  */
 
 import { migrateMachinesData } from './migrateMachinesData';
-import { MachinePlaceholder, MigrationResult } from './types';
+import type { MachinePlaceholder, MigrationResult, MachineFormValues, MachineData } from './types';
 
-export {
-  migrateMachinesData,
-  MachinePlaceholder,
-  MigrationResult
-};
+export { migrateMachinesData };
+export type { MachinePlaceholder, MigrationResult, MachineFormValues, MachineData };
