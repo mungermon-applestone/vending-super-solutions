@@ -13,8 +13,6 @@ import AdminMedia from '@/pages/admin/AdminMedia';
 import SignIn from '@/pages/admin/SignIn';
 import ContentfulManagement from '@/pages/admin/ContentfulManagement';
 import PerformanceTesting from '@/pages/admin/PerformanceTesting';
-import StrapiSetupPage from '@/pages/admin/StrapiSetupPage';
-import StrapiConnectionDebug from '@/pages/admin/StrapiConnectionDebug';
 import ContentfulRedirector from '@/components/admin/contentful/ContentfulRedirector';
 
 export const adminRoutes: RouteObject[] = [
@@ -195,14 +193,6 @@ export const adminRoutes: RouteObject[] = [
   {
     path: "/admin/performance-testing",
     element: <PerformanceTesting />
-  },
-  {
-    path: "/admin/strapi-setup",
-    element: <StrapiSetupPage />
-  },
-  {
-    path: "/admin/strapi-debug",
-    element: <StrapiConnectionDebug />
   }
 ];
 

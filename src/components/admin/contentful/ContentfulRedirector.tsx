@@ -14,6 +14,8 @@ interface ContentfulRedirectorProps {
   contentfulUrl?: string;
   showBackButton?: boolean;
   backPath?: string;
+  contentfulSpaceId?: string;
+  contentfulEnvironmentId?: string;
 }
 
 /**
@@ -26,7 +28,9 @@ const ContentfulRedirector: React.FC<ContentfulRedirectorProps> = ({
   description,
   contentfulUrl = 'https://app.contentful.com/',
   showBackButton = true,
-  backPath = '/admin'
+  backPath = '/admin',
+  contentfulSpaceId,
+  contentfulEnvironmentId
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -45,8 +49,37 @@ const ContentfulRedirector: React.FC<ContentfulRedirectorProps> = ({
   const displayDescription = description || 
     `The ${contentType.toLowerCase()} editor has been deprecated. Please use Contentful CMS to manage ${contentType.toLowerCase()} content.`;
   
+  // Construct the Contentful URL with space and environment if provided
+  const getContentfulUrl = () => {
+    if (contentfulUrl !== 'https://app.contentful.com/') {
+      return contentfulUrl;
+    }
+    
+    // Base Contentful URL
+    let url = "https://app.contentful.com/";
+    
+    // If space ID is provided, add it
+    if (contentfulSpaceId) {
+      url += `spaces/${contentfulSpaceId}/`;
+      
+      // If environment is also provided, add it
+      if (contentfulEnvironmentId) {
+        url += `environments/${contentfulEnvironmentId}/`;
+      }
+      
+      // Add entries endpoint
+      url += "entries";
+      
+      // Convert contentType to kebab case for filtering
+      const contentTypeSlug = contentType.toLowerCase().replace(/\s+/g, '-');
+      url += `?contentTypeId=${contentTypeSlug}`;
+    }
+    
+    return url;
+  };
+  
   const handleOpenContentful = () => {
-    window.open(contentfulUrl, "_blank");
+    window.open(getContentfulUrl(), "_blank");
   };
   
   const handleBack = () => {

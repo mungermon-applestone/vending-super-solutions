@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,10 +12,11 @@ interface ContentfulButtonProps extends Omit<ButtonProps, 'onClick'> {
   contentfulSpaceId?: string;
   contentfulEnvironmentId?: string;
   customUrl?: string;
+  entryId?: string;
 }
 
 /**
- * A button component that links to Contentful, optionally focusing on a specific content type
+ * A button component that links to Contentful, optionally focusing on a specific content type or entry
  */
 const ContentfulButton: React.FC<ContentfulButtonProps> = ({ 
   contentType, 
@@ -27,6 +27,7 @@ const ContentfulButton: React.FC<ContentfulButtonProps> = ({
   contentfulSpaceId,
   contentfulEnvironmentId,
   customUrl,
+  entryId,
   ...props 
 }) => {
   const handleOpenContentful = () => {
@@ -48,11 +49,19 @@ const ContentfulButton: React.FC<ContentfulButtonProps> = ({
         contentfulUrl += `environments/${contentfulEnvironmentId}/`;
       }
       
-      // If content type is provided, add it to the URL
-      if (contentType) {
+      // If entry ID is provided, go directly to that entry
+      if (entryId) {
+        contentfulUrl += `entries/${entryId}`;
+      }
+      // If content type is provided but no specific entry, filter by content type
+      else if (contentType) {
         // Convert contentType to kebab case if it contains spaces (e.g., "Business Goal" -> "business-goal")
         const contentTypeSlug = contentType.toLowerCase().replace(/\s+/g, '-');
         contentfulUrl += `entries/?contentTypeId=${contentTypeSlug}`;
+      } 
+      // Otherwise just go to entries
+      else {
+        contentfulUrl += 'entries/';
       }
     }
 
@@ -61,7 +70,8 @@ const ContentfulButton: React.FC<ContentfulButtonProps> = ({
 
   // Determine button text
   const buttonText = customText || 
-    (contentType ? `Manage ${contentType} in Contentful` : 'Open Contentful');
+    (entryId && contentType ? `Edit this ${contentType} in Contentful` :
+    contentType ? `Manage ${contentType} in Contentful` : 'Open Contentful');
 
   return (
     <Button 
