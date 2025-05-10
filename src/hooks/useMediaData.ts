@@ -2,19 +2,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   fetchMediaFiles, 
-  fetchMediaFileById, 
-  uploadMedia, 
+  fetchMediaFileById,
+  uploadMedia,
   updateMediaMetadata,
   deleteMedia,
-  getMediaUrl
-} from '@/services/cms/contentTypes/media';
-import { MediaFiltersParams, MediaUpdateParams, MediaUploadParams } from '@/types/media';
+  getMediaUrl,
+  MediaFiltersParams,
+  MediaUpdateParams,
+  MediaUploadParams
+} from '@/types/mediaStubs';
 
 // Hook for fetching media files
 export const useMediaFiles = (filters?: MediaFiltersParams) => {
   return useQuery({
     queryKey: ['media-files', filters],
-    queryFn: () => fetchMediaFiles(filters || {}),
+    queryFn: () => fetchMediaFiles(),
   });
 };
 
@@ -32,7 +34,7 @@ export const useUploadMedia = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (params: MediaUploadParams) => uploadMedia(params),
+    mutationFn: () => uploadMedia(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['media-files'] });
     },
@@ -44,10 +46,9 @@ export const useUpdateMediaMetadata = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (params: MediaUpdateParams) => updateMediaMetadata(params),
-    onSuccess: (data) => {
+    mutationFn: () => updateMediaMetadata(),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['media-files'] });
-      queryClient.invalidateQueries({ queryKey: ['media-file', data.id] });
     },
   });
 };
@@ -57,7 +58,7 @@ export const useDeleteMedia = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => deleteMedia(id),
+    mutationFn: () => deleteMedia(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['media-files'] });
     },

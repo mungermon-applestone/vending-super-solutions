@@ -1,6 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchBusinessGoals } from '@/services/cms/contentTypes/businessGoals/fetchBusinessGoals';
+import { businessGoalOperations } from '@/services/cms/contentTypes/businessGoals';
 import { fetchMachines } from '@/services/cms/contentTypes/machines/api';
 import { CMSBusinessGoal, CMSMachine } from '@/types/cms';
 
@@ -45,7 +45,7 @@ export function useHomepageItems() {
   } = useQuery({
     queryKey: ['homepage', 'businessGoals'],
     queryFn: async () => {
-      const goals = await fetchBusinessGoals();
+      const goals = await businessGoalOperations.fetchAll();
       
       console.log(`[useHomepageItems] Fetched ${goals.length} featured business goals`);
       return goals;
@@ -103,7 +103,7 @@ export function useFeaturedBusinessGoals() {
   return useQuery({
     queryKey: ['homepage', 'businessGoals'],
     queryFn: async () => {
-      const goals = await fetchBusinessGoals();
+      const goals = await businessGoalOperations.fetchAll();
       return goals;
     }
   });

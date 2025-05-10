@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Zap } from 'lucide-react';
-import { LayoutDashboard, PackageSearch, Box, BarChart, BookOpen, ImageIcon } from 'lucide-react';
+import { LayoutDashboard, PackageSearch, Box, BarChart, BookOpen } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const AdminControls = () => {
@@ -22,7 +22,6 @@ const AdminControls = () => {
     { name: 'Business Goals', path: '/admin/business-goals', icon: <BarChart className="h-5 w-5" /> },
     { name: 'Technology', path: '/admin/technology', icon: <Zap className="h-5 w-5" /> },
     { name: 'Blog', path: '/admin/blog', icon: <BookOpen className="h-5 w-5" /> },
-    { name: 'Media', path: '/admin/media', icon: <ImageIcon className="h-5 w-5" /> },
   ];
   
   const isActive = (path: string): boolean => {

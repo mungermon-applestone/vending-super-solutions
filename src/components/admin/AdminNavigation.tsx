@@ -11,7 +11,6 @@ import {
   FileText, 
   BookOpen, 
   BriefcaseBusiness,
-  Image,
   Database,
   BarChart
 } from 'lucide-react';
@@ -31,7 +30,6 @@ const navigation: NavigationItem[] = [
   { name: 'Landing Pages', href: '/admin/landing-pages', icon: FileText },
   { name: 'Blog', href: '/admin/blog', icon: BookOpen },
   { name: 'Case Studies', href: '/admin/case-studies', icon: BriefcaseBusiness },
-  { name: 'Media', href: '/admin/media', icon: Image },
 ];
 
 const secondaryNavigation: NavigationItem[] = [

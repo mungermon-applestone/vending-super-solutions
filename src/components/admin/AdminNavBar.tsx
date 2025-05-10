@@ -16,7 +16,6 @@ const AdminNavBar: React.FC<AdminNavBarProps> = ({ activeItem }) => {
     { name: 'Blog', path: '/admin/blog', key: 'blog' },
     { name: 'Case Studies', path: '/admin/case-studies', key: 'case-studies' },
     { name: 'Landing Pages', path: '/admin/landing-pages', key: 'landing-pages' },
-    { name: 'Media', path: '/admin/media', key: 'media' },
     { name: 'Users', path: '/admin/users', key: 'users' },
   ];
 
