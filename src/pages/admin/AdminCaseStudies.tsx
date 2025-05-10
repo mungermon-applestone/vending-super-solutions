@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { caseStudyOperations } from '@/services/cms/contentTypes/caseStudies';
+import { fetchCaseStudies } from '@/services/cms/contentTypes/caseStudies';
 import {
   Table,
   TableBody,
@@ -17,14 +17,25 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, ChevronRight } from 'lucide-react';
 import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
+import { CaseStudyWithRelations } from '@/types/caseStudy';
+import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
 
 const AdminCaseStudies = () => {
   const navigate = useNavigate();
   
+  // Log deprecation of this admin page
+  React.useEffect(() => {
+    logDeprecationWarning(
+      "AdminCaseStudies",
+      "The Case Studies admin interface is deprecated and will be removed in a future version.",
+      "Please use Contentful to manage case study content."
+    );
+  }, []);
+  
   // Fetch all case studies
-  const { data: caseStudies = [], isLoading } = useQuery({
+  const { data: caseStudies = [], isLoading } = useQuery<CaseStudyWithRelations[]>({
     queryKey: ['caseStudies'],
-    queryFn: caseStudyOperations.getAll
+    queryFn: fetchCaseStudies
   });
 
   return (
@@ -71,10 +82,10 @@ const AdminCaseStudies = () => {
                 {caseStudies.map((study) => (
                   <TableRow key={study.id}>
                     <TableCell className="font-medium">{study.title}</TableCell>
-                    <TableCell>{study.client || 'N/A'}</TableCell>
+                    <TableCell>{study.industry || 'N/A'}</TableCell>
                     <TableCell>
-                      <Badge variant={study.featured ? "default" : "outline"}>
-                        {study.featured ? 'Featured' : 'Standard'}
+                      <Badge variant={study.visible ? "default" : "outline"}>
+                        {study.visible ? 'Featured' : 'Standard'}
                       </Badge>
                     </TableCell>
                     <TableCell>

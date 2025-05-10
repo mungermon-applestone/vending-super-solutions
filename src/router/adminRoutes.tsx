@@ -6,17 +6,17 @@ import { RouteObject } from 'react-router-dom';
 const AdminDashboard = lazy(() => import('@/pages/AdminDashboard'));
 const AdminProducts = lazy(() => import('@/pages/admin/AdminProducts'));
 const ProductEditor = lazy(() => import('@/pages/ProductEditor'));
-const AdminBusinessGoals = lazy(() => import('@/pages/AdminBusinessGoals'));
-const BusinessGoalEditor = lazy(() => import('@/pages/BusinessGoalEditor'));
+const AdminBusinessGoals = lazy(() => import('@/pages/admin/AdminBusinessGoals'));
+const BusinessGoalEditor = lazy(() => import('@/pages/admin/BusinessGoalEditor'));
 const AdminMachines = lazy(() => import('@/pages/admin/AdminMachines'));
 const MachineEditor = lazy(() => import('@/pages/MachineEditor'));
-const AdminTechnology = lazy(() => import('@/pages/AdminTechnology'));
+const AdminTechnology = lazy(() => import('@/pages/admin/AdminTechnology'));
 const TechnologyEditor = lazy(() => import('@/pages/TechnologyEditor'));
 const AdminBlog = lazy(() => import('@/pages/admin/AdminBlog'));
 const AdminCaseStudies = lazy(() => import('@/pages/admin/AdminCaseStudies'));
 const AdminMedia = lazy(() => import('@/pages/admin/AdminMedia'));
 const ContentfulManagement = lazy(() => import('@/pages/admin/ContentfulManagement'));
-const SignInPage = lazy(() => import('@/pages/admin/SignInPage'));
+const SignInPage = lazy(() => import('@/pages/admin/SignIn'));
 
 // Admin routes
 export const adminRoutes: RouteObject[] = [

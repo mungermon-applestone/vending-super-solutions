@@ -1,5 +1,6 @@
 
 import { BlogPost, BlogPostFormData } from "@/types/blog";
+import { logDeprecationWarning } from "@/services/cms/utils/deprecationLogger";
 
 // Mock blog posts data
 const mockBlogPosts: BlogPost[] = [
@@ -34,7 +35,11 @@ export const fetchBlogPosts = async (filters: {
   limit?: number;
   offset?: number;
 } = {}): Promise<BlogPost[]> => {
-  console.log("[fetchBlogPosts] Fetching blog posts with filters:", filters);
+  logDeprecationWarning(
+    "fetchBlogPosts",
+    "Direct blog posts API is deprecated.",
+    "Please use Contentful API instead."
+  );
   
   // Apply filters to mock data
   let filteredPosts = [...mockBlogPosts];
@@ -68,7 +73,11 @@ export const fetchBlogPosts = async (filters: {
 
 // Fetch a single blog post by slug
 export const fetchBlogPostBySlug = async (slug: string): Promise<BlogPost | null> => {
-  console.log("[fetchBlogPostBySlug] Fetching blog post with slug:", slug);
+  logDeprecationWarning(
+    "fetchBlogPostBySlug",
+    "Direct blog post API is deprecated.",
+    "Please use Contentful API instead."
+  );
   
   const post = mockBlogPosts.find(post => post.slug === slug) || null;
   return post;
@@ -76,7 +85,11 @@ export const fetchBlogPostBySlug = async (slug: string): Promise<BlogPost | null
 
 // Create a new blog post
 export const createBlogPost = async (postData: BlogPostFormData): Promise<BlogPost> => {
-  console.log("[createBlogPost] Creating blog post:", postData);
+  logDeprecationWarning(
+    "createBlogPost",
+    "Direct blog post creation is deprecated.",
+    "Please use Contentful to manage blog content."
+  );
   
   const newPost: BlogPost = {
     id: `mock-${Date.now()}`,
@@ -92,7 +105,11 @@ export const createBlogPost = async (postData: BlogPostFormData): Promise<BlogPo
 
 // Update an existing blog post
 export const updateBlogPost = async (id: string, postData: BlogPostFormData): Promise<BlogPost> => {
-  console.log("[updateBlogPost] Updating blog post:", id, postData);
+  logDeprecationWarning(
+    "updateBlogPost",
+    "Direct blog post updating is deprecated.",
+    "Please use Contentful to manage blog content."
+  );
   
   const existingPostIndex = mockBlogPosts.findIndex(post => post.id === id);
   
@@ -121,7 +138,11 @@ export const updateBlogPost = async (id: string, postData: BlogPostFormData): Pr
 
 // Delete a blog post
 export const deleteBlogPost = async (id: string): Promise<boolean> => {
-  console.log("[deleteBlogPost] Deleting blog post:", id);
+  logDeprecationWarning(
+    "deleteBlogPost",
+    "Direct blog post deletion is deprecated.",
+    "Please use Contentful to manage blog content."
+  );
   
   const initialLength = mockBlogPosts.length;
   const filteredPosts = mockBlogPosts.filter(post => post.id !== id);
@@ -135,7 +156,11 @@ export const deleteBlogPost = async (id: string): Promise<boolean> => {
 
 // Clone a blog post
 export const cloneBlogPost = async (id: string): Promise<BlogPost> => {
-  console.log("[cloneBlogPost] Cloning blog post:", id);
+  logDeprecationWarning(
+    "cloneBlogPost",
+    "Direct blog post cloning is deprecated.",
+    "Please use Contentful to manage blog content."
+  );
   
   const postToClone = mockBlogPosts.find(post => post.id === id);
   
@@ -165,7 +190,11 @@ export const getAdjacentPosts = async (currentPostSlug: string): Promise<{
   previous: BlogPost | null;
   next: BlogPost | null;
 }> => {
-  console.log("[getAdjacentPosts] Finding adjacent posts for:", currentPostSlug);
+  logDeprecationWarning(
+    "getAdjacentPosts",
+    "Direct blog post navigation API is deprecated.",
+    "Please use Contentful API instead."
+  );
   
   const sortedPosts = [...mockBlogPosts].sort((a, b) => {
     const dateA = a.published_at ? new Date(a.published_at) : new Date(a.created_at);

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { fetchBlogPosts } from '@/services/cms/contentTypes/blogPosts';
+import { fetchBlogPosts } from '@/services/cms/contentTypes/blog';
 import {
   Table,
   TableBody,
@@ -18,12 +18,23 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, ChevronRight, Calendar } from 'lucide-react';
 import { formatDate } from '@/utils/date';
 import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
+import { BlogPost } from '@/types/blog';
+import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
 
 const AdminBlog = () => {
   const navigate = useNavigate();
   
+  // Log deprecation of this admin page
+  React.useEffect(() => {
+    logDeprecationWarning(
+      "AdminBlog",
+      "The Blog admin interface is deprecated and will be removed in a future version.",
+      "Please use Contentful to manage blog content."
+    );
+  }, []);
+  
   // Fetch all blog posts
-  const { data: blogPosts = [], isLoading } = useQuery({
+  const { data: blogPosts = [], isLoading } = useQuery<BlogPost[]>({
     queryKey: ['blogPosts'],
     queryFn: fetchBlogPosts
   });
@@ -75,12 +86,12 @@ const AdminBlog = () => {
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3 text-muted-foreground" />
-                        <span>{formatDate(post.publishDate || post.createdAt)}</span>
+                        <span>{formatDate(post.published_at || post.created_at)}</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={post.published ? "default" : "outline"}>
-                        {post.published ? 'Published' : 'Draft'}
+                      <Badge variant={post.status === 'published' ? "default" : "outline"}>
+                        {post.status}
                       </Badge>
                     </TableCell>
                     <TableCell>

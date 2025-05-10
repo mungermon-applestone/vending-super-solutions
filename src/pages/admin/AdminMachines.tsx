@@ -17,11 +17,22 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
+import { CMSMachine } from '@/types/cms';
+import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
 
 const AdminMachines = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: machines = [], isLoading } = useMachines();
+  
+  // Log deprecation of this admin page
+  React.useEffect(() => {
+    logDeprecationWarning(
+      "AdminMachines",
+      "The Machines admin interface is deprecated and will be removed in a future version.",
+      "Please use Contentful to manage machine content."
+    );
+  }, []);
   
   return (
     <DeprecatedAdminLayout
@@ -64,7 +75,7 @@ const AdminMachines = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {machines.map((machine) => (
+                {machines.map((machine: CMSMachine) => (
                   <TableRow key={machine.id}>
                     <TableCell className="font-medium">{machine.title}</TableCell>
                     <TableCell>
