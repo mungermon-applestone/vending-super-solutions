@@ -30,18 +30,32 @@ export interface CreateTechnologyData {
 /**
  * Creates a new technology entry in the database
  * @param data Technology data to create
- * @returns The created technology ID
+ * @returns The created technology as a CMSTechnology object
  */
-export const createTechnology = async (data: CreateTechnologyData): Promise<string> => {
+export const createTechnology = async (data: CreateTechnologyData): Promise<CMSTechnology> => {
   console.log('[createTechnology] Creating new technology (MOCK):', data.title);
   
   try {
     // Mock implementation that doesn't touch Supabase
     const mockId = uuidv4();
     
+    // Create a full CMSTechnology object
+    const newTechnology: CMSTechnology = {
+      id: mockId,
+      title: data.title,
+      slug: data.slug,
+      description: data.description || '',
+      visible: data.visible || false,
+      image_url: data.image_url,
+      image_alt: data.image_alt,
+      sections: data.sections || [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
     console.log(`[createTechnology] Created mock technology with ID: ${mockId}`);
     
-    return mockId;
+    return newTechnology;
     
   } catch (error) {
     console.error('[createTechnology] Error:', error);
@@ -59,6 +73,8 @@ export const fetchTechnologyWithRelations = async (id: string): Promise<CMSTechn
     slug: 'mock-technology',
     description: 'This is a mock technology created for testing',
     visible: true,
-    sections: []
+    sections: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   };
 };
