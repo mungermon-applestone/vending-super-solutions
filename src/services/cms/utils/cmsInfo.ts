@@ -8,6 +8,9 @@ export interface CMSInfo {
   apiUrl?: string;
   apiKeyConfigured?: boolean;
   contentfulConfigured?: boolean;
+  spaceId?: string;
+  deliveryTokenConfigured: boolean;
+  managementTokenConfigured: boolean;
 }
 
 // Content provider type enum
@@ -43,6 +46,7 @@ export const getCMSInfo = (): CMSInfo => {
   // Check if Contentful environment variables are set
   const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID || import.meta.env.CONTENTFUL_SPACE_ID;
   const deliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || import.meta.env.CONTENTFUL_DELIVERY_TOKEN;
+  const managementToken = import.meta.env.VITE_CONTENTFUL_MANAGEMENT_TOKEN || import.meta.env.CONTENTFUL_MANAGEMENT_TOKEN;
   const contentfulConfigured = !!spaceId && !!deliveryToken;
   
   return {
@@ -50,6 +54,9 @@ export const getCMSInfo = (): CMSInfo => {
     status: contentfulConfigured ? 'configured' : 'not-configured', 
     isConfigured: contentfulConfigured,
     adminUrl: 'https://app.contentful.com/',
-    contentfulConfigured
+    contentfulConfigured,
+    spaceId,
+    deliveryTokenConfigured: !!deliveryToken,
+    managementTokenConfigured: !!managementToken
   };
 };
