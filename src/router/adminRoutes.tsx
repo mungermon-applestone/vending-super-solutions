@@ -22,6 +22,7 @@ import LandingPageEditor from '@/pages/admin/LandingPageEditor';
 import CaseStudyEditor from '@/pages/admin/CaseStudyEditor';
 import StrapiSetupPage from '@/pages/admin/StrapiSetupPage';
 import StrapiConnectionDebug from '@/pages/admin/StrapiConnectionDebug';
+import ContentfulRedirector from '@/components/admin/contentful/ContentfulRedirector';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -38,7 +39,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/products/new",
-    element: <ProductEditor />
+    element: <ContentfulRedirector 
+      contentType="Product" 
+      title="Create New Product"
+      description="Product creation has been moved to Contentful CMS. Please use Contentful to create and manage products."
+      backPath="/admin/products"
+    />
   },
   {
     path: "/admin/products/edit/:id",
@@ -50,7 +56,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/machines/new",
-    element: <MachineEditor />
+    element: <ContentfulRedirector 
+      contentType="Machine" 
+      title="Create New Machine"
+      description="Machine creation has been moved to Contentful CMS. Please use Contentful to create and manage machines."
+      backPath="/admin/machines"
+    />
   },
   {
     path: "/admin/machines/edit/:id",
@@ -62,7 +73,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/technology/new",
-    element: <TechnologyEditor />
+    element: <ContentfulRedirector 
+      contentType="Technology" 
+      title="Create New Technology"
+      description="Technology creation has been moved to Contentful CMS. Please use Contentful to create and manage technologies."
+      backPath="/admin/technology"
+    />
   },
   {
     path: "/admin/technology/edit/:id",
@@ -74,7 +90,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/business-goals/new",
-    element: <BusinessGoalEditor />
+    element: <ContentfulRedirector 
+      contentType="Business Goal" 
+      title="Create New Business Goal"
+      description="Business goal creation has been moved to Contentful CMS. Please use Contentful to create and manage business goals."
+      backPath="/admin/business-goals"
+    />
   },
   {
     path: "/admin/business-goals/edit/:id",

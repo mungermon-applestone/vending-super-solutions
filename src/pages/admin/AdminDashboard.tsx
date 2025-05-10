@@ -1,16 +1,16 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, Goal, Database, Server, Monitor, FileText, Image, BookOpen, Layout as LayoutIcon, AlertTriangle } from 'lucide-react';
+import { Package, Goal, Database, Server, Monitor, FileText, Image, BookOpen, Layout as LayoutIcon, AlertTriangle, ExternalLink } from 'lucide-react';
 import ContentTypeCard from '@/components/admin/dashboard/ContentTypeCard';
 import QuickNavigation from '@/components/admin/dashboard/QuickNavigation';
 import ContentManagementList from '@/components/admin/dashboard/ContentManagementList';
 import QuickActions from '@/components/admin/dashboard/QuickActions';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
 
 const contentTypes = [
   {
@@ -20,7 +20,8 @@ const contentTypes = [
     path: "/admin/products",
     createPath: "/admin/products/new",
     colorClass: "bg-blue-50 border-blue-200",
-    deprecated: true
+    deprecated: true,
+    contentfulSection: "products"
   },
   {
     title: "Business Goals",
@@ -29,7 +30,8 @@ const contentTypes = [
     path: "/admin/business-goals",
     createPath: "/admin/business-goals/new",
     colorClass: "bg-purple-50 border-purple-200",
-    deprecated: true
+    deprecated: true,
+    contentfulSection: "business-goals"
   },
   {
     title: "Machines",
@@ -38,7 +40,8 @@ const contentTypes = [
     path: "/admin/machines",
     createPath: "/admin/machines/new",
     colorClass: "bg-emerald-50 border-emerald-200",
-    deprecated: true
+    deprecated: true,
+    contentfulSection: "machines"
   },
   {
     title: "Technology",
@@ -47,7 +50,8 @@ const contentTypes = [
     path: "/admin/technology",
     createPath: "/admin/technology/new",
     colorClass: "bg-indigo-50 border-indigo-200",
-    deprecated: true
+    deprecated: true,
+    contentfulSection: "technology"
   },
   {
     title: "Blog",
@@ -109,11 +113,16 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (isAdmin) {
       toast({
-        title: "Admin Dashboard",
-        description: "Welcome to the CMS admin dashboard",
+        title: "Content Management Migration",
+        description: "All content management has moved to Contentful CMS. This admin interface is being phased out.",
+        variant: "warning",
       });
     }
   }, [isAdmin, toast]);
+
+  const handleOpenContentful = () => {
+    window.open("https://app.contentful.com/", "_blank");
+  };
 
   if (isLoading) {
     return (
@@ -135,17 +144,45 @@ const AdminDashboard = () => {
     <Layout>
       <div className="container mx-auto py-10">
         <div className="mb-10">
-          <h1 className="text-3xl font-bold mb-2">CMS Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold mb-2">Content Management</h1>
           <p className="text-muted-foreground">
-            Manage all content types from a single interface
+            Manage content through Contentful CMS
           </p>
         </div>
 
+        <Card className="bg-blue-50 border-blue-200 mb-8 shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-800">
+              <Database className="h-5 w-5" />
+              Contentful CMS Migration
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="p-4 bg-white rounded-md border border-blue-200">
+                <p className="text-blue-800 font-medium mb-2">Content Management has Moved</p>
+                <p className="text-blue-700 mb-4">
+                  All content creation and editing has been migrated to Contentful CMS. The legacy admin interface 
+                  is being phased out and will be removed in future updates. Please use Contentful for all content management.
+                </p>
+                
+                <Button 
+                  onClick={handleOpenContentful}
+                  className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Open Contentful CMS
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Alert variant="warning" className="mb-8 border-amber-300 bg-amber-50">
           <AlertTriangle className="h-5 w-5 text-amber-600" />
-          <AlertTitle className="text-amber-800 font-medium">CMS Migration in Progress</AlertTitle>
+          <AlertTitle className="text-amber-800 font-medium">Legacy Admin Interface</AlertTitle>
           <AlertDescription className="text-amber-700">
-            <p>We are migrating our content management to Contentful. Some admin features are being deprecated and will be removed in future updates.</p>
+            <p>The sections below are part of the legacy admin interface and are being deprecated.</p>
             <p className="mt-2">Content types marked with the "Deprecated" badge should now be managed directly in Contentful.</p>
           </AlertDescription>
         </Alert>
