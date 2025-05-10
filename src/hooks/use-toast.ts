@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import {
   Toast,
@@ -154,7 +153,6 @@ function toast(props: ToastOptions) {
     type: actionTypes.ADD_TOAST,
     toast: {
       ...props,
-      id,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
