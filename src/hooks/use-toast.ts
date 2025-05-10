@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import {
   Toast,
@@ -14,6 +15,16 @@ type ToasterToast = ToastProps & {
   description?: React.ReactNode
   action?: ToastActionElement
 }
+
+// Define UseToastReturn type directly here instead of importing it
+export type UseToastReturn = {
+  toasts: ToasterToast[]
+  toast: (props: ToastOptions) => { id: string; dismiss: () => void; update: (props: ToasterToast) => void }
+  dismiss: (toastId?: string) => void
+}
+
+// Add ToastOptions type to fix the type error
+export type ToastOptions = Omit<ToasterToast, "id">
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -34,7 +45,7 @@ type ActionType = typeof actionTypes
 type Action =
   | {
       type: ActionType["ADD_TOAST"]
-      toast: Omit<ToasterToast, "id">
+      toast: ToastOptions
     }
   | {
       type: ActionType["UPDATE_TOAST"]
@@ -128,9 +139,8 @@ function dispatch(action: Action) {
   })
 }
 
-type Toast = Omit<ToasterToast, "id">
-
-function toast({ ...props }: Toast) {
+function toast(props: ToastOptions) {
+  // Generate an ID for the toast
   const id = genId()
 
   const update = (props: ToasterToast) =>
@@ -153,13 +163,13 @@ function toast({ ...props }: Toast) {
   })
 
   return {
-    id: id,
+    id,
     dismiss,
     update,
   }
 }
 
-function useToast() {
+function useToast(): UseToastReturn {
   const [state, setState] = React.useState<State>(memoryState)
 
   React.useEffect(() => {
@@ -180,4 +190,3 @@ function useToast() {
 }
 
 export { useToast, toast }
-export type { UseToastReturn } from "@/components/ui/use-toast"

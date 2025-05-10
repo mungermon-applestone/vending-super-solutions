@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Navigate, RouteObject } from 'react-router-dom';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
@@ -48,7 +47,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/products/edit/:id",
-    element: <ProductEditor />
+    element: <ContentfulRedirector 
+      contentType="Product" 
+      title="Edit Product"
+      description="Product editing has been moved to Contentful CMS. Please use Contentful to edit products."
+      backPath="/admin/products"
+    />
   },
   {
     path: "/admin/machines",
@@ -65,7 +69,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/machines/edit/:id",
-    element: <MachineEditor />
+    element: <ContentfulRedirector 
+      contentType="Machine" 
+      title="Edit Machine"
+      description="Machine editing has been moved to Contentful CMS. Please use Contentful to edit machines."
+      backPath="/admin/machines"
+    />
   },
   {
     path: "/admin/technology",
@@ -82,7 +91,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/technology/edit/:id",
-    element: <TechnologyEditor />
+    element: <ContentfulRedirector 
+      contentType="Technology" 
+      title="Edit Technology"
+      description="Technology editing has been moved to Contentful CMS. Please use Contentful to edit technologies."
+      backPath="/admin/technology"
+    />
   },
   {
     path: "/admin/business-goals",
@@ -99,7 +113,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/business-goals/edit/:id",
-    element: <BusinessGoalEditor />
+    element: <ContentfulRedirector 
+      contentType="Business Goal" 
+      title="Edit Business Goal"
+      description="Business goal editing has been moved to Contentful CMS. Please use Contentful to edit business goals."
+      backPath="/admin/business-goals"
+    />
   },
   {
     path: "/admin/landing-pages",

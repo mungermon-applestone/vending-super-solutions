@@ -116,7 +116,7 @@ const AdminDashboard = () => {
       toast({
         title: "Content Management Migration",
         description: "All content management has moved to Contentful CMS. This admin interface is being phased out.",
-        variant: "default", // Changed from "warning" to "default" to fix the type error
+        variant: "warning", // Now properly typed and supported
       });
     }
   }, [isAdmin, toast]);
