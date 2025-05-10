@@ -9,6 +9,7 @@ import MachineForm from '@/components/admin/machine-editor/MachineForm';
 import { MachineFormValues, MachineData } from '@/utils/machineMigration/types';
 import { useToast } from '@/hooks/use-toast';
 import { CMSMachine } from '@/types/cms';
+import DeprecatedInterfaceWarning from '@/components/admin/DeprecatedInterfaceWarning';
 
 const MachineEditor = () => {
   const { machineId } = useParams<{ machineId: string }>();
@@ -42,6 +43,13 @@ const MachineEditor = () => {
   
   const handleFormSubmit = async (data: MachineFormValues) => {
     console.log('[MachineEditor] Form submission with data:', data);
+    
+    // Show deprecation warning
+    toast({
+      title: "Deprecated Feature",
+      description: "Direct database operations are being phased out. Please use Contentful directly.",
+      variant: "destructive",
+    });
     
     try {
       if (isCreating) {
@@ -118,6 +126,11 @@ const MachineEditor = () => {
   return (
     <Layout>
       <div className="container mx-auto py-8">
+        <DeprecatedInterfaceWarning 
+          contentType="machine" 
+          message="This machine editor is being phased out. Content edits should be made directly in Contentful CMS. Changes made here may not be reflected on the website."
+        />
+        
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">
             {isCreating ? "Add New Machine" : `Edit Machine: ${machine?.title}`}

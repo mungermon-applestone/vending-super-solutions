@@ -1,17 +1,19 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, List } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { PlusCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface ContentTypeCardProps {
   title: string;
   description: string;
   icon: React.ReactNode;
   path: string;
-  createPath: string;
+  createPath?: string;
   colorClass?: string;
+  deprecated?: boolean;
 }
 
 const ContentTypeCard: React.FC<ContentTypeCardProps> = ({
@@ -20,34 +22,62 @@ const ContentTypeCard: React.FC<ContentTypeCardProps> = ({
   icon,
   path,
   createPath,
-  colorClass = "bg-gray-50 border-gray-200"
+  colorClass = "bg-gray-50 border-gray-200", 
+  deprecated = false
 }) => {
   return (
-    <Card className={`border ${colorClass} hover:shadow-md transition-shadow overflow-hidden`}>
-      <div className="p-6">
-        <div className="flex items-start space-x-4">
-          <div>{icon}</div>
-          <div>
-            <h3 className="text-lg font-semibold">{title}</h3>
-            <p className="text-sm text-muted-foreground">{description}</p>
+    <Card className={`border overflow-hidden ${colorClass}`}>
+      <CardContent className="pt-6">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-4">
+            <div className="p-2 bg-white rounded-md shadow-sm border border-gray-100">
+              {icon}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-lg">{title}</h3>
+                {deprecated && (
+                  <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
+                    Deprecated
+                  </Badge>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                {description}
+              </p>
+              {deprecated && (
+                <p className="text-xs text-amber-600 mt-2">
+                  Use Contentful CMS for management
+                </p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-      
-      <CardFooter className="bg-card border-t p-2 flex justify-between">
-        <Button asChild variant="ghost" size="sm">
+      </CardContent>
+      <CardFooter className="flex justify-between items-center px-6 py-4 bg-white/50 border-t">
+        <Button 
+          variant="outline" 
+          asChild 
+          size="sm"
+        >
           <Link to={path}>
-            <List className="h-4 w-4 mr-2" />
-            Manage
+            View All
           </Link>
         </Button>
         
-        <Button asChild variant="ghost" size="sm">
-          <Link to={createPath}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create
-          </Link>
-        </Button>
+        {createPath && (
+          <Button 
+            asChild 
+            size="sm"
+            variant={deprecated ? "outline" : "default"}
+            className={deprecated ? "text-amber-600 border-amber-300 hover:bg-amber-50" : ""}
+          >
+            <Link to={createPath}>
+              <PlusCircle className="mr-1 h-4 w-4" />
+              Create New
+            </Link>
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

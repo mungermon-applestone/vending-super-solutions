@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Plus, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useMachines, useDeleteMachine } from '@/hooks/useMachinesData';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import MachineHeader from '@/components/admin/machines/MachineHeader';
 import MachineTableRow from '@/components/admin/machines/MachineTableRow';
 import DeleteMachineDialog from '@/components/admin/machines/DeleteMachineDialog';
@@ -67,12 +68,19 @@ const AdminMachines = () => {
   const handleCloneMachine = async (machine: CMSMachine) => {
     try {
       setCloningMachineId(machine.id);
+      
+      toast({
+        title: "Deprecated Feature",
+        description: "Direct database operations are being phased out. Please use Contentful directly.",
+        variant: "destructive",
+      });
+      
       const clonedMachine = await cloneMachineMutation.mutateAsync(machine.id);
       
       if (clonedMachine) {
         toast({
           title: "Machine cloned",
-          description: `${machine.title} has been cloned successfully.`
+          description: `${machine.title} has been cloned successfully. Note that this functionality will be removed in the future.`
         });
       }
     } catch (error) {
@@ -95,12 +103,18 @@ const AdminMachines = () => {
     });
   };
 
-  // Admin pages should have access to the refresh functionality
-  // regardless of environment as they're only accessible to authenticated users
-
   return (
     <Layout>
       <div className="container mx-auto py-8">
+        <Alert variant="warning" className="mb-6 border-amber-300 bg-amber-50">
+          <AlertTriangle className="h-5 w-5 text-amber-600" />
+          <AlertTitle className="text-amber-800 font-medium">Deprecated Administration Interface</AlertTitle>
+          <AlertDescription className="text-amber-700">
+            <p>This machine administration interface is being phased out in favor of direct Contentful CMS management.</p>
+            <p className="mt-2">Changes made here will not affect content displayed on the website, which is now managed through Contentful.</p>
+          </AlertDescription>
+        </Alert>
+
         <MachineHeader onRefresh={handleRefresh} />
 
         {isLoading ? (
