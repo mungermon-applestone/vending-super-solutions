@@ -8,10 +8,44 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { MachineFormValues } from '@/utils/machineMigration/types';
-import { CMSMachine } from '@/types/cms';
+import { CMSMachine, CMSImage } from '@/types/cms';
 
 // In-memory storage for mocked operations
 let mockMachines: CMSMachine[] = [];
+
+/**
+ * Helper functions to transform data to correct types
+ */
+const transformImages = (images: any[] = []): CMSImage[] => {
+  return images.map(img => ({
+    id: img.id || uuidv4(),
+    url: img.url || '',
+    alt: img.alt || '',
+    width: img.width,
+    height: img.height
+  }));
+};
+
+const transformSpecs = (specs: any = {}): Record<string, string> => {
+  if (Array.isArray(specs)) {
+    // Convert array format to Record format
+    return specs.reduce((acc, spec) => {
+      acc[spec.key] = spec.value;
+      return acc;
+    }, {} as Record<string, string>);
+  }
+  return specs as Record<string, string>;
+};
+
+const transformFeatures = (features: any = []): string[] => {
+  if (Array.isArray(features)) {
+    // Convert array of objects to array of strings
+    return features.map(feature => 
+      typeof feature === 'string' ? feature : feature.text || ''
+    );
+  }
+  return features as string[];
+};
 
 /**
  * Mock implementation of machine create operation
@@ -27,12 +61,12 @@ export async function mockCreateMachine(machineData: MachineFormValues): Promise
     id,
     title: machineData.title,
     slug: machineData.slug,
-    type: machineData.type,
+    type: (machineData.type as "vending" | "locker") || "vending",
     temperature: machineData.temperature,
     description: machineData.description || '',
-    images: machineData.images || [],
-    specs: machineData.specs || {},
-    features: machineData.features || [],
+    images: transformImages(machineData.images || []),
+    specs: transformSpecs(machineData.specs || {}),
+    features: transformFeatures(machineData.features || []),
     visible: true,
     created_at: new Date().toISOString(),
   };
@@ -64,12 +98,12 @@ export async function mockUpdateMachine(id: string, machineData: MachineFormValu
     ...mockMachines[machineIndex],
     title: machineData.title,
     slug: machineData.slug,
-    type: machineData.type,
+    type: (machineData.type as "vending" | "locker") || "vending",
     temperature: machineData.temperature,
     description: machineData.description || '',
-    images: machineData.images || [],
-    specs: machineData.specs || {},
-    features: machineData.features || [],
+    images: transformImages(machineData.images || []),
+    specs: transformSpecs(machineData.specs || {}),
+    features: transformFeatures(machineData.features || []),
   };
   
   console.log(`[mockUpdateMachine] Updated mock machine with ID: ${id}`);
@@ -96,7 +130,7 @@ export async function mockDeleteMachine(id: string): Promise<boolean> {
 /**
  * Mock implementation of machine clone operation
  */
-export async function mockCloneMachine(id: string): Promise<string | null> {
+export async function mockCloneMachine(id: string): Promise<CMSMachine | null> {
   console.warn('[mockCloneMachine] This is a mock implementation. Use Contentful for production data.');
   
   // Find the machine to clone
@@ -122,5 +156,5 @@ export async function mockCloneMachine(id: string): Promise<string | null> {
   
   console.log(`[mockCloneMachine] Cloned mock machine with ID: ${id}, new ID: ${newId}`);
   
-  return newId;
+  return clonedMachine;
 }
