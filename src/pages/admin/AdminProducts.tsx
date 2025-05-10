@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import RunRegressionTest from '@/components/admin/testing/RunRegressionTest';
@@ -22,6 +23,7 @@ import { DeleteProductDialog } from '@/components/admin/products/DeleteProductDi
 import { useCloneProductType } from '@/hooks/cms/useCloneCMS';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import DeprecatedInterfaceWarning from '@/components/admin/DeprecatedInterfaceWarning';
 
 const AdminProducts: React.FC = () => {
   const queryClient = useQueryClient();
@@ -83,6 +85,12 @@ const AdminProducts: React.FC = () => {
   return (
     <Layout>
       <div className="container py-10">
+        <DeprecatedInterfaceWarning 
+          title="Deprecated Products Administration" 
+          message="This products administration interface is being phased out. Please use Contentful directly to manage product content."
+          showContentfulLink={true}
+        />
+        
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Products</h1>

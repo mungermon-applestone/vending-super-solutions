@@ -1,26 +1,16 @@
 
-// This is a placeholder implementation since we're using the external service
+import { mockUpdateBusinessGoal } from './mockAdapter';
+
+/**
+ * Update an existing business goal in the CMS
+ * @deprecated This method uses a mock implementation and will be removed in future versions.
+ * Please use Contentful directly for business goal content management.
+ */
 export async function updateBusinessGoal(id: string, data: any): Promise<boolean> {
-  console.log('[updateBusinessGoal] Using external service');
-  const { updateBusinessGoal: externalUpdate } = await import('@/services/businessGoal');
-  
-  // Create a mock toast object to satisfy the parameter requirement
-  const mockToast = {
-    toast: () => {
-      return {
-        id: "mock-id",
-        dismiss: () => {},
-        update: () => {}
-      };
-    },
-    dismiss: () => {},
-    toasts: []
-  };
-  
+  console.warn('[updateBusinessGoal] ⚠️ DEPRECATED: This method uses a mock implementation. Use Contentful for production data.');
   try {
-    // Call external update with correct parameters (data, id as goalSlug, mock toast)
-    await externalUpdate(data, id, mockToast);
-    return true;
+    // Use the mock implementation
+    return await mockUpdateBusinessGoal(id, data);
   } catch (error) {
     console.error('[updateBusinessGoal] Error:', error);
     return false;

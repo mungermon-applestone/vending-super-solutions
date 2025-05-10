@@ -1,7 +1,18 @@
 
-// This is a placeholder implementation since we're using the external service
+import { mockDeleteBusinessGoal } from './mockAdapter';
+
+/**
+ * Delete a business goal from the CMS
+ * @deprecated This method uses a mock implementation and will be removed in future versions.
+ * Please use Contentful directly for business goal content management.
+ */
 export async function deleteBusinessGoal(id: string): Promise<boolean> {
-  console.log('[deleteBusinessGoal] Using external service');
-  const { deleteBusinessGoal: externalDelete } = await import('@/services/businessGoal');
-  return await externalDelete(id);
+  console.warn('[deleteBusinessGoal] ⚠️ DEPRECATED: This method uses a mock implementation. Use Contentful for production data.');
+  try {
+    // Use the mock implementation
+    return await mockDeleteBusinessGoal(id);
+  } catch (error) {
+    console.error('[deleteBusinessGoal] Error:', error);
+    throw error;
+  }
 }

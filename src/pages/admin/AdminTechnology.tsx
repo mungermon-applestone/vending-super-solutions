@@ -21,6 +21,7 @@ import { useCloneTechnology } from '@/hooks/cms/useCloneCMS';
 import TechnologyTableRow from '@/components/admin/technology/TechnologyTableRow';
 import DeleteTechnologyDialog from '@/components/admin/technology/DeleteTechnologyDialog';
 import { CMSTechnology } from '@/types/cms';
+import DeprecatedInterfaceWarning from '@/components/admin/DeprecatedInterfaceWarning';
 
 const AdminTechnology = () => {
   const navigate = useNavigate();
@@ -119,6 +120,12 @@ const AdminTechnology = () => {
   return (
     <Layout>
       <div className="container py-10">
+        <DeprecatedInterfaceWarning 
+          title="Deprecated Technology Administration" 
+          message="This technology administration interface is being phased out. Please use Contentful directly to manage technology content."
+          showContentfulLink={true}
+        />
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold">Technology Management</h1>

@@ -1,46 +1,18 @@
 
-import { CMSMachine } from '@/types/cms';
-import { handleCMSError, logCMSOperation } from '../types';
-import { cloneContentItem, cloneRelatedItems } from '../../utils/cloneContent';
+import { mockCloneMachine } from './mockAdapter';
 
 /**
- * Clone a machine - mock implementation
- * @param id ID of the machine to clone
- * @returns The cloned machine or null if failed
+ * Clone an existing machine in the CMS
+ * @deprecated This method uses a mock implementation and will be removed in future versions.
+ * Please use Contentful directly for machine content management.
  */
-export async function cloneMachine(id: string): Promise<CMSMachine | null> {
+export async function cloneMachine(id: string): Promise<string | null> {
+  console.warn('[cloneMachine] ⚠️ DEPRECATED: This method uses a mock implementation. Use Contentful for production data.');
   try {
-    logCMSOperation('cloneMachine', 'Machine', `Starting clone operation for machine with ID: ${id}`);
-    
-    // Clone the main machine using our mock implementation
-    const newMachine = await cloneContentItem<CMSMachine>(
-      'machines', // This is just a label now, not an actual table
-      id,
-      'Machine'
-    );
-    
-    if (!newMachine) {
-      throw new Error('Failed to clone machine');
-    }
-    
-    // Clone related items (just logs, no actual operations)
-    await Promise.all([
-      // Clone images
-      cloneRelatedItems('machine_images', 'machine_id', id, newMachine.id),
-      
-      // Clone features
-      cloneRelatedItems('machine_features', 'machine_id', id, newMachine.id),
-      
-      // Clone specifications
-      cloneRelatedItems('machine_specs', 'machine_id', id, newMachine.id),
-      
-      // Clone deployment examples
-      cloneRelatedItems('deployment_examples', 'machine_id', id, newMachine.id)
-    ]);
-    
-    return newMachine;
+    // Use the mock implementation
+    return await mockCloneMachine(id);
   } catch (error) {
-    handleCMSError('cloneMachine', 'Machine', error);
-    return null;
+    console.error(`[cloneMachine] Error:`, error);
+    throw null;
   }
 }
