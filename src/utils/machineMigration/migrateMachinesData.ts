@@ -126,13 +126,15 @@ export const migrateMachinesData = async (): Promise<MigrationResult> => {
 
 /**
  * Helper function to add related data for a machine
+ * MOCK IMPLEMENTATION: This function simulates adding related data for machines
  * @param machineId The ID of the machine
  * @param machineData The machine data
  * @param errors Array to collect errors
  */
 async function addMachineRelatedData(machineId: string, machineData: MachinePlaceholder, errors: string[]) {
-  // Add machine images
+  // Mock adding machine images
   if (machineData.images.length > 0) {
+    console.log(`MOCK: Adding ${machineData.images.length} images for machine ${machineData.title}`);
     const imageInserts = machineData.images.map((image, index) => ({
       machine_id: machineId,
       url: image.url,
@@ -142,21 +144,14 @@ async function addMachineRelatedData(machineId: string, machineData: MachinePlac
       display_order: index
     }));
     
-    const { error: imageError } = await supabase
-      .from('machine_images')
-      .insert(imageInserts);
-    
-    if (imageError) {
-      console.error(`Error adding images for machine ${machineData.title}:`, imageError);
-      errors.push(`Failed to add images for ${machineData.title}: ${imageError.message}`);
-      // Continue despite image error
-    } else {
-      console.log(`Added ${imageInserts.length} images for machine ${machineData.title}`);
-    }
+    // Log the mock operation instead of executing it
+    console.log(`MOCK: Would insert ${imageInserts.length} images for machine ${machineData.title}`);
+    console.log('MOCK: Sample image data:', imageInserts[0]);
   }
   
-  // Add machine specs
+  // Mock adding machine specs
   if (machineData.specs) {
+    console.log(`MOCK: Adding specs for machine ${machineData.title}`);
     const specInserts = Object.entries(machineData.specs)
       .filter(([_, value]) => value !== undefined)
       .map(([key, value]) => ({
@@ -166,43 +161,29 @@ async function addMachineRelatedData(machineId: string, machineData: MachinePlac
       }));
     
     if (specInserts.length > 0) {
-      const { error: specError } = await supabase
-        .from('machine_specs')
-        .insert(specInserts);
-      
-      if (specError) {
-        console.error(`Error adding specs for machine ${machineData.title}:`, specError);
-        errors.push(`Failed to add specs for ${machineData.title}: ${specError.message}`);
-        // Continue despite spec error
-      } else {
-        console.log(`Added ${specInserts.length} specs for machine ${machineData.title}`);
-      }
+      console.log(`MOCK: Would insert ${specInserts.length} specs for machine ${machineData.title}`);
+      console.log('MOCK: Sample spec data:', specInserts[0]);
     }
   }
   
-  // Add machine features
+  // Mock adding machine features
   if (machineData.features.length > 0) {
+    console.log(`MOCK: Adding ${machineData.features.length} features for machine ${machineData.title}`);
     const featureInserts = machineData.features.map((feature, index) => ({
       machine_id: machineId,
       feature,
       display_order: index
     }));
     
-    const { error: featureError } = await supabase
-      .from('machine_features')
-      .insert(featureInserts);
-    
-    if (featureError) {
-      console.error(`Error adding features for machine ${machineData.title}:`, featureError);
-      errors.push(`Failed to add features for ${machineData.title}: ${featureError.message}`);
-      // Continue despite feature error
-    } else {
-      console.log(`Added ${featureInserts.length} features for machine ${machineData.title}`);
+    console.log(`MOCK: Would insert ${featureInserts.length} features for machine ${machineData.title}`);
+    if (featureInserts.length > 0) {
+      console.log('MOCK: Sample feature data:', featureInserts[0]);
     }
   }
   
-  // Add deployment examples
+  // Mock adding deployment examples
   if (machineData.deploymentExamples.length > 0) {
+    console.log(`MOCK: Adding ${machineData.deploymentExamples.length} deployment examples for machine ${machineData.title}`);
     const exampleInserts = machineData.deploymentExamples.map((example, index) => ({
       machine_id: machineId,
       title: example.title,
@@ -212,16 +193,9 @@ async function addMachineRelatedData(machineId: string, machineData: MachinePlac
       display_order: index
     }));
     
-    const { error: exampleError } = await supabase
-      .from('deployment_examples')
-      .insert(exampleInserts);
-    
-    if (exampleError) {
-      console.error(`Error adding deployment examples for machine ${machineData.title}:`, exampleError);
-      errors.push(`Failed to add deployment examples for ${machineData.title}: ${exampleError.message}`);
-      // Continue despite example error
-    } else {
-      console.log(`Added ${exampleInserts.length} deployment examples for machine ${machineData.title}`);
+    console.log(`MOCK: Would insert ${exampleInserts.length} deployment examples for machine ${machineData.title}`);
+    if (exampleInserts.length > 0) {
+      console.log('MOCK: Sample deployment example data:', exampleInserts[0]);
     }
   }
 }
