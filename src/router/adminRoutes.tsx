@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Navigate, RouteObject } from 'react-router-dom';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
@@ -12,13 +13,6 @@ import AdminMedia from '@/pages/admin/AdminMedia';
 import SignIn from '@/pages/admin/SignIn';
 import ContentfulManagement from '@/pages/admin/ContentfulManagement';
 import PerformanceTesting from '@/pages/admin/PerformanceTesting';
-import ProductEditor from '@/pages/ProductEditor';
-import MachineEditor from '@/pages/MachineEditor';
-import TechnologyEditor from '@/pages/TechnologyEditor';
-import BusinessGoalEditor from '@/pages/admin/BusinessGoalEditor';
-import BlogEditor from '@/pages/admin/BlogEditor';
-import LandingPageEditor from '@/pages/admin/LandingPageEditor';
-import CaseStudyEditor from '@/pages/admin/CaseStudyEditor';
 import StrapiSetupPage from '@/pages/admin/StrapiSetupPage';
 import StrapiConnectionDebug from '@/pages/admin/StrapiConnectionDebug';
 import ContentfulRedirector from '@/components/admin/contentful/ContentfulRedirector';
@@ -135,7 +129,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/landing-pages/edit/:id",
-    element: <LandingPageEditor />
+    element: <ContentfulRedirector 
+      contentType="Landing Page"
+      title="Edit Landing Page"
+      description="Landing page editing has been moved to Contentful CMS. Please use Contentful to edit landing pages."
+      backPath="/admin/landing-pages"
+    />
   },
   {
     path: "/admin/blog",
@@ -152,7 +151,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/blog/edit/:id",
-    element: <BlogEditor />
+    element: <ContentfulRedirector
+      contentType="Blog Post"
+      title="Edit Blog Post"
+      description="Blog post editing has been moved to Contentful CMS. Please use Contentful to edit blog posts."
+      backPath="/admin/blog"
+    />
   },
   {
     path: "/admin/case-studies",
@@ -169,7 +173,12 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/case-studies/edit/:id",
-    element: <CaseStudyEditor />
+    element: <ContentfulRedirector
+      contentType="Case Study"
+      title="Edit Case Study"
+      description="Case study editing has been moved to Contentful CMS. Please use Contentful to edit case studies."
+      backPath="/admin/case-studies"
+    />
   },
   {
     path: "/admin/media",

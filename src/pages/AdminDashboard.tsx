@@ -6,6 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Package, Goal, Database, ExternalLink, AlertTriangle, Settings } from 'lucide-react';
+import ContentfulButton from '@/components/admin/ContentfulButton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/context/AuthContext';
 
 const AdminDashboard = () => {
@@ -24,17 +26,14 @@ const AdminDashboard = () => {
     if (isAdmin) {
       toast({
         title: "Content Management",
-        description: "Welcome to the content management dashboard. Use Contentful for all content updates.",
+        description: "Welcome to the content management dashboard. All content management has been moved to Contentful CMS.",
+        variant: "warning",
       });
     }
   }, [isAdmin, toast]);
 
   const handleOpenContentful = () => {
     window.open("https://app.contentful.com/", "_blank");
-  };
-
-  const handleOpenConfig = () => {
-    navigate('/admin/contentful-config');
   };
 
   if (isLoading) {
@@ -63,20 +62,16 @@ const AdminDashboard = () => {
           </p>
         </div>
 
-        <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mb-8 rounded-md">
-          <div className="flex gap-3">
-            <AlertTriangle className="h-6 w-6 text-amber-500" />
-            <div>
-              <h3 className="font-medium text-amber-800">Legacy Admin Portal</h3>
-              <p className="text-amber-700 mt-1">
-                The internal admin portal is being phased out. Please use Contentful for all content management. 
-                Direct database operations will be removed in future updates.
-              </p>
-            </div>
-          </div>
-        </div>
+        <Alert variant="warning" className="mb-8">
+          <AlertTriangle className="h-6 w-6" />
+          <AlertTitle>Legacy Admin Portal</AlertTitle>
+          <AlertDescription>
+            The internal admin portal is being phased out. Please use Contentful for all content management. 
+            Direct database operations will be removed in future updates.
+          </AlertDescription>
+        </Alert>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
           <Card className="border-2 border-blue-100 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="bg-blue-50 border-b border-blue-100">
               <CardTitle className="flex items-center gap-2">
@@ -110,38 +105,48 @@ const AdminDashboard = () => {
                 Configure your Contentful API keys, environment IDs, and other settings 
                 needed to connect your website to the Contentful CMS.
               </p>
-              <Button onClick={handleOpenConfig} variant="outline" className="w-full">
+              <Button 
+                onClick={() => navigate('/admin/contentful')} 
+                variant="outline" 
+                className="w-full"
+              >
                 Manage Configuration
               </Button>
             </CardContent>
           </Card>
         </div>
 
-        <div id="legacy-notice" className="mt-16 border border-gray-200 rounded-lg p-6 bg-gray-50">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Legacy Admin Sections</h2>
+        <div className="mt-10 border-t pt-6">
+          <h2 className="text-xl font-semibold mb-4">Legacy Admin Sections</h2>
           <p className="text-gray-600 mb-6">
-            The following legacy admin sections are deprecated and will be removed in a future update.
-            Please transition all content management to Contentful.
+            The following admin sections are deprecated and will be removed in a future update.
+            All content management should now be done directly in Contentful CMS.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {[
               { name: "Products", path: "/admin/products", icon: <Package className="h-4 w-4" /> },
               { name: "Business Goals", path: "/admin/business-goals", icon: <Goal className="h-4 w-4" /> },
-              // More legacy sections can be listed here
+              // Add other legacy sections as needed
             ].map((item) => (
               <Button 
                 key={item.name}
-                variant="ghost" 
+                variant="outline" 
                 className="justify-start text-gray-500 border border-gray-200 hover:bg-gray-100"
                 onClick={() => navigate(item.path)}
               >
                 {item.icon}
                 <span className="ml-2">{item.name}</span>
-                <span className="ml-auto text-xs bg-gray-200 px-2 py-1 rounded-full">Deprecated</span>
               </Button>
             ))}
           </div>
+        </div>
+
+        <div className="mt-10 text-center">
+          <ContentfulButton 
+            className="bg-blue-600 hover:bg-blue-700 text-white" 
+            variant="default"
+          />
         </div>
       </div>
     </Layout>

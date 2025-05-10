@@ -9,6 +9,7 @@ interface ContentfulButtonProps extends Omit<ButtonProps, 'onClick'> {
   className?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
+  customText?: string;
 }
 
 const ContentfulButton: React.FC<ContentfulButtonProps> = ({ 
@@ -16,12 +17,17 @@ const ContentfulButton: React.FC<ContentfulButtonProps> = ({
   className,
   variant = "outline",
   size = "sm",
+  customText,
   ...props 
 }) => {
   const handleOpenContentful = () => {
     // Open Contentful, potentially with a specific content type focused if provided
     window.open("https://app.contentful.com/", "_blank");
   };
+
+  // Determine button text
+  const buttonText = customText || 
+    (contentType ? `Manage ${contentType} in Contentful` : 'Open Contentful');
 
   return (
     <Button 
@@ -32,7 +38,7 @@ const ContentfulButton: React.FC<ContentfulButtonProps> = ({
       {...props}
     >
       <ExternalLink className="mr-2 h-4 w-4" />
-      {contentType ? `Manage ${contentType} in Contentful` : 'Open Contentful'}
+      {buttonText}
     </Button>
   );
 };
