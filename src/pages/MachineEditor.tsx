@@ -8,6 +8,7 @@ import MachineForm from '@/components/admin/machine-editor/MachineForm';
 import { MachineFormValues, MachineData } from '@/utils/machineMigration/types';
 import { useToast } from '@/hooks/use-toast';
 import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
+import { CMSMachine } from '@/types/cms';
 
 const MachineEditor = () => {
   const { machineId } = useParams<{ machineId: string }>();
@@ -42,6 +43,12 @@ const MachineEditor = () => {
   const handleFormSubmit = async (data: MachineFormValues) => {
     console.log('[MachineEditor] Form submission with data:', data);
     
+    // Convert form values to compatible types for the API
+    const machineData: Partial<CMSMachine> = {
+      ...data,
+      type: data.type as "vending" | "locker" // Force type assertion to match CMSMachine
+    };
+    
     // Show deprecation warning
     toast({
       title: "Deprecated Feature",
@@ -52,11 +59,14 @@ const MachineEditor = () => {
     try {
       if (isCreating) {
         console.log('[MachineEditor] Creating new machine');
-        await createMachineMutation.mutateAsync(data);
+        await createMachineMutation.mutateAsync(machineData);
         console.log('[MachineEditor] Machine created successfully');
       } else if (machineId) {
         console.log(`[MachineEditor] Updating machine with ID: ${machineId}`);
-        await updateMachineMutation.mutateAsync({ id: machineId, machineData: data });
+        await updateMachineMutation.mutateAsync({ 
+          id: machineId, 
+          data: machineData 
+        });
         console.log('[MachineEditor] Machine updated successfully');
       }
       

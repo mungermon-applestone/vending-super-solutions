@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import ContentfulButton from '../ContentfulButton';
 
 interface DeprecatedAdminLayoutProps {
   children: React.ReactNode;
@@ -12,6 +13,7 @@ interface DeprecatedAdminLayoutProps {
   description?: string;
   contentType: string;
   backPath?: string;
+  showContentfulButton?: boolean;
 }
 
 const DeprecatedAdminLayout: React.FC<DeprecatedAdminLayoutProps> = ({
@@ -19,7 +21,8 @@ const DeprecatedAdminLayout: React.FC<DeprecatedAdminLayoutProps> = ({
   title,
   description,
   contentType,
-  backPath = "/admin/dashboard"
+  backPath = "/admin/dashboard",
+  showContentfulButton = false
 }) => {
   const navigate = useNavigate();
 
@@ -48,9 +51,17 @@ const DeprecatedAdminLayout: React.FC<DeprecatedAdminLayoutProps> = ({
         <Alert variant="warning" className="mb-6">
           <AlertTriangle className="h-5 w-5" />
           <AlertTitle>Deprecated Interface</AlertTitle>
-          <AlertDescription>
-            This {contentType} admin interface is deprecated and will be removed in a future version.
-            Please use Contentful to manage {contentType.toLowerCase()} content.
+          <AlertDescription className="flex flex-col gap-2">
+            <p>
+              This {contentType} admin interface is deprecated and will be removed in a future version.
+              Please use Contentful to manage {contentType.toLowerCase()} content.
+            </p>
+            
+            {showContentfulButton && (
+              <div className="mt-2">
+                <ContentfulButton variant="outline" size="sm" />
+              </div>
+            )}
           </AlertDescription>
         </Alert>
         

@@ -1,13 +1,13 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  getMachines, 
-  getMachineBySlug, 
-  getMachineById,
-  createNewMachine,
-  updateExistingMachine,
-  removeExistingMachine,
-  cloneMachine
+  fetchMachines,
+  fetchMachineBySlug,
+  fetchMachineById,
+  createMachine,
+  updateMachine,
+  deleteMachine,
+  cloneMachine as cloneMachineApi
 } from '@/services/cms/contentTypes/machines';
 import { CMSMachine } from '@/types/cms';
 import { useToast } from './use-toast';
@@ -21,7 +21,7 @@ export const useMachines = (filters?: {
 }) => {
   return useQuery({
     queryKey: ['machines', filters],
-    queryFn: async () => getMachines(filters || {}),
+    queryFn: async () => fetchMachines(filters || {}),
   });
 };
 
@@ -29,7 +29,7 @@ export const useMachines = (filters?: {
 export const useMachineBySlug = (slug: string | undefined) => {
   return useQuery({
     queryKey: ['machine', slug],
-    queryFn: async () => slug ? getMachineBySlug(slug) : null,
+    queryFn: async () => slug ? fetchMachineBySlug(slug) : null,
     enabled: !!slug,
   });
 };
@@ -38,7 +38,7 @@ export const useMachineBySlug = (slug: string | undefined) => {
 export const useMachineById = (id: string | undefined) => {
   return useQuery({
     queryKey: ['machine', id],
-    queryFn: async () => id ? getMachineById(id) : null,
+    queryFn: async () => id ? fetchMachineById(id) : null,
     enabled: !!id,
   });
 };
@@ -49,7 +49,7 @@ export const useCreateMachine = () => {
   const { toast } = useToast();
   
   return useMutation({
-    mutationFn: async (machineData: Partial<CMSMachine>) => createNewMachine(machineData),
+    mutationFn: async (machineData: Partial<CMSMachine>) => createMachine(machineData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['machines'] });
       toast({
@@ -74,7 +74,7 @@ export const useUpdateMachine = () => {
   
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<CMSMachine> }) => 
-      updateExistingMachine(id, data),
+      updateMachine(id, data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['machines'] });
       queryClient.invalidateQueries({ queryKey: ['machine', data.id] });
@@ -100,7 +100,7 @@ export const useDeleteMachine = () => {
   const { toast } = useToast();
   
   return useMutation({
-    mutationFn: async (id: string) => removeExistingMachine(id),
+    mutationFn: async (id: string) => deleteMachine(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['machines'] });
       toast({
@@ -124,7 +124,7 @@ export const useCloneMachine = () => {
   const { toast } = useToast();
   
   return useMutation({
-    mutationFn: async (id: string) => cloneMachine(id),
+    mutationFn: async (id: string) => cloneMachineApi(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['machines'] });
       toast({
