@@ -1,15 +1,13 @@
 
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useMachineById, useCreateMachine, useUpdateMachine } from '@/hooks/useMachinesData';
 import MachineForm from '@/components/admin/machine-editor/MachineForm';
 import { MachineFormValues, MachineData } from '@/utils/machineMigration/types';
 import { useToast } from '@/hooks/use-toast';
-import { CMSMachine } from '@/types/cms';
-import DeprecatedInterfaceWarning from '@/components/admin/DeprecatedInterfaceWarning';
+import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
 
 const MachineEditor = () => {
   const { machineId } = useParams<{ machineId: string }>();
@@ -84,66 +82,57 @@ const MachineEditor = () => {
   // Handle loading errors
   if (machineError && !isCreating) {
     return (
-      <Layout>
-        <div className="container mx-auto py-8">
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-            <div className="flex">
-              <div>
-                <p className="text-red-700 font-medium">Error loading machine</p>
-                <p className="text-red-600">
-                  {machineError instanceof Error
-                    ? machineError.message
-                    : "Failed to load machine data. Please try again."}
-                </p>
-              </div>
+      <DeprecatedAdminLayout
+        title="Error Loading Machine"
+        description="Could not load the machine data"
+        contentType="Machine"
+        backPath="/admin/machines"
+      >
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+          <div className="flex">
+            <div>
+              <p className="text-red-700 font-medium">Error loading machine</p>
+              <p className="text-red-600">
+                {machineError instanceof Error
+                  ? machineError.message
+                  : "Failed to load machine data. Please try again."}
+              </p>
             </div>
           </div>
-          <div className="flex justify-end">
-            <Button
-              onClick={() => navigate('/admin/machines')}
-              variant="outline"
-            >
-              Back to Machines
-            </Button>
-          </div>
         </div>
-      </Layout>
+      </DeprecatedAdminLayout>
     );
   }
 
   if (isLoading && !isCreating) {
     return (
-      <Layout>
-        <div className="container mx-auto py-8">
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-          </div>
+      <DeprecatedAdminLayout
+        title="Loading Machine Data"
+        description="Please wait while the machine data loads"
+        contentType="Machine"
+        backPath="/admin/machines"
+        showContentfulButton={false}
+      >
+        <div className="flex justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
         </div>
-      </Layout>
+      </DeprecatedAdminLayout>
     );
   }
 
   return (
-    <Layout>
-      <div className="container mx-auto py-8">
-        <DeprecatedInterfaceWarning 
-          contentType="machine" 
-          message="This machine editor is being phased out. Content edits should be made directly in Contentful CMS. Changes made here may not be reflected on the website."
-        />
-        
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">
-            {isCreating ? "Add New Machine" : `Edit Machine: ${machine?.title}`}
-          </h1>
-        </div>
-
-        <MachineForm 
-          machine={machine} 
-          isCreating={isCreating} 
-          onSubmit={handleFormSubmit} 
-        />
-      </div>
-    </Layout>
+    <DeprecatedAdminLayout
+      title={isCreating ? "Add New Machine" : `Edit Machine: ${machine?.title}`}
+      description="This machine editor is being phased out. Content edits should be made directly in Contentful CMS."
+      contentType="Machine"
+      backPath="/admin/machines"
+    >
+      <MachineForm 
+        machine={machine} 
+        isCreating={isCreating} 
+        onSubmit={handleFormSubmit} 
+      />
+    </DeprecatedAdminLayout>
   );
 };
 

@@ -10,19 +10,53 @@ interface ContentfulButtonProps extends Omit<ButtonProps, 'onClick'> {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
   customText?: string;
+  contentfulSpaceId?: string;
+  contentfulEnvironmentId?: string;
+  customUrl?: string;
 }
 
+/**
+ * A button component that links to Contentful, optionally focusing on a specific content type
+ */
 const ContentfulButton: React.FC<ContentfulButtonProps> = ({ 
   contentType, 
   className,
   variant = "outline",
   size = "sm",
   customText,
+  contentfulSpaceId,
+  contentfulEnvironmentId,
+  customUrl,
   ...props 
 }) => {
   const handleOpenContentful = () => {
-    // Open Contentful, potentially with a specific content type focused if provided
-    window.open("https://app.contentful.com/", "_blank");
+    // Construct the Contentful URL - if custom URL provided, use that
+    if (customUrl) {
+      window.open(customUrl, "_blank");
+      return;
+    }
+    
+    // Base Contentful URL
+    let contentfulUrl = "https://app.contentful.com/";
+    
+    // If space ID is provided, use it to create a more specific URL
+    if (contentfulSpaceId) {
+      contentfulUrl += `spaces/${contentfulSpaceId}/`;
+      
+      // If environment is also provided, add it to the URL
+      if (contentfulEnvironmentId) {
+        contentfulUrl += `environments/${contentfulEnvironmentId}/`;
+      }
+      
+      // If content type is provided, add it to the URL
+      if (contentType) {
+        // Convert contentType to kebab case if it contains spaces (e.g., "Business Goal" -> "business-goal")
+        const contentTypeSlug = contentType.toLowerCase().replace(/\s+/g, '-');
+        contentfulUrl += `entries/?contentTypeId=${contentTypeSlug}`;
+      }
+    }
+
+    window.open(contentfulUrl, "_blank");
   };
 
   // Determine button text

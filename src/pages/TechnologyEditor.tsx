@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useTechnologyData } from '@/hooks/useTechnologyData';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import TechnologyEditorForm from '@/components/admin/technology-editor/TechnologyEditorForm';
 import { createTechnology, updateTechnology } from '@/services/cms/contentTypes/technologies';
+import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
 
 const TechnologyEditor: React.FC = () => {
   const { toast } = useToast();
@@ -41,20 +41,14 @@ const TechnologyEditor: React.FC = () => {
   }, [error, toast]);
 
   React.useEffect(() => {
-    // Show editor mode notification
+    // Show deprecation notification
     toast({
-      title: isNewTechnology ? 'Creating New Technology' : 'Editing Technology',
-      description: isNewTechnology
-        ? 'You are creating a new technology. This will be visible on the site after saving.'
-        : 'You are editing an existing technology. Changes will be visible on the site after saving.',
+      title: "Deprecated Editor",
+      description: "This technology editor is being phased out. Please use Contentful CMS for content management.",
+      variant: "warning",
       duration: 5000,
     });
-    
-    console.log('TechnologyEditor mounted:', {
-      isNewTechnology,
-      technologySlug
-    });
-  }, [toast, isNewTechnology, technologySlug]);
+  }, [toast]);
 
   const handleSaveTechnology = async (formData: any) => {
     console.log('Technology Editor: handleSaveTechnology called with data:', formData);
@@ -108,54 +102,38 @@ const TechnologyEditor: React.FC = () => {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto py-10">
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/admin/technology')}
-            className="mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Technologies
-          </Button>
-          
-          <h1 className="text-3xl font-bold">
-            {isNewTechnology ? 'Create New Technology' : 'Edit Technology'}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {isNewTechnology
-              ? 'Add a new technology to your platform'
-              : `Editing: ${isLoading ? '...' : technology?.title}`}
-          </p>
-        </div>
-
-        {saveError && (
-          <div className="bg-destructive/15 p-4 rounded-md mb-4 flex items-start gap-2">
-            <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
-            <div>
-              <h4 className="font-medium text-destructive">Error</h4>
-              <p className="text-sm text-destructive/90">{saveError}</p>
-            </div>
+    <DeprecatedAdminLayout
+      title={isNewTechnology ? 'Create New Technology' : `Edit Technology: ${isLoading ? '...' : technology?.title}`}
+      description="This technology editor is being phased out. Content edits should be made directly in Contentful CMS."
+      contentType="Technology"
+      backPath="/admin/technology"
+    >
+      {saveError && (
+        <div className="bg-destructive/15 p-4 rounded-md mb-4 flex items-start gap-2">
+          <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
+          <div>
+            <h4 className="font-medium text-destructive">Error</h4>
+            <p className="text-sm text-destructive/90">{saveError}</p>
           </div>
-        )}
+        </div>
+      )}
 
-        {isLoading && !isNewTechnology ? (
-          <Card className="p-6">
-            <div className="space-y-4 animate-pulse">
-              <div className="h-8 bg-gray-200 rounded-md w-1/3"></div>
-              <div className="h-20 bg-gray-200 rounded-md"></div>
-              <div className="h-40 bg-gray-200 rounded-md"></div>
-            </div>
-          </Card>
-        ) : (
-          <TechnologyEditorForm
-            initialData={isNewTechnology ? null : technology}
-            onSave={handleSaveTechnology}
-            isLoading={isSaving}
-          />
-        )}
-      </div>
-    </Layout>
+      {isLoading && !isNewTechnology ? (
+        <Card className="p-6">
+          <div className="space-y-4 animate-pulse">
+            <div className="h-8 bg-gray-200 rounded-md w-1/3"></div>
+            <div className="h-20 bg-gray-200 rounded-md"></div>
+            <div className="h-40 bg-gray-200 rounded-md"></div>
+          </div>
+        </Card>
+      ) : (
+        <TechnologyEditorForm
+          initialData={isNewTechnology ? null : technology}
+          onSave={handleSaveTechnology}
+          isLoading={isSaving}
+        />
+      )}
+    </DeprecatedAdminLayout>
   );
 };
 
