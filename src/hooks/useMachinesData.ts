@@ -43,12 +43,14 @@ export const useMachineById = (id: string | undefined) => {
 /**
  * Hook to fetch a machine by slug
  */
-export const useMachineBySlug = (type: string | undefined, slug: string | undefined) => {
+export const useMachineBySlug = (idOrSlug: string | undefined) => {
   return useQuery({
-    queryKey: ['machine', type, slug],
+    queryKey: ['machine', idOrSlug],
     queryFn: async () => {
-      // For now, we'll use the existing machines function and filter by type and slug
-      const machines = await fetchMachines({ type, slug });
+      if (!idOrSlug) return null;
+      
+      // For now, we'll use the existing machines function and filter by slug
+      const machines = await fetchMachines({ slug: idOrSlug });
       
       if (machines.length > 0) {
         // Log machine data to help diagnose thumbnail issues
@@ -58,11 +60,19 @@ export const useMachineBySlug = (type: string | undefined, slug: string | undefi
           hasThumbnail: !!machines[0].thumbnail,
           thumbnailUrl: machines[0].thumbnail?.url || 'none'
         });
+        
+        return machines[0];
       }
       
-      return machines.length > 0 ? machines[0] : null;
+      // If not found by slug, try by ID
+      try {
+        return await fetchMachineById(idOrSlug);
+      } catch (error) {
+        console.error(`[useMachineBySlug] Error fetching machine by ID ${idOrSlug}:`, error);
+        return null;
+      }
     },
-    enabled: !!type && !!slug,
+    enabled: !!idOrSlug,
   });
 };
 
