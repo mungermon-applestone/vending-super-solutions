@@ -1,199 +1,104 @@
 
-import React from 'react';
-import { Navigate, RouteObject } from 'react-router-dom';
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import AdminProducts from '@/pages/admin/AdminProducts';
-import AdminMachines from '@/pages/admin/AdminMachines';
-import AdminTechnology from '@/pages/admin/AdminTechnology';
-import AdminBusinessGoals from '@/pages/admin/AdminBusinessGoals';
-import AdminLandingPages from '@/pages/admin/AdminLandingPages';
-import AdminBlog from '@/pages/admin/AdminBlog';
-import AdminCaseStudies from '@/pages/admin/AdminCaseStudies';
-import AdminMedia from '@/pages/admin/AdminMedia';
-import SignIn from '@/pages/admin/SignIn';
-import ContentfulManagement from '@/pages/admin/ContentfulManagement';
-import PerformanceTesting from '@/pages/admin/PerformanceTesting';
-import ContentfulRedirector from '@/components/admin/contentful/ContentfulRedirector';
+import React, { lazy } from 'react';
+import { RouteObject } from 'react-router-dom';
 
+// Lazy load admin pages
+const AdminDashboard = lazy(() => import('@/pages/AdminDashboard'));
+const AdminProducts = lazy(() => import('@/pages/admin/AdminProducts'));
+const ProductEditor = lazy(() => import('@/pages/ProductEditor'));
+const AdminBusinessGoals = lazy(() => import('@/pages/AdminBusinessGoals'));
+const BusinessGoalEditor = lazy(() => import('@/pages/BusinessGoalEditor'));
+const AdminMachines = lazy(() => import('@/pages/admin/AdminMachines'));
+const MachineEditor = lazy(() => import('@/pages/MachineEditor'));
+const AdminTechnology = lazy(() => import('@/pages/AdminTechnology'));
+const TechnologyEditor = lazy(() => import('@/pages/TechnologyEditor'));
+const AdminBlog = lazy(() => import('@/pages/admin/AdminBlog'));
+const AdminCaseStudies = lazy(() => import('@/pages/admin/AdminCaseStudies'));
+const AdminMedia = lazy(() => import('@/pages/admin/AdminMedia'));
+const ContentfulManagement = lazy(() => import('@/pages/admin/ContentfulManagement'));
+const SignInPage = lazy(() => import('@/pages/admin/SignInPage'));
+
+// Admin routes
 export const adminRoutes: RouteObject[] = [
   {
-    path: "/admin",
-    element: <Navigate to="/admin/dashboard" replace />
+    path: 'dashboard',
+    element: <AdminDashboard />,
+  },
+  // Product routes
+  {
+    path: 'products',
+    element: <AdminProducts />,
   },
   {
-    path: "/admin/dashboard",
-    element: <AdminDashboard />
+    path: 'products/new',
+    element: <ProductEditor />,
   },
   {
-    path: "/admin/products",
-    element: <AdminProducts />
+    path: 'products/edit/:slug',
+    element: <ProductEditor />,
+  },
+  // Business goals routes
+  {
+    path: 'business-goals',
+    element: <AdminBusinessGoals />,
   },
   {
-    path: "/admin/products/new",
-    element: <ContentfulRedirector 
-      contentType="Product" 
-      title="Create New Product"
-      description="Product creation has been moved to Contentful CMS. Please use Contentful to create and manage products."
-      backPath="/admin/products"
-    />
+    path: 'business-goals/new',
+    element: <BusinessGoalEditor />,
   },
   {
-    path: "/admin/products/edit/:id",
-    element: <ContentfulRedirector 
-      contentType="Product" 
-      title="Edit Product"
-      description="Product editing has been moved to Contentful CMS. Please use Contentful to edit products."
-      backPath="/admin/products"
-    />
+    path: 'business-goals/edit/:slug',
+    element: <BusinessGoalEditor />,
+  },
+  // Machine routes
+  {
+    path: 'machines',
+    element: <AdminMachines />,
   },
   {
-    path: "/admin/machines",
-    element: <AdminMachines />
+    path: 'machines/new',
+    element: <MachineEditor />,
   },
   {
-    path: "/admin/machines/new",
-    element: <ContentfulRedirector 
-      contentType="Machine" 
-      title="Create New Machine"
-      description="Machine creation has been moved to Contentful CMS. Please use Contentful to create and manage machines."
-      backPath="/admin/machines"
-    />
+    path: 'machines/edit/:machineId',
+    element: <MachineEditor />,
+  },
+  // Technology routes
+  {
+    path: 'technology',
+    element: <AdminTechnology />,
   },
   {
-    path: "/admin/machines/edit/:id",
-    element: <ContentfulRedirector 
-      contentType="Machine" 
-      title="Edit Machine"
-      description="Machine editing has been moved to Contentful CMS. Please use Contentful to edit machines."
-      backPath="/admin/machines"
-    />
+    path: 'technology/new',
+    element: <TechnologyEditor />,
   },
   {
-    path: "/admin/technology",
-    element: <AdminTechnology />
+    path: 'technology/edit/:technologySlug',
+    element: <TechnologyEditor />,
   },
+  // Blog routes
   {
-    path: "/admin/technology/new",
-    element: <ContentfulRedirector 
-      contentType="Technology" 
-      title="Create New Technology"
-      description="Technology creation has been moved to Contentful CMS. Please use Contentful to create and manage technologies."
-      backPath="/admin/technology"
-    />
+    path: 'blog',
+    element: <AdminBlog />,
   },
+  // Case studies routes
   {
-    path: "/admin/technology/edit/:id",
-    element: <ContentfulRedirector 
-      contentType="Technology" 
-      title="Edit Technology"
-      description="Technology editing has been moved to Contentful CMS. Please use Contentful to edit technologies."
-      backPath="/admin/technology"
-    />
+    path: 'case-studies',
+    element: <AdminCaseStudies />,
   },
+  // Media routes
   {
-    path: "/admin/business-goals",
-    element: <AdminBusinessGoals />
+    path: 'media',
+    element: <AdminMedia />,
   },
+  // Contentful management
   {
-    path: "/admin/business-goals/new",
-    element: <ContentfulRedirector 
-      contentType="Business Goal" 
-      title="Create New Business Goal"
-      description="Business goal creation has been moved to Contentful CMS. Please use Contentful to create and manage business goals."
-      backPath="/admin/business-goals"
-    />
+    path: 'contentful',
+    element: <ContentfulManagement />,
   },
+  // Auth routes
   {
-    path: "/admin/business-goals/edit/:id",
-    element: <ContentfulRedirector 
-      contentType="Business Goal" 
-      title="Edit Business Goal"
-      description="Business goal editing has been moved to Contentful CMS. Please use Contentful to edit business goals."
-      backPath="/admin/business-goals"
-    />
+    path: 'sign-in',
+    element: <SignInPage />,
   },
-  {
-    path: "/admin/landing-pages",
-    element: <AdminLandingPages />
-  },
-  {
-    path: "/admin/landing-pages/new",
-    element: <ContentfulRedirector
-      contentType="Landing Page"
-      title="Create New Landing Page"
-      description="Landing page creation has been moved to Contentful CMS. Please use Contentful to create and manage landing pages."
-      backPath="/admin/landing-pages"
-    />
-  },
-  {
-    path: "/admin/landing-pages/edit/:id",
-    element: <ContentfulRedirector 
-      contentType="Landing Page"
-      title="Edit Landing Page"
-      description="Landing page editing has been moved to Contentful CMS. Please use Contentful to edit landing pages."
-      backPath="/admin/landing-pages"
-    />
-  },
-  {
-    path: "/admin/blog",
-    element: <AdminBlog />
-  },
-  {
-    path: "/admin/blog/new",
-    element: <ContentfulRedirector
-      contentType="Blog Post"
-      title="Create New Blog Post"
-      description="Blog post creation has been moved to Contentful CMS. Please use Contentful to create and manage blog posts."
-      backPath="/admin/blog"
-    />
-  },
-  {
-    path: "/admin/blog/edit/:id",
-    element: <ContentfulRedirector
-      contentType="Blog Post"
-      title="Edit Blog Post"
-      description="Blog post editing has been moved to Contentful CMS. Please use Contentful to edit blog posts."
-      backPath="/admin/blog"
-    />
-  },
-  {
-    path: "/admin/case-studies",
-    element: <AdminCaseStudies />
-  },
-  {
-    path: "/admin/case-studies/new",
-    element: <ContentfulRedirector
-      contentType="Case Study"
-      title="Create New Case Study"
-      description="Case study creation has been moved to Contentful CMS. Please use Contentful to create and manage case studies."
-      backPath="/admin/case-studies"
-    />
-  },
-  {
-    path: "/admin/case-studies/edit/:id",
-    element: <ContentfulRedirector
-      contentType="Case Study"
-      title="Edit Case Study"
-      description="Case study editing has been moved to Contentful CMS. Please use Contentful to edit case studies."
-      backPath="/admin/case-studies"
-    />
-  },
-  {
-    path: "/admin/media",
-    element: <AdminMedia />
-  },
-  {
-    path: "/admin/sign-in",
-    element: <SignIn />
-  },
-  {
-    path: "/admin/contentful",
-    element: <ContentfulManagement />
-  },
-  {
-    path: "/admin/performance-testing",
-    element: <PerformanceTesting />
-  }
 ];
-
-export default adminRoutes;

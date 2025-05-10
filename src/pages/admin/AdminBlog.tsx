@@ -1,157 +1,118 @@
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
-import { Loader2, Plus } from 'lucide-react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { useBlogPosts, useDeleteBlogPost, useCloneBlogPost } from '@/hooks/useBlogData';
-import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent } from '@/components/ui/card';
+import { fetchBlogPosts } from '@/services/cms/contentTypes/blogPosts';
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import BlogHeader from '@/components/admin/blog/BlogHeader';
-import BlogPostTableRow from '@/components/admin/blog/BlogPostTableRow';
-import DeleteBlogPostDialog from '@/components/admin/blog/DeleteBlogPostDialog';
-import { BlogPost } from '@/types/blog';
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Plus, Edit, ChevronRight, Calendar } from 'lucide-react';
+import { formatDate } from '@/utils/date';
+import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
 
 const AdminBlog = () => {
-  const { toast } = useToast();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [postToDelete, setPostToDelete] = useState<{id: string, title: string} | null>(null);
-
-  // For cloning functionality
-  const cloneBlogPostMutation = useCloneBlogPost();
-  const [cloningPostId, setCloningPostId] = useState<string | null>(null);
-
-  const { data: posts = [], isLoading, refetch } = useBlogPosts();
-  const deleteMutation = useDeleteBlogPost();
-
-  const handleDeleteClick = (post: BlogPost) => {
-    console.log("[AdminBlog] Delete clicked for post:", post);
-    setPostToDelete({
-      id: post.id,
-      title: post.title
-    });
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!postToDelete) return;
-    
-    try {
-      console.log("[AdminBlog] Confirming delete for post:", postToDelete);
-      await deleteMutation.mutateAsync(postToDelete.id);
-      setDeleteDialogOpen(false);
-      setPostToDelete(null);
-      toast({
-        title: "Post deleted",
-        description: `${postToDelete.title} has been deleted successfully.`
-      });
-    } catch (error) {
-      console.error('[AdminBlog] Error deleting post:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete post. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+  const navigate = useNavigate();
   
-  const handleClonePost = async (post: BlogPost) => {
-    try {
-      setCloningPostId(post.id);
-      const clonedPost = await cloneBlogPostMutation.mutateAsync(post.id);
-      
-      if (clonedPost) {
-        toast({
-          title: "Post cloned",
-          description: `${post.title} has been cloned successfully.`
-        });
-      }
-    } catch (error) {
-      console.error('[AdminBlog] Error cloning post:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to clone post. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setCloningPostId(null);
-    }
-  };
-
-  const handleRefresh = () => {
-    refetch();
-    toast({
-      title: "Refreshing...",
-      description: "Refreshing blog posts data from the database",
-    });
-  };
+  // Fetch all blog posts
+  const { data: blogPosts = [], isLoading } = useQuery({
+    queryKey: ['blogPosts'],
+    queryFn: fetchBlogPosts
+  });
 
   return (
-    <Layout>
-      <div className="container mx-auto py-8">
-        <BlogHeader onRefresh={handleRefresh} />
+    <DeprecatedAdminLayout
+      title="Blog Management"
+      description="View all blog posts (read-only)"
+      contentType="Blog Post"
+      backPath="/admin/dashboard"
+    >
+      <div className="flex justify-between mb-6">
+        <div></div>
+        <Button 
+          onClick={() => window.open('https://app.contentful.com/', '_blank')}
+          className="flex items-center gap-2"
+        >
+          <Plus size={16} />
+          Add New Blog Post in Contentful
+        </Button>
+      </div>
 
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-          </div>
-        ) : posts && posts.length > 0 ? (
-          <div className="bg-white rounded-md shadow overflow-x-auto">
-            <div className="p-4 border-b">
-              <p className="text-sm text-gray-500">
-                Showing {posts.length} post{posts.length !== 1 && 's'}
-              </p>
+      <Card className="shadow-sm">
+        <CardContent className="pt-6">
+          {isLoading ? (
+            <div className="text-center py-10">Loading blog posts...</div>
+          ) : blogPosts.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-muted-foreground mb-4">No blog posts found</p>
+              <Button onClick={() => window.open('https://app.contentful.com/', '_blank')}>
+                Create Your First Blog Post
+              </Button>
             </div>
+          ) : (
             <Table>
+              <TableCaption>A list of all blog posts (read-only view).</TableCaption>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[300px]">Title</TableHead>
-                  <TableHead>Slug</TableHead>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Date</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Published Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {posts.map((post) => (
-                  <BlogPostTableRow
-                    key={post.id}
-                    post={post}
-                    onDeleteClick={() => handleDeleteClick(post)}
-                    onCloneClick={() => handleClonePost(post)}
-                    isCloningId={cloningPostId}
-                  />
+                {blogPosts.map((post) => (
+                  <TableRow key={post.id}>
+                    <TableCell className="font-medium">{post.title}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3 text-muted-foreground" />
+                        <span>{formatDate(post.publishDate || post.createdAt)}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={post.published ? "default" : "outline"}>
+                        {post.published ? 'Published' : 'Draft'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open('https://app.contentful.com/', '_blank')}
+                          className="h-8 px-2 w-8"
+                          title="Edit blog post in Contentful"
+                        >
+                          <Edit size={16} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate(`/blog/${post.slug}`)}
+                          className="h-8 px-2 w-8"
+                          title="View blog post"
+                        >
+                          <ChevronRight size={16} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </div>
-        ) : (
-          <div className="bg-white rounded-md shadow p-8 text-center">
-            <p className="text-gray-500 mb-4">No blog posts found</p>
-            <Button asChild>
-              <Link to="/admin/blog/new">
-                <Plus className="h-4 w-4 mr-2" /> Create Your First Post
-              </Link>
-            </Button>
-          </div>
-        )}
-
-        <DeleteBlogPostDialog
-          isOpen={deleteDialogOpen}
-          setIsOpen={setDeleteDialogOpen}
-          postToDelete={postToDelete}
-          onConfirmDelete={confirmDelete}
-          isDeleting={deleteMutation.isPending}
-        />
-      </div>
-    </Layout>
+          )}
+        </CardContent>
+      </Card>
+    </DeprecatedAdminLayout>
   );
 };
 
