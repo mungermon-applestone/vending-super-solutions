@@ -1,4 +1,3 @@
-
 import { ContentProviderConfig, ContentProviderType } from '../types';
 import { TechnologyAdapter } from './types';
 import { contentfulTechnologyAdapter } from './contentfulTechnologyAdapter';
@@ -15,7 +14,7 @@ export function getTechnologyAdapter(config: ContentProviderConfig): TechnologyA
   try {
     // If USE_SUPABASE_CMS is false, always return contentful adapter
     if (!USE_SUPABASE_CMS) {
-      console.log('[technologyAdapterFactory] Supabase CMS is disabled, using Contentful technology adapter');
+      console.log('[technologyAdapterFactory] Using Contentful technology adapter');
       return contentfulTechnologyAdapter;
     }
     

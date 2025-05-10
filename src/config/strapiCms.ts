@@ -2,7 +2,8 @@
 /**
  * Strapi CMS Configuration
  * 
- * This file contains all configuration settings for Strapi CMS integration.
+ * DEPRECATED: This file is deprecated as we are transitioning from Strapi to Contentful.
+ * It will be removed in a future release. Please use Contentful APIs instead.
  */
 
 // Base URL for the Strapi API
@@ -48,6 +49,7 @@ export const STRAPI_CONFIG = {
 
 /**
  * Helper to build Strapi query parameters for API requests
+ * @deprecated Use Contentful query builders instead
  */
 export function buildStrapiQueryParams(options: {
   populate?: string | string[] | Record<string, any>,
@@ -56,6 +58,8 @@ export function buildStrapiQueryParams(options: {
   pagination?: { page?: number, pageSize?: number },
   fields?: string[]
 }): URLSearchParams {
+  console.warn('buildStrapiQueryParams is deprecated. Please use Contentful query builders instead.');
+  
   const params = new URLSearchParams();
   
   // Handle population
