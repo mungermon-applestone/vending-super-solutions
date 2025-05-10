@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -110,9 +109,8 @@ const AdminBusinessGoals = () => {
     <Layout>
       <div className="container py-10">
         <DeprecatedInterfaceWarning 
-          title="Deprecated Business Goals Administration" 
+          contentType="Business Goals Administration"
           message="This business goals administration interface is being phased out. Please use Contentful directly to manage business goals content."
-          showContentfulLink={true}
         />
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -121,9 +120,8 @@ const AdminTechnology = () => {
     <Layout>
       <div className="container py-10">
         <DeprecatedInterfaceWarning 
-          title="Deprecated Technology Administration" 
+          contentType="Technology Administration"
           message="This technology administration interface is being phased out. Please use Contentful directly to manage technology content."
-          showContentfulLink={true}
         />
 
         <div className="flex items-center justify-between mb-8">

@@ -24,9 +24,8 @@ const CMSConfigInfo: React.FC = () => {
       </CardHeader>
       <CardContent>
         <DeprecatedInterfaceWarning 
-          title="Legacy CMS Panel" 
+          contentType="CMS Config" 
           message="This admin panel is being phased out. Please use Contentful directly to manage content."
-          showContentfulLink={true}
         />
         
         <div className="flex flex-col gap-2 mt-4">

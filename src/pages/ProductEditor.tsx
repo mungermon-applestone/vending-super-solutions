@@ -5,6 +5,7 @@ import Layout from '@/components/layout/Layout';
 import ProductEditorForm from '@/components/admin/product-editor/ProductEditorForm';
 import useAdminAlert from '@/hooks/useAdminAlert';
 import { useProductTypeFromUrl } from '@/hooks/useProductTypeFromUrl';
+import DeprecatedInterfaceWarning from '@/components/admin/DeprecatedInterfaceWarning';
 
 const ProductEditorPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,12 +24,19 @@ const ProductEditorPage = () => {
   
   return (
     <Layout>
-      <ProductEditorForm 
-        key={`editor-${productSlug || 'new'}`} 
-        productSlug={productSlug === 'new' ? undefined : productSlug}
-        uuid={uuid}
-        isEditMode={isEditMode}
-      />
+      <div className="container mx-auto px-4 py-8">
+        <DeprecatedInterfaceWarning 
+          contentType="product" 
+          message="This product editor is being phased out. Content edits should be made directly in Contentful CMS."
+        />
+        
+        <ProductEditorForm 
+          key={`editor-${productSlug || 'new'}`} 
+          productSlug={productSlug === 'new' ? undefined : productSlug}
+          uuid={uuid}
+          isEditMode={isEditMode}
+        />
+      </div>
     </Layout>
   );
 };

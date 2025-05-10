@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import RunRegressionTest from '@/components/admin/testing/RunRegressionTest';
@@ -80,15 +79,12 @@ const AdminProducts: React.FC = () => {
     navigate(`/admin/products/edit/${slug}`);
   };
 
-  // Admin pages should always show refresh controls regardless of environment
-
   return (
     <Layout>
       <div className="container py-10">
         <DeprecatedInterfaceWarning 
-          title="Deprecated Products Administration" 
+          contentType="Products Administration"
           message="This products administration interface is being phased out. Please use Contentful directly to manage product content."
-          showContentfulLink={true}
         />
         
         <div className="flex items-center justify-between mb-6">
