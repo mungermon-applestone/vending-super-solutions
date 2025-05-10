@@ -1,82 +1,58 @@
 
-import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
- * Update a product's features
+ * Update a product's features - MOCK IMPLEMENTATION
  */
 export const updateProductFeatures = async (data: ProductFormData, productId: string): Promise<void> => {
-  console.log('[featureHelpers] Updating features for product ID:', productId);
+  console.log('[featureHelpers] MOCK: Updating features for product ID:', productId);
   
   try {
-    // Get existing features to manage their associated images
-    const { data: existingFeatures, error: fetchError } = await supabase
-      .from('product_type_features')
-      .select('id')
-      .eq('product_type_id', productId);
+    // Mock getting existing features
+    console.log('[featureHelpers] MOCK: Fetching existing features for product');
+    const mockExistingFeatures = [
+      { id: uuidv4() },
+      { id: uuidv4() }
+    ];
+    console.log('[featureHelpers] MOCK: Found existing features:', mockExistingFeatures);
 
-    if (fetchError) {
-      console.error('[featureHelpers] Error fetching existing features:', fetchError);
-      throw new Error(fetchError.message);
-    }
-
-    // First delete all existing features (and cascade to their images)
-    const { error: deleteError } = await supabase
-      .from('product_type_features')
-      .delete()
-      .eq('product_type_id', productId);
-
-    if (deleteError) {
-      console.error('[featureHelpers] Error deleting existing features:', deleteError);
-      throw new Error(deleteError.message);
-    }
-
-    // Insert each new feature and its screenshot
+    // Mock deletion
+    console.log('[featureHelpers] MOCK: Deleting existing features');
+    
+    // Mock insert of each feature
     for (let i = 0; i < data.features.length; i++) {
       const feature = data.features[i];
       
       // Skip features with empty title or description
       if (!feature.title.trim() || !feature.description.trim()) {
-        console.log('[featureHelpers] Skipping empty feature at index:', i);
+        console.log('[featureHelpers] MOCK: Skipping empty feature at index:', i);
         continue;
       }
       
-      // Insert the feature
-      const { data: newFeature, error: featureError } = await supabase
-        .from('product_type_features')
-        .insert({
-          product_type_id: productId,
-          title: feature.title,
-          description: feature.description,
-          icon: feature.icon || 'check',
-          display_order: i
-        })
-        .select()
-        .single();
+      // Mock insert the feature
+      const mockFeatureId = uuidv4();
+      console.log(`[featureHelpers] MOCK: Inserted feature with ID: ${mockFeatureId}`);
+      console.log('[featureHelpers] MOCK: Feature data:', {
+        product_type_id: productId,
+        title: feature.title,
+        description: feature.description,
+        icon: feature.icon || 'check',
+        display_order: i
+      });
 
-      if (featureError) {
-        console.error('[featureHelpers] Error inserting feature:', featureError);
-        throw new Error(featureError.message);
-      }
-
-      // If screenshot data is provided, insert it
+      // If screenshot data is provided, mock insert it
       if (feature.screenshotUrl || feature.screenshotAlt) {
-        const { error: screenshotError } = await supabase
-          .from('product_type_feature_images')
-          .insert({
-            feature_id: newFeature.id,
-            url: feature.screenshotUrl || '',
-            alt: feature.screenshotAlt || ''
-          });
-
-        if (screenshotError) {
-          console.error('[featureHelpers] Error inserting feature screenshot:', screenshotError);
-          // Continue with other features even if this screenshot fails
-        }
+        console.log('[featureHelpers] MOCK: Inserting feature screenshot');
+        console.log('[featureHelpers] MOCK: Screenshot data:', {
+          feature_id: mockFeatureId,
+          url: feature.screenshotUrl || '',
+          alt: feature.screenshotAlt || ''
+        });
       }
     }
 
-    console.log(`[featureHelpers] ${data.features.length} features processed successfully`);
+    console.log(`[featureHelpers] MOCK: ${data.features.length} features processed successfully`);
   } catch (error) {
     console.error('[featureHelpers] Error in updateProductFeatures:', error);
     throw error;
