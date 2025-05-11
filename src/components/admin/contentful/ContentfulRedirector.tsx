@@ -1,11 +1,12 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, ArrowLeft } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
 
 interface ContentfulRedirectorProps {
   contentType: string;
@@ -16,112 +17,114 @@ interface ContentfulRedirectorProps {
   backPath?: string;
   contentfulSpaceId?: string;
   contentfulEnvironmentId?: string;
+  contentTypeId?: string;
 }
 
 /**
- * Component to redirect users from legacy admin editors to Contentful
- * Part of the CMS migration strategy to phase out direct database operations
+ * Component that provides a transition page to redirect users to Contentful
+ * Used when a legacy admin page has been completely deprecated
  */
 const ContentfulRedirector: React.FC<ContentfulRedirectorProps> = ({
   contentType,
-  title,
+  title = "Content Management Moved",
   description,
-  contentfulUrl = 'https://app.contentful.com/',
+  contentfulUrl,
   showBackButton = true,
-  backPath = '/admin',
+  backPath = "/admin/dashboard",
   contentfulSpaceId,
-  contentfulEnvironmentId
+  contentfulEnvironmentId = "master",
+  contentTypeId
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Display toast notification on mount
+  // Default description if none provided
+  const defaultDescription = `All ${contentType} management has moved to Contentful. Please use Contentful to manage this content.`;
+  const displayDescription = description || defaultDescription;
+
   useEffect(() => {
+    // Log this redirection
+    logDeprecationWarning(
+      "ContentfulRedirector",
+      `User attempted to access deprecated admin page for ${contentType}`,
+      "Use Contentful directly"
+    );
+    
+    // Show toast
     toast({
-      title: "Admin Interface Deprecated",
-      description: `${contentType} management has been moved to Contentful CMS.`,
-      variant: "destructive",
+      title: "Redirecting to Contentful",
+      description: displayDescription,
+      variant: "info",
     });
-  }, [toast, contentType]);
-  
-  // Derived values
-  const displayTitle = title || `${contentType} Management Moved`;
-  const displayDescription = description || 
-    `The ${contentType.toLowerCase()} editor has been deprecated. Please use Contentful CMS to manage ${contentType.toLowerCase()} content.`;
-  
-  // Construct the Contentful URL with space and environment if provided
-  const getContentfulUrl = () => {
-    if (contentfulUrl !== 'https://app.contentful.com/') {
+  }, [contentType, displayDescription, toast]);
+
+  const getContentfulUrl = (): string => {
+    if (contentfulUrl) {
       return contentfulUrl;
     }
     
-    // Base Contentful URL
     let url = "https://app.contentful.com/";
     
-    // If space ID is provided, add it
     if (contentfulSpaceId) {
       url += `spaces/${contentfulSpaceId}/`;
       
-      // If environment is also provided, add it
       if (contentfulEnvironmentId) {
         url += `environments/${contentfulEnvironmentId}/`;
       }
       
-      // Add entries endpoint
-      url += "entries";
-      
-      // Convert contentType to kebab case for filtering
-      const contentTypeSlug = contentType.toLowerCase().replace(/\s+/g, '-');
-      url += `?contentTypeId=${contentTypeSlug}`;
+      if (contentTypeId) {
+        url += `entries/?contentTypeId=${contentTypeId}`;
+      } else {
+        url += "entries/";
+      }
     }
     
     return url;
   };
-  
+
   const handleOpenContentful = () => {
     window.open(getContentfulUrl(), "_blank");
   };
-  
+
   const handleBack = () => {
     navigate(backPath);
   };
-  
+
   return (
     <Layout>
-      <div className="container mx-auto py-10">
-        <Card className="max-w-2xl mx-auto shadow-md">
-          <CardHeader className="bg-amber-50 border-b border-amber-200">
-            <CardTitle className="text-amber-800">{displayTitle}</CardTitle>
-            <CardDescription className="text-amber-700">
-              Migration to Contentful CMS
+      <div className="container mx-auto px-4 py-16 max-w-3xl">
+        <Card className="shadow-md border-2 border-blue-100">
+          <CardHeader className="bg-blue-50 border-b border-blue-100">
+            <CardTitle className="text-xl text-blue-800">{title}</CardTitle>
+            <CardDescription className="text-blue-700">
+              {displayDescription}
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="p-4 border border-amber-200 rounded-md bg-amber-50">
-                <p className="text-amber-800 mb-2 font-medium">
-                  Content Management Update
-                </p>
-                <p className="text-amber-700 mb-4">
-                  {displayDescription}
-                </p>
-              </div>
+          <CardContent className="pt-8 pb-8">
+            <div className="flex flex-col items-center text-center">
+              <p className="mb-6 text-gray-600">
+                The {contentType} management interface has been moved to Contentful CMS.
+                Please click the button below to open Contentful and manage your content there.
+              </p>
               
-              <div className="flex flex-col space-y-4">
+              <Button 
+                onClick={handleOpenContentful} 
+                className="bg-blue-600 hover:bg-blue-700 mb-8"
+                size="lg"
+              >
+                <ExternalLink className="mr-2 h-5 w-5" />
+                Open {contentType} in Contentful
+              </Button>
+              
+              {showBackButton && (
                 <Button 
-                  onClick={handleOpenContentful}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  variant="ghost" 
+                  onClick={handleBack}
                 >
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Open Contentful
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Admin Dashboard
                 </Button>
-                
-                {showBackButton && (
-                  <Button variant="outline" onClick={handleBack}>
-                    Return to Admin Dashboard
-                  </Button>
-                )}
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -131,3 +134,4 @@ const ContentfulRedirector: React.FC<ContentfulRedirectorProps> = ({
 };
 
 export default ContentfulRedirector;
+

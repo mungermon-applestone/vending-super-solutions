@@ -9,6 +9,7 @@
  */
 
 import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
+import { STRAPI_API_URL, STRAPI_API_KEY, STRAPI_ENDPOINTS } from '@/legacy/utils/legacyUtils';
 
 // Log deprecation warning when this module is imported
 const warnOnImport = () => {
@@ -22,13 +23,6 @@ const warnOnImport = () => {
 // Execute warning
 warnOnImport();
 
-// Mock Strapi configuration values
-export const STRAPI_API_URL = '';
-export const STRAPI_API_KEY = '';
-export const STRAPI_ENDPOINTS = {
-  PRODUCTS: '/products',
-  TECHNOLOGIES: '/technologies',
-  BUSINESS_GOALS: '/business-goals',
-  MACHINES: '/machines'
-};
+// Re-export the legacy constants
+export { STRAPI_API_URL, STRAPI_API_KEY, STRAPI_ENDPOINTS };
 
