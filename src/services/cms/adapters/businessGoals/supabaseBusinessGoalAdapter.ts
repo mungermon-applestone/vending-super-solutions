@@ -1,149 +1,64 @@
 
-import { CMSBusinessGoal, CMSFeature } from '@/types/cms';
-import { BusinessGoalAdapter, BusinessGoalCreateInput, BusinessGoalUpdateInput } from './types';
-import { USE_SUPABASE_CMS } from '@/config/featureFlags';
-
 /**
- * Implementation of the Business Goal Adapter for Supabase
- * Completely disabled when USE_SUPABASE_CMS is false
+ * @deprecated ARCHIVED ADAPTER - Do not use in new development
+ * 
+ * This adapter is deprecated as we are transitioning to Contentful.
+ * This file provides a minimal implementation that logs operations 
+ * and returns empty results.
  */
+
+import { CMSBusinessGoal } from '@/types/cms';
+import { BusinessGoalAdapter, BusinessGoalCreateInput, BusinessGoalUpdateInput } from './types';
+import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
+import { contentfulBusinessGoalAdapter } from './contentfulBusinessGoalAdapter';
+
+// Log deprecation warning when this module is imported
+const warnDeprecation = () => {
+  logDeprecationWarning(
+    "supabaseBusinessGoalAdapter", 
+    "This adapter is deprecated and will be removed in a future release.",
+    "Please use contentfulBusinessGoalAdapter directly."
+  );
+};
+
+// Create a proxy that logs deprecation warnings and delegates to Contentful
 export const supabaseBusinessGoalAdapter: BusinessGoalAdapter = {
-  getAll: async (): Promise<CMSBusinessGoal[]> => {
-    console.log('[supabaseBusinessGoalAdapter] Fetching all business goals');
-    
-    if (!USE_SUPABASE_CMS) {
-      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning empty array');
-      return [];
-    }
-    
-    // We won't actually import functions when CMS is disabled
-    console.log('[supabaseBusinessGoalAdapter] Would fetch business goals from Supabase if CMS was enabled');
-    return [];
+  getAll: async (filters) => {
+    warnDeprecation();
+    return await contentfulBusinessGoalAdapter.getAll(filters);
   },
   
-  getBySlug: async (slug: string): Promise<CMSBusinessGoal | null> => {
-    console.log(`[supabaseBusinessGoalAdapter] Fetching business goal with slug: ${slug}`);
-    
-    if (!USE_SUPABASE_CMS) {
-      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning null');
-      return null;
-    }
-    
-    console.log('[supabaseBusinessGoalAdapter] Would fetch business goal by slug from Supabase if CMS was enabled');
-    return null;
+  getBySlug: async (slug) => {
+    warnDeprecation();
+    return await contentfulBusinessGoalAdapter.getBySlug(slug);
   },
   
-  getById: async (id: string): Promise<CMSBusinessGoal | null> => {
-    console.log(`[supabaseBusinessGoalAdapter] Fetching business goal with ID: ${id}`);
-    
-    if (!USE_SUPABASE_CMS) {
-      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning null');
-      return null;
-    }
-    
-    console.log('[supabaseBusinessGoalAdapter] Would fetch business goal by ID from Supabase if CMS was enabled');
-    return null;
+  getById: async (id) => {
+    warnDeprecation();
+    return await contentfulBusinessGoalAdapter.getById(id);
   },
   
-  create: async (data: BusinessGoalCreateInput): Promise<CMSBusinessGoal> => {
-    console.log('[supabaseBusinessGoalAdapter] Creating new business goal:', data);
-    
-    if (!USE_SUPABASE_CMS) {
-      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning mock data');
-      return {
-        id: 'mock-id',
-        title: data.title,
-        slug: data.slug,
-        description: data.description || '',
-        visible: data.visible || true,
-        icon: data.icon || '',
-        benefits: data.benefits || [],
-        features: []
-      };
-    }
-    
-    console.log('[supabaseBusinessGoalAdapter] Would create business goal in Supabase if CMS was enabled');
-    return {
-      id: 'mock-id',
-      title: data.title,
-      slug: data.slug,
-      description: data.description || '',
-      visible: data.visible || true,
-      icon: data.icon || '',
-      benefits: data.benefits || [],
-      features: []
-    };
+  create: async (data) => {
+    warnDeprecation();
+    logDeprecationWarning("supabaseBusinessGoalAdapter.create", "Write operations are disabled");
+    throw new Error("This operation is deprecated. Please use Contentful directly.");
   },
   
-  update: async (id: string, data: BusinessGoalUpdateInput): Promise<CMSBusinessGoal> => {
-    console.log(`[supabaseBusinessGoalAdapter] Updating business goal with ID: ${id}`, data);
-    
-    if (!USE_SUPABASE_CMS) {
-      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning mock data');
-      return {
-        id: id,
-        title: data.title,
-        slug: data.slug,
-        description: data.description || '',
-        visible: data.visible || true,
-        icon: data.icon || '',
-        benefits: data.benefits || [],
-        features: []
-      };
-    }
-    
-    console.log('[supabaseBusinessGoalAdapter] Would update business goal in Supabase if CMS was enabled');
-    return {
-      id: id,
-      title: data.title,
-      slug: data.slug,
-      description: data.description || '',
-      visible: data.visible || true,
-      icon: data.icon || '',
-      benefits: data.benefits || [],
-      features: []
-    };
+  update: async (id, data) => {
+    warnDeprecation();
+    logDeprecationWarning("supabaseBusinessGoalAdapter.update", "Write operations are disabled");
+    throw new Error("This operation is deprecated. Please use Contentful directly.");
   },
   
-  delete: async (id: string): Promise<boolean> => {
-    console.log(`[supabaseBusinessGoalAdapter] Deleting business goal with ID: ${id}`);
-    
-    if (!USE_SUPABASE_CMS) {
-      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning true');
-      return true;
-    }
-    
-    console.log('[supabaseBusinessGoalAdapter] Would delete business goal from Supabase if CMS was enabled');
-    return true;
+  delete: async (id) => {
+    warnDeprecation();
+    logDeprecationWarning("supabaseBusinessGoalAdapter.delete", "Write operations are disabled");
+    throw new Error("This operation is deprecated. Please use Contentful directly.");
   },
   
-  clone: async (id: string): Promise<CMSBusinessGoal> => {
-    console.log(`[supabaseBusinessGoalAdapter] Cloning business goal with ID: ${id}`);
-    
-    if (!USE_SUPABASE_CMS) {
-      console.log('[supabaseBusinessGoalAdapter] Supabase CMS is disabled, returning mock data');
-      return {
-        id: 'mock-id',
-        title: 'Cloned Goal',
-        slug: 'cloned-goal',
-        description: '',
-        visible: true,
-        icon: '',
-        benefits: [],
-        features: []
-      };
-    }
-    
-    console.log('[supabaseBusinessGoalAdapter] Would clone business goal in Supabase if CMS was enabled');
-    return {
-      id: 'mock-id',
-      title: 'Cloned Goal',
-      slug: 'cloned-goal',
-      description: '',
-      visible: true,
-      icon: '',
-      benefits: [],
-      features: []
-    };
+  clone: async (id) => {
+    warnDeprecation();
+    logDeprecationWarning("supabaseBusinessGoalAdapter.clone", "Write operations are disabled");
+    throw new Error("This operation is deprecated. Please use Contentful directly.");
   }
 };

@@ -14,24 +14,29 @@ import {
   Database,
   BarChart,
   AlertTriangle,
-  CheckSquare
+  CheckSquare,
+  Check,
+  Clock
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { CONTENT_TYPE_MIGRATION_STATUS } from '@/services/cms/constants';
 
 interface NavigationItem {
   name: string;
   href: string;
   icon: LucideIcon;
+  contentType?: string; // Optional reference to content type for migration status
 }
 
 const navigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-  { name: 'Products', href: '/admin/products', icon: Package },
-  { name: 'Machines', href: '/admin/machines', icon: Monitor },
-  { name: 'Technology', href: '/admin/technology', icon: CircuitBoard },
-  { name: 'Business Goals', href: '/admin/business-goals', icon: Target },
-  { name: 'Landing Pages', href: '/admin/landing-pages', icon: FileText },
-  { name: 'Blog', href: '/admin/blog', icon: BookOpen },
-  { name: 'Case Studies', href: '/admin/case-studies', icon: BriefcaseBusiness },
+  { name: 'Products', href: '/admin/products', icon: Package, contentType: 'product' },
+  { name: 'Machines', href: '/admin/machines', icon: Monitor, contentType: 'machine' },
+  { name: 'Technology', href: '/admin/technology', icon: CircuitBoard, contentType: 'technology' },
+  { name: 'Business Goals', href: '/admin/business-goals', icon: Target, contentType: 'businessGoal' },
+  { name: 'Landing Pages', href: '/admin/landing-pages', icon: FileText, contentType: 'landingPage' },
+  { name: 'Blog', href: '/admin/blog', icon: BookOpen, contentType: 'blog' },
+  { name: 'Case Studies', href: '/admin/case-studies', icon: BriefcaseBusiness, contentType: 'caseStudy' },
 ];
 
 const secondaryNavigation: NavigationItem[] = [
@@ -50,15 +55,17 @@ export default function AdminNavigation() {
             key={item.name}
             to={item.href}
             className={({ isActive }) =>
-              `flex items-center py-2 px-4 text-sm font-medium rounded-md ${
+              cn(
+                "flex items-center py-2 px-4 text-sm font-medium rounded-md",
                 isActive
                   ? "bg-gray-100 text-gray-900"
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              }`
+              )
             }
           >
             <item.icon className="mr-3 h-5 w-5 flex-shrink-0 text-gray-500" aria-hidden="true" />
-            {item.name}
+            <span className="flex-1">{item.name}</span>
+            {item.contentType && renderMigrationStatus(item.contentType)}
           </NavLink>
         ))}
       </div>
@@ -72,11 +79,12 @@ export default function AdminNavigation() {
               key={item.name}
               to={item.href}
               className={({ isActive }) =>
-                `flex items-center py-2 px-4 text-sm font-medium rounded-md ${
+                cn(
+                  "flex items-center py-2 px-4 text-sm font-medium rounded-md",
                   isActive
                     ? "bg-gray-100 text-gray-900"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                }`
+                )
               }
             >
               <item.icon className="mr-3 h-5 w-5 flex-shrink-0 text-gray-500" aria-hidden="true" />
@@ -87,4 +95,25 @@ export default function AdminNavigation() {
       </div>
     </nav>
   );
+}
+
+function renderMigrationStatus(contentType: string) {
+  const status = CONTENT_TYPE_MIGRATION_STATUS[contentType] || 'pending';
+  
+  switch (status) {
+    case 'completed':
+      return (
+        <span className="inline-flex items-center ml-2 px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+          <Check className="h-3 w-3 mr-0.5" />
+        </span>
+      );
+    case 'in-progress':
+      return (
+        <span className="inline-flex items-center ml-2 px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
+          <Clock className="h-3 w-3 mr-0.5" />
+        </span>
+      );
+    default:
+      return null;
+  }
 }
