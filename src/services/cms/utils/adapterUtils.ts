@@ -20,15 +20,16 @@ export function makeAdapterReadOnly<T extends Record<string, any>>(
   adapter: T,
   entityType: string
 ): T {
-  const readOnlyAdapter = { ...adapter };
+  const readOnlyAdapter = { ...adapter } as T;
   
   // Define which methods are write operations that should be disabled
   const writeOperations = ['create', 'update', 'delete', 'clone', 'publish', 'unpublish'];
   
   // Replace all write operations with error-throwing functions
   for (const operation of writeOperations) {
-    if (operation in adapter) {
-      readOnlyAdapter[operation] = createDeprecatedWriteOperation(
+    if (operation in adapter && typeof adapter[operation as keyof T] === 'function') {
+      // Use type assertion to safely assign to the readOnlyAdapter
+      (readOnlyAdapter as any)[operation] = createDeprecatedWriteOperation(
         operation,
         entityType
       );
@@ -53,7 +54,7 @@ export function makeContentTypeOperationsCompatible<T extends Record<string, any
   adapter: T,
   entityType: string
 ): T & Record<string, any> {
-  const compatibleAdapter = { ...adapter };
+  const compatibleAdapter = { ...adapter } as T & Record<string, any>;
   
   // Map of adapter methods to ContentTypeOperations methods
   const methodMapping: Record<string, string> = {
@@ -64,8 +65,8 @@ export function makeContentTypeOperationsCompatible<T extends Record<string, any
   
   // Add compatible methods that delegate to the original methods
   for (const [adapterMethod, operationsMethod] of Object.entries(methodMapping)) {
-    if (adapterMethod in adapter && typeof adapter[adapterMethod] === 'function') {
-      compatibleAdapter[operationsMethod] = adapter[adapterMethod];
+    if (adapterMethod in adapter && typeof adapter[adapterMethod as keyof T] === 'function') {
+      compatibleAdapter[operationsMethod] = adapter[adapterMethod as keyof T];
     }
   }
   
@@ -89,13 +90,13 @@ export function createLoggingAdapter<T extends object>(
 ): T {
   return new Proxy(adapter, {
     get(target, prop: string) {
-      const value = target[prop as keyof T];
+      const value = Reflect.get(target, prop);
       
       if (typeof value === 'function') {
         // Return a function that logs the call and then delegates to the original function
         return function(...args: any[]) {
           console.log(`[${adapterName}] Called ${String(prop)}`, args);
-          return value.apply(target, args);
+          return Reflect.apply(value, target, args);
         };
       }
       

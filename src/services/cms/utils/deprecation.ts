@@ -1,3 +1,4 @@
+
 /**
  * Consolidated Deprecation Module
  * 
@@ -265,3 +266,6 @@ export function deprecated<T>(
   // it's just for TypeScript documentation
   return target;
 }
+
+// Explicitly export the DeprecationStat type to fix the build error
+export type { DeprecationStat };
