@@ -27,12 +27,10 @@ const MigrationStatusAlert: React.FC<MigrationStatusAlertProps> = ({
     switch (status) {
       case 'completed':
         return {
-          variant: 'success' as const,
+          variant: 'success' as const, // Now using the success variant we added
           icon: <CheckCircle2 className="h-4 w-4" />,
           defaultTitle: 'Migration Complete',
           defaultDescription: 'This functionality has been fully migrated to Contentful.',
-          bg: 'bg-green-50',
-          border: 'border-green-200',
           text: 'text-green-800'
         };
       case 'in-progress':
@@ -41,8 +39,6 @@ const MigrationStatusAlert: React.FC<MigrationStatusAlertProps> = ({
           icon: <Clock className="h-4 w-4" />,
           defaultTitle: 'Migration In Progress',
           defaultDescription: 'This functionality is currently being migrated to Contentful.',
-          bg: 'bg-amber-50',
-          border: 'border-amber-200',
           text: 'text-amber-800'
         };
       case 'pending':
@@ -51,8 +47,6 @@ const MigrationStatusAlert: React.FC<MigrationStatusAlertProps> = ({
           icon: <AlertTriangle className="h-4 w-4" />,
           defaultTitle: 'Migration Pending',
           defaultDescription: 'This functionality will be migrated to Contentful in the future.',
-          bg: 'bg-gray-50',
-          border: 'border-gray-200',
           text: 'text-gray-800'
         };
       default:
@@ -61,8 +55,6 @@ const MigrationStatusAlert: React.FC<MigrationStatusAlertProps> = ({
           icon: <AlertTriangle className="h-4 w-4" />,
           defaultTitle: 'Migration Status Unknown',
           defaultDescription: 'The status of this migration is unknown.',
-          bg: 'bg-gray-50',
-          border: 'border-gray-200',
           text: 'text-gray-800'
         };
     }
@@ -75,7 +67,7 @@ const MigrationStatusAlert: React.FC<MigrationStatusAlertProps> = ({
   return (
     <Alert 
       variant={statusStyles.variant} 
-      className={`${statusStyles.bg} ${statusStyles.border} ${className}`}
+      className={className}
     >
       {statusStyles.icon}
       <AlertTitle className={`font-medium ${statusStyles.text}`}>{displayTitle}</AlertTitle>
