@@ -18,33 +18,37 @@ const warnDeprecated = (functionName: string) => {
 
 /**
  * Mock implementation of business goal create operation - now throws an error
+ * @param data Optional data parameter (ignored)
  */
-export async function mockCreateBusinessGoal(): Promise<string> {
+export async function mockCreateBusinessGoal(data?: any): Promise<string> {
   warnDeprecated('mockCreateBusinessGoal');
   throw new Error("Business Goal creation is disabled. Please use Contentful directly.");
 }
 
 /**
  * Mock implementation of business goal update operation - now throws an error
+ * @param id Optional id parameter (ignored)
+ * @param data Optional data parameter (ignored)
  */
-export async function mockUpdateBusinessGoal(): Promise<boolean> {
+export async function mockUpdateBusinessGoal(id?: string, data?: any): Promise<boolean> {
   warnDeprecated('mockUpdateBusinessGoal');
   throw new Error("Business Goal updates are disabled. Please use Contentful directly.");
 }
 
 /**
  * Mock implementation of business goal delete operation - now throws an error
+ * @param id Optional id parameter (ignored)
  */
-export async function mockDeleteBusinessGoal(): Promise<boolean> {
+export async function mockDeleteBusinessGoal(id?: string): Promise<boolean> {
   warnDeprecated('mockDeleteBusinessGoal');
   throw new Error("Business Goal deletion is disabled. Please use Contentful directly.");
 }
 
 /**
  * Mock implementation of business goal clone operation - now throws an error
+ * @param id Optional id parameter (ignored)
  */
-export async function mockCloneBusinessGoal(): Promise<string | null> {
+export async function mockCloneBusinessGoal(id?: string): Promise<string | null> {
   warnDeprecated('mockCloneBusinessGoal');
   throw new Error("Business Goal cloning is disabled. Please use Contentful directly.");
 }
-

@@ -19,15 +19,17 @@ This guide documents the transition from our previous CMS implementations to Con
    - Made admin interfaces read-only
 
 3. **Progressive Removal (In Progress)**
-   - Removing low-risk utility functions
+   - Replacing write operations with read-only implementations
    - Consolidating duplicative code
    - Creating clear migration paths
+   - Adding toast notifications for deprecated functionality
 
-4. **Schema Cleanup (Planned)**
+4. **Schema Cleanup (Planned - Q3 2025)**
    - Remove legacy database schemas
    - Update API endpoints to use Contentful directly
+   - Complete removal of deprecated adapters
 
-5. **Final Validation (Planned)**
+5. **Final Validation (Planned - Q4 2025)**
    - Complete testing of all functionality
    - Remove all deprecated code
    - Finalize documentation
@@ -44,6 +46,28 @@ const adapter = getCMSAdapter(config); // Could return Strapi, Supabase, etc.
 
 // After migration:
 const adapter = getCMSAdapter(config); // Always returns Contentful
+```
+
+### Read-Only Pattern
+
+For deprecated write operations, we follow this pattern:
+
+```typescript
+// All write operations now throw clear errors
+export async function updateEntity(id: string, data: any): Promise<boolean> {
+  // Log deprecation warning
+  logDeprecationWarning('updateEntity', 'Use Contentful directly');
+  
+  // Show UI notification
+  toast({
+    title: "Deprecated Feature",
+    description: "Please use Contentful directly for content management.",
+    variant: "destructive",
+  });
+  
+  // Throw informative error
+  throw new Error("This operation is disabled. Please use Contentful directly.");
+}
 ```
 
 ### Data Structures
@@ -92,3 +116,10 @@ For new development, always:
 - [Contentful Web App](https://app.contentful.com/)
 - [Contentful Documentation](https://www.contentful.com/developers/docs/)
 - [Internal Contentful Implementation Docs](./contentful-implementation.md)
+
+## Timeline
+
+- **Q2 2025**: Complete Phase 3 (Progressive Removal)
+- **Q3 2025**: Complete Phase 4 (Schema Cleanup)
+- **Q4 2025**: Complete Phase 5 (Final Validation)
+- **Q1 2026**: Complete removal of all deprecated code

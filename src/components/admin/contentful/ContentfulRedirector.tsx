@@ -50,11 +50,11 @@ const ContentfulRedirector: React.FC<ContentfulRedirectorProps> = ({
       "Use Contentful directly"
     );
     
-    // Show toast
+    // Show toast - using 'default' variant instead of 'info' which is not a valid variant
     toast({
       title: "Redirecting to Contentful",
       description: displayDescription,
-      variant: "info",
+      variant: "default", // Changed from "info" to "default"
     });
   }, [contentType, displayDescription, toast]);
 
@@ -134,4 +134,3 @@ const ContentfulRedirector: React.FC<ContentfulRedirectorProps> = ({
 };
 
 export default ContentfulRedirector;
-
