@@ -1,15 +1,20 @@
 
 import { mockDeleteBusinessGoal } from './mockAdapter';
+import { showDeprecationToast, throwDeprecatedOperationError } from '@/services/cms/utils/deprecationToastUtils';
 
 /**
  * Delete a business goal from the CMS
- * @deprecated This method uses a mock implementation and will be removed in future versions.
+ * @deprecated This method is deprecated and will be removed in future versions.
  * Please use Contentful directly for business goal content management.
  */
 export async function deleteBusinessGoal(id: string): Promise<boolean> {
-  console.warn('[deleteBusinessGoal] ⚠️ DEPRECATED: This method uses a mock implementation. Use Contentful for production data.');
+  console.warn('[deleteBusinessGoal] ⚠️ DEPRECATED: Please use Contentful for content management.');
+  
+  // Show toast notification
+  showDeprecationToast('Business goal deletion');
+  
   try {
-    // Use the mock implementation
+    // This will throw an error as the mock implementation is designed to prevent deletion
     return await mockDeleteBusinessGoal(id);
   } catch (error) {
     console.error('[deleteBusinessGoal] Error:', error);

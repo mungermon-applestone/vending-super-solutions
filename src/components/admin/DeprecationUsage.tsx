@@ -1,159 +1,121 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { 
-  AlertTriangle, 
-  RefreshCw, 
-  Check 
-} from 'lucide-react';
-import { 
-  getDeprecationUsageStats, 
-  resetUsageStats 
-} from '@/services/cms/utils/deprecationLogger';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { getDeprecationUsageStats, resetUsageStats } from '@/services/cms/utils/deprecationLogger';
+import { Trash, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface DeprecationUsageProps {
   showResetButton?: boolean;
   showChart?: boolean;
 }
 
+/**
+ * Component to display deprecation usage statistics
+ */
 const DeprecationUsage: React.FC<DeprecationUsageProps> = ({
-  showResetButton = true,
+  showResetButton = false,
   showChart = true
 }) => {
-  const [stats, setStats] = useState(getDeprecationUsageStats());
-  const [lastUpdated, setLastUpdated] = useState(new Date());
-  const [resetSuccess, setResetSuccess] = useState(false);
+  const [stats, setStats] = useState<any[]>([]);
+  const [expanded, setExpanded] = useState(showChart);
+  const { toast } = useToast();
 
-  // Format stats for chart display
-  const chartData = stats
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10)
-    .map(stat => ({
-      name: stat.feature.length > 15 
-        ? stat.feature.substring(0, 15) + '...' 
-        : stat.feature,
-      count: stat.count
-    }));
+  useEffect(() => {
+    // Get initial stats
+    refreshStats();
+  }, []);
 
   const refreshStats = () => {
-    setStats(getDeprecationUsageStats());
-    setLastUpdated(new Date());
+    const usageStats = getDeprecationUsageStats();
+    setStats(usageStats.map(stat => ({
+      name: stat.feature,
+      value: stat.count
+    })));
   };
 
   const handleReset = () => {
     resetUsageStats();
     setStats([]);
-    setResetSuccess(true);
-    setTimeout(() => setResetSuccess(false), 3000);
+    toast({
+      title: "Statistics Reset",
+      description: "Deprecation usage statistics have been reset.",
+    });
   };
 
-  useEffect(() => {
-    // Update stats every 30 seconds to catch any new usage
-    const interval = setInterval(refreshStats, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  const toggleExpanded = () => {
+    setExpanded(!expanded);
+  };
 
   return (
     <Card className="shadow-sm">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-amber-500" />
-          Deprecated Feature Usage
-        </CardTitle>
-        <CardDescription>
-          Tracking usage of deprecated features in the current session
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Deprecation Usage</CardTitle>
+          <CardDescription>
+            Tracking usage of deprecated features to guide migration efforts
+          </CardDescription>
+        </div>
+        <Button variant="ghost" size="sm" onClick={toggleExpanded}>
+          {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </Button>
       </CardHeader>
-      <CardContent>
-        <div className="flex justify-between items-center mb-4">
-          <div className="text-sm text-muted-foreground">
-            Last updated: {lastUpdated.toLocaleTimeString()}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={refreshStats}
-              className="flex items-center gap-1"
-            >
-              <RefreshCw className="h-3 w-3 mr-1" />
+      
+      {expanded && (
+        <CardContent>
+          <div className="flex justify-between mb-4">
+            <Button variant="outline" size="sm" onClick={refreshStats}>
+              <RefreshCw size={14} className="mr-1" />
               Refresh
             </Button>
             
             {showResetButton && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleReset}
-                className={`flex items-center gap-1 ${resetSuccess ? 'bg-green-50 text-green-600 border-green-200' : ''}`}
-              >
-                {resetSuccess ? (
-                  <>
-                    <Check className="h-3 w-3 mr-1" />
-                    Reset Complete
-                  </>
-                ) : (
-                  'Reset Stats'
-                )}
+              <Button variant="outline" size="sm" onClick={handleReset}>
+                <Trash size={14} className="mr-1" />
+                Reset
               </Button>
             )}
           </div>
-        </div>
-        
-        {showChart && stats.length > 0 && (
-          <div className="h-64 mb-6">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <XAxis 
-                  dataKey="name" 
-                  fontSize={12}
-                  tickLine={false}
-                />
-                <YAxis 
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(value) => `${value}`}
-                />
-                <Tooltip />
-                <Bar 
-                  dataKey="count" 
-                  fill="#f59e0b" 
-                  radius={[4, 4, 0, 0]} 
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-        
-        {stats.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No deprecated features have been used in this session.
-          </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Feature</TableHead>
-                <TableHead>Usage Count</TableHead>
-                <TableHead>Last Used</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {stats.map((stat, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{stat.feature}</TableCell>
-                  <TableCell>{stat.count}</TableCell>
-                  <TableCell>{new Date(stat.lastUsed).toLocaleTimeString()}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </CardContent>
+          
+          {stats.length === 0 ? (
+            <div className="text-center py-6 text-muted-foreground">
+              No deprecated feature usage detected
+            </div>
+          ) : (
+            <>
+              {showChart && (
+                <div className="w-full h-60 mb-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={stats}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#8884d8" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                {stats.map((stat, index) => (
+                  <div 
+                    key={index} 
+                    className="flex justify-between items-center py-2 px-3 rounded-md bg-gray-50"
+                  >
+                    <span className="text-sm font-medium text-gray-700">{stat.name}</span>
+                    <span className="text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                      Used {stat.value} {stat.value === 1 ? 'time' : 'times'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </CardContent>
+      )}
     </Card>
   );
 };

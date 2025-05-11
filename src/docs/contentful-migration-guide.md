@@ -23,6 +23,7 @@ This guide documents the transition from our previous CMS implementations to Con
    - Consolidating duplicative code
    - Creating clear migration paths
    - Adding toast notifications for deprecated functionality
+   - Tracking usage of deprecated functions to prioritize cleanup
 
 4. **Schema Cleanup (Planned - Q3 2025)**
    - Remove legacy database schemas
@@ -70,6 +71,35 @@ export async function updateEntity(id: string, data: any): Promise<boolean> {
 }
 ```
 
+### Redirection Pattern
+
+For admin interfaces, we use this redirection pattern:
+
+```typescript
+// Replace admin forms with redirects to Contentful
+const AdminEntityEditor = () => {
+  // Show deprecation warnings
+  useEffect(() => {
+    logDeprecationWarning('AdminEntityEditor', 'Use Contentful directly');
+    
+    // Show UI notification
+    toast({
+      title: "Content Management Moved",
+      description: "This functionality has moved to Contentful CMS.",
+      variant: "destructive",
+    });
+  }, []);
+  
+  // Provide a button to redirect to Contentful
+  return (
+    <ContentfulRedirector 
+      contentType="entityType"
+      entityId={entityId}
+    />
+  );
+};
+```
+
 ### Data Structures
 
 All data structures now follow Contentful's content model:
@@ -111,6 +141,23 @@ For new development, always:
 3. Leverage React Query for data fetching and caching
 4. Use type definitions from `@/types/cms.ts`
 
+## Deprecation Tracking
+
+We've implemented a deprecation tracking system to:
+
+1. Log when deprecated functions are called
+2. Monitor which parts of the application are still using legacy code
+3. Display statistics in the admin dashboard
+4. Help prioritize migration efforts
+
+### Usage Statistics
+
+To view deprecation usage statistics:
+
+1. Navigate to `/admin/deprecation-stats` in the admin portal
+2. Review which features are still being used
+3. Use the data to prioritize your migration efforts
+
 ## Resources
 
 - [Contentful Web App](https://app.contentful.com/)
@@ -123,3 +170,19 @@ For new development, always:
 - **Q3 2025**: Complete Phase 4 (Schema Cleanup)
 - **Q4 2025**: Complete Phase 5 (Final Validation)
 - **Q1 2026**: Complete removal of all deprecated code
+
+## Recently Completed Tasks
+
+- ✅ Fixed build errors in mock adapter implementations
+- ✅ Created centralized deprecation warning utilities
+- ✅ Implemented read-only pattern for all business goal operations
+- ✅ Added redirector components for admin interfaces
+- ✅ Updated documentation with detailed migration patterns
+
+## Next Steps
+
+- 🔄 Complete review of remaining admin interfaces
+- 🔄 Consolidate redundant utility functions
+- 🔄 Update adapter interfaces to be more consistent
+- 🔄 Enhance usage tracking to provide more detailed reports
+
