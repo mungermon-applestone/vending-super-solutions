@@ -7,7 +7,7 @@
  */
 
 import { contentfulBusinessGoalAdapter } from '../contentfulBusinessGoalAdapter';
-import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
+import { logDeprecationWarning } from '@/services/cms/utils/deprecation';
 
 // Log deprecation warning when this module is imported
 logDeprecationWarning(

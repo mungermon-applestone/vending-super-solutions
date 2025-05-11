@@ -1,49 +1,49 @@
 
 /**
- * Shared constants for CMS integration and migration
+ * CMS Migration Status Constants
+ * 
+ * This file contains constants related to the CMS migration status
+ * and configuration for different content types.
  */
 
-// Feature flags for controlling migration features
-export const SHOW_MIGRATION_WARNINGS = true;
-export const REDIRECT_TO_CONTENTFUL = true;
-
-// Documentation URLs
-export const MIGRATION_GUIDE_URL = 'https://github.com/your-org/your-repo/blob/main/src/services/cms/MIGRATION_GUIDE.md';
-export const CONTENTFUL_DOCS_URL = 'https://www.contentful.com/developers/docs/';
-
-// Contentful integration status
-export enum MigrationStatus {
-  PENDING = 'pending',
-  IN_PROGRESS = 'in-progress',
-  COMPLETED = 'completed'
-}
-
-// Tracking which content types are fully migrated
-export const CONTENT_TYPE_MIGRATION_STATUS: Record<string, MigrationStatus> = {
-  product: MigrationStatus.COMPLETED,
-  businessGoal: MigrationStatus.COMPLETED,
-  technology: MigrationStatus.IN_PROGRESS,
-  machine: MigrationStatus.IN_PROGRESS,
-  blog: MigrationStatus.PENDING,
-  caseStudy: MigrationStatus.PENDING,
-  landingPage: MigrationStatus.IN_PROGRESS
+// Migration status for each content type
+export const CONTENT_TYPE_MIGRATION_STATUS: Record<string, 'completed' | 'in-progress' | 'pending'> = {
+  // Completed migrations
+  'product': 'completed',
+  'businessGoal': 'completed',
+  
+  // In-progress migrations
+  'technology': 'in-progress',
+  'machine': 'in-progress',
+  'landingPage': 'in-progress',
+  'caseStudy': 'in-progress',
+  
+  // Pending migrations
+  'blog': 'pending'
 };
 
-// Map of content type IDs to their human-readable names
-export const CONTENT_TYPE_NAMES: Record<string, string> = {
-  product: 'Product',
-  businessGoal: 'Business Goal',
-  technology: 'Technology',
-  machine: 'Machine',
-  blog: 'Blog Post',
-  caseStudy: 'Case Study',
-  landingPage: 'Landing Page'
+// Contentful content type IDs for each entity type
+export const CONTENTFUL_CONTENT_TYPE_IDS = {
+  PRODUCT: 'product',
+  BUSINESS_GOAL: 'businessGoal',
+  TECHNOLOGY: 'technology',
+  MACHINE: 'machine',
+  CASE_STUDY: 'caseStudy',
+  LANDING_PAGE: 'landingPage',
+  BLOG_POST: 'blogPost'
 };
 
-// Legacy database names - referenced by deprecation warnings
-export const LEGACY_SYSTEMS = {
-  STRAPI: 'Strapi CMS',
-  SUPABASE: 'Supabase Database',
-  FIREBASE: 'Firebase Database',
-  MOCK_DATA: 'Mock Data'
+// URL to migration guide documentation
+export const MIGRATION_GUIDE_URL = 'https://docs.contentful.com/migration-guides';
+
+// Deprecation message templates
+export const DEPRECATION_MESSAGES = {
+  ADAPTER_DEPRECATED: (adapterName: string) => 
+    `${adapterName} is deprecated and will be removed in a future release.`,
+  
+  OPERATION_DISABLED: (operation: string, entityType: string) =>
+    `${operation} operation on ${entityType} is disabled. Please use Contentful directly.`,
+  
+  INTERFACE_DEPRECATED: (interfaceName: string) =>
+    `${interfaceName} is deprecated and will be removed in future updates.`
 };

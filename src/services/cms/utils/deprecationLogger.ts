@@ -1,83 +1,36 @@
 
 /**
- * Utility for consistent deprecation warning messages
+ * @deprecated This file is being consolidated into deprecation.ts
+ * and will be removed in a future version.
+ * 
+ * Re-exports from the consolidated deprecation module for backward compatibility.
  */
 
-import { trackDeprecatedUsage, getDeprecatedUsage, resetDeprecationTracker } from './deprecationUsageTracker';
+import {
+  trackDeprecatedUsage,
+  getDeprecatedUsage,
+  resetDeprecationTracker,
+  logDeprecationWarning,
+  trackDeprecatedFeatureUsage,
+  getDeprecationUsageStats,
+  resetDeprecationTracker as resetUsageStats,
+  DeprecationStat
+} from './deprecation';
 
-// Interface for usage statistics data
-export interface DeprecationStat {
-  feature: string;
-  count: number;
-  lastUsed: number;
-}
+// Re-export all functions to maintain backward compatibility
+export {
+  trackDeprecatedUsage,
+  getDeprecatedUsage,
+  resetDeprecationTracker,
+  logDeprecationWarning,
+  trackDeprecatedFeatureUsage,
+  getDeprecationUsageStats,
+  resetUsageStats,
+  DeprecationStat
+};
 
-/**
- * Log a deprecation warning message consistently
- * @param feature The name of the feature that is deprecated
- * @param message The deprecation message
- * @param replacement Optional recommendation for replacement
- */
-export function logDeprecationWarning(
-  feature: string, 
-  message: string, 
-  replacement?: string
-): void {
-  // Get stack trace to find calling file
-  const stack = new Error().stack || '';
-  const stackLines = stack.split('\n');
-  const callerLine = stackLines.length > 2 ? stackLines[2] : '';
-  const callerMatch = callerLine.match(/at\s+(.+)\s+\((.+)\)/);
-  const callerFile = callerMatch ? callerMatch[2] : 'unknown';
-  
-  // Track this usage for deprecation metrics
-  trackDeprecatedUsage(feature, callerFile);
-  
-  // Log the warning
-  const baseMessage = `⚠️ DEPRECATED: ${message}`;
-  const replacementMessage = replacement ? `\n👉 RECOMMENDED: ${replacement}` : '';
-  
-  console.warn(`${baseMessage}${replacementMessage}`);
-}
-
-/**
- * Alternative name for trackDeprecatedUsage to maintain compatibility
- * @deprecated Use trackDeprecatedUsage instead
- */
-export function trackDeprecatedFeatureUsage(feature: string, details?: string): void {
-  // Forward to the standard tracking function
-  trackDeprecatedUsage(feature, details);
-}
-
-/**
- * Get formatted statistics about deprecated feature usage
- * @returns Array of statistics objects with feature name, count, and last usage time
- */
-export function getDeprecationUsageStats(): DeprecationStat[] {
-  const usageEntries = getDeprecatedUsage();
-  const stats: Record<string, DeprecationStat> = {};
-  
-  // Process the raw usage data into statistics
-  usageEntries.forEach(entry => {
-    const [feature] = entry.split(':');
-    
-    if (!stats[feature]) {
-      stats[feature] = {
-        feature,
-        count: 0,
-        lastUsed: Date.now()
-      };
-    }
-    
-    stats[feature].count++;
-  });
-  
-  return Object.values(stats).sort((a, b) => b.count - a.count);
-}
-
-/**
- * Reset all deprecation usage statistics
- */
-export function resetUsageStats(): void {
-  resetDeprecationTracker();
-}
+// Log deprecation warning when this file is imported
+console.warn(
+  "⚠️ DEPRECATION WARNING: deprecationLogger.ts is deprecated and will be removed in a future update. " +
+  "Import directly from the consolidated 'deprecation.ts' module instead."
+);

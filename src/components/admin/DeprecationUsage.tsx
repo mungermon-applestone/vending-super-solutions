@@ -1,121 +1,129 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { getDeprecationUsageStats, resetUsageStats } from '@/services/cms/utils/deprecationLogger';
-import { Trash, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { AlertTriangle, RefreshCcw, BarChart3 } from 'lucide-react';
+import { 
+  getDeprecationUsageStats, 
+  resetDeprecationTracker,
+  DeprecationStat
+} from '@/services/cms/utils/deprecation';
 
 interface DeprecationUsageProps {
-  showResetButton?: boolean;
   showChart?: boolean;
+  showResetButton?: boolean;
+  maxItems?: number;
+  className?: string;
 }
 
 /**
- * Component to display deprecation usage statistics
+ * Component to display statistics about deprecated feature usage
  */
-const DeprecationUsage: React.FC<DeprecationUsageProps> = ({
+const DeprecationUsage: React.FC<DeprecationUsageProps> = ({ 
+  showChart = false,
   showResetButton = false,
-  showChart = true
+  maxItems = 10,
+  className = ''
 }) => {
-  const [stats, setStats] = useState<any[]>([]);
-  const [expanded, setExpanded] = useState(showChart);
-  const { toast } = useToast();
-
+  const [stats, setStats] = useState<DeprecationStat[]>([]);
+  const [isResetting, setIsResetting] = useState(false);
+  
+  // Load statistics on mount and when stats are reset
   useEffect(() => {
-    // Get initial stats
-    refreshStats();
-  }, []);
-
-  const refreshStats = () => {
     const usageStats = getDeprecationUsageStats();
-    setStats(usageStats.map(stat => ({
-      name: stat.feature,
-      value: stat.count
-    })));
-  };
-
+    setStats(usageStats);
+  }, [isResetting]);
+  
+  // Handle resetting the usage tracker
   const handleReset = () => {
-    resetUsageStats();
-    setStats([]);
-    toast({
-      title: "Statistics Reset",
-      description: "Deprecation usage statistics have been reset.",
-    });
+    setIsResetting(true);
+    resetDeprecationTracker();
+    
+    // Set a small delay to allow the reset to complete
+    setTimeout(() => {
+      setStats(getDeprecationUsageStats());
+      setIsResetting(false);
+    }, 100);
   };
-
-  const toggleExpanded = () => {
-    setExpanded(!expanded);
-  };
-
+  
+  // Limit the number of items shown
+  const displayStats = stats.slice(0, maxItems);
+  
   return (
-    <Card className="shadow-sm">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Deprecation Usage</CardTitle>
-          <CardDescription>
-            Tracking usage of deprecated features to guide migration efforts
-          </CardDescription>
-        </div>
-        <Button variant="ghost" size="sm" onClick={toggleExpanded}>
-          {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </Button>
-      </CardHeader>
-      
-      {expanded && (
-        <CardContent>
-          <div className="flex justify-between mb-4">
-            <Button variant="outline" size="sm" onClick={refreshStats}>
-              <RefreshCw size={14} className="mr-1" />
-              Refresh
+    <Card className={`shadow-sm ${className}`}>
+      <CardHeader className="pb-2 bg-gray-50 border-b">
+        <CardTitle className="flex items-center justify-between text-base">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-500" />
+            <span>Deprecated Feature Usage</span>
+          </div>
+          {showResetButton && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReset}
+              disabled={isResetting || stats.length === 0}
+              className="h-8"
+            >
+              <RefreshCcw className="h-3.5 w-3.5 mr-1" />
+              Reset Tracker
             </Button>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-4">
+        {stats.length === 0 ? (
+          <div className="text-center py-6 text-gray-500">
+            <p>No deprecated features have been used yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {showChart && stats.length > 0 && (
+              <div className="mb-4">
+                <h4 className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-1.5">
+                  <BarChart3 className="h-4 w-4" />
+                  Usage Breakdown
+                </h4>
+                <div className="space-y-2">
+                  {displayStats.map(stat => (
+                    <div key={stat.feature} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="font-medium text-gray-700">{stat.feature}</span>
+                        <span className="text-gray-500">{stat.count} uses</span>
+                      </div>
+                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-amber-400"
+                          style={{ 
+                            width: `${Math.min(100, (stat.count / Math.max(...stats.map(s => s.count))) * 100)}%` 
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             
-            {showResetButton && (
-              <Button variant="outline" size="sm" onClick={handleReset}>
-                <Trash size={14} className="mr-1" />
-                Reset
-              </Button>
+            <ul className="divide-y">
+              {displayStats.map(stat => (
+                <li key={stat.feature} className="py-2 flex justify-between items-center">
+                  <span className="font-medium text-sm">{stat.feature}</span>
+                  <span className="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full">
+                    {stat.count} {stat.count === 1 ? 'use' : 'uses'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            
+            {stats.length > maxItems && (
+              <div className="text-center text-sm text-gray-500 pt-2">
+                Showing {maxItems} of {stats.length} deprecated features
+              </div>
             )}
           </div>
-          
-          {stats.length === 0 ? (
-            <div className="text-center py-6 text-muted-foreground">
-              No deprecated feature usage detected
-            </div>
-          ) : (
-            <>
-              {showChart && (
-                <div className="w-full h-60 mb-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={stats}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="value" fill="#8884d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-              
-              <div className="space-y-2">
-                {stats.map((stat, index) => (
-                  <div 
-                    key={index} 
-                    className="flex justify-between items-center py-2 px-3 rounded-md bg-gray-50"
-                  >
-                    <span className="text-sm font-medium text-gray-700">{stat.name}</span>
-                    <span className="text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                      Used {stat.value} {stat.value === 1 ? 'time' : 'times'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </CardContent>
-      )}
+        )}
+      </CardContent>
     </Card>
   );
 };

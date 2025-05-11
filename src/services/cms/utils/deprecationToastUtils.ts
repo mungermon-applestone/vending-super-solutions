@@ -1,30 +1,24 @@
 
 /**
- * @deprecated This file is being consolidated into deprecationUtils.ts
+ * @deprecated This file is being consolidated into deprecation.ts
  * and will be removed in a future version.
+ * 
+ * Re-exports from the consolidated deprecation module for backward compatibility.
  */
 
-import { toast } from '@/hooks/use-toast';
-import { logDeprecation, createDeprecationError } from './deprecationUtils';
+import {
+  showDeprecationToast,
+  throwDeprecatedOperationError
+} from './deprecation';
 
-/**
- * @deprecated Use showDeprecationToast from deprecationUtils.ts
- */
-export function showDeprecationToast(feature: string, alternativeAction: string = 'Use Contentful directly'): void {
-  // Log the deprecation first
-  logDeprecation(feature, `${feature} is deprecated.`, alternativeAction);
-  
-  // Show toast notification
-  toast({
-    title: "Deprecated Feature",
-    description: `${feature} is deprecated. ${alternativeAction} for content management.`,
-    variant: "destructive",
-  });
-}
+// Re-export functions to maintain backward compatibility
+export {
+  showDeprecationToast,
+  throwDeprecatedOperationError
+};
 
-/**
- * @deprecated Use createDeprecationError from deprecationUtils.ts
- */
-export function throwDeprecatedOperationError(operation: string, entityType: string): never {
-  throw createDeprecationError(operation, entityType);
-}
+// Log deprecation warning when this module is imported
+console.warn(
+  "⚠️ DEPRECATION WARNING: deprecationToastUtils.ts is deprecated and will be removed in a future update. " +
+  "Import directly from the consolidated 'deprecation.ts' module instead."
+);
