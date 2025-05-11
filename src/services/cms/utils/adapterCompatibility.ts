@@ -11,6 +11,15 @@ import { ContentTypeOperations } from '../contentTypes/types';
 import { logDeprecation } from './deprecationUtils';
 
 /**
+ * Type to ensure adapter has the necessary methods
+ */
+interface GetMethods {
+  getAll?: (...args: any[]) => Promise<any>;
+  getBySlug?: (...args: any[]) => Promise<any>;
+  getById?: (...args: any[]) => Promise<any>;
+}
+
+/**
  * Makes any adapter with getAll/getBySlug/getById methods compatible with
  * the ContentTypeOperations interface by adding fetchAll/fetchBySlug/fetchById methods
  * that delegate to the original methods.
@@ -19,45 +28,47 @@ import { logDeprecation } from './deprecationUtils';
  * @param entityType The name of the entity type (for logging)
  * @returns The adapter enhanced with fetch* methods
  */
-export function makeContentTypeOperationsCompatible<T extends Record<string, any>>(
+export function makeContentTypeOperationsCompatible<T extends GetMethods>(
   adapter: T,
   entityType: string
 ): T & ContentTypeOperations<any> {
+  const enhancedAdapter = { ...adapter } as T & ContentTypeOperations<any>;
+  
   // Only add compatibility methods if they don't already exist
-  if (typeof adapter.fetchAll !== 'function' && typeof adapter.getAll === 'function') {
-    adapter.fetchAll = async (...args: any[]) => {
+  if (!enhancedAdapter.fetchAll && enhancedAdapter.getAll) {
+    enhancedAdapter.fetchAll = async (...args: any[]) => {
       logDeprecation(
         `${entityType}.fetchAll`, 
         `fetchAll is a compatibility method. Consider using ${entityType}.getAll directly.`,
         `Use Contentful API directly for ${entityType} retrieval in new code.`
       );
-      return adapter.getAll(...args);
+      return enhancedAdapter.getAll!(...args);
     };
   }
 
-  if (typeof adapter.fetchBySlug !== 'function' && typeof adapter.getBySlug === 'function') {
-    adapter.fetchBySlug = async (...args: any[]) => {
+  if (!enhancedAdapter.fetchBySlug && enhancedAdapter.getBySlug) {
+    enhancedAdapter.fetchBySlug = async (...args: any[]) => {
       logDeprecation(
         `${entityType}.fetchBySlug`, 
         `fetchBySlug is a compatibility method. Consider using ${entityType}.getBySlug directly.`,
         `Use Contentful API directly for ${entityType} retrieval in new code.`
       );
-      return adapter.getBySlug(...args);
+      return enhancedAdapter.getBySlug!(...args);
     };
   }
 
-  if (typeof adapter.fetchById !== 'function' && typeof adapter.getById === 'function') {
-    adapter.fetchById = async (...args: any[]) => {
+  if (!enhancedAdapter.fetchById && enhancedAdapter.getById) {
+    enhancedAdapter.fetchById = async (...args: any[]) => {
       logDeprecation(
         `${entityType}.fetchById`, 
         `fetchById is a compatibility method. Consider using ${entityType}.getById directly.`,
         `Use Contentful API directly for ${entityType} retrieval in new code.`
       );
-      return adapter.getById(...args);
+      return enhancedAdapter.getById!(...args);
     };
   }
 
-  return adapter as T & ContentTypeOperations<any>;
+  return enhancedAdapter;
 }
 
 /**

@@ -37,8 +37,8 @@ export function createDeprecatedReadOperation<T extends (...args: any[]) => Prom
   operation: string,
   entityType: string,
   implementation: T
-): (...args: Parameters<T>) => Promise<ReturnType<T>> {
-  return async (...args: Parameters<T>): Promise<ReturnType<T>> => {
+): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
+  return async (...args: Parameters<T>): Promise<Awaited<ReturnType<T>>> => {
     // Log the deprecation but allow the operation
     logDeprecation(
       `${entityType}.${operation}`, 
