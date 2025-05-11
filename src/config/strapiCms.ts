@@ -1,28 +1,37 @@
 
 /**
- * @deprecated COMPATIBILITY LAYER - Do not use in new development
- * This file provides mock configurations for Strapi CMS that were previously removed
- * as part of the migration to Contentful.
+ * @deprecated COMPATIBILITY LAYER - Will be removed in v3.0
  * 
- * TODO: Update all imports to use Contentful configuration directly.
- * This file will be removed in a future release.
+ * This file provides compatibility for legacy code that depended on Strapi configurations.
+ * All new development should use Contentful directly.
+ * 
+ * REMOVAL PLAN:
+ * 1. Phase out imports of this file (in progress)
+ * 2. Track usage with deprecation logger (in progress)
+ * 3. Complete removal in v3.0
  */
 
-import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
-import { STRAPI_API_URL, STRAPI_API_KEY, STRAPI_ENDPOINTS } from '@/legacy/utils/legacyUtils';
+import { logDeprecation } from '@/services/cms/utils/deprecationUtils';
 
-// Log deprecation warning when this module is imported
-const warnOnImport = () => {
-  logDeprecationWarning(
-    "strapiCms.ts",
-    "Strapi CMS configuration is deprecated and will be removed in a future release.",
-    "Please use Contentful configuration instead."
-  );
+// Empty constants to maintain interface compatibility
+export const STRAPI_API_URL = '';
+export const STRAPI_API_KEY = '';
+export const STRAPI_ENDPOINTS = {
+  PRODUCTS: '/products',
+  TECHNOLOGIES: '/technologies',
+  BUSINESS_GOALS: '/business-goals',
+  MACHINES: '/machines'
 };
 
-// Execute warning
-warnOnImport();
+// Log deprecation warning when this module is imported
+logDeprecation(
+  "strapiCms.ts",
+  "Importing deprecated Strapi CMS configuration",
+  "Use Contentful configuration directly"
+);
 
-// Re-export the legacy constants
-export { STRAPI_API_URL, STRAPI_API_KEY, STRAPI_ENDPOINTS };
-
+// Add a console warning on import
+console.warn(
+  "⚠️ DEPRECATION WARNING: strapiCms.ts is deprecated and will be removed in v3.0. " +
+  "Use Contentful configuration directly."
+);

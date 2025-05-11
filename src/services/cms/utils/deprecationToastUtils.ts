@@ -1,20 +1,18 @@
 
 /**
- * Utility functions for showing consistent deprecated feature toasts
+ * @deprecated This file is being consolidated into deprecationUtils.ts
+ * and will be removed in a future version.
  */
 
 import { toast } from '@/hooks/use-toast';
-import { logDeprecationWarning } from './deprecationLogger';
+import { logDeprecation, createDeprecationError } from './deprecationUtils';
 
 /**
- * Shows a standardized toast notification for deprecated CMS features
- * 
- * @param feature The name of the deprecated feature
- * @param alternativeAction What the user should do instead
+ * @deprecated Use showDeprecationToast from deprecationUtils.ts
  */
 export function showDeprecationToast(feature: string, alternativeAction: string = 'Use Contentful directly'): void {
   // Log the deprecation first
-  logDeprecationWarning(feature, `${feature} is deprecated.`, alternativeAction);
+  logDeprecation(feature, `${feature} is deprecated.`, alternativeAction);
   
   // Show toast notification
   toast({
@@ -25,12 +23,8 @@ export function showDeprecationToast(feature: string, alternativeAction: string 
 }
 
 /**
- * Common function to handle throwing standardized errors for disabled operations
- * 
- * @param operation Name of the operation being attempted
- * @param entityType Type of entity being operated on
- * @throws Error with standardized message
+ * @deprecated Use createDeprecationError from deprecationUtils.ts
  */
 export function throwDeprecatedOperationError(operation: string, entityType: string): never {
-  throw new Error(`${entityType} ${operation} is disabled. Please use Contentful directly.`);
+  throw createDeprecationError(operation, entityType);
 }

@@ -17,6 +17,7 @@ const AdminCaseStudies = lazy(() => import('@/pages/admin/AdminCaseStudies'));
 const AdminMedia = lazy(() => import('@/pages/admin/AdminMedia'));
 const ContentfulManagement = lazy(() => import('@/pages/admin/ContentfulManagement'));
 const SignInPage = lazy(() => import('@/pages/admin/SignIn'));
+const DeprecationStatsPage = lazy(() => import('@/pages/admin/DeprecationStatsPage'));
 
 // Admin routes
 export const adminRoutes: RouteObject[] = [
@@ -95,6 +96,11 @@ export const adminRoutes: RouteObject[] = [
   {
     path: 'contentful',
     element: <ContentfulManagement />,
+  },
+  // Deprecation statistics
+  {
+    path: 'deprecation-stats',
+    element: <DeprecationStatsPage />,
   },
   // Auth routes
   {

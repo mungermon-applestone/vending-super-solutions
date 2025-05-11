@@ -1,29 +1,69 @@
 
 /**
- * @deprecated COMPATIBILITY LAYER - Do not use in new development
- * This file provides mock implementations for Strapi configuration functions
- * that were previously removed as part of the migration to Contentful.
+ * @deprecated COMPATIBILITY LAYER - All functionality in this file will be removed in v3.0
  * 
- * TODO: Remove all dependencies on these functions and then remove this file.
+ * This module provides compatibility functions for legacy code that depended on Strapi.
+ * All new development should use Contentful APIs and configuration directly.
  */
 
-import { strapiUtils } from '@/legacy/utils/legacyUtils';
-import { logDeprecationWarning } from './deprecationLogger';
+import { logDeprecation } from './deprecationUtils';
 
-// Log deprecation when this module is imported
-(() => {
-  logDeprecationWarning(
+// Log warning when this module is imported
+const warnOnImport = () => {
+  logDeprecation(
     "strapiConfig.ts",
-    "This module is deprecated and will be removed in a future release",
-    "Please use Contentful configuration utilities instead"
+    "Importing deprecated Strapi configuration utilities.",
+    "Use Contentful configuration utilities from src/services/cms/utils/contentfulConfig.ts"
   );
-})();
+};
 
-// Re-export all functions from strapiUtils
-export const getStrapiBaseUrl = strapiUtils.getStrapiBaseUrl;
-export const getStrapiApiKey = strapiUtils.getStrapiApiKey;
-export const getStrapiHeaders = strapiUtils.getStrapiHeaders;
-export const isStrapiConfigured = strapiUtils.isStrapiConfigured;
-export const validateStrapiConfig = strapiUtils.validateStrapiConfig;
-export const buildStrapiQueryParams = strapiUtils.buildStrapiQueryParams;
+// Execute warning
+warnOnImport();
 
+/**
+ * @deprecated Use Contentful configuration instead
+ */
+export function getStrapiBaseUrl(): string {
+  logDeprecation('getStrapiBaseUrl', 'Use contentful client instead');
+  return 'DEPRECATED';
+}
+
+/**
+ * @deprecated Use Contentful configuration instead
+ */
+export function getStrapiApiKey(): string {
+  logDeprecation('getStrapiApiKey', 'Use contentful client instead');
+  return 'DEPRECATED';
+}
+
+/**
+ * @deprecated Use Contentful configuration instead
+ */
+export function getStrapiHeaders(): Record<string, string> {
+  logDeprecation('getStrapiHeaders', 'Use contentful client instead');
+  return { 'Content-Type': 'application/json' };
+}
+
+/**
+ * @deprecated Use isContentfulConfigured instead
+ */
+export function isStrapiConfigured(): boolean {
+  logDeprecation('isStrapiConfigured', 'Use isContentfulConfigured instead');
+  return false;
+}
+
+/**
+ * @deprecated Use contentful validation instead
+ */
+export function validateStrapiConfig(): void {
+  logDeprecation('validateStrapiConfig', 'Use contentful validation instead');
+  throw new Error("Strapi configuration no longer supported. Use Contentful instead.");
+}
+
+/**
+ * @deprecated Use contentful query parameters instead
+ */
+export function buildStrapiQueryParams(options: any): URLSearchParams {
+  logDeprecation('buildStrapiQueryParams', 'Use contentful query parameters instead');
+  return new URLSearchParams();
+}

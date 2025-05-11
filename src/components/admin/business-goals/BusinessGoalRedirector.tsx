@@ -1,10 +1,11 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ExternalLink, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
+import { logDeprecation, getContentfulRedirectUrl } from '@/services/cms/utils/deprecationUtils';
 
 interface BusinessGoalRedirectorProps {
   businessGoalId?: string;
@@ -34,7 +35,7 @@ const BusinessGoalRedirector: React.FC<BusinessGoalRedirectorProps> = ({
   
   useEffect(() => {
     // Log this redirection
-    logDeprecationWarning(
+    logDeprecation(
       "BusinessGoalRedirector",
       `User attempted to ${isCreating ? 'create' : 'edit'} a business goal through the deprecated interface`,
       "Use Contentful directly"
@@ -49,26 +50,12 @@ const BusinessGoalRedirector: React.FC<BusinessGoalRedirectorProps> = ({
   }, [isCreating, toast]);
 
   const getContentfulUrl = (): string => {
-    let url = "https://app.contentful.com/";
-    
-    if (contentfulSpaceId) {
-      url += `spaces/${contentfulSpaceId}/`;
-      
-      if (contentfulEnvironmentId) {
-        url += `environments/${contentfulEnvironmentId}/`;
-      }
-      
-      // If we have an ID, link directly to the entry
-      if (businessGoalId) {
-        url += `entries/${businessGoalId}`;
-      } 
-      // Otherwise link to content type entries
-      else {
-        url += `entries?contentTypeId=businessGoal`;
-      }
-    }
-    
-    return url;
+    return getContentfulRedirectUrl(
+      'businessGoal', 
+      businessGoalId,
+      contentfulSpaceId,
+      contentfulEnvironmentId
+    );
   };
 
   const handleOpenContentful = () => {

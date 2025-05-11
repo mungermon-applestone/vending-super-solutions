@@ -6,7 +6,7 @@ import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
+import { logDeprecation, getContentfulRedirectUrl } from '@/services/cms/utils/deprecationUtils';
 
 interface ContentfulRedirectorProps {
   contentType: string;
@@ -44,17 +44,17 @@ const ContentfulRedirector: React.FC<ContentfulRedirectorProps> = ({
 
   useEffect(() => {
     // Log this redirection
-    logDeprecationWarning(
+    logDeprecation(
       "ContentfulRedirector",
       `User attempted to access deprecated admin page for ${contentType}`,
       "Use Contentful directly"
     );
     
-    // Show toast - using 'default' variant instead of 'info' which is not a valid variant
+    // Show toast with default variant instead of info (which is not valid)
     toast({
       title: "Redirecting to Contentful",
       description: displayDescription,
-      variant: "default", // Changed from "info" to "default"
+      variant: "default", // Using default variant instead of info
     });
   }, [contentType, displayDescription, toast]);
 
@@ -63,23 +63,12 @@ const ContentfulRedirector: React.FC<ContentfulRedirectorProps> = ({
       return contentfulUrl;
     }
     
-    let url = "https://app.contentful.com/";
-    
-    if (contentfulSpaceId) {
-      url += `spaces/${contentfulSpaceId}/`;
-      
-      if (contentfulEnvironmentId) {
-        url += `environments/${contentfulEnvironmentId}/`;
-      }
-      
-      if (contentTypeId) {
-        url += `entries/?contentTypeId=${contentTypeId}`;
-      } else {
-        url += "entries/";
-      }
-    }
-    
-    return url;
+    return getContentfulRedirectUrl(
+      contentTypeId || contentType.toLowerCase().replace(/\s+/g, ''),
+      undefined,
+      contentfulSpaceId,
+      contentfulEnvironmentId
+    );
   };
 
   const handleOpenContentful = () => {

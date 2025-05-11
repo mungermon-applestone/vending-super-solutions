@@ -18,12 +18,14 @@ This guide documents the transition from our previous CMS implementations to Con
    - Created deprecation statistics dashboard
    - Made admin interfaces read-only
 
-3. **Progressive Removal (In Progress)**
-   - Replacing write operations with read-only implementations
-   - Consolidating duplicative code
-   - Creating clear migration paths
-   - Adding toast notifications for deprecated functionality
-   - Tracking usage of deprecated functions to prioritize cleanup
+3. **Progressive Removal (In Progress - Q2 2025)**
+   - ✅ Replaced write operations with read-only implementations
+   - ✅ Added toast notifications for deprecated functionality  
+   - ✅ Created tracking system for deprecated function usage
+   - ✅ Implemented redirects from admin edit routes to Contentful
+   - ✅ Consolidated utility functions into central modules
+   - 🔄 Removing legacy configuration files
+   - 🔄 Converting admin forms to read-only views
 
 4. **Schema Cleanup (Planned - Q3 2025)**
    - Remove legacy database schemas
@@ -34,6 +36,32 @@ This guide documents the transition from our previous CMS implementations to Con
    - Complete testing of all functionality
    - Remove all deprecated code
    - Finalize documentation
+
+## Recent Updates
+
+### May 2025 Update
+
+We've made significant progress in our migration to Contentful:
+
+1. **Consolidated Deprecation Utilities**
+   - Created centralized `deprecationUtils.ts` with standardized logging and UI notifications
+   - Implemented unified tracking system to identify which deprecated functions are still in use
+   - Added helper utilities for generating Contentful URLs
+
+2. **Enhanced Redirectors**
+   - Improved BusinessGoalRedirector to provide clearer guidance
+   - Created ContentfulRedirectHandler for automatic redirections
+   - Added clear visual indicators for deprecated interfaces
+
+3. **Read-Only Adapter Pattern**
+   - Implemented a generic read-only adapter pattern
+   - Maintained read operations while preventing write operations
+   - Added clear error messages directing users to Contentful
+
+4. **Configuration Cleanup**
+   - Marked all Strapi-related configuration as explicitly deprecated
+   - Removed redundant utility functions
+   - Added removal timelines to all deprecated files
 
 ## Migration Patterns
 
@@ -55,20 +83,15 @@ For deprecated write operations, we follow this pattern:
 
 ```typescript
 // All write operations now throw clear errors
-export async function updateEntity(id: string, data: any): Promise<boolean> {
-  // Log deprecation warning
-  logDeprecationWarning('updateEntity', 'Use Contentful directly');
-  
-  // Show UI notification
-  toast({
-    title: "Deprecated Feature",
-    description: "Please use Contentful directly for content management.",
-    variant: "destructive",
-  });
-  
-  // Throw informative error
-  throw new Error("This operation is disabled. Please use Contentful directly.");
-}
+export const writeOperation = createDeprecatedWriteOperation(
+  'create',
+  'entityType'
+);
+
+// This generates a function that:
+// 1. Logs the deprecation
+// 2. Shows a toast notification
+// 3. Throws a clear error message
 ```
 
 ### Redirection Pattern
@@ -78,19 +101,6 @@ For admin interfaces, we use this redirection pattern:
 ```typescript
 // Replace admin forms with redirects to Contentful
 const AdminEntityEditor = () => {
-  // Show deprecation warnings
-  useEffect(() => {
-    logDeprecationWarning('AdminEntityEditor', 'Use Contentful directly');
-    
-    // Show UI notification
-    toast({
-      title: "Content Management Moved",
-      description: "This functionality has moved to Contentful CMS.",
-      variant: "destructive",
-    });
-  }, []);
-  
-  // Provide a button to redirect to Contentful
   return (
     <ContentfulRedirector 
       contentType="entityType"
@@ -99,26 +109,6 @@ const AdminEntityEditor = () => {
   );
 };
 ```
-
-### Data Structures
-
-All data structures now follow Contentful's content model:
-
-- Products
-- Business Goals
-- Technologies
-- Machines
-- Case Studies
-
-### Critical Migration Paths
-
-These components and hooks have been identified as critical paths:
-
-1. `useContentfulProducts()` - Used in Homepage, Products page
-2. `useFeaturedProducts()` - Used in Homepage  
-3. `useContentfulMachines()` - Used in Machines page
-4. `useFeaturedMachines()` - Used in Homepage
-5. `useMachineBySlug()` - Used in Machine detail pages
 
 ## Using Contentful Directly
 
@@ -143,12 +133,12 @@ For new development, always:
 
 ## Deprecation Tracking
 
-We've implemented a deprecation tracking system to:
+Our new deprecation tracking system:
 
-1. Log when deprecated functions are called
-2. Monitor which parts of the application are still using legacy code
-3. Display statistics in the admin dashboard
-4. Help prioritize migration efforts
+1. Logs when deprecated functions are called
+2. Shows which parts of the application still use legacy code
+3. Displays statistics in the admin dashboard
+4. Helps prioritize migration efforts
 
 ### Usage Statistics
 
@@ -158,31 +148,17 @@ To view deprecation usage statistics:
 2. Review which features are still being used
 3. Use the data to prioritize your migration efforts
 
-## Resources
-
-- [Contentful Web App](https://app.contentful.com/)
-- [Contentful Documentation](https://www.contentful.com/developers/docs/)
-- [Internal Contentful Implementation Docs](./contentful-implementation.md)
-
 ## Timeline
 
-- **Q2 2025**: Complete Phase 3 (Progressive Removal)
+- **Q2 2025 (Current)**: Complete Phase 3 (Progressive Removal)
 - **Q3 2025**: Complete Phase 4 (Schema Cleanup)
 - **Q4 2025**: Complete Phase 5 (Final Validation)
 - **Q1 2026**: Complete removal of all deprecated code
 
-## Recently Completed Tasks
-
-- ✅ Fixed build errors in mock adapter implementations
-- ✅ Created centralized deprecation warning utilities
-- ✅ Implemented read-only pattern for all business goal operations
-- ✅ Added redirector components for admin interfaces
-- ✅ Updated documentation with detailed migration patterns
-
 ## Next Steps
 
-- 🔄 Complete review of remaining admin interfaces
-- 🔄 Consolidate redundant utility functions
+- 🔄 Continue reviewing remaining admin interfaces
+- 🔄 Remove more redundant utility functions
 - 🔄 Update adapter interfaces to be more consistent
 - 🔄 Enhance usage tracking to provide more detailed reports
 
