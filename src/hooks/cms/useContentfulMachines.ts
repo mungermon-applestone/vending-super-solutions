@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 /**
  * Hook for fetching Contentful machines
  * 
- * !!!!! DO NOT REMOVE OR FUNDAMENTALLY ALTER !!!!
+ * @remarks
+ * !!!!! CRITICAL PATH - DO NOT MODIFY WITHOUT EXTENSIVE TESTING !!!!!
  * Core requirements:
  * - Fetch all machines
  * - Provide fallback in preview/error scenarios
@@ -61,7 +62,8 @@ export function useContentfulMachines() {
 /**
  * Hook for fetching a single Contentful machine
  * 
- * !!!!! DO NOT REMOVE OR FUNDAMENTALLY ALTER !!!!
+ * @remarks
+ * !!!!! CRITICAL PATH - DO NOT MODIFY WITHOUT EXTENSIVE TESTING !!!!!
  * Core requirements:
  * - Fetch machine by ID or slug
  * - Handle special cases (e.g., divi-wp)
@@ -151,4 +153,3 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
 }
 
 export default { useContentfulMachines, useContentfulMachine };
-

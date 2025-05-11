@@ -12,6 +12,9 @@ import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
 
 /**
  * Hook to fetch machines data
+ * 
+ * @remarks
+ * CRITICAL PATH: This hook powers machine listings throughout the application.
  */
 export const useMachines = () => {
   // Use the Contentful machines hook to ensure consistent data source
@@ -30,6 +33,9 @@ export const useMachines = () => {
 
 /**
  * Hook to fetch a specific machine by ID
+ * 
+ * @remarks
+ * CRITICAL PATH: This hook is used by machine detail pages.
  */
 export const useMachineById = (id: string | undefined) => {
   // Use the Contentful machine hook to ensure consistent data source
@@ -43,6 +49,12 @@ export const useMachineById = (id: string | undefined) => {
 
 /**
  * Hook to fetch a machine by slug
+ * 
+ * @remarks
+ * CRITICAL PATH: This hook is used by ALL machine detail pages.
+ * The implementation must handle both the legacy two-parameter and new one-parameter calls.
+ * Modifications to this hook will affect all individual machine pages.
+ * 
  * @param typeOrSlug Machine type (legacy) or slug
  * @param idOrSlug Machine ID or slug (legacy second parameter)
  * @deprecated This function signature will be changing to accept a single parameter (slug/ID) in future versions.

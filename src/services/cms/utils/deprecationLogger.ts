@@ -6,6 +6,9 @@
 // Store the deprecation warnings that have been logged during this session
 const loggedWarnings = new Set<string>();
 
+// Store critical path warnings that have been logged
+const loggedCriticalPathWarnings = new Set<string>();
+
 /**
  * Log a deprecation warning once per session
  * @param feature Name of the deprecated feature
@@ -30,6 +33,34 @@ export function logDeprecationWarning(
     
     // Log warning to console
     console.warn(`[DEPRECATED] ${feature}: ${fullMessage}`);
+  }
+}
+
+/**
+ * Mark a function or component as a critical path that requires careful testing
+ * before modification
+ * 
+ * @param path Name of the critical path
+ * @param message Warning message about the criticality
+ * @param usageContext Where this critical path is used
+ */
+export function markCriticalPath(
+  path: string,
+  message: string = "This is a critical path in the application. Modification requires thorough testing.",
+  usageContext: string = "multiple places"
+): void {
+  const key = `${path}:${message}`;
+  
+  // Only log each critical path warning once to avoid console spam
+  if (!loggedCriticalPathWarnings.has(key)) {
+    loggedCriticalPathWarnings.add(key);
+    
+    console.warn(`
+[CRITICAL PATH] ${path}
+${message}
+Used in: ${usageContext}
+⚠️ Changes may break core application functionality.
+    `);
   }
 }
 
@@ -61,6 +92,14 @@ export function deprecate<T extends (...args: any[]) => any>(
  */
 export function getLoggedDeprecationWarnings(): string[] {
   return Array.from(loggedWarnings);
+}
+
+/**
+ * Get a list of all critical path warnings logged in this session
+ * @returns Array of logged critical path warning messages
+ */
+export function getLoggedCriticalPathWarnings(): string[] {
+  return Array.from(loggedCriticalPathWarnings);
 }
 
 /**

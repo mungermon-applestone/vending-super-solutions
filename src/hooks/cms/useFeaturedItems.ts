@@ -7,6 +7,10 @@ import { useContentfulProducts } from './useContentfulProducts';
 
 /**
  * Hook to fetch items for homepage display
+ * 
+ * @remarks
+ * CRITICAL PATH: This hook powers the homepage content display.
+ * Modifications can cause homepage sections to break.
  */
 export function useHomepageItems() {
   // Fetch featured products
@@ -64,6 +68,13 @@ export function useHomepageItems() {
 
 /**
  * Hook to fetch featured products for homepage
+ * 
+ * @remarks
+ * CRITICAL PATH: This hook is used by the homepage to display product cards.
+ * The implementation must return properly formatted product data with valid links.
+ * 
+ * Previously returned an empty array, which broke product cards on homepage.
+ * Now uses useContentfulProducts() to ensure consistent data.
  */
 export function useFeaturedProducts() {
   // Use the Contentful products hook instead of returning an empty array
@@ -73,6 +84,9 @@ export function useFeaturedProducts() {
 
 /**
  * Hook to fetch featured machines for homepage
+ * 
+ * @remarks
+ * CRITICAL PATH: This hook is used by the homepage to display machine cards.
  */
 export function useFeaturedMachines() {
   return useQuery({
@@ -88,6 +102,9 @@ export function useFeaturedMachines() {
 
 /**
  * Hook to fetch featured business goals for homepage
+ * 
+ * @remarks
+ * CRITICAL PATH: This hook is used by the homepage to display business goal cards.
  */
 export function useFeaturedBusinessGoals() {
   return useQuery({
