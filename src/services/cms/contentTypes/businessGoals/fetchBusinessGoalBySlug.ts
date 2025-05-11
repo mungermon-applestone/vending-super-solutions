@@ -159,7 +159,7 @@ export async function fetchBusinessGoalBySlug<T extends CMSBusinessGoal>(slug: s
       console.log("[fetchBusinessGoalBySlug] Attempting to use mock data");
       try {
         // Use the mock data from businessGoalOperations instead
-        const goals = await businessGoalOperations.fetchAll();
+        const goals = await businessGoalOperations.getAll();
         
         // Try to find a match using our slug matching function
         for (const goal of goals) {

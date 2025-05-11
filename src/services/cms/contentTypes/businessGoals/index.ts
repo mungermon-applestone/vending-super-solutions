@@ -2,13 +2,14 @@
 import { CMSBusinessGoal } from '@/types/cms';
 import { contentfulBusinessGoalAdapter } from '@/services/cms/adapters/businessGoals/contentfulBusinessGoalAdapter';
 import { createReadOnlyAdapter } from '@/services/cms/adapters/readOnlyAdapter';
+import { makeContentTypeOperationsCompatible } from '@/services/cms/utils/adapterCompatibility';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Read-only version of the business goals adapter
  * This maintains read operations but prevents write operations as part of our migration to Contentful
  */
-export const businessGoalOperations = createReadOnlyAdapter<typeof contentfulBusinessGoalAdapter>(
+const baseAdapter = createReadOnlyAdapter<typeof contentfulBusinessGoalAdapter>(
   'businessGoal',
   {
     getAll: contentfulBusinessGoalAdapter.getAll,
@@ -16,6 +17,12 @@ export const businessGoalOperations = createReadOnlyAdapter<typeof contentfulBus
     getById: contentfulBusinessGoalAdapter.getById,
   },
   ['create', 'update', 'delete', 'clone']
+);
+
+// Make the adapter compatible with ContentTypeOperations interface
+export const businessGoalOperations = makeContentTypeOperationsCompatible(
+  baseAdapter, 
+  'businessGoal'
 );
 
 // Export individual functions for backward compatibility
