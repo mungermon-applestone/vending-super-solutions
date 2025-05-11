@@ -29,10 +29,11 @@ export function makeAdapterReadOnly<T extends Record<string, any>>(
   for (const operation of writeOperations) {
     if (operation in adapter && typeof adapter[operation as keyof T] === 'function') {
       // Use type assertion to safely assign to the readOnlyAdapter
-      (readOnlyAdapter as any)[operation] = createDeprecatedWriteOperation(
-        operation,
-        entityType
-      );
+      Object.defineProperty(readOnlyAdapter, operation, {
+        value: createDeprecatedWriteOperation(operation, entityType),
+        configurable: true,
+        enumerable: true
+      });
     }
   }
   
@@ -54,7 +55,11 @@ export function makeContentTypeOperationsCompatible<T extends Record<string, any
   adapter: T,
   entityType: string
 ): T & Record<string, any> {
-  const compatibleAdapter = { ...adapter } as T & Record<string, any>;
+  // Create a new object that preserves the original adapter's prototype chain
+  const compatibleAdapter = Object.create(
+    Object.getPrototypeOf(adapter),
+    Object.getOwnPropertyDescriptors(adapter)
+  );
   
   // Map of adapter methods to ContentTypeOperations methods
   const methodMapping: Record<string, string> = {
@@ -66,7 +71,10 @@ export function makeContentTypeOperationsCompatible<T extends Record<string, any
   // Add compatible methods that delegate to the original methods
   for (const [adapterMethod, operationsMethod] of Object.entries(methodMapping)) {
     if (adapterMethod in adapter && typeof adapter[adapterMethod as keyof T] === 'function') {
-      compatibleAdapter[operationsMethod] = adapter[adapterMethod as keyof T];
+      const originalMethod = adapter[adapterMethod as keyof T];
+      if (typeof originalMethod === 'function') {
+        compatibleAdapter[operationsMethod] = originalMethod.bind(adapter);
+      }
     }
   }
   

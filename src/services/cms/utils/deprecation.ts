@@ -267,5 +267,5 @@ export function deprecated<T>(
   return target;
 }
 
-// Explicitly export the DeprecationStat type to fix the build error
-export type { DeprecationStat };
+// Export the type properly - removed the duplicate export at the end
+// to fix the "Export declaration conflicts" error
