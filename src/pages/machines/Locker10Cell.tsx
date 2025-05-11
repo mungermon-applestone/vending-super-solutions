@@ -1,3 +1,4 @@
+
 import React from 'react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
@@ -57,7 +58,7 @@ const Locker10Cell = () => {
   };
 
   // Fetch machine data from the database
-  const { data: dbMachineData, isLoading, error } = useMachineBySlug('10-cell-temperature-controlled');
+  const { data: dbMachineData, isLoading, error } = useMachineBySlug('locker', '10-cell-temperature-controlled');
 
   // Use database data if available, otherwise fall back to static data
   const machineData = dbMachineData || fallbackMachineData;

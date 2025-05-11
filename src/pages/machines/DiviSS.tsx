@@ -62,7 +62,7 @@ const DiviSS = () => {
   };
 
   // Fetch machine data from the database
-  const { data: dbMachineData, isLoading, error } = useMachineBySlug('divi-ss');
+  const { data: dbMachineData, isLoading, error } = useMachineBySlug('vending', 'divi-ss');
   
   console.log('[DiviSS] Machine data from DB:', {
     isLoading,
