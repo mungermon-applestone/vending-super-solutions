@@ -2,62 +2,53 @@
 /**
  * Contentful Machine Adapter
  * 
- * Implements the adapter interface for machine content type in Contentful
+ * This adapter interfaces with Contentful to provide machine data.
  */
 
-import { logDeprecationWarning } from '../../utils/deprecation';
-
-// Define minimal interface for the adapter
-interface MachineAdapter {
-  getAll: (filters?: Record<string, any>) => Promise<any[]>;
-  getBySlug: (slug: string) => Promise<any | null>;
-  getById: (id: string) => Promise<any | null>;
-  create?: (data: any) => Promise<string>;
-  update?: (id: string, data: any) => Promise<boolean>;
-  delete?: (id: string) => Promise<boolean>;
-  clone?: (id: string) => Promise<string>;
-}
+import { CMSMachine } from '@/types/cms';
+import { MachineAdapter } from './types';
+import { createDeprecatedWriteOperation } from '@/services/cms/utils/deprecation';
 
 /**
- * Implementation of the machine adapter for Contentful
+ * Implements the machine adapter interface for Contentful
  */
 export const contentfulMachineAdapter: MachineAdapter = {
+  /**
+   * Get all machines from Contentful
+   */
   getAll: async (filters = {}) => {
-    // Log the adapter usage
-    logDeprecationWarning(
-      "contentfulMachineAdapter.getAll",
-      "This method is a stub implementation and will be updated in the future",
-      "Implement proper Contentful integration"
-    );
+    console.log('Fetching all machines from Contentful with filters:', filters);
     
-    // This is a stub - in a real implementation, this would fetch from Contentful
-    return [];
+    // Implementation would query the Contentful API here
+    // For now, we return a placeholder
+    return Promise.resolve([]);
   },
   
+  /**
+   * Get a machine by its slug
+   */
   getBySlug: async (slug: string) => {
-    // Log the adapter usage
-    logDeprecationWarning(
-      "contentfulMachineAdapter.getBySlug",
-      "This method is a stub implementation and will be updated in the future",
-      "Implement proper Contentful integration"
-    );
+    console.log(`Fetching machine with slug: ${slug} from Contentful`);
     
-    // This is a stub - in a real implementation, this would fetch from Contentful
-    return null;
+    // Implementation would query the Contentful API here
+    // For now, we return null to indicate "not found"
+    return Promise.resolve(null);
   },
   
+  /**
+   * Get a machine by its ID
+   */
   getById: async (id: string) => {
-    // Log the adapter usage
-    logDeprecationWarning(
-      "contentfulMachineAdapter.getById",
-      "This method is a stub implementation and will be updated in the future",
-      "Implement proper Contentful integration"
-    );
+    console.log(`Fetching machine with ID: ${id} from Contentful`);
     
-    // This is a stub - in a real implementation, this would fetch from Contentful
-    return null;
+    // Implementation would query the Contentful API here
+    // For now, we return null to indicate "not found"
+    return Promise.resolve(null);
   },
   
-  // These operations are intentionally left as stubs that will redirect to Contentful
-  // in the future implementation
+  // Use the deprecated write operation factory for write operations
+  create: createDeprecatedWriteOperation('create', 'machine'),
+  update: createDeprecatedWriteOperation('update', 'machine'),
+  delete: createDeprecatedWriteOperation('delete', 'machine'),
+  clone: createDeprecatedWriteOperation('clone', 'machine')
 };

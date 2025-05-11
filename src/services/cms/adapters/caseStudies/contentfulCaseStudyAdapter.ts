@@ -2,61 +2,63 @@
 /**
  * Contentful Case Study Adapter
  * 
- * Implements the adapter interface for case study content type in Contentful
+ * This adapter interfaces with Contentful to provide case study data.
  */
 
-import { logDeprecationWarning } from '../../utils/deprecation';
+import { CMSCaseStudy } from '@/types/cms';
+import { createDeprecatedWriteOperation } from '@/services/cms/utils/deprecation';
 
-// Define minimal interface for the adapter
-interface CaseStudyAdapter {
-  getAll: (filters?: Record<string, any>) => Promise<any[]>;
-  getBySlug: (slug: string) => Promise<any | null>;
-  getById: (id: string) => Promise<any | null>;
-  create?: (data: any) => Promise<string>;
-  update?: (id: string, data: any) => Promise<boolean>;
-  delete?: (id: string) => Promise<boolean>;
+/**
+ * Interface for the case study adapter
+ */
+export interface CaseStudyAdapter {
+  getAll: (filters?: Record<string, any>) => Promise<CMSCaseStudy[]>;
+  getBySlug: (slug: string) => Promise<CMSCaseStudy | null>;
+  getById: (id: string) => Promise<CMSCaseStudy | null>;
+  create: (data: any) => Promise<CMSCaseStudy>;
+  update: (id: string, data: any) => Promise<CMSCaseStudy>;
+  delete: (id: string) => Promise<void>;
 }
 
 /**
- * Implementation of the case study adapter for Contentful
+ * Implements the case study adapter interface for Contentful
  */
 export const contentfulCaseStudyAdapter: CaseStudyAdapter = {
+  /**
+   * Get all case studies from Contentful
+   */
   getAll: async (filters = {}) => {
-    // Log the adapter usage
-    logDeprecationWarning(
-      "contentfulCaseStudyAdapter.getAll",
-      "This method is a stub implementation and will be updated in the future",
-      "Implement proper Contentful integration"
-    );
+    console.log('Fetching all case studies from Contentful with filters:', filters);
     
-    // This is a stub - in a real implementation, this would fetch from Contentful
-    return [];
+    // Implementation would query the Contentful API here
+    // For now, we return a placeholder
+    return Promise.resolve([]);
   },
   
+  /**
+   * Get a case study by its slug
+   */
   getBySlug: async (slug: string) => {
-    // Log the adapter usage
-    logDeprecationWarning(
-      "contentfulCaseStudyAdapter.getBySlug",
-      "This method is a stub implementation and will be updated in the future",
-      "Implement proper Contentful integration"
-    );
+    console.log(`Fetching case study with slug: ${slug} from Contentful`);
     
-    // This is a stub - in a real implementation, this would fetch from Contentful
-    return null;
+    // Implementation would query the Contentful API here
+    // For now, we return null to indicate "not found"
+    return Promise.resolve(null);
   },
   
+  /**
+   * Get a case study by its ID
+   */
   getById: async (id: string) => {
-    // Log the adapter usage
-    logDeprecationWarning(
-      "contentfulCaseStudyAdapter.getById",
-      "This method is a stub implementation and will be updated in the future",
-      "Implement proper Contentful integration"
-    );
+    console.log(`Fetching case study with ID: ${id} from Contentful`);
     
-    // This is a stub - in a real implementation, this would fetch from Contentful
-    return null;
+    // Implementation would query the Contentful API here
+    // For now, we return null to indicate "not found"
+    return Promise.resolve(null);
   },
   
-  // These operations are intentionally left as stubs that will redirect to Contentful
-  // in the future implementation
+  // Use the deprecated write operation factory for write operations
+  create: createDeprecatedWriteOperation('create', 'caseStudy'),
+  update: createDeprecatedWriteOperation('update', 'caseStudy'),
+  delete: createDeprecatedWriteOperation('delete', 'caseStudy')
 };

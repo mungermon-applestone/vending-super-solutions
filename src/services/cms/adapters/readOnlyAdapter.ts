@@ -1,88 +1,69 @@
 
 /**
- * Generic Read-Only Adapter
- * This adapter provides a consistent pattern for creating read-only versions
- * of content adapters as part of our deprecation strategy.
+ * Read-Only Adapter Factory
+ *
+ * This module provides utilities for creating read-only adapters by preserving
+ * read operations and replacing write operations with functions that throw errors.
  */
 
-import { logDeprecation, showDeprecationToast, createDeprecationError } from '../utils/deprecationUtils';
+import { createDeprecatedWriteOperation } from '../utils/deprecation';
+import { trackDeprecatedUsage } from '../utils/deprecationLogger';
 
 /**
- * Creates a function that logs deprecation and throws an error for write operations
- */
-export function createDeprecatedWriteOperation<T extends (...args: any[]) => any>(
-  operation: string,
-  entityType: string
-): (...args: Parameters<T>) => ReturnType<T> {
-  return (...args: Parameters<T>): ReturnType<T> => {
-    // Log the deprecation
-    logDeprecation(
-      `${entityType}.${operation}`, 
-      `${operation} operation on ${entityType} is deprecated.`,
-      `Use Contentful directly for ${entityType} management.`
-    );
-    
-    // Show user-facing notification
-    showDeprecationToast(`${entityType} ${operation}`);
-    
-    // Throw an error to prevent the operation
-    throw createDeprecationError(operation, entityType);
-  };
-}
-
-/**
- * Creates a function that wraps a read operation and logs deprecation
- */
-export function createDeprecatedReadOperation<T extends (...args: any[]) => Promise<any>>(
-  operation: string,
-  entityType: string,
-  implementation: T
-): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
-  return async (...args: Parameters<T>): Promise<Awaited<ReturnType<T>>> => {
-    // Log the deprecation but allow the operation
-    logDeprecation(
-      `${entityType}.${operation}`, 
-      `${operation} operation on ${entityType} is deprecated, but still functional.`,
-      `Consider using Contentful directly for future development.`
-    );
-    
-    // Execute the actual implementation
-    return await implementation(...args);
-  };
-}
-
-/**
- * Creates a read-only version of any content adapter
- * This maintains read operations but replaces write operations with functions
- * that throw errors and log deprecation warnings.
+ * Creates a read-only version of any adapter by preserving specified read operations
+ * and disabling write operations.
+ *
+ * @param entityType The type of entity (e.g., 'product', 'businessGoal')
+ * @param readOperations Object containing the read operations to preserve
+ * @param disabledOperations Array of operation names that should throw errors when called
+ * @returns A new adapter with read operations intact but write operations disabled
  */
 export function createReadOnlyAdapter<T extends Record<string, any>>(
   entityType: string,
-  readImplementations: Partial<T>,
-  writeOperations: string[]
+  readOperations: Record<string, Function>,
+  disabledOperations: string[] = ['create', 'update', 'delete', 'clone']
 ): T {
-  const adapter = {} as T;
-  
-  // Add all read implementations
-  for (const [key, implementation] of Object.entries(readImplementations)) {
-    if (typeof implementation === 'function') {
-      adapter[key as keyof T] = createDeprecatedReadOperation(
-        key, 
-        entityType,
-        implementation
-      ) as T[keyof T];
-    } else {
-      adapter[key as keyof T] = implementation as T[keyof T];
+  // Create a new adapter with the read operations
+  const readOnlyAdapter = { ...readOperations } as unknown as T;
+
+  // Add disabled operations that throw clear error messages
+  for (const operation of disabledOperations) {
+    Object.defineProperty(readOnlyAdapter, operation, {
+      value: createDeprecatedWriteOperation(operation, entityType),
+      configurable: true,
+      enumerable: true
+    });
+  }
+
+  // Track usage of the read-only adapter
+  trackDeprecatedUsage(`ReadOnlyAdapter-${entityType}`);
+
+  return readOnlyAdapter;
+}
+
+/**
+ * Creates a logging wrapper around any adapter, useful for debugging
+ * 
+ * @param adapter The original adapter
+ * @param adapterName Name to use in logs
+ * @returns A proxy that logs all method calls
+ */
+export function createLoggingAdapter<T extends object>(
+  adapter: T,
+  adapterName: string
+): T {
+  return new Proxy(adapter, {
+    get(target, prop: string) {
+      const value = Reflect.get(target, prop);
+      
+      if (typeof value === 'function') {
+        return function(...args: any[]) {
+          console.log(`[${adapterName}] Called ${String(prop)}`, args);
+          return Reflect.apply(value, target, args);
+        };
+      }
+      
+      return value;
     }
-  }
-  
-  // Add write operations that throw errors
-  for (const operation of writeOperations) {
-    adapter[operation as keyof T] = createDeprecatedWriteOperation(
-      operation,
-      entityType
-    ) as T[keyof T];
-  }
-  
-  return adapter;
+  });
 }

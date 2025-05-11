@@ -1,89 +1,103 @@
-
 /**
  * Adapter Compatibility Utilities
- * 
- * This module provides tools to make different adapter interfaces compatible with each other.
- * It's part of our deprecation strategy to maintain backward compatibility while
- * we transition to Contentful and standardize interfaces.
+ *
+ * Functions to help bridge different adapter interfaces and naming conventions.
+ * This is particularly useful for the transition from different adapter types
+ * to a standardized ContentTypeOperations interface.
  */
 
-import { ContentTypeOperations } from '../contentTypes/types';
-import { logDeprecation } from './deprecationUtils';
-
-/**
- * Type to ensure adapter has the necessary methods
- */
-interface GetMethods {
-  getAll?: (...args: any[]) => Promise<any>;
-  getBySlug?: (...args: any[]) => Promise<any>;
-  getById?: (...args: any[]) => Promise<any>;
-}
+import { trackDeprecatedUsage } from './deprecationLogger';
 
 /**
- * Makes any adapter with getAll/getBySlug/getById methods compatible with
- * the ContentTypeOperations interface by adding fetchAll/fetchBySlug/fetchById methods
- * that delegate to the original methods.
+ * Makes any adapter follow the ContentTypeOperations interface naming convention
+ * This helps bridge different naming conventions between adapters
  * 
- * @param adapter The original adapter with get* methods
- * @param entityType The name of the entity type (for logging)
- * @returns The adapter enhanced with fetch* methods
+ * @param adapter The original adapter
+ * @param entityType The type of entity this adapter handles
+ * @returns An adapter with both original methods and ContentTypeOperations-compatible methods
  */
-export function makeContentTypeOperationsCompatible<T extends GetMethods>(
+export function makeContentTypeOperationsCompatible<T extends Record<string, any>>(
   adapter: T,
   entityType: string
-): T & ContentTypeOperations<any> {
-  const enhancedAdapter = { ...adapter } as T & ContentTypeOperations<any>;
+): T & Record<string, any> {
+  // Create a new object that preserves the original adapter's prototype chain
+  const compatibleAdapter = Object.create(
+    Object.getPrototypeOf(adapter),
+    Object.getOwnPropertyDescriptors(adapter)
+  );
   
-  // Only add compatibility methods if they don't already exist
-  if (!enhancedAdapter.fetchAll && enhancedAdapter.getAll) {
-    enhancedAdapter.fetchAll = async (...args: any[]) => {
-      logDeprecation(
-        `${entityType}.fetchAll`, 
-        `fetchAll is a compatibility method. Consider using ${entityType}.getAll directly.`,
-        `Use Contentful API directly for ${entityType} retrieval in new code.`
-      );
-      return enhancedAdapter.getAll!(...args);
-    };
+  // Map of adapter methods to ContentTypeOperations methods
+  const methodMapping: Record<string, string> = {
+    'getAll': 'fetchAll',
+    'getBySlug': 'fetchBySlug',
+    'getById': 'fetchById'
+  };
+  
+  // Add compatible methods that delegate to the original methods
+  for (const [adapterMethod, operationsMethod] of Object.entries(methodMapping)) {
+    if (adapterMethod in adapter && typeof adapter[adapterMethod as keyof T] === 'function') {
+      const originalMethod = adapter[adapterMethod as keyof T];
+      if (typeof originalMethod === 'function') {
+        compatibleAdapter[operationsMethod] = originalMethod.bind(adapter);
+      }
+    }
   }
-
-  if (!enhancedAdapter.fetchBySlug && enhancedAdapter.getBySlug) {
-    enhancedAdapter.fetchBySlug = async (...args: any[]) => {
-      logDeprecation(
-        `${entityType}.fetchBySlug`, 
-        `fetchBySlug is a compatibility method. Consider using ${entityType}.getBySlug directly.`,
-        `Use Contentful API directly for ${entityType} retrieval in new code.`
-      );
-      return enhancedAdapter.getBySlug!(...args);
-    };
-  }
-
-  if (!enhancedAdapter.fetchById && enhancedAdapter.getById) {
-    enhancedAdapter.fetchById = async (...args: any[]) => {
-      logDeprecation(
-        `${entityType}.fetchById`, 
-        `fetchById is a compatibility method. Consider using ${entityType}.getById directly.`,
-        `Use Contentful API directly for ${entityType} retrieval in new code.`
-      );
-      return enhancedAdapter.getById!(...args);
-    };
-  }
-
-  return enhancedAdapter;
+  
+  // Track usage of the compatibility layer
+  trackDeprecatedUsage(`CompatibilityAdapter-${entityType}`);
+  
+  return compatibleAdapter;
 }
 
 /**
- * Registers an adapter with the ContentTypeOperations factory, ensuring compatibility
- * by adding any missing methods needed by the ContentTypeOperations interface.
+ * Creates a standardized adapter interface from a variety of source adapters
  * 
- * @param factory The factory to register with
- * @param contentType The content type identifier
- * @param adapter The adapter to register
+ * @param options Configuration options including source adapters and entity type
+ * @returns A standardized adapter that follows ContentTypeOperations conventions
  */
-export function registerCompatibleAdapter(
-  factory: any,
-  contentType: string,
-  adapter: Record<string, any>
-): void {
-  const compatibleAdapter = makeContentTypeOperationsCompatible(adapter, contentType);
-  factory.registerOperations(contentType, compatibleAdapter);
+export function createStandardizedAdapter<T extends Record<string, any>>(
+  options: {
+    sourceAdapter: T,
+    entityType: string,
+    preserveSourceMethods?: boolean,
+    methodMappings?: Record<string, string>
+  }
+): Record<string, any> {
+  const { sourceAdapter, entityType, preserveSourceMethods = true, methodMappings = {} } = options;
+  
+  // Start with default mappings
+  const defaultMappings = {
+    'getAll': 'fetchAll',
+    'getBySlug': 'fetchBySlug',
+    'getById': 'fetchById',
+    'create': 'createEntry',
+    'update': 'updateEntry',
+    'delete': 'deleteEntry'
+  };
+  
+  // Merge with custom mappings
+  const finalMappings = { ...defaultMappings, ...methodMappings };
+  
+  // Create the standardized adapter
+  const standardAdapter: Record<string, any> = {};
+  
+  // Map methods from source to standardized names
+  for (const [sourceName, standardName] of Object.entries(finalMappings)) {
+    if (sourceName in sourceAdapter && typeof sourceAdapter[sourceName as keyof T] === 'function') {
+      const originalMethod = sourceAdapter[sourceName as keyof T];
+      if (typeof originalMethod === 'function') {
+        standardAdapter[standardName] = originalMethod.bind(sourceAdapter);
+        
+        // If specified, also keep the original method name
+        if (preserveSourceMethods) {
+          standardAdapter[sourceName] = originalMethod.bind(sourceAdapter);
+        }
+      }
+    }
+  }
+  
+  // Track usage
+  trackDeprecatedUsage(`StandardizedAdapter-${entityType}`);
+  
+  return standardAdapter;
 }

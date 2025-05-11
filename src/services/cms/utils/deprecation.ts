@@ -1,4 +1,3 @@
-
 /**
  * Consolidated Deprecation Module
  * 
@@ -266,6 +265,3 @@ export function deprecated<T>(
   // it's just for TypeScript documentation
   return target;
 }
-
-// Export the type properly - removed the duplicate export at the end
-// to fix the "Export declaration conflicts" error
