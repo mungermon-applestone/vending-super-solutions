@@ -1,14 +1,23 @@
 
 /**
- * @deprecated This adapter is deprecated as we are transitioning to Contentful.
- * This file now simply re-exports the contentful adapter to maintain compatibility.
+ * @deprecated ARCHIVED ADAPTER - Do not use in new development
+ * 
+ * This adapter is deprecated as we are transitioning to Contentful.
+ * This file now simply re-exports the contentful adapter for backward compatibility.
+ * It will be removed in a future release.
  */
 
 import { contentfulTechnologyAdapter } from './contentfulTechnologyAdapter';
-import { TechnologyAdapter } from './types';
+import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
 
 // Log deprecation warning when this module is imported
-console.warn('strapiTechnologyAdapter is deprecated and will be removed in a future release. Please use contentfulTechnologyAdapter instead.');
+const warnDeprecation = () => {
+  logDeprecationWarning(
+    "strapiTechnologyAdapter", 
+    "This adapter is deprecated and will be removed in a future release.",
+    "Please use contentfulTechnologyAdapter directly."
+  );
+};
 
-// Re-export the contentful adapter to avoid breaking changes
-export const strapiTechnologyAdapter: TechnologyAdapter = contentfulTechnologyAdapter;
+// Re-export the contentful adapter to maintain backward compatibility
+export const strapiTechnologyAdapter = contentfulTechnologyAdapter;

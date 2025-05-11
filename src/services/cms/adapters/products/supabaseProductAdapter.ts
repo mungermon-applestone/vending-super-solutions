@@ -1,69 +1,59 @@
 
-import { CMSProductType } from '@/types/cms';
-import { ProductAdapter, ProductCreateInput, ProductUpdateInput } from './types';
-import { USE_SUPABASE_CMS } from '@/config/featureFlags';
-
 /**
- * Mock implementation of the Supabase Product adapter
- * This adapter returns empty/mock data since Supabase CMS is disabled
+ * @deprecated ARCHIVED ADAPTER - Do not use in new development
+ * 
+ * This adapter is deprecated as we are transitioning to Contentful.
+ * This file provides a minimal implementation that logs operations 
+ * and returns empty results.
  */
+
+import { ProductAdapter } from './types';
+import { contentfulProductAdapter } from './contentfulProductAdapter';
+import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
+
+// Log deprecation warning when this module is imported
+const warnDeprecation = () => {
+  logDeprecationWarning(
+    "supabaseProductAdapter", 
+    "This adapter is deprecated and will be removed in a future release.",
+    "Please use contentfulProductAdapter directly."
+  );
+};
+
+// Create a proxy that logs deprecation warnings and delegates to Contentful
 export const supabaseProductAdapter: ProductAdapter = {
-  getAll: async (filters?: Record<string, any>): Promise<CMSProductType[]> => {
-    console.log('[supabaseProductAdapter] Supabase CMS is disabled, returning empty array');
-    return [];
+  getAll: async (filters) => {
+    warnDeprecation();
+    return await contentfulProductAdapter.getAll(filters);
   },
   
-  getBySlug: async (slug: string): Promise<CMSProductType | null> => {
-    console.log(`[supabaseProductAdapter] Supabase CMS is disabled, returning null`);
-    return null;
+  getBySlug: async (slug) => {
+    warnDeprecation();
+    return await contentfulProductAdapter.getBySlug(slug);
   },
   
-  getById: async (id: string): Promise<CMSProductType | null> => {
-    console.log(`[supabaseProductAdapter] Supabase CMS is disabled, returning null`);
-    return null;
+  getById: async (id) => {
+    warnDeprecation();
+    return await contentfulProductAdapter.getById(id);
   },
   
-  create: async (product: ProductCreateInput): Promise<CMSProductType> => {
-    console.log(`[supabaseProductAdapter] Supabase CMS is disabled, returning mock data`);
-    return {
-      id: 'mock-id-' + Date.now(),
-      title: product.title,
-      slug: product.slug || 'mock-slug',
-      description: product.description || '',
-      visible: true,
-      benefits: product.benefits || [],
-      features: []
-    };
+  create: async (product) => {
+    warnDeprecation();
+    return await contentfulProductAdapter.create(product);
   },
   
-  update: async (id: string, product: ProductUpdateInput): Promise<CMSProductType> => {
-    console.log(`[supabaseProductAdapter] Supabase CMS is disabled, returning mock data`);
-    return {
-      id: id,
-      title: product.title,
-      slug: product.slug || 'mock-slug',
-      description: product.description || '',
-      visible: true,
-      benefits: product.benefits || [],
-      features: []
-    };
+  update: async (id, product) => {
+    warnDeprecation();
+    return await contentfulProductAdapter.update(id, product);
   },
   
-  delete: async (id: string): Promise<boolean> => {
-    console.log(`[supabaseProductAdapter] Supabase CMS is disabled, returning true`);
-    return true;
+  delete: async (id) => {
+    warnDeprecation();
+    return await contentfulProductAdapter.delete(id);
   },
   
-  clone: async (id: string): Promise<CMSProductType> => {
-    console.log(`[supabaseProductAdapter] Supabase CMS is disabled, returning mock data`);
-    return {
-      id: 'cloned-' + id,
-      title: 'Cloned Product',
-      slug: 'cloned-product-' + Date.now(),
-      description: '',
-      visible: true,
-      benefits: [],
-      features: []
-    };
+  clone: async (id) => {
+    warnDeprecation();
+    return await contentfulProductAdapter.clone(id);
   }
 };
