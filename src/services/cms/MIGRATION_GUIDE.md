@@ -13,16 +13,18 @@ As of May 2025, we have completed the following migration steps:
 2. ✅ Deprecation of non-Contentful adapters
 3. ✅ Addition of compatibility layers for legacy code
 4. ✅ Implementation of deprecation tracking system
-5. 🔄 Conversion of admin interfaces to read-only views
-6. 🔄 Removal of mock database operations
-7. ⏳ Complete removal of compatibility layers
+5. ✅ Creation of adapter compatibility layer to bridge different method naming conventions
+6. 🔄 Conversion of admin interfaces to read-only views
+7. 🔄 Removal of mock database operations
+8. ⏳ Complete removal of compatibility layers
 
 ## Timeline
 
 - **Phase 1:** ✅ Implement Contentful adapters (Completed January 2025)
 - **Phase 2:** ✅ Deprecate non-Contentful adapters (Completed March 2025)
-- **Phase 3:** 🔄 Provide compatibility layers & convert to read-only (Current phase - May 2025)
-- **Phase 4:** ⏳ Remove compatibility layers and legacy code (Scheduled for July 2025)
+- **Phase 3:** ✅ Provide compatibility layers & method name bridging (Completed May 2025)
+- **Phase 4:** 🔄 Convert interfaces to read-only (In progress - May 2025)
+- **Phase 5:** ⏳ Remove compatibility layers and legacy code (Scheduled for July 2025)
 
 ## For Developers
 
@@ -54,6 +56,25 @@ All content management should now be done directly in Contentful. The applicatio
    
    const { spaceId, accessToken } = getContentfulConfig();
    ```
+
+### Method Name Compatibility
+
+We've added a compatibility layer to bridge different method naming conventions:
+
+```typescript
+// BusinessGoalAdapter uses getAll, getBySlug, getById methods
+// ContentTypeOperations uses fetchAll, fetchBySlug, fetchById methods
+
+// This compatibility layer creates a unified interface
+const compatibleAdapter = makeContentTypeOperationsCompatible(
+  businessGoalAdapter,
+  'businessGoal'
+);
+
+// Now compatibleAdapter has both sets of methods:
+// - Original methods: getAll, getBySlug, getById 
+// - Compatibility methods: fetchAll, fetchBySlug, fetchById
+```
 
 ### Working with Deprecated Types
 
@@ -104,4 +125,3 @@ The following components and modules are scheduled for complete removal:
 ## Need Help?
 
 Contact the engineering team for assistance with this migration.
-

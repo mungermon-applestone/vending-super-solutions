@@ -13,7 +13,8 @@ import {
   BriefcaseBusiness,
   Database,
   BarChart,
-  AlertTriangle
+  AlertTriangle,
+  CheckSquare
 } from 'lucide-react';
 
 interface NavigationItem {
@@ -34,7 +35,8 @@ const navigation: NavigationItem[] = [
 ];
 
 const secondaryNavigation: NavigationItem[] = [
-  { name: 'Content Management', href: '/admin/contentful', icon: Database },
+  { name: 'Contentful CMS', href: '/admin/contentful', icon: Database },
+  { name: 'Migration Tasks', href: '/admin/migration-tasks', icon: CheckSquare },
   { name: 'Deprecation Stats', href: '/admin/deprecation-stats', icon: AlertTriangle },
   { name: 'Performance', href: '/admin/performance-testing', icon: BarChart },
 ];

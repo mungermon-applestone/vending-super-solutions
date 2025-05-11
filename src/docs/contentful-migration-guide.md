@@ -1,4 +1,5 @@
 
+
 # Contentful Migration Guide
 
 ## Overview
@@ -187,3 +188,4 @@ To view deprecation usage statistics:
 - 🔄 Remove more redundant utility functions
 - 🔄 Update adapter interfaces to be more consistent
 - 🔄 Enhance usage tracking to provide more detailed reports
+
