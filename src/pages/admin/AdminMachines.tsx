@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMachines } from '@/hooks/useMachinesData';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Edit, ChevronRight } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { ChevronRight } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -14,19 +15,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
 import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
 import { CMSMachine } from '@/types/cms';
 import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
+import ViewInContentful from '@/components/admin/ViewInContentful';
 
 const AdminMachines = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { data: machines = [], isLoading } = useMachines();
   
   // Log deprecation of this admin page
-  React.useEffect(() => {
+  useEffect(() => {
     logDeprecationWarning(
       "AdminMachines",
       "The Machines admin interface is deprecated and will be removed in a future version.",
@@ -42,14 +41,13 @@ const AdminMachines = () => {
       backPath="/admin/dashboard"
     >
       <div className="flex justify-between mb-6">
-        <div></div>
-        <Button 
-          onClick={() => navigate('/admin/machines/new')}
-          className="flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Add New Machine in Contentful
-        </Button>
+        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+          Read-Only View
+        </Badge>
+        <ViewInContentful 
+          contentType="machine"
+          className="bg-blue-50 text-blue-700 border-blue-200"
+        />
       </div>
 
       <Card className="shadow-sm">
@@ -59,9 +57,11 @@ const AdminMachines = () => {
           ) : machines.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-muted-foreground mb-4">No machines found</p>
-              <Button onClick={() => navigate('/admin/machines/new')}>
-                Create Your First Machine
-              </Button>
+              <ViewInContentful 
+                contentType="machine"
+                variant="default"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              />
             </div>
           ) : (
             <Table>
@@ -90,15 +90,13 @@ const AdminMachines = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Button
+                        <ViewInContentful 
+                          contentType="machine"
+                          contentId={machine.id}
                           variant="ghost"
                           size="sm"
-                          onClick={() => navigate(`/admin/machines/edit/${machine.id}`)}
-                          className="h-8 px-2 w-8"
-                          title="Edit machine in Contentful"
-                        >
-                          <Edit size={16} />
-                        </Button>
+                          className="h-8 w-8 p-0"
+                        />
                         <Button
                           variant="ghost"
                           size="sm"
@@ -116,6 +114,15 @@ const AdminMachines = () => {
             </Table>
           )}
         </CardContent>
+        <CardFooter className="border-t bg-gray-50 flex justify-between items-center">
+          <p className="text-sm text-muted-foreground">
+            This interface is read-only. All content management should be done in Contentful.
+          </p>
+          <ViewInContentful 
+            contentType="machine"
+            size="sm"
+          />
+        </CardFooter>
       </Card>
     </DeprecatedAdminLayout>
   );

@@ -3,16 +3,29 @@ import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Settings, Database, ExternalLink, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Settings, Database, ExternalLink, AlertTriangle, ArrowRight, BarChart3 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
 
 const AdminPage = () => {
   const navigate = useNavigate();
 
   const handleOpenContentful = () => {
+    logDeprecationWarning(
+      "ContentfulRedirect",
+      "User clicked to open Contentful from the Admin page"
+    );
     window.open("https://app.contentful.com/", "_blank");
   };
+  
+  React.useEffect(() => {
+    logDeprecationWarning(
+      "AdminPage",
+      "The Admin page is being phased out as we migrate to Contentful",
+      "Please use Contentful for content management"
+    );
+  }, []);
 
   return (
     <Layout>
@@ -69,21 +82,21 @@ const AdminPage = () => {
             </AlertDescription>
           </Alert>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="shadow-sm hover:shadow transition-shadow duration-200 border-gray-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Settings className="h-5 w-5" />
-                  <span>Contentful Configuration</span>
+                  <span>Contentful Config</span>
                 </CardTitle>
                 <CardDescription>
-                  Set up environment variables for Contentful CMS
+                  API keys and environment setup
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-600 mb-4">
-                  Configure the connection between your application and Contentful CMS.
-                  Set API keys, environment variables, and other Contentful settings.
+                  Configure API keys and environment 
+                  variables for Contentful CMS.
                 </p>
               </CardContent>
               <CardFooter className="bg-gray-50 border-t">
@@ -104,14 +117,14 @@ const AdminPage = () => {
                   <span>Legacy Dashboard</span>
                 </CardTitle>
                 <CardDescription>
-                  Access legacy content management tools
+                  Read-only legacy interfaces
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-600 mb-4">
-                  The previous content management interface is being deprecated.
-                  These tools will be removed in future updates as we complete
-                  the migration to Contentful.
+                  View-only access to content previously 
+                  managed through the admin interface.
+                  All updates should be done in Contentful.
                 </p>
               </CardContent>
               <CardFooter className="bg-gray-50 border-t">
@@ -121,7 +134,36 @@ const AdminPage = () => {
                   onClick={() => navigate('/admin/dashboard')}
                 >
                   View Dashboard
-                  <span className="ml-2 text-xs bg-gray-200 px-2 py-0.5 rounded-full">Deprecated</span>
+                  <span className="ml-2 text-xs bg-gray-200 px-2 py-0.5 rounded-full">Read-only</span>
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card className="shadow-sm hover:shadow transition-shadow duration-200 border-gray-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  <span>Deprecation Stats</span>
+                </CardTitle>
+                <CardDescription>
+                  Monitor usage of deprecated features
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 mb-4">
+                  View statistics on deprecated feature usage
+                  to help identify code that needs migration to
+                  newer implementations.
+                </p>
+              </CardContent>
+              <CardFooter className="bg-gray-50 border-t">
+                <Button 
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => navigate('/admin/deprecation-stats')}
+                >
+                  View Statistics
+                  <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">New</span>
                 </Button>
               </CardFooter>
             </Card>

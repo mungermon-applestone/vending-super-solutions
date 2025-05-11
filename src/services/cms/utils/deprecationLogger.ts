@@ -9,16 +9,29 @@ const loggedWarnings = new Set<string>();
 // Store critical path warnings that have been logged
 const loggedCriticalPathWarnings = new Set<string>();
 
+// Track usage of deprecated functions (with timestamps)
+interface DeprecationUsage {
+  feature: string;
+  message: string;
+  count: number;
+  lastUsed: Date;
+}
+
+// Map to store usage statistics
+const usageStats = new Map<string, DeprecationUsage>();
+
 /**
  * Log a deprecation warning once per session
  * @param feature Name of the deprecated feature
  * @param message Custom message describing the deprecation
  * @param suggestion Suggested alternative
+ * @param trackUsage Whether to track usage statistics for this warning
  */
 export function logDeprecationWarning(
   feature: string,
   message: string = "This feature is deprecated and will be removed in a future version.",
-  suggestion?: string
+  suggestion?: string,
+  trackUsage = true
 ): void {
   const key = `${feature}:${message}`;
   
@@ -33,6 +46,33 @@ export function logDeprecationWarning(
     
     // Log warning to console
     console.warn(`[DEPRECATED] ${feature}: ${fullMessage}`);
+  }
+  
+  // Track usage statistics if enabled
+  if (trackUsage) {
+    trackDeprecatedFeatureUsage(feature, message);
+  }
+}
+
+/**
+ * Track usage of deprecated features
+ * @param feature Name of the deprecated feature
+ * @param message Associated warning message
+ */
+export function trackDeprecatedFeatureUsage(feature: string, message: string): void {
+  const key = `${feature}:${message}`;
+  
+  if (usageStats.has(key)) {
+    const stats = usageStats.get(key)!;
+    stats.count += 1;
+    stats.lastUsed = new Date();
+  } else {
+    usageStats.set(key, {
+      feature,
+      message,
+      count: 1,
+      lastUsed: new Date()
+    });
   }
 }
 
@@ -80,7 +120,8 @@ export function deprecate<T extends (...args: any[]) => any>(
     logDeprecationWarning(
       feature,
       "This function is deprecated and will be removed in a future version.",
-      suggestion
+      suggestion,
+      true // Track usage
     );
     return fn(...args);
   }) as T;
@@ -103,10 +144,25 @@ export function getLoggedCriticalPathWarnings(): string[] {
 }
 
 /**
+ * Get usage statistics for all deprecated features
+ * @returns Array of usage statistics objects
+ */
+export function getDeprecationUsageStats(): DeprecationUsage[] {
+  return Array.from(usageStats.values());
+}
+
+/**
  * Clear the logged deprecation warnings
  */
 export function clearLoggedDeprecationWarnings(): void {
   loggedWarnings.clear();
+}
+
+/**
+ * Reset usage statistics tracking
+ */
+export function resetUsageStats(): void {
+  usageStats.clear();
 }
 
 /**
@@ -130,3 +186,27 @@ export function createDeprecatedMock<T>(
     return mockReturnValue as T;
   };
 }
+
+/**
+ * Create a read-only version of a function that logs deprecation warning
+ * and informs that write operations are disabled
+ * @param readFn Original read function to preserve
+ * @param feature Name of the deprecated feature
+ * @param suggestion Suggested alternative
+ * @returns Function that can only read, with write operations disabled
+ */
+export function createReadOnlyFunction<T extends (...args: any[]) => any>(
+  readFn: T,
+  feature: string,
+  suggestion?: string
+): T {
+  return ((...args: Parameters<T>): ReturnType<T> => {
+    logDeprecationWarning(
+      feature,
+      "Write operations on this feature are disabled. This is now read-only.",
+      suggestion || "Please use Contentful directly for content management."
+    );
+    return readFn(...args);
+  }) as T;
+}
+

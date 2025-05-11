@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { fetchCaseStudies } from '@/services/cms/contentTypes/caseStudies';
 import {
   Table,
@@ -14,16 +15,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
+import ViewInContentful from '@/components/admin/ViewInContentful';
 import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
 
 const AdminCaseStudies = () => {
   const navigate = useNavigate();
   
   // Log deprecation of this admin page
-  React.useEffect(() => {
+  useEffect(() => {
     logDeprecationWarning(
       "AdminCaseStudies",
       "The Case Studies admin interface is deprecated and will be removed in a future version.",
@@ -50,14 +51,13 @@ const AdminCaseStudies = () => {
       backPath="/admin/dashboard"
     >
       <div className="flex justify-between mb-6">
-        <div></div>
-        <Button 
-          onClick={() => window.open('https://app.contentful.com/', '_blank')}
-          className="flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Add New Case Study in Contentful
-        </Button>
+        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+          Read-Only View
+        </Badge>
+        <ViewInContentful 
+          contentType="caseStudy"
+          className="bg-blue-50 text-blue-700 border-blue-200"
+        />
       </div>
 
       <Card className="shadow-sm">
@@ -67,9 +67,11 @@ const AdminCaseStudies = () => {
           ) : caseStudies.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-muted-foreground mb-4">No case studies found</p>
-              <Button onClick={() => window.open('https://app.contentful.com/', '_blank')}>
-                Create Your First Case Study
-              </Button>
+              <ViewInContentful 
+                contentType="caseStudy"
+                variant="default"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              />
             </div>
           ) : (
             <Table>
@@ -94,15 +96,13 @@ const AdminCaseStudies = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Button
+                        <ViewInContentful 
+                          contentType="caseStudy"
+                          contentId={study.id}
                           variant="ghost"
                           size="sm"
-                          onClick={() => window.open('https://app.contentful.com/', '_blank')}
-                          className="h-8 px-2 w-8"
-                          title="Edit case study in Contentful"
-                        >
-                          <Edit size={16} />
-                        </Button>
+                          className="h-8 w-8 p-0"
+                        />
                         <Button
                           variant="ghost"
                           size="sm"
@@ -120,6 +120,15 @@ const AdminCaseStudies = () => {
             </Table>
           )}
         </CardContent>
+        <CardFooter className="border-t bg-gray-50 flex justify-between items-center">
+          <p className="text-sm text-muted-foreground">
+            This interface is read-only. All content management should be done in Contentful.
+          </p>
+          <ViewInContentful 
+            contentType="caseStudy"
+            size="sm"
+          />
+        </CardFooter>
       </Card>
     </DeprecatedAdminLayout>
   );

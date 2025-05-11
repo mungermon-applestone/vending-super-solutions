@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { fetchBlogPosts } from '@/services/cms/contentTypes/blog';
 import {
   Table,
@@ -14,10 +15,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, ChevronRight, Calendar } from 'lucide-react';
+import { Calendar, ChevronRight } from 'lucide-react';
 import { formatDate } from '@/utils/date';
 import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
+import ViewInContentful from '@/components/admin/ViewInContentful';
 import { BlogPost } from '@/types/blog';
 import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
 
@@ -25,7 +26,7 @@ const AdminBlog = () => {
   const navigate = useNavigate();
   
   // Log deprecation of this admin page
-  React.useEffect(() => {
+  useEffect(() => {
     logDeprecationWarning(
       "AdminBlog",
       "The Blog admin interface is deprecated and will be removed in a future version.",
@@ -33,7 +34,7 @@ const AdminBlog = () => {
     );
   }, []);
   
-  // Fetch all blog posts - updated to use the new TanStack Query v5 API pattern
+  // Fetch all blog posts - using TanStack Query v5 API pattern
   const { data, isLoading } = useQuery({
     queryKey: ['blogPosts'],
     queryFn: async () => {
@@ -52,14 +53,13 @@ const AdminBlog = () => {
       backPath="/admin/dashboard"
     >
       <div className="flex justify-between mb-6">
-        <div></div>
-        <Button 
-          onClick={() => window.open('https://app.contentful.com/', '_blank')}
-          className="flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Add New Blog Post in Contentful
-        </Button>
+        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+          Read-Only View
+        </Badge>
+        <ViewInContentful 
+          contentType="blogPost"
+          className="bg-blue-50 text-blue-700 border-blue-200"
+        />
       </div>
 
       <Card className="shadow-sm">
@@ -69,9 +69,11 @@ const AdminBlog = () => {
           ) : blogPosts.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-muted-foreground mb-4">No blog posts found</p>
-              <Button onClick={() => window.open('https://app.contentful.com/', '_blank')}>
-                Create Your First Blog Post
-              </Button>
+              <ViewInContentful 
+                contentType="blogPost"
+                variant="default"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              />
             </div>
           ) : (
             <Table>
@@ -101,15 +103,13 @@ const AdminBlog = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Button
+                        <ViewInContentful 
+                          contentType="blogPost"
+                          contentId={post.id}
                           variant="ghost"
                           size="sm"
-                          onClick={() => window.open('https://app.contentful.com/', '_blank')}
-                          className="h-8 px-2 w-8"
-                          title="Edit blog post in Contentful"
-                        >
-                          <Edit size={16} />
-                        </Button>
+                          className="h-8 w-8 p-0"
+                        />
                         <Button
                           variant="ghost"
                           size="sm"
@@ -127,6 +127,15 @@ const AdminBlog = () => {
             </Table>
           )}
         </CardContent>
+        <CardFooter className="border-t bg-gray-50 flex justify-between items-center">
+          <p className="text-sm text-muted-foreground">
+            This interface is read-only. All content management should be done in Contentful.
+          </p>
+          <ViewInContentful 
+            contentType="blogPost"
+            size="sm"
+          />
+        </CardFooter>
       </Card>
     </DeprecatedAdminLayout>
   );

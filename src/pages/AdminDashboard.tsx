@@ -9,6 +9,7 @@ import { Package, Goal, Database, ExternalLink, AlertTriangle, Settings } from '
 import ContentfulButton from '@/components/admin/ContentfulButton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/context/AuthContext';
+import DeprecationUsage from '@/components/admin/DeprecationUsage';
 
 const AdminDashboard = () => {
   const { toast } = useToast();
@@ -114,6 +115,12 @@ const AdminDashboard = () => {
               </Button>
             </CardContent>
           </Card>
+        </div>
+        
+        {/* Usage tracking section */}
+        <div className="mb-10">
+          <h2 className="text-xl font-semibold mb-6">Deprecation Usage Tracking</h2>
+          <DeprecationUsage showResetButton={true} showChart={true} />
         </div>
 
         <div className="mt-10 border-t pt-6">
