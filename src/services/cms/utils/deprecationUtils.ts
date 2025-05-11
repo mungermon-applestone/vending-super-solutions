@@ -1,7 +1,9 @@
+
 /**
  * Utilities for managing and tracking deprecated functions and components
  */
 import { logDeprecationWarning } from './deprecationLogger';
+import { toast } from '@/hooks/use-toast';
 
 /**
  * Log a deprecation warning for a feature
@@ -15,6 +17,32 @@ export function logDeprecation(
   alternative?: string
 ): void {
   logDeprecationWarning(feature, message || `${feature} is deprecated`, alternative);
+}
+
+/**
+ * Show a toast notification for deprecated features
+ * @param feature The feature being used that is deprecated
+ * @param alternativeAction Optional suggestion for alternative
+ */
+export function showDeprecationToast(feature: string, alternativeAction: string = 'Use Contentful directly'): void {
+  // Log the deprecation first
+  logDeprecation(feature, `${feature} is deprecated.`, alternativeAction);
+  
+  // Show toast notification
+  toast({
+    title: "Deprecated Feature",
+    description: `${feature} is deprecated. ${alternativeAction} for content management.`,
+    variant: "destructive",
+  });
+}
+
+/**
+ * Create an error object with a standardized message for deprecated operations
+ * @param operation The operation being attempted (e.g., 'create', 'update')
+ * @param entityType The type of entity being operated on
+ */
+export function createDeprecationError(operation: string, entityType: string): Error {
+  return new Error(`${operation} operation on ${entityType} is disabled. Please use Contentful directly.`);
 }
 
 /**
