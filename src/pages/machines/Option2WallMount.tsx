@@ -52,7 +52,7 @@ const Option2WallMount = () => {
   };
 
   // Fetch machine data from the database
-  const { data: dbMachineData, isLoading, error } = useMachineBySlug('vending', 'option-2-wall-mount');
+  const { data: dbMachineData, isLoading, error } = useMachineBySlug('option-2-wall-mount');
 
   // Use database data if available, otherwise fall back to static data
   const machineData = dbMachineData || fallbackMachineData;

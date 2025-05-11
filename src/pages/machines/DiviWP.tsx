@@ -58,7 +58,7 @@ const DiviWP = () => {
   };
 
   // Fetch machine data from the database
-  const { data: dbMachineData, isLoading, error } = useMachineBySlug('vending', 'divi-wp');
+  const { data: dbMachineData, isLoading, error } = useMachineBySlug('divi-wp');
 
   // Use database data if available, otherwise fall back to static data
   const machineData = dbMachineData || fallbackMachineData;

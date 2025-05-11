@@ -1,4 +1,3 @@
-
 import React from 'react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
@@ -58,7 +57,7 @@ const DiviWS = () => {
   };
 
   // Fetch machine data from the database
-  const { data: dbMachineData, isLoading, error } = useMachineBySlug('vending', 'divi-ws');
+  const { data: dbMachineData, isLoading, error } = useMachineBySlug('divi-ws');
 
   // Use database data if available, otherwise fall back to static data
   const machineData = dbMachineData || fallbackMachineData;
