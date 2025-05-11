@@ -8,17 +8,16 @@
  * This file will be removed in a future release.
  */
 
-import { 
+import type { 
   MachinePlaceholder, 
   MigrationResult, 
   MachineFormValues, 
   MachineData 
 } from '@/legacy/cms/machineMigration/types';
 
-export { 
+export type { 
   MachinePlaceholder, 
   MigrationResult, 
   MachineFormValues, 
   MachineData 
 };
-

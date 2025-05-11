@@ -3,7 +3,14 @@
  * Utility for consistent deprecation warning messages
  */
 
-import { trackDeprecatedUsage } from './deprecationUsageTracker';
+import { trackDeprecatedUsage, getDeprecatedUsage, resetDeprecationTracker } from './deprecationUsageTracker';
+
+// Interface for usage statistics data
+export interface DeprecationStat {
+  feature: string;
+  count: number;
+  lastUsed: number;
+}
 
 /**
  * Log a deprecation warning message consistently
@@ -33,3 +40,44 @@ export function logDeprecationWarning(
   console.warn(`${baseMessage}${replacementMessage}`);
 }
 
+/**
+ * Alternative name for trackDeprecatedUsage to maintain compatibility
+ * @deprecated Use trackDeprecatedUsage instead
+ */
+export function trackDeprecatedFeatureUsage(feature: string, details?: string): void {
+  // Forward to the standard tracking function
+  trackDeprecatedUsage(feature, details);
+}
+
+/**
+ * Get formatted statistics about deprecated feature usage
+ * @returns Array of statistics objects with feature name, count, and last usage time
+ */
+export function getDeprecationUsageStats(): DeprecationStat[] {
+  const usageEntries = getDeprecatedUsage();
+  const stats: Record<string, DeprecationStat> = {};
+  
+  // Process the raw usage data into statistics
+  usageEntries.forEach(entry => {
+    const [feature] = entry.split(':');
+    
+    if (!stats[feature]) {
+      stats[feature] = {
+        feature,
+        count: 0,
+        lastUsed: Date.now()
+      };
+    }
+    
+    stats[feature].count++;
+  });
+  
+  return Object.values(stats).sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Reset all deprecation usage statistics
+ */
+export function resetUsageStats(): void {
+  resetDeprecationTracker();
+}
