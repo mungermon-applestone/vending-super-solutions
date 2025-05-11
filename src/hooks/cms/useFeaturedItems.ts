@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { businessGoalOperations } from '@/services/cms/contentTypes/businessGoals';
 import { fetchMachines } from '@/services/cms/contentTypes/machines/api';
 import { CMSBusinessGoal, CMSMachine } from '@/types/cms';
+import { useContentfulProducts } from './useContentfulProducts';
 
 /**
  * Hook to fetch items for homepage display
@@ -65,20 +66,9 @@ export function useHomepageItems() {
  * Hook to fetch featured products for homepage
  */
 export function useFeaturedProducts() {
-  return useQuery({
-    queryKey: ['homepage', 'products'],
-    queryFn: async () => {
-      console.log('[useFeaturedProducts] Mock: Would fetch featured products');
-      // Return empty array for mock implementation
-      return [];
-    },
-    staleTime: 60000, // 1 minute before refetching
-    meta: {
-      onError: (error: Error) => {
-        console.error('[useFeaturedProducts] Error fetching featured products:', error);
-      }
-    }
-  });
+  // Use the Contentful products hook instead of returning an empty array
+  // This will fetch real data from Contentful and ensure proper links
+  return useContentfulProducts();
 }
 
 /**
