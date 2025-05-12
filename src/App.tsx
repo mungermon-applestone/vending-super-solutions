@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -6,26 +7,22 @@ import {
   Navigate
 } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import SignIn from './pages/SignIn';
-import SignUp from './pages/SignUp';
 import AdminPage from './pages/AdminPage';
 import ProductsPage from './pages/ProductsPage';
 import ProductEditorPage from './pages/ProductEditor';
 import BusinessGoalsPage from './pages/BusinessGoalsPage';
 import BusinessGoalEditor from './pages/admin/BusinessGoalEditor';
-import ContentfulConfigPage from './pages/admin/ContentfulConfigPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminMedia from './pages/admin/AdminMedia';
 import DeprecationStatsPage from './pages/admin/DeprecationStatsPage';
 import ContentfulMigrationGuide from './pages/admin/ContentfulMigrationGuide';
+import ContentfulConfigurationPage from './pages/ContentfulConfigurationPage';
 
 function App() {
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Root Route - Redirect to admin */}
       <Route path="/" element={<Navigate to="/admin" />} />
-      <Route path="/sign-in" element={<SignIn />} />
-      <Route path="/sign-up" element={<SignUp />} />
       
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminPage />} />
@@ -34,7 +31,7 @@ function App() {
       <Route path="/admin/products/:slug" element={<ProductEditorPage />} />
       <Route path="/admin/business-goals" element={<BusinessGoalsPage />} />
       <Route path="/admin/business-goals/:slug" element={<BusinessGoalEditor />} />
-      <Route path="/admin/contentful" element={<ContentfulConfigPage />} />
+      <Route path="/admin/contentful" element={<ContentfulConfigurationPage />} />
       <Route path="/admin/media" element={<AdminMedia />} />
       <Route path="/admin/deprecation-stats" element={<DeprecationStatsPage />} />
       <Route path="/admin/contentful-migration-guide" element={<ContentfulMigrationGuide />} />

@@ -179,7 +179,11 @@ const ContentfulMigrationGuide = () => {
                     </p>
                     <Button 
                       variant="outline" 
-                      onClick={() => window.open("https://app.contentful.com/spaces/SPACE_ID/content_types", "_blank").replace("SPACE_ID", process.env.CONTENTFUL_SPACE_ID || "demo")}
+                      onClick={() => {
+                        const url = "https://app.contentful.com/spaces/SPACE_ID/content_types";
+                        const spaceId = process.env.CONTENTFUL_SPACE_ID || "demo";
+                        window.open(url.replace("SPACE_ID", spaceId), "_blank");
+                      }}
                     >
                       <PackageOpen className="mr-2 h-4 w-4" />
                       View Content Models

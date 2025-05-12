@@ -27,7 +27,7 @@ const ViewInContentful: React.FC<ViewInContentfulProps> = ({
   const handleClick = () => {
     // Track usage of the "View in Contentful" button
     logDeprecation(
-      "ViewInContentful",
+      "ViewInContentful", 
       `Button clicked for content type: ${contentType || 'Unknown'}`
     );
     
