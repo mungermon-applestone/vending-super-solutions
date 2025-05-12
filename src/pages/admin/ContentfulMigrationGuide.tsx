@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import AdminLayout from '@/components/AdminLayout';
 import DeprecationBanner from '@/components/admin/DeprecationBanner';
 import MigrationStatusBadge from '@/components/admin/MigrationStatusBadge';
 import { 
@@ -30,7 +29,7 @@ const ContentfulMigrationGuide: React.FC = () => {
   };
 
   return (
-    <AdminLayout>
+    <div className="container py-10">
       <DeprecationBanner />
       
       <div className="container py-10">
@@ -172,7 +171,7 @@ const ContentfulMigrationGuide: React.FC = () => {
           </ul>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 };
 
