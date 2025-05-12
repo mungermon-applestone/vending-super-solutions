@@ -17,6 +17,9 @@ import AdminMedia from './pages/admin/AdminMedia';
 import DeprecationStatsPage from './pages/admin/DeprecationStatsPage';
 import ContentfulMigrationGuide from './pages/admin/ContentfulMigrationGuide';
 import ContentfulConfigurationPage from './pages/ContentfulConfigurationPage';
+import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
+import ContentfulConfigPage from './pages/admin/ContentfulConfigPage';
 
 function App() {
   return (
@@ -32,9 +35,14 @@ function App() {
       <Route path="/admin/business-goals" element={<BusinessGoalsPage />} />
       <Route path="/admin/business-goals/:slug" element={<BusinessGoalEditor />} />
       <Route path="/admin/contentful" element={<ContentfulConfigurationPage />} />
+      <Route path="/admin/contentful-config" element={<ContentfulConfigPage />} />
       <Route path="/admin/media" element={<AdminMedia />} />
       <Route path="/admin/deprecation-stats" element={<DeprecationStatsPage />} />
       <Route path="/admin/contentful-migration-guide" element={<ContentfulMigrationGuide />} />
+      
+      {/* Authentication Routes */}
+      <Route path="/sign-in" element={<SignIn />} />
+      <Route path="/sign-up" element={<SignUp />} />
     </Routes>
   );
 }

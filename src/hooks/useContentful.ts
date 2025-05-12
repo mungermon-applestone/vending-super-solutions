@@ -1,84 +1,41 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
-
-interface ContentfulQueryOptions<T> {
-  queryKey: string[];
-  queryFn: () => Promise<T>;
-  fallbackData?: T;
-  enableToasts?: boolean;
-  retryLimit?: number;
-  onSuccess?: (data: T) => void;
-  onError?: (error: Error) => void;
-}
+import React from 'react';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { getContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { logDeprecation } from '@/services/cms/utils/deprecation';
 
 /**
- * A hook for fetching data from Contentful with built-in error handling,
- * logging, and fallbacks.
+ * Generic hook for fetching data from Contentful
+ * This centralizes Contentful data fetching logic and adds deprecation tracking
  */
-export function useContentful<T>({
+export default function useContentful<T>({
   queryKey,
   queryFn,
-  fallbackData,
-  enableToasts = true,
-  retryLimit = 2,
-  onSuccess,
-  onError
-}: ContentfulQueryOptions<T>) {
-  const query = useQuery({
+  enabled = true,
+  staleTime = 1000 * 60 * 5, // 5 minutes
+  ...options
+}: UseQueryOptions<T, Error>) {
+  // Log usage for tracking purposes
+  React.useEffect(() => {
+    logDeprecation(
+      'useContentful',
+      `Fetching ${Array.isArray(queryKey) ? queryKey.join('-') : queryKey}`
+    );
+  }, [queryKey]);
+  
+  const queryResult = useQuery({
     queryKey,
-    queryFn: async () => {
-      try {
-        console.log(`[useContentful] Fetching data for ${queryKey.join('/')}`);
-        return await queryFn();
-      } catch (error) {
-        // Enhanced error logging
-        console.error(`[useContentful] Error fetching ${queryKey.join('/')}:`, error);
-        console.error(`[useContentful] Stack trace:`, error instanceof Error ? error.stack : 'No stack trace');
-        
-        // Check for common Contentful errors
-        let errorMessage = 'Error fetching content';
-        
-        if (error instanceof Error) {
-          errorMessage = error.message;
-          
-          // Check for specific Contentful error patterns
-          if (errorMessage.includes('space') && errorMessage.includes('access token')) {
-            errorMessage = 'Invalid Contentful space or access token';
-          } else if (errorMessage.includes('content type')) {
-            errorMessage = 'Content type not found in Contentful';
-          } else if (errorMessage.includes('entry') && errorMessage.includes('not found')) {
-            errorMessage = 'Content entry not found in Contentful';
-          } else if (errorMessage.includes('Network Error')) {
-            errorMessage = 'Network error while connecting to Contentful';
-          }
-        }
-        
-        // Re-throw the error with a more helpful message
-        throw new Error(`Contentful error: ${errorMessage}`);
-      }
-    },
-    retry: retryLimit,
-    initialData: fallbackData,
-    refetchOnWindowFocus: false,
-    meta: {
-      onSuccess: (data) => {
-        console.log(`[useContentful] Successfully fetched data for ${queryKey.join('/')}`);
-        if (onSuccess) onSuccess(data);
-      },
-      onError: (error: Error) => {
-        if (enableToasts) {
-          toast.error(`Content loading error: ${error.message}`);
-        }
-        if (onError) onError(error);
-      }
-    }
+    queryFn,
+    enabled,
+    staleTime,
+    ...options,
   });
-
+  
+  // Add convenience flag to check if content is truly ready
+  const isContentReady = !queryResult.isLoading && !queryResult.error && !!queryResult.data;
+  
   return {
-    ...query,
-    isContentReady: query.isSuccess && !!query.data
+    ...queryResult,
+    isContentReady,
   };
 }
-
-export default useContentful;

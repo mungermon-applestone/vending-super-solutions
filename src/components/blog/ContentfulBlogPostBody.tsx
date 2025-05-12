@@ -1,11 +1,12 @@
 
 import React from "react";
 import { Document } from "@contentful/rich-text-types";
-import { renderRichText } from '@/utils/contentful/richTextRenderer';
+import ContentfulRichText from "@/components/contentful/ContentfulRichText";
+import { ContentfulAsset } from "@/types/contentful";
 
 interface ContentfulBlogPostBodyProps {
   content?: Document;
-  includedAssets?: any[];
+  includedAssets?: ContentfulAsset[];
 }
 
 const ContentfulBlogPostBody: React.FC<ContentfulBlogPostBodyProps> = ({ 
@@ -21,9 +22,13 @@ const ContentfulBlogPostBody: React.FC<ContentfulBlogPostBodyProps> = ({
   }, [content, includedAssets]);
 
   return (
-    <div className="prose max-w-none prose-slate mb-12">
+    <div className="mb-12">
       {content ? (
-        renderRichText(content, { includedAssets })
+        <ContentfulRichText 
+          content={content} 
+          includedAssets={includedAssets}
+          className="prose max-w-none prose-slate"
+        />
       ) : (
         <p>No content available for this blog post.</p>
       )}

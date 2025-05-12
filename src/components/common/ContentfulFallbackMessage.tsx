@@ -1,71 +1,70 @@
 
 import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
-import { AlertTriangle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { RefreshCw, ExternalLink } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { logDeprecation, getContentfulRedirectUrl } from '@/services/cms/utils/deprecation';
 
 interface ContentfulFallbackMessageProps {
-  title?: string;              // Added title prop
+  title?: string;
   message: string;
   contentType: string;
+  actionText?: string;
+  actionHref?: string;
   showRefresh?: boolean;
   showAdmin?: boolean;
-  actionText?: string;         // Added actionText prop
-  actionHref?: string;         // Added actionHref prop
-  onAction?: () => void;       // Added onAction prop
 }
 
 const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
   title,
   message,
   contentType,
-  showRefresh = false,
-  showAdmin = true,
   actionText,
   actionHref,
-  onAction,
+  showRefresh = false,
+  showAdmin = true
 }) => {
   const handleRefresh = () => {
-    if (onAction) {
-      onAction();
-    } else {
-      window.location.reload();
-    }
+    window.location.reload();
   };
-
+  
+  const handleViewInContentful = () => {
+    logDeprecation('ContentfulFallbackMessage', `Redirected to Contentful for ${contentType}`);
+    const url = getContentfulRedirectUrl(contentType.toLowerCase().replace(/\s+/g, ''));
+    window.open(url, '_blank');
+  };
+  
   return (
-    <div className="max-w-3xl mx-auto py-8">
-      <Alert variant="warning" className="mb-6">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>{title || `Unable to load ${contentType}`}</AlertTitle>
-        <AlertDescription className="mt-2">
-          <p>{message}</p>
+    <div className="rounded-lg border p-6 shadow-sm bg-card">
+      <Alert variant="warning" className="mb-4">
+        <AlertTitle>{title || `${contentType} Unavailable`}</AlertTitle>
+        <AlertDescription>
+          {message}
         </AlertDescription>
       </Alert>
-
-      <div className="flex flex-wrap gap-4 justify-center mt-6">
+      
+      <div className="flex flex-wrap gap-3 mt-4">
         {showRefresh && (
-          <Button onClick={handleRefresh} variant="outline">
+          <Button onClick={handleRefresh} variant="outline" size="sm">
             <RefreshCw className="mr-2 h-4 w-4" />
-            {actionText || "Refresh Page"}
+            Refresh Page
           </Button>
         )}
         
-        {actionHref && actionText && !showRefresh && (
-          <Button onClick={onAction || (() => {})} asChild>
-            <Link to={actionHref}>
-              {actionText}
-            </Link>
+        {actionText && actionHref && (
+          <Button 
+            onClick={() => window.location.href = actionHref} 
+            variant="default" 
+            size="sm"
+          >
+            {actionText}
           </Button>
         )}
         
-        {showAdmin && !actionHref && (
-          <Button asChild>
-            <Link to="/admin/contentful-config">
-              Configure Contentful
-            </Link>
+        {showAdmin && (
+          <Button onClick={handleViewInContentful} variant="outline" size="sm">
+            <ExternalLink className="mr-2 h-4 w-4" />
+            View in Contentful
           </Button>
         )}
       </div>
