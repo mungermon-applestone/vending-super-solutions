@@ -4,9 +4,9 @@
  * This maintains backward compatibility for imports
  */
 
-import { createReadOnlyAdapter } from '../utils/deprecation';
+import { createReadOnlyAdapter, createReadOnlyContentTypeOperations } from '../utils/deprecation';
 
-export { createReadOnlyAdapter };
+export { createReadOnlyAdapter, createReadOnlyContentTypeOperations };
 
 /**
  * @deprecated Legacy function - use createReadOnlyAdapter directly from deprecation.ts

@@ -7,7 +7,7 @@
  */
 
 import { ContentTypeOperations } from '../contentTypes/types';
-import { createReadOnlyContentTypeOperations } from './readOnlyAdapter';
+import { createReadOnlyContentTypeOperations } from '../utils/deprecation';
 import { logDeprecation } from '../utils/deprecation';
 
 /**
@@ -61,8 +61,8 @@ export function createReadOnlyContentTypeAdapter<T>(
   };
   
   return createReadOnlyContentTypeOperations<T>(
-    adapterName, 
-    entityName, 
+    contentType,
+    entityName,
     readMethods
   );
 }

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { getDeprecationUsageStats, resetUsageStats } from '@/services/cms/utils/deprecationLogger';
+import { getDeprecationStats, resetDeprecationTracker } from '@/services/cms/utils/deprecation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -18,17 +18,17 @@ const DeprecationStatsPage: React.FC = () => {
   }, []);
 
   const refreshStats = () => {
-    const usageStats = getDeprecationUsageStats();
+    const usageStats = getDeprecationStats();
     setStats(usageStats.map(stat => ({
-      name: stat.feature,
+      name: stat.component || stat.feature || 'Unknown',
       value: stat.count,
-      lastUsed: new Date(stat.lastUsed).toLocaleString()
+      lastUsed: new Date(stat.timestamp || stat.lastUsed || Date.now()).toLocaleString()
     })));
     setLastRefreshed(new Date());
   };
 
   const handleReset = () => {
-    resetUsageStats();
+    resetDeprecationTracker();
     setStats([]);
     toast({
       title: "Statistics Reset",

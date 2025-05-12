@@ -3,7 +3,7 @@ import React from 'react';
 import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ButtonProps } from '@/components/ui/button';
-import { logDeprecation, getContentfulRedirectUrl } from '@/services/cms/utils/deprecationUtils';
+import { logDeprecation, getContentfulRedirectUrl } from '@/services/cms/utils/deprecation';
 
 interface ContentfulButtonProps extends Omit<ButtonProps, 'onClick'> {
   contentType?: string;

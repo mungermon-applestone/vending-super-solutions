@@ -7,13 +7,15 @@
  */
 
 import { 
-  showDeprecationToast, 
-  throwDeprecatedOperationError
+  logDeprecation,
+  throwDeprecatedOperationError,
+  showDeprecationToast
 } from './deprecation';
 
 export {
   showDeprecationToast,
-  throwDeprecatedOperationError
+  throwDeprecatedOperationError,
+  logDeprecation
 };
 
 // Log deprecation warning when this file is imported

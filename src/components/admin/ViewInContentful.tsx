@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button, ButtonProps } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
-import { logDeprecation, getContentfulRedirectUrl } from '@/services/cms/utils/deprecationUtils';
+import { logDeprecation, getContentfulRedirectUrl } from '@/services/cms/utils/deprecation';
 
 interface ViewInContentfulProps extends ButtonProps {
   contentType?: string;

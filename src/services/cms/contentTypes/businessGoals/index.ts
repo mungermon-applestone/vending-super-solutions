@@ -1,9 +1,8 @@
 
 import { CMSBusinessGoal } from '@/types/cms';
 import { contentfulBusinessGoalAdapter } from '@/services/cms/adapters/businessGoals/contentfulBusinessGoalAdapter';
-import { createReadOnlyContentTypeOperations } from '@/services/cms/adapters/readOnlyAdapter';
+import { createReadOnlyContentTypeOperations } from '@/services/cms/utils/deprecation';
 import { ContentTypeOperations } from '@/services/cms/contentTypes/types';
-import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Read-only version of the business goals adapter

@@ -7,6 +7,9 @@ export interface DeprecationStat {
   message: string;
   timestamp: number;
   count: number;
+  // For backwards compatibility with existing code
+  feature?: string;
+  lastUsed?: number;
 }
 
 // Singleton to track deprecations
@@ -15,8 +18,9 @@ const deprecationStats: DeprecationStat[] = [];
 /**
  * Log deprecation warning and track usage statistics
  */
-export const logDeprecation = (component: string, message: string) => {
-  console.warn(`⚠️ DEPRECATED ${component}: ${message}`);
+export const logDeprecation = (component: string, message: string, suggestion?: string) => {
+  const fullMessage = suggestion ? `${message} ${suggestion}` : message;
+  console.warn(`⚠️ DEPRECATED ${component}: ${fullMessage}`);
   
   // Record deprecation for tracking
   const existing = deprecationStats.find(
@@ -26,24 +30,28 @@ export const logDeprecation = (component: string, message: string) => {
   if (existing) {
     existing.count += 1;
     existing.timestamp = Date.now();
+    // Update legacy properties for backward compatibility
+    existing.lastUsed = Date.now();
   } else {
     deprecationStats.push({
       component,
       message,
       timestamp: Date.now(),
-      count: 1
+      count: 1,
+      // Legacy properties for backward compatibility
+      feature: component,
+      lastUsed: Date.now()
     });
   }
+
+  return fullMessage;
 };
 
 /**
  * Simple warning logger for deprecated interfaces
  */
 export const logDeprecationWarning = (component: string, message: string, suggestion?: string) => {
-  const fullMessage = suggestion ? `${message} ${suggestion}` : message;
-  logDeprecation(component, fullMessage);
-  
-  return fullMessage;
+  return logDeprecation(component, message, suggestion);
 };
 
 /**
@@ -111,9 +119,20 @@ export const resetDeprecationTracker = () => {
 };
 
 /**
- * Get Contentful redirect URL for a content type and optional ID
+ * Legacy function for compatibility
  */
-export const getContentfulRedirectUrl = (contentType: string, contentId?: string | null): string => {
+export const resetUsageStats = resetDeprecationTracker;
+
+/**
+ * Get Contentful redirect URL for a content type and optional ID
+ * Updated to have fewer required parameters
+ */
+export const getContentfulRedirectUrl = (
+  contentType?: string | null, 
+  contentId?: string | null,
+  spaceId?: string,
+  environmentId?: string
+): string => {
   // Base Contentful URL
   const baseUrl = 'https://app.contentful.com/spaces';
   
@@ -129,13 +148,13 @@ export const getContentfulRedirectUrl = (contentType: string, contentId?: string
   };
   
   // Environment is usually 'master'
-  const environment = 'master';
+  const environment = environmentId || process.env.CONTENTFUL_ENVIRONMENT_ID || 'master';
   
   // Contentful space ID - in a real app this would come from config
-  const spaceId = process.env.CONTENTFUL_SPACE_ID || 'demo-space';
+  const space = spaceId || process.env.CONTENTFUL_SPACE_ID || 'demo-space';
   
   // Build the URL
-  let url = `${baseUrl}/${spaceId}/environments/${environment}/entries`;
+  let url = `${baseUrl}/${space}/environments/${environment}/entries`;
   
   // If a specific content type is provided
   if (contentType && contentTypeMapping[contentType]) {
@@ -185,4 +204,30 @@ export function createReadOnlyAdapter<T extends Record<string, any>>(
   trackDeprecatedUsage(`ReadOnlyAdapter-${entityType}`);
   
   return adapter;
+}
+
+/**
+ * Create read-only content type operations
+ */
+export function createReadOnlyContentTypeOperations<T>(
+  contentType: string,
+  entityName: string,
+  baseAdapter: Record<string, any>
+) {
+  // Track usage of this function for deprecation monitoring
+  trackDeprecatedUsage(`ReadOnlyContentTypeOps-${contentType}`);
+  
+  // Return an object with compatible operations
+  return {
+    // Read operations - pass through to the base adapter
+    fetchAll: baseAdapter.getAll || (async () => []),
+    fetchBySlug: baseAdapter.getBySlug || (async () => null),
+    fetchById: baseAdapter.getById || (async () => null),
+    
+    // Write operations - these will throw appropriate errors
+    create: createDeprecatedWriteOperation('create', entityName),
+    update: createDeprecatedWriteOperation('update', entityName),
+    delete: createDeprecatedWriteOperation('delete', entityName),
+    clone: createDeprecatedWriteOperation('clone', entityName)
+  };
 }
