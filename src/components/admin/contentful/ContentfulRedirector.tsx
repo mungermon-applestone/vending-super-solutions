@@ -1,124 +1,130 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ExternalLink, ArrowLeft } from 'lucide-react';
-import Layout from '@/components/layout/Layout';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { ExternalLink, AlertTriangle } from 'lucide-react';
 import { logDeprecation, getContentfulRedirectUrl } from '@/services/cms/utils/deprecationUtils';
+import ViewInContentful from '@/components/admin/ViewInContentful';
+import DeprecatedInterfaceWarning from '@/components/admin/DeprecatedInterfaceWarning';
 
 interface ContentfulRedirectorProps {
+  /**
+   * The content type ID in Contentful
+   */
   contentType: string;
-  title?: string;
-  description?: string;
-  contentfulUrl?: string;
-  showBackButton?: boolean;
-  backPath?: string;
-  contentfulSpaceId?: string;
-  contentfulEnvironmentId?: string;
-  contentTypeId?: string;
+  
+  /**
+   * Human-readable name of the content type (e.g., "Business Goal")
+   */
+  contentTypeName: string;
+  
+  /**
+   * The entity slug if we're editing an existing entity
+   */
+  slug?: string;
+  
+  /**
+   * Whether we're creating a new entity
+   */
+  isCreating?: boolean;
+  
+  /**
+   * The path to return to if the user cancels
+   */
+  returnPath: string;
+  
+  /**
+   * Optional content ID for Contentful
+   */
+  contentId?: string;
+  
+  /**
+   * Optional custom description message
+   */
+  customMessage?: string;
 }
 
 /**
- * Component that provides a transition page to redirect users to Contentful
- * Used when a legacy admin page has been completely deprecated
+ * Generic component that redirects users from deprecated admin interfaces to Contentful
  */
 const ContentfulRedirector: React.FC<ContentfulRedirectorProps> = ({
   contentType,
-  title = "Content Management Moved",
-  description,
-  contentfulUrl,
-  showBackButton = true,
-  backPath = "/admin/dashboard",
-  contentfulSpaceId,
-  contentfulEnvironmentId = "master",
-  contentTypeId
+  contentTypeName,
+  slug,
+  isCreating = false,
+  returnPath,
+  contentId,
+  customMessage
 }) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   
-  // Default description if none provided
-  const defaultDescription = `All ${contentType} management has moved to Contentful. Please use Contentful to manage this content.`;
-  const displayDescription = description || defaultDescription;
-
+  // Track this redirection
   useEffect(() => {
-    // Log this redirection
     logDeprecation(
-      "ContentfulRedirector",
-      `User attempted to access deprecated admin page for ${contentType}`,
+      `ContentfulRedirector-${contentType}-${isCreating ? 'create' : 'edit'}`,
+      `User attempted to ${isCreating ? 'create' : 'edit'} ${contentTypeName.toLowerCase()}${slug ? ` (${slug})` : ''}`,
       "Use Contentful directly"
     );
+  }, [contentType, contentTypeName, isCreating, slug]);
+  
+  // Handle redirecting to Contentful
+  const handleGoToContentful = () => {
+    // Use either provided contentId or slug
+    const resolvedContentId = contentId || slug;
     
-    // Show toast with default variant instead of info (which is not valid)
-    toast({
-      title: "Redirecting to Contentful",
-      description: displayDescription,
-      variant: "default", // Using default variant instead of info
-    });
-  }, [contentType, displayDescription, toast]);
-
-  const getContentfulUrl = (): string => {
-    if (contentfulUrl) {
-      return contentfulUrl;
-    }
+    // Generate the Contentful URL
+    const url = getContentfulRedirectUrl(contentType, resolvedContentId);
     
-    return getContentfulRedirectUrl(
-      contentTypeId || contentType.toLowerCase().replace(/\s+/g, ''),
-      undefined,
-      contentfulSpaceId,
-      contentfulEnvironmentId
-    );
+    // Open Contentful in a new tab
+    window.open(url, "_blank");
+  };
+  
+  // Handle going back/cancel
+  const handleCancel = () => {
+    navigate(returnPath);
   };
 
-  const handleOpenContentful = () => {
-    window.open(getContentfulUrl(), "_blank");
-  };
-
-  const handleBack = () => {
-    navigate(backPath);
-  };
+  // Determine the message to display
+  const actionText = isCreating ? 'Creating' : 'Editing';
+  const message = customMessage || `${actionText} ${contentTypeName.toLowerCase()} is now done directly in Contentful. Please use the button below to open Contentful and continue.`;
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-16 max-w-3xl">
-        <Card className="shadow-md border-2 border-blue-100">
-          <CardHeader className="bg-blue-50 border-b border-blue-100">
-            <CardTitle className="text-xl text-blue-800">{title}</CardTitle>
-            <CardDescription className="text-blue-700">
-              {displayDescription}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-8 pb-8">
-            <div className="flex flex-col items-center text-center">
-              <p className="mb-6 text-gray-600">
-                The {contentType} management interface has been moved to Contentful CMS.
-                Please click the button below to open Contentful and manage your content there.
-              </p>
-              
-              <Button 
-                onClick={handleOpenContentful} 
-                className="bg-blue-600 hover:bg-blue-700 mb-8"
-                size="lg"
-              >
-                <ExternalLink className="mr-2 h-5 w-5" />
-                Open {contentType} in Contentful
-              </Button>
-              
-              {showBackButton && (
-                <Button 
-                  variant="ghost" 
-                  onClick={handleBack}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Admin Dashboard
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </Layout>
+    <div className="space-y-6">
+      <DeprecatedInterfaceWarning 
+        contentType={contentTypeName}
+        contentTypeId={contentType}
+        variant="warning"
+      />
+      
+      <Alert className="bg-amber-50 border-amber-200">
+        <AlertTriangle className="h-5 w-5 text-amber-600" />
+        <AlertTitle className="text-amber-800">
+          {contentTypeName} {isCreating ? "Creation" : "Editing"} Has Moved
+        </AlertTitle>
+        <AlertDescription className="text-amber-700 mt-2">
+          <p className="mb-4">{message}</p>
+          
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <ViewInContentful 
+              contentType={contentType}
+              contentId={contentId || slug}
+              className="flex-1"
+              variant="default"
+              size="default"
+            />
+            
+            <Button 
+              variant="outline"
+              onClick={handleCancel}
+              className="flex-1 sm:flex-initial"
+            >
+              Return to {contentTypeName} List
+            </Button>
+          </div>
+        </AlertDescription>
+      </Alert>
+    </div>
   );
 };
 

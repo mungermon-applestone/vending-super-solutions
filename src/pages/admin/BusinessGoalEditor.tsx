@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
-import BusinessGoalRedirector from '@/components/admin/business-goals/BusinessGoalRedirector';
-import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
+import ContentfulRedirector from '@/components/admin/contentful/ContentfulRedirector';
+import { logDeprecationWarning } from '@/services/cms/utils/deprecation';
 
 const BusinessGoalEditor = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -25,10 +25,12 @@ const BusinessGoalEditor = () => {
       contentType="Business Goal"
       backPath="/admin/business-goals"
     >
-      <BusinessGoalRedirector 
-        businessGoalSlug={isEditMode ? slug : undefined}
+      <ContentfulRedirector 
+        contentType="businessGoal"
+        contentTypeName="Business Goal"
+        slug={isEditMode ? slug : undefined}
         isCreating={isCreating}
-        backPath="/admin/business-goals"
+        returnPath="/admin/business-goals"
       />
     </DeprecatedAdminLayout>
   );

@@ -6,7 +6,7 @@ import { AlertTriangle, RefreshCcw, BarChart3 } from 'lucide-react';
 import { 
   getDeprecationUsageStats, 
   resetDeprecationTracker,
-  DeprecationStat
+  type DeprecationStat
 } from '@/services/cms/utils/deprecation';
 
 interface DeprecationUsageProps {

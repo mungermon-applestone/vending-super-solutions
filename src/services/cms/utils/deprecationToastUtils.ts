@@ -7,15 +7,26 @@
  */
 
 import {
-  showDeprecationToast,
-  throwDeprecatedOperationError
+  logDeprecation,
+  throwDeprecatedOperationError as throwDeprecatedError
 } from './deprecation';
+import { toast } from '@/hooks/use-toast';
 
-// Re-export functions to maintain backward compatibility
-export {
-  showDeprecationToast,
-  throwDeprecatedOperationError
+// Define a showDeprecationToast function that uses the toast hook
+export const showDeprecationToast = (title: string, description: string) => {
+  // Log the deprecation first
+  logDeprecation('DeprecationToast', `${title}: ${description}`);
+  
+  // Show the toast notification
+  toast({
+    title,
+    description,
+    variant: "destructive",
+  });
 };
+
+// Export throwDeprecatedOperationError with a compatible signature
+export const throwDeprecatedOperationError = throwDeprecatedError;
 
 // Log deprecation warning when this module is imported
 console.warn(

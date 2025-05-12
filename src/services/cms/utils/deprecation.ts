@@ -4,7 +4,7 @@
  */
 
 // Track which deprecated features are being used
-type DeprecationStat = {
+export type DeprecationStat = {
   count: number;
   lastUsed: Date;
   feature: string;
@@ -113,6 +113,30 @@ export function logDeprecation(
   
   console.warn(`[DEPRECATION] ${component}: ${message}${recommendation ? ` | Recommendation: ${recommendation}` : ''}`);
   console.debug('deprecation-data', logData);
+}
+
+/**
+ * Show a toast notification for a deprecated operation
+ */
+export function showDeprecationToast(title: string, message: string): void {
+  console.warn(`DEPRECATION TOAST: ${title} - ${message}`);
+  // This would normally show a toast, but we'll just log it for now
+  // The actual toast implementation would be in the component that imports this
+}
+
+/**
+ * Throw an error for a deprecated operation
+ */
+export function throwDeprecatedOperationError(operation: string, entityType: string, id?: string): never {
+  const idInfo = id ? ` for ${entityType} with ID ${id}` : '';
+  const errorMessage = `${operation} operation${idInfo} is not supported. Please use Contentful directly.`;
+  
+  trackDeprecatedFeatureUsage(
+    `deprecated-operation-${entityType}-${operation}`,
+    `Attempted to use deprecated ${operation} operation on ${entityType}`
+  );
+  
+  throw new Error(errorMessage);
 }
 
 /**

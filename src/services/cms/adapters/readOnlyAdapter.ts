@@ -51,3 +51,5 @@ export const standardAdapterMethodNames = {
   operations: ['fetchAll', 'fetchBySlug', 'fetchById', 'create', 'update', 'delete', 'clone']
 };
 
+// Re-export the createReadOnlyAdapter function from the deprecation module
+export { createReadOnlyAdapter } from '../utils/deprecation';
