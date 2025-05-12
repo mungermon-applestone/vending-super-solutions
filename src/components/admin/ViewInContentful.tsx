@@ -27,12 +27,18 @@ const ViewInContentful: React.FC<ViewInContentfulProps> = ({
   const handleClick = () => {
     // Track usage of the "View in Contentful" button
     logDeprecation(
-      "ViewInContentful", 
-      `Button clicked for content type: ${contentType || 'Unknown'}`
+      "ViewInContentful",
+      `Button clicked for content type: ${contentType || 'Unknown'}`,
+      "Use Contentful directly for content management"
     );
     
     // Use our utility function to generate the URL
-    const url = getContentfulRedirectUrl(contentType, contentId);
+    const url = getContentfulRedirectUrl(
+      contentType, 
+      contentId,
+      spaceId,
+      environmentId
+    );
     
     window.open(url, "_blank");
   };
