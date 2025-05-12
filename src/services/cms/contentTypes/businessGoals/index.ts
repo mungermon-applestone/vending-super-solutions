@@ -20,13 +20,10 @@ const baseAdapter = createReadOnlyAdapter<typeof contentfulBusinessGoalAdapter>(
 
 // Create a fully compatible ContentTypeOperations instance
 export const businessGoalOperations: ContentTypeOperations<CMSBusinessGoal> = {
-  // Map the standard methods from the base adapter to ContentTypeOperations interface
+  // Map the standard methods from ContentTypeOperations interface
   fetchAll: baseAdapter.getAll,
   fetchBySlug: baseAdapter.getBySlug,
   fetchById: baseAdapter.getById,
-  
-  // Include the base adapter methods for backward compatibility
-  ...baseAdapter,
   
   // Explicitly implement write operations that throw deprecation errors
   create: baseAdapter.create,
@@ -35,12 +32,11 @@ export const businessGoalOperations: ContentTypeOperations<CMSBusinessGoal> = {
   clone: baseAdapter.clone || ((id) => {
     throw new Error(`Clone operation for businessGoal with ID ${id} is not supported. Please use Contentful directly.`);
   }),
-  
-  // Keep the original methods for backward compatibility
-  getAll: baseAdapter.getAll,
-  getBySlug: baseAdapter.getBySlug,
-  getById: baseAdapter.getById
 };
+
+// Keep the original adapter methods as properties on the operations object for backward compatibility
+// but don't explicitly declare them in the type signature
+Object.assign(businessGoalOperations, baseAdapter);
 
 // Export individual functions for backward compatibility
 export const fetchBusinessGoals = businessGoalOperations.fetchAll;
