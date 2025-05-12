@@ -1,11 +1,10 @@
 
 import React from 'react';
-import Layout from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import AdminLayout from '@/components/AdminLayout';
 import DeprecationBanner from '@/components/admin/DeprecationBanner';
+import MigrationStatusBadge from '@/components/admin/MigrationStatusBadge';
 import { 
   CONTENT_TYPE_MIGRATION_STATUS,
   CONTENT_TYPE_IDS,
@@ -22,23 +21,6 @@ const ContentfulMigrationGuide: React.FC = () => {
 
   const totalCount = contentTypeEntries.length;
   const completionPercentage = Math.round((statusCount[MIGRATION_STATUS.COMPLETED] / totalCount) * 100);
-
-  const getStatusBadgeVariant = (status: string) => {
-    switch(status) {
-      case MIGRATION_STATUS.COMPLETED:
-        return 'success';
-      case MIGRATION_STATUS.IN_PROGRESS:
-        return 'warning';
-      case MIGRATION_STATUS.PENDING:
-      default:
-        return 'outline';
-    }
-  };
-
-  const renderStatusBadge = (status: string) => {
-    const variant = getStatusBadgeVariant(status);
-    return <Badge variant={variant as any}>{status}</Badge>;
-  };
 
   // Get content type ID from the constants if available, otherwise use the content type name
   const getContentTypeId = (contentType: string): string => {
@@ -98,23 +80,23 @@ const ContentfulMigrationGuide: React.FC = () => {
               <ul className="space-y-2">
                 <li className="flex justify-between items-center">
                   <span>Initial Setup</span>
-                  <Badge variant="outline">Completed</Badge>
+                  <MigrationStatusBadge status={MIGRATION_STATUS.COMPLETED} />
                 </li>
                 <li className="flex justify-between items-center">
                   <span>Core Content Types</span>
-                  <Badge variant="success">Completed</Badge>
+                  <MigrationStatusBadge status={MIGRATION_STATUS.COMPLETED} />
                 </li>
                 <li className="flex justify-between items-center">
                   <span>Extended Content Types</span>
-                  <Badge variant="warning">In Progress</Badge>
+                  <MigrationStatusBadge status={MIGRATION_STATUS.IN_PROGRESS} />
                 </li>
                 <li className="flex justify-between items-center">
                   <span>Final Data Migration</span>
-                  <Badge variant="outline">Pending</Badge>
+                  <MigrationStatusBadge status={MIGRATION_STATUS.PENDING} />
                 </li>
                 <li className="flex justify-between items-center">
                   <span>Admin Interface Updates</span>
-                  <Badge variant="warning">In Progress</Badge>
+                  <MigrationStatusBadge status={MIGRATION_STATUS.IN_PROGRESS} />
                 </li>
               </ul>
             </CardContent>
@@ -146,7 +128,7 @@ const ContentfulMigrationGuide: React.FC = () => {
                     <TableRow key={index}>
                       <TableCell className="font-medium capitalize">{contentType}</TableCell>
                       <TableCell>{contentTypeId}</TableCell>
-                      <TableCell>{renderStatusBadge(statusString)}</TableCell>
+                      <TableCell><MigrationStatusBadge status={statusString} /></TableCell>
                       <TableCell>{priority}</TableCell>
                     </TableRow>
                   );
