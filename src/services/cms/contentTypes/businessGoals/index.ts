@@ -1,4 +1,3 @@
-
 import { CMSBusinessGoal } from '@/types/cms';
 import { contentfulBusinessGoalAdapter } from '@/services/cms/adapters/businessGoals/contentfulBusinessGoalAdapter';
 import { createReadOnlyAdapter } from '@/services/cms/adapters/readOnlyAdapter';
@@ -21,7 +20,7 @@ const baseAdapter = createReadOnlyAdapter<typeof contentfulBusinessGoalAdapter>(
 
 // Create a fully compatible ContentTypeOperations instance
 export const businessGoalOperations: ContentTypeOperations<CMSBusinessGoal> = {
-  // Map the standard methods from the base adapter
+  // Map the standard methods from the base adapter to ContentTypeOperations interface
   fetchAll: baseAdapter.getAll,
   fetchBySlug: baseAdapter.getBySlug,
   fetchById: baseAdapter.getById,
@@ -35,7 +34,12 @@ export const businessGoalOperations: ContentTypeOperations<CMSBusinessGoal> = {
   delete: baseAdapter.delete,
   clone: baseAdapter.clone || ((id) => {
     throw new Error(`Clone operation for businessGoal with ID ${id} is not supported. Please use Contentful directly.`);
-  })
+  }),
+  
+  // Keep the original methods for backward compatibility
+  getAll: baseAdapter.getAll,
+  getBySlug: baseAdapter.getBySlug,
+  getById: baseAdapter.getById
 };
 
 // Export individual functions for backward compatibility
@@ -53,4 +57,3 @@ export const deleteBusinessGoal = businessGoalOperations.delete;
  * @deprecated This method is deprecated and will throw an error
  */
 export const cloneBusinessGoal = businessGoalOperations.clone;
-

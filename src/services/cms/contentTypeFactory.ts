@@ -48,8 +48,7 @@ import { landingPageOperations } from './contentTypes/landingPages/operations';
 
 // Initialize by registering known content types
 CMSContentTypeFactory.registerOperations('product-types', productTypeOperations);
-// For businessGoalOperations, ensure it's compatible with ContentTypeOperations interface
-// This works because we've added the fetchAll, fetchBySlug, and fetchById methods earlier
+// For businessGoalOperations, we ensure it's compatible with ContentTypeOperations
 CMSContentTypeFactory.registerOperations('business-goals', businessGoalOperations);
 CMSContentTypeFactory.registerOperations('technologies', technologyOperations);
 CMSContentTypeFactory.registerOperations('case-studies', caseStudyOperations);

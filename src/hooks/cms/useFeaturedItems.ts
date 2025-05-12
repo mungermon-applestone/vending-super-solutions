@@ -50,7 +50,7 @@ export function useHomepageItems() {
   } = useQuery({
     queryKey: ['homepage', 'businessGoals'],
     queryFn: async () => {
-      const goals = await businessGoalOperations.getAll();
+      const goals = await businessGoalOperations.fetchAll();
       
       console.log(`[useHomepageItems] Fetched ${goals.length} featured business goals`);
       return goals;
@@ -110,7 +110,7 @@ export function useFeaturedBusinessGoals() {
   return useQuery({
     queryKey: ['homepage', 'businessGoals'],
     queryFn: async () => {
-      const goals = await businessGoalOperations.getAll();
+      const goals = await businessGoalOperations.fetchAll();
       return goals;
     }
   });

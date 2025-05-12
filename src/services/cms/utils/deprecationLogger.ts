@@ -14,7 +14,7 @@ import {
   trackDeprecatedFeatureUsage,
   getDeprecationUsageStats,
   resetDeprecationTracker as resetUsageStats,
-  DeprecationStat
+  type DeprecationStat
 } from './deprecation';
 
 // Re-export all functions to maintain backward compatibility
@@ -26,7 +26,7 @@ export {
   trackDeprecatedFeatureUsage,
   getDeprecationUsageStats,
   resetUsageStats,
-  DeprecationStat
+  type DeprecationStat
 };
 
 // Log deprecation warning when this file is imported

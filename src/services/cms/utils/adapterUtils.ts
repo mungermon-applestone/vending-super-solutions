@@ -7,6 +7,7 @@
  */
 
 import { trackDeprecatedUsage, createDeprecatedWriteOperation } from './deprecation';
+import type { ContentTypeOperations } from '../contentTypes/types';
 
 /**
  * Creates a read-only version of any adapter by replacing write operations
@@ -51,21 +52,25 @@ export function makeAdapterReadOnly<T extends Record<string, any>>(
  * @param entityType The type of entity this adapter handles
  * @returns An adapter with both original methods and ContentTypeOperations-compatible methods
  */
-export function makeContentTypeOperationsCompatible<T extends Record<string, any>>(
+export function makeContentTypeOperationsCompatible<T extends Record<string, any>, EntityType>(
   adapter: T,
   entityType: string
-): T & Record<string, unknown> {
+): T & ContentTypeOperations<EntityType> {
   // Create a new object that preserves the original adapter's prototype chain
   const compatibleAdapter = Object.create(
     Object.getPrototypeOf(adapter),
     Object.getOwnPropertyDescriptors(adapter)
-  ) as T & Record<string, unknown>;
+  ) as T & ContentTypeOperations<EntityType>;
   
   // Map of adapter methods to ContentTypeOperations methods
-  const methodMapping: Record<string, string> = {
+  const methodMapping: Record<string, keyof ContentTypeOperations<any>> = {
     'getAll': 'fetchAll',
     'getBySlug': 'fetchBySlug',
-    'getById': 'fetchById'
+    'getById': 'fetchById',
+    'create': 'create',
+    'update': 'update',
+    'delete': 'delete',
+    'clone': 'clone'
   };
   
   // Add compatible methods that delegate to the original methods
@@ -73,7 +78,8 @@ export function makeContentTypeOperationsCompatible<T extends Record<string, any
     if (adapterMethod in adapter && typeof adapter[adapterMethod as keyof T] === 'function') {
       const originalMethod = adapter[adapterMethod as keyof T];
       if (typeof originalMethod === 'function') {
-        compatibleAdapter[operationsMethod] = originalMethod.bind(adapter);
+        // Safely assign methods to the compatible adapter
+        (compatibleAdapter as any)[operationsMethod] = originalMethod.bind(adapter);
       }
     }
   }

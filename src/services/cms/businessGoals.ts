@@ -8,7 +8,7 @@ import { normalizeSlug, resolveSlug } from './utils/slugMatching';
  * Get all business goals
  */
 export async function getBusinessGoals(): Promise<CMSBusinessGoal[]> {
-  return await businessGoalOperations.getAll();
+  return await businessGoalOperations.fetchAll();
 }
 
 /**
@@ -28,7 +28,7 @@ export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGo
     console.log(`[businessGoals.ts] Using resolved slug for lookup: "${resolvedSlug}"`);
     
     // Use the direct method to get a business goal by slug
-    let businessGoal = await businessGoalOperations.getBySlug(resolvedSlug);
+    let businessGoal = await businessGoalOperations.fetchBySlug(resolvedSlug);
     
     if (businessGoal) {
       console.log(`[businessGoals.ts] Successfully retrieved business goal: ${businessGoal.title}`);
@@ -49,7 +49,7 @@ export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGo
     // If the resolved slug didn't work, try with the original slug as fallback
     if (resolvedSlug !== normalizeSlug(slug)) {
       console.log(`[businessGoals.ts] Trying with original normalized slug: "${normalizeSlug(slug)}"`);
-      const businessGoalOriginal = await businessGoalOperations.getBySlug(normalizeSlug(slug));
+      const businessGoalOriginal = await businessGoalOperations.fetchBySlug(normalizeSlug(slug));
       
       if (businessGoalOriginal) {
         // Also verify feature integrity here
