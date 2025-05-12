@@ -14,12 +14,14 @@ export const API_RECOMMENDATION = "Use the Contentful API client directly";
 export const FEATURE_STATUS = {
   DEPRECATED: "Deprecated - will be removed in future updates",
   READ_ONLY: "Read-only mode - use Contentful for content management",
-  REMOVED: "Removed - functionality has been removed"
+  REMOVED: "Removed - functionality has been removed",
+  CONTENTFUL_ONLY: "Contentful only - this feature is only available via Contentful"
 };
 
 // Redirect URLs
 export const CONTENTFUL_APP_URL = "https://app.contentful.com";
 export const CONTENTFUL_DOCS_URL = "https://www.contentful.com/developers/docs/";
+export const MIGRATION_GUIDE_URL = "/admin/contentful-migration-guide";
 
 // Deprecation timeframes (in milliseconds)
 export const DEPRECATION_TIMES = {
@@ -34,7 +36,28 @@ export const CONTENT_TYPE_IDS = {
   TECHNOLOGY: "technology",
   BUSINESS_GOAL: "businessGoal",
   MACHINE: "machine",
-  CASE_STUDY: "caseStudy"
+  CASE_STUDY: "caseStudy",
+  BLOG: "blogPost",
+  LANDING_PAGE: "landingPage"
+};
+
+// Migration status
+export const MIGRATION_STATUS = {
+  COMPLETE: "complete",
+  IN_PROGRESS: "in-progress",
+  PENDING: "pending",
+  NOT_STARTED: "not-started"
+};
+
+// Content type migration status
+export const CONTENT_TYPE_MIGRATION_STATUS = {
+  [CONTENT_TYPE_IDS.PRODUCT]: MIGRATION_STATUS.COMPLETE,
+  [CONTENT_TYPE_IDS.TECHNOLOGY]: MIGRATION_STATUS.COMPLETE,
+  [CONTENT_TYPE_IDS.BUSINESS_GOAL]: MIGRATION_STATUS.IN_PROGRESS,
+  [CONTENT_TYPE_IDS.MACHINE]: MIGRATION_STATUS.IN_PROGRESS,
+  [CONTENT_TYPE_IDS.CASE_STUDY]: MIGRATION_STATUS.COMPLETE,
+  [CONTENT_TYPE_IDS.BLOG]: MIGRATION_STATUS.COMPLETE,
+  [CONTENT_TYPE_IDS.LANDING_PAGE]: MIGRATION_STATUS.IN_PROGRESS
 };
 
 // Standard messages

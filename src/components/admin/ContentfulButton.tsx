@@ -48,17 +48,14 @@ const ContentfulButton: React.FC<ContentfulButtonProps> = ({
       // Track usage of the button
       logDeprecation(
         "ContentfulButton",
-        `${action} button clicked for ${contentType || 'Unknown'} ${entryId ? `ID: ${entryId}` : ''}`,
-        "Use Contentful directly for content management"
+        `${action} button clicked for ${contentType || 'Unknown'} ${entryId ? `ID: ${entryId}` : ''}`
       );
     }
     
     // Construct the Contentful URL - if custom URL provided, use that
     const url = customUrl || getContentfulRedirectUrl(
       actualContentTypeId,
-      entryId,
-      contentfulSpaceId,
-      contentfulEnvironmentId
+      entryId
     );
     
     window.open(url, "_blank");

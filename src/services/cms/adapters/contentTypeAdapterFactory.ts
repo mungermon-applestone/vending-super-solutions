@@ -49,8 +49,7 @@ export function createReadOnlyContentTypeAdapter<T>(
   // Log creation of this adapter
   logDeprecation(
     `ReadOnlyAdapter-${contentType}`,
-    `Created read-only ${adapterName} adapter for ${entityName} content type`,
-    'Use Contentful directly for content management'
+    `Created read-only ${adapterName} adapter for ${entityName} content type`
   );
   
   // Filter down to just the read methods to ensure write methods are properly deprecated

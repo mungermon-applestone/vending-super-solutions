@@ -1,126 +1,183 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCcw, BarChart3 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertTriangle, BarChart3, RefreshCw, Trash2 } from 'lucide-react';
 import { 
   getDeprecationStats, 
-  resetDeprecationTracker,
-  type DeprecationStat
+  resetDeprecationTracker 
 } from '@/services/cms/utils/deprecation';
+import { DeprecationStat } from '@/services/cms/utils/deprecation';
+import { useToast } from '@/hooks/use-toast';
 
 interface DeprecationUsageProps {
-  showChart?: boolean;
   showResetButton?: boolean;
-  maxItems?: number;
-  className?: string;
+  showChart?: boolean;
+  limit?: number;
 }
 
 /**
- * Component to display statistics about deprecated feature usage
+ * Component for displaying and managing deprecation usage statistics
  */
-const DeprecationUsage: React.FC<DeprecationUsageProps> = ({ 
-  showChart = false,
+const DeprecationUsage: React.FC<DeprecationUsageProps> = ({
   showResetButton = false,
-  maxItems = 10,
-  className = ''
+  showChart = false,
+  limit = 5
 }) => {
   const [stats, setStats] = useState<DeprecationStat[]>([]);
-  const [isResetting, setIsResetting] = useState(false);
-  
-  // Load statistics on mount and when stats are reset
-  useEffect(() => {
-    const usageStats = getDeprecationStats();
-    setStats(usageStats);
-  }, [isResetting]);
-  
-  // Handle resetting the usage tracker
-  const handleReset = () => {
-    setIsResetting(true);
-    resetDeprecationTracker();
-    
-    // Set a small delay to allow the reset to complete
-    setTimeout(() => {
-      setStats(getDeprecationStats());
-      setIsResetting(false);
-    }, 100);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  const loadStats = () => {
+    setIsLoading(true);
+    try {
+      const deprecationStats = getDeprecationStats();
+      
+      // Sort stats by most recent and by count
+      const sortedStats = [...deprecationStats].sort((a, b) => {
+        // Sort first by count (descending)
+        if (b.count !== a.count) {
+          return b.count - a.count;
+        }
+        // Then by timestamp (most recent first)
+        return b.timestamp - a.timestamp;
+      });
+      
+      setStats(sortedStats);
+    } catch (error) {
+      console.error('Error loading deprecation stats:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
-  
-  // Limit the number of items shown
-  const displayStats = stats.slice(0, maxItems);
-  
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const handleReset = () => {
+    resetDeprecationTracker();
+    toast({
+      title: 'Statistics Reset',
+      description: 'Deprecation usage statistics have been reset.',
+      variant: 'default',
+    });
+    loadStats();
+  };
+
+  const handleRefresh = () => {
+    loadStats();
+    toast({
+      title: 'Statistics Refreshed',
+      description: 'Deprecation usage statistics have been updated.',
+      variant: 'default',
+    });
+  };
+
+  // Format the timestamp to a readable date string
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleString();
+  };
+
   return (
-    <Card className={`shadow-sm ${className}`}>
-      <CardHeader className="pb-2 bg-gray-50 border-b">
-        <CardTitle className="flex items-center justify-between text-base">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
-            <span>Deprecated Feature Usage</span>
-          </div>
-          {showResetButton && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleReset}
-              disabled={isResetting || stats.length === 0}
-              className="h-8"
-            >
-              <RefreshCcw className="h-3.5 w-3.5 mr-1" />
-              Reset Tracker
-            </Button>
-          )}
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-amber-500" />
+          <span>Deprecation Usage</span>
         </CardTitle>
+        <CardDescription>
+          Tracking of deprecated features and functions still being used
+        </CardDescription>
       </CardHeader>
-      <CardContent className="pt-4">
-        {stats.length === 0 ? (
-          <div className="text-center py-6 text-gray-500">
-            <p>No deprecated features have been used yet.</p>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <p className="text-muted-foreground">Loading statistics...</p>
+          </div>
+        ) : stats.length === 0 ? (
+          <div className="flex flex-col items-center py-8 text-center">
+            <p className="text-muted-foreground mb-2">No deprecated features have been used.</p>
+            <p className="text-sm text-muted-foreground">This is good! It means you're using the latest recommended patterns.</p>
           </div>
         ) : (
           <div className="space-y-4">
-            {showChart && stats.length > 0 && (
-              <div className="mb-4">
-                <h4 className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-1.5">
-                  <BarChart3 className="h-4 w-4" />
-                  Usage Breakdown
-                </h4>
-                <div className="space-y-2">
-                  {displayStats.map(stat => (
-                    <div key={stat.component} className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span className="font-medium text-gray-700">{stat.component}</span>
-                        <span className="text-gray-500">{stat.count} uses</span>
-                      </div>
-                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-amber-400"
-                          style={{ 
-                            width: `${Math.min(100, (stat.count / Math.max(...stats.map(s => s.count))) * 100)}%` 
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+            {showChart && (
+              <div className="mb-6">
+                <h3 className="text-sm font-medium mb-2 flex items-center">
+                  <BarChart3 className="h-4 w-4 mr-1" />
+                  Usage Distribution
+                </h3>
+                <div className="h-12 bg-gray-100 rounded-md overflow-hidden flex">
+                  {stats.slice(0, 5).map((stat, index) => {
+                    const maxCount = Math.max(...stats.map(s => s.count));
+                    const percentage = (stat.count / maxCount) * 100;
+                    const colors = [
+                      'bg-blue-500',
+                      'bg-green-500',
+                      'bg-yellow-500',
+                      'bg-orange-500',
+                      'bg-red-500'
+                    ];
+                    return (
+                      <div 
+                        key={index}
+                        className={`h-full ${colors[index % colors.length]}`}
+                        style={{ width: `${percentage}%` }}
+                        title={`${stat.component}: ${stat.count} uses`}
+                      />
+                    );
+                  })}
+                </div>
+                <div className="flex justify-between mt-1 text-xs text-gray-500">
+                  <span>Most used: {stats[0]?.component}</span>
+                  <span>{stats[0]?.count} calls</span>
                 </div>
               </div>
             )}
-            
-            <ul className="divide-y">
-              {displayStats.map(stat => (
-                <li key={stat.component} className="py-2 flex justify-between items-center">
-                  <span className="font-medium text-sm">{stat.component}</span>
-                  <span className="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full">
-                    {stat.count} {stat.count === 1 ? 'use' : 'uses'}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            
-            {stats.length > maxItems && (
-              <div className="text-center text-sm text-gray-500 pt-2">
-                Showing {maxItems} of {stats.length} deprecated features
+
+            <div>
+              <h3 className="text-sm font-medium mb-2">Top Deprecated Features</h3>
+              <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
+                {stats.slice(0, limit).map((stat, index) => (
+                  <div key={index} className="p-2 border border-gray-200 rounded-md">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-medium">{stat.component}</h4>
+                      <span className="text-xs bg-amber-100 text-amber-800 rounded-full px-2 py-0.5">
+                        {stat.count} {stat.count === 1 ? 'use' : 'uses'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-1">{stat.message}</p>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Last used: {formatDate(stat.timestamp)}
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
+            
+            <div className="flex gap-2 justify-end mt-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh}
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Refresh
+              </Button>
+              
+              {showResetButton && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleReset}
+                  className="text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Reset Stats
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
