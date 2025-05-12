@@ -1,3 +1,4 @@
+
 /**
  * Consolidated Deprecation Module
  * 
@@ -5,7 +6,7 @@
  * It combines tracking, logging, UI notifications, and redirection utilities.
  */
 
-import { toast } from '@/hooks/use-toast';
+import { toast as showToast } from '@/hooks/use-toast';
 
 // Set to store unique deprecation events
 const reportedDeprecations = new Set<string>();
@@ -220,10 +221,11 @@ export function createDeprecatedWriteOperation(
     trackDeprecatedUsage(`${operation}${entityType}`, `deprecated-write-operation`);
     
     // Show toast
-    showDeprecationToast(
-      `${operation} ${entityType}`,
-      `Use Contentful directly for ${entityType} management`
-    );
+    showToast({
+      title: "Deprecated Feature",
+      description: `${operation} ${entityType} is deprecated. Use Contentful directly for ${entityType} management.`,
+      variant: "destructive",
+    });
     
     // Throw error
     throw createDeprecationError(

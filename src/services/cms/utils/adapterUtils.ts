@@ -54,12 +54,12 @@ export function makeAdapterReadOnly<T extends Record<string, any>>(
 export function makeContentTypeOperationsCompatible<T extends Record<string, any>>(
   adapter: T,
   entityType: string
-): T & Record<string, any> {
+): T & Record<string, unknown> {
   // Create a new object that preserves the original adapter's prototype chain
   const compatibleAdapter = Object.create(
     Object.getPrototypeOf(adapter),
     Object.getOwnPropertyDescriptors(adapter)
-  );
+  ) as T & Record<string, unknown>;
   
   // Map of adapter methods to ContentTypeOperations methods
   const methodMapping: Record<string, string> = {
