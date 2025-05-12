@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCcw, BarChart3 } from 'lucide-react';
 import { 
-  getDeprecationUsageStats, 
+  getDeprecationStats, 
   resetDeprecationTracker,
   type DeprecationStat
 } from '@/services/cms/utils/deprecation';
@@ -30,7 +30,7 @@ const DeprecationUsage: React.FC<DeprecationUsageProps> = ({
   
   // Load statistics on mount and when stats are reset
   useEffect(() => {
-    const usageStats = getDeprecationUsageStats();
+    const usageStats = getDeprecationStats();
     setStats(usageStats);
   }, [isResetting]);
   
@@ -41,7 +41,7 @@ const DeprecationUsage: React.FC<DeprecationUsageProps> = ({
     
     // Set a small delay to allow the reset to complete
     setTimeout(() => {
-      setStats(getDeprecationUsageStats());
+      setStats(getDeprecationStats());
       setIsResetting(false);
     }, 100);
   };
@@ -86,9 +86,9 @@ const DeprecationUsage: React.FC<DeprecationUsageProps> = ({
                 </h4>
                 <div className="space-y-2">
                   {displayStats.map(stat => (
-                    <div key={stat.feature} className="space-y-1">
+                    <div key={stat.component} className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="font-medium text-gray-700">{stat.feature}</span>
+                        <span className="font-medium text-gray-700">{stat.component}</span>
                         <span className="text-gray-500">{stat.count} uses</span>
                       </div>
                       <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -107,8 +107,8 @@ const DeprecationUsage: React.FC<DeprecationUsageProps> = ({
             
             <ul className="divide-y">
               {displayStats.map(stat => (
-                <li key={stat.feature} className="py-2 flex justify-between items-center">
-                  <span className="font-medium text-sm">{stat.feature}</span>
+                <li key={stat.component} className="py-2 flex justify-between items-center">
+                  <span className="font-medium text-sm">{stat.component}</span>
                   <span className="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full">
                     {stat.count} {stat.count === 1 ? 'use' : 'uses'}
                   </span>

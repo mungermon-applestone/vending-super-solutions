@@ -76,3 +76,113 @@ export const throwDeprecatedOperationError = (operation: string, contentType: st
 export const getDeprecationStats = (): DeprecationStat[] => {
   return [...deprecationStats];
 };
+
+/**
+ * Alias for getDeprecationStats - for backward compatibility
+ */
+export const getDeprecationUsageStats = getDeprecationStats;
+
+/**
+ * Track usage of deprecated features
+ */
+export const trackDeprecatedFeatureUsage = (feature: string, details: string) => {
+  logDeprecation(feature, details);
+};
+
+/**
+ * Track usage of deprecated code
+ */
+export const trackDeprecatedUsage = (component: string) => {
+  logDeprecation(component, 'Usage of deprecated component/function');
+};
+
+/**
+ * Get usage data for deprecated features
+ */
+export const getDeprecatedUsage = () => {
+  return [...deprecationStats];
+};
+
+/**
+ * Reset the deprecation tracker
+ */
+export const resetDeprecationTracker = () => {
+  deprecationStats.length = 0;
+};
+
+/**
+ * Get Contentful redirect URL for a content type and optional ID
+ */
+export const getContentfulRedirectUrl = (contentType: string, contentId?: string | null): string => {
+  // Base Contentful URL
+  const baseUrl = 'https://app.contentful.com/spaces';
+  
+  // Content type specific paths
+  const contentTypeMapping: Record<string, string> = {
+    'product': 'productType',
+    'technology': 'technology',
+    'businessGoal': 'businessGoal',
+    'machine': 'machine',
+    'caseStudy': 'caseStudy',
+    'blog': 'blogPost',
+    'landingPage': 'landingPage'
+  };
+  
+  // Environment is usually 'master'
+  const environment = 'master';
+  
+  // Contentful space ID - in a real app this would come from config
+  const spaceId = process.env.CONTENTFUL_SPACE_ID || 'demo-space';
+  
+  // Build the URL
+  let url = `${baseUrl}/${spaceId}/environments/${environment}/entries`;
+  
+  // If a specific content type is provided
+  if (contentType && contentTypeMapping[contentType]) {
+    url += `?contentTypeId=${contentTypeMapping[contentType]}`;
+  }
+  
+  // If a specific content ID is provided
+  if (contentId) {
+    url += `/${contentId}`;
+  }
+  
+  return url;
+};
+
+/**
+ * Create a function that throws an error for deprecated write operations
+ */
+export const createDeprecatedWriteOperation = (operation: string, entityType: string) => {
+  return (...args: any[]) => {
+    throwDeprecatedOperationError(operation, entityType);
+    return Promise.reject(new Error(`${operation} is not supported for ${entityType}`));
+  };
+};
+
+/**
+ * Create a read-only adapter from a source adapter by replacing write operations with error-throwing functions
+ */
+export function createReadOnlyAdapter<T extends Record<string, any>>(
+  entityType: string,
+  readOperations: Partial<T>,
+  writeOperationNames: string[] = ['create', 'update', 'delete', 'clone']
+): T {
+  const adapter = { ...readOperations } as T;
+  
+  // Replace all write operations with error-throwing functions
+  for (const operation of writeOperationNames) {
+    if (!(operation in adapter)) {
+      Object.defineProperty(adapter, operation, {
+        value: createDeprecatedWriteOperation(operation, entityType),
+        configurable: true,
+        enumerable: true
+      });
+    }
+  }
+  
+  // Track usage
+  trackDeprecatedUsage(`ReadOnlyAdapter-${entityType}`);
+  
+  return adapter;
+}

@@ -12,8 +12,7 @@ import {
   resetDeprecationTracker,
   logDeprecationWarning,
   trackDeprecatedFeatureUsage,
-  getDeprecationUsageStats,
-  resetDeprecationTracker as resetUsageStats,
+  getDeprecationStats,
   type DeprecationStat
 } from './deprecation';
 
@@ -24,10 +23,13 @@ export {
   resetDeprecationTracker,
   logDeprecationWarning,
   trackDeprecatedFeatureUsage,
-  getDeprecationUsageStats,
-  resetUsageStats,
+  getDeprecationStats,
   type DeprecationStat
 };
+
+// Alias for backward compatibility
+export const getDeprecationUsageStats = getDeprecationStats;
+export const resetUsageStats = resetDeprecationTracker;
 
 // Log deprecation warning when this file is imported
 console.warn(

@@ -6,30 +6,17 @@
  * Re-exports from the consolidated deprecation module for backward compatibility.
  */
 
-import {
-  logDeprecation,
-  showDeprecationToast as showToast,
-  throwDeprecatedOperationError as throwDeprecatedError
+import { 
+  showDeprecationToast, 
+  throwDeprecatedOperationError
 } from './deprecation';
-import { toast } from '@/hooks/use-toast';
 
-// Define a showDeprecationToast function that uses the toast hook
-export const showDeprecationToast = (title: string, description: string = "This operation is deprecated and will be removed in a future version. Please use Contentful for content management.") => {
-  // Log the deprecation first
-  logDeprecation('DeprecationToast', `${title}: ${description}`);
-  
-  // Show the toast notification
-  toast({
-    title,
-    description,
-    variant: "destructive",
-  });
+export {
+  showDeprecationToast,
+  throwDeprecatedOperationError
 };
 
-// Export throwDeprecatedOperationError with a compatible signature
-export const throwDeprecatedOperationError = throwDeprecatedError;
-
-// Log deprecation warning when this module is imported
+// Log deprecation warning when this file is imported
 console.warn(
   "⚠️ DEPRECATION WARNING: deprecationToastUtils.ts is deprecated and will be removed in a future update. " +
   "Import directly from the consolidated 'deprecation.ts' module instead."

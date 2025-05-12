@@ -6,7 +6,10 @@
  * the transition from direct database operations to Contentful.
  */
 
-import { trackDeprecatedUsage, createDeprecatedWriteOperation } from './deprecation';
+import { 
+  trackDeprecatedUsage, 
+  createDeprecatedWriteOperation 
+} from './deprecation';
 import type { ContentTypeOperations } from '../contentTypes/types';
 
 /**

@@ -3,7 +3,11 @@
  * Utility functions to help with deprecation tasks and tracking
  */
 
-import { logDeprecationWarning, trackDeprecatedFeatureUsage, getContentfulRedirectUrl } from './deprecation';
+import { 
+  logDeprecationWarning, 
+  trackDeprecatedFeatureUsage, 
+  getContentfulRedirectUrl
+} from './deprecation';
 
 /**
  * Log deprecation with standardized format
@@ -74,4 +78,3 @@ export function formatDeprecationDate(date: Date): string {
  * Re-export getContentfulRedirectUrl for convenience
  */
 export { getContentfulRedirectUrl };
-
