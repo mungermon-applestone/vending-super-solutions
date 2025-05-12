@@ -1,55 +1,85 @@
 
-/**
- * Read-only adapter utilities for transitioning to Contentful
- * 
- * This module provides utilities to create read-only versions of CMS adapters,
- * which is part of our transition strategy to Contentful CMS.
- */
-
-import { createReadOnlyAdapter, createDeprecatedWriteOperation } from '../utils/deprecation';
-import { ContentTypeOperations } from '../contentTypes/types';
+import { logDeprecationWarning, showDeprecationToast, throwDeprecatedOperationError } from '@/services/cms/utils/deprecation';
+import { ContentTypeOperations } from '@/services/cms/contentTypes/types';
 
 /**
- * Creates a read-only adapter that implements the ContentTypeOperations interface
- * 
- * @param adapterName The name of the adapter for logging and error messages
- * @param entityType The type of entity this adapter handles (e.g., 'product')
- * @param adapter The original adapter with read operations
- * @returns A ContentTypeOperations-compatible read-only adapter
+ * Create a read-only version of content type operations
+ * This maintains read operations but prevents write operations as part of our migration to Contentful
  */
 export function createReadOnlyContentTypeOperations<T>(
-  adapterName: string,
-  entityType: string,
-  adapter: Record<string, any>
+  contentType: string,
+  contentTypeName: string,
+  readAdapter: any
 ): ContentTypeOperations<T> {
-  // Map adapter methods to ContentTypeOperations interface
+  // Create base operations object with read operations
   const operations: ContentTypeOperations<T> = {
-    // Map read methods
-    fetchAll: adapter.getAll || (async () => []),
-    fetchBySlug: adapter.getBySlug || (async () => null),
-    fetchById: adapter.getById || (async () => null),
+    fetchAll: async (options?: any) => {
+      try {
+        return await readAdapter.getAll(options);
+      } catch (error) {
+        console.error(`[${contentType}Operations] Error fetching all:`, error);
+        throw error;
+      }
+    },
     
-    // Map write methods to deprecated versions
-    create: createDeprecatedWriteOperation('create', entityType),
-    update: createDeprecatedWriteOperation('update', entityType),
-    delete: createDeprecatedWriteOperation('delete', entityType),
-    clone: createDeprecatedWriteOperation('clone', entityType),
+    fetchBySlug: async (slug: string, options?: any) => {
+      try {
+        return await readAdapter.getBySlug(slug, options);
+      } catch (error) {
+        console.error(`[${contentType}Operations] Error fetching by slug:`, error);
+        throw error;
+      }
+    },
+    
+    fetchById: async (id: string, options?: any) => {
+      try {
+        return await readAdapter.getById(id, options);
+      } catch (error) {
+        console.error(`[${contentType}Operations] Error fetching by ID:`, error);
+        throw error;
+      }
+    },
+    
+    // Write operations that will show deprecation warnings and throw errors
+    create: async (data: any) => {
+      showDeprecationToast(
+        `${contentTypeName} Creation Disabled`,
+        `Creating ${contentTypeName.toLowerCase()}s is not supported in this interface. Please use Contentful.`
+      );
+      throwDeprecatedOperationError('create', contentType);
+      return null as any;
+    },
+    
+    update: async (id: string, data: any) => {
+      showDeprecationToast(
+        `${contentTypeName} Updates Disabled`,
+        `Updating ${contentTypeName.toLowerCase()}s is not supported in this interface. Please use Contentful.`
+      );
+      throwDeprecatedOperationError('update', contentType);
+      return null as any;
+    },
+    
+    delete: async (id: string) => {
+      showDeprecationToast(
+        `${contentTypeName} Deletion Disabled`,
+        `Deleting ${contentTypeName.toLowerCase()}s is not supported in this interface. Please use Contentful.`
+      );
+      throwDeprecatedOperationError('delete', contentType);
+      return false;
+    },
+    
+    clone: async (id: string, newData?: any) => {
+      showDeprecationToast(
+        `${contentTypeName} Cloning Disabled`,
+        `Cloning ${contentTypeName.toLowerCase()}s is not supported in this interface. Please use Contentful.`
+      );
+      throwDeprecatedOperationError('clone', contentType);
+      return null as any;
+    }
   };
-  
-  // For backward compatibility, also add the original adapter methods
-  Object.assign(operations, adapter);
   
   return operations;
 }
 
-/**
- * Standard schema for CMS adapter methods to ensure consistent naming
- */
-export const standardAdapterMethodNames = {
-  read: ['getAll', 'getBySlug', 'getById'],
-  write: ['create', 'update', 'delete', 'clone'],
-  operations: ['fetchAll', 'fetchBySlug', 'fetchById', 'create', 'update', 'delete', 'clone']
-};
-
-// Re-export the createReadOnlyAdapter function from the deprecation module
-export { createReadOnlyAdapter } from '../utils/deprecation';
+// Re-export for backward compatibility
+export const createReadOnlyAdapter = createReadOnlyContentTypeOperations;

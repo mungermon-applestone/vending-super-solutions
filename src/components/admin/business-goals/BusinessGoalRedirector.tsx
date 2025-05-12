@@ -1,6 +1,8 @@
 
 import React from 'react';
 import ContentfulRedirector from '@/components/admin/contentful/ContentfulRedirector';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 interface BusinessGoalRedirectorProps {
   slug?: string; // The business goal slug if we're editing an existing one
@@ -18,13 +20,24 @@ const BusinessGoalRedirector: React.FC<BusinessGoalRedirectorProps> = ({
   returnPath
 }) => {
   return (
-    <ContentfulRedirector
-      contentType="businessGoal"
-      contentTypeName="Business Goal"
-      slug={slug}
-      isCreating={isNew}
-      returnPath={returnPath}
-    />
+    <>
+      <Alert variant="destructive" className="mb-6">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Redirecting to Contentful</AlertTitle>
+        <AlertDescription>
+          Business goal management has been moved to Contentful.
+          You will be redirected to the appropriate Contentful interface.
+        </AlertDescription>
+      </Alert>
+      
+      <ContentfulRedirector
+        contentType="businessGoal"
+        contentTypeName="Business Goal"
+        slug={slug}
+        isCreating={isNew}
+        returnPath={returnPath}
+      />
+    </>
   );
 };
 

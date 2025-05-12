@@ -3,12 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Save } from 'lucide-react';
+import { Save, AlertTriangle } from 'lucide-react';
 import { Form } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { BusinessGoalFormData } from '@/types/forms';
 import { useBusinessGoal } from '@/hooks/useCMSData';
-import { createBusinessGoal, updateBusinessGoal } from '@/services/businessGoal';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { showDeprecationToast } from '@/services/cms/utils/deprecationToastUtils';
+import { logDeprecationWarning } from '@/services/cms/utils/deprecation';
 
 // Import form sections
 import BasicInformation from './sections/BasicInformation';
@@ -26,6 +28,20 @@ const BusinessGoalEditorForm = ({ goalSlug, isEditMode = false }: BusinessGoalEd
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const isCreating = !isEditMode;
+  
+  // Log deprecation warning when component is mounted
+  useEffect(() => {
+    const warningMsg = logDeprecationWarning(
+      "BusinessGoalEditorForm",
+      "This Business Goal editor interface is deprecated and will be removed in a future version.",
+      "Please use Contentful to manage business goal content."
+    );
+    
+    showDeprecationToast(
+      "Deprecated Business Goal Editor", 
+      "This interface is deprecated. Please use Contentful for content management."
+    );
+  }, []);
   
   // Fetch business goal data if editing
   const { data: existingGoal, isLoading: isLoadingGoal } = useBusinessGoal(goalSlug);
@@ -83,24 +99,24 @@ const BusinessGoalEditorForm = ({ goalSlug, isEditMode = false }: BusinessGoalEd
     }
   }, [existingGoal, isEditMode, form]);
 
-  // Handle form submission
+  // Handle form submission - redirects to Contentful now
   const handleSubmit = form.handleSubmit(async (data) => {
-    console.log('[BusinessGoalEditorForm] Form submission with data:', data);
+    console.log('[BusinessGoalEditorForm] Form submission redirecting to Contentful');
     setIsLoading(true);
     
     try {
-      if (isCreating) {
-        console.log('[BusinessGoalEditorForm] Creating new business goal');
-        await createBusinessGoal(data, toast);
+      // Show deprecation toast
+      showDeprecationToast(
+        "Business Goal Editor Deprecated",
+        "Please use Contentful for business goal management. Redirecting to admin page."
+      );
+      
+      // Navigate back to admin page after showing toast
+      setTimeout(() => {
         navigate('/admin/business-goals');
-      } else if (goalSlug) {
-        console.log(`[BusinessGoalEditorForm] Updating business goal: ${goalSlug}`);
-        await updateBusinessGoal(data, goalSlug, toast);
-        navigate('/admin/business-goals');
-      }
+      }, 1500);
     } catch (error) {
-      console.error('[BusinessGoalEditorForm] Error saving business goal:', error);
-      // Error toast is handled in the service functions
+      console.error('[BusinessGoalEditorForm] Error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -122,6 +138,15 @@ const BusinessGoalEditorForm = ({ goalSlug, isEditMode = false }: BusinessGoalEd
 
   return (
     <div className="container py-10">
+      <Alert variant="destructive" className="mb-6">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Deprecated Interface</AlertTitle>
+        <AlertDescription>
+          This Business Goal editor is deprecated and will be removed in a future version.
+          Please use Contentful directly for content management.
+        </AlertDescription>
+      </Alert>
+      
       <h1 className="text-3xl font-bold mb-6">
         {isCreating ? 'Create New Business Goal' : `Edit Business Goal: ${form.watch('title') || 'Loading...'}`}
       </h1>
@@ -147,7 +172,7 @@ const BusinessGoalEditorForm = ({ goalSlug, isEditMode = false }: BusinessGoalEd
               disabled={isLoading} 
               className="gap-2"
             >
-              {isLoading ? 'Saving...' : <><Save className="h-4 w-4" /> Save Business Goal</>}
+              {isLoading ? 'Redirecting...' : <><Save className="h-4 w-4" /> Continue to Contentful</>}
             </Button>
           </div>
         </form>

@@ -8,12 +8,13 @@
 
 import {
   logDeprecation,
+  showDeprecationToast as showToast,
   throwDeprecatedOperationError as throwDeprecatedError
 } from './deprecation';
 import { toast } from '@/hooks/use-toast';
 
 // Define a showDeprecationToast function that uses the toast hook
-export const showDeprecationToast = (title: string, description: string) => {
+export const showDeprecationToast = (title: string, description: string = "This operation is deprecated and will be removed in a future version. Please use Contentful for content management.") => {
   // Log the deprecation first
   logDeprecation('DeprecationToast', `${title}: ${description}`);
   

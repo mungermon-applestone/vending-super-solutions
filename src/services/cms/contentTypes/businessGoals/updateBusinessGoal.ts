@@ -11,7 +11,8 @@ export async function updateBusinessGoal(id: string, data: any): Promise<boolean
   console.warn('[updateBusinessGoal] ⚠️ DEPRECATED: Please use Contentful for content management.');
   
   // Show toast notification
-  showDeprecationToast('Business goal updates');
+  showDeprecationToast('Business goal updates are deprecated',
+    'Updating business goals is no longer supported. Please use Contentful directly.');
   
   try {
     // This will throw an error as the mock implementation is designed to prevent updates

@@ -11,7 +11,8 @@ export async function cloneBusinessGoal(id: string): Promise<string | null> {
   console.warn('[cloneBusinessGoal] ⚠️ DEPRECATED: Please use Contentful for content management.');
   
   // Show toast notification
-  showDeprecationToast('Business goal cloning');
+  showDeprecationToast('Business goal cloning is deprecated', 
+    'Cloning business goals is no longer supported. Please use Contentful directly.');
   
   try {
     // This will throw an error as the mock implementation is designed to prevent cloning
