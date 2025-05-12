@@ -4,6 +4,7 @@ import { Document } from "@contentful/rich-text-types";
 import { renderRichText } from '@/utils/contentful/richTextRenderer';
 import { ContentfulAsset } from '@/types/contentful';
 import { Asset } from 'contentful';
+import { logDeprecation } from '@/services/cms/utils/deprecation';
 
 interface ContentfulBlogPostBodyProps {
   content?: Document;
@@ -17,6 +18,7 @@ const normalizeAssets = (assets: any[]): ContentfulAsset[] => {
   return assets.map(asset => {
     // Handle both our ContentfulAsset type and Contentful's Asset type
     if (asset?.fields) {
+      // Return normalized asset structure
       return {
         sys: {
           id: asset.sys?.id || ''
@@ -32,21 +34,23 @@ const normalizeAssets = (assets: any[]): ContentfulAsset[] => {
         }
       };
     }
-    return asset;
+    return asset as ContentfulAsset;
   });
 };
 
+/**
+ * Renders Contentful Rich Text content with embedded assets
+ */
 const ContentfulBlogPostBody: React.FC<ContentfulBlogPostBodyProps> = ({ 
   content, 
   includedAssets = [] 
 }) => {
-  // For debugging
+  // Log any missing content for debugging purposes
   React.useEffect(() => {
-    if (content) {
-      console.log("Blog post rich text content structure:", JSON.stringify(content, null, 2));
-      console.log("Available included assets:", includedAssets);
+    if (!content) {
+      logDeprecation('ContentfulBlogPostBody', 'Rendering without content');
     }
-  }, [content, includedAssets]);
+  }, [content]);
 
   // Normalize assets to ensure they match our ContentfulAsset type
   const normalizedAssets = normalizeAssets(includedAssets);
