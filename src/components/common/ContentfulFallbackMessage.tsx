@@ -7,14 +7,14 @@ import { AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface ContentfulFallbackMessageProps {
-  title?: string;              // Added title prop
+  title?: string;
   message: string;
   contentType: string;
   showRefresh?: boolean;
   showAdmin?: boolean;
-  actionText?: string;         // Added actionText prop
-  actionHref?: string;         // Added actionHref prop
-  onAction?: () => void;       // Added onAction prop
+  actionText?: string;
+  actionHref?: string;
+  onAction?: () => void;
 }
 
 const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({

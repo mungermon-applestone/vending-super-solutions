@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import Layout from "@/components/layout/Layout";
-import { useContentful } from '@/hooks/useContentful';
+import useContentful from '@/hooks/useContentful';
 import { fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { ContentfulErrorBoundary, ContentfulFallbackMessage } from '@/components/common';
 import { renderRichText } from '@/utils/contentful/richTextRenderer';

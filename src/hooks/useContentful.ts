@@ -81,4 +81,5 @@ export function useContentful<T>({
   };
 }
 
+// Also export as default for backward compatibility
 export default useContentful;

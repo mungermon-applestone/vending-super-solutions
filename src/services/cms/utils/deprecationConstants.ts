@@ -17,6 +17,36 @@ export const FEATURE_STATUS = {
   REMOVED: "Removed - functionality has been removed"
 };
 
+// Migration status constants
+export const MIGRATION_STATUS = {
+  COMPLETED: 'completed',
+  IN_PROGRESS: 'in-progress',
+  PENDING: 'pending',
+  NOT_STARTED: 'not-started'
+};
+
+// Migration status for each content type
+export const CONTENT_TYPE_MIGRATION_STATUS = {
+  'product': MIGRATION_STATUS.COMPLETED,
+  'businessGoal': MIGRATION_STATUS.COMPLETED,
+  'technology': MIGRATION_STATUS.IN_PROGRESS,
+  'machine': MIGRATION_STATUS.IN_PROGRESS,
+  'landingPage': MIGRATION_STATUS.IN_PROGRESS,
+  'caseStudy': MIGRATION_STATUS.IN_PROGRESS,
+  'blog': MIGRATION_STATUS.PENDING
+};
+
+// Content type IDs for migration
+export const CONTENT_TYPE_IDS = {
+  PRODUCT: "productType",
+  TECHNOLOGY: "technology",
+  BUSINESS_GOAL: "businessGoal",
+  MACHINE: "machine",
+  CASE_STUDY: "caseStudy",
+  BLOG_POST: "blogPost",
+  LANDING_PAGE: "landingPage"
+};
+
 // Redirect URLs
 export const CONTENTFUL_APP_URL = "https://app.contentful.com";
 export const CONTENTFUL_DOCS_URL = "https://www.contentful.com/developers/docs/";
@@ -26,15 +56,6 @@ export const DEPRECATION_TIMES = {
   SHORT: 30 * 24 * 60 * 60 * 1000, // 30 days
   MEDIUM: 60 * 24 * 60 * 60 * 1000, // 60 days
   LONG: 90 * 24 * 60 * 60 * 1000 // 90 days
-};
-
-// Content type IDs for migration
-export const CONTENT_TYPE_IDS = {
-  PRODUCT: "productType",
-  TECHNOLOGY: "technology",
-  BUSINESS_GOAL: "businessGoal",
-  MACHINE: "machine",
-  CASE_STUDY: "caseStudy"
 };
 
 // Standard messages

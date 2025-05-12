@@ -1,5 +1,5 @@
 
-import { useContentful } from '@/hooks/useContentful';
+import useContentful from '@/hooks/useContentful';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { CMS_MODELS } from '@/config/cms';
 
