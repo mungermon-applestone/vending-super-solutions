@@ -1,268 +1,210 @@
+
 /**
- * Consolidated Deprecation Module
- * 
- * This module serves as the central point for all deprecation-related functionality.
- * It combines tracking, logging, UI notifications, and redirection utilities.
+ * Centralized utilities for handling deprecation warnings, tracking, and creating read-only adapters
  */
 
-import { toast } from '@/hooks/use-toast';
-
-// Set to store unique deprecation events
-const reportedDeprecations = new Set<string>();
-
-// Interface for usage statistics data
-export interface DeprecationStat {
-  feature: string;
+// Track which deprecated features are being used
+type DeprecationStat = {
   count: number;
-  lastUsed: number;
-}
+  lastUsed: Date;
+  feature: string;
+  message?: string;
+};
+
+// In-memory store for tracking deprecation usage
+const deprecationStats: Record<string, DeprecationStat> = {};
 
 /**
- * Tracks usage of deprecated features and logs it only once per feature
- * to avoid console spam
- * 
- * @param feature The name of the deprecated feature being used
- * @param file The file where the usage occurred
- */
-export function trackDeprecatedUsage(feature: string, file?: string): void {
-  const key = `${feature}:${file || 'unknown'}`;
-  
-  // Only log each deprecation once
-  if (!reportedDeprecations.has(key)) {
-    reportedDeprecations.add(key);
-    
-    // Log to console for development visibility
-    console.warn(
-      `[Deprecation Tracker] Usage of deprecated feature "${feature}" detected in ${file || 'unknown location'}`
-    );
-    
-    // In a real implementation, this could also send telemetry data
-    // to track usage across the application
-  }
-}
-
-/**
- * Gets a list of all deprecated features that have been used
- * @returns Array of feature:file strings that have been tracked
- */
-export function getDeprecatedUsage(): string[] {
-  return Array.from(reportedDeprecations);
-}
-
-/**
- * Reset the deprecation usage tracker (mainly for testing)
- */
-export function resetDeprecationTracker(): void {
-  reportedDeprecations.clear();
-}
-
-/**
- * Log a deprecation warning message consistently
- * @param feature The name of the feature that is deprecated
+ * Log a deprecation warning to the console
+ * @param feature The deprecated feature name
  * @param message The deprecation message
- * @param replacement Optional recommendation for replacement
+ * @param alternative The recommended alternative
  */
 export function logDeprecationWarning(
   feature: string, 
   message: string, 
-  replacement?: string
+  alternative?: string
 ): void {
-  // Get stack trace to find calling file
-  const stack = new Error().stack || '';
-  const stackLines = stack.split('\n');
-  const callerLine = stackLines.length > 2 ? stackLines[2] : '';
-  const callerMatch = callerLine.match(/at\s+(.+)\s+\((.+)\)/);
-  const callerFile = callerMatch ? callerMatch[2] : 'unknown';
-  
-  // Track this usage for deprecation metrics
-  trackDeprecatedUsage(feature, callerFile);
-  
-  // Log the warning
-  const baseMessage = `⚠️ DEPRECATED: ${message}`;
-  const replacementMessage = replacement ? `\n👉 RECOMMENDED: ${replacement}` : '';
-  
-  console.warn(`${baseMessage}${replacementMessage}`);
-}
-
-/**
- * Legacy name for trackDeprecatedUsage to maintain compatibility
- * @deprecated Use trackDeprecatedUsage instead
- */
-export function trackDeprecatedFeatureUsage(feature: string, details?: string): void {
-  // Forward to the standard tracking function
-  trackDeprecatedUsage(feature, details);
-}
-
-/**
- * Get formatted statistics about deprecated feature usage
- * @returns Array of statistics objects with feature name, count, and last usage time
- */
-export function getDeprecationUsageStats(): DeprecationStat[] {
-  const usageEntries = getDeprecatedUsage();
-  const stats: Record<string, DeprecationStat> = {};
-  
-  // Process the raw usage data into statistics
-  usageEntries.forEach(entry => {
-    const [feature] = entry.split(':');
-    
-    if (!stats[feature]) {
-      stats[feature] = {
-        feature,
-        count: 0,
-        lastUsed: Date.now()
-      };
-    }
-    
-    stats[feature].count++;
-  });
-  
-  return Object.values(stats).sort((a, b) => b.count - a.count);
-}
-
-/**
- * Show a toast notification for deprecated features
- * @param feature The feature being used that is deprecated
- * @param alternativeAction Optional suggestion for alternative
- */
-export function showDeprecationToast(feature: string, alternativeAction: string = 'Use Contentful directly'): void {
-  // Log the deprecation first
-  logDeprecationWarning(feature, `${feature} is deprecated.`, alternativeAction);
-  
-  // Show toast notification
-  toast({
-    title: "Deprecated Feature",
-    description: `${feature} is deprecated. ${alternativeAction} for content management.`,
-    variant: "destructive",
-  });
-}
-
-/**
- * Create an error object with a standardized message for deprecated operations
- * @param operation The operation being attempted (e.g., 'create', 'update')
- * @param entityType The type of entity being operated on
- */
-export function createDeprecationError(operation: string, entityType: string): Error {
-  return new Error(`${operation} operation on ${entityType} is disabled. Please use Contentful directly.`);
-}
-
-/**
- * Throw an error for a deprecated operation
- * @param operation The operation being attempted (e.g., 'create', 'update')
- * @param entityType The type of entity being operated on
- */
-export function throwDeprecatedOperationError(operation: string, entityType: string): never {
-  throw createDeprecationError(operation, entityType);
-}
-
-/**
- * Get a URL for redirecting users directly to Contentful
- * for a specific content type
- */
-export function getContentfulRedirectUrl(
-  contentTypeId: string,
-  entryId?: string,
-  spaceId?: string,
-  environmentId: string = 'master'
-): string {
-  // Use environment variables for space ID if not provided
-  const contentfulSpaceId = spaceId || process.env.REACT_APP_CONTENTFUL_SPACE_ID || '';
-  
-  // Base URL for Contentful web app
-  const baseUrl = 'https://app.contentful.com/spaces';
-  
-  // If we have a specific entry ID, direct to that entry
-  if (entryId) {
-    return `${baseUrl}/${contentfulSpaceId}/environments/${environmentId}/entries/${entryId}`;
+  // Build the warning message
+  let warning = `⚠️ DEPRECATION WARNING: ${feature} is deprecated. ${message}`;
+  if (alternative) {
+    warning += ` Use ${alternative} instead.`;
   }
   
-  // Otherwise, direct to the content type listing
-  return `${baseUrl}/${contentfulSpaceId}/environments/${environmentId}/entries?contentTypeId=${contentTypeId}`;
+  console.warn(warning);
+  trackDeprecatedFeatureUsage(feature, message);
 }
 
 /**
- * Create a proxy handler that warns when deprecated properties are accessed
- * Useful for creating backward compatibility layers
+ * Track usage of a deprecated feature
+ * @param feature The deprecated feature name
+ * @param details Optional details about the usage
  */
-export function createDeprecationProxy<T extends object>(
-  target: T,
-  name: string,
-  deprecatedProps: Record<keyof T, string>
-): T {
-  return new Proxy(target, {
-    get(obj, prop: string) {
-      // Check if the accessed property is deprecated
-      if (prop in deprecatedProps) {
-        logDeprecationWarning(
-          `${name}.${String(prop)}`,
-          `This property is deprecated: ${deprecatedProps[prop as keyof T]}`,
-          'Use new Contentful-based APIs instead'
-        );
-      }
-      return obj[prop as keyof T];
-    }
-  });
+export function trackDeprecatedFeatureUsage(
+  feature: string, 
+  details?: string
+): void {
+  if (!deprecationStats[feature]) {
+    deprecationStats[feature] = {
+      count: 0,
+      lastUsed: new Date(),
+      feature,
+      message: details
+    };
+  }
+  
+  deprecationStats[feature].count += 1;
+  deprecationStats[feature].lastUsed = new Date();
+  
+  if (details && !deprecationStats[feature].message) {
+    deprecationStats[feature].message = details;
+  }
 }
 
 /**
- * Creates a function that logs deprecation and throws an error
- * Useful for creating stubs for deprecated write operations
- * @param operation The operation type (create, update, delete, etc)
- * @param entityType The entity type (product, technology, etc)
- * @param customMessage Optional custom error message
+ * Get statistics about deprecated feature usage
  */
-export function createDeprecatedWriteOperation(
-  operation: string,
-  entityType: string,
-  customMessage?: string
-): (...args: any[]) => never {
-  return (...args: any[]): never => {
-    // Track usage
-    trackDeprecatedUsage(`${operation}${entityType}`, `deprecated-write-operation`);
+export function getDeprecationUsageStats(): DeprecationStat[] {
+  return Object.values(deprecationStats);
+}
+
+/**
+ * Reset the deprecation tracker (primarily for testing)
+ */
+export function resetDeprecationTracker(): void {
+  for (const key of Object.keys(deprecationStats)) {
+    delete deprecationStats[key];
+  }
+}
+
+/**
+ * Alias for trackDeprecatedFeatureUsage for backward compatibility
+ * @deprecated Use trackDeprecatedFeatureUsage instead
+ */
+export const trackDeprecatedUsage = trackDeprecatedFeatureUsage;
+
+/**
+ * Alias for getDeprecationUsageStats for backward compatibility
+ * @deprecated Use getDeprecationUsageStats instead
+ */
+export const getDeprecatedUsage = getDeprecationUsageStats;
+
+/**
+ * Log deprecation information for use in log analysis
+ * @param component The component or module being deprecated
+ * @param message Additional details about the deprecation
+ * @param recommendation Optional recommendation for alternative
+ */
+export function logDeprecation(
+  component: string,
+  message: string,
+  recommendation?: string
+): void {
+  trackDeprecatedFeatureUsage(component, message);
+  
+  // Format for log analysis
+  const logData = {
+    type: 'DEPRECATION',
+    component,
+    message,
+    recommendation,
+    timestamp: new Date().toISOString()
+  };
+  
+  console.warn(`[DEPRECATION] ${component}: ${message}${recommendation ? ` | Recommendation: ${recommendation}` : ''}`);
+  console.debug('deprecation-data', logData);
+}
+
+/**
+ * Creates a function that throws an error for deprecated write operations
+ * @param operation The operation name (create, update, delete, etc.)
+ * @param entityType The entity type name
+ * @returns A function that throws a descriptive error
+ */
+export function createDeprecatedWriteOperation<T>(
+  operation: string, 
+  entityType: string
+): (...args: any[]) => Promise<T> {
+  return (...args: any[]): Promise<T> => {
+    const id = args[0] ? ` for ${entityType} with ID ${args[0]}` : '';
+    const errorMessage = `${operation} operation${id} is not supported. Please use Contentful directly.`;
     
-    // Show toast
-    toast({
-      title: "Deprecated Feature",
-      description: `${operation} ${entityType} is deprecated. Use Contentful directly for ${entityType} management.`,
-      variant: "destructive",
-    });
-    
-    // Throw error
-    throw createDeprecationError(
-      operation,
-      entityType
+    // Track the attempted usage
+    trackDeprecatedFeatureUsage(
+      `deprecated-write-${entityType}-${operation}`,
+      `Attempted to use deprecated ${operation} operation on ${entityType}`
     );
+    
+    // Log the deprecation
+    logDeprecationWarning(
+      `${entityType}.${operation}()`,
+      `Direct ${operation} operations are deprecated and will be removed in a future release.`,
+      'Contentful directly'
+    );
+    
+    throw new Error(errorMessage);
   };
 }
 
 /**
- * Helper to create a complete set of deprecated write operations for an entity
- * @param entityType The type of entity (product, technology, etc)
- * @returns Object with create, update, delete methods that all throw errors
+ * Creates a read-only version of an adapter that allows read operations
+ * but replaces write operations with functions that throw descriptive errors
+ * 
+ * @param entityType The type of entity this adapter handles (e.g., 'product', 'technology')
+ * @param readOperations The read operations to keep from the original adapter
+ * @param writeOperationNames Names of write operations to replace with error-throwing functions
+ * @returns A new adapter with read operations intact but write operations replaced
  */
-export function createDeprecatedWriteOperations(entityType: string): {
-  create: (...args: any[]) => never;
-  update: (...args: any[]) => never;
-  delete: (...args: any[]) => never;
-  clone?: (...args: any[]) => never;
-} {
-  return {
-    create: createDeprecatedWriteOperation('create', entityType),
-    update: createDeprecatedWriteOperation('update', entityType),
-    delete: createDeprecatedWriteOperation('delete', entityType),
-    clone: createDeprecatedWriteOperation('clone', entityType)
-  };
+export function createReadOnlyAdapter<T extends Record<string, any>>(
+  entityType: string,
+  readOperations: Record<string, any>,
+  writeOperationNames: string[]
+): Record<string, any> {
+  const readOnlyAdapter: Record<string, any> = { ...readOperations };
+  
+  // Replace all write operations with error-throwing functions
+  for (const operation of writeOperationNames) {
+    readOnlyAdapter[operation] = createDeprecatedWriteOperation(operation, entityType);
+  }
+  
+  // Track usage of the read-only adapter
+  logDeprecation(
+    `ReadOnlyAdapter-${entityType}`,
+    `Read-only adapter created for ${entityType}`,
+    'Use Contentful directly for content management'
+  );
+  
+  return readOnlyAdapter;
 }
 
 /**
- * Mark a component or function as deprecated with JSDoc comment
- * This is just a type utility for better code documentation
+ * Returns a Contentful URL for a specific content type or entry
  */
-export function deprecated<T>(
-  target: T,
-  reason: string,
-  alternative?: string
-): T {
-  // This doesn't actually do anything at runtime,
-  // it's just for TypeScript documentation
-  return target;
+export function getContentfulRedirectUrl(
+  contentType: string,
+  entryId?: string,
+  spaceId: string = process.env.CONTENTFUL_SPACE_ID || '',
+  environmentId: string = process.env.CONTENTFUL_ENVIRONMENT_ID || 'master'
+): string {
+  let url = 'https://app.contentful.com/';
+  
+  // Add space and environment if available
+  if (spaceId) {
+    url += `spaces/${spaceId}/`;
+    
+    if (environmentId) {
+      url += `environments/${environmentId}/`;
+    }
+    
+    // Direct to specific entry or content type
+    if (entryId) {
+      url += `entries/${entryId}`;
+    } else if (contentType) {
+      url += `entries?contentTypeId=${contentType}`;
+    } else {
+      url += 'entries';
+    }
+  }
+  
+  return url;
 }

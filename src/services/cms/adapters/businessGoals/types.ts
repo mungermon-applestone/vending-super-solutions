@@ -1,76 +1,69 @@
 
+/**
+ * Types for business goal adapters
+ */
+
 import { CMSBusinessGoal } from '@/types/cms';
 
 /**
- * Input data structure for creating a new business goal
+ * Input data for creating a business goal
  */
 export interface BusinessGoalCreateInput {
   title: string;
   slug: string;
   description: string;
-  visible: boolean;
   icon?: string;
+  benefits?: string[];
+  visible?: boolean;
   image?: {
     url: string;
     alt: string;
   };
-  benefits?: string[];
-  features?: {
-    title: string;
-    description: string;
-    icon?: string;
-    screenshot?: {
-      url: string;
-      alt: string;
-    };
-    display_order?: number;
-  }[];
 }
 
 /**
- * Input data structure for updating an existing business goal
+ * Input data for updating a business goal
  */
-export interface BusinessGoalUpdateInput extends BusinessGoalCreateInput {
-  // We may need additional fields specific to updates in the future
-  originalSlug?: string;
+export interface BusinessGoalUpdateInput extends Partial<BusinessGoalCreateInput> {
+  id?: string;
 }
 
 /**
- * Business Goal Adapter interface that both Supabase and Strapi implementations must follow
+ * Interface for business goal adapter implementations
  */
 export interface BusinessGoalAdapter {
   /**
-   * Fetch all business goals
+   * Get all business goals
    */
-  getAll: (filters?: Record<string, any>) => Promise<CMSBusinessGoal[]>;
+  getAll: (options?: Record<string, any>) => Promise<CMSBusinessGoal[]>;
   
   /**
-   * Fetch a business goal by slug
+   * Get a business goal by slug
    */
   getBySlug: (slug: string) => Promise<CMSBusinessGoal | null>;
   
   /**
-   * Fetch a business goal by ID
+   * Get a business goal by ID
    */
   getById: (id: string) => Promise<CMSBusinessGoal | null>;
   
   /**
-   * Create a new business goal
+   * Create a business goal
    */
   create: (data: BusinessGoalCreateInput) => Promise<CMSBusinessGoal>;
   
   /**
-   * Update an existing business goal
+   * Update a business goal
    */
   update: (id: string, data: BusinessGoalUpdateInput) => Promise<CMSBusinessGoal>;
   
   /**
-   * Delete a business goal by ID
+   * Delete a business goal
    */
   delete: (id: string) => Promise<boolean>;
   
   /**
-   * Clone an existing business goal
+   * Clone a business goal
    */
-  clone?: (id: string) => Promise<CMSBusinessGoal | null>;
+  clone?: (id: string) => Promise<CMSBusinessGoal>;
 }

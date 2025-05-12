@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Button, ButtonProps } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
-import { trackDeprecatedFeatureUsage } from '@/services/cms/utils/deprecationLogger';
+import { logDeprecation, getContentfulRedirectUrl } from '@/services/cms/utils/deprecationUtils';
 
 interface ViewInContentfulProps extends ButtonProps {
   contentType?: string;
@@ -25,22 +26,19 @@ const ViewInContentful: React.FC<ViewInContentfulProps> = ({
 }) => {
   const handleClick = () => {
     // Track usage of the "View in Contentful" button
-    trackDeprecatedFeatureUsage(
+    logDeprecation(
       "ViewInContentful",
-      `Button clicked for content type: ${contentType || 'Unknown'}`
+      `Button clicked for content type: ${contentType || 'Unknown'}`,
+      "Use Contentful directly for content management"
     );
     
-    let url = "https://app.contentful.com/";
-    
-    // If we have all the necessary information to link directly to an entry
-    if (spaceId && environmentId && contentType && contentId) {
-      url = `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries/${contentId}`;
-    }
-    // If we only have content type, link to the content type
-    else if (spaceId && environmentId && contentType) {
-      url = `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries?contentTypeId=${contentType}`;
-    }
-    // Otherwise just open Contentful
+    // Use our utility function to generate the URL
+    const url = getContentfulRedirectUrl(
+      contentType, 
+      contentId,
+      spaceId,
+      environmentId
+    );
     
     window.open(url, "_blank");
   };

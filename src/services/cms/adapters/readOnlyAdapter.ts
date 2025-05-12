@@ -1,69 +1,53 @@
 
 /**
- * Read-Only Adapter Factory
- *
- * This module provides utilities for creating read-only adapters by preserving
- * read operations and replacing write operations with functions that throw errors.
- */
-
-import { createDeprecatedWriteOperation } from '../utils/deprecation';
-import { trackDeprecatedUsage } from '../utils/deprecationLogger';
-
-/**
- * Creates a read-only version of any adapter by preserving specified read operations
- * and disabling write operations.
- *
- * @param entityType The type of entity (e.g., 'product', 'businessGoal')
- * @param readOperations Object containing the read operations to preserve
- * @param disabledOperations Array of operation names that should throw errors when called
- * @returns A new adapter with read operations intact but write operations disabled
- */
-export function createReadOnlyAdapter<T extends Record<string, any>>(
-  entityType: string,
-  readOperations: Record<string, Function>,
-  disabledOperations: string[] = ['create', 'update', 'delete', 'clone']
-): T {
-  // Create a new adapter with the read operations
-  const readOnlyAdapter = { ...readOperations } as unknown as T;
-
-  // Add disabled operations that throw clear error messages
-  for (const operation of disabledOperations) {
-    Object.defineProperty(readOnlyAdapter, operation, {
-      value: createDeprecatedWriteOperation(operation, entityType),
-      configurable: true,
-      enumerable: true
-    });
-  }
-
-  // Track usage of the read-only adapter
-  trackDeprecatedUsage(`ReadOnlyAdapter-${entityType}`);
-
-  return readOnlyAdapter;
-}
-
-/**
- * Creates a logging wrapper around any adapter, useful for debugging
+ * Read-only adapter utilities for transitioning to Contentful
  * 
- * @param adapter The original adapter
- * @param adapterName Name to use in logs
- * @returns A proxy that logs all method calls
+ * This module provides utilities to create read-only versions of CMS adapters,
+ * which is part of our transition strategy to Contentful CMS.
  */
-export function createLoggingAdapter<T extends object>(
-  adapter: T,
-  adapterName: string
-): T {
-  return new Proxy(adapter, {
-    get(target, prop: string) {
-      const value = Reflect.get(target, prop);
-      
-      if (typeof value === 'function') {
-        return function(...args: any[]) {
-          console.log(`[${adapterName}] Called ${String(prop)}`, args);
-          return Reflect.apply(value, target, args);
-        };
-      }
-      
-      return value;
-    }
-  });
+
+import { createReadOnlyAdapter, createDeprecatedWriteOperation } from '../utils/deprecation';
+import { ContentTypeOperations } from '../contentTypes/types';
+
+/**
+ * Creates a read-only adapter that implements the ContentTypeOperations interface
+ * 
+ * @param adapterName The name of the adapter for logging and error messages
+ * @param entityType The type of entity this adapter handles (e.g., 'product')
+ * @param adapter The original adapter with read operations
+ * @returns A ContentTypeOperations-compatible read-only adapter
+ */
+export function createReadOnlyContentTypeOperations<T>(
+  adapterName: string,
+  entityType: string,
+  adapter: Record<string, any>
+): ContentTypeOperations<T> {
+  // Map adapter methods to ContentTypeOperations interface
+  const operations: ContentTypeOperations<T> = {
+    // Map read methods
+    fetchAll: adapter.getAll || (async () => []),
+    fetchBySlug: adapter.getBySlug || (async () => null),
+    fetchById: adapter.getById || (async () => null),
+    
+    // Map write methods to deprecated versions
+    create: createDeprecatedWriteOperation('create', entityType),
+    update: createDeprecatedWriteOperation('update', entityType),
+    delete: createDeprecatedWriteOperation('delete', entityType),
+    clone: createDeprecatedWriteOperation('clone', entityType),
+  };
+  
+  // For backward compatibility, also add the original adapter methods
+  Object.assign(operations, adapter);
+  
+  return operations;
 }
+
+/**
+ * Standard schema for CMS adapter methods to ensure consistent naming
+ */
+export const standardAdapterMethodNames = {
+  read: ['getAll', 'getBySlug', 'getById'],
+  write: ['create', 'update', 'delete', 'clone'],
+  operations: ['fetchAll', 'fetchBySlug', 'fetchById', 'create', 'update', 'delete', 'clone']
+};
+
