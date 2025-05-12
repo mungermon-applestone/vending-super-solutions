@@ -4,8 +4,8 @@ import Layout from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { AdminLayout } from '@/components';
-import { DeprecationBanner } from '@/components/admin';
+import AdminLayout from '@/components/AdminLayout';
+import DeprecationBanner from '@/components/admin/DeprecationBanner';
 import { 
   CONTENT_TYPE_MIGRATION_STATUS,
   CONTENT_TYPE_IDS,

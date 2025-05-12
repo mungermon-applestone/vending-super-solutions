@@ -19,6 +19,7 @@ const ContentfulManagement = lazy(() => import('@/pages/admin/ContentfulManageme
 const SignInPage = lazy(() => import('@/pages/admin/SignIn'));
 const DeprecationStatsPage = lazy(() => import('@/pages/admin/DeprecationStatsPage'));
 const MigrationTasksPage = lazy(() => import('@/pages/admin/MigrationTasksPage'));
+const ContentfulMigrationGuide = lazy(() => import('@/pages/admin/ContentfulMigrationGuide'));
 
 // Admin routes
 export const adminRoutes: RouteObject[] = [
@@ -107,6 +108,11 @@ export const adminRoutes: RouteObject[] = [
   {
     path: 'migration-tasks',
     element: <MigrationTasksPage />,
+  },
+  // Contentful migration guide
+  {
+    path: 'contentful-migration-guide',
+    element: <ContentfulMigrationGuide />,
   },
   // Auth routes
   {
