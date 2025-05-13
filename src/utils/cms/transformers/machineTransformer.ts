@@ -75,7 +75,7 @@ export const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => 
     temperature: temperature,
     features: features,
     images: images,
-    thumbnail: thumbnail, // Add thumbnail to the returned machine object
+    thumbnail: thumbnail,
     specs: specs
   };
   

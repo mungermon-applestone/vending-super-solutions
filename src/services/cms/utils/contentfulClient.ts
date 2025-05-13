@@ -1,3 +1,4 @@
+
 import { createClient } from 'contentful';
 import { CONTENTFUL_CONFIG, logContentfulConfig } from '@/config/cms';
 import { toast } from 'sonner';
