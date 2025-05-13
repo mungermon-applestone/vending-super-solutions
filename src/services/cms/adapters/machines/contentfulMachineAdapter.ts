@@ -8,6 +8,8 @@
 import { CMSMachine, CMSImage } from '@/types/cms';
 import { MachineAdapter } from './types';
 import { createDeprecatedWriteOperation } from '@/services/cms/utils/deprecation';
+import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
+import { CONTENTFUL_CONFIG } from '@/config/cms';
 
 /**
  * Process an image from Contentful to ensure it has the required fields
@@ -32,7 +34,7 @@ function processContentfulMachine(entry: any): CMSMachine {
   
   // Process images to ensure they have required fields
   const images = Array.isArray(fields.images) 
-    ? fields.images.map((img, idx) => processContentfulImage(img, id, idx))
+    ? fields.images.map((img: any, idx: number) => processContentfulImage(img, id, idx))
     : [];
     
   // Process thumbnail if it exists
@@ -66,9 +68,39 @@ export const contentfulMachineAdapter: MachineAdapter = {
   getAll: async (filters = {}) => {
     console.log('Fetching all machines from Contentful with filters:', filters);
     
-    // Implementation would query the Contentful API here
-    // For now, we return a placeholder
-    return Promise.resolve([]);
+    try {
+      // Check if Contentful is configured
+      if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
+        console.error('Contentful not properly configured. Check environment variables.');
+        return [];
+      }
+      
+      // Build query for filters
+      const query: Record<string, any> = {};
+      
+      // Process filters
+      if (filters.slug) {
+        query['fields.slug'] = filters.slug;
+      }
+      
+      if (filters.type) {
+        query['fields.type'] = filters.type;
+      }
+      
+      if (filters.visible !== undefined) {
+        query['fields.visible'] = filters.visible ? 'true' : 'false';
+      }
+      
+      // Fetch machines from Contentful
+      const entries = await fetchContentfulEntries('machine', query);
+      console.log(`Fetched ${entries.length} machines from Contentful`);
+      
+      // Process and return machine data
+      return entries.map(processContentfulMachine);
+    } catch (error) {
+      console.error('Error fetching machines from Contentful:', error);
+      return [];
+    }
   },
   
   /**
@@ -77,9 +109,29 @@ export const contentfulMachineAdapter: MachineAdapter = {
   getBySlug: async (slug: string) => {
     console.log(`Fetching machine with slug: ${slug} from Contentful`);
     
-    // Implementation would query the Contentful API here
-    // For now, we return null to indicate "not found"
-    return Promise.resolve(null);
+    try {
+      // Check if Contentful is configured
+      if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
+        console.error('Contentful not properly configured. Check environment variables.');
+        return null;
+      }
+      
+      // Fetch machines with the specified slug
+      const entries = await fetchContentfulEntries('machine', {
+        'fields.slug': slug
+      });
+      
+      if (entries.length === 0) {
+        console.log(`No machine found with slug: ${slug}`);
+        return null;
+      }
+      
+      // Process and return the first matching machine
+      return processContentfulMachine(entries[0]);
+    } catch (error) {
+      console.error(`Error fetching machine with slug ${slug} from Contentful:`, error);
+      return null;
+    }
   },
   
   /**
@@ -88,9 +140,27 @@ export const contentfulMachineAdapter: MachineAdapter = {
   getById: async (id: string) => {
     console.log(`Fetching machine with ID: ${id} from Contentful`);
     
-    // Implementation would query the Contentful API here
-    // For now, we return null to indicate "not found"
-    return Promise.resolve(null);
+    try {
+      // Check if Contentful is configured
+      if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
+        console.error('Contentful not properly configured. Check environment variables.');
+        return null;
+      }
+      
+      // Fetch the machine with the specified ID
+      const entry = await fetchContentfulEntry(id);
+      
+      if (!entry) {
+        console.log(`No machine found with ID: ${id}`);
+        return null;
+      }
+      
+      // Process and return the machine
+      return processContentfulMachine(entry);
+    } catch (error) {
+      console.error(`Error fetching machine with ID ${id} from Contentful:`, error);
+      return null;
+    }
   },
   
   // Use the deprecated write operation factory for write operations

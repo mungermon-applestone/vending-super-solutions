@@ -1,3 +1,4 @@
+
 /**
  * Adapter Compatibility Utilities
  *
@@ -6,7 +7,7 @@
  * to a standardized ContentTypeOperations interface.
  */
 
-import { trackDeprecatedUsage, logDeprecation, throwDeprecatedOperationError, createDeprecatedWriteOperation } from './deprecation';
+import { trackDeprecatedUsage, logDeprecation, throwDeprecatedOperationError } from './deprecation';
 import { ContentTypeOperations } from '../contentTypes/types';
 
 /**
