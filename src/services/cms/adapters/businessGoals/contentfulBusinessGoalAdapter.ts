@@ -13,7 +13,7 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
    */
   getAll: async (filters = {}): Promise<CMSBusinessGoal[]> => {
     try {
-      const client = getContentfulClient();
+      const client = await getContentfulClient();
       const query: any = {
         content_type: 'businessGoal',
         order: 'fields.title',
@@ -49,7 +49,7 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
    */
   getBySlug: async (slug: string): Promise<CMSBusinessGoal | null> => {
     try {
-      const client = getContentfulClient();
+      const client = await getContentfulClient();
       const response = await client.getEntries({
         content_type: 'businessGoal',
         'fields.slug': slug,
@@ -80,7 +80,7 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
    */
   getById: async (id: string): Promise<CMSBusinessGoal | null> => {
     try {
-      const client = getContentfulClient();
+      const client = await getContentfulClient();
       const response = await client.getEntry(id);
       
       return {

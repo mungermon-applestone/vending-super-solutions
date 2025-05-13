@@ -2,17 +2,22 @@
 import { createReadOnlyContentTypeAdapter } from '../../adapters/contentTypeAdapterFactory';
 import { contentfulMachineAdapter } from '../../adapters/machines/contentfulMachineAdapter';
 import { CMSMachine } from '@/types/cms';
+import { ContentTypeOperations } from '@/services/cms/contentTypes/types';
+import { createReadOnlyContentTypeOperations } from '@/services/cms/utils/deprecation';
 
 /**
  * Machine content type operations
  * Read-only adapter for machine content type
  */
-export const machineOperations = createReadOnlyContentTypeAdapter<CMSMachine>({
-  contentType: 'machine',
-  entityName: 'machine',
-  adapter: contentfulMachineAdapter,
-  adapterName: 'contentful'
-});
+export const machineOperations: ContentTypeOperations<CMSMachine> = createReadOnlyContentTypeOperations(
+  'machine',
+  'machine',
+  {
+    getAll: contentfulMachineAdapter.getAll,
+    getBySlug: contentfulMachineAdapter.getBySlug,
+    getById: contentfulMachineAdapter.getById
+  }
+);
 
 /**
  * Fetch machines with optional filters

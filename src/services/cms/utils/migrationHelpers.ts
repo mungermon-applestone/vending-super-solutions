@@ -1,108 +1,154 @@
+
 /**
- * CMS Migration Helper Utilities
+ * Migration helpers and utilities
  * 
- * This module provides helper functions for migrating from legacy CMS
- * systems to Contentful, including data transformation and URL generation.
+ * This file provides tools for tracking and reporting on the CMS migration
+ * status from legacy systems to Contentful.
  */
-
-import { logDeprecation } from './deprecation';
 
 /**
- * Get the Contentful edit URL for a content type
+ * Content type migration status
  */
-export function getContentfulEditUrl(
-  contentType?: string, 
-  contentId?: string,
-  spaceId: string = process.env.CONTENTFUL_SPACE_ID || '',
-  environmentId: string = process.env.CONTENTFUL_ENVIRONMENT_ID || 'master'
-): string {
-  // Log usage of this helper
-  logDeprecation(
-    'getContentfulEditUrl',
-    `Generated Contentful URL for ${contentType || 'Unknown'} ${contentId ? ` (${contentId})` : ''}`,
-    'direct Contentful access'
-  );
-  
-  // Base Contentful URL
-  const baseUrl = 'https://app.contentful.com';
-  
-  // Handle missing space ID
-  if (!spaceId) {
-    return `${baseUrl}/spaces`;
-  }
-  
-  // If no content type, return the space home
-  if (!contentType) {
-    return `${baseUrl}/spaces/${spaceId}/home`;
-  }
-  
-  // If we have a content ID, build a direct edit URL
-  if (contentId) {
-    return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}/entries/${contentId}`;
-  }
-  
-  // Otherwise, return the content type listing URL
-  return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}/entries?contentTypeId=${contentType}`;
+export type MigrationStatus = 'completed' | 'in-progress' | 'pending';
+
+/**
+ * Content type migration information
+ */
+export interface ContentTypeMigrationInfo {
+  name: string;
+  status: MigrationStatus;
+  progress: number; // 0-100
+  contentfulType: string;
 }
 
 /**
- * Generate a migration report to show progress towards full Contentful migration
- * This is used by various admin components to display migration status
+ * Migration statistics
  */
-export function generateMigrationReport() {
-  // This could eventually pull from a database or API to show real migration status
+export interface MigrationStats {
+  completed: number;
+  inProgress: number;
+  pending: number;
+  total: number;
+}
+
+/**
+ * Migration report
+ */
+export interface MigrationReport {
+  stats: MigrationStats;
+  contentTypes: ContentTypeMigrationInfo[];
+  completionPercentage: number;
+  lastUpdated: Date;
+}
+
+/**
+ * Define the migration status for all content types
+ */
+const CONTENT_TYPE_MIGRATION_STATUS: ContentTypeMigrationInfo[] = [
+  {
+    name: 'Business Goals',
+    status: 'completed',
+    progress: 100,
+    contentfulType: 'businessGoal'
+  },
+  {
+    name: 'Product Types',
+    status: 'completed',
+    progress: 100,
+    contentfulType: 'productType'
+  },
+  {
+    name: 'Technologies',
+    status: 'completed',
+    progress: 100,
+    contentfulType: 'technology'
+  },
+  {
+    name: 'Machines',
+    status: 'completed',
+    progress: 100,
+    contentfulType: 'machine'
+  },
+  {
+    name: 'Case Studies',
+    status: 'completed',
+    progress: 100,
+    contentfulType: 'caseStudy'
+  },
+  {
+    name: 'Landing Pages',
+    status: 'completed',
+    progress: 100,
+    contentfulType: 'landingPage'
+  },
+  {
+    name: 'Blog Posts',
+    status: 'completed',
+    progress: 100,
+    contentfulType: 'blogPost'
+  },
+  {
+    name: 'Testimonials',
+    status: 'completed',
+    progress: 100,
+    contentfulType: 'testimonial'
+  },
+];
+
+/**
+ * Generate a migration report
+ * 
+ * @returns A report of migration progress
+ */
+export function generateMigrationReport(): MigrationReport {
+  // Count content types by status
+  const completed = CONTENT_TYPE_MIGRATION_STATUS.filter(ct => ct.status === 'completed').length;
+  const inProgress = CONTENT_TYPE_MIGRATION_STATUS.filter(ct => ct.status === 'in-progress').length;
+  const pending = CONTENT_TYPE_MIGRATION_STATUS.filter(ct => ct.status === 'pending').length;
+  const total = CONTENT_TYPE_MIGRATION_STATUS.length;
+  
+  // Calculate overall completion percentage
+  const completionPercentage = Math.round(
+    (completed * 100 + 
+     inProgress * CONTENT_TYPE_MIGRATION_STATUS.filter(ct => ct.status === 'in-progress')
+       .reduce((sum, ct) => sum + ct.progress, 0) / inProgress || 0) / 
+    total
+  );
+  
   return {
-    completionPercentage: 75,
     stats: {
-      completed: 6,
-      inProgress: 1,
-      pending: 1
+      completed,
+      inProgress,
+      pending,
+      total
     },
-    contentTypes: [
-      { name: "Products", status: "completed" },
-      { name: "Business Goals", status: "completed" },
-      { name: "Technologies", status: "completed" },
-      { name: "Machines", status: "in-progress" },
-      { name: "Case Studies", status: "completed" },
-      { name: "Landing Pages", status: "completed" },
-      { name: "Testimonials", status: "completed" },
-      { name: "Media Library", status: "pending" }
-    ]
+    contentTypes: CONTENT_TYPE_MIGRATION_STATUS,
+    completionPercentage,
+    lastUpdated: new Date()
   };
 }
 
 /**
- * Helper for ensuring backward compatibility with Strapi data structures
- * when migrating to Contentful
+ * Get migration status for a specific content type
+ * 
+ * @param contentType The name of the content type
+ * @returns Migration info or null if not found
  */
-export function normalizeDeprecatedCmsData<T extends Record<string, any>>(
-  data: any, 
-  contentType: string
-): T {
-  if (!data) return null as unknown as T;
-  
-  // Log the normalization
-  logDeprecation(
-    'normalizeDeprecatedCmsData',
-    `Normalizing deprecated ${contentType} data structure`,
-    'Contentful data structure directly'
+export function getContentTypeMigrationStatus(contentType: string): ContentTypeMigrationInfo | null {
+  const found = CONTENT_TYPE_MIGRATION_STATUS.find(
+    ct => ct.name.toLowerCase() === contentType.toLowerCase()
   );
   
-  // Handle common normalizations here based on content type
-  // This is a simplified example - in a real scenario, you'd have
-  // type-specific transformations
-  
-  return data as T;
+  return found || null;
 }
 
 /**
- * Create a utility for checking if Strapi-style data needs migration
+ * Check if a content type migration is complete
+ * 
+ * @param contentType The name of the content type
+ * @returns True if migration is complete
  */
-export function requiresMigration(data: any): boolean {
-  // Check for common Strapi data structures
-  if (data && data.attributes && data.id) {
-    return true;
-  }
-  
-  return false;
+export function isContentTypeMigrationComplete(contentType: string): boolean {
+  const status = getContentTypeMigrationStatus(contentType);
+  return status?.status === 'completed';
 }

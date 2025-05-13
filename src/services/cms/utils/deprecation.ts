@@ -1,223 +1,240 @@
-import { toast } from '@/hooks/use-toast';
 
-// Data types for tracking deprecation usage
+import { toast } from 'sonner';
+
+// Define the deprecation statistics type
 export interface DeprecationStat {
-  component: string;
+  feature: string;
   message: string;
-  timestamp: number;
+  alternative: string;  // Added to fix TS error
   count: number;
-  // For backwards compatibility with existing code
-  feature?: string;
-  lastUsed?: number;
-  alternative?: string;
+  lastUsed: Date;
 }
 
-// Singleton to track deprecations
-const deprecationStats: DeprecationStat[] = [];
+/**
+ * Tracking of deprecated feature usage
+ */
+const DEPRECATION_STATS: Record<string, DeprecationStat> = {};
 
 /**
- * Log deprecation warning and track usage statistics
+ * Log a deprecation warning to the console
+ * @param feature The deprecated feature name
+ * @param message The deprecation message
+ * @param alternativeMethod The recommended alternative
  */
-export const logDeprecation = (component: string, message: string, suggestion?: string) => {
-  const fullMessage = suggestion ? `${message} ${suggestion}` : message;
-  console.warn(`⚠️ DEPRECATED ${component}: ${fullMessage}`);
+export const logDeprecationWarning = (
+  feature: string,
+  message: string,
+  alternativeMethod: string = ""
+): void => {
+  console.warn(`⚠️ DEPRECATION WARNING: ${feature} is deprecated. ${message}`);
   
-  // Record deprecation for tracking
-  const existing = deprecationStats.find(
-    (stat) => stat.component === component && stat.message === message
-  );
-  
-  if (existing) {
-    existing.count += 1;
-    existing.timestamp = Date.now();
-    // Update legacy properties for backward compatibility
-    existing.lastUsed = Date.now();
-    if (suggestion) {
-      existing.alternative = suggestion;
-    }
-  } else {
-    deprecationStats.push({
-      component,
-      message,
-      timestamp: Date.now(),
-      count: 1,
-      // Legacy properties for backward compatibility
-      feature: component,
-      lastUsed: Date.now(),
-      alternative: suggestion
-    });
+  if (alternativeMethod) {
+    console.warn(`💡 RECOMMENDED: ${alternativeMethod}`);
   }
-
-  return fullMessage;
-};
-
-/**
- * Simple warning logger for deprecated interfaces
- */
-export const logDeprecationWarning = (component: string, message: string, suggestion?: string) => {
-  return logDeprecation(component, message, suggestion);
-};
-
-/**
- * Show toast notification for deprecation warning
- */
-export const showDeprecationToast = (title: string, description: string = "This operation is deprecated and will be removed in a future version. Please use Contentful for content management.") => {
-  // Log the deprecation first
-  logDeprecation('DeprecationToast', `${title}: ${description}`);
   
-  // Show the toast notification
-  toast({
-    title,
-    description,
-    variant: "destructive",
+  // Track this usage
+  trackDeprecatedFeatureUsage(feature, message, alternativeMethod);
+};
+
+/**
+ * Alias for logDeprecationWarning
+ */
+export const logDeprecation = logDeprecationWarning;
+
+/**
+ * Show a deprecation toast notification to the user
+ */
+export const showDeprecationToast = (
+  feature: string,
+  message: string,
+  alternativeMethod: string = ""
+): void => {
+  // Log to console as well
+  logDeprecationWarning(feature, message, alternativeMethod);
+  
+  // Show toast notification
+  toast.warning(`${feature} is deprecated`, {
+    description: message,
+    duration: 5000,
   });
 };
 
 /**
- * Throw an error for completely deprecated operations
+ * Track usage of a deprecated feature
  */
-export const throwDeprecatedOperationError = (operation: string, contentType: string) => {
-  const message = `${operation} is no longer supported for ${contentType}. Please use Contentful directly.`;
-  logDeprecation('DeprecatedOperation', message);
-  throw new Error(message);
+export const trackDeprecatedFeatureUsage = (
+  feature: string,
+  message: string,
+  alternative: string = ""
+): void => {
+  if (!DEPRECATION_STATS[feature]) {
+    DEPRECATION_STATS[feature] = {
+      feature,
+      message,
+      alternative,
+      count: 0,
+      lastUsed: new Date(),
+    };
+  }
+  
+  DEPRECATION_STATS[feature].count++;
+  DEPRECATION_STATS[feature].lastUsed = new Date();
 };
 
 /**
- * Get current deprecation stats for analysis
+ * Alias for backward compatibility
+ */
+export const trackDeprecatedUsage = trackDeprecatedFeatureUsage;
+
+/**
+ * Get all tracked deprecation statistics
  */
 export const getDeprecationStats = (): DeprecationStat[] => {
-  return [...deprecationStats];
+  return Object.values(DEPRECATION_STATS).sort((a, b) => 
+    b.count - a.count || b.lastUsed.getTime() - a.lastUsed.getTime()
+  );
 };
 
 /**
- * Alias for getDeprecationStats - for backward compatibility
+ * Alias for backward compatibility
  */
-export const getDeprecationUsageStats = getDeprecationStats;
+export const getDeprecatedUsage = getDeprecationStats;
 
 /**
- * Track usage of deprecated features
+ * Reset the deprecation tracking statistics
  */
-export const trackDeprecatedFeatureUsage = (feature: string, details: string) => {
-  logDeprecation(feature, details);
+export const resetDeprecationTracker = (): void => {
+  Object.keys(DEPRECATION_STATS).forEach(key => {
+    delete DEPRECATION_STATS[key];
+  });
 };
 
 /**
- * Track usage of deprecated code
+ * Throw a consistent error for deprecated operations
  */
-export const trackDeprecatedUsage = (component: string) => {
-  logDeprecation(component, 'Usage of deprecated component/function');
+export const throwDeprecatedOperationError = (
+  operation: string,
+  entityType: string
+): never => {
+  throw new Error(
+    `Operation '${operation}' on ${entityType} is deprecated and no longer supported. ` +
+    `Please use Contentful directly for content management.`
+  );
 };
 
 /**
- * Get usage data for deprecated features
+ * Create a read-only adapter from a full adapter
+ * This maintains read operations but prevents write operations
+ * @param adapter The full adapter with read and write operations
+ * @param entityType The type of entity for error messages
  */
-export const getDeprecatedUsage = () => {
-  return [...deprecationStats];
+export const createReadOnlyAdapter = <T>(
+  adapter: any,
+  entityType: string
+): T => {
+  const readOnlyAdapter = { ...adapter };
+  
+  // Replace write operations with functions that throw errors
+  if (adapter.create) {
+    readOnlyAdapter.create = () => throwDeprecatedOperationError('create', entityType);
+  }
+  
+  if (adapter.update) {
+    readOnlyAdapter.update = () => throwDeprecatedOperationError('update', entityType);
+  }
+  
+  if (adapter.delete) {
+    readOnlyAdapter.delete = () => throwDeprecatedOperationError('delete', entityType);
+  }
+  
+  if (adapter.clone) {
+    readOnlyAdapter.clone = () => throwDeprecatedOperationError('clone', entityType);
+  }
+  
+  return readOnlyAdapter as T;
 };
 
 /**
- * Reset the deprecation tracker
- */
-export const resetDeprecationTracker = () => {
-  deprecationStats.length = 0;
-};
-
-/**
- * Legacy function for compatibility
- */
-export const resetUsageStats = resetDeprecationTracker;
-
-/**
- * Get Contentful redirect URL for a content type and optional ID
- * Updated to have fewer required parameters
+ * Get a URL for editing content in Contentful
  */
 export const getContentfulRedirectUrl = (
-  contentType?: string | null, 
-  contentId?: string | null,
-  spaceId: string = process.env.CONTENTFUL_SPACE_ID || '',
-  environmentId: string = process.env.CONTENTFUL_ENVIRONMENT_ID || 'master'
+  contentType: string,
+  contentId?: string
 ): string => {
   // Base Contentful URL
-  const baseUrl = 'https://app.contentful.com';
+  const baseUrl = 'https://app.contentful.com/';
   
-  // If no space ID, return the base space selection URL
-  if (!spaceId) {
-    return `${baseUrl}/spaces`;
-  }
+  // Get the space ID from environment if available
+  const spaceId = typeof window !== 'undefined' && window.env?.VITE_CONTENTFUL_SPACE_ID 
+    ? window.env.VITE_CONTENTFUL_SPACE_ID 
+    : process.env.VITE_CONTENTFUL_SPACE_ID || 'al01e4yh2wq4';
   
-  // If no content type, return the space home
-  if (!contentType) {
-    return `${baseUrl}/spaces/${spaceId}/home`;
-  }
+  // Get the environment ID (default to master)
+  const environmentId = typeof window !== 'undefined' && window.env?.VITE_CONTENTFUL_ENVIRONMENT_ID
+    ? window.env.VITE_CONTENTFUL_ENVIRONMENT_ID
+    : process.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
   
-  // If we have a content ID, build an edit URL
+  // Build the URL based on whether we have a specific content ID
   if (contentId) {
-    return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}/entries/${contentId}`;
+    return `${baseUrl}spaces/${spaceId}/environments/${environmentId}/entries/${contentId}`;
   }
   
-  // Otherwise, return the content type listing URL
-  return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}/entries?contentTypeId=${contentType}`;
+  // Return URL to the content type
+  return `${baseUrl}spaces/${spaceId}/environments/${environmentId}/entries?contentTypeId=${contentType}`;
 };
 
 /**
- * Create a function that throws an error for deprecated write operations
- */
-export const createDeprecatedWriteOperation = (operation: string, entityType: string) => {
-  return (...args: any[]) => {
-    throwDeprecatedOperationError(operation, entityType);
-    return Promise.reject(new Error(`${operation} is not supported for ${entityType}`));
-  };
-};
-
-/**
- * Create a read-only adapter from a source adapter by replacing write operations with error-throwing functions
- */
-export function createReadOnlyAdapter<T extends Record<string, any>>(
-  entityType: string,
-  readOperations: Partial<T>,
-  writeOperationNames: string[] = ['create', 'update', 'delete', 'clone']
-): T {
-  const adapter = { ...readOperations } as T;
-  
-  // Replace all write operations with error-throwing functions
-  for (const operation of writeOperationNames) {
-    if (!(operation in adapter)) {
-      Object.defineProperty(adapter, operation, {
-        value: createDeprecatedWriteOperation(operation, entityType),
-        configurable: true,
-        enumerable: true
-      });
-    }
-  }
-  
-  // Track usage
-  trackDeprecatedUsage(`ReadOnlyAdapter-${entityType}`);
-  
-  return adapter;
-}
-
-/**
- * Create read-only content type operations
+ * Create ContentTypeOperations compatible with previous operations
  */
 export function createReadOnlyContentTypeOperations<T>(
   contentType: string,
   entityName: string,
-  baseAdapter: Record<string, any>
-) {
-  // Track usage of this function for deprecation monitoring
-  trackDeprecatedUsage(`ReadOnlyContentTypeOps-${contentType}`);
-  
-  // Return an object with compatible operations
+  adapter: any
+): any {
   return {
-    // Read operations - pass through to the base adapter
-    fetchAll: baseAdapter.getAll || (async () => []),
-    fetchBySlug: baseAdapter.getBySlug || (async () => null),
-    fetchById: baseAdapter.getById || (async () => null),
+    // Base operations
+    contentType,
     
-    // Write operations - these will throw appropriate errors
-    create: createDeprecatedWriteOperation('create', entityName),
-    update: createDeprecatedWriteOperation('update', entityName),
-    delete: createDeprecatedWriteOperation('delete', entityName),
-    clone: createDeprecatedWriteOperation('clone', entityName)
+    // Read operations
+    fetchAll: (filters = {}) => adapter.getAll(filters),
+    fetchBySlug: (slug: string) => adapter.getBySlug(slug),
+    fetchById: (id: string) => adapter.getById(id),
+    
+    // Write operations (all deprecated)
+    create: () => {
+      logDeprecation(
+        `${contentType}.create`,
+        `Creating ${entityName} is deprecated`,
+        'Contentful web interface directly'
+      );
+      throwDeprecatedOperationError('create', entityName);
+    },
+    
+    update: () => {
+      logDeprecation(
+        `${contentType}.update`,
+        `Updating ${entityName} is deprecated`,
+        'Contentful web interface directly'
+      );
+      throwDeprecatedOperationError('update', entityName);
+    },
+    
+    delete: () => {
+      logDeprecation(
+        `${contentType}.delete`,
+        `Deleting ${entityName} is deprecated`,
+        'Contentful web interface directly'
+      );
+      throwDeprecatedOperationError('delete', entityName);
+    },
+    
+    clone: () => {
+      logDeprecation(
+        `${contentType}.clone`,
+        `Cloning ${entityName} is deprecated`,
+        'Contentful web interface directly'
+      );
+      throwDeprecatedOperationError('clone', entityName);
+    }
   };
 }
