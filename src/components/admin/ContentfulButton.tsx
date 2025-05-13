@@ -96,3 +96,4 @@ const ContentfulButton: React.FC<ContentfulButtonProps> = ({
 };
 
 export default ContentfulButton;
+

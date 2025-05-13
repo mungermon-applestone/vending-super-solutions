@@ -152,3 +152,28 @@ export function isContentTypeMigrationComplete(contentType: string): boolean {
   const status = getContentTypeMigrationStatus(contentType);
   return status?.status === 'completed';
 }
+
+/**
+ * Get URL for editing content in Contentful
+ * 
+ * @param contentType The content type ID
+ * @param contentId Optional specific content entry ID
+ * @returns URL to Contentful editor
+ */
+export function getContentfulEditUrl(contentType: string, contentId?: string): string {
+  // Get environment variables for Contentful
+  const spaceId = process.env.VITE_CONTENTFUL_SPACE_ID || 'al01e4yh2wq4';
+  const environmentId = process.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+  
+  // Base Contentful URL
+  const baseUrl = 'https://app.contentful.com/';
+  
+  // Build URL based on whether we have a content ID
+  if (contentId) {
+    return `${baseUrl}spaces/${spaceId}/environments/${environmentId}/entries/${contentId}`;
+  }
+  
+  // Return URL to content type listing
+  return `${baseUrl}spaces/${spaceId}/environments/${environmentId}/entries?contentTypeId=${contentType}`;
+}
+

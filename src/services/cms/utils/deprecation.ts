@@ -3,11 +3,13 @@ import { toast } from 'sonner';
 
 // Define the deprecation statistics type
 export interface DeprecationStat {
-  feature: string;
+  feature?: string;
+  component?: string; // Added to support component property references
   message: string;
-  alternative: string;  // Added to fix TS error
+  alternative: string;
   count: number;
-  lastUsed: Date;
+  lastUsed?: Date;
+  timestamp?: Date; // Added to support timestamp property references
 }
 
 /**
@@ -70,15 +72,18 @@ export const trackDeprecatedFeatureUsage = (
   if (!DEPRECATION_STATS[feature]) {
     DEPRECATION_STATS[feature] = {
       feature,
+      component: feature, // Add component as alias for feature
       message,
       alternative,
       count: 0,
       lastUsed: new Date(),
+      timestamp: new Date(), // Add timestamp as alias for lastUsed
     };
   }
   
   DEPRECATION_STATS[feature].count++;
   DEPRECATION_STATS[feature].lastUsed = new Date();
+  DEPRECATION_STATS[feature].timestamp = new Date(); // Keep timestamp in sync
 };
 
 /**
@@ -91,7 +96,7 @@ export const trackDeprecatedUsage = trackDeprecatedFeatureUsage;
  */
 export const getDeprecationStats = (): DeprecationStat[] => {
   return Object.values(DEPRECATION_STATS).sort((a, b) => 
-    b.count - a.count || b.lastUsed.getTime() - a.lastUsed.getTime()
+    b.count - a.count || (b.lastUsed?.getTime() || 0) - (a.lastUsed?.getTime() || 0)
   );
 };
 
@@ -120,6 +125,25 @@ export const throwDeprecatedOperationError = (
     `Operation '${operation}' on ${entityType} is deprecated and no longer supported. ` +
     `Please use Contentful directly for content management.`
   );
+};
+
+/**
+ * Create a function that throws a deprecation error when called
+ * Used to replace write operations in read-only adapters
+ */
+export const createDeprecatedWriteOperation = (
+  operation: string,
+  entityType: string
+) => {
+  return () => {
+    logDeprecation(
+      `${entityType}.${operation}`,
+      `The ${operation} operation on ${entityType} is deprecated`,
+      'Use Contentful directly for content management'
+    );
+    
+    return throwDeprecatedOperationError(operation, entityType);
+  };
 };
 
 /**
@@ -158,30 +182,43 @@ export const createReadOnlyAdapter = <T>(
  * Get a URL for editing content in Contentful
  */
 export const getContentfulRedirectUrl = (
-  contentType: string,
-  contentId?: string
+  contentType?: string,
+  contentId?: string,
+  spaceId?: string,
+  environmentId?: string
 ): string => {
   // Base Contentful URL
   const baseUrl = 'https://app.contentful.com/';
   
   // Get the space ID from environment if available
-  const spaceId = typeof window !== 'undefined' && window.env?.VITE_CONTENTFUL_SPACE_ID 
+  const finalSpaceId = spaceId || (typeof window !== 'undefined' && window.env?.VITE_CONTENTFUL_SPACE_ID 
     ? window.env.VITE_CONTENTFUL_SPACE_ID 
-    : process.env.VITE_CONTENTFUL_SPACE_ID || 'al01e4yh2wq4';
+    : process.env.VITE_CONTENTFUL_SPACE_ID || 'al01e4yh2wq4');
   
   // Get the environment ID (default to master)
-  const environmentId = typeof window !== 'undefined' && window.env?.VITE_CONTENTFUL_ENVIRONMENT_ID
+  const finalEnvironmentId = environmentId || (typeof window !== 'undefined' && window.env?.VITE_CONTENTFUL_ENVIRONMENT_ID
     ? window.env.VITE_CONTENTFUL_ENVIRONMENT_ID
-    : process.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+    : process.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master');
   
   // Build the URL based on whether we have a specific content ID
   if (contentId) {
-    return `${baseUrl}spaces/${spaceId}/environments/${environmentId}/entries/${contentId}`;
+    return `${baseUrl}spaces/${finalSpaceId}/environments/${finalEnvironmentId}/entries/${contentId}`;
   }
   
-  // Return URL to the content type
-  return `${baseUrl}spaces/${spaceId}/environments/${environmentId}/entries?contentTypeId=${contentType}`;
+  // If contentType is provided, return URL to the content type listing
+  if (contentType) {
+    return `${baseUrl}spaces/${finalSpaceId}/environments/${finalEnvironmentId}/entries?contentTypeId=${contentType}`;
+  }
+  
+  // Default to space overview
+  return `${baseUrl}spaces/${finalSpaceId}/environments/${finalEnvironmentId}`;
 };
+
+/**
+ * Get URL for editing a specific content in Contentful
+ * This is an alias for getContentfulRedirectUrl for backward compatibility
+ */
+export const getContentfulEditUrl = getContentfulRedirectUrl;
 
 /**
  * Create ContentTypeOperations compatible with previous operations
@@ -201,40 +238,10 @@ export function createReadOnlyContentTypeOperations<T>(
     fetchById: (id: string) => adapter.getById(id),
     
     // Write operations (all deprecated)
-    create: () => {
-      logDeprecation(
-        `${contentType}.create`,
-        `Creating ${entityName} is deprecated`,
-        'Contentful web interface directly'
-      );
-      throwDeprecatedOperationError('create', entityName);
-    },
-    
-    update: () => {
-      logDeprecation(
-        `${contentType}.update`,
-        `Updating ${entityName} is deprecated`,
-        'Contentful web interface directly'
-      );
-      throwDeprecatedOperationError('update', entityName);
-    },
-    
-    delete: () => {
-      logDeprecation(
-        `${contentType}.delete`,
-        `Deleting ${entityName} is deprecated`,
-        'Contentful web interface directly'
-      );
-      throwDeprecatedOperationError('delete', entityName);
-    },
-    
-    clone: () => {
-      logDeprecation(
-        `${contentType}.clone`,
-        `Cloning ${entityName} is deprecated`,
-        'Contentful web interface directly'
-      );
-      throwDeprecatedOperationError('clone', entityName);
-    }
+    create: createDeprecatedWriteOperation('create', entityName),
+    update: createDeprecatedWriteOperation('update', entityName),
+    delete: createDeprecatedWriteOperation('delete', entityName),
+    clone: createDeprecatedWriteOperation('clone', entityName)
   };
 }
+

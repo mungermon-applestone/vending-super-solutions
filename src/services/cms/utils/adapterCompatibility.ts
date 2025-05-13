@@ -7,9 +7,22 @@
  * to a standardized ContentTypeOperations interface.
  */
 
-import { trackDeprecatedUsage } from './deprecationLogger';
+import { trackDeprecatedUsage, logDeprecation, throwDeprecatedOperationError } from './deprecationLogger';
 import { ContentTypeOperations } from '../contentTypes/types';
-import { createDeprecatedWriteOperation } from './deprecation';
+
+/**
+ * Helper function to create a deprecated write operation
+ */
+const createDeprecatedWriteOperation = (operation: string, entityType: string) => {
+  return () => {
+    logDeprecation(
+      `${entityType}.${operation}`,
+      `The ${operation} operation on ${entityType} is deprecated`,
+      'Use Contentful directly for content management'
+    );
+    return throwDeprecatedOperationError(operation, entityType);
+  };
+};
 
 /**
  * Makes any adapter follow the ContentTypeOperations interface naming convention
@@ -70,7 +83,7 @@ export function makeContentTypeOperationsCompatible<T extends Record<string, any
   } as ContentTypeOperations<EntityType>;
   
   // Track usage of the compatibility layer
-  trackDeprecatedUsage(`CompatibilityAdapter-${entityType}`);
+  trackDeprecatedUsage(`CompatibilityAdapter-${entityType}`, `Using compatibility adapter for ${entityType}`);
   
   return result;
 }
@@ -124,7 +137,8 @@ export function createStandardizedAdapter<T extends Record<string, any>, EntityT
     : standardAdapter as ContentTypeOperations<EntityType>;
   
   // Track usage
-  trackDeprecatedUsage(`StandardizedAdapter-${entityType}`);
+  trackDeprecatedUsage(`StandardizedAdapter-${entityType}`, `Using standardized adapter for ${entityType}`);
   
   return result;
 }
+

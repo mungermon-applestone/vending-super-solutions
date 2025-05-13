@@ -10,7 +10,7 @@
 import { productTypeOperations } from './contentTypes/productTypes';
 import { businessGoalOperations } from './contentTypes/businessGoals';
 import { technologyOperations } from './contentTypes/technologies';
-import { machineOperations } from './contentTypes/machines';
+import { machineOperations } from './contentTypes/machines/index';
 import { caseStudyOperations } from './contentTypes/caseStudies';
 import { landingPageOperations } from './contentTypes/landingPages/operations';
 
@@ -87,3 +87,4 @@ export { initCMS, refreshCmsConnection } from './cmsInit';
 
 // Export combined adapter
 export { getCombinedAdapter } from './adapters';
+
