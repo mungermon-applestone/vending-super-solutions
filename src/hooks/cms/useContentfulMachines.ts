@@ -2,20 +2,24 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { CMSMachine } from '@/types/cms';
-import { ContentfulEntry } from '@/types/contentful/machine';
-import { transformContentfulEntry } from '@/utils/cms/transformers/machineTransformer';
+import { transformMachineFromContentful } from '@/utils/cms/transformers/machineTransformer';
 import { fallbackMachineData } from '@/data/fallbacks/machineFallbacks';
 import { toast } from 'sonner';
 
 /**
+ * Type for raw Contentful entry before transformation
+ */
+interface ContentfulRawEntry {
+  sys: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  fields: Record<string, any>;
+}
+
+/**
  * Hook for fetching Contentful machines
- * 
- * @remarks
- * !!!!! CRITICAL PATH - DO NOT MODIFY WITHOUT EXTENSIVE TESTING !!!!!
- * Core requirements:
- * - Fetch all machines
- * - Provide fallback in preview/error scenarios
- * - Consistent error logging
  */
 export function useContentfulMachines() {
   return useQuery({
@@ -23,10 +27,10 @@ export function useContentfulMachines() {
     queryFn: async () => {
       console.log('[useContentfulMachines] Fetching all machines');
       try {
-        const entries = await fetchContentfulEntries<ContentfulEntry>('machine');
-        console.log('[useContentfulMachines] Fetched entries:', entries);
+        const response = await fetchContentfulEntries('machine');
+        console.log('[useContentfulMachines] Fetched entries:', response);
         
-        if (!entries || entries.length === 0) {
+        if (!response || response.length === 0) {
           console.log('[useContentfulMachines] No machines found in Contentful');
           
           if (window.location.hostname.includes('lovable')) {
@@ -38,7 +42,16 @@ export function useContentfulMachines() {
           return [];
         }
         
-        const machines = entries.map(transformContentfulEntry);
+        // Transform each machine entry
+        const machines = response.map(entry => {
+          try {
+            return transformMachineFromContentful(entry as any);
+          } catch (transformError) {
+            console.error('[useContentfulMachines] Error transforming machine:', transformError);
+            return null;
+          }
+        }).filter(Boolean) as CMSMachine[];
+        
         console.log('[useContentfulMachines] Transformed machines:', machines);
         return machines;
         
@@ -61,13 +74,6 @@ export function useContentfulMachines() {
 
 /**
  * Hook for fetching a single Contentful machine
- * 
- * @remarks
- * !!!!! CRITICAL PATH - DO NOT MODIFY WITHOUT EXTENSIVE TESTING !!!!!
- * Core requirements:
- * - Fetch machine by ID or slug
- * - Handle special cases (e.g., divi-wp)
- * - Provide fallback in preview/error scenarios
  */
 export function useContentfulMachine(idOrSlug: string | undefined) {
   return useQuery({
@@ -86,10 +92,9 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
           console.log('[useContentfulMachine] Special case: directly fetching divi-wp with ID: 1omUbnEhB6OeBFpwPFj1Ww');
           
           try {
-            const entry = await fetchContentfulEntry<ContentfulEntry>('1omUbnEhB6OeBFpwPFj1Ww');
+            const entry = await fetchContentfulEntry('1omUbnEhB6OeBFpwPFj1Ww');
             if (entry) {
-              console.log('[useContentfulMachine] Successfully fetched divi-wp entry by ID:', entry);
-              return transformContentfulEntry(entry);
+              return transformMachineFromContentful(entry as any);
             }
           } catch (diviError) {
             console.error('[useContentfulMachine] Error fetching divi-wp by ID:', diviError);
@@ -106,10 +111,9 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         if (idOrSlug.length > 10) {
           try {
             console.log('[useContentfulMachine] Trying direct ID fetch:', idOrSlug);
-            const entry = await fetchContentfulEntry<ContentfulEntry>(idOrSlug);
+            const entry = await fetchContentfulEntry(idOrSlug);
             if (entry) {
-              console.log('[useContentfulMachine] Successfully fetched by ID:', entry);
-              return transformContentfulEntry(entry);
+              return transformMachineFromContentful(entry as any);
             }
           } catch (idError) {
             console.log('[useContentfulMachine] Could not fetch by ID:', idError);
@@ -118,7 +122,7 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         
         // Then try by slug
         console.log('[useContentfulMachine] Fetching by slug field:', idOrSlug);
-        const entries = await fetchContentfulEntries<ContentfulEntry>('machine', {
+        const entries = await fetchContentfulEntries('machine', {
           'fields.slug': idOrSlug
         });
         
@@ -133,8 +137,7 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
           return null;
         }
         
-        console.log('[useContentfulMachine] Found machine by slug:', entries[0]);
-        return transformContentfulEntry(entries[0]);
+        return transformMachineFromContentful(entries[0] as any);
         
       } catch (error) {
         console.error(`[useContentfulMachine] Error:`, error);

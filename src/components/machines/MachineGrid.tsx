@@ -1,9 +1,10 @@
 
 import React from 'react';
 import MachineCard from './MachineCard';
+import { CMSMachine } from '@/types/cms';
 
 interface MachineGridProps {
-  machines: any[];
+  machines: CMSMachine[];
   title: string;
 }
 
@@ -14,9 +15,11 @@ const MachineGrid: React.FC<MachineGridProps> = ({ machines, title }) => {
   console.log(`[MachineGrid] Rendering ${machines.length} machines with title: ${title}`);
   console.log('[MachineGrid] Machines data:', machines.map(machine => ({
     id: machine.id,
-    title: machine.title,
+    title: machine.title || machine.name,
     hasThumbnail: !!machine.thumbnail,
-    thumbnailUrl: machine.thumbnail?.url || 'none'
+    hasMainImage: !!machine.mainImage,
+    thumbnailUrl: machine.thumbnail?.url || 'none',
+    mainImageUrl: machine.mainImage?.url || 'none'
   })));
   
   return (

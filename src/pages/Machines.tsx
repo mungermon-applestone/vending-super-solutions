@@ -1,13 +1,12 @@
 
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
-import { useMachines } from '@/hooks/useMachinesData';
+import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
 import { Loader2 } from 'lucide-react';
 import { CMSMachine } from '@/types/cms';
 import { forceContentfulProvider } from '@/services/cms/cmsInit';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import CTASection from '@/components/common/CTASection';
 import PageHero from '@/components/common/PageHero';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
@@ -25,24 +24,45 @@ const MachinesPage = () => {
     }
   }, []);
 
-  const { data: machines = [], isLoading, error } = useMachines();
+  const { data: machines = [], isLoading, error } = useContentfulMachines();
   const { data: testimonialSection } = useTestimonialSection('machines');
   
-  const vendingMachines = machines.filter(machine => machine.type === 'vending');
-  const smartLockers = machines.filter(machine => machine.type === 'locker');
+  // Safe type checking to filter machines
+  const vendingMachines: CMSMachine[] = machines.filter(machine => 
+    machine && machine.type === 'vending'
+  );
+  
+  const smartLockers: CMSMachine[] = machines.filter(machine => 
+    machine && machine.type === 'locker'
+  );
 
   const renderMachineCard = (machine: CMSMachine) => {
-    const machineImage = machine.images?.[0]?.url || 'https://placehold.co/600x400?text=No+Image';
-    const machineAlt = machine.images?.[0]?.alt || machine.title;
+    // Determine which image to use - thumbnail has priority, then mainImage, then first image from array
+    const displayImage = machine.thumbnail?.url ? machine.thumbnail : 
+      (machine.mainImage?.url ? machine.mainImage : 
+        (machine.images && machine.images.length > 0 ? machine.images[0] : undefined));
+    
+    // Use title or name, whichever is available
+    const displayTitle = machine.title || machine.name || 'Unnamed Machine';
     
     return (
       <Card key={machine.id} className="overflow-hidden hover:shadow-xl transition-shadow">
         <div className="relative h-48">
-          <img 
-            src={machineImage} 
-            alt={machineAlt} 
-            className="w-full h-full object-cover"
-          />
+          {displayImage ? (
+            <img 
+              src={displayImage.url} 
+              alt={displayImage.alt || displayTitle} 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full bg-gray-100">
+              {machine.type === 'vending' ? (
+                <Server className="h-16 w-16 text-gray-300" />
+              ) : (
+                <HardDrive className="h-16 w-16 text-gray-300" />
+              )}
+            </div>
+          )}
           {machine.temperature && (
             <div className="absolute top-0 right-0 bg-vending-teal/90 text-white px-3 py-1 rounded-bl-lg text-sm font-medium">
               {machine.temperature.charAt(0).toUpperCase() + machine.temperature.slice(1)}
@@ -58,9 +78,9 @@ const MachinesPage = () => {
                 <HardDrive className="h-4 w-4 text-vending-blue" />
               )}
             </div>
-            <h3 className="text-xl font-semibold">{machine.title}</h3>
+            <h3 className="text-xl font-semibold">{displayTitle}</h3>
           </div>
-          <p className="text-gray-600 mb-4 line-clamp-2">{machine.description}</p>
+          <p className="text-gray-600 mb-4 line-clamp-2">{machine.description || 'No description available'}</p>
           
           <Button asChild variant="outline" className="w-full">
             <Link to={`/machines/${machine.slug}`} className="flex items-center justify-center">

@@ -5,56 +5,44 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Server, HardDrive } from 'lucide-react';
 import Image from '@/components/common/Image';
+import { CMSMachine } from '@/types/cms';
 
 interface MachineCardProps {
-  machine: {
-    id: string;
-    slug: string;
-    title: string;
-    description: string;
-    type: string;
-    temperature?: string;
-    images?: Array<{
-      url: string;
-      alt?: string;
-    }>;
-    thumbnail?: {
-      url: string;
-      alt?: string;
-    };
-  };
+  machine: CMSMachine;
 }
 
 const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
-  // Determine which image to use - thumbnail has priority
+  // Use title or name, whichever is available
+  const displayTitle = machine.title || machine.name || 'Unnamed Machine';
+  
+  // Determine which image to use - thumbnail has priority, then mainImage, then first image from array
+  const hasMainImage = !!machine.mainImage?.url;
+  const hasThumbnail = !!machine.thumbnail?.url;
   const hasImages = machine.images && machine.images.length > 0;
-  const hasThumbnail = !!machine.thumbnail;
   
   // Log the image selection for debugging
-  console.log(`[MachineCard] Rendering ${machine.title}:`, {
+  console.log(`[MachineCard] Rendering ${displayTitle}:`, {
     hasThumbnail,
+    hasMainImage,
     hasImages,
-    imageSource: hasThumbnail ? 'thumbnail' : (hasImages ? 'first image' : 'none')
+    imageSource: hasThumbnail ? 'thumbnail' : (hasMainImage ? 'mainImage' : (hasImages ? 'first image' : 'none'))
   });
+  
+  // Determine the image to display
+  const displayImage = hasThumbnail ? machine.thumbnail : 
+    (hasMainImage ? machine.mainImage : 
+      (hasImages ? machine.images[0] : undefined));
   
   return (
     <Card key={machine.id} className="overflow-hidden flex flex-col h-full">
       <div className="relative h-48 bg-gray-50 flex items-center justify-center">
-        {hasThumbnail ? (
+        {displayImage ? (
           <Image 
-            src={machine.thumbnail.url} 
-            alt={machine.thumbnail.alt || machine.title} 
+            src={displayImage.url} 
+            alt={displayImage.alt || displayTitle} 
             className="w-full h-full"
             objectFit="contain"
             isThumbnail={true}
-          />
-        ) : hasImages ? (
-          <Image 
-            src={machine.images[0].url} 
-            alt={machine.images[0].alt || machine.title} 
-            className="w-full h-full"
-            objectFit="contain"
-            isThumbnail={false}
           />
         ) : (
           <div className="flex items-center justify-center h-full">
@@ -72,7 +60,7 @@ const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
         )}
       </div>
       <CardHeader>
-        <CardTitle className="text-xl">{machine.title || 'Unnamed Machine'}</CardTitle>
+        <CardTitle className="text-xl">{displayTitle}</CardTitle>
       </CardHeader>
       <CardContent className="flex-grow">
         <p className="text-gray-600 line-clamp-3">

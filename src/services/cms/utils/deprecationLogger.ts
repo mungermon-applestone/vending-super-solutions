@@ -1,38 +1,39 @@
 
 /**
- * @deprecated This file is being consolidated into deprecation.ts
- * and will be removed in a future version.
- * 
- * Re-exports from the consolidated deprecation module for backward compatibility.
+ * Utility functions for logging deprecation warnings
+ * This helps track which legacy features are being used
  */
 
-import {
-  trackDeprecatedUsage,
-  getDeprecatedUsage,
-  resetDeprecationTracker,
-  logDeprecationWarning,
-  trackDeprecatedFeatureUsage,
-  getDeprecationStats,
-  type DeprecationStat
-} from './deprecation';
+const loggedDeprecations = new Set<string>();
 
-// Re-export all functions to maintain backward compatibility
-export {
-  trackDeprecatedUsage,
-  getDeprecatedUsage,
-  resetDeprecationTracker,
-  logDeprecationWarning,
-  trackDeprecatedFeatureUsage,
-  getDeprecationStats,
-  type DeprecationStat
-};
+/**
+ * Log a deprecation warning once per key
+ * 
+ * @param key - Unique identifier for this deprecation
+ * @param message - Warning message
+ * @param recommendation - Recommended alternative
+ */
+export function logDeprecationWarning(key: string, message: string, recommendation?: string) {
+  // Only log each deprecation once per session
+  if (loggedDeprecations.has(key)) return;
+  
+  loggedDeprecations.add(key);
+  
+  console.warn(
+    `[DEPRECATED] ${message}` + 
+    (recommendation ? `\nRecommendation: ${recommendation}` : '')
+  );
+}
 
-// Alias for backward compatibility
-export const getDeprecationUsageStats = getDeprecationStats;
-export const resetUsageStats = resetDeprecationTracker;
-
-// Log deprecation warning when this file is imported
-console.warn(
-  "⚠️ DEPRECATION WARNING: deprecationLogger.ts is deprecated and will be removed in a future update. " +
-  "Import directly from the consolidated 'deprecation.ts' module instead."
-);
+/**
+ * Log usage of deprecated code paths
+ * 
+ * @param key - Unique identifier for this deprecation
+ * @param message - Warning message
+ * @param recommendation - Recommended alternative
+ */
+export function logDeprecation(key: string, message: string, recommendation?: string) {
+  if (import.meta.env.DEV) {
+    logDeprecationWarning(key, message, recommendation);
+  }
+}

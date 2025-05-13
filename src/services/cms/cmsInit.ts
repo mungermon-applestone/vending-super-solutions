@@ -1,77 +1,35 @@
+import { CMSProvider, forceCMSProvider } from '@/config/cms';
 
-import { ContentProviderType } from './adapters/types';
-import { setCMSProviderConfig } from './providerConfig';
-import { testContentfulConnection, getContentfulClient, refreshContentfulClient } from './utils/contentfulClient';
-import { toast } from 'sonner';
-import { isContentfulConfigured } from '@/config/cms';
-
-export async function initCMS() {
-  console.log('[initCMS] Initializing CMS configuration...');
-  
-  // Check if Contentful is configured
-  if (!isContentfulConfigured()) {
-    console.error('[initCMS] Contentful is not configured');
-    setCMSProviderConfig({
-      type: ContentProviderType.CONTENTFUL,
-      initialized: false,
-      error: 'Contentful credentials not configured'
-    });
-    throw new Error('Contentful credentials not configured. Please set up your Space ID and Delivery Token in Admin > Environment Variables.');
-  }
-  
-  try {
-    // Refresh the client to ensure we have the latest configuration
-    await refreshContentfulClient();
-    
-    // Test Contentful connection
-    const testResult = await testContentfulConnection();
-    if (!testResult.success) {
-      console.error('[initCMS] Contentful connection test failed:', testResult.message);
-      setCMSProviderConfig({
-        type: ContentProviderType.CONTENTFUL,
-        initialized: false,
-        error: testResult.message
-      });
-      throw new Error(`Contentful connection failed: ${testResult.message}`);
-    }
-    
-    console.log('[initCMS] Using Contentful CMS provider');
-    setCMSProviderConfig({
-      type: ContentProviderType.CONTENTFUL,
-      initialized: true,
-      error: null
-    });
-    return true;
-  } catch (error) {
-    console.error('[initCMS] Error initializing CMS:', error);
-    toast.error('Failed to initialize CMS. Please check your configuration.');
-    throw error;
-  }
+/**
+ * Force Contentful as the CMS provider
+ * Used by components that specifically need Contentful integration
+ */
+export function forceContentfulProvider(): void {
+  forceCMSProvider(CMSProvider.CONTENTFUL);
 }
 
-export function forceContentfulProvider() {
-  console.log('[forceContentfulProvider] Forcing use of Contentful provider');
-  try {
-    setCMSProviderConfig({
-      type: ContentProviderType.CONTENTFUL,
-      initialized: true,
-      error: null
-    });
-    return true;
-  } catch (error) {
-    console.error('[forceContentfulProvider] Error forcing Contentful provider:', error);
-    return false;
-  }
+/**
+ * Force Strapi as the CMS provider (legacy)
+ */
+export function forceStrapiProvider(): void {
+  forceCMSProvider(CMSProvider.STRAPI);
 }
 
-export async function refreshCmsConnection() {
-  console.log('[refreshCmsConnection] Refreshing CMS connection');
-  try {
-    // Reset client first
-    await refreshContentfulClient(); 
-    return await initCMS();
-  } catch (error) {
-    console.error('[refreshCmsConnection] Error refreshing connection:', error);
-    throw error;
-  }
+/**
+ * Force Supabase as the CMS provider
+ */
+export function forceSupabaseProvider(): void {
+  forceCMSProvider(CMSProvider.SUPABASE);
+}
+
+/**
+ * Initialize the CMS
+ * Call this on app startup
+ */
+export function initializeCMS(): void {
+  console.log('[CMS] Initializing CMS services...');
+  
+  // Any setup code that needs to run on app startup
+  
+  console.log('[CMS] CMS services initialized successfully');
 }

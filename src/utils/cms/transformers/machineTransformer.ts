@@ -1,6 +1,6 @@
 
 import { Entry, Asset } from 'contentful';
-import { CMSMachine, MachineFeature, MachineImage, MachineSpecification } from '@/services/cms/adapters/machines/types';
+import { CMSMachine, CMSImage } from '@/types/cms';
 
 /**
  * Transforms a Contentful machine entry into our application's CMSMachine format
@@ -17,43 +17,69 @@ export function transformMachineFromContentful(entry: Entry<any>): CMSMachine {
   try {
     const fields = entry.fields;
     
-    // Transform main image
-    const mainImage = transformContentfulAsset(fields.mainImage);
+    // Transform main image (if exists)
+    const mainImage = fields.mainImage ? transformContentfulAsset(fields.mainImage) : undefined;
+    
+    // Transform thumbnail (if exists)
+    const thumbnail = fields.machineThumbnail ? transformContentfulAsset(fields.machineThumbnail) : undefined;
     
     // Transform gallery images
-    const gallery = Array.isArray(fields.gallery) 
-      ? fields.gallery.map(transformContentfulAsset).filter(Boolean)
-      : [];
+    const images: CMSImage[] = [];
+    if (Array.isArray(fields.images)) {
+      fields.images.forEach(imageAsset => {
+        if (imageAsset && imageAsset.fields) {
+          const image = transformContentfulAsset(imageAsset);
+          if (image) images.push(image);
+        }
+      });
+    }
     
     // Transform features
-    const features = Array.isArray(fields.features)
-      ? fields.features.map(transformFeature).filter(Boolean)
+    const features: string[] = Array.isArray(fields.features) 
+      ? fields.features.filter(f => typeof f === 'string') 
       : [];
     
-    // Transform specifications
-    const specifications = Array.isArray(fields.specifications)
-      ? fields.specifications.map(transformSpecification).filter(Boolean)
-      : [];
+    // Build specs object from individual specification fields
+    const specs: Record<string, string> = {};
+    if (fields.dimensions) specs.dimensions = String(fields.dimensions);
+    if (fields.weight) specs.weight = String(fields.weight);
+    if (fields.powerRequirements) specs.powerRequirements = String(fields.powerRequirements);
+    if (fields.capacity) specs.capacity = String(fields.capacity);
+    if (fields.paymentOptions) specs.paymentOptions = String(fields.paymentOptions);
+    if (fields.connectivity) specs.connectivity = String(fields.connectivity);
+    if (fields.manufacturer) specs.manufacturer = String(fields.manufacturer);
+    if (fields.warranty) specs.warranty = String(fields.warranty);
+    if (fields.temperature) specs.temperature = String(fields.temperature);
+    
+    // Handle nested specs object if it exists
+    if (fields.specs && typeof fields.specs === 'object') {
+      Object.entries(fields.specs).forEach(([key, value]) => {
+        if (typeof value === 'string' || typeof value === 'number') {
+          specs[key] = String(value);
+        }
+      });
+    }
     
     // Build the machine object
     const machine: CMSMachine = {
       id: entry.sys.id,
       contentType: 'machine',
-      name: fields.name || '',
-      slug: fields.slug || '',
-      description: fields.description || '',
-      type: fields.type || '',
-      mainImage: mainImage,
-      gallery: gallery,
-      features: features,
-      specifications: specifications,
-      featured: Boolean(fields.featured),
+      title: String(fields.title || ''),
+      name: String(fields.title || ''), // Some components use name instead of title
+      slug: String(fields.slug || ''),
+      description: String(fields.description || ''),
+      type: String(fields.type || ''),
+      mainImage,
+      thumbnail,
+      images,
+      features,
+      specs,
+      featured: Boolean(fields.visible),
       displayOrder: typeof fields.displayOrder === 'number' ? fields.displayOrder : 999,
-      temperature: fields.temperature || 'ambient',
-      deploymentExamples: fields.deploymentExamples || [],
-      shortDescription: fields.shortDescription || '',
-      createdAt: entry.sys.createdAt || new Date().toISOString(),
-      updatedAt: entry.sys.updatedAt || new Date().toISOString()
+      temperature: fields.temperature ? String(fields.temperature) : 'ambient',
+      shortDescription: fields.shortDescription ? String(fields.shortDescription) : '',
+      createdAt: entry.sys.createdAt,
+      updatedAt: entry.sys.updatedAt
     };
     
     return machine;
@@ -64,13 +90,21 @@ export function transformMachineFromContentful(entry: Entry<any>): CMSMachine {
 }
 
 /**
- * Transforms a Contentful asset to our MachineImage format
+ * Transform a Contentful entry to our CMSMachine format
+ * This is the main function used by the hooks
+ */
+export function transformContentfulEntry(entry: any): CMSMachine {
+  return transformMachineFromContentful(entry);
+}
+
+/**
+ * Transforms a Contentful asset to our CMSImage format
  * 
  * @param asset - Contentful asset
- * @returns MachineImage - Transformed image object
+ * @returns CMSImage - Transformed image object
  */
-function transformContentfulAsset(asset: Asset): MachineImage {
-  if (!asset || !asset.fields) {
+function transformContentfulAsset(asset: any): CMSImage {
+  if (!asset || !asset.fields || !asset.fields.file) {
     return {
       url: '',
       alt: '',
@@ -79,56 +113,13 @@ function transformContentfulAsset(asset: Asset): MachineImage {
     };
   }
   
+  const file = asset.fields.file;
+  const imageDetails = file.details && file.details.image;
+  
   return {
-    url: asset.fields.file?.url ? `https:${asset.fields.file.url}` : '',
+    url: file.url ? `https:${file.url}` : '',
     alt: asset.fields.title || '',
-    width: asset.fields.file?.details?.image?.width || 0,
-    height: asset.fields.file?.details?.image?.height || 0
-  };
-}
-
-/**
- * Transforms a Contentful feature entry to our MachineFeature format
- * 
- * @param featureEntry - Contentful feature entry
- * @returns MachineFeature - Transformed feature object
- */
-function transformFeature(featureEntry: Entry<any>): MachineFeature {
-  if (!featureEntry || !featureEntry.fields) {
-    return {
-      name: '',
-      description: '',
-      icon: ''
-    };
-  }
-  
-  return {
-    name: featureEntry.fields.name || '',
-    description: featureEntry.fields.description || '',
-    icon: featureEntry.fields.icon || ''
-  };
-}
-
-/**
- * Transforms a Contentful specification entry to our MachineSpecification format
- * 
- * @param specEntry - Contentful specification entry
- * @returns MachineSpecification - Transformed specification object
- */
-function transformSpecification(specEntry: Entry<any>): MachineSpecification {
-  if (!specEntry || !specEntry.fields) {
-    return {
-      name: '',
-      value: '',
-      unit: '',
-      category: 'general'
-    };
-  }
-  
-  return {
-    name: specEntry.fields.name || '',
-    value: specEntry.fields.value || '',
-    unit: specEntry.fields.unit || '',
-    category: specEntry.fields.category || 'general'
+    width: imageDetails ? imageDetails.width : 0,
+    height: imageDetails ? imageDetails.height : 0
   };
 }

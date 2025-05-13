@@ -1,97 +1,84 @@
+
 import { CMSMachine } from '@/types/cms';
 
+/**
+ * Fallback machine data for development and preview environments
+ * Used when Contentful is not configured or encounters an error
+ */
 export const fallbackMachineData: Record<string, CMSMachine> = {
   'divi-wp': {
-    id: '1omUbnEhB6OeBFpwPFj1Ww',
-    title: 'DIVI-WP',
+    id: 'fallback-divi-wp',
+    contentType: 'machine',
+    title: 'DIVI-WP Vending Machine',
+    name: 'DIVI-WP Vending Machine',
     slug: 'divi-wp',
+    description: 'Advanced vending machine with touchscreen interface and refrigeration capabilities.',
     type: 'vending',
-    description: "Weather-protected vending system for outdoor installations with sealed compartments and climate resistance. Perfect for parks, transit stations, and other exposed locations.",
-    temperature: 'ambient',
-    features: [
-      "Weather-resistant construction",
-      "Anti-vandal reinforcements", 
-      "Internal climate control system",
-      "Sunlight-readable display",
-      "Remote monitoring and diagnostics",
-      "Solar power options available",
-      "Ruggedized payment systems",
-      "High-security locking system with tamper alerts"
+    temperature: 'refrigerated',
+    images: [
+      {
+        url: 'https://images.unsplash.com/photo-1568291170859-dd8c6c1c4ece?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8dmVuZGluZyUyMG1hY2hpbmV8ZW58MHx8MHx8&auto=format&fit=crop&w=600&q=60',
+        alt: 'DIVI-WP Vending Machine'
+      }
     ],
-    images: [{
-      id: 'fallback-image-divi-wp',
-      url: 'https://images.unsplash.com/photo-1557034362-4ec717153f8f',
-      alt: 'DIVI-WP - Front View'
-    }],
-    specs: {
-      dimensions: "76\"H x 42\"W x 36\"D",
-      weight: "750 lbs (empty)",
-      capacity: "Up to 350 items depending on configuration",
-      powerRequirements: "110V, 8 amps",
-      temperature: "Operating range: -10°F to 110°F with internal climate control",
-      connectivity: "WiFi, Ethernet, Cellular (included)",
-      paymentOptions: "Credit card, mobile payment, NFC",
-      manufacturer: "VendTech Solutions",
-      warranty: "3 years standard"
-    }
-  },
-  'option-2-wall-mount': {
-    id: 'option2wallmount',
-    title: 'Option 2 Wall Mount',
-    slug: 'option-2-wall-mount',
-    type: 'vending',
-    description: "Compact wall-mounted vending solution ideal for offices, break rooms, and small spaces.",
-    temperature: 'ambient',
+    thumbnail: {
+      url: 'https://images.unsplash.com/photo-1568291170859-dd8c6c1c4ece?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8dmVuZGluZyUyMG1hY2hpbmV8ZW58MHx8MHx8&auto=format&fit=crop&w=600&q=60',
+      alt: 'DIVI-WP Vending Machine'
+    },
     features: [
-      "Space-efficient design",
-      "Easy wall mounting",
-      "Digital touch interface",
-      "Cashless payment system",
-      "Remote inventory management"
+      'Touchscreen interface',
+      'Refrigeration',
+      'Payment processing',
+      'Remote monitoring'
     ],
-    images: [{
-      id: 'fallback-option2',
-      url: 'https://images.unsplash.com/photo-1525182008055-f88b95ff7980',
-      alt: 'Option 2 Wall Mount - Front View'
-    }],
     specs: {
-      dimensions: "32\"H x 28\"W x 18\"D",
-      weight: "180 lbs (empty)",
-      capacity: "Up to 120 items",
-      powerRequirements: "110V, 5 amps",
-      connectivity: "WiFi, Ethernet",
-      paymentOptions: "Credit card, mobile payment, NFC",
-      manufacturer: "VendTech Solutions",
-      warranty: "2 years standard"
-    }
+      dimensions: '72" H x 39" W x 35" D',
+      weight: '650 lbs',
+      powerRequirements: '120V, 60Hz',
+      capacity: '500 items',
+      paymentOptions: 'Credit card, mobile payment, cash',
+      connectivity: 'Wi-Fi, Ethernet'
+    },
+    featured: true,
+    displayOrder: 1,
+    createdAt: '2023-01-01T00:00:00Z',
+    updatedAt: '2023-01-01T00:00:00Z'
   },
-  'locker-10-cell': {
-    id: 'locker10cell',
-    title: 'Locker 10-Cell',
-    slug: 'locker-10-cell',
+  'smart-locker': {
+    id: 'fallback-smart-locker',
+    contentType: 'machine',
+    title: 'Smart Locker System',
+    name: 'Smart Locker System',
+    slug: 'smart-locker',
+    description: 'Intelligent locker system for secure package delivery and storage.',
     type: 'locker',
-    description: "Modular smart locker system with 10 compartments for secure package delivery and pickup.",
     temperature: 'ambient',
-    features: [
-      "10 secure compartments",
-      "Digital access control",
-      "Notification system",
-      "Administrative dashboard",
-      "Expandable design"
+    images: [
+      {
+        url: 'https://images.unsplash.com/photo-1512503638402-a29a4c2b6a8c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fGxvY2tlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=600&q=60',
+        alt: 'Smart Locker System'
+      }
     ],
-    images: [{
-      id: 'fallback-locker10',
-      url: 'https://images.unsplash.com/photo-1606161290795-aa2093b87798',
-      alt: 'Locker 10-Cell'
-    }],
+    thumbnail: {
+      url: 'https://images.unsplash.com/photo-1512503638402-a29a4c2b6a8c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTB8fGxvY2tlcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=600&q=60',
+      alt: 'Smart Locker System'
+    },
+    features: [
+      'Secure delivery',
+      'Digital access codes',
+      'Notification system',
+      'Multi-size compartments'
+    ],
     specs: {
-      dimensions: "72\"H x 36\"W x 24\"D",
-      weight: "350 lbs (empty)",
-      capacity: "10 compartments of varying sizes",
-      powerRequirements: "110V, 3 amps",
-      connectivity: "WiFi, Ethernet, Cellular (optional)",
-      manufacturer: "VendTech Solutions",
-      warranty: "3 years standard"
-    }
+      dimensions: '80" H x 60" W x 24" D',
+      weight: '800 lbs',
+      powerRequirements: '120V, 60Hz',
+      capacity: '24 compartments',
+      connectivity: 'Wi-Fi, Cellular'
+    },
+    featured: true,
+    displayOrder: 2,
+    createdAt: '2023-01-02T00:00:00Z',
+    updatedAt: '2023-01-02T00:00:00Z'
   }
 };
