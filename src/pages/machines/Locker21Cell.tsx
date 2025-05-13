@@ -2,6 +2,7 @@
 import React from 'react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
+import { normalizeMachineData } from '@/utils/machineDataAdapter';
 
 const Locker21Cell = () => {
   // Default fallback data
@@ -13,8 +14,8 @@ const Locker21Cell = () => {
     temperature: "controlled",
     description: "Large capacity temperature-controlled locker system with 21 individual compartments of varying sizes, perfect for high-volume delivery operations and retail pickup solutions.",
     images: [
-      { url: "https://images.unsplash.com/photo-1534723328310-e82dad3ee43f", alt: "21-cell Temperature Controlled Locker - Front View" },
-      { url: "https://images.unsplash.com/photo-1606836591695-4d58a73fba38", alt: "21-cell Temperature Controlled Locker - Side View" }
+      { id: 'locker21-img-1', url: "https://images.unsplash.com/photo-1534723328310-e82dad3ee43f", alt: "21-cell Temperature Controlled Locker - Front View" },
+      { id: 'locker21-img-2', url: "https://images.unsplash.com/photo-1606836591695-4d58a73fba38", alt: "21-cell Temperature Controlled Locker - Side View" }
     ],
     specs: {
       dimensions: "78\"H x 72\"W x 30\"D",
@@ -44,22 +45,22 @@ const Locker21Cell = () => {
       {
         title: "Grocery Chain",
         description: "High-volume order pickup solution for online grocery orders",
-        image: { url: "https://images.unsplash.com/photo-1579113800032-c38bd7635818", alt: "Grocery chain deployment" }
+        image: { id: 'locker21-deploy-1', url: "https://images.unsplash.com/photo-1579113800032-c38bd7635818", alt: "Grocery chain deployment" }
       },
       {
         title: "Apartment Complex",
         description: "Centralized package and food delivery solution for residents",
-        image: { url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2", alt: "Apartment complex deployment" }
+        image: { id: 'locker21-deploy-2', url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2", alt: "Apartment complex deployment" }
       },
       {
         title: "University Campus",
         description: "Multi-purpose delivery system for campus food service and package delivery",
-        image: { url: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a", alt: "University campus deployment" }
+        image: { id: 'locker21-deploy-3', url: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a", alt: "University campus deployment" }
       },
       {
         title: "Hospital",
         description: "Secure medication and sample storage with controlled access",
-        image: { url: "https://images.unsplash.com/photo-1516549655103-982afbfce8f5", alt: "Hospital deployment" }
+        image: { id: 'locker21-deploy-4', url: "https://images.unsplash.com/photo-1516549655103-982afbfce8f5", alt: "Hospital deployment" }
       }
     ]
   };
@@ -68,7 +69,8 @@ const Locker21Cell = () => {
   const { data: dbMachineData, isLoading, error } = useMachineBySlug('21-cell-temperature-controlled');
 
   // Use database data if available, otherwise fall back to static data
-  const machineData = dbMachineData || fallbackMachineData;
+  // Apply normalization to ensure the data conforms to CMSMachine type
+  const machineData = normalizeMachineData(dbMachineData || fallbackMachineData);
 
   return <MachinePageTemplate machine={machineData} />;
 };

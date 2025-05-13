@@ -2,7 +2,7 @@
 import React from 'react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
-import { useParams } from 'react-router-dom';
+import { normalizeMachineData } from '@/utils/machineDataAdapter';
 
 const DiviSP = () => {
   // Default fallback data
@@ -14,8 +14,8 @@ const DiviSP = () => {
     temperature: "ambient",
     description: "Space-saving profile vending machine with flexible configuration options designed for medium-capacity locations with limited floor space.",
     images: [
-      { url: "https://images.unsplash.com/photo-1621964275191-ccc01ef2134c", alt: "DIVI-SP - Front View" },
-      { url: "https://images.unsplash.com/photo-1626282874430-c11ae32d2898", alt: "DIVI-SP - Side View" }
+      { id: 'divi-sp-img-1', url: "https://images.unsplash.com/photo-1621964275191-ccc01ef2134c", alt: "DIVI-SP - Front View" },
+      { id: 'divi-sp-img-2', url: "https://images.unsplash.com/photo-1626282874430-c11ae32d2898", alt: "DIVI-SP - Side View" }
     ],
     specs: {
       dimensions: "68\"H x 30\"W x 28\"D",
@@ -43,17 +43,17 @@ const DiviSP = () => {
       {
         title: "University Dormitory",
         description: "Providing essentials to students in residence hall common areas",
-        image: { url: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a", alt: "University dormitory deployment" }
+        image: { id: 'divi-sp-deploy-1', url: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a", alt: "University dormitory deployment" }
       },
       {
         title: "Boutique Hotel",
         description: "Compact vending solution for smaller hotel properties",
-        image: { url: "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa", alt: "Boutique hotel deployment" }
+        image: { id: 'divi-sp-deploy-2', url: "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa", alt: "Boutique hotel deployment" }
       },
       {
         title: "Corporate Break Room",
         description: "Space-efficient refreshment solution for smaller employee areas",
-        image: { url: "https://images.unsplash.com/photo-1517502884422-41eaead166d4", alt: "Corporate break room deployment" }
+        image: { id: 'divi-sp-deploy-3', url: "https://images.unsplash.com/photo-1517502884422-41eaead166d4", alt: "Corporate break room deployment" }
       }
     ]
   };
@@ -62,7 +62,8 @@ const DiviSP = () => {
   const { data: dbMachineData, isLoading, error } = useMachineBySlug('divi-sp');
 
   // Use database data if available, otherwise fall back to static data
-  const machineData = dbMachineData || fallbackMachineData;
+  // Apply normalization to ensure the data conforms to CMSMachine type
+  const machineData = normalizeMachineData(dbMachineData || fallbackMachineData);
 
   return <MachinePageTemplate machine={machineData} />;
 };

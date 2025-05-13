@@ -2,6 +2,7 @@
 import React from 'react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
+import { normalizeMachineData } from '@/utils/machineDataAdapter';
 
 const Option2WallMountXL = () => {
   // Default fallback data
@@ -13,8 +14,8 @@ const Option2WallMountXL = () => {
     temperature: "ambient",
     description: "Extra large wall-mounted vending solution for high capacity needs. This space-saving design attaches directly to walls while offering significant product capacity.",
     images: [
-      { url: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2", alt: "Option-2 Wall Mount XL - Front View" },
-      { url: "https://images.unsplash.com/photo-1623039405147-547794f92e9e", alt: "Option-2 Wall Mount XL - Side View" }
+      { id: 'opt2-xl-img-1', url: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2", alt: "Option-2 Wall Mount XL - Front View" },
+      { id: 'opt2-xl-img-2', url: "https://images.unsplash.com/photo-1623039405147-547794f92e9e", alt: "Option-2 Wall Mount XL - Side View" }
     ],
     specs: {
       dimensions: "60\"H x 42\"W x 24\"D",
@@ -42,17 +43,17 @@ const Option2WallMountXL = () => {
       {
         title: "Airport Terminal",
         description: "Deployed in high-traffic airport terminals providing convenience items to travelers",
-        image: { url: "https://images.unsplash.com/photo-1468436385273-8abca6dfd8d3", alt: "Airport terminal deployment" }
+        image: { id: 'opt2-xl-deploy-1', url: "https://images.unsplash.com/photo-1468436385273-8abca6dfd8d3", alt: "Airport terminal deployment" }
       },
       {
         title: "Hotel Hallway",
         description: "Installed in hotel corridors providing 24/7 access to sundries and snacks",
-        image: { url: "https://images.unsplash.com/photo-1590073242678-70ee3fc28e8e", alt: "Hotel hallway deployment" }
+        image: { id: 'opt2-xl-deploy-2', url: "https://images.unsplash.com/photo-1590073242678-70ee3fc28e8e", alt: "Hotel hallway deployment" }
       },
       {
         title: "Office Building",
         description: "Space-efficient solution for corporate buildings with limited floor space",
-        image: { url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174", alt: "Office building deployment" }
+        image: { id: 'opt2-xl-deploy-3', url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174", alt: "Office building deployment" }
       }
     ]
   };
@@ -61,7 +62,8 @@ const Option2WallMountXL = () => {
   const { data: dbMachineData, isLoading, error } = useMachineBySlug('option-2-wall-mount-xl');
 
   // Use database data if available, otherwise fall back to static data
-  const machineData = dbMachineData || fallbackMachineData;
+  // Apply normalization to ensure the data conforms to CMSMachine type
+  const machineData = normalizeMachineData(dbMachineData || fallbackMachineData);
 
   return <MachinePageTemplate machine={machineData} />;
 };

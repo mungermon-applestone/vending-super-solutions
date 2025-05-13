@@ -2,6 +2,7 @@
 import React from 'react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
+import { normalizeMachineData } from '@/utils/machineDataAdapter';
 
 const Combi3000 = () => {
   // Default fallback data
@@ -13,9 +14,9 @@ const Combi3000 = () => {
     temperature: "multi",
     description: "Combination vending system with multiple product categories and temperature zones. The Combi 3000 can dispense refrigerated, frozen, and ambient products from a single machine.",
     images: [
-      { url: "https://images.unsplash.com/photo-1527256351016-8ad33ff833fc", alt: "Combi 3000 - Front View" },
-      { url: "https://images.unsplash.com/photo-1624453409772-e329a1a9f85c", alt: "Combi 3000 - Side View" },
-      { url: "https://images.unsplash.com/photo-1627843240167-b1f9440fc173", alt: "Combi 3000 - Interior" }
+      { id: 'combi-img-1', url: "https://images.unsplash.com/photo-1527256351016-8ad33ff833fc", alt: "Combi 3000 - Front View" },
+      { id: 'combi-img-2', url: "https://images.unsplash.com/photo-1624453409772-e329a1a9f85c", alt: "Combi 3000 - Side View" },
+      { id: 'combi-img-3', url: "https://images.unsplash.com/photo-1627843240167-b1f9440fc173", alt: "Combi 3000 - Interior" }
     ],
     specs: {
       dimensions: "78\"H x 45\"W x 38\"D",
@@ -44,17 +45,17 @@ const Combi3000 = () => {
       {
         title: "Corporate Headquarters",
         description: "All-in-one food and beverage solution for large office environments",
-        image: { url: "https://images.unsplash.com/photo-1577412647305-991150c7d163", alt: "Corporate headquarters deployment" }
+        image: { id: 'combi-deploy-1', url: "https://images.unsplash.com/photo-1577412647305-991150c7d163", alt: "Corporate headquarters deployment" }
       },
       {
         title: "Hospital",
         description: "24/7 food service option offering varied menu for staff and visitors",
-        image: { url: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d", alt: "Hospital deployment" }
+        image: { id: 'combi-deploy-2', url: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d", alt: "Hospital deployment" }
       },
       {
         title: "College Student Center",
         description: "One-stop vending solution for campus with diverse product needs",
-        image: { url: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3", alt: "College student center deployment" }
+        image: { id: 'combi-deploy-3', url: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3", alt: "College student center deployment" }
       }
     ]
   };
@@ -63,7 +64,8 @@ const Combi3000 = () => {
   const { data: dbMachineData, isLoading, error } = useMachineBySlug('combi-3000');
 
   // Use database data if available, otherwise fall back to static data
-  const machineData = dbMachineData || fallbackMachineData;
+  // Apply normalization to ensure the data conforms to CMSMachine type
+  const machineData = normalizeMachineData(dbMachineData || fallbackMachineData);
 
   return <MachinePageTemplate machine={machineData} />;
 };

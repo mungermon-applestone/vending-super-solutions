@@ -2,6 +2,7 @@
 import React from 'react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
+import { normalizeMachineData } from '@/utils/machineDataAdapter';
 
 const DiviWP = () => {
   // Default fallback data
@@ -13,8 +14,8 @@ const DiviWP = () => {
     temperature: "ambient",
     description: "Weather-protected vending system for outdoor installations with sealed compartments and climate resistance. Perfect for parks, transit stations, and other exposed locations.",
     images: [
-      { url: "https://images.unsplash.com/photo-1557034362-4ec717153f8f", alt: "DIVI-WP - Front View" },
-      { url: "https://images.unsplash.com/photo-1542653389-9c252b378429", alt: "DIVI-WP - Outdoor Installation" }
+      { id: 'divi-wp-img-1', url: "https://images.unsplash.com/photo-1557034362-4ec717153f8f", alt: "DIVI-WP - Front View" },
+      { id: 'divi-wp-img-2', url: "https://images.unsplash.com/photo-1542653389-9c252b378429", alt: "DIVI-WP - Outdoor Installation" }
     ],
     specs: {
       dimensions: "76\"H x 42\"W x 36\"D",
@@ -42,17 +43,17 @@ const DiviWP = () => {
       {
         title: "Public Park",
         description: "Providing refreshments and essentials in outdoor recreational areas",
-        image: { url: "https://images.unsplash.com/photo-1533124436425-a9c6a41dfbe5", alt: "Public park deployment" }
+        image: { id: 'divi-wp-deploy-1', url: "https://images.unsplash.com/photo-1533124436425-a9c6a41dfbe5", alt: "Public park deployment" }
       },
       {
         title: "Transit Station",
         description: "All-weather vending solution for bus stops and train platforms",
-        image: { url: "https://images.unsplash.com/photo-1568438350562-2cae6d394ad0", alt: "Transit station deployment" }
+        image: { id: 'divi-wp-deploy-2', url: "https://images.unsplash.com/photo-1568438350562-2cae6d394ad0", alt: "Transit station deployment" }
       },
       {
         title: "Sports Complex",
         description: "Outdoor refreshment stations for sports fields and stadium exteriors",
-        image: { url: "https://images.unsplash.com/photo-1470232146202-5b10f5cdf9c5", alt: "Sports complex deployment" }
+        image: { id: 'divi-wp-deploy-3', url: "https://images.unsplash.com/photo-1470232146202-5b10f5cdf9c5", alt: "Sports complex deployment" }
       }
     ]
   };
@@ -61,7 +62,8 @@ const DiviWP = () => {
   const { data: dbMachineData, isLoading, error } = useMachineBySlug('divi-wp');
 
   // Use database data if available, otherwise fall back to static data
-  const machineData = dbMachineData || fallbackMachineData;
+  // Apply normalization to ensure the data conforms to CMSMachine type
+  const machineData = normalizeMachineData(dbMachineData || fallbackMachineData);
 
   return <MachinePageTemplate machine={machineData} />;
 };

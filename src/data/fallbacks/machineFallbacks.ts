@@ -1,3 +1,4 @@
+
 import { CMSMachine } from '@/types/cms';
 
 export const fallbackMachineData: Record<string, CMSMachine> = {

@@ -5,10 +5,10 @@ import {
   fetchMachineById, 
   createMachine, 
   updateMachine, 
-  deleteMachine,
-  machineOperations
+  deleteMachine
 } from './contentTypes/machines';
 import { logDeprecation } from './utils/deprecation';
+import { machineOperations } from './contentTypes/machines/index';
 
 /**
  * Get all machines with optional filters

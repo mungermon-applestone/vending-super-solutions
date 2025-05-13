@@ -2,6 +2,7 @@
 import React from 'react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
+import { normalizeMachineData } from '@/utils/machineDataAdapter';
 
 const Option2WallMount = () => {
   // Default fallback data
@@ -13,8 +14,8 @@ const Option2WallMount = () => {
     temperature: "ambient",
     description: "Space-efficient wall-mounted vending machine for standard applications where floor space is limited. Perfect for hallways, waiting areas, and other tight spaces.",
     images: [
-      { url: "https://images.unsplash.com/photo-1572635148818-ef6fd45eb394", alt: "Option-2 Wall Mount - Front View" },
-      { url: "https://images.unsplash.com/photo-1627395637580-988089c61818", alt: "Option-2 Wall Mount - Side View" }
+      { id: 'opt2-wm-img-1', url: "https://images.unsplash.com/photo-1572635148818-ef6fd45eb394", alt: "Option-2 Wall Mount - Front View" },
+      { id: 'opt2-wm-img-2', url: "https://images.unsplash.com/photo-1627395637580-988089c61818", alt: "Option-2 Wall Mount - Side View" }
     ],
     specs: {
       dimensions: "48\"H x 36\"W x 18\"D",
@@ -41,12 +42,12 @@ const Option2WallMount = () => {
       {
         title: "Hotel Hallway",
         description: "Providing guest conveniences without taking up valuable floor space",
-        image: { url: "https://images.unsplash.com/photo-1590073242678-70ee3fc28e8e", alt: "Hotel hallway deployment" }
+        image: { id: 'opt2-wm-deploy-1', url: "https://images.unsplash.com/photo-1590073242678-70ee3fc28e8e", alt: "Hotel hallway deployment" }
       },
       {
         title: "Office Break Room",
         description: "Mounted in smaller break areas where floor space is at a premium",
-        image: { url: "https://images.unsplash.com/photo-1497215842964-222b430dc094", alt: "Office break room deployment" }
+        image: { id: 'opt2-wm-deploy-2', url: "https://images.unsplash.com/photo-1497215842964-222b430dc094", alt: "Office break room deployment" }
       }
     ]
   };
@@ -55,7 +56,8 @@ const Option2WallMount = () => {
   const { data: dbMachineData, isLoading, error } = useMachineBySlug('option-2-wall-mount');
 
   // Use database data if available, otherwise fall back to static data
-  const machineData = dbMachineData || fallbackMachineData;
+  // Apply normalization to ensure the data conforms to CMSMachine type
+  const machineData = normalizeMachineData(dbMachineData || fallbackMachineData);
 
   return <MachinePageTemplate machine={machineData} />;
 };
