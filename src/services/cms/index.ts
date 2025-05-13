@@ -87,4 +87,3 @@ export { initCMS, refreshCmsConnection } from './cmsInit';
 
 // Export combined adapter
 export { getCombinedAdapter } from './adapters';
-

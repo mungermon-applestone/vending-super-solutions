@@ -1,4 +1,3 @@
-
 /**
  * Adapter Compatibility Utilities
  *
@@ -7,7 +6,7 @@
  * to a standardized ContentTypeOperations interface.
  */
 
-import { trackDeprecatedUsage, logDeprecation, throwDeprecatedOperationError } from './deprecationLogger';
+import { trackDeprecatedUsage, logDeprecation, throwDeprecatedOperationError, createDeprecatedWriteOperation } from './deprecation';
 import { ContentTypeOperations } from '../contentTypes/types';
 
 /**
@@ -141,4 +140,3 @@ export function createStandardizedAdapter<T extends Record<string, any>, EntityT
   
   return result;
 }
-
