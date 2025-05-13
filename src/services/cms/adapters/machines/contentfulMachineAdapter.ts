@@ -1,171 +1,279 @@
 
-/**
- * Contentful Machine Adapter
- * 
- * This adapter interfaces with Contentful to provide machine data.
- */
-
-import { CMSMachine, CMSImage } from '@/types/cms';
+import { Machine } from '@/types/machine';
 import { MachineAdapter } from './types';
-import { createDeprecatedWriteOperation } from '@/services/cms/utils/deprecation';
-import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
-import { CONTENTFUL_CONFIG } from '@/config/cms';
+import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { logDeprecation, throwDeprecatedOperationError } from '@/services/cms/utils/deprecation';
 
 /**
- * Process an image from Contentful to ensure it has the required fields
- */
-function processContentfulImage(image: any, machineId: string, index: number): CMSImage {
-  if (!image) return { id: `${machineId}-fallback-${index}`, url: '', alt: 'Image not found' };
-  
-  const fileUrl = image.fields?.file?.url || '';
-  const url = fileUrl.startsWith('//') ? `https:${fileUrl}` : fileUrl;
-  const alt = image.fields?.title || 'Machine image';
-  const id = image.sys?.id || `${machineId}-image-${index}`;
-  
-  return { id, url, alt };
-}
-
-/**
- * Process a Contentful machine entry to normalize the data format
- */
-function processContentfulMachine(entry: any): CMSMachine {
-  const id = entry.sys?.id || entry.id || 'unknown';
-  const fields = entry.fields || entry;
-  
-  // Process images to ensure they have required fields
-  const images = Array.isArray(fields.images) 
-    ? fields.images.map((img: any, idx: number) => processContentfulImage(img, id, idx))
-    : [];
-    
-  // Process thumbnail if it exists
-  let thumbnail;
-  if (fields.thumbnail) {
-    thumbnail = processContentfulImage(fields.thumbnail, id, 0);
-  }
-  
-  return {
-    id,
-    title: fields.title || 'Unnamed Machine',
-    slug: fields.slug || id,
-    type: fields.type || 'vending',
-    description: fields.description || '',
-    temperature: fields.temperature || 'ambient',
-    features: Array.isArray(fields.features) ? fields.features : [],
-    images,
-    ...(thumbnail ? { thumbnail } : {}),
-    specs: fields.specs || {},
-    visible: fields.visible !== false // Default to true if not specified
-  };
-}
-
-/**
- * Implements the machine adapter interface for Contentful
+ * Contentful implementation of the Machine adapter
  */
 export const contentfulMachineAdapter: MachineAdapter = {
   /**
-   * Get all machines from Contentful
+   * Get all machines
    */
-  getAll: async (filters = {}) => {
-    console.log('Fetching all machines from Contentful with filters:', filters);
-    
+  getAll: async (filters = {}): Promise<Machine[]> => {
     try {
-      // Check if Contentful is configured
-      if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
-        console.error('Contentful not properly configured. Check environment variables.');
+      console.log('[contentfulMachineAdapter] Fetching all machines');
+      const client = await getContentfulClient();
+      
+      if (!client) {
+        console.error('[contentfulMachineAdapter] Failed to initialize Contentful client');
         return [];
       }
       
-      // Build query for filters
-      const query: Record<string, any> = {};
+      const query: any = {
+        content_type: 'machine',
+        order: 'fields.name'
+      };
       
-      // Process filters
-      if (filters.slug) {
-        query['fields.slug'] = filters.slug;
+      // Apply any filters
+      if (filters && Object.keys(filters).length > 0) {
+        // Handle specific filters
+        if (filters.featured) {
+          query['fields.featured'] = filters.featured === 'true' || filters.featured === true;
+        }
+        
+        if (filters.machineType) {
+          query['fields.machineType'] = filters.machineType;
+        }
       }
       
-      if (filters.type) {
-        query['fields.type'] = filters.type;
-      }
+      const response = await client.getEntries(query);
+      console.log(`[contentfulMachineAdapter] Fetched ${response.items.length} machines`);
       
-      if (filters.visible !== undefined) {
-        query['fields.visible'] = filters.visible ? 'true' : 'false';
-      }
-      
-      // Fetch machines from Contentful
-      const entries = await fetchContentfulEntries('machine', query);
-      console.log(`Fetched ${entries.length} machines from Contentful`);
-      
-      // Process and return machine data
-      return entries.map(processContentfulMachine);
+      // Map Contentful response to our Machine type
+      return response.items.map((item: any) => {
+        try {
+          const machine: Machine = {
+            id: item.sys.id,
+            name: item.fields.name || 'Unnamed Machine',
+            slug: item.fields.slug || '',
+            description: item.fields.description || '',
+            shortDescription: item.fields.shortDescription || '',
+            featured: !!item.fields.featured,
+            machineType: item.fields.machineType || 'standard',
+            dimensions: {
+              height: item.fields.heightInches || 0,
+              width: item.fields.widthInches || 0,
+              depth: item.fields.depthInches || 0
+            },
+            weight: item.fields.weightPounds || 0,
+            capacity: item.fields.capacity || 0,
+            priceRange: {
+              low: item.fields.priceLow || 0,
+              high: item.fields.priceHigh || 0
+            },
+            features: item.fields.features || [],
+            compatibleProducts: item.fields.compatibleProducts || [],
+            image: item.fields.image?.fields?.file?.url ? 
+              `https:${item.fields.image.fields.file.url}` : 
+              'https://placehold.co/600x400?text=Machine',
+            gallery: (item.fields.gallery || [])
+              .filter((img: any) => img.fields?.file?.url)
+              .map((img: any) => ({
+                url: `https:${img.fields.file.url}`,
+                alt: img.fields.title || 'Machine Image',
+                width: img.fields.file.details.image.width,
+                height: img.fields.file.details.image.height
+              })),
+          };
+          
+          // Additional fields if present
+          if (item.fields.specifications) {
+            machine.specifications = item.fields.specifications;
+          }
+          
+          if (item.fields.technicalDetails) {
+            machine.technicalDetails = item.fields.technicalDetails;
+          }
+          
+          return machine;
+        } catch (err) {
+          console.error(`[contentfulMachineAdapter] Error mapping machine with ID ${item.sys.id}:`, err);
+          // Return a minimal valid machine object
+          return {
+            id: item.sys.id,
+            name: item.fields?.name || 'Error Loading Machine',
+            slug: item.fields?.slug || 'error',
+            description: 'Error loading complete machine data',
+            shortDescription: 'Error loading data',
+            featured: false,
+            machineType: 'unknown',
+            dimensions: { height: 0, width: 0, depth: 0 },
+            weight: 0,
+            capacity: 0,
+            priceRange: { low: 0, high: 0 },
+            features: [],
+            compatibleProducts: [],
+            image: 'https://placehold.co/600x400?text=Error+Loading+Machine',
+            gallery: []
+          };
+        }
+      });
     } catch (error) {
-      console.error('Error fetching machines from Contentful:', error);
+      console.error('[contentfulMachineAdapter] Error fetching machines:', error);
       return [];
     }
   },
   
   /**
-   * Get a machine by its slug
+   * Get a machine by slug
    */
-  getBySlug: async (slug: string) => {
-    console.log(`Fetching machine with slug: ${slug} from Contentful`);
-    
+  getBySlug: async (slug: string): Promise<Machine | null> => {
     try {
-      // Check if Contentful is configured
-      if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
-        console.error('Contentful not properly configured. Check environment variables.');
+      console.log(`[contentfulMachineAdapter] Fetching machine with slug: ${slug}`);
+      const client = await getContentfulClient();
+      
+      if (!client) {
+        console.error('[contentfulMachineAdapter] Failed to initialize Contentful client');
         return null;
       }
       
-      // Fetch machines with the specified slug
-      const entries = await fetchContentfulEntries('machine', {
-        'fields.slug': slug
+      const response = await client.getEntries({
+        content_type: 'machine',
+        'fields.slug': slug,
+        limit: 1
       });
       
-      if (entries.length === 0) {
-        console.log(`No machine found with slug: ${slug}`);
+      if (response.items.length === 0) {
+        console.log(`[contentfulMachineAdapter] No machine found with slug: ${slug}`);
         return null;
       }
       
-      // Process and return the first matching machine
-      return processContentfulMachine(entries[0]);
+      const item = response.items[0];
+      console.log(`[contentfulMachineAdapter] Found machine: ${item.fields.name}`);
+      
+      return {
+        id: item.sys.id,
+        name: item.fields.name || 'Unnamed Machine',
+        slug: item.fields.slug || '',
+        description: item.fields.description || '',
+        shortDescription: item.fields.shortDescription || '',
+        featured: !!item.fields.featured,
+        machineType: item.fields.machineType || 'standard',
+        dimensions: {
+          height: item.fields.heightInches || 0,
+          width: item.fields.widthInches || 0,
+          depth: item.fields.depthInches || 0
+        },
+        weight: item.fields.weightPounds || 0,
+        capacity: item.fields.capacity || 0,
+        priceRange: {
+          low: item.fields.priceLow || 0,
+          high: item.fields.priceHigh || 0
+        },
+        features: item.fields.features || [],
+        compatibleProducts: item.fields.compatibleProducts || [],
+        image: item.fields.image?.fields?.file?.url ? 
+          `https:${item.fields.image.fields.file.url}` : 
+          'https://placehold.co/600x400?text=Machine',
+        gallery: (item.fields.gallery || [])
+          .filter((img: any) => img.fields?.file?.url)
+          .map((img: any) => ({
+            url: `https:${img.fields.file.url}`,
+            alt: img.fields.title || 'Machine Image',
+            width: img.fields.file.details.image.width,
+            height: img.fields.file.details.image.height
+          })),
+        specifications: item.fields.specifications || [],
+        technicalDetails: item.fields.technicalDetails || []
+      };
     } catch (error) {
-      console.error(`Error fetching machine with slug ${slug} from Contentful:`, error);
+      console.error(`[contentfulMachineAdapter] Error fetching machine with slug "${slug}":`, error);
       return null;
     }
   },
   
   /**
-   * Get a machine by its ID
+   * Get a machine by ID
    */
-  getById: async (id: string) => {
-    console.log(`Fetching machine with ID: ${id} from Contentful`);
-    
+  getById: async (id: string): Promise<Machine | null> => {
     try {
-      // Check if Contentful is configured
-      if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
-        console.error('Contentful not properly configured. Check environment variables.');
+      console.log(`[contentfulMachineAdapter] Fetching machine with ID: ${id}`);
+      const client = await getContentfulClient();
+      
+      if (!client) {
+        console.error('[contentfulMachineAdapter] Failed to initialize Contentful client');
         return null;
       }
       
-      // Fetch the machine with the specified ID
-      const entry = await fetchContentfulEntry(id);
+      const item = await client.getEntry(id);
       
-      if (!entry) {
-        console.log(`No machine found with ID: ${id}`);
-        return null;
-      }
-      
-      // Process and return the machine
-      return processContentfulMachine(entry);
+      return {
+        id: item.sys.id,
+        name: item.fields.name || 'Unnamed Machine',
+        slug: item.fields.slug || '',
+        description: item.fields.description || '',
+        shortDescription: item.fields.shortDescription || '',
+        featured: !!item.fields.featured,
+        machineType: item.fields.machineType || 'standard',
+        dimensions: {
+          height: item.fields.heightInches || 0,
+          width: item.fields.widthInches || 0,
+          depth: item.fields.depthInches || 0
+        },
+        weight: item.fields.weightPounds || 0,
+        capacity: item.fields.capacity || 0,
+        priceRange: {
+          low: item.fields.priceLow || 0,
+          high: item.fields.priceHigh || 0
+        },
+        features: item.fields.features || [],
+        compatibleProducts: item.fields.compatibleProducts || [],
+        image: item.fields.image?.fields?.file?.url ? 
+          `https:${item.fields.image.fields.file.url}` : 
+          'https://placehold.co/600x400?text=Machine',
+        gallery: (item.fields.gallery || [])
+          .filter((img: any) => img.fields?.file?.url)
+          .map((img: any) => ({
+            url: `https:${img.fields.file.url}`,
+            alt: img.fields.title || 'Machine Image',
+            width: img.fields.file.details.image.width,
+            height: img.fields.file.details.image.height
+          })),
+      };
     } catch (error) {
-      console.error(`Error fetching machine with ID ${id} from Contentful:`, error);
-      return null;
+      console.error(`[contentfulMachineAdapter] Error fetching machine with ID "${id}":`, error);
+      
+      // If entry doesn't exist, return null instead of throwing
+      if ((error as Error).message?.includes('not found')) {
+        return null;
+      }
+      
+      throw error;
     }
   },
   
-  // Use the deprecated write operation factory for write operations
-  create: createDeprecatedWriteOperation('create', 'machine'),
-  update: createDeprecatedWriteOperation('update', 'machine'),
-  delete: createDeprecatedWriteOperation('delete', 'machine'),
-  clone: createDeprecatedWriteOperation('clone', 'machine')
+  /**
+   * @deprecated Use Contentful directly for content creation
+   * Create a new machine
+   */
+  create: async (): Promise<Machine> => {
+    logDeprecation('machineAdapter.create', 'Creating machines through the adapter is deprecated', 
+      'Use the Contentful web interface directly');
+    throwDeprecatedOperationError('create', 'machine');
+    return {} as Machine; // This will never actually be reached
+  },
+  
+  /**
+   * @deprecated Use Contentful directly for content updates
+   * Update a machine
+   */
+  update: async (): Promise<Machine> => {
+    logDeprecation('machineAdapter.update', 'Updating machines through the adapter is deprecated',
+      'Use the Contentful web interface directly');
+    throwDeprecatedOperationError('update', 'machine');
+    return {} as Machine; // This will never actually be reached
+  },
+  
+  /**
+   * @deprecated Use Contentful directly for content deletion
+   * Delete a machine
+   */
+  delete: async (): Promise<boolean> => {
+    logDeprecation('machineAdapter.delete', 'Deleting machines through the adapter is deprecated',
+      'Use the Contentful web interface directly');
+    throwDeprecatedOperationError('delete', 'machine'); 
+    return false; // This will never actually be reached
+  }
 };

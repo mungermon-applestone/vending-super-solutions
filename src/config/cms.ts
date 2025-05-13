@@ -30,6 +30,50 @@ export const isContentfulConfigured = () => {
   return !!(CONTENTFUL_CONFIG.SPACE_ID && CONTENTFUL_CONFIG.DELIVERY_TOKEN);
 };
 
+// Check if current environment is a preview environment
+export const isPreviewEnvironment = () => {
+  // Check if we're in a Lovable preview environment
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    return hostname.includes('preview') || 
+           hostname.includes('staging') || 
+           hostname.includes('dev.lovable.app') ||
+           hostname.includes('id-preview');
+  }
+  return false;
+};
+
+// Log Contentful configuration
+export const logContentfulConfig = () => {
+  console.log('[Config] Contentful configuration status:', {
+    isConfigured: isContentfulConfigured(),
+    spaceId: CONTENTFUL_CONFIG.SPACE_ID ? 'Set' : 'Not set',
+    deliveryToken: CONTENTFUL_CONFIG.DELIVERY_TOKEN ? 'Set' : 'Not set',
+    environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master',
+    isPreviewEnvironment: isPreviewEnvironment()
+  });
+  return {
+    isConfigured: isContentfulConfigured(),
+    spaceId: CONTENTFUL_CONFIG.SPACE_ID ? 'Set' : 'Not set',
+    deliveryToken: CONTENTFUL_CONFIG.DELIVERY_TOKEN ? 'Set' : 'Not set',
+    environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master',
+    isPreviewEnvironment: isPreviewEnvironment()
+  };
+};
+
+// Content model definitions for use in hooks and components
+export const CMS_MODELS = {
+  BUSINESS_GOAL: 'businessGoal',
+  MACHINE: 'machine',
+  TECHNOLOGY: 'technology',
+  PRODUCT: 'product',
+  PRODUCT_TYPE: 'productType',
+  HERO: 'heroSection',
+  BLOG_POST: 'blogPost',
+  BLOG_CATEGORY: 'blogCategory',
+  CUSTOMER_TESTIMONIAL: 'customerTestimonial'
+};
+
 // Log Contentful configuration status
 console.log('[Config] Contentful configuration status:', {
   isConfigured: isContentfulConfigured(),
@@ -45,6 +89,18 @@ declare global {
       VITE_CONTENTFUL_SPACE_ID?: string;
       VITE_CONTENTFUL_DELIVERY_TOKEN?: string;
       VITE_CONTENTFUL_ENVIRONMENT_ID?: string;
+      [key: string]: any;
+    };
+    _contentfulInitialized?: boolean;
+    _contentfulInitializedSource?: string;
+    _refreshContentfulAfterConfig?: () => Promise<void>;
+    env?: {
+      VITE_CONTENTFUL_SPACE_ID?: string;
+      VITE_CONTENTFUL_DELIVERY_TOKEN?: string;
+      VITE_CONTENTFUL_ENVIRONMENT_ID?: string;
+      spaceId?: string;
+      deliveryToken?: string;
+      environmentId?: string;
       [key: string]: any;
     };
   }

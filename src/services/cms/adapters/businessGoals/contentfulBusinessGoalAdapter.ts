@@ -14,6 +14,10 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
   getAll: async (filters = {}): Promise<CMSBusinessGoal[]> => {
     try {
       const client = await getContentfulClient();
+      if (!client) {
+        throw new Error('Failed to initialize Contentful client');
+      }
+      
       const query: any = {
         content_type: 'businessGoal',
         order: 'fields.title',
@@ -32,10 +36,10 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
       // Map the response to our CMSBusinessGoal interface
       return response.items.map((item: any) => ({
         id: item.sys.id,
-        title: item.fields.title,
-        description: item.fields.description,
-        slug: item.fields.slug,
-        icon: item.fields.icon || 'check',
+        title: item.fields.title?.toString() || '',
+        description: item.fields.description?.toString() || '',
+        slug: item.fields.slug?.toString() || '',
+        icon: item.fields.icon?.toString() || 'check',
         // Add other fields as needed
       }));
     } catch (error) {
@@ -50,6 +54,10 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
   getBySlug: async (slug: string): Promise<CMSBusinessGoal | null> => {
     try {
       const client = await getContentfulClient();
+      if (!client) {
+        throw new Error('Failed to initialize Contentful client');
+      }
+      
       const response = await client.getEntries({
         content_type: 'businessGoal',
         'fields.slug': slug,
@@ -63,10 +71,10 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
       const item = response.items[0];
       return {
         id: item.sys.id,
-        title: item.fields.title,
-        description: item.fields.description,
-        slug: item.fields.slug,
-        icon: item.fields.icon || 'check',
+        title: item.fields.title?.toString() || '',
+        description: item.fields.description?.toString() || '',
+        slug: item.fields.slug?.toString() || '',
+        icon: item.fields.icon?.toString() || 'check',
         // Add other fields as needed
       };
     } catch (error) {
@@ -81,14 +89,18 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
   getById: async (id: string): Promise<CMSBusinessGoal | null> => {
     try {
       const client = await getContentfulClient();
+      if (!client) {
+        throw new Error('Failed to initialize Contentful client');
+      }
+      
       const response = await client.getEntry(id);
       
       return {
         id: response.sys.id,
-        title: response.fields.title,
-        description: response.fields.description,
-        slug: response.fields.slug,
-        icon: response.fields.icon || 'check',
+        title: response.fields.title?.toString() || '',
+        description: response.fields.description?.toString() || '',
+        slug: response.fields.slug?.toString() || '',
+        icon: response.fields.icon?.toString() || 'check',
         // Add other fields as needed
       };
     } catch (error) {

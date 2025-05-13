@@ -3,9 +3,17 @@ import { createClient } from 'contentful';
 import { CONTENTFUL_CONFIG } from '@/config/cms';
 import { toast } from 'sonner';
 
+// Cache for the Contentful client
+let contentfulClientCache: any = null;
+
 // Create and initialize Contentful client
 export const getContentfulClient = () => {
   try {
+    // If we have a cached client, return it
+    if (contentfulClientCache) {
+      return contentfulClientCache;
+    }
+
     const { SPACE_ID, DELIVERY_TOKEN, ENVIRONMENT_ID } = CONTENTFUL_CONFIG;
 
     if (!SPACE_ID || !DELIVERY_TOKEN) {
@@ -13,15 +21,130 @@ export const getContentfulClient = () => {
       return null;
     }
 
-    return createClient({
+    contentfulClientCache = createClient({
       space: SPACE_ID,
       accessToken: DELIVERY_TOKEN,
       environment: ENVIRONMENT_ID || 'master'
     });
+    
+    return contentfulClientCache;
   } catch (error) {
     console.error('Error creating Contentful client:', error);
     return null;
   }
+};
+
+/**
+ * Refresh the Contentful client (clear cache and create a new instance)
+ */
+export const refreshContentfulClient = async () => {
+  console.log('[contentfulClient] Refreshing Contentful client');
+  contentfulClientCache = null; // Clear the cache
+  
+  try {
+    const client = getContentfulClient();
+    if (!client) {
+      throw new Error('Failed to initialize Contentful client');
+    }
+    
+    // Test the connection to make sure credentials are valid
+    const testResult = await testContentfulConnection();
+    if (!testResult.success) {
+      console.warn('[contentfulClient] Refresh warning:', testResult.message);
+    }
+    
+    return client;
+  } catch (error) {
+    console.error('[contentfulClient] Error refreshing Contentful client:', error);
+    throw error;
+  }
+};
+
+/**
+ * Test the Contentful connection with proper error handling
+ * @param silent If true, suppresses toast notifications
+ */
+export const testContentfulConnection = async (silent = false) => {
+  try {
+    console.log('[testContentfulConnection] Testing Contentful connection...');
+    
+    const configCheck = checkContentfulConfig();
+    
+    if (!configCheck.isConfigured) {
+      console.error('[testContentfulConnection] Missing Contentful configuration');
+      return {
+        success: false,
+        message: `Missing Contentful configuration: ${configCheck.missingValues.join(', ')}`
+      };
+    }
+    
+    console.log('[testContentfulConnection] Creating test Contentful client');
+    
+    // Create a new client directly using the values from config
+    const client = createClient({
+      space: configCheck.config.spaceId,
+      accessToken: configCheck.config.deliveryToken,
+      environment: configCheck.config.environmentId
+    });
+    
+    // Make a simple request to verify connection
+    console.log('[testContentfulConnection] Making test request to Contentful API');
+    const { total } = await client.getEntries({
+      limit: 1
+    });
+    
+    console.log(`[testContentfulConnection] Connection successful. Found ${total} total entries`);
+    
+    return {
+      success: true,
+      message: `Connection to Contentful successful! Found ${total} total entries.`
+    };
+  } catch (error) {
+    console.error('[testContentfulConnection] Error testing connection:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    if (!silent) {
+      toast.error(`Failed to connect to Contentful: ${errorMessage}`);
+    }
+    
+    return {
+      success: false,
+      message: `Failed to connect to Contentful: ${errorMessage}`
+    };
+  }
+};
+
+/**
+ * Check if Contentful configuration is valid
+ */
+export const checkContentfulConfig = () => {
+  // Check if the required configuration values are set
+  const spaceId = CONTENTFUL_CONFIG.SPACE_ID;
+  const deliveryToken = CONTENTFUL_CONFIG.DELIVERY_TOKEN;
+  const environmentId = CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master';
+  
+  const missingValues: string[] = [];
+  
+  if (!spaceId) missingValues.push('SPACE_ID');
+  if (!deliveryToken) missingValues.push('DELIVERY_TOKEN');
+  
+  return {
+    isConfigured: missingValues.length === 0,
+    missingValues,
+    config: {
+      spaceId,
+      deliveryToken,
+      environmentId
+    }
+  };
+};
+
+/**
+ * Validate Contentful client (for backward compatibility)
+ */
+export const validateContentfulClient = async () => {
+  return await testContentfulConnection(true);
 };
 
 /**
