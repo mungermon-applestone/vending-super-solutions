@@ -2,7 +2,6 @@
 import React from 'react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
-import { normalizeMachineData } from '@/utils/machineDataAdapter';
 
 const DiviSS = () => {
   // Default fallback data
@@ -14,11 +13,10 @@ const DiviSS = () => {
     temperature: "ambient",
     description: "Premium stainless steel vending solution with advanced touchscreen interface. The DIVI-SS is designed for upscale environments where aesthetics matter.",
     images: [
-      { id: 'divi-ss-img-1', url: "https://images.unsplash.com/photo-1627998792088-f8016b438988", alt: "DIVI-SS - Front View" },
-      { id: 'divi-ss-img-2', url: "https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55", alt: "DIVI-SS - Closeup of Interface" }
+      { url: "https://images.unsplash.com/photo-1627998792088-f8016b438988", alt: "DIVI-SS - Front View" },
+      { url: "https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55", alt: "DIVI-SS - Closeup of Interface" }
     ],
     thumbnail: {
-      id: 'divi-ss-thumb-1',
       url: "https://images.unsplash.com/photo-1627998792088-f8016b438988", 
       alt: "DIVI-SS Thumbnail"
     },
@@ -48,23 +46,23 @@ const DiviSS = () => {
       {
         title: "Luxury Hotel Lobby",
         description: "Provides high-end retail items in upscale hotel environments",
-        image: { id: 'divi-ss-deploy-1', url: "https://images.unsplash.com/photo-1566073771259-6a8506099945", alt: "Luxury hotel deployment" }
+        image: { url: "https://images.unsplash.com/photo-1566073771259-6a8506099945", alt: "Luxury hotel deployment" }
       },
       {
         title: "Corporate Headquarters",
         description: "Premium vending solution for executive floors and visitor areas",
-        image: { id: 'divi-ss-deploy-2', url: "https://images.unsplash.com/photo-1497366754035-f200968a6e72", alt: "Corporate headquarters deployment" }
+        image: { url: "https://images.unsplash.com/photo-1497366754035-f200968a6e72", alt: "Corporate headquarters deployment" }
       },
       {
         title: "Upscale Retail Location",
         description: "Automated retail solution for high-end shopping centers",
-        image: { id: 'divi-ss-deploy-3', url: "https://images.unsplash.com/photo-1555529771-7888783a18d3", alt: "Retail location deployment" }
+        image: { url: "https://images.unsplash.com/photo-1555529771-7888783a18d3", alt: "Retail location deployment" }
       }
     ]
   };
 
-  // Fetch machine data from the database using the updated hook signature
-  const { data: dbMachineData, isLoading, error } = useMachineBySlug('divi-ss');
+  // Fetch machine data from the database
+  const { data: dbMachineData, isLoading, error } = useMachineBySlug('vending', 'divi-ss');
   
   console.log('[DiviSS] Machine data from DB:', {
     isLoading,
@@ -74,8 +72,7 @@ const DiviSS = () => {
   });
 
   // Use database data if available, otherwise fall back to static data
-  // Apply normalization to ensure the data conforms to CMSMachine type
-  const machineData = normalizeMachineData(dbMachineData || fallbackMachineData);
+  const machineData = dbMachineData || fallbackMachineData;
 
   return <MachinePageTemplate machine={machineData} />;
 };

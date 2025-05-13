@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { CMSMachine } from '@/types/cms';
-import { normalizeMachineData } from '@/utils/machineDataAdapter';
 
 interface MachinePageTemplateProps {
   machines?: CMSMachine[];
@@ -17,14 +16,7 @@ const MachinePageTemplate: React.FC<MachinePageTemplateProps> = ({
   description 
 }) => {
   // If a single machine is provided, use that; otherwise use the machines array
-  // Also normalize any machine data passed to ensure compatibility
-  let machinesToDisplay: CMSMachine[] = [];
-  
-  if (machine) {
-    machinesToDisplay = [normalizeMachineData(machine)];
-  } else if (machines && machines.length > 0) {
-    machinesToDisplay = machines.map(m => normalizeMachineData(m));
-  }
+  const machinesToDisplay = machine ? [machine] : machines;
   
   return (
     <div className="container mx-auto px-4 py-8">

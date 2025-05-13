@@ -8,7 +8,6 @@ import { createLandingPage } from './createLandingPage';
 import { updateLandingPage } from './updateLandingPage';
 import { deleteLandingPage } from './deleteLandingPage';
 import { getMockLandingPages } from './mock';
-import { landingPageOperations } from './operations';
 
 // Re-export operations
 export {
@@ -17,7 +16,6 @@ export {
   createLandingPage,
   updateLandingPage,
   deleteLandingPage,
-  landingPageOperations
 };
 
 // Export mock data helper for internal use

@@ -6,7 +6,7 @@
  */
 
 import { CMSCaseStudy } from '@/types/cms';
-import { logDeprecation, throwDeprecatedOperationError } from '@/services/cms/utils/deprecation';
+import { createDeprecatedWriteOperation } from '@/services/cms/utils/deprecation';
 
 /**
  * Interface for the case study adapter
@@ -19,18 +19,6 @@ export interface CaseStudyAdapter {
   update: (id: string, data: any) => Promise<CMSCaseStudy>;
   delete: (id: string) => Promise<void>;
 }
-
-// Helper function to create deprecated write operations
-const createWriteOperation = (operation: string) => {
-  return () => {
-    logDeprecation(
-      `CaseStudy.${operation}`,
-      `The ${operation} operation on case studies is deprecated`,
-      'Use Contentful directly for content management'
-    );
-    return throwDeprecatedOperationError(operation, 'caseStudy');
-  };
-};
 
 /**
  * Implements the case study adapter interface for Contentful
@@ -69,9 +57,8 @@ export const contentfulCaseStudyAdapter: CaseStudyAdapter = {
     return Promise.resolve(null);
   },
   
-  // Use our helper function for write operations
-  create: createWriteOperation('create'),
-  update: createWriteOperation('update'),
-  delete: createWriteOperation('delete')
+  // Use the deprecated write operation factory for write operations
+  create: createDeprecatedWriteOperation('create', 'caseStudy'),
+  update: createDeprecatedWriteOperation('update', 'caseStudy'),
+  delete: createDeprecatedWriteOperation('delete', 'caseStudy')
 };
-

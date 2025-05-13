@@ -8,25 +8,9 @@
 
 import { 
   trackDeprecatedUsage, 
-  logDeprecation,
-  throwDeprecatedOperationError
+  createDeprecatedWriteOperation 
 } from './deprecation';
 import type { ContentTypeOperations } from '../contentTypes/types';
-
-/**
- * Helper function to create a deprecated write operation
- */
-const createDeprecatedOperation = (operation: string, entityType: string) => {
-  return () => {
-    logDeprecation(
-      `${entityType}.${operation}`,
-      `The ${operation} operation on ${entityType} is deprecated`,
-      'Use Contentful directly for content management'
-    );
-    
-    return throwDeprecatedOperationError(operation, entityType);
-  };
-};
 
 /**
  * Creates a read-only version of any adapter by replacing write operations
@@ -50,7 +34,7 @@ export function makeAdapterReadOnly<T extends Record<string, any>>(
     if (operation in adapter && typeof adapter[operation as keyof T] === 'function') {
       // Use type assertion to safely assign to the readOnlyAdapter
       Object.defineProperty(readOnlyAdapter, operation, {
-        value: createDeprecatedOperation(operation, entityType),
+        value: createDeprecatedWriteOperation(operation, entityType),
         configurable: true,
         enumerable: true
       });
@@ -58,7 +42,7 @@ export function makeAdapterReadOnly<T extends Record<string, any>>(
   }
   
   // Track each time the adapter is used
-  trackDeprecatedUsage(`ReadOnlyAdapter-${entityType}`, `Used read-only adapter for ${entityType}`);
+  trackDeprecatedUsage(`ReadOnlyAdapter-${entityType}`);
   
   return readOnlyAdapter;
 }
@@ -104,7 +88,7 @@ export function makeContentTypeOperationsCompatible<T extends Record<string, any
   }
   
   // Track usage of the compatibility layer
-  trackDeprecatedUsage(`CompatibilityAdapter-${entityType}`, `Used compatibility adapter for ${entityType}`);
+  trackDeprecatedUsage(`CompatibilityAdapter-${entityType}`);
   
   return compatibleAdapter;
 }
@@ -137,4 +121,3 @@ export function createLoggingAdapter<T extends object>(
     }
   });
 }
-

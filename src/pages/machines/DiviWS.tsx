@@ -2,7 +2,6 @@
 import React from 'react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
-import { normalizeMachineData } from '@/utils/machineDataAdapter';
 
 const DiviWS = () => {
   // Default fallback data
@@ -14,8 +13,8 @@ const DiviWS = () => {
     temperature: "ambient",
     description: "Wall-mounted slim profile vending machine for tight spaces with a focus on sleek design. Ideal for narrow corridors and small waiting areas.",
     images: [
-      { id: 'divi-ws-img-1', url: "https://images.unsplash.com/photo-1627395637580-988089c61818", alt: "DIVI-WS - Front View" },
-      { id: 'divi-ws-img-2', url: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2", alt: "DIVI-WS - Side View" }
+      { url: "https://images.unsplash.com/photo-1627395637580-988089c61818", alt: "DIVI-WS - Front View" },
+      { url: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2", alt: "DIVI-WS - Side View" }
     ],
     specs: {
       dimensions: "60\"H x 32\"W x 15\"D",
@@ -43,27 +42,26 @@ const DiviWS = () => {
       {
         title: "Medical Office Hallway",
         description: "Providing refreshments in narrow medical facility corridors",
-        image: { id: 'divi-ws-deploy-1', url: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d", alt: "Medical office deployment" }
+        image: { url: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d", alt: "Medical office deployment" }
       },
       {
         title: "Hotel Room Floors",
         description: "Slim profile solution for guest convenience without obstructing hallways",
-        image: { id: 'divi-ws-deploy-2', url: "https://images.unsplash.com/photo-1629140727571-9b5c6f6267b4", alt: "Hotel hallway deployment" }
+        image: { url: "https://images.unsplash.com/photo-1629140727571-9b5c6f6267b4", alt: "Hotel hallway deployment" }
       },
       {
         title: "Office Waiting Area",
         description: "Space-saving refreshment solution for compact reception areas",
-        image: { id: 'divi-ws-deploy-3', url: "https://images.unsplash.com/photo-1549637642-90187f64f420", alt: "Office waiting area deployment" }
+        image: { url: "https://images.unsplash.com/photo-1549637642-90187f64f420", alt: "Office waiting area deployment" }
       }
     ]
   };
 
-  // Fetch machine data from the database using the updated hook signature
-  const { data: dbMachineData, isLoading, error } = useMachineBySlug('divi-ws');
+  // Fetch machine data from the database
+  const { data: dbMachineData, isLoading, error } = useMachineBySlug('vending', 'divi-ws');
 
   // Use database data if available, otherwise fall back to static data
-  // Apply normalization to ensure the data conforms to CMSMachine type
-  const machineData = normalizeMachineData(dbMachineData || fallbackMachineData);
+  const machineData = dbMachineData || fallbackMachineData;
 
   return <MachinePageTemplate machine={machineData} />;
 };

@@ -1,68 +1,38 @@
+// This file is maintained for backward compatibility
+// New code should import from the specific modules directly
 
-/**
- * CMS Services
- * 
- * This is the main entry point for CMS services.
- * It re-exports all CMS functionality from more specific modules.
- */
-
-// Import operations from content type modules
-import { productTypeOperations } from './contentTypes/productTypes';
-import { businessGoalOperations } from './contentTypes/businessGoals';
-import { technologyOperations } from './contentTypes/technologies';
-import { machineOperations } from './contentTypes/machines/index';
-import { caseStudyOperations } from './contentTypes/caseStudies';
-import { landingPageOperations } from './contentTypes/landingPages/operations';
-
-// Export standardized content type operations
-export const productTypes = productTypeOperations;
-export const businessGoals = businessGoalOperations;
-export const technologies = technologyOperations;
-export const machines = machineOperations;
-export const caseStudies = caseStudyOperations;
-export const landingPages = landingPageOperations;
-
-// Re-export functions from specific content type services for backward compatibility
-// These are being deprecated in favor of the operations objects above
-
-// Product types
-export {
-  getProductTypes,
-  getProductTypeBySlug,
-  getProductTypeByUUID,
-  deleteProductType
+// Import services from specialized modules
+import { 
+  getProductTypes, 
+  getProductTypeBySlug, 
+  getProductTypeByUUID, 
+  deleteProductType 
 } from './productTypes';
 
-// Business goals
-export { 
+import { 
   getBusinessGoals,
   getBusinessGoalBySlug 
 } from './businessGoals';
 
-// Machines
-export {
+import {
   getMachines,
   getMachineBySlug,
   getMachineById,
-  createNewMachine as createMachine,
-  updateExistingMachine as updateMachine,
-  removeExistingMachine as deleteMachine
+  createNewMachine,
+  updateExistingMachine,
+  removeExistingMachine
 } from './machines';
 
-export { cloneMachine } from './contentTypes/machines/cloneMachine';
-
-// Technologies
-export {
+import {
   getTechnologies,
   getTechnologyBySlug,
   deleteTechnology
 } from './technologies';
 
-// Testimonials
-export { getTestimonials } from './testimonials';
+import { getTestimonials } from './testimonials';
 
-// Case Studies
-export {
+// Import case studies service
+import {
   fetchCaseStudies,
   fetchCaseStudyBySlug,
   createCaseStudy,
@@ -70,8 +40,8 @@ export {
   deleteCaseStudy
 } from './contentTypes/caseStudies';
 
-// Landing Pages
-export {
+// Import landing pages service
+import {
   fetchLandingPages,
   fetchLandingPageByKey,
   createLandingPage,
@@ -79,11 +49,67 @@ export {
   deleteLandingPage
 } from './contentTypes/landingPages';
 
-// Export the initialized contentful client for advanced usage
-export { getContentfulClient } from './utils/contentfulClient';
+// Import operations for direct access
+import { productTypeOperations } from './contentTypes/productTypes';
+import { businessGoalOperations } from './contentTypes/businessGoals';
+import { technologyOperations } from './contentTypes/technologies';
+import { caseStudyOperations } from './contentTypes/caseStudies/operations';
+import { landingPageOperations } from './contentTypes/landingPages/operations';
+import { cloneProductType } from './contentTypes/productTypes/cloneProductType';
+import { cloneBusinessGoal } from './contentTypes/businessGoals/cloneBusinessGoal';
+import { cloneTechnology } from './contentTypes/technologies/cloneTechnology';
+import { cloneMachine } from './contentTypes/machines/cloneMachine';
 
-// Export CMS initialization functions
-export { initCMS, refreshCmsConnection } from './cmsInit';
+// Export standardized content type operations
+export const productTypes = productTypeOperations;
+export const businessGoals = businessGoalOperations;
+export const technologies = technologyOperations;
+export const caseStudies = caseStudyOperations;
+export const landingPages = landingPageOperations;
 
-// Export combined adapter
-export { getCombinedAdapter } from './adapters';
+// Export individual service functions for backward compatibility
+export {
+  // Product types
+  getProductTypes,
+  getProductTypeBySlug,
+  getProductTypeByUUID,
+  deleteProductType,
+  cloneProductType,
+  
+  // Business goals
+  getBusinessGoals,
+  getBusinessGoalBySlug,
+  cloneBusinessGoal,
+  
+  // Machines
+  getMachines,
+  getMachineBySlug,
+  getMachineById,
+  createNewMachine,
+  updateExistingMachine,
+  removeExistingMachine,
+  cloneMachine,
+  
+  // Technologies
+  getTechnologies,
+  getTechnologyBySlug,
+  deleteTechnology,
+  cloneTechnology,
+  
+  // Testimonials
+  getTestimonials,
+  
+  // Case Studies
+  fetchCaseStudies,
+  fetchCaseStudyBySlug,
+  createCaseStudy,
+  updateCaseStudy,
+  deleteCaseStudy,
+
+  // Landing Pages
+  fetchLandingPages,
+  fetchLandingPageByKey,
+  createLandingPage,
+  updateLandingPage,
+  deleteLandingPage
+};

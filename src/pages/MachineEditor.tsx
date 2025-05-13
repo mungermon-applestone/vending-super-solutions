@@ -8,7 +8,6 @@ import MachineForm from '@/components/admin/machine-editor/MachineForm';
 import { MachineFormValues, MachineData } from '@/utils/machineMigration/types';
 import { useToast } from '@/hooks/use-toast';
 import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
-import DeprecatedInterfaceWarning from '@/components/admin/DeprecatedInterfaceWarning';
 
 const MachineEditor = () => {
   const { machineId } = useParams<{ machineId: string }>();
@@ -128,14 +127,6 @@ const MachineEditor = () => {
       contentType="Machine"
       backPath="/admin/machines"
     >
-      <DeprecatedInterfaceWarning
-        contentType="Machine"
-        contentTypeId={machineId}
-        variant="warning"
-        message="Machine management has been migrated to Contentful CMS. This editor is deprecated and will be removed in a future update."
-        showContentfulButton={true}
-      />
-      
       <MachineForm 
         machine={machine} 
         isCreating={isCreating} 

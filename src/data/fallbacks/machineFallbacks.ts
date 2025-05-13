@@ -95,6 +95,3 @@ export const fallbackMachineData: Record<string, CMSMachine> = {
     }
   }
 };
-
-// Export mockMachines for use in mock data handler
-export const mockMachines = Object.values(fallbackMachineData);

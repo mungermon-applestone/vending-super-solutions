@@ -17,8 +17,8 @@ interface ViewInContentfulProps extends ButtonProps {
 const ViewInContentful: React.FC<ViewInContentfulProps> = ({
   contentType,
   contentId,
-  spaceId,
-  environmentId,
+  spaceId = process.env.CONTENTFUL_SPACE_ID,
+  environmentId = process.env.CONTENTFUL_ENVIRONMENT_ID,
   className,
   variant = "outline",
   size = "sm",
@@ -58,4 +58,3 @@ const ViewInContentful: React.FC<ViewInContentfulProps> = ({
 };
 
 export default ViewInContentful;
-

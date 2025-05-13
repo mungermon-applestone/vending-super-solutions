@@ -2,7 +2,8 @@
 import React from 'react';
 import { Button, ButtonProps } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
-import { logDeprecation, getContentfulEditUrl } from '@/services/cms/utils/deprecation';
+import { getContentfulEditUrl } from '@/services/cms/utils/migrationHelpers';
+import { logDeprecation } from '@/services/cms/utils/deprecation';
 
 interface ViewInContentfulButtonProps extends ButtonProps {
   contentType: string;
@@ -55,4 +56,3 @@ const ViewInContentfulButton: React.FC<ViewInContentfulButtonProps> = ({
 };
 
 export default ViewInContentfulButton;
-
