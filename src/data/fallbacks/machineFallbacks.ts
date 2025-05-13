@@ -1,4 +1,3 @@
-
 import { CMSMachine } from '@/types/cms';
 
 export const fallbackMachineData: Record<string, CMSMachine> = {
@@ -96,3 +95,6 @@ export const fallbackMachineData: Record<string, CMSMachine> = {
     }
   }
 };
+
+// Export mockMachines for use in mock data handler
+export const mockMachines = Object.values(fallbackMachineData);

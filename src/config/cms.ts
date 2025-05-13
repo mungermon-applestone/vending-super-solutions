@@ -43,6 +43,9 @@ export const isPreviewEnvironment = () => {
   return false;
 };
 
+// Flag for development environment
+export const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
+
 // Log Contentful configuration
 export const logContentfulConfig = () => {
   console.log('[Config] Contentful configuration status:', {
@@ -89,9 +92,9 @@ declare global {
       VITE_CONTENTFUL_SPACE_ID?: string;
       VITE_CONTENTFUL_DELIVERY_TOKEN?: string;
       VITE_CONTENTFUL_ENVIRONMENT_ID?: string;
-      [key: string]: any;
+      [key: string]: string | undefined;
     };
-    _contentfulInitialized?: boolean;
+    _contentfulInitialized?: boolean | string;
     _contentfulInitializedSource?: string;
     _refreshContentfulAfterConfig?: () => Promise<void>;
     env?: {
@@ -101,7 +104,7 @@ declare global {
       spaceId?: string;
       deliveryToken?: string;
       environmentId?: string;
-      [key: string]: any;
+      [key: string]: string | undefined;
     };
   }
 }
