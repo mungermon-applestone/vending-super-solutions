@@ -58,8 +58,8 @@ const DiviSP = () => {
     ]
   };
 
-  // Fetch machine data from the database
-  const { data: dbMachineData, isLoading, error } = useMachineBySlug('vending', 'divi-sp');
+  // Fetch machine data from the database using the updated hook signature
+  const { data: dbMachineData, isLoading, error } = useMachineBySlug('divi-sp');
 
   // Use database data if available, otherwise fall back to static data
   const machineData = dbMachineData || fallbackMachineData;

@@ -59,8 +59,8 @@ const Combi3000 = () => {
     ]
   };
 
-  // Fetch machine data from the database
-  const { data: dbMachineData, isLoading, error } = useMachineBySlug('vending', 'combi-3000');
+  // Fetch machine data from the database using the updated hook signature
+  const { data: dbMachineData, isLoading, error } = useMachineBySlug('combi-3000');
 
   // Use database data if available, otherwise fall back to static data
   const machineData = dbMachineData || fallbackMachineData;

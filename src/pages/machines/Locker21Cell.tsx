@@ -64,8 +64,8 @@ const Locker21Cell = () => {
     ]
   };
 
-  // Fetch machine data from the database
-  const { data: dbMachineData, isLoading, error } = useMachineBySlug('locker', '21-cell-temperature-controlled');
+  // Fetch machine data from the database using the updated hook signature
+  const { data: dbMachineData, isLoading, error } = useMachineBySlug('21-cell-temperature-controlled');
 
   // Use database data if available, otherwise fall back to static data
   const machineData = dbMachineData || fallbackMachineData;

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 import { logDeprecation } from '@/services/cms/utils/deprecation';
 import { generateMigrationReport } from '@/services/cms/utils/migrationHelpers';

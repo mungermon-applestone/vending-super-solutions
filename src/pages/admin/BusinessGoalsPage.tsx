@@ -39,7 +39,7 @@ const BusinessGoalsPage = () => {
         <DeprecatedInterfaceWarning
           contentType="Business Goals"
           message="Business Goals management has been migrated to Contentful CMS. This interface is read-only and will be removed in a future update."
-          showContentfulLink={true}
+          showContentfulButton={true}
         />
       )}
 

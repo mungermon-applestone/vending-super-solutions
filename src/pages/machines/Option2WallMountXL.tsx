@@ -57,8 +57,8 @@ const Option2WallMountXL = () => {
     ]
   };
 
-  // Fetch machine data from the database
-  const { data: dbMachineData, isLoading, error } = useMachineBySlug('vending', 'option-2-wall-mount-xl');
+  // Fetch machine data from the database using the updated hook signature
+  const { data: dbMachineData, isLoading, error } = useMachineBySlug('option-2-wall-mount-xl');
 
   // Use database data if available, otherwise fall back to static data
   const machineData = dbMachineData || fallbackMachineData;

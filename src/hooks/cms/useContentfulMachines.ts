@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { CMSMachine } from '@/types/cms';
-import { machineOperations } from '@/services/cms/contentTypes/machines';
+import { fetchMachines, fetchMachineById } from '@/services/cms/contentTypes/machines';
 import { logDeprecation } from '@/services/cms/utils/deprecation';
 import { fallbackMachineData } from '@/data/fallbacks/machineFallbacks';
 
@@ -14,7 +14,7 @@ export function useContentfulMachines(filters?: Record<string, any>) {
     queryKey: ['contentful-machines', filters],
     queryFn: async () => {
       try {
-        const machines = await machineOperations.fetchAll(filters || {});
+        const machines = await fetchMachines(filters || {});
         console.log('Fetched machines from Contentful:', machines.length);
         
         // If no machines returned and we're in development, use fallbacks
@@ -52,14 +52,14 @@ export function useContentfulMachine(identifier?: string) {
       
       try {
         // First try to fetch by slug
-        const machinesBySlug = await machineOperations.fetchBySlug(identifier);
+        const machinesBySlug = await fetchMachines({ slug: identifier });
         
-        if (machinesBySlug) {
-          return machinesBySlug;
+        if (machinesBySlug && machinesBySlug.length > 0) {
+          return machinesBySlug[0];
         }
         
         // If not found by slug, try by ID
-        const machineById = await machineOperations.fetchById(identifier);
+        const machineById = await fetchMachineById(identifier);
         
         if (machineById) {
           return machineById;

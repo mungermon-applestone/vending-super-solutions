@@ -54,50 +54,50 @@ export async function getMachineById(id: string): Promise<CMSMachine | null> {
     'Use machineOperations.fetchById() directly'
   );
   
-  return await fetchMachineById(id);
+  return await fetchMachineById<CMSMachine>(id);
 }
 
 /**
  * @deprecated Use Contentful directly for machine creation
  * Create a new machine
  */
-export async function createNewMachine(machineData: any): Promise<string> {
+export async function createNewMachine(machineData: any): Promise<CMSMachine> {
   logDeprecation(
     'createNewMachine',
     'Using legacy createNewMachine() function',
     'Use Contentful directly for content management'
   );
   
-  return await createMachine(machineData);
+  return await createMachine(machineData) as unknown as CMSMachine;
 }
 
 /**
  * @deprecated Use Contentful directly for machine updates
  * Update an existing machine
  */
-export async function updateExistingMachine(id: string, machineData: any): Promise<boolean> {
+export async function updateExistingMachine(id: string, machineData: any): Promise<CMSMachine> {
   logDeprecation(
     'updateExistingMachine',
     'Using legacy updateExistingMachine() function',
     'Use Contentful directly for content management'
   );
   
-  return await updateMachine(id, machineData);
+  return await updateMachine(id, machineData) as unknown as CMSMachine;
 }
 
 /**
  * @deprecated Use Contentful directly for machine deletion
  * Delete a machine
  */
-export async function removeExistingMachine(id: string): Promise<boolean> {
+export async function removeExistingMachine(id: string): Promise<CMSMachine> {
   logDeprecation(
     'removeExistingMachine',
     'Using legacy removeExistingMachine() function',
     'Use Contentful directly for content management'
   );
   
-  return await deleteMachine(id);
+  return await deleteMachine(id) as unknown as CMSMachine;
 }
 
 // Export machine operations for direct use
-export const machines = machineOperations;
+export { machineOperations };
