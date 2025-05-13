@@ -1,94 +1,134 @@
 
-import { ContentfulEntry } from '@/types/contentful/machine';
-import { CMSMachine } from '@/types/cms';
-import { validateMachineData } from '../validation/machineValidation';
+import { Entry, Asset } from 'contentful';
+import { CMSMachine, MachineFeature, MachineImage, MachineSpecification } from '@/services/cms/adapters/machines/types';
 
 /**
- * Transforms a Contentful entry into a consistent CMSMachine format
+ * Transforms a Contentful machine entry into our application's CMSMachine format
  * 
- * @param entry - The raw Contentful entry to transform
- * @returns A standardized CMSMachine object
+ * @param entry - Contentful entry for a machine
+ * @returns CMSMachine - Transformed machine object
  */
-export const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => {
-  console.log('Transforming entry:', entry);
-  
-  // Handle nested Contentful structure - fields may be at top level or in fields property
-  const fields = entry.fields || entry;
-  const title = fields.title || '';
-  const slug = fields.slug || '';
-  
-  // Ensure type is strictly "vending" or "locker"
-  const type = fields.type === 'locker' ? 'locker' : 'vending';
-  
-  const description = fields.description || '';
-  const temperature = fields.temperature || 'ambient';
-  const features = fields.features || [];
-  
-  // Handle images, which can be complex in Contentful
-  let images = [];
-  if (fields.images && Array.isArray(fields.images)) {
-    images = fields.images.map((image) => {
-      const imageFields = image.fields || {};
-      const url = imageFields.file?.url ? `https:${imageFields.file.url}` : '';
-      const alt = imageFields.title || title || '';
-      return {
-        id: image.sys?.id || '',
-        url: url,
-        alt: alt
-      };
-    });
+export function transformMachineFromContentful(entry: Entry<any>): CMSMachine {
+  if (!entry || !entry.fields) {
+    console.error('[machineTransformer] Invalid entry provided:', entry);
+    throw new Error('Invalid Contentful entry provided');
   }
   
-  // Extract thumbnail if available
-  let thumbnail = undefined;
-  if (fields.thumbnail) {
-    const thumbFields = fields.thumbnail.fields || {};
-    const thumbUrl = thumbFields.file?.url ? `https:${thumbFields.file.url}` : '';
-    const thumbAlt = thumbFields.title || title || '';
-    thumbnail = {
-      id: fields.thumbnail.sys?.id || '',
-      url: thumbUrl,
-      alt: thumbAlt
+  try {
+    const fields = entry.fields;
+    
+    // Transform main image
+    const mainImage = transformContentfulAsset(fields.mainImage);
+    
+    // Transform gallery images
+    const gallery = Array.isArray(fields.gallery) 
+      ? fields.gallery.map(transformContentfulAsset).filter(Boolean)
+      : [];
+    
+    // Transform features
+    const features = Array.isArray(fields.features)
+      ? fields.features.map(transformFeature).filter(Boolean)
+      : [];
+    
+    // Transform specifications
+    const specifications = Array.isArray(fields.specifications)
+      ? fields.specifications.map(transformSpecification).filter(Boolean)
+      : [];
+    
+    // Build the machine object
+    const machine: CMSMachine = {
+      id: entry.sys.id,
+      contentType: 'machine',
+      name: fields.name || '',
+      slug: fields.slug || '',
+      description: fields.description || '',
+      type: fields.type || '',
+      mainImage: mainImage,
+      gallery: gallery,
+      features: features,
+      specifications: specifications,
+      featured: Boolean(fields.featured),
+      displayOrder: typeof fields.displayOrder === 'number' ? fields.displayOrder : 999,
+      temperature: fields.temperature || 'ambient',
+      deploymentExamples: fields.deploymentExamples || [],
+      shortDescription: fields.shortDescription || '',
+      createdAt: entry.sys.createdAt || new Date().toISOString(),
+      updatedAt: entry.sys.updatedAt || new Date().toISOString()
+    };
+    
+    return machine;
+  } catch (error) {
+    console.error('[machineTransformer] Error transforming machine:', error);
+    throw new Error(`Failed to transform machine: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Transforms a Contentful asset to our MachineImage format
+ * 
+ * @param asset - Contentful asset
+ * @returns MachineImage - Transformed image object
+ */
+function transformContentfulAsset(asset: Asset): MachineImage {
+  if (!asset || !asset.fields) {
+    return {
+      url: '',
+      alt: '',
+      width: 0,
+      height: 0
     };
   }
   
-  // Safe access to specs with proper fallbacks
-  const specs = {
-    dimensions: fields.dimensions || (fields.specs?.dimensions) || '',
-    weight: fields.weight || (fields.specs?.weight) || '',
-    capacity: fields.capacity || (fields.specs?.capacity) || '',
-    powerRequirements: fields.powerRequirements || (fields.specs?.powerRequirements) || '',
-    paymentOptions: fields.paymentOptions || (fields.specs?.paymentOptions) || '',
-    connectivity: fields.connectivity || (fields.specs?.connectivity) || '',
-    manufacturer: fields.manufacturer || (fields.specs?.manufacturer) || '',
-    warranty: fields.warranty || (fields.specs?.warranty) || '',
-    temperature: fields.temperature || (fields.specs?.temperature) || ''
+  return {
+    url: asset.fields.file?.url ? `https:${asset.fields.file.url}` : '',
+    alt: asset.fields.title || '',
+    width: asset.fields.file?.details?.image?.width || 0,
+    height: asset.fields.file?.details?.image?.height || 0
   };
-  
-  // Construct the final object
-  const machineData: CMSMachine = {
-    id: entry.sys?.id || entry.id || '',
-    title: title,
-    slug: slug,
-    type: type, 
-    description: description,
-    temperature: temperature,
-    features: features,
-    images: images,
-    thumbnail: thumbnail,
-    specs: specs
-  };
-  
-  // Validate before returning
-  try {
-    const safeMachine = validateMachineData(machineData);
-    return safeMachine;
-  } catch (validationError) {
-    console.error('[CRITICAL] Machine data validation failed', {
-      error: validationError,
-      entry,
-      timestamp: new Date().toISOString()
-    });
-    throw validationError;
+}
+
+/**
+ * Transforms a Contentful feature entry to our MachineFeature format
+ * 
+ * @param featureEntry - Contentful feature entry
+ * @returns MachineFeature - Transformed feature object
+ */
+function transformFeature(featureEntry: Entry<any>): MachineFeature {
+  if (!featureEntry || !featureEntry.fields) {
+    return {
+      name: '',
+      description: '',
+      icon: ''
+    };
   }
-};
+  
+  return {
+    name: featureEntry.fields.name || '',
+    description: featureEntry.fields.description || '',
+    icon: featureEntry.fields.icon || ''
+  };
+}
+
+/**
+ * Transforms a Contentful specification entry to our MachineSpecification format
+ * 
+ * @param specEntry - Contentful specification entry
+ * @returns MachineSpecification - Transformed specification object
+ */
+function transformSpecification(specEntry: Entry<any>): MachineSpecification {
+  if (!specEntry || !specEntry.fields) {
+    return {
+      name: '',
+      value: '',
+      unit: '',
+      category: 'general'
+    };
+  }
+  
+  return {
+    name: specEntry.fields.name || '',
+    value: specEntry.fields.value || '',
+    unit: specEntry.fields.unit || '',
+    category: specEntry.fields.category || 'general'
+  };
+}

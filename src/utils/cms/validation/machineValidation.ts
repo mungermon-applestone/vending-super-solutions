@@ -1,68 +1,87 @@
 
-import { CMSMachine } from '@/types/cms';
+import { CMSMachine } from '@/services/cms/adapters/machines/types';
 
 /**
- * Validates machine data to ensure it has all required fields with correct types
+ * Validates a machine object for required fields
+ * Throws an error if validation fails
  * 
- * @param machine The machine data to validate
- * @returns A clean machine object with validated data
- * @throws Error if validation fails
+ * @param machine - The machine object to validate
+ * @returns boolean - True if validation passes
  */
-export function validateMachineData(machine: any): CMSMachine {
+export function validateMachineData(machine: CMSMachine): boolean {
   // Check for required fields
-  if (!machine.id) {
-    throw new Error('Machine ID is required');
+  if (!machine) {
+    throw new Error('Machine data is null or undefined');
   }
   
-  if (!machine.title) {
-    throw new Error('Machine title is required');
+  if (!machine.name) {
+    throw new Error('Machine name is required');
   }
   
-  // Default values for optional fields to prevent errors downstream
-  const validatedMachine: CMSMachine = {
-    id: String(machine.id),
-    title: String(machine.title),
-    slug: machine.slug ? String(machine.slug) : String(machine.title).toLowerCase().replace(/\s+/g, '-'),
-    type: machine.type === 'locker' ? 'locker' : 'vending',
-    description: machine.description ? String(machine.description) : '',
-    features: Array.isArray(machine.features) ? machine.features.filter(Boolean).map(String) : [],
-    temperature: machine.temperature ? String(machine.temperature) : 'ambient'
-  };
-  
-  // Validate and clean images
-  if (machine.images && Array.isArray(machine.images)) {
-    validatedMachine.images = machine.images
-      .filter(img => img && typeof img === 'object' && img.url)
-      .map(img => ({
-        id: img.id || '',
-        url: String(img.url),
-        alt: img.alt || validatedMachine.title
-      }));
+  if (!machine.slug) {
+    throw new Error(`Machine slug is required for ${machine.name}`);
   }
   
-  // Validate and clean thumbnail
-  if (machine.thumbnail && typeof machine.thumbnail === 'object' && machine.thumbnail.url) {
-    validatedMachine.thumbnail = {
-      id: machine.thumbnail.id || '',
-      url: String(machine.thumbnail.url),
-      alt: machine.thumbnail.alt || validatedMachine.title
-    };
+  // Validate slug format (lowercase, no spaces, only hyphens)
+  const validSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  if (!validSlugPattern.test(machine.slug)) {
+    console.warn(`Machine slug "${machine.slug}" may not be properly formatted`);
+    // Don't throw an error as we want to be flexible with existing data
   }
   
-  // Validate and clean specs
-  if (machine.specs && typeof machine.specs === 'object') {
-    validatedMachine.specs = {
-      dimensions: machine.specs.dimensions ? String(machine.specs.dimensions) : '',
-      weight: machine.specs.weight ? String(machine.specs.weight) : '',
-      capacity: machine.specs.capacity ? String(machine.specs.capacity) : '',
-      powerRequirements: machine.specs.powerRequirements ? String(machine.specs.powerRequirements) : '',
-      paymentOptions: machine.specs.paymentOptions ? String(machine.specs.paymentOptions) : '',
-      connectivity: machine.specs.connectivity ? String(machine.specs.connectivity) : '',
-      manufacturer: machine.specs.manufacturer ? String(machine.specs.manufacturer) : '',
-      warranty: machine.specs.warranty ? String(machine.specs.warranty) : '',
-      temperature: machine.specs.temperature ? String(machine.specs.temperature) : ''
-    };
+  // Check that image properties exist if specified
+  if (machine.mainImage && typeof machine.mainImage === 'object') {
+    if (!machine.mainImage.url) {
+      console.warn(`Machine ${machine.name} has a mainImage object but no URL`);
+    }
   }
   
-  return validatedMachine;
+  // Validate that features have required properties if present
+  if (machine.features && Array.isArray(machine.features)) {
+    machine.features.forEach((feature, index) => {
+      if (!feature.name) {
+        console.warn(`Machine ${machine.name} has a feature at index ${index} with no name`);
+      }
+    });
+  }
+  
+  // Validate specifications if present
+  if (machine.specifications && Array.isArray(machine.specifications)) {
+    machine.specifications.forEach((spec, index) => {
+      if (!spec.name) {
+        console.warn(`Machine ${machine.name} has a specification at index ${index} with no name`);
+      }
+      if (spec.value === undefined || spec.value === null) {
+        console.warn(`Machine ${machine.name} has a specification "${spec.name}" with no value`);
+      }
+    });
+  }
+  
+  return true;
+}
+
+/**
+ * Validates an array of machines
+ * Logs warnings for invalid machines but doesn't throw
+ * 
+ * @param machines - Array of machine objects to validate
+ * @returns CMSMachine[] - Array of valid machines
+ */
+export function validateMachines(machines: CMSMachine[]): CMSMachine[] {
+  if (!Array.isArray(machines)) {
+    console.error('Invalid machines data: expected an array');
+    return [];
+  }
+  
+  const validMachines = machines.filter(machine => {
+    try {
+      validateMachineData(machine);
+      return true;
+    } catch (error) {
+      console.error(`Validation failed for machine:`, error);
+      return false;
+    }
+  });
+  
+  return validMachines;
 }

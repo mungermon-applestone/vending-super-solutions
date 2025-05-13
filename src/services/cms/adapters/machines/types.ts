@@ -1,42 +1,87 @@
 
-import { CMSMachine } from '@/types/cms';
-
 /**
- * Input type for creating a machine in the CMS
+ * Main Machine interface for CMS integration
  */
-export type MachineCreateInput = {
-  title: string;
-  slug: string;
-  type?: string;
-  description?: string;
-  temperature?: string;
-  features?: string[];
-  images?: any[];
-  specs?: Record<string, string>;
-};
-
-/**
- * Input type for updating a machine in the CMS
- */
-export type MachineUpdateInput = Partial<MachineCreateInput> & {
+export interface CMSMachine {
   id: string;
-};
-
-/**
- * Machine adapter interface
- */
-export interface MachineAdapter {
-  getAll: (filters?: Record<string, any>) => Promise<CMSMachine[]>;
-  getBySlug: (slug: string) => Promise<CMSMachine | null>;
-  getById: (id: string) => Promise<CMSMachine | null>;
-  create: (data: MachineCreateInput) => Promise<CMSMachine>;
-  update: (id: string, data: MachineUpdateInput) => Promise<CMSMachine>;
-  delete: (id: string) => Promise<boolean>;
-  clone?: (id: string) => Promise<CMSMachine>;
+  contentType: string;
+  name: string;
+  slug: string;
+  description: string;
+  shortDescription?: string;
+  type: string;
+  mainImage: MachineImage;
+  gallery: MachineImage[];
+  features: MachineFeature[];
+  specifications: MachineSpecification[];
+  featured: boolean;
+  displayOrder: number;
+  temperature: 'ambient' | 'refrigerated' | 'frozen' | string;
+  deploymentExamples?: DeploymentExample[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
- * Factory function type for getting a machine adapter
+ * Machine image interface
  */
-export type MachineAdapterFactory = () => MachineAdapter;
+export interface MachineImage {
+  url: string;
+  alt: string;
+  width: number;
+  height: number;
+}
 
+/**
+ * Machine feature interface
+ */
+export interface MachineFeature {
+  name: string;
+  description: string;
+  icon?: string;
+}
+
+/**
+ * Machine specification interface
+ */
+export interface MachineSpecification {
+  name: string;
+  value: string | number;
+  unit?: string;
+  category?: string;
+}
+
+/**
+ * Deployment example interface
+ */
+export interface DeploymentExample {
+  title: string;
+  description?: string;
+  image?: MachineImage;
+}
+
+/**
+ * Interface for machine filter options
+ */
+export interface MachineFilterOptions {
+  type?: string;
+  featured?: boolean;
+  temperature?: string;
+  limit?: number;
+  includeDetails?: boolean;
+}
+
+/**
+ * Interface for machine creation payload
+ */
+export interface CreateMachinePayload {
+  name: string;
+  slug: string;
+  description: string;
+  shortDescription?: string;
+  type: string;
+  mainImage?: MachineImage;
+  featured?: boolean;
+  displayOrder?: number;
+  temperature?: string;
+}

@@ -3,7 +3,7 @@ import React, { useEffect, Suspense, lazy } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from './layout/Header';
 import Footer from './layout/Footer';
-import ContentfulPersistenceProvider from './providers/ContentfulPersistenceProvider';
+import { ContentfulPersistenceProvider } from './providers/ContentfulPersistenceProvider';
 import ContentfulInitializer from './contentful/ContentfulInitializer';
 import { isPreviewEnvironment, logContentfulConfig } from '@/config/cms';
 import { Offline } from '@/components/common';

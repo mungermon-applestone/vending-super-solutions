@@ -1,113 +1,231 @@
 
-/**
- * Contentful Machine Adapter
- * 
- * This adapter interfaces with Contentful to provide machine data.
- */
-
-import { CMSMachine } from '@/types/cms';
-import { MachineAdapter, MachineCreateInput, MachineUpdateInput } from './types';
-import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
-import { ContentfulEntry } from '@/types/contentful/machine';
-import { transformContentfulEntry } from '@/utils/cms/transformers/machineTransformer';
-import { createDeprecatedWriteOperation } from '@/services/cms/utils/deprecation';
+import { ContentfulClientApi, EntryCollection, Entry, Asset } from 'contentful';
+import { getContentfulClientInstance } from '@/services/cms/utils/contentfulClient';
+import { transformMachineFromContentful } from '@/utils/cms/transformers/machineTransformer';
+import { validateMachineData } from '@/utils/cms/validation/machineValidation';
+import { CMSMachine, MachineFeature, MachineSpecification } from './types';
+import { logDeprecation } from '@/services/cms/utils/deprecation';
 
 /**
- * Implements the machine adapter interface for Contentful
+ * Contentful Machine Adapter Implementation
+ * Provides methods for fetching machine data from Contentful CMS
  */
-export const contentfulMachineAdapter: MachineAdapter = {
+export const contentfulMachineAdapter = {
   /**
-   * Get all machines from Contentful
+   * Fetch all machines from Contentful
+   * 
+   * @returns Promise<CMSMachine[]> - Array of machine objects
    */
-  getAll: async (filters = {}) => {
-    console.log('Fetching all machines from Contentful with filters:', filters);
-    
+  getMachines: async (): Promise<CMSMachine[]> => {
     try {
-      const query: Record<string, any> = {};
+      console.log('[contentfulMachineAdapter] Fetching all machines');
+      const client = getContentfulClientInstance();
       
-      // Add filters for type if specified
-      if (filters.type) {
-        query['fields.type'] = filters.type;
+      if (!client) {
+        console.error('[contentfulMachineAdapter] Contentful client is not available');
+        return [];
       }
       
-      // Add filters for slug if specified
-      if (filters.slug) {
-        query['fields.slug'] = filters.slug;
-      }
+      const response: EntryCollection<any> = await client.getEntries({
+        content_type: 'machine',
+        include: 2, // Include 2 levels of linked entries
+        limit: 100,
+      });
       
-      // Filter by visibility status if specified
-      if (filters.visible !== undefined) {
-        query['fields.visible'] = filters.visible;
-      }
+      console.log(`[contentfulMachineAdapter] Fetched ${response.items.length} machines`);
       
-      // Add filters for temperature if specified
-      if (filters.temperature) {
-        query['fields.temperature'] = filters.temperature;
-      }
-      
-      // Get entries from Contentful
-      const entries = await fetchContentfulEntries<ContentfulEntry>('machine', query);
-      
-      // Transform entries to CMSMachine objects
-      const machines = entries.map(entry => transformContentfulEntry(entry));
+      // Transform and validate each machine entry
+      const machines = response.items.map(entry => {
+        const machine = transformMachineFromContentful(entry);
+        validateMachineData(machine);
+        return machine;
+      });
       
       return machines;
     } catch (error) {
-      console.error('Error fetching machines from Contentful:', error);
+      console.error('[contentfulMachineAdapter] Error fetching machines:', error);
       return [];
     }
   },
   
   /**
-   * Get a machine by its slug
+   * Fetch a single machine by slug
+   * 
+   * @param slug - Machine slug to find
+   * @returns Promise<CMSMachine | null> - Machine object or null if not found
    */
-  getBySlug: async (slug: string) => {
-    console.log(`Fetching machine with slug: ${slug} from Contentful`);
-    
+  getMachineBySlug: async (slug: string): Promise<CMSMachine | null> => {
     try {
-      // Query by slug
-      const entries = await fetchContentfulEntries<ContentfulEntry>('machine', {
-        'fields.slug': slug
-      });
+      console.log(`[contentfulMachineAdapter] Fetching machine by slug: ${slug}`);
       
-      if (entries.length === 0) {
-        console.log(`No machine found with slug: ${slug}`);
+      if (!slug) {
+        console.error('[contentfulMachineAdapter] Invalid slug provided');
         return null;
       }
       
-      // Transform the first entry to a CMSMachine object
-      const machine = transformContentfulEntry(entries[0]);
+      const client = getContentfulClientInstance();
+      
+      if (!client) {
+        console.error('[contentfulMachineAdapter] Contentful client is not available');
+        return null;
+      }
+      
+      const response: EntryCollection<any> = await client.getEntries({
+        content_type: 'machine',
+        'fields.slug': slug,
+        include: 2,
+      });
+      
+      if (response.items.length === 0) {
+        console.warn(`[contentfulMachineAdapter] No machine found with slug: ${slug}`);
+        return null;
+      }
+      
+      const machine = transformMachineFromContentful(response.items[0]);
+      validateMachineData(machine);
       
       return machine;
     } catch (error) {
-      console.error(`Error fetching machine with slug: ${slug}`, error);
+      console.error(`[contentfulMachineAdapter] Error fetching machine by slug ${slug}:`, error);
       return null;
     }
   },
   
   /**
-   * Get a machine by its ID
+   * Create a new machine
+   * 
+   * @param machine - Machine data to create
+   * @returns Promise<CMSMachine | null> - Created machine or null on error
    */
-  getById: async (id: string) => {
-    console.log(`Fetching machine with ID: ${id} from Contentful`);
+  createMachine: async (machine: Partial<CMSMachine>): Promise<CMSMachine | null> => {
+    // This is now handled through Contentful UI
+    logDeprecation(
+      'contentfulMachineAdapter.createMachine',
+      'Creating machines through the API is deprecated',
+      'Use Contentful UI to manage machine content'
+    );
     
+    console.warn('[contentfulMachineAdapter] Machine creation is managed through Contentful UI');
+    return null;
+  },
+  
+  /**
+   * Update an existing machine
+   * 
+   * @param id - Machine ID to update
+   * @param machine - Updated machine data
+   * @returns Promise<CMSMachine | null> - Updated machine or null on error
+   */
+  updateMachine: async (id: string, machine: Partial<CMSMachine>): Promise<CMSMachine | null> => {
+    // This is now handled through Contentful UI
+    logDeprecation(
+      'contentfulMachineAdapter.updateMachine',
+      'Updating machines through the API is deprecated',
+      'Use Contentful UI to manage machine content'
+    );
+    
+    console.warn('[contentfulMachineAdapter] Machine updates are managed through Contentful UI');
+    return null;
+  },
+  
+  /**
+   * Delete a machine
+   * 
+   * @param id - Machine ID to delete
+   * @returns Promise<boolean> - Success status
+   */
+  deleteMachine: async (id: string): Promise<boolean> => {
+    // This is now handled through Contentful UI
+    logDeprecation(
+      'contentfulMachineAdapter.deleteMachine',
+      'Deleting machines through the API is deprecated',
+      'Use Contentful UI to manage machine content'
+    );
+    
+    console.warn('[contentfulMachineAdapter] Machine deletion is managed through Contentful UI');
+    return false;
+  },
+  
+  /**
+   * Get featured machines
+   * 
+   * @param limit - Maximum number of machines to fetch
+   * @returns Promise<CMSMachine[]> - Array of featured machines
+   */
+  getFeaturedMachines: async (limit: number = 4): Promise<CMSMachine[]> => {
     try {
-      // Direct fetch by entry ID
-      const entry = await fetchContentfulEntry<ContentfulEntry>(id);
+      console.log(`[contentfulMachineAdapter] Fetching featured machines (limit: ${limit})`);
+      const client = getContentfulClientInstance();
       
-      // Transform the entry to a CMSMachine object
-      const machine = transformContentfulEntry(entry);
+      if (!client) {
+        console.error('[contentfulMachineAdapter] Contentful client is not available');
+        return [];
+      }
       
-      return machine;
+      const response: EntryCollection<any> = await client.getEntries({
+        content_type: 'machine',
+        'fields.featured': true,
+        order: 'fields.displayOrder',
+        limit,
+        include: 2,
+      });
+      
+      console.log(`[contentfulMachineAdapter] Fetched ${response.items.length} featured machines`);
+      
+      const machines = response.items.map(entry => {
+        const machine = transformMachineFromContentful(entry);
+        validateMachineData(machine);
+        return machine;
+      });
+      
+      return machines;
     } catch (error) {
-      console.error(`Error fetching machine with ID: ${id}`, error);
-      return null;
+      console.error('[contentfulMachineAdapter] Error fetching featured machines:', error);
+      return [];
     }
   },
   
-  // Write operations are deprecated in favor of using Contentful directly
-  create: createDeprecatedWriteOperation('create', 'machine'),
-  update: createDeprecatedWriteOperation('update', 'machine'),
-  delete: createDeprecatedWriteOperation('delete', 'machine'),
-  clone: createDeprecatedWriteOperation('clone', 'machine')
+  /**
+   * Get machines by type
+   * 
+   * @param type - Machine type to filter by
+   * @returns Promise<CMSMachine[]> - Array of matching machines
+   */
+  getMachinesByType: async (type: string): Promise<CMSMachine[]> => {
+    try {
+      console.log(`[contentfulMachineAdapter] Fetching machines by type: ${type}`);
+      
+      if (!type) {
+        console.error('[contentfulMachineAdapter] Invalid type provided');
+        return [];
+      }
+      
+      const client = getContentfulClientInstance();
+      
+      if (!client) {
+        console.error('[contentfulMachineAdapter] Contentful client is not available');
+        return [];
+      }
+      
+      const response: EntryCollection<any> = await client.getEntries({
+        content_type: 'machine',
+        'fields.type': type,
+        order: 'fields.displayOrder',
+        include: 2,
+      });
+      
+      console.log(`[contentfulMachineAdapter] Fetched ${response.items.length} machines of type ${type}`);
+      
+      const machines = response.items.map(entry => {
+        const machine = transformMachineFromContentful(entry);
+        validateMachineData(machine);
+        return machine;
+      });
+      
+      return machines;
+    } catch (error) {
+      console.error(`[contentfulMachineAdapter] Error fetching machines by type ${type}:`, error);
+      return [];
+    }
+  }
 };
