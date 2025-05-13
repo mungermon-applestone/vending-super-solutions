@@ -1,4 +1,3 @@
-
 import { toast } from '@/hooks/use-toast';
 
 // Data types for tracking deprecation usage
@@ -130,43 +129,29 @@ export const resetUsageStats = resetDeprecationTracker;
 export const getContentfulRedirectUrl = (
   contentType?: string | null, 
   contentId?: string | null,
-  spaceId?: string,
-  environmentId?: string
+  spaceId: string = process.env.CONTENTFUL_SPACE_ID || '',
+  environmentId: string = process.env.CONTENTFUL_ENVIRONMENT_ID || 'master'
 ): string => {
   // Base Contentful URL
-  const baseUrl = 'https://app.contentful.com/spaces';
+  const baseUrl = 'https://app.contentful.com';
   
-  // Content type specific paths
-  const contentTypeMapping: Record<string, string> = {
-    'product': 'productType',
-    'technology': 'technology',
-    'businessGoal': 'businessGoal',
-    'machine': 'machine',
-    'caseStudy': 'caseStudy',
-    'blog': 'blogPost',
-    'landingPage': 'landingPage'
-  };
-  
-  // Environment is usually 'master'
-  const environment = environmentId || process.env.CONTENTFUL_ENVIRONMENT_ID || 'master';
-  
-  // Contentful space ID - in a real app this would come from config
-  const space = spaceId || process.env.CONTENTFUL_SPACE_ID || 'demo-space';
-  
-  // Build the URL
-  let url = `${baseUrl}/${space}/environments/${environment}/entries`;
-  
-  // If a specific content type is provided
-  if (contentType && contentTypeMapping[contentType]) {
-    url += `?contentTypeId=${contentTypeMapping[contentType]}`;
+  // If no space ID, return the base space selection URL
+  if (!spaceId) {
+    return `${baseUrl}/spaces`;
   }
   
-  // If a specific content ID is provided
+  // If no content type, return the space home
+  if (!contentType) {
+    return `${baseUrl}/spaces/${spaceId}/home`;
+  }
+  
+  // If we have a content ID, build an edit URL
   if (contentId) {
-    url += `/${contentId}`;
+    return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}/entries/${contentId}`;
   }
   
-  return url;
+  // Otherwise, return the content type listing URL
+  return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}/entries?contentTypeId=${contentType}`;
 };
 
 /**

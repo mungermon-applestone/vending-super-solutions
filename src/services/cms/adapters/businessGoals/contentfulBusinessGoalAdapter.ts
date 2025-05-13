@@ -1,113 +1,177 @@
-import { BusinessGoalAdapter } from './types';
+
+import { BusinessGoalAdapter, BusinessGoalCreateInput, BusinessGoalUpdateInput } from './types';
 import { CMSBusinessGoal } from '@/types/cms';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
-import { handleCMSError } from '@/services/cms/utils/errorHandling';
+import { logDeprecation } from '@/services/cms/utils/deprecation';
 
+/**
+ * Contentful implementation of the BusinessGoalAdapter
+ */
 export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
-  async getAll(options = {}) {
+  /**
+   * Get all business goals
+   */
+  getAll: async (filters = {}): Promise<CMSBusinessGoal[]> => {
     try {
-      console.log('[contentfulBusinessGoalAdapter] Fetching all business goals');
-      const client = await getContentfulClient();
-      const entries = await client.getEntries({
+      const client = getContentfulClient();
+      const query: any = {
         content_type: 'businessGoal',
-        include: 2,
-        ...options
-      });
-
-      return entries.items.map(entry => ({
-        id: entry.sys.id,
-        title: entry.fields.title as string,
-        slug: entry.fields.slug as string,
-        description: entry.fields.description as string,
-        visible: entry.fields.visible as boolean ?? true,
-        icon: entry.fields.icon as string,
-        benefits: entry.fields.benefits as string[] || [],
-        image: entry.fields.image ? {
-          id: (entry.fields.image as any).sys.id,
-          url: `https:${(entry.fields.image as any).fields.file.url}`,
-          alt: (entry.fields.image as any).fields.title
-        } : undefined
+        order: 'fields.title',
+      };
+      
+      // Apply any filters
+      if (filters && Object.keys(filters).length > 0) {
+        // Handle common filtering patterns
+        if (filters.slug) {
+          query['fields.slug'] = filters.slug;
+        }
+      }
+      
+      const response = await client.getEntries(query);
+      
+      // Map the response to our CMSBusinessGoal interface
+      return response.items.map((item: any) => ({
+        id: item.sys.id,
+        title: item.fields.title,
+        description: item.fields.description,
+        slug: item.fields.slug,
+        icon: item.fields.icon || 'check',
+        // Add other fields as needed
       }));
     } catch (error) {
-      console.error('[contentfulBusinessGoalAdapter] Error fetching all business goals:', error);
-      throw handleCMSError(error, 'fetch', 'business goals');
+      console.error('Error fetching business goals from Contentful:', error);
+      throw error;
     }
   },
-
-  async getBySlug(slug: string) {
+  
+  /**
+   * Get a business goal by slug
+   */
+  getBySlug: async (slug: string): Promise<CMSBusinessGoal | null> => {
     try {
-      console.log(`[contentfulBusinessGoalAdapter] Fetching business goal with slug: "${slug}"`);
-      const client = await getContentfulClient();
-      const entries = await client.getEntries({
+      const client = getContentfulClient();
+      const response = await client.getEntries({
         content_type: 'businessGoal',
         'fields.slug': slug,
-        include: 2,
-        limit: 1
+        limit: 1,
       });
-
-      if (!entries.items.length) {
+      
+      if (response.items.length === 0) {
         return null;
       }
-
-      const entry = entries.items[0];
+      
+      const item = response.items[0];
       return {
-        id: entry.sys.id,
-        title: entry.fields.title as string,
-        slug: entry.fields.slug as string,
-        description: entry.fields.description as string,
-        visible: entry.fields.visible as boolean ?? true,
-        icon: entry.fields.icon as string,
-        benefits: entry.fields.benefits as string[] || [],
-        image: entry.fields.image ? {
-          id: (entry.fields.image as any).sys.id,
-          url: `https:${(entry.fields.image as any).fields.file.url}`,
-          alt: (entry.fields.image as any).fields.title
-        } : undefined
+        id: item.sys.id,
+        title: item.fields.title,
+        description: item.fields.description,
+        slug: item.fields.slug,
+        icon: item.fields.icon || 'check',
+        // Add other fields as needed
       };
     } catch (error) {
-      console.error(`[contentfulBusinessGoalAdapter] Error fetching business goal by slug "${slug}":`, error);
-      throw handleCMSError(error, 'fetch', 'business goal', slug);
+      console.error(`Error fetching business goal with slug "${slug}" from Contentful:`, error);
+      throw error;
     }
   },
-
-  async getById(id: string) {
+  
+  /**
+   * Get a business goal by ID
+   */
+  getById: async (id: string): Promise<CMSBusinessGoal | null> => {
     try {
-      console.log(`[contentfulBusinessGoalAdapter] Fetching business goal with ID: "${id}"`);
-      const client = await getContentfulClient();
-      const entry = await client.getEntry(id, { include: 2 });
-
+      const client = getContentfulClient();
+      const response = await client.getEntry(id);
+      
       return {
-        id: entry.sys.id,
-        title: entry.fields.title as string,
-        slug: entry.fields.slug as string,
-        description: entry.fields.description as string,
-        visible: entry.fields.visible as boolean ?? true,
-        icon: entry.fields.icon as string,
-        benefits: entry.fields.benefits as string[] || [],
-        image: entry.fields.image ? {
-          id: (entry.fields.image as any).sys.id,
-          url: `https:${(entry.fields.image as any).fields.file.url}`,
-          alt: (entry.fields.image as any).fields.title
-        } : undefined
+        id: response.sys.id,
+        title: response.fields.title,
+        description: response.fields.description,
+        slug: response.fields.slug,
+        icon: response.fields.icon || 'check',
+        // Add other fields as needed
       };
     } catch (error) {
-      console.error(`[contentfulBusinessGoalAdapter] Error fetching business goal by ID "${id}":`, error);
-      throw handleCMSError(error, 'fetch', 'business goal', id);
+      console.error(`Error fetching business goal with ID "${id}" from Contentful:`, error);
+      
+      // If the entry doesn't exist, return null instead of throwing
+      if (error.message?.includes('not found')) {
+        return null;
+      }
+      
+      throw error;
     }
   },
-
-  async create(data) {
-    console.error('[contentfulBusinessGoalAdapter] Create operation not supported with Delivery API');
-    throw new Error('Creating business goals is not supported with the current Contentful setup.');
+  
+  /**
+   * @deprecated Use Contentful directly for content creation
+   * Create a new business goal
+   */
+  create: async (data: BusinessGoalCreateInput): Promise<string> => {
+    // Log the deprecation
+    logDeprecation(
+      'contentfulBusinessGoalAdapter.create',
+      'Creating business goals through the adapter is deprecated',
+      'Contentful web interface directly'
+    );
+    
+    throw new Error(
+      "Creating business goals through the adapter is deprecated. " +
+      "Please use the Contentful web interface directly."
+    );
   },
-
-  async update(id, data) {
-    console.error('[contentfulBusinessGoalAdapter] Update operation not supported with Delivery API');
-    throw new Error('Updating business goals is not supported with the current Contentful setup.');
+  
+  /**
+   * @deprecated Use Contentful directly for content updates
+   * Update a business goal
+   */
+  update: async (id: string, data: BusinessGoalUpdateInput): Promise<boolean> => {
+    // Log the deprecation
+    logDeprecation(
+      'contentfulBusinessGoalAdapter.update',
+      'Updating business goals through the adapter is deprecated',
+      'Contentful web interface directly'
+    );
+    
+    throw new Error(
+      "Updating business goals through the adapter is deprecated. " +
+      "Please use the Contentful web interface directly."
+    );
   },
-
-  async delete(id) {
-    console.error('[contentfulBusinessGoalAdapter] Delete operation not supported with Delivery API');
-    throw new Error('Deleting business goals is not supported with the current Contentful setup.');
+  
+  /**
+   * @deprecated Use Contentful directly for content deletion
+   * Delete a business goal
+   */
+  delete: async (id: string): Promise<boolean> => {
+    // Log the deprecation
+    logDeprecation(
+      'contentfulBusinessGoalAdapter.delete',
+      'Deleting business goals through the adapter is deprecated',
+      'Contentful web interface directly'
+    );
+    
+    throw new Error(
+      "Deleting business goals through the adapter is deprecated. " +
+      "Please use the Contentful web interface directly."
+    );
+  },
+  
+  /**
+   * @deprecated Use Contentful directly for content cloning
+   * Clone a business goal
+   */
+  clone: async (id: string): Promise<string> => {
+    // Log the deprecation
+    logDeprecation(
+      'contentfulBusinessGoalAdapter.clone',
+      'Cloning business goals through the adapter is deprecated',
+      'Contentful web interface directly'
+    );
+    
+    throw new Error(
+      "Cloning business goals through the adapter is deprecated. " +
+      "Please use the Contentful web interface directly."
+    );
   }
 };
