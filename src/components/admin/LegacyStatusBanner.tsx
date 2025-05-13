@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { generateMigrationReport } from '@/services/cms/utils/migrationHelpers';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { InformationCircle } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { logDeprecation } from '@/services/cms/utils/deprecation';
 import { Button } from '@/components/ui/button';
 
@@ -48,7 +48,7 @@ const LegacyStatusBanner: React.FC<LegacyStatusBannerProps> = ({
   
   return (
     <Alert className={`${bgColor} ${borderColor} mb-6`}>
-      <InformationCircle className="h-5 w-5 text-blue-600" />
+      <Info className="h-5 w-5 text-blue-600" />
       <AlertDescription>
         <div className={textColor}>
           <p className="font-medium">

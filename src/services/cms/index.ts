@@ -12,7 +12,7 @@ import { businessGoalOperations } from './contentTypes/businessGoals';
 import { technologyOperations } from './contentTypes/technologies';
 import { machineOperations } from './contentTypes/machines';
 import { caseStudyOperations } from './contentTypes/caseStudies';
-import { landingPageOperations } from './contentTypes/landingPages';
+import { landingPageOperations } from './contentTypes/landingPages/operations';
 
 // Export standardized content type operations
 export const productTypes = productTypeOperations;

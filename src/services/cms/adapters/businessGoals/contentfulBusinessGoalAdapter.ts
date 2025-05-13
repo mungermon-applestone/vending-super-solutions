@@ -2,7 +2,7 @@
 import { BusinessGoalAdapter, BusinessGoalCreateInput, BusinessGoalUpdateInput } from './types';
 import { CMSBusinessGoal } from '@/types/cms';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
-import { logDeprecation } from '@/services/cms/utils/deprecation';
+import { logDeprecation, throwDeprecatedOperationError } from '@/services/cms/utils/deprecation';
 
 /**
  * Contentful implementation of the BusinessGoalAdapter
@@ -95,7 +95,7 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
       console.error(`Error fetching business goal with ID "${id}" from Contentful:`, error);
       
       // If the entry doesn't exist, return null instead of throwing
-      if (error.message?.includes('not found')) {
+      if ((error as Error).message?.includes('not found')) {
         return null;
       }
       
@@ -107,7 +107,7 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
    * @deprecated Use Contentful directly for content creation
    * Create a new business goal
    */
-  create: async (data: BusinessGoalCreateInput): Promise<string> => {
+  create: async (data: BusinessGoalCreateInput): Promise<CMSBusinessGoal> => {
     // Log the deprecation
     logDeprecation(
       'contentfulBusinessGoalAdapter.create',
@@ -115,17 +115,18 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
       'Contentful web interface directly'
     );
     
-    throw new Error(
-      "Creating business goals through the adapter is deprecated. " +
-      "Please use the Contentful web interface directly."
-    );
+    // Make this method throw a consistent error
+    throwDeprecatedOperationError('create', 'business goal');
+    
+    // This will never be reached due to the error above, but satisfies TypeScript
+    return Promise.reject(new Error("Creating business goals is not supported")) as Promise<CMSBusinessGoal>;
   },
   
   /**
    * @deprecated Use Contentful directly for content updates
    * Update a business goal
    */
-  update: async (id: string, data: BusinessGoalUpdateInput): Promise<boolean> => {
+  update: async (id: string, data: BusinessGoalUpdateInput): Promise<CMSBusinessGoal> => {
     // Log the deprecation
     logDeprecation(
       'contentfulBusinessGoalAdapter.update',
@@ -133,10 +134,11 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
       'Contentful web interface directly'
     );
     
-    throw new Error(
-      "Updating business goals through the adapter is deprecated. " +
-      "Please use the Contentful web interface directly."
-    );
+    // Make this method throw a consistent error
+    throwDeprecatedOperationError('update', 'business goal');
+    
+    // This will never be reached due to the error above, but satisfies TypeScript
+    return Promise.reject(new Error("Updating business goals is not supported")) as Promise<CMSBusinessGoal>;
   },
   
   /**
@@ -151,17 +153,18 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
       'Contentful web interface directly'
     );
     
-    throw new Error(
-      "Deleting business goals through the adapter is deprecated. " +
-      "Please use the Contentful web interface directly."
-    );
+    // Make this method throw a consistent error
+    throwDeprecatedOperationError('delete', 'business goal');
+    
+    // This will never be reached due to the error above, but satisfies TypeScript
+    return Promise.reject(new Error("Deleting business goals is not supported"));
   },
   
   /**
    * @deprecated Use Contentful directly for content cloning
    * Clone a business goal
    */
-  clone: async (id: string): Promise<string> => {
+  clone: async (id: string): Promise<CMSBusinessGoal> => {
     // Log the deprecation
     logDeprecation(
       'contentfulBusinessGoalAdapter.clone',
@@ -169,9 +172,10 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
       'Contentful web interface directly'
     );
     
-    throw new Error(
-      "Cloning business goals through the adapter is deprecated. " +
-      "Please use the Contentful web interface directly."
-    );
+    // Make this method throw a consistent error
+    throwDeprecatedOperationError('clone', 'business goal');
+    
+    // This will never be reached due to the error above, but satisfies TypeScript
+    return Promise.reject(new Error("Cloning business goals is not supported")) as Promise<CMSBusinessGoal>;
   }
 };

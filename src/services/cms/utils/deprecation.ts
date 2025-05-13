@@ -9,6 +9,7 @@ export interface DeprecationStat {
   // For backwards compatibility with existing code
   feature?: string;
   lastUsed?: number;
+  alternative?: string;
 }
 
 // Singleton to track deprecations
@@ -31,6 +32,9 @@ export const logDeprecation = (component: string, message: string, suggestion?: 
     existing.timestamp = Date.now();
     // Update legacy properties for backward compatibility
     existing.lastUsed = Date.now();
+    if (suggestion) {
+      existing.alternative = suggestion;
+    }
   } else {
     deprecationStats.push({
       component,
@@ -39,7 +43,8 @@ export const logDeprecation = (component: string, message: string, suggestion?: 
       count: 1,
       // Legacy properties for backward compatibility
       feature: component,
-      lastUsed: Date.now()
+      lastUsed: Date.now(),
+      alternative: suggestion
     });
   }
 

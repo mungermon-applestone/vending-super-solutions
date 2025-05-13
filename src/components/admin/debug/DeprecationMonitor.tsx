@@ -74,11 +74,11 @@ const DeprecationMonitor: React.FC = () => {
             <div className="space-y-1">
               {stats.map((stat) => (
                 <div
-                  key={stat.feature}
+                  key={stat.feature || stat.component}
                   className="text-xs p-2 bg-gray-50 rounded border border-gray-100"
                 >
                   <div className="flex justify-between items-center">
-                    <span className="font-medium">{stat.feature}</span>
+                    <span className="font-medium">{stat.feature || stat.component}</span>
                     <span className="text-amber-600 font-bold">{stat.count}</span>
                   </div>
                   <p className="text-muted-foreground mt-1">{stat.message}</p>
@@ -88,7 +88,7 @@ const DeprecationMonitor: React.FC = () => {
                     </p>
                   )}
                   <div className="text-gray-400 mt-1">
-                    Last used: {new Date(stat.lastUsed).toLocaleTimeString()}
+                    Last used: {new Date(stat.lastUsed || stat.timestamp).toLocaleTimeString()}
                   </div>
                 </div>
               ))}
