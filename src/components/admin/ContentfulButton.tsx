@@ -32,7 +32,7 @@ const ContentfulButton: React.FC<ContentfulButtonProps> = ({
   size = "sm",
   customText,
   contentfulSpaceId,
-  contentfulEnvironmentId,
+  contentfulEnvironmentId = "master",
   customUrl,
   entryId,
   action = 'view',
@@ -56,9 +56,7 @@ const ContentfulButton: React.FC<ContentfulButtonProps> = ({
     // Construct the Contentful URL - if custom URL provided, use that
     const url = customUrl || getContentfulRedirectUrl(
       actualContentTypeId,
-      entryId,
-      contentfulSpaceId,
-      contentfulEnvironmentId
+      entryId
     );
     
     window.open(url, "_blank");

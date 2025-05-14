@@ -17,8 +17,8 @@ interface ViewInContentfulProps extends ButtonProps {
 const ViewInContentful: React.FC<ViewInContentfulProps> = ({
   contentType,
   contentId,
-  spaceId = process.env.CONTENTFUL_SPACE_ID,
-  environmentId = process.env.CONTENTFUL_ENVIRONMENT_ID,
+  spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID,
+  environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master',
   className,
   variant = "outline",
   size = "sm",
@@ -33,12 +33,7 @@ const ViewInContentful: React.FC<ViewInContentfulProps> = ({
     );
     
     // Use our utility function to generate the URL
-    const url = getContentfulRedirectUrl(
-      contentType, 
-      contentId,
-      spaceId,
-      environmentId
-    );
+    const url = getContentfulRedirectUrl(contentType, contentId);
     
     window.open(url, "_blank");
   };

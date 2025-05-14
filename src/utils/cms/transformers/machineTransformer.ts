@@ -63,9 +63,11 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
     const machine: CMSMachine = {
       id: entry.sys.id,
       title: String(fields.title || ''),
+      name: String(fields.title || ''), // For backward compatibility
       slug: String(fields.slug || ''),
       type: String(fields.type || ''),
       description: String(fields.description || ''),
+      shortDescription: String(fields.shortDescription || fields.description?.substring(0, 160) || ''),
       images: images,
       thumbnail: thumbnail,
       mainImage: mainImage,
@@ -73,53 +75,45 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
       specs: specs,
       temperature: fields.temperature ? String(fields.temperature) : 'ambient',
       visible: Boolean(fields.visible),
+      featured: Boolean(fields.featured),
       displayOrder: typeof fields.displayOrder === 'number' ? fields.displayOrder : 999,
       showOnHomepage: Boolean(fields.showOnHomepage),
       homepageOrder: typeof fields.homepageOrder === 'number' ? fields.homepageOrder : null,
       createdAt: entry.sys.createdAt,
-      updatedAt: entry.sys.updatedAt
+      updatedAt: entry.sys.updatedAt,
+      created_at: entry.sys.createdAt,
+      updated_at: entry.sys.updatedAt
     };
     
     return machine;
   } catch (error) {
     console.error('[machineTransformer] Error transforming machine:', error);
-    throw new Error(`Failed to transform machine: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(`Failed to transform machine: ${error instanceof Error ? error.message : 'unknown error'}`);
   }
 }
 
 /**
  * Transform a Contentful asset to our CMSImage format
- * 
- * @param asset - Contentful asset
- * @returns CMSImage - Transformed image object
  */
-function transformContentfulAsset(asset: any): CMSImage {
+function transformContentfulAsset(asset: any): CMSImage | undefined {
   if (!asset || !asset.fields || !asset.fields.file) {
-    return {
-      id: 'missing-image',
-      url: '',
-      alt: '',
-      width: 0,
-      height: 0
-    };
+    return undefined;
   }
-  
-  const file = asset.fields.file;
-  const imageDetails = file.details && file.details.image;
-  
-  return {
-    id: asset.sys.id,
-    url: file.url ? `https:${file.url}` : '',
-    alt: asset.fields.title || '',
-    width: imageDetails ? imageDetails.width : 0,
-    height: imageDetails ? imageDetails.height : 0
-  };
-}
 
-/**
- * Transform a Contentful entry to our CMSMachine format
- * This is the main function used by the hooks
- */
-export function transformContentfulEntry(entry: any): CMSMachine {
-  return transformMachineFromContentful(entry);
+  try {
+    const file = asset.fields.file;
+    const url = file.url.startsWith('//') ? `https:${file.url}` : file.url;
+    
+    return {
+      id: asset.sys?.id,
+      url,
+      alt: asset.fields.title || '',
+      filename: file.fileName,
+      width: file.details?.image?.width,
+      height: file.details?.image?.height
+    };
+  } catch (error) {
+    console.error('[machineTransformer] Error transforming asset:', error);
+    return undefined;
+  }
 }

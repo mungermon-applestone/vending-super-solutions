@@ -22,6 +22,8 @@ export interface CMSMachine {
   createdAt?: string;
   updatedAt?: string;
   name?: string; // For backwards compatibility with some components
+  showOnHomepage?: boolean;
+  homepageOrder?: number | null;
 }
 
 export interface CMSImage {
@@ -101,11 +103,35 @@ export interface CMSTestimonial {
   image_url?: string;
 }
 
-// Interface for a testimonial section with multiple testimonials
-export interface ContentfulTestimonialSection {
-  title?: string;
-  subtitle?: string;
-  testimonials: CMSTestimonial[];
-  background?: string;
-  displayStyle?: string;
+// Interface for a blog post
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt?: string;
+  status: 'draft' | 'published' | 'archived';
+  published_at?: string;
+  created_at: string;
+  updated_at: string;
+  featuredImage?: {
+    url: string;
+    title: string;
+    width?: number;
+    height?: number;
+  };
+  author?: string;
+  tags?: string[];
+  sys?: {
+    id: string;
+    createdAt?: string;
+    updatedAt?: string;
+  };
+  fields?: any;
+}
+
+// Type for adjacent blog posts (prev/next)
+export interface AdjacentPost {
+  slug: string; 
+  title: string;
 }

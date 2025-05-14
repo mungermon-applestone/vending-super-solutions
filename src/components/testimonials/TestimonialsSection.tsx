@@ -11,7 +11,7 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   
   // Handle both new and legacy formats
-  const testimonials = data.fields?.testimonials || [];
+  const testimonials = data.fields?.testimonials || data.testimonials || [];
 
   if (!testimonials.length) {
     return null;
@@ -25,12 +25,37 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
     setActiveIndex((prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length);
   };
 
-  const currentTestimonial = testimonials[activeIndex]?.fields;
+  // We need to handle both Contentful and CMS formats
+  const currentTestimonial = testimonials[activeIndex];
   if (!currentTestimonial) return null;
 
   // Get section title and subtitle from either format
-  const title = data.fields?.title || "Trusted by Industry Leaders";
-  const subtitle = data.fields?.subtitle || "Hear what our clients have to say about our solutions";
+  const title = data.fields?.title || data.title || "Trusted by Industry Leaders";
+  const subtitle = data.fields?.subtitle || data.subtitle || "Hear what our clients have to say about our solutions";
+
+  // Helper function to determine if it's a ContentfulTestimonial
+  const isContentfulFormat = (test: any): test is ContentfulTestimonial => {
+    return test && test.fields && test.fields.author;
+  };
+
+  // Extract testimonial data based on format
+  const testimonialData = isContentfulFormat(currentTestimonial)
+    ? {
+        quote: currentTestimonial.fields.quote,
+        author: currentTestimonial.fields.author,
+        position: currentTestimonial.fields.position,
+        company: currentTestimonial.fields.company,
+        rating: currentTestimonial.fields.rating,
+        image: currentTestimonial.fields.image
+      }
+    : {
+        quote: currentTestimonial.testimonial,
+        author: currentTestimonial.name,
+        position: currentTestimonial.title,
+        company: currentTestimonial.company,
+        rating: currentTestimonial.rating,
+        image: currentTestimonial.image_url ? { fields: { file: { url: currentTestimonial.image_url } } } : null
+      };
 
   return (
     <section className="py-16 md:py-24 bg-gray-50">
@@ -52,12 +77,12 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
 
             <div className="relative">
               {/* Stars */}
-              {currentTestimonial.rating && (
+              {testimonialData.rating && (
                 <div className="flex mb-6 justify-center">
-                  {[...Array(currentTestimonial.rating)].map((_, i) => (
+                  {[...Array(testimonialData.rating)].map((_, i) => (
                     <Star key={i} className="h-5 w-5 text-yellow-500 fill-yellow-500" />
                   ))}
-                  {[...Array(5 - (currentTestimonial.rating || 0))].map((_, i) => (
+                  {[...Array(5 - (testimonialData.rating || 0))].map((_, i) => (
                     <Star key={i} className="h-5 w-5 text-gray-300" />
                   ))}
                 </div>
@@ -65,23 +90,23 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
 
               {/* Quote */}
               <blockquote className="text-xl md:text-2xl text-center font-medium text-gray-700 mb-8">
-                "{currentTestimonial.quote}"
+                "{testimonialData.quote}"
               </blockquote>
 
               {/* Author info */}
               <div className="text-center">
-                {currentTestimonial.image?.fields?.file?.url && (
+                {testimonialData.image?.fields?.file?.url && (
                   <img 
-                    src={`https:${currentTestimonial.image.fields.file.url}`}
-                    alt={currentTestimonial.image.fields.title || currentTestimonial.author}
+                    src={`https:${testimonialData.image.fields.file.url}`}
+                    alt={testimonialData.image.fields.title || testimonialData.author}
                     className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
                   />
                 )}
-                <div className="font-semibold text-lg">{currentTestimonial.author}</div>
+                <div className="font-semibold text-lg">{testimonialData.author}</div>
                 <div className="text-vending-gray-dark">
-                  {currentTestimonial.position}
-                  {currentTestimonial.position && currentTestimonial.company && ', '}
-                  {currentTestimonial.company}
+                  {testimonialData.position}
+                  {testimonialData.position && testimonialData.company && ', '}
+                  {testimonialData.company}
                 </div>
               </div>
             </div>

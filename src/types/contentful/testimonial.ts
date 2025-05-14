@@ -23,6 +23,16 @@ export interface ContentfulTestimonial {
  * Interface for a testimonial section with multiple testimonials
  */
 export interface ContentfulTestimonialSection {
+  sys?: {
+    id: string;
+  };
+  fields?: {
+    title?: string;
+    subtitle?: string;
+    testimonials: ContentfulTestimonial[];
+    background?: string;
+    displayStyle?: string;
+  };
   title?: string;
   subtitle?: string;
   testimonials: CMSTestimonial[];

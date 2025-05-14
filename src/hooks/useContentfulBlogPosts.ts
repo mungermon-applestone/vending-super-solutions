@@ -11,7 +11,7 @@ export interface ContentfulBlogPost {
   title: string;
   slug: string;
   publishDate?: string;
-  content?: string;
+  content?: any;
   excerpt?: string;
   featuredImage?: {
     url: string;
@@ -36,12 +36,18 @@ export interface ContentfulBlogPost {
     author?: string;
     tags?: string[];
   };
+  // For BlogPost compatibility
+  status?: string;
+  published_at?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface BlogPostQueryOptions {
   limit?: number;
   skip?: number;
   order?: string;
+  status?: string; // Added for compatibility
 }
 
 // Updated hook to not require parameters
@@ -56,7 +62,7 @@ export function useContentfulBlogPosts(options?: BlogPostQueryOptions) {
           order: options?.order || '-fields.publishDate'
         };
         
-        const entries = await fetchContentfulEntries(CMS_MODELS ? CMS_MODELS.BLOG_POST : 'blogPost', queryOptions);
+        const entries = await fetchContentfulEntries(CMS_MODELS.BLOG_POST, queryOptions);
         
         // Transform entries to match expected format
         return entries.map(entry => {
@@ -76,11 +82,14 @@ export function useContentfulBlogPosts(options?: BlogPostQueryOptions) {
             };
           }
           
+          const publishDate = entry.fields?.publishDate ? safeString(entry.fields.publishDate) : undefined;
+          
           return {
             id: entry.sys?.id || '',
             title: safeString(entry.fields?.title || 'Untitled'),
             slug: safeString(entry.fields?.slug || ''),
-            publishDate: entry.fields?.publishDate ? safeString(entry.fields.publishDate) : undefined,
+            publishDate,
+            published_at: publishDate, // For backward compatibility
             content: entry.fields?.content,
             excerpt: entry.fields?.excerpt ? safeString(entry.fields.excerpt) : undefined,
             featuredImage,
@@ -93,7 +102,10 @@ export function useContentfulBlogPosts(options?: BlogPostQueryOptions) {
               createdAt: entry.sys?.createdAt,
               updatedAt: entry.sys?.updatedAt
             },
-            fields: entry.fields
+            fields: entry.fields,
+            status: 'published', // Default status for Contentful posts
+            created_at: entry.sys?.createdAt,
+            updated_at: entry.sys?.updatedAt
           };
         }).filter(Boolean) as ContentfulBlogPost[];
       } catch (error) {
