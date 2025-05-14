@@ -43,7 +43,7 @@ const MachinesPage: React.FC = () => {
   
   const { data: machines = [], isLoading, error, refetch } = useContentfulMachines();
   const { data: pageContent } = useMachinesPageContent();
-  const { data: testimonialSection } = useTestimonialSection('machines');
+  const { data: testimonialSection } = useTestimonialSection();
   
   useEffect(() => {
     if (machines) {

@@ -44,6 +44,38 @@ export function safeArray<T>(value: any, mapper?: (item: any) => T): T[] {
 }
 
 /**
+ * Safe access to an array field in an object
+ */
+export function safeArrayField(obj: any, fieldName: string): any[] {
+  if (!obj || !obj.fields || !Array.isArray(obj.fields[fieldName])) {
+    return [];
+  }
+  return obj.fields[fieldName];
+}
+
+/**
+ * Convert a Contentful asset to a CMS image object
+ */
+export function safeAssetToImage(asset: any) {
+  if (!asset || !asset.fields || !asset.fields.file) {
+    return null;
+  }
+  
+  try {
+    return {
+      id: asset.sys?.id || '',
+      url: `https:${asset.fields.file.url}`,
+      alt: asset.fields.title || '',
+      width: asset.fields.file.details?.image?.width,
+      height: asset.fields.file.details?.image?.height
+    };
+  } catch (error) {
+    console.error('Error converting asset to image:', error);
+    return null;
+  }
+}
+
+/**
  * Safe access to an object's property
  */
 export function safeObjectProperty<T>(obj: any, path: string, defaultValue: T): T {

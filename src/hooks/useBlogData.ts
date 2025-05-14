@@ -1,64 +1,60 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { useContentfulBlogPosts } from './useContentfulBlogPosts';
-import { useContentfulBlogPostBySlug } from './useContentfulBlogPostBySlug';
+import { useContentfulBlogPosts, ContentfulBlogPost } from '@/hooks/useContentfulBlogPosts';
+import { useContentfulBlogPostBySlug } from '@/hooks/useContentfulBlogPostBySlug';
+import { AdjacentPost } from '@/types/blog';
 import { convertContentfulBlogPostToBlogPost } from '@/utils/contentfulTypeGuards';
 
 /**
- * Hook for retrieving a blog post by slug
+ * Get a blog post by its slug
  */
 export function useBlogPostBySlug(slug?: string) {
-  const query = useContentfulBlogPostBySlug(slug);
-  
-  // Convert the result to our standard BlogPost format if possible
-  return {
-    ...query,
-    data: query.data ? convertContentfulBlogPostToBlogPost(query.data) : null
-  };
-}
-
-interface AdjacentPost {
-  slug: string;
-  title: string;
+  return useContentfulBlogPostBySlug(slug);
 }
 
 /**
- * Hook for retrieving the adjacent (previous and next) posts for a given post slug
+ * Get previous and next posts relative to a given slug
  */
-export function useAdjacentPosts(slug?: string) {
-  // Get all blog posts to find adjacent ones
-  const { data: allPosts = [], isLoading } = useContentfulBlogPosts({
-    order: '-fields.publishDate'
-  });
+export function useAdjacentPosts(currentSlug?: string) {
+  const { data: posts = [], isLoading } = useContentfulBlogPosts();
   
   return useQuery({
-    queryKey: ['blog', 'adjacent', slug],
-    queryFn: () => {
-      if (!slug || allPosts.length === 0) {
+    queryKey: ['contentful', 'adjacentPosts', currentSlug],
+    queryFn: async () => {
+      if (!currentSlug || posts.length === 0) {
         return { previous: null, next: null };
       }
       
-      // Find the current post index
-      const currentIndex = allPosts.findIndex(post => post.slug === slug);
+      // Sort posts by publish date (newest first)
+      const sortedPosts = [...posts].sort((a, b) => {
+        const dateA = a.publishDate || a.published_at || '';
+        const dateB = b.publishDate || b.published_at || '';
+        return new Date(dateB).getTime() - new Date(dateA).getTime();
+      });
       
+      // Find current post index
+      const currentIndex = sortedPosts.findIndex(post => post.slug === currentSlug);
       if (currentIndex === -1) {
         return { previous: null, next: null };
       }
       
-      // Get previous and next posts
-      const previous = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
-      const next = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+      // Get adjacent posts
+      const previous: AdjacentPost | null = currentIndex < sortedPosts.length - 1
+        ? {
+            slug: sortedPosts[currentIndex + 1].slug,
+            title: sortedPosts[currentIndex + 1].title
+          }
+        : null;
+        
+      const next: AdjacentPost | null = currentIndex > 0
+        ? {
+            slug: sortedPosts[currentIndex - 1].slug,
+            title: sortedPosts[currentIndex - 1].title
+          }
+        : null;
       
-      return {
-        previous: previous ? { slug: previous.slug, title: previous.title } as AdjacentPost : null,
-        next: next ? { slug: next.slug, title: next.title } as AdjacentPost : null
-      };
+      return { previous, next };
     },
-    enabled: !isLoading && !!slug && allPosts.length > 0
+    enabled: !isLoading && posts.length > 0 && !!currentSlug
   });
 }
-
-/**
- * Export all blog-related hooks for compatibility
- */
-export { useContentfulBlogPosts as useBlogPosts };

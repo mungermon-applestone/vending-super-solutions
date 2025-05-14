@@ -11,7 +11,7 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   
   // Handle both new and legacy formats
-  const testimonials = data.fields?.testimonials || data.testimonials || [];
+  const testimonials = data.fields?.testimonials || [];
 
   if (!testimonials.length) {
     return null;
@@ -30,8 +30,8 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
   if (!currentTestimonial) return null;
 
   // Get section title and subtitle from either format
-  const title = data.fields?.title || data.title || "Trusted by Industry Leaders";
-  const subtitle = data.fields?.subtitle || data.subtitle || "Hear what our clients have to say about our solutions";
+  const title = data.fields?.title || "Trusted by Industry Leaders";
+  const subtitle = data.fields?.subtitle || "Hear what our clients have to say about our solutions";
 
   // Helper function to determine if it's a ContentfulTestimonial
   const isContentfulFormat = (test: any): test is ContentfulTestimonial => {

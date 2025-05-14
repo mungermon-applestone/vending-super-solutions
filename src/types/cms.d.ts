@@ -4,10 +4,10 @@ export interface CMSMachine {
   id: string;
   title: string;
   slug: string;
-  type: "vending" | "locker" | string;  // Allow any string for backward compatibility
+  type: string;  // Allow any string for backward compatibility
   description?: string;
   shortDescription?: string;
-  temperature?: 'ambient' | 'refrigerated' | 'frozen' | 'heated' | string; // Allow any string
+  temperature?: string; // Allow any string
   mainImage?: CMSImage; 
   thumbnail?: CMSImage;
   images?: CMSImage[];

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { isContentfulEntry, isContentfulAsset } from '@/utils/contentfulTypeGuards';
 import { CMSMachine, CMSImage } from '@/types/cms';
+import { safeString } from '@/services/cms/utils/safeTypeUtilities';
 
 /**
  * Transform a Contentful machine entry to our CMSMachine format
@@ -13,29 +14,39 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
   }
   
   // Get main image URL if it exists
-  let mainImageUrl = '';
-  let mainImageAlt = '';
+  let mainImage: CMSImage | undefined = undefined;
   
   if (entry.fields.mainImage && isContentfulAsset(entry.fields.mainImage)) {
-    mainImageUrl = `https:${entry.fields.mainImage.fields.file.url}`;
-    mainImageAlt = entry.fields.mainImage.fields.title || entry.fields.title || '';
+    const imageUrl = entry.fields.mainImage.fields.file.url;
+    mainImage = {
+      id: entry.fields.mainImage.sys?.id,
+      url: imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl,
+      alt: safeString(entry.fields.mainImage.fields.title || entry.fields.title || ''),
+      width: entry.fields.mainImage.fields.file.details?.image?.width,
+      height: entry.fields.mainImage.fields.file.details?.image?.height
+    };
   }
   
   // Transform gallery images if they exist
-  const galleryImages = Array.isArray(entry.fields.gallery) 
-    ? entry.fields.gallery
-      .filter(isContentfulAsset)
-      .map(asset => ({
-        url: `https:${asset.fields.file.url}`,
-        alt: asset.fields.title || '',
-        width: asset.fields.file.details?.image?.width,
-        height: asset.fields.file.details?.image?.height
-      }))
-    : [];
+  const galleryImages: CMSImage[] = [];
+  if (Array.isArray(entry.fields.gallery)) {
+    for (const asset of entry.fields.gallery) {
+      if (isContentfulAsset(asset) && asset.fields && asset.fields.file) {
+        const imageUrl = asset.fields.file.url;
+        galleryImages.push({
+          id: asset.sys?.id,
+          url: imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl,
+          alt: safeString(asset.fields.title || ''),
+          width: asset.fields.file.details?.image?.width,
+          height: asset.fields.file.details?.image?.height
+        });
+      }
+    }
+  }
   
   // Handle features
   const features = Array.isArray(entry.fields.features)
-    ? entry.fields.features.map((feature: any) => String(feature))
+    ? entry.fields.features.map((feature: any) => safeString(feature))
     : [];
   
   // Handle specifications
@@ -43,7 +54,7 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
   if (entry.fields.specifications && Array.isArray(entry.fields.specifications)) {
     entry.fields.specifications.forEach((spec: any) => {
       if (spec.fields && spec.fields.name && spec.fields.value) {
-        specs[spec.fields.name] = String(spec.fields.value);
+        specs[safeString(spec.fields.name)] = safeString(spec.fields.value);
       }
     });
   }
@@ -51,33 +62,26 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
   // Create the machine object with proper type casting
   return {
     id: entry.sys.id,
-    title: String(entry.fields.title || ''),
-    name: String(entry.fields.title || ''), // For backwards compatibility
-    slug: String(entry.fields.slug || ''),
-    type: String(entry.fields.type || 'vending'),
-    description: String(entry.fields.description || ''),
-    // Use description as shortDescription if not provided
-    shortDescription: String(entry.fields.shortDescription || entry.fields.description || ''),
-    temperature: String(entry.fields.temperature || 'ambient'),
-    mainImage: mainImageUrl ? {
-      url: mainImageUrl,
-      alt: mainImageAlt,
-      id: entry.fields.mainImage?.sys?.id // Add id for compatibility
-    } : undefined,
-    images: galleryImages.length > 0 ? galleryImages.map(img => ({
-      ...img,
-      id: Math.random().toString(36).substring(2) // Add a placeholder id
-    })) : undefined,
+    title: safeString(entry.fields.title),
+    name: safeString(entry.fields.title), // For backwards compatibility
+    slug: safeString(entry.fields.slug),
+    type: safeString(entry.fields.type || 'vending') as any, // Cast to satisfy TypeScript
+    description: safeString(entry.fields.description),
+    shortDescription: safeString(entry.fields.shortDescription || entry.fields.description),
+    temperature: safeString(entry.fields.temperature || 'ambient'),
+    mainImage,
+    thumbnail: mainImage, // Use same image as thumbnail for simplicity
+    images: galleryImages.length > 0 ? galleryImages : undefined,
     features,
     specs,
     visible: entry.fields.visible !== false, // Default to true if not specified
     featured: !!entry.fields.featured,
     displayOrder: Number(entry.fields.displayOrder || 0),
-    createdAt: String(entry.sys.createdAt || ''),
-    updatedAt: String(entry.sys.updatedAt || ''),
+    createdAt: safeString(entry.sys.createdAt),
+    updatedAt: safeString(entry.sys.updatedAt),
     // Include legacy naming convention
-    created_at: String(entry.sys.createdAt || ''),
-    updated_at: String(entry.sys.updatedAt || ''),
+    created_at: safeString(entry.sys.createdAt),
+    updated_at: safeString(entry.sys.updatedAt),
     showOnHomepage: !!entry.fields.showOnHomepage,
     homepageOrder: entry.fields.homepageOrder ? Number(entry.fields.homepageOrder) : null
   };
@@ -93,14 +97,16 @@ export function useContentfulMachines() {
       try {
         const entries = await fetchContentfulEntries('machine');
         
-        return entries.map((entry: any) => {
-          try {
-            return transformMachineFromContentful(entry);
-          } catch (error) {
-            console.error('[useContentfulMachines] Error transforming machine:', error);
-            return null;
-          }
-        }).filter(Boolean) as CMSMachine[];
+        return entries
+          .filter(entry => entry && entry.sys && entry.fields)
+          .map((entry: any) => {
+            try {
+              return transformMachineFromContentful(entry);
+            } catch (error) {
+              console.error('[useContentfulMachines] Error transforming machine:', error);
+              return null;
+            }
+          }).filter(Boolean) as CMSMachine[];
       } catch (error) {
         console.error('[useContentfulMachines] Error fetching machines:', error);
         throw error;
@@ -134,7 +140,8 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         // If no match by slug, try by ID
         try {
           const entryById = await fetchContentfulEntry(idOrSlug);
-          if (entryById && entryById.sys.contentType.sys.id === 'machine') {
+          if (entryById && entryById.sys && entryById.sys.contentType && 
+              entryById.sys.contentType.sys.id === 'machine') {
             return transformMachineFromContentful(entryById);
           }
         } catch (idError) {

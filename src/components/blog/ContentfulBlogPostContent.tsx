@@ -22,16 +22,25 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
   previousPost,
   nextPost,
 }) => {
-  if (!post || !post.fields) {
-    console.error("[ContentfulBlogPostContent] Missing or invalid post data:", post);
+  if (!post) {
+    console.error("[ContentfulBlogPostContent] Missing post data");
     return (
       <ContentfulErrorBoundary contentType="blog post">
-        <div>Error: Blog post data is missing or invalid</div>
+        <div>Error: Blog post data is missing</div>
       </ContentfulErrorBoundary>
     );
   }
 
-  const { title = "Untitled", content, excerpt, publishDate, featuredImage } = post.fields;
+  const title = post.title || post.fields?.title || "Untitled";
+  const content = post.content || post.fields?.content;
+  const excerpt = post.excerpt || post.fields?.excerpt;
+  const publishDate = post.publishDate || post.fields?.publishDate || post.published_at;
+  const featuredImage = post.featuredImage || (post.fields?.featuredImage ? {
+    url: `https:${post.fields.featuredImage.fields?.file?.url || ''}`,
+    title: post.fields.featuredImage.fields?.title || '',
+    width: post.fields.featuredImage.fields?.file?.details?.image?.width,
+    height: post.fields.featuredImage.fields?.file?.details?.image?.height
+  } : undefined);
   
   // Extract included assets from the response if available
   const includedAssets = post.includes?.Asset || [];
@@ -41,16 +50,11 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
     console.log("[ContentfulBlogPostContent] Rendering post:", {
       title,
       hasContent: !!content,
-      assetCount: includedAssets.length,
+      assetCount: includedAssets?.length || 0,
       publishDate,
+      featuredImage: !!featuredImage
     });
-    
-    if (includedAssets?.length) {
-      includedAssets.forEach(asset => {
-        console.log(`[ContentfulBlogPostContent] Asset ${asset.sys.id}:`, asset.fields);
-      });
-    }
-  }, [post, includedAssets, title, content, publishDate]);
+  }, [post, includedAssets, title, content, publishDate, featuredImage]);
 
   return (
     <ContentfulErrorBoundary contentType="blog post">

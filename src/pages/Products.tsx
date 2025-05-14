@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import SEO from '@/components/seo/SEO';
@@ -21,7 +20,7 @@ import { Link } from 'react-router-dom';
 import ProductsLoadingState from '@/components/products/sections/ProductsLoadingState';
 import { isPreviewEnvironment } from '@/config/cms';
 
-const Products = () => {
+const Products: React.FC = () => {
   // Optimized data fetching with React Query
   const { data: products, isLoading, error, refetch } = useContentfulProducts();
   const { 
@@ -30,7 +29,8 @@ const Products = () => {
     error: contentError,
     refetch: refetchContent
   } = useProductsPageContent();
-  const { data: testimonialSection } = useTestimonialSection('products');
+  const { data: testimonialSection } = useTestimonialSection();
+  const { data: machineTestimonials } = useTestimonialSection();
   const queryClient = useQueryClient();
   
   // Use React's lazy loading for performance monitoring
@@ -70,8 +70,8 @@ const Products = () => {
   React.useEffect(() => {
     // Start fetching testimonials immediately instead of waiting
     queryClient.prefetchQuery({
-      queryKey: ['testimonialSection', 'products'],
-      queryFn: () => useTestimonialSection('products').refetch()
+      queryKey: ['testimonialSection'],
+      queryFn: () => useTestimonialSection().refetch()
     });
   }, [queryClient]);
 

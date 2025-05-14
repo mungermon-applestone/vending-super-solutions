@@ -8,35 +8,7 @@ import ContentfulBlogPostContent from '@/components/blog/ContentfulBlogPostConte
 import { useBlogPostBySlug, useAdjacentPosts } from '@/hooks/useBlogData';
 import { SimpleContactCTA } from '@/components/common';
 import { ContentfulBlogPost } from '@/hooks/useContentfulBlogPosts';
-
-// Helper function to convert adjacent posts to the format expected by ContentfulBlogPostContent
-const convertAdjacentPostToContentful = (post: any) => {
-  if (!post) return null;
-  return {
-    slug: post.slug,
-    title: post.title
-  };
-};
-
-// Convert Contentful blog post to compatible BlogPost format
-const convertContentfulBlogPostToBlogPost = (contentfulPost: ContentfulBlogPost | null) => {
-  if (!contentfulPost) return null;
-  
-  return {
-    id: contentfulPost.id,
-    title: contentfulPost.title,
-    slug: contentfulPost.slug,
-    content: contentfulPost.content,
-    excerpt: contentfulPost.excerpt,
-    status: 'published',
-    published_at: contentfulPost.publishDate || contentfulPost.published_at,
-    created_at: contentfulPost.created_at || '',
-    updated_at: contentfulPost.updated_at || '',
-    featuredImage: contentfulPost.featuredImage,
-    author: contentfulPost.author,
-    tags: contentfulPost.tags
-  };
-};
+import { convertContentfulBlogPostToBlogPost, convertAdjacentPostToContentful } from '@/utils/contentfulTypeGuards';
 
 const BlogPostDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -66,6 +38,9 @@ const BlogPostDetail = () => {
     ? convertAdjacentPostToContentful(adjacentPosts.next)
     : null;
 
+  // Determine whether to use Contentful or standard rendering
+  const isContentfulPost = post && post.fields && post.sys;
+
   return (
     <Layout>
       <div className="flex flex-col min-h-screen">
@@ -79,17 +54,17 @@ const BlogPostDetail = () => {
               <p className="text-red-500">Something went wrong. Please try again later.</p>
             </div>
           ) : post ? (
-            post.fields ? (
+            isContentfulPost ? (
               <ContentfulBlogPostContent 
-                post={post} 
+                post={post as ContentfulBlogPost} 
                 previousPost={contentfulPreviousPost} 
                 nextPost={contentfulNextPost} 
               />
             ) : (
               <BlogPostContent 
                 post={compatiblePost} 
-                previousPost={adjacentPosts?.previous} 
-                nextPost={adjacentPosts?.next} 
+                previousPost={adjacentPosts?.previous || null} 
+                nextPost={adjacentPosts?.next || null} 
               />
             )
           ) : null}

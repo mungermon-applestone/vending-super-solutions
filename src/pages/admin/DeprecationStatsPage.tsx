@@ -1,150 +1,92 @@
-
 import React, { useState, useEffect } from 'react';
-import { getDeprecationStats, resetDeprecationTracker } from '@/services/cms/utils/deprecation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import AdminLayout from '@/components/admin/AdminLayout';
+import { 
+  getDeprecationStats, 
+  resetDeprecationTracker, 
+  type DeprecationStat 
+} from '@/services/cms/utils/deprecation';
 import { Button } from '@/components/ui/button';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { RefreshCw, Trash, Download } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import Layout from '@/components/layout/Layout';
+import { RefreshCcw } from 'lucide-react';
 
 const DeprecationStatsPage: React.FC = () => {
-  const [stats, setStats] = useState<any[]>([]);
-  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
-  const { toast } = useToast();
+  const [stats, setStats] = useState<DeprecationStat[]>([]);
+  const [isResetting, setIsResetting] = useState(false);
 
   useEffect(() => {
-    refreshStats();
-  }, []);
-
-  const refreshStats = () => {
     const usageStats = getDeprecationStats();
-    setStats(usageStats.map(stat => ({
-      name: stat.component || stat.feature || 'Unknown',
-      value: stat.count,
-      lastUsed: new Date(stat.timestamp || stat.lastUsed || Date.now()).toLocaleString()
-    })));
-    setLastRefreshed(new Date());
-  };
+    setStats(usageStats);
+  }, [isResetting]);
 
   const handleReset = () => {
+    setIsResetting(true);
     resetDeprecationTracker();
-    setStats([]);
-    toast({
-      title: "Statistics Reset",
-      description: "Deprecation usage statistics have been reset.",
-    });
-  };
 
-  const exportStats = () => {
-    const csvContent = [
-      'Feature,Count,Last Used',
-      ...stats.map(stat => `${stat.name},${stat.value},"${stat.lastUsed}"`)
-    ].join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `deprecation-stats-${new Date().toISOString().slice(0,10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Set a small delay to allow the reset to complete
+    setTimeout(() => {
+      setStats(getDeprecationStats());
+      setIsResetting(false);
+    }, 100);
   };
-
+  
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">Deprecation Usage Statistics</h1>
-            <p className="text-muted-foreground">
-              Track usage of deprecated features to guide migration efforts
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={refreshStats}>
-              <RefreshCw size={14} className="mr-1" />
-              Refresh
-            </Button>
-            
-            <Button variant="outline" size="sm" onClick={exportStats}>
-              <Download size={14} className="mr-1" />
-              Export CSV
-            </Button>
-            
-            <Button variant="outline" size="sm" onClick={handleReset}>
-              <Trash size={14} className="mr-1" />
-              Reset
-            </Button>
-          </div>
+    <AdminLayout>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Deprecation Statistics</h1>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleReset}
+            disabled={isResetting || stats.length === 0}
+            className="h-8"
+          >
+            <RefreshCcw className="h-3.5 w-3.5 mr-1" />
+            Reset Tracker
+          </Button>
         </div>
         
-        <Card className="shadow-sm mb-6">
-          <CardHeader>
-            <CardTitle>Usage Overview</CardTitle>
-            <CardDescription>
-              Last refreshed: {lastRefreshed.toLocaleString()}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {stats.length === 0 ? (
-              <div className="text-center py-10 text-muted-foreground">
-                No deprecated feature usage detected
-              </div>
-            ) : (
-              <div className="w-full h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#8884d8" name="Times Used" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle>Detailed Usage</CardTitle>
-            <CardDescription>
-              Breakdown of deprecated feature usage
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {stats.length === 0 ? (
-              <div className="text-center py-6 text-muted-foreground">
-                No deprecated feature usage detected
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {stats.map((stat, index) => (
-                  <div 
-                    key={index} 
-                    className="flex justify-between items-center py-3 px-4 rounded-md bg-gray-50 border border-gray-100"
-                  >
-                    <div>
-                      <h3 className="font-medium">{stat.name}</h3>
-                      <p className="text-sm text-muted-foreground">Last used: {stat.lastUsed}</p>
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Feature
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Usage Count
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Last Used
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {stats.map(stat => (
+              <tr key={stat.id}>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center">
+                    <div className="ml-4">
+                      <div className="text-sm font-medium text-gray-900">{stat.item}</div>
                     </div>
-                    <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">
-                      Used {stat.value} {stat.value === 1 ? 'time' : 'times'}
-                    </span>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-          <CardFooter className="bg-gray-50 text-sm text-muted-foreground border-t">
-            These statistics are tracked in-memory and will reset when the application is restarted.
-          </CardFooter>
-        </Card>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-500">{stat.count}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {new Date(stat.lastOccurred).toLocaleString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        
+        {stats.length === 0 && (
+          <div className="text-center py-4 text-gray-500">
+            No deprecated features have been used yet.
+          </div>
+        )}
       </div>
-    </Layout>
+    </AdminLayout>
   );
 };
 

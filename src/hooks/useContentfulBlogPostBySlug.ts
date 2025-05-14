@@ -2,8 +2,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { ContentfulAsset } from '@/types/contentful';
-import { isContentfulEntry } from '@/utils/contentfulTypeGuards';
+import { isContentfulEntry, isContentfulAsset } from '@/utils/contentfulTypeGuards';
 import { ContentfulBlogPost } from './useContentfulBlogPosts';
+import { safeString } from '@/services/cms/utils/safeTypeUtilities';
 
 export interface ContentfulBlogPostBySlugOptions {
   preview?: boolean;
@@ -46,41 +47,48 @@ export function useContentfulBlogPostBySlug(slug?: string, options?: ContentfulB
 
         // Featured image handling
         let featuredImage = undefined;
-        if (entry.fields.featuredImage) {
-          const image = entry.fields.featuredImage;
-          if (image && typeof image === 'object' && 'fields' in image && image.fields && image.fields.file) {
-            featuredImage = {
-              url: `https:${image.fields.file.url}`,
-              title: image.fields.title || '',
-              width: image.fields.file.details?.image?.width,
-              height: image.fields.file.details?.image?.height
-            };
-          }
+        if (entry.fields.featuredImage && isContentfulAsset(entry.fields.featuredImage)) {
+          featuredImage = {
+            url: `https:${entry.fields.featuredImage.fields.file.url}`,
+            title: safeString(entry.fields.featuredImage.fields.title),
+            width: entry.fields.featuredImage.fields.file.details?.image?.width,
+            height: entry.fields.featuredImage.fields.file.details?.image?.height
+          };
         }
         
-        const publishDate = entry.fields.publishDate ? String(entry.fields.publishDate) : '';
+        const publishDate = entry.fields.publishDate ? safeString(entry.fields.publishDate) : '';
         
         // Return in ContentfulBlogPost format to match useContentfulBlogPosts
         const blogPost: ContentfulBlogPost = {
           id: entry.sys.id,
-          title: String(entry.fields.title || 'Untitled'),
-          slug: String(entry.fields.slug),
+          title: safeString(entry.fields.title || 'Untitled'),
+          slug: safeString(entry.fields.slug || ''),
           content: entry.fields.content,
-          excerpt: entry.fields.excerpt ? String(entry.fields.excerpt) : undefined,
-          publishDate: publishDate,
+          excerpt: entry.fields.excerpt ? safeString(entry.fields.excerpt) : undefined,
+          publishDate,
           published_at: publishDate,
           featuredImage,
-          author: entry.fields.author ? String(entry.fields.author) : undefined,
-          tags: Array.isArray(entry.fields.tags) ? entry.fields.tags.map(tag => String(tag)) : [],
+          author: entry.fields.author ? safeString(entry.fields.author) : undefined,
+          tags: Array.isArray(entry.fields.tags) ? entry.fields.tags.map(tag => safeString(tag)) : [],
           sys: {
             id: entry.sys.id,
             createdAt: entry.sys.createdAt,
             updatedAt: entry.sys.updatedAt
           },
-          fields: entry.fields,
+          fields: {
+            title: safeString(entry.fields.title || 'Untitled'),
+            slug: safeString(entry.fields.slug || ''),
+            publishDate,
+            content: entry.fields.content,
+            excerpt: entry.fields.excerpt ? safeString(entry.fields.excerpt) : undefined,
+            featuredImage: entry.fields.featuredImage,
+            author: entry.fields.author ? safeString(entry.fields.author) : undefined,
+            tags: Array.isArray(entry.fields.tags) ? entry.fields.tags.map(tag => safeString(tag)) : []
+          },
           status: 'published',
-          created_at: entry.sys.createdAt,
-          updated_at: entry.sys.updatedAt,
+          created_at: entry.sys.createdAt || '',
+          updated_at: entry.sys.updatedAt || '',
+          // Add support for includes to make content resolution work
           includes: entry.includes
         };
         

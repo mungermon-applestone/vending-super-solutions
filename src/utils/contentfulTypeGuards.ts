@@ -44,13 +44,14 @@ export function convertContentfulBlogPostToBlogPost(post: ContentfulBlogPost | n
     slug: post.slug,
     content: post.content,
     excerpt: post.excerpt,
-    status: 'published',
-    published_at: post.publishDate || post.published_at,
+    status: 'published' as 'published' | 'draft', // Cast to satisfy TypeScript
+    published_at: post.publishDate || post.published_at || '',
     created_at: post.created_at || post.sys?.createdAt || '',
     updated_at: post.updated_at || post.sys?.updatedAt || '',
     featuredImage: post.featuredImage,
     author: post.author,
-    tags: post.tags || []
+    tags: post.tags || [],
+    sys: post.sys
   };
 }
 

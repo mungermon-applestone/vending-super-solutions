@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
@@ -14,7 +13,7 @@ import { Server, HardDrive, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { SimpleContactCTA } from '@/components/common';
 
-const MachinesPage = () => {
+const Machines = () => {
   // Force Contentful provider
   useEffect(() => {
     try {
@@ -25,7 +24,7 @@ const MachinesPage = () => {
   }, []);
 
   const { data: machines = [], isLoading, error } = useContentfulMachines();
-  const { data: testimonialSection } = useTestimonialSection('machines');
+  const { data: testimonialSection } = useTestimonialSection();
   
   // Safe type checking to filter machines
   const vendingMachines: CMSMachine[] = machines.filter(machine => 
@@ -43,7 +42,7 @@ const MachinesPage = () => {
         (machine.images && machine.images.length > 0 ? machine.images[0] : undefined));
     
     // Use title or name, whichever is available
-    const displayTitle = machine.title || machine.name || 'Unnamed Machine';
+    const displayTitle = machine.title || machine.name || '';
     
     return (
       <Card key={machine.id} className="overflow-hidden hover:shadow-xl transition-shadow">
@@ -203,4 +202,4 @@ const MachinesPage = () => {
   );
 };
 
-export default MachinesPage;
+export default Machines;

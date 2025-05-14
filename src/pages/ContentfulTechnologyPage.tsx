@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useContentfulTechnology } from '@/hooks/cms/useContentfulTechnology';
 import TechnologyHero from '@/components/technology/TechnologyHero';
@@ -16,7 +15,7 @@ import { SimpleContactCTA } from '@/components/common';
 
 const ContentfulTechnologyPage: React.FC = () => {
   const { data: technologies, isLoading, error, refetch } = useContentfulTechnology();
-  const { data: testimonialSection } = useTestimonialSection('technology');
+  const { data: testimonialSection } = useTestimonialSection();
   const [connectionStatus, setConnectionStatus] = React.useState<{
     checked: boolean;
     isConnected: boolean;
@@ -57,7 +56,7 @@ const ContentfulTechnologyPage: React.FC = () => {
     }
   }, [refetch]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (error && !connectionStatus.checked) {
       checkConnection();
     }
