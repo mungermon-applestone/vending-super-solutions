@@ -3,10 +3,39 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { Entry, EntrySkeletonType } from 'contentful';
 import { ContentfulBusinessGoal } from '@/types/contentful';
+import { isContentfulEntry, isContentfulAsset } from '@/services/cms/utils/contentfulHelpers';
 
-// Helper function to type guard Contentful entries
-function isContentfulEntry(value: any): value is Entry<EntrySkeletonType, undefined, string> {
-  return value && typeof value === 'object' && value.sys && value.fields;
+// Helper function to transform Contentful entries
+function transformBusinessGoal(entry: Entry<EntrySkeletonType, undefined, string>) {
+  if (!isContentfulEntry(entry)) {
+    console.error('[useContentfulBusinessGoals] Entry is not a valid Contentful entry:', entry);
+    return null;
+  }
+  
+  // Get the ID and fields
+  const id = entry.sys.id;
+  const fields = entry.fields;
+  
+  let imageData = undefined;
+  if (fields.image && isContentfulEntry(fields.image) && fields.image.fields.file) {
+    imageData = {
+      id: fields.image.sys.id,
+      url: `https:${fields.image.fields.file.url}`,
+      alt: fields.image.fields.title || ''
+    };
+  }
+  
+  // Transform contentful format to our app format
+  return {
+    id,
+    title: String(fields.title || ''),
+    slug: String(fields.slug || ''),
+    description: String(fields.description || ''),
+    icon: String(fields.icon || ''),
+    benefits: Array.isArray(fields.benefits) ? fields.benefits.map(benefit => String(benefit)) : [],
+    visible: fields.visible === true,
+    image: imageData
+  };
 }
 
 export function useContentfulBusinessGoals() {
@@ -25,36 +54,9 @@ export function useContentfulBusinessGoals() {
         }
         
         // Map entries to our application format
-        return entries.map(entry => {
-          if (!isContentfulEntry(entry)) {
-            console.error('[useContentfulBusinessGoals] Entry is not a valid Contentful entry:', entry);
-            return null;
-          }
-          
-          // Get the ID and fields
-          const id = entry.sys.id;
-          const fields = entry.fields;
-          
-          // Transform contentful format to our app format
-          return {
-            id,
-            title: fields.title as string,
-            slug: fields.slug as string,
-            description: fields.description as string,
-            icon: fields.icon as string,
-            benefits: Array.isArray(fields.benefits) ? fields.benefits : [],
-            visible: fields.visible === true,
-            
-            // Image handling with fallback
-            image: fields.image && isContentfulEntry(fields.image) 
-              ? {
-                  id: fields.image.sys.id,
-                  url: `https:${fields.image.fields.file.url}`,
-                  alt: fields.image.fields.title
-                }
-              : undefined
-          };
-        }).filter(Boolean);
+        return entries
+          .map(transformBusinessGoal)
+          .filter(Boolean);
       } catch (error) {
         console.error('[useContentfulBusinessGoals] Error fetching business goals:', error);
         throw error;
@@ -86,35 +88,7 @@ export function useContentfulBusinessGoalBySlug(slug: string) {
         }
         
         const entry = entries[0];
-        
-        if (!isContentfulEntry(entry)) {
-          console.error('[useContentfulBusinessGoalBySlug] Entry is not a valid Contentful entry:', entry);
-          return null;
-        }
-        
-        // Get the ID and fields
-        const id = entry.sys.id;
-        const fields = entry.fields;
-        
-        // Return transformed entry
-        return {
-          id,
-          title: fields.title as string,
-          slug: fields.slug as string,
-          description: fields.description as string,
-          icon: fields.icon as string,
-          benefits: Array.isArray(fields.benefits) ? fields.benefits : [],
-          visible: fields.visible === true,
-          
-          // Image handling with fallback
-          image: fields.image && isContentfulEntry(fields.image)
-            ? {
-                id: fields.image.sys.id,
-                url: `https:${fields.image.fields.file.url}`,
-                alt: fields.image.fields.title
-              }
-            : undefined
-        };
+        return transformBusinessGoal(entry);
       } catch (error) {
         console.error(`[useContentfulBusinessGoalBySlug] Error fetching business goal with slug ${slug}:`, error);
         throw error;

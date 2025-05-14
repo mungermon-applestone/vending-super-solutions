@@ -3,6 +3,9 @@
  * Utility functions for tracking and managing deprecated features
  */
 
+// In-memory storage for deprecated feature usage stats
+const deprecationStats: Record<string, { count: number, lastUsed: Date, messages: string[] }> = {};
+
 // Track usage of deprecated features
 export function logDeprecation(
   feature: string,
@@ -14,6 +17,24 @@ export function logDeprecation(
   if (suggestion) {
     console.info(`[SUGGESTION] ${suggestion}`);
   }
+  
+  // Track usage for stats
+  if (!deprecationStats[feature]) {
+    deprecationStats[feature] = {
+      count: 0,
+      lastUsed: new Date(),
+      messages: []
+    };
+  }
+  
+  deprecationStats[feature].count += 1;
+  deprecationStats[feature].lastUsed = new Date();
+  
+  // Store the message (limit to most recent 5)
+  if (deprecationStats[feature].messages.length >= 5) {
+    deprecationStats[feature].messages.pop();
+  }
+  deprecationStats[feature].messages.unshift(message);
 }
 
 /**
@@ -78,16 +99,30 @@ export function getContentfulRedirectUrl(
 }
 
 /**
- * Deprecated stats functions - stubs to prevent errors
+ * Stats functions for deprecation tracking
  */
 export interface DeprecationStat {
   feature: string;
   count: number;
   lastUsed: Date;
-  suggestions: string[];
+  messages: string[];
 }
 
 export function getDeprecationStats(): DeprecationStat[] {
-  console.warn('[DEPRECATED] getDeprecationStats is no longer supported');
-  return [];
+  return Object.entries(deprecationStats).map(([feature, data]) => ({
+    feature,
+    count: data.count,
+    lastUsed: data.lastUsed,
+    messages: [...data.messages]
+  }));
+}
+
+/**
+ * Reset the deprecation tracker (clear all stats)
+ */
+export function resetDeprecationTracker(): void {
+  Object.keys(deprecationStats).forEach(key => {
+    delete deprecationStats[key];
+  });
+  console.log('[Deprecation] Usage tracker has been reset');
 }

@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { toast } from 'sonner';
+import { isContentfulAsset } from '@/services/cms/utils/contentfulHelpers';
 
 export interface HomePageContent {
   id: string;
@@ -29,6 +30,12 @@ export interface HomePageContent {
   availableMachinesDescription: string;
 }
 
+// Helper function to safely convert values to strings
+function safeString(value: any): string {
+  if (value === null || value === undefined) return '';
+  return String(value);
+}
+
 export function useHomePageContent() {
   return useQuery({
     queryKey: ['contentful', 'homePageContent'],
@@ -49,31 +56,37 @@ export function useHomePageContent() {
         const entry = entries.items[0];
         const fields = entry.fields;
 
-        // Convert Contentful data to our expected format
+        // Extract heroImage URL with proper type checking
+        let heroImageUrl = '';
+        if (fields.heroImage && isContentfulAsset(fields.heroImage)) {
+          heroImageUrl = `https:${fields.heroImage.fields.file.url}`;
+        }
+
+        // Convert Contentful data to our expected format with safe string conversions
         const content: HomePageContent = {
           id: entry.sys.id,
-          title: fields.title || 'Home',
-          heroHeadline: fields.heroHeadline || 'Smart Vending Solutions',
-          heroSubheading: fields.heroSubheading || 'Discover our advanced vending technology',
-          heroCTAText: fields.heroCTAText || 'Get Started',
-          heroCTALink: fields.heroCTALink || '/contact',
-          heroImage: fields.heroImage?.fields?.file?.url ? `https:${fields.heroImage.fields.file.url}` : '',
-          featuredProductsTitle: fields.featuredProductsTitle || 'Our Products',
-          featuredProductsSubtitle: fields.featuredProductsSubtitle || 'Discover our product categories',
-          featuredMachinesTitle: fields.featuredMachinesTitle || 'Our Machines',
-          featuredMachinesSubtitle: fields.featuredMachinesSubtitle || 'Explore our vending machines',
-          testimonialsSectionTitle: fields.testimonialsSectionTitle || 'What Our Customers Say',
-          testimonialsSectionSubtitle: fields.testimonialsSectionSubtitle || 'Hear from our satisfied clients',
-          businessGoalsTitle: fields.businessGoalsTitle || 'Business Goals',
-          businessGoalsDescription: fields.businessGoalsDescription || 'How we can help you achieve your business goals',
-          ctaSectionTitle: fields.ctaSectionTitle || 'Ready to Get Started?',
-          ctaSectionDescription: fields.ctaSectionDescription || 'Contact us today to learn more about our solutions',
-          ctaPrimaryButtonText: fields.ctaPrimaryButtonText || 'Contact Us',
-          ctaPrimaryButtonUrl: fields.ctaPrimaryButtonUrl || '/contact',
-          ctaSecondaryButtonText: fields.ctaSecondaryButtonText || 'Learn More',
-          ctaSecondaryButtonUrl: fields.ctaSecondaryButtonUrl || '/about',
-          availableMachines: fields.availableMachines || 'Available Machines',
-          availableMachinesDescription: fields.availableMachinesDescription || 'Explore our range of vending machines'
+          title: safeString(fields.title) || 'Home',
+          heroHeadline: safeString(fields.heroHeadline) || 'Smart Vending Solutions',
+          heroSubheading: safeString(fields.heroSubheading) || 'Discover our advanced vending technology',
+          heroCTAText: safeString(fields.heroCTAText) || 'Get Started',
+          heroCTALink: safeString(fields.heroCTALink) || '/contact',
+          heroImage: heroImageUrl,
+          featuredProductsTitle: safeString(fields.featuredProductsTitle) || 'Our Products',
+          featuredProductsSubtitle: safeString(fields.featuredProductsSubtitle) || 'Discover our product categories',
+          featuredMachinesTitle: safeString(fields.featuredMachinesTitle) || 'Our Machines',
+          featuredMachinesSubtitle: safeString(fields.featuredMachinesSubtitle) || 'Explore our vending machines',
+          testimonialsSectionTitle: safeString(fields.testimonialsSectionTitle) || 'What Our Customers Say',
+          testimonialsSectionSubtitle: safeString(fields.testimonialsSectionSubtitle) || 'Hear from our satisfied clients',
+          businessGoalsTitle: safeString(fields.businessGoalsTitle) || 'Business Goals',
+          businessGoalsDescription: safeString(fields.businessGoalsDescription) || 'How we can help you achieve your business goals',
+          ctaSectionTitle: safeString(fields.ctaSectionTitle) || 'Ready to Get Started?',
+          ctaSectionDescription: safeString(fields.ctaSectionDescription) || 'Contact us today to learn more about our solutions',
+          ctaPrimaryButtonText: safeString(fields.ctaPrimaryButtonText) || 'Contact Us',
+          ctaPrimaryButtonUrl: safeString(fields.ctaPrimaryButtonUrl) || '/contact',
+          ctaSecondaryButtonText: safeString(fields.ctaSecondaryButtonText) || 'Learn More',
+          ctaSecondaryButtonUrl: safeString(fields.ctaSecondaryButtonUrl) || '/about',
+          availableMachines: safeString(fields.availableMachines) || 'Available Machines',
+          availableMachinesDescription: safeString(fields.availableMachinesDescription) || 'Explore our range of vending machines'
         };
 
         return content;

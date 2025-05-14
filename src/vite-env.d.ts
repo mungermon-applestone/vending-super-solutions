@@ -10,6 +10,8 @@ interface Window {
   env?: Record<string, any>;
   _runtimeConfig?: Record<string, any>;
   _runtimeConfigLoaded?: boolean;
+  __RUNTIME_CONFIG__?: Record<string, string>;
+  _devMockData?: Record<string, any>;
   
   // Contentful-specific runtime properties
   _contentfulInitialized?: boolean;

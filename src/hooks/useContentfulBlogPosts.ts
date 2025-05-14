@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { CMS_MODELS } from '@/config/cms';
+import { isContentfulEntry, isContentfulAsset } from '@/utils/contentfulTypeGuards';
 
 // Export the interface for blog posts
 export interface ContentfulBlogPost {
@@ -31,22 +32,37 @@ export function useContentfulBlogPosts() {
         });
         
         // Transform entries to match expected format
-        return entries.map(entry => ({
-          id: entry.sys?.id || '',
-          title: entry.fields?.title || 'Untitled',
-          slug: entry.fields?.slug || '',
-          publishDate: entry.fields?.publishDate,
-          content: entry.fields?.content,
-          excerpt: entry.fields?.excerpt,
-          featuredImage: entry.fields?.featuredImage?.fields ? {
-            url: `https:${entry.fields.featuredImage.fields.file?.url}` || '',
-            title: entry.fields.featuredImage.fields.title || '',
-            width: entry.fields.featuredImage.fields.file?.details?.image?.width,
-            height: entry.fields.featuredImage.fields.file?.details?.image?.height
-          } : undefined,
-          author: entry.fields?.author,
-          tags: entry.fields?.tags || []
-        })) as ContentfulBlogPost[];
+        return entries.map(entry => {
+          if (!isContentfulEntry(entry)) {
+            console.error('[useContentfulBlogPosts] Invalid entry format:', entry);
+            return null;
+          }
+          
+          // Featured image handling with type safety
+          let featuredImage = undefined;
+          if (entry.fields.featuredImage && isContentfulAsset(entry.fields.featuredImage)) {
+            featuredImage = {
+              url: `https:${entry.fields.featuredImage.fields.file.url}`,
+              title: String(entry.fields.featuredImage.fields.title || ''),
+              width: entry.fields.featuredImage.fields.file?.details?.image?.width,
+              height: entry.fields.featuredImage.fields.file?.details?.image?.height
+            };
+          }
+          
+          return {
+            id: entry.sys?.id || '',
+            title: String(entry.fields?.title || 'Untitled'),
+            slug: String(entry.fields?.slug || ''),
+            publishDate: entry.fields?.publishDate ? String(entry.fields.publishDate) : undefined,
+            content: entry.fields?.content,
+            excerpt: entry.fields?.excerpt ? String(entry.fields.excerpt) : undefined,
+            featuredImage,
+            author: entry.fields?.author ? String(entry.fields.author) : undefined,
+            tags: Array.isArray(entry.fields?.tags) 
+              ? entry.fields.tags.map(tag => String(tag)) 
+              : []
+          };
+        }).filter(Boolean) as ContentfulBlogPost[];
       } catch (error) {
         console.error('[useContentfulBlogPosts] Error fetching blog posts:', error);
         return [];

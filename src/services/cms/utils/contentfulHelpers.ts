@@ -83,3 +83,50 @@ export function safeString(value: any): string {
   if (value === null || value === undefined) return '';
   return String(value);
 }
+
+/**
+ * Transform entry fields to a normalized object
+ * This simplifies accessing Contentful data in a consistent way
+ */
+export function normalizeEntryFields(entry: Entry<EntrySkeletonType, undefined, string> | undefined | null): Record<string, any> {
+  if (!entry || !entry.fields) {
+    return {};
+  }
+  
+  const normalized: Record<string, any> = {};
+  
+  Object.keys(entry.fields).forEach(key => {
+    const value = entry.fields[key];
+    
+    // Handle linked entry
+    if (isContentfulEntry(value)) {
+      normalized[key] = normalizeEntryFields(value);
+      return;
+    }
+    
+    // Handle linked asset
+    if (isContentfulAsset(value)) {
+      normalized[key] = assetToImage(value);
+      return;
+    }
+    
+    // Handle arrays (could contain entries or assets)
+    if (Array.isArray(value)) {
+      normalized[key] = value.map(item => {
+        if (isContentfulEntry(item)) {
+          return normalizeEntryFields(item);
+        }
+        if (isContentfulAsset(item)) {
+          return assetToImage(item);
+        }
+        return item;
+      });
+      return;
+    }
+    
+    // Default case: use value as is
+    normalized[key] = value;
+  });
+  
+  return normalized;
+}

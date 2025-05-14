@@ -2,38 +2,53 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { CMSMachine } from '@/types/cms';
+import { isContentfulEntry, isContentfulAsset } from '@/services/cms/utils/contentfulHelpers';
 
 /**
  * Transform a Contentful machine entry into our app's CMSMachine format
  */
 function transformMachineFromContentful(entry: any): CMSMachine {
+  if (!isContentfulEntry(entry)) {
+    throw new Error('Invalid Contentful entry provided to transformer');
+  }
+  
   console.log('[transformMachineFromContentful] Transforming machine:', entry.sys.id);
   
   // Extract images from the entry
-  const images = entry.fields.images?.map((image: any) => ({
-    id: image.sys?.id,
-    url: `https:${image.fields?.file?.url}`,
-    alt: image.fields?.title || entry.fields.title,
-    width: image.fields?.file?.details?.image?.width,
-    height: image.fields?.file?.details?.image?.height
-  })) || [];
+  const images = entry.fields.images?.map((image: any) => {
+    if (isContentfulAsset(image)) {
+      return {
+        id: image.sys?.id,
+        url: `https:${image.fields?.file?.url}`,
+        alt: image.fields?.title || entry.fields.title,
+        width: image.fields?.file?.details?.image?.width,
+        height: image.fields?.file?.details?.image?.height
+      };
+    }
+    return null;
+  }).filter(Boolean) || [];
   
   // Get the main image (first image or undefined)
   const mainImage = images.length > 0 ? images[0] : undefined;
   
   // Get or create a thumbnail
-  const thumbnail = entry.fields.thumbnail
-    ? {
-        id: entry.fields.thumbnail.sys?.id,
-        url: `https:${entry.fields.thumbnail.fields?.file?.url}`,
-        alt: entry.fields.thumbnail.fields?.title || entry.fields.title,
-        width: entry.fields.thumbnail.fields?.file?.details?.image?.width,
-        height: entry.fields.thumbnail.fields?.file?.details?.image?.height
-      }
-    : mainImage;
+  let thumbnail = undefined;
+  if (entry.fields.thumbnail && isContentfulAsset(entry.fields.thumbnail)) {
+    thumbnail = {
+      id: entry.fields.thumbnail.sys?.id,
+      url: `https:${entry.fields.thumbnail.fields?.file?.url}`,
+      alt: entry.fields.thumbnail.fields?.title || entry.fields.title,
+      width: entry.fields.thumbnail.fields?.file?.details?.image?.width,
+      height: entry.fields.thumbnail.fields?.file?.details?.image?.height
+    };
+  } else {
+    thumbnail = mainImage;
+  }
   
   // Extract features
-  const features = entry.fields.features?.map((feature: string) => feature) || [];
+  const features = Array.isArray(entry.fields.features) 
+    ? entry.fields.features.map((feature: any) => String(feature))
+    : [];
   
   // Extract specs
   const specs = entry.fields.specs || {};
@@ -41,19 +56,19 @@ function transformMachineFromContentful(entry: any): CMSMachine {
   // Transform to our app's machine format
   return {
     id: entry.sys.id,
-    title: entry.fields.title || 'Untitled Machine',
-    slug: entry.fields.slug || entry.sys.id,
-    description: entry.fields.description || '',
-    shortDescription: entry.fields.shortDescription,
-    type: entry.fields.type || 'vending',
+    title: String(entry.fields.title || 'Untitled Machine'),
+    slug: String(entry.fields.slug || entry.sys.id),
+    description: String(entry.fields.description || ''),
+    shortDescription: entry.fields.shortDescription ? String(entry.fields.shortDescription) : undefined,
+    type: String(entry.fields.type || 'vending'),
     mainImage,
     thumbnail,
     images,
     features,
     specs,
-    temperature: entry.fields.temperature || 'ambient',
-    featured: entry.fields.featured || false,
-    displayOrder: entry.fields.displayOrder || 0,
+    temperature: String(entry.fields.temperature || 'ambient'),
+    featured: Boolean(entry.fields.featured) || false,
+    displayOrder: Number(entry.fields.displayOrder) || 0,
     createdAt: entry.sys.createdAt,
     updatedAt: entry.sys.updatedAt,
     visible: entry.fields.visible !== false // Default to true if not specified
@@ -80,6 +95,10 @@ export function useContentfulMachines() {
         // Transform each machine entry
         const machines = response.map(entry => {
           try {
+            if (!isContentfulEntry(entry)) {
+              console.error('[useContentfulMachines] Invalid entry format:', entry);
+              return null;
+            }
             return transformMachineFromContentful(entry);
           } catch (transformError) {
             console.error('[useContentfulMachines] Error transforming machine:', transformError);
@@ -121,7 +140,7 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
           try {
             console.log('[useContentfulMachine] Trying direct ID fetch:', idOrSlug);
             const entry = await fetchContentfulEntry(idOrSlug);
-            if (entry) {
+            if (entry && isContentfulEntry(entry)) {
               return transformMachineFromContentful(entry);
             }
           } catch (idError) {
@@ -135,8 +154,13 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
           'fields.slug': idOrSlug
         });
         
-        if (entries.length === 0) {
+        if (!entries || entries.length === 0) {
           console.log(`[useContentfulMachine] No machine found with slug: ${idOrSlug}`);
+          return null;
+        }
+        
+        if (!isContentfulEntry(entries[0])) {
+          console.error('[useContentfulMachine] Invalid entry format:', entries[0]);
           return null;
         }
         

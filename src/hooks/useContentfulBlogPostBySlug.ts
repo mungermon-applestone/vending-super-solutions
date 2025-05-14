@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { ContentfulAsset } from '@/types/contentful';
+import { isContentfulEntry, convertToBlogPost } from '@/utils/contentfulTypeGuards';
 
 export interface ContentfulBlogPost {
   sys: {
@@ -44,8 +45,16 @@ export function useContentfulBlogPostBySlug(slug?: string) {
           return null;
         }
         
-        // Return the first matching post
-        return entries[0] as ContentfulBlogPost;
+        // Process the first entry
+        const entry = entries[0];
+        
+        // Validate entry format and convert to our BlogPost type
+        if (isContentfulEntry(entry)) {
+          return convertToBlogPost(entry);
+        }
+        
+        console.error('[useContentfulBlogPostBySlug] Invalid entry format:', entry);
+        return null;
       } catch (error) {
         console.error(`[useContentfulBlogPostBySlug] Error fetching blog post: ${slug}`, error);
         return null;

@@ -68,14 +68,3 @@ export function logContentfulConfig(): void {
     isPreview: isPreviewEnvironment()
   });
 }
-
-// Declare window runtime config
-declare global {
-  interface Window {
-    __RUNTIME_CONFIG__?: Record<string, string>;
-    _devMockData?: Record<string, any>;
-    _contentfulInitialized?: boolean;
-    _contentfulInitializedSource?: string;
-    env?: Record<string, string>;
-  }
-}
