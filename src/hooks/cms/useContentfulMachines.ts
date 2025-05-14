@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { CMSMachine } from '@/types/cms';
 import { isContentfulEntry, isContentfulAsset } from '@/services/cms/utils/contentfulHelpers';
+import { safeString, safeArrayField, safeAssetToImage } from '@/services/cms/utils/safeTypeUtilities';
 
 /**
  * Transform a Contentful machine entry into our app's CMSMachine format
@@ -15,18 +16,20 @@ function transformMachineFromContentful(entry: any): CMSMachine {
   console.log('[transformMachineFromContentful] Transforming machine:', entry.sys.id);
   
   // Extract images from the entry
-  const images = entry.fields.images?.map((image: any) => {
-    if (isContentfulAsset(image)) {
-      return {
-        id: image.sys?.id,
-        url: `https:${image.fields?.file?.url}`,
-        alt: image.fields?.title || entry.fields.title,
-        width: image.fields?.file?.details?.image?.width,
-        height: image.fields?.file?.details?.image?.height
-      };
-    }
-    return null;
-  }).filter(Boolean) || [];
+  const images = safeArrayField(entry.fields, 'images')
+    .map((image: any) => {
+      if (isContentfulAsset(image)) {
+        return {
+          id: image.sys?.id || '',
+          url: `https:${image.fields?.file?.url || ''}`,
+          alt: image.fields?.title || entry.fields.title || '',
+          width: image.fields?.file?.details?.image?.width,
+          height: image.fields?.file?.details?.image?.height
+        };
+      }
+      return null;
+    })
+    .filter(Boolean) || [];
   
   // Get the main image (first image or undefined)
   const mainImage = images.length > 0 ? images[0] : undefined;
@@ -35,9 +38,9 @@ function transformMachineFromContentful(entry: any): CMSMachine {
   let thumbnail = undefined;
   if (entry.fields.thumbnail && isContentfulAsset(entry.fields.thumbnail)) {
     thumbnail = {
-      id: entry.fields.thumbnail.sys?.id,
-      url: `https:${entry.fields.thumbnail.fields?.file?.url}`,
-      alt: entry.fields.thumbnail.fields?.title || entry.fields.title,
+      id: entry.fields.thumbnail.sys?.id || '',
+      url: `https:${entry.fields.thumbnail.fields?.file?.url || ''}`,
+      alt: entry.fields.thumbnail.fields?.title || entry.fields.title || '',
       width: entry.fields.thumbnail.fields?.file?.details?.image?.width,
       height: entry.fields.thumbnail.fields?.file?.details?.image?.height
     };
@@ -46,27 +49,32 @@ function transformMachineFromContentful(entry: any): CMSMachine {
   }
   
   // Extract features
-  const features = Array.isArray(entry.fields.features) 
-    ? entry.fields.features.map((feature: any) => String(feature))
-    : [];
+  const features = safeArrayField(entry.fields, 'features')
+    .map((feature: any) => safeString(feature))
+    .filter(Boolean);
   
-  // Extract specs
-  const specs = entry.fields.specs || {};
+  // Extract specs as a record
+  const specs: Record<string, string> = {};
+  if (entry.fields.specs && typeof entry.fields.specs === 'object') {
+    Object.entries(entry.fields.specs).forEach(([key, value]) => {
+      specs[key] = safeString(value);
+    });
+  }
   
   // Transform to our app's machine format
   return {
     id: entry.sys.id,
-    title: String(entry.fields.title || 'Untitled Machine'),
-    slug: String(entry.fields.slug || entry.sys.id),
-    description: String(entry.fields.description || ''),
-    shortDescription: entry.fields.shortDescription ? String(entry.fields.shortDescription) : undefined,
-    type: String(entry.fields.type || 'vending'),
+    title: safeString(entry.fields.title || 'Untitled Machine'),
+    slug: safeString(entry.fields.slug || entry.sys.id),
+    description: safeString(entry.fields.description || ''),
+    shortDescription: entry.fields.shortDescription ? safeString(entry.fields.shortDescription) : undefined,
+    type: safeString(entry.fields.type || 'vending') as 'vending' | 'locker', // Force to one of the allowed types
     mainImage,
     thumbnail,
     images,
     features,
     specs,
-    temperature: String(entry.fields.temperature || 'ambient'),
+    temperature: safeString(entry.fields.temperature || 'ambient'),
     featured: Boolean(entry.fields.featured) || false,
     displayOrder: Number(entry.fields.displayOrder) || 0,
     createdAt: entry.sys.createdAt,

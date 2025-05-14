@@ -1,75 +1,74 @@
 
 import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
-import { AlertTriangle } from 'lucide-react';
+import { RefreshCw, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface ContentfulFallbackMessageProps {
-  title?: string;
-  message: string;
-  contentType: string;
+  message?: string;
+  contentType?: string;
   showRefresh?: boolean;
-  showAdmin?: boolean;
-  actionText?: string;
-  actionHref?: string;
-  onAction?: () => void;
+  showAdminLink?: boolean;
+  className?: string;
+  onRefresh?: () => void;
 }
 
+/**
+ * Reusable fallback message for Contentful content loading failures
+ */
 const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
-  title,
   message,
-  contentType,
-  showRefresh = false,
-  showAdmin = true,
-  actionText,
-  actionHref,
-  onAction,
+  contentType = 'content',
+  showRefresh = true,
+  showAdminLink = true,
+  className = '',
+  onRefresh
 }) => {
   const handleRefresh = () => {
-    if (onAction) {
-      onAction();
+    if (onRefresh) {
+      onRefresh();
     } else {
       window.location.reload();
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-8">
-      <Alert variant="warning" className="mb-6">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>{title || `Unable to load ${contentType}`}</AlertTitle>
-        <AlertDescription className="mt-2">
-          <p>{message}</p>
-        </AlertDescription>
-      </Alert>
-
-      <div className="flex flex-wrap gap-4 justify-center mt-6">
-        {showRefresh && (
-          <Button onClick={handleRefresh} variant="outline">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            {actionText || "Refresh Page"}
-          </Button>
-        )}
-        
-        {actionHref && actionText && !showRefresh && (
-          <Button onClick={onAction || (() => {})} asChild>
-            <Link to={actionHref}>
-              {actionText}
-            </Link>
-          </Button>
-        )}
-        
-        {showAdmin && !actionHref && (
-          <Button asChild>
-            <Link to="/admin/contentful-config">
-              Configure Contentful
-            </Link>
-          </Button>
-        )}
-      </div>
-    </div>
+    <Alert variant="default" className={`mb-4 ${className}`}>
+      <AlertTitle>Contentful {contentType} not available</AlertTitle>
+      <AlertDescription>
+        <p className="mb-4">
+          {message || `We couldn't load the ${contentType} from Contentful. This could be due to missing content or configuration issues.`}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {showRefresh && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefresh} 
+              className="flex items-center gap-1"
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span>Refresh</span>
+            </Button>
+          )}
+          
+          {showAdminLink && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              asChild
+              className="flex items-center gap-1"
+            >
+              <Link to="/admin/contentful">
+                <Settings className="h-4 w-4" />
+                <span>Manage Contentful</span>
+              </Link>
+            </Button>
+          )}
+        </div>
+      </AlertDescription>
+    </Alert>
   );
 };
 

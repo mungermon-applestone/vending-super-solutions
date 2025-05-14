@@ -1,120 +1,86 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
   contentType?: string;
-  showDetails?: boolean;
-  onRetry?: () => Promise<void>;
+  fallbackComponent?: ReactNode;
+  onReset?: () => void;
 }
 
 interface State {
   hasError: boolean;
   error: Error | null;
-  errorInfo: ErrorInfo | null;
-  isRetrying: boolean;
 }
 
+/**
+ * Error boundary component specifically for catching Contentful-related errors
+ */
 class ContentfulErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false,
-    error: null,
-    errorInfo: null,
-    isRetrying: false
-  };
-
-  public static getDerivedStateFromError(error: Error): State {
-    // Update state so the next render shows the fallback UI
-    return { 
-      hasError: true, 
-      error, 
-      errorInfo: null,
-      isRetrying: false
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: null
     };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Log the error to the console
-    console.error('[ContentfulErrorBoundary] Error caught:', {
+  static getDerivedStateFromError(error: Error): State {
+    return {
+      hasError: true,
+      error
+    };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    console.error(`[ContentfulErrorBoundary] Error in ${this.props.contentType || 'component'}:`, {
       error,
-      errorInfo: errorInfo.componentStack,
+      errorInfo,
       component: this.props.contentType || 'unknown'
-    });
-    
-    this.setState({ 
-      error, 
-      errorInfo 
     });
   }
 
-  private handleRetry = async (): Promise<void> => {
-    this.setState({ isRetrying: true });
-    
-    try {
-      // If onRetry prop exists, call it
-      if (this.props.onRetry) {
-        await this.props.onRetry();
-      }
-      
-      // Reset the error state
-      this.setState({
-        hasError: false,
-        error: null,
-        errorInfo: null,
-        isRetrying: false
-      });
-    } catch (error) {
-      // If retry fails, update state with new error
-      this.setState({
-        hasError: true,
-        error: error instanceof Error ? error : new Error(String(error)),
-        isRetrying: false
-      });
+  handleReset = (): void => {
+    this.setState({ hasError: false, error: null });
+    if (this.props.onReset) {
+      this.props.onReset();
     }
   };
 
-  public render(): ReactNode {
-    if (this.state.hasError) {
-      const contentType = this.props.contentType || 'content';
-      
+  render(): ReactNode {
+    const { hasError, error } = this.state;
+    const { children, contentType, fallbackComponent } = this.props;
+
+    if (hasError) {
+      // If a custom fallback component is provided, use it
+      if (fallbackComponent) {
+        return fallbackComponent;
+      }
+
+      // Default error UI
       return (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 my-4 text-center">
-          <h3 className="text-lg font-medium text-gray-800 mb-2">
-            Unable to load {contentType}
-          </h3>
-          <p className="text-gray-600 mb-4">
-            There was a problem loading the {contentType} from our CMS.
-          </p>
-          
-          {this.props.showDetails && this.state.error && (
-            <div className="bg-gray-100 p-3 rounded text-left text-sm mb-4 overflow-auto max-h-40">
-              <p className="font-mono text-red-600">
-                {this.state.error.toString()}
-              </p>
-              {this.state.errorInfo && (
-                <pre className="text-xs text-gray-600 mt-2">
-                  {this.state.errorInfo.componentStack}
-                </pre>
-              )}
-            </div>
-          )}
-          
-          <Button 
-            onClick={this.handleRetry} 
-            disabled={this.state.isRetrying}
-            variant="outline"
-            className="mt-2"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${this.state.isRetrying ? 'animate-spin' : ''}`} />
-            {this.state.isRetrying ? 'Retrying...' : 'Try Again'}
-          </Button>
-        </div>
+        <Alert variant="destructive" className="my-4">
+          <AlertTitle>Error Loading {contentType || 'Content'}</AlertTitle>
+          <AlertDescription>
+            <p className="mb-2">{error?.message || 'An unexpected error occurred'}</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={this.handleReset} 
+              className="flex items-center gap-1"
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span>Retry</span>
+            </Button>
+          </AlertDescription>
+        </Alert>
       );
     }
 
-    return this.props.children;
+    return children;
   }
 }
 

@@ -1,106 +1,46 @@
 
-import React, { useEffect, useState } from 'react';
-import { forceContentfulProvider, initCMS, refreshCmsConnection } from '@/services/cms/cmsInit';
-import { testContentfulConnection } from '@/services/cms/utils/contentfulClient';
-import { toast } from 'sonner';
+import React from 'react';
+import { useContentfulInit } from '@/hooks/useContentfulInit';
 import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { isContentfulConfigured } from '@/config/cms';
-import ContentfulDebug from '@/components/debug/ContentfulDebug';
 
 interface ContentfulInitializerProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }
 
-export const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({ 
+/**
+ * Simple wrapper component to handle Contentful initialization for blog content
+ */
+const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({ 
   children, 
   fallback 
 }) => {
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [attempted, setAttempted] = useState(false);
+  const { isInitialized, isLoading, error } = useContentfulInit();
 
-  const initContentful = async () => {
-    if (!isContentfulConfigured()) {
-      console.error('[ContentfulInitializer] Contentful is not configured');
-      setError(new Error('Contentful is not configured. Please set up your API credentials in the admin panel.'));
-      setIsLoading(false);
-      setAttempted(true);
-      return;
-    }
-    
-    setIsLoading(true);
-    try {
-      console.log('[ContentfulInitializer] Starting Contentful initialization');
-      
-      // Force Contentful provider and initialize
-      await initCMS();
-      
-      console.log('[ContentfulInitializer] Contentful initialized successfully');
-      setIsInitialized(true);
-      setError(null);
-      
-    } catch (err) {
-      console.error('[ContentfulInitializer] Initialization failed:', err);
-      setError(err instanceof Error ? err : new Error('Failed to initialize Contentful'));
-    } finally {
-      setIsLoading(false);
-      setAttempted(true);
-    }
-  };
-
-  const retryConnection = async () => {
-    setIsLoading(true);
-    try {
-      await refreshCmsConnection();
-      setIsInitialized(true);
-      setError(null);
-      toast.success('Contentful connection refreshed');
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to refresh Contentful connection'));
-      toast.error('Failed to refresh connection');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    initContentful();
-  }, []);
-
+  // Still initializing
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500 mb-4" />
-        <p className="text-gray-500">Connecting to Contentful...</p>
+      <div className="flex justify-center items-center py-16">
+        <div className="flex flex-col items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-2" />
+          <span className="text-sm text-gray-600">Connecting to Contentful...</span>
+        </div>
       </div>
     );
   }
 
-  if (error && attempted) {
-    return fallback || (
-      <div className="p-4">
-        <Alert variant="destructive" className="mb-6">
-          <AlertTitle>Contentful Connection Error</AlertTitle>
-          <AlertDescription className="space-y-2">
-            <p>{error.message}</p>
-            <p className="text-sm">Make sure you've set up your Contentful credentials in Admin &gt; Contentful Configuration.</p>
-          </AlertDescription>
-        </Alert>
-        <ContentfulDebug />
-        <Button onClick={retryConnection} className="mt-4">
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Retry Connection
-        </Button>
+  // Initialization failed
+  if (error || !isInitialized) {
+    return fallback ? fallback : (
+      <div className="p-4 border rounded shadow-sm bg-gray-50">
+        <p className="text-red-500 mb-2">Failed to connect to Contentful</p>
+        <p className="text-sm text-gray-600">Please check your Contentful configuration.</p>
       </div>
     );
   }
 
-  return isInitialized ? <>{children}</> : null;
+  // Successfully initialized
+  return <>{children}</>;
 };
 
 export default ContentfulInitializer;

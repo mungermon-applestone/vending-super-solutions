@@ -1,11 +1,19 @@
 
+// Define the window interface to include __RUNTIME_CONFIG__
+declare global {
+  interface Window {
+    __RUNTIME_CONFIG__?: Record<string, string>;
+    _contentfulInitialized?: boolean;
+    _contentfulInitializedSource?: string;
+  }
+}
+
 // Get runtime environment configuration from public/api/runtime-config when available
 const getRuntimeConfig = () => {
   try {
     // Try to load from runtime-config if available
-    if (typeof window !== 'undefined') {
-      const runtimeConfig = window.__RUNTIME_CONFIG__ || {};
-      return runtimeConfig;
+    if (typeof window !== 'undefined' && window.__RUNTIME_CONFIG__) {
+      return window.__RUNTIME_CONFIG__ || {};
     }
   } catch (e) {
     console.warn('[cms] Runtime config not available:', e);

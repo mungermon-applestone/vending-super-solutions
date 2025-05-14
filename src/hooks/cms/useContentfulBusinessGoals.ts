@@ -2,8 +2,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { Entry, EntrySkeletonType } from 'contentful';
-import { ContentfulBusinessGoal } from '@/types/contentful';
 import { isContentfulEntry, isContentfulAsset } from '@/services/cms/utils/contentfulHelpers';
+import { safeString, safeAssetToImage } from '@/services/cms/utils/safeTypeUtilities';
 
 // Helper function to transform Contentful entries
 function transformBusinessGoal(entry: Entry<EntrySkeletonType, undefined, string>) {
@@ -17,7 +17,7 @@ function transformBusinessGoal(entry: Entry<EntrySkeletonType, undefined, string
   const fields = entry.fields;
   
   let imageData = undefined;
-  if (fields.image && isContentfulEntry(fields.image) && fields.image.fields.file) {
+  if (fields.image && isContentfulAsset(fields.image)) {
     imageData = {
       id: fields.image.sys.id,
       url: `https:${fields.image.fields.file.url}`,
@@ -28,11 +28,11 @@ function transformBusinessGoal(entry: Entry<EntrySkeletonType, undefined, string
   // Transform contentful format to our app format
   return {
     id,
-    title: String(fields.title || ''),
-    slug: String(fields.slug || ''),
-    description: String(fields.description || ''),
-    icon: String(fields.icon || ''),
-    benefits: Array.isArray(fields.benefits) ? fields.benefits.map(benefit => String(benefit)) : [],
+    title: safeString(fields.title || ''),
+    slug: safeString(fields.slug || ''),
+    description: safeString(fields.description || ''),
+    icon: safeString(fields.icon || ''),
+    benefits: Array.isArray(fields.benefits) ? fields.benefits.map(benefit => safeString(benefit)) : [],
     visible: fields.visible === true,
     image: imageData
   };

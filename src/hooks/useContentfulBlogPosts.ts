@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { CMS_MODELS } from '@/config/cms';
 import { isContentfulEntry, isContentfulAsset } from '@/utils/contentfulTypeGuards';
+import { safeString } from '@/services/cms/utils/safeTypeUtilities';
 
 // Export the interface for blog posts
 export interface ContentfulBlogPost {
@@ -43,7 +44,7 @@ export function useContentfulBlogPosts() {
           if (entry.fields.featuredImage && isContentfulAsset(entry.fields.featuredImage)) {
             featuredImage = {
               url: `https:${entry.fields.featuredImage.fields.file.url}`,
-              title: String(entry.fields.featuredImage.fields.title || ''),
+              title: safeString(entry.fields.featuredImage.fields.title || ''),
               width: entry.fields.featuredImage.fields.file?.details?.image?.width,
               height: entry.fields.featuredImage.fields.file?.details?.image?.height
             };
@@ -51,15 +52,15 @@ export function useContentfulBlogPosts() {
           
           return {
             id: entry.sys?.id || '',
-            title: String(entry.fields?.title || 'Untitled'),
-            slug: String(entry.fields?.slug || ''),
-            publishDate: entry.fields?.publishDate ? String(entry.fields.publishDate) : undefined,
+            title: safeString(entry.fields?.title || 'Untitled'),
+            slug: safeString(entry.fields?.slug || ''),
+            publishDate: entry.fields?.publishDate ? safeString(entry.fields.publishDate) : undefined,
             content: entry.fields?.content,
-            excerpt: entry.fields?.excerpt ? String(entry.fields.excerpt) : undefined,
+            excerpt: entry.fields?.excerpt ? safeString(entry.fields.excerpt) : undefined,
             featuredImage,
-            author: entry.fields?.author ? String(entry.fields.author) : undefined,
+            author: entry.fields?.author ? safeString(entry.fields.author) : undefined,
             tags: Array.isArray(entry.fields?.tags) 
-              ? entry.fields.tags.map(tag => String(tag)) 
+              ? entry.fields.tags.map(tag => safeString(tag)) 
               : []
           };
         }).filter(Boolean) as ContentfulBlogPost[];

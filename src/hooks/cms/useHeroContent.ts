@@ -1,7 +1,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
-import { normalizeEntryFields, isContentfulEntry, isContentfulAsset } from '@/services/cms/utils/contentfulHelpers';
+import { isContentfulEntry, isContentfulAsset } from '@/services/cms/utils/contentfulHelpers';
+import { safeString, safeAssetToImage } from '@/services/cms/utils/safeTypeUtilities';
 
 export function useHeroContent(id?: string) {
   return useQuery({
@@ -31,40 +32,39 @@ export function useHeroContent(id?: string) {
         // Get image data safely
         let imageData = undefined;
         if (fields.image && isContentfulAsset(fields.image)) {
-          imageData = {
-            url: `https:${fields.image.fields.file?.url}` || '',
-            alt: fields.image.fields.title || 'Hero image'
-          };
+          imageData = safeAssetToImage(fields.image);
         }
         
         let backgroundImageUrl = undefined;
         if (fields.backgroundImage && isContentfulAsset(fields.backgroundImage)) {
-          backgroundImageUrl = `https:${fields.backgroundImage.fields.file?.url}`;
+          backgroundImageUrl = `https:${fields.backgroundImage.fields?.file?.url || ''}`;
         }
         
         // Return a normalized structure that works with both old and new component naming
         return {
           // New property naming
-          title: String(fields.headline || 'Welcome to Our Platform'),
-          subtitle: String(fields.subheading || 'Discover the future of vending'),
-          primaryButtonText: String(fields.ctaText || 'Learn More'),
-          primaryButtonUrl: String(fields.ctaLink || '/products'),
-          secondaryButtonText: fields.secondaryCTAText ? String(fields.secondaryCTAText) : undefined,
-          secondaryButtonUrl: fields.secondaryCTALink ? String(fields.secondaryCTALink) : undefined,
-          backgroundClass: fields.backgroundClass ? String(fields.backgroundClass) : '',
+          title: safeString(fields.headline || 'Welcome to Our Platform'),
+          subtitle: safeString(fields.subheading || 'Discover the future of vending'),
+          primaryButtonText: safeString(fields.ctaText || 'Learn More'),
+          primaryButtonUrl: safeString(fields.ctaLink || '/products'),
+          secondaryButtonText: fields.secondaryCTAText ? safeString(fields.secondaryCTAText) : undefined,
+          secondaryButtonUrl: fields.secondaryCTALink ? safeString(fields.secondaryCTALink) : undefined,
+          backgroundClass: fields.backgroundClass ? safeString(fields.backgroundClass) : '',
           
           // Legacy property naming
-          headline: String(fields.headline || 'Welcome to Our Platform'),
-          subheading: String(fields.subheading || 'Discover the future of vending'),
-          ctaText: String(fields.ctaText || 'Learn More'),
-          ctaLink: String(fields.ctaLink || '/products'),
-          secondaryCTAText: fields.secondaryCTAText ? String(fields.secondaryCTAText) : undefined,
-          secondaryCTALink: fields.secondaryCTALink ? String(fields.secondaryCTALink) : undefined,
+          headline: safeString(fields.headline || 'Welcome to Our Platform'),
+          subheading: safeString(fields.subheading || 'Discover the future of vending'),
+          ctaText: safeString(fields.ctaText || 'Learn More'),
+          ctaLink: safeString(fields.ctaLink || '/products'),
+          secondaryCTAText: fields.secondaryCTAText ? safeString(fields.secondaryCTAText) : undefined,
+          secondaryCTALink: fields.secondaryCTALink ? safeString(fields.secondaryCTALink) : undefined,
           
           // Image handling
           image: imageData,
           backgroundImage: backgroundImageUrl,
-          backgroundImageAlt: fields.backgroundImage?.fields?.title || 'Hero Background'
+          backgroundImageAlt: fields.backgroundImage && isContentfulAsset(fields.backgroundImage) 
+            ? safeString(fields.backgroundImage.fields?.title) || 'Hero Background'
+            : 'Hero Background'
         };
       } catch (error) {
         console.error('Error fetching hero content:', error);

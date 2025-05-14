@@ -1,65 +1,68 @@
 
 /**
- * Utilities for handling slug matching and normalization
+ * Utility functions for slug management and matching
  */
 
 /**
- * Normalize a slug by removing special characters and making it URL-friendly
- * @param slug The slug to normalize
+ * Prepare a slug by trimming, lowercasing, and replacing spaces with hyphens
  */
-export function normalizeSlug(slug: string): string {
-  return slug
+export function prepareSlug(text: string): string {
+  return text
+    .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-') // Replace special chars with hyphens
-    .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
-    .replace(/--+/g, '-'); // Replace multiple hyphens with a single one
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 /**
- * Get the canonical form of a slug
- * @param slug The slug to canonicalize
+ * Map a URL slug to the format used in the database
+ * This handles common transformations needed for matching
  */
-export function getCanonicalSlug(slug: string): string {
-  return normalizeSlug(slug);
-}
-
-/**
- * Check if two slugs match (case-insensitive)
- * @param slug1 First slug
- * @param slug2 Second slug
- */
-export function doSlugsMatch(slug1: string, slug2: string): boolean {
-  return normalizeSlug(slug1) === normalizeSlug(slug2);
-}
-
-/**
- * Convert slug variations and find the right format
- * @param slug The slug to resolve
- * @returns The resolved slug
- */
-export function resolveSlug(slug: string): string {
-  // Handle common slug variations
-  const variations = [
-    slug,
-    slug.replace(/-/g, '_'),
-    slug.replace(/_/g, '-'),
-    normalizeSlug(slug)
-  ];
+export function mapUrlSlugToDatabaseSlug(urlSlug: string): string {
+  if (!urlSlug) return '';
   
-  // Return the first variation (original) as default
-  return variations[0];
+  // Remove any UUID that might be present
+  const baseSlug = urlSlug.split('__')[0];
+  
+  return baseSlug
+    .toLowerCase()
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 /**
- * Get all possible variations of a slug
- * @param slug The base slug
- * @returns An array of possible slug variations
+ * Parse a slug that might contain a UUID
+ * Format: base-slug__uuid
  */
-export function getSlugVariations(slug: string): string[] {
-  return [
-    slug,
-    slug.replace(/-/g, '_'),
-    slug.replace(/_/g, '-'),
-    normalizeSlug(slug)
-  ];
+export function parseSlugWithUUID(slug: string): { baseSlug: string; uuid: string | null } {
+  if (!slug) {
+    return { baseSlug: '', uuid: null };
+  }
+  
+  const parts = slug.split('__');
+  const baseSlug = parts[0];
+  const uuid = parts.length > 1 ? parts[1] : null;
+  
+  return { baseSlug, uuid };
+}
+
+/**
+ * Extract a UUID from a slug if present
+ */
+export function extractUUID(slug: string): string | null {
+  const { uuid } = parseSlugWithUUID(slug);
+  return uuid;
+}
+
+/**
+ * Compare two slugs to see if they match, ignoring case and formatting differences
+ */
+export function slugsMatch(slug1: string, slug2: string): boolean {
+  if (!slug1 || !slug2) return false;
+  
+  const normalized1 = mapUrlSlugToDatabaseSlug(slug1);
+  const normalized2 = mapUrlSlugToDatabaseSlug(slug2);
+  
+  return normalized1 === normalized2;
 }

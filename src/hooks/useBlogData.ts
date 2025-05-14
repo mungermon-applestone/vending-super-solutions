@@ -1,95 +1,71 @@
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { 
-  fetchBlogPosts, 
-  fetchBlogPostBySlug, 
-  createBlogPost, 
-  updateBlogPost, 
-  deleteBlogPost,
-  cloneBlogPost,
-  getAdjacentPosts
-} from '@/services/cms/contentTypes/blog';
-import { BlogPostFormData } from '@/types/blog';
+import { useQuery } from '@tanstack/react-query';
+import { useContentfulBlogPostBySlug } from './useContentfulBlogPostBySlug';
+import { useContentfulBlogPosts } from './useContentfulBlogPosts';
 
-// Hook for fetching blog posts
-export const useBlogPosts = (filters?: { 
-  status?: string;
-  slug?: string;
-  limit?: number;
-  offset?: number;
-}) => {
+// Helper function to convert parameters to the correct format
+function normalizeSlugParam(slugParam: string | { slug: string }): string {
+  if (typeof slugParam === 'string') {
+    return slugParam;
+  }
+  if (slugParam && typeof slugParam === 'object' && 'slug' in slugParam) {
+    return slugParam.slug;
+  }
+  return '';
+}
+
+/**
+ * Hook to fetch a blog post by slug
+ */
+export function useBlogPostBySlug(slugParam: string | { slug: string } | undefined) {
+  const normalizedSlug = slugParam ? normalizeSlugParam(slugParam) : undefined;
+  
+  return useContentfulBlogPostBySlug(normalizedSlug);
+}
+
+/**
+ * Hook to fetch adjacent posts (previous and next) for navigation
+ */
+export function useAdjacentPosts(currentSlug: string | { slug: string } | undefined) {
+  const normalizedSlug = currentSlug ? normalizeSlugParam(currentSlug) : undefined;
+  const { data: allPosts } = useContentfulBlogPosts();
+
   return useQuery({
-    queryKey: ['blog-posts', filters],
-    queryFn: async () => fetchBlogPosts(filters || {}),
-  });
-};
+    queryKey: ['adjacentPosts', normalizedSlug],
+    queryFn: () => {
+      if (!normalizedSlug || !allPosts || allPosts.length === 0) {
+        return { previous: null, next: null };
+      }
 
-// Hook for fetching a single blog post by slug
-export const useBlogPostBySlug = (slug: string | undefined) => {
-  return useQuery({
-    queryKey: ['blog-post', slug],
-    queryFn: async () => slug ? fetchBlogPostBySlug(slug) : null,
-    enabled: !!slug,
-  });
-};
+      // Sort posts by date (newest first)
+      const sortedPosts = [...allPosts].sort((a, b) => {
+        if (!a.publishDate && !b.publishDate) return 0;
+        if (!a.publishDate) return 1;
+        if (!b.publishDate) return -1;
+        return new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime();
+      });
 
-// Hook for getting adjacent (next/previous) posts
-export const useAdjacentPosts = (slug: string | undefined) => {
-  return useQuery({
-    queryKey: ['adjacent-posts', slug],
-    queryFn: async () => slug ? getAdjacentPosts(slug) : { previous: null, next: null },
-    enabled: !!slug,
-  });
-};
+      // Find the index of the current post
+      const currentIndex = sortedPosts.findIndex(post => post.slug === normalizedSlug);
+      if (currentIndex === -1) return { previous: null, next: null };
 
-// Hook for creating a blog post
-export const useCreateBlogPost = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (postData: BlogPostFormData) => createBlogPost(postData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
+      // Get adjacent posts
+      const previousPost = currentIndex < sortedPosts.length - 1 
+        ? { 
+            slug: sortedPosts[currentIndex + 1].slug,
+            title: sortedPosts[currentIndex + 1].title 
+          } 
+        : null;
+
+      const nextPost = currentIndex > 0 
+        ? { 
+            slug: sortedPosts[currentIndex - 1].slug,
+            title: sortedPosts[currentIndex - 1].title 
+          } 
+        : null;
+
+      return { previous: previousPost, next: nextPost };
     },
+    enabled: !!normalizedSlug && !!allPosts && allPosts.length > 0
   });
-};
-
-// Hook for updating a blog post
-export const useUpdateBlogPost = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async ({ id, postData }: { id: string; postData: BlogPostFormData }) => 
-      updateBlogPost(id, postData),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
-      queryClient.invalidateQueries({ queryKey: ['blog-post', data.slug] });
-      queryClient.invalidateQueries({ queryKey: ['adjacent-posts'] });
-    },
-  });
-};
-
-// Hook for deleting a blog post
-export const useDeleteBlogPost = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (id: string) => deleteBlogPost(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
-      queryClient.invalidateQueries({ queryKey: ['adjacent-posts'] });
-    },
-  });
-};
-
-// Hook for cloning a blog post
-export const useCloneBlogPost = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (id: string) => cloneBlogPost(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
-    },
-  });
-};
+}
