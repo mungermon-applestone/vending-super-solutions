@@ -35,6 +35,11 @@ export function logDeprecation(component: string, message: string, alternative?:
 }
 
 /**
+ * Alias for logDeprecation (for backward compatibility)
+ */
+export const logDeprecationWarning = logDeprecation;
+
+/**
  * Get statistics about deprecated feature usage
  */
 export function getDeprecationStats(): DeprecationStat[] {
@@ -104,3 +109,67 @@ export function createDeprecatedWriteOperation(operation: string, contentType: s
     throw new Error(`${contentType}.${operation} is deprecated`);
   };
 }
+
+/**
+ * Create a read-only adapter for contentful types
+ */
+export function createReadOnlyAdapter<T extends object>(
+  contentType: string,
+  readOperations: Partial<T>,
+  deprecatedOperations: string[] = []
+) {
+  const adapter: any = { ...readOperations };
+  
+  // Add deprecated operations
+  deprecatedOperations.forEach(operation => {
+    adapter[operation] = () => {
+      logDeprecation(`${contentType}.${operation}`, `This operation is deprecated`);
+      throw new Error(`${contentType}.${operation} is not supported`);
+    };
+  });
+  
+  return adapter as T;
+}
+
+/**
+ * Get Contentful URL for viewing or editing content
+ */
+export function getContentfulRedirectUrl(
+  contentType?: string,
+  entryId?: string,
+  spaceId?: string,
+  environmentId: string = 'master'
+): string {
+  // Use the provided space ID or fall back to the configured one
+  const actualSpaceId = spaceId || import.meta.env.VITE_CONTENTFUL_SPACE_ID || '';
+  
+  // Base Contentful URL
+  const baseUrl = `https://app.contentful.com/spaces/${actualSpaceId}`;
+  
+  // If no content type or entry ID is provided, just open Contentful
+  if (!contentType && !entryId) {
+    return baseUrl;
+  }
+  
+  // Environment part of the URL
+  const environmentPart = environmentId ? `/environments/${environmentId}` : '';
+  
+  // If we have both a content type and an entry ID, link to the specific entry
+  if (contentType && entryId) {
+    return `${baseUrl}${environmentPart}/entries/${entryId}`;
+  }
+  
+  // If we only have a content type, link to the content type's entries
+  if (contentType) {
+    return `${baseUrl}${environmentPart}/entries?contentTypeId=${contentType}`;
+  }
+  
+  // If we only have an entry ID, link directly to the entry
+  if (entryId) {
+    return `${baseUrl}${environmentPart}/entries/${entryId}`;
+  }
+  
+  // Default fallback
+  return baseUrl;
+}
+

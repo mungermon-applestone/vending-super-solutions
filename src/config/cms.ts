@@ -80,7 +80,22 @@ export function logContentfulConfig(): void {
 }
 
 /**
+ * Check if the current environment is a preview environment
+ */
+export function isPreviewEnvironment(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    (window.location.hostname.includes('preview') ||
+     window.location.hostname.includes('staging') ||
+     window.location.hostname.includes('lovable') ||
+     window.location.hostname === 'localhost' ||
+     window.location.hostname === '127.0.0.1')
+  );
+}
+
+/**
  * Development mode flag
  */
 export const IS_DEVELOPMENT = import.meta.env.DEV || 
   (typeof window !== 'undefined' && window.location.hostname === 'localhost');
+

@@ -1,53 +1,97 @@
 
-import { getContentfulClient, refreshContentfulClient, testContentfulConnection } from './utils/contentfulClient';
+/**
+ * CMS Initialization Module
+ */
+import * as contentful from 'contentful';
+import { CONTENTFUL_CONFIG, isContentfulConfigured, logContentfulConfig } from '@/config/cms';
+import { toast } from 'sonner';
+
+// Store the client instance
+let contentfulClient: contentful.ContentfulClientApi | null = null;
 
 /**
  * Force the CMS provider to be Contentful
  */
 export function forceContentfulProvider(): void {
-  console.log('[cmsInit] Forcing Contentful provider');
-  // Nothing to do since we're always using Contentful
+  // This is now a no-op since we're only supporting Contentful
+  console.log('[CMS] Using Contentful as the CMS provider');
 }
 
 /**
- * Reset any CMS provider settings
+ * Initialize the CMS
  */
-export function resetCmsProvider(): void {
-  // Nothing to do in the simplified architecture
-}
-
-/**
- * Initialize the CMS connection
- */
-export async function initializeCms(): Promise<boolean> {
+export async function initCMS(): Promise<void> {
+  console.log('[CMS] Initializing CMS...');
+  
+  if (!isContentfulConfigured()) {
+    console.error('[CMS] Contentful is not configured');
+    throw new Error('Contentful is not configured');
+  }
+  
+  logContentfulConfig();
+  
   try {
-    console.log('[cmsInit] Initializing Contentful CMS');
-    const client = getContentfulClient();
-    if (!client) {
-      console.error('[cmsInit] Failed to initialize Contentful client');
-      return false;
-    }
+    // Initialize Contentful client
+    contentfulClient = contentful.createClient({
+      space: CONTENTFUL_CONFIG.SPACE_ID,
+      accessToken: CONTENTFUL_CONFIG.DELIVERY_TOKEN,
+      environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master'
+    });
     
     // Test the connection
-    const test = await testContentfulConnection();
-    return test.success;
+    await contentfulClient.getEntries({
+      limit: 1,
+      content_type: 'blogPost' // Using blogPost as a test content type
+    });
+    
+    console.log('[CMS] CMS initialized successfully');
   } catch (error) {
-    console.error('[cmsInit] Error initializing CMS:', error);
-    return false;
+    console.error('[CMS] Failed to initialize CMS:', error);
+    toast.error('Failed to connect to Contentful');
+    throw error;
   }
 }
 
 /**
  * Refresh the CMS connection
  */
-export async function refreshCmsConnection(): Promise<boolean> {
-  try {
-    console.log('[cmsInit] Refreshing CMS connection');
-    await refreshContentfulClient();
-    const test = await testContentfulConnection();
-    return test.success;
-  } catch (error) {
-    console.error('[cmsInit] Error refreshing CMS connection:', error);
-    return false;
+export async function refreshCmsConnection(): Promise<void> {
+  console.log('[CMS] Refreshing CMS connection...');
+  
+  // Reset the client
+  contentfulClient = null;
+  
+  // Re-initialize
+  await initCMS();
+}
+
+/**
+ * Get the Contentful client
+ */
+export function getContentfulClient(): contentful.ContentfulClientApi {
+  if (!contentfulClient) {
+    throw new Error('Contentful client not initialized. Call initCMS() first.');
   }
+  return contentfulClient;
+}
+
+/**
+ * Refresh the Contentful client
+ */
+export function refreshContentfulClient(): contentful.ContentfulClientApi {
+  // Re-create the client
+  contentfulClient = contentful.createClient({
+    space: CONTENTFUL_CONFIG.SPACE_ID,
+    accessToken: CONTENTFUL_CONFIG.DELIVERY_TOKEN,
+    environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master'
+  });
+  
+  return contentfulClient;
+}
+
+/**
+ * Check if the CMS is initialized
+ */
+export function isCMSInitialized(): boolean {
+  return contentfulClient !== null;
 }

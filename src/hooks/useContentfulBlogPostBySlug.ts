@@ -1,7 +1,8 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
-import { CMS_MODELS } from '@/config/cms';
+import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { Entry } from 'contentful';
+import { Document } from '@contentful/rich-text-types';
 
 export interface ContentfulBlogPost {
   sys: {
@@ -12,13 +13,37 @@ export interface ContentfulBlogPost {
   fields: {
     title: string;
     slug: string;
-    content: any;
+    content: Document;
     excerpt?: string;
-    publishDate?: string;
-    featuredImage?: any;
+    publishDate: string;
+    featuredImage?: {
+      fields: {
+        file: {
+          url: string;
+        };
+        title: string;
+      };
+    };
   };
   includes?: {
-    Asset?: any[];
+    Asset?: Array<{
+      sys: {
+        id: string;
+      };
+      fields: {
+        title: string;
+        file: {
+          url: string;
+          contentType: string;
+          details?: {
+            image?: {
+              width: number;
+              height: number;
+            };
+          };
+        };
+      };
+    }>;
   };
 }
 
@@ -26,22 +51,38 @@ export function useContentfulBlogPostBySlug(slug: string | undefined) {
   return useQuery({
     queryKey: ['contentful', 'blogPost', slug],
     queryFn: async () => {
-      if (!slug) return null;
-      
-      try {
-        const entries = await fetchContentfulEntries(CMS_MODELS.BLOG_POST, {
-          'fields.slug': slug,
-          include: 3
-        });
-        
-        if (!entries || entries.length === 0) return null;
-        
-        return entries[0] as ContentfulBlogPost;
-      } catch (error) {
-        console.error('[useContentfulBlogPostBySlug] Error fetching blog post:', error);
+      if (!slug) {
+        console.warn('[useContentfulBlogPostBySlug] No slug provided');
         return null;
       }
+      
+      try {
+        console.log(`[useContentfulBlogPostBySlug] Fetching blog post with slug: ${slug}`);
+        const client = await getContentfulClient();
+        
+        const entries = await client.getEntries({
+          content_type: 'blogPost',
+          'fields.slug': slug,
+          include: 3 // Include 3 levels of linked entries
+        });
+        
+        if (entries.items.length === 0) {
+          console.warn(`[useContentfulBlogPostBySlug] No blog post found with slug: ${slug}`);
+          return null;
+        }
+        
+        const post = entries.items[0] as unknown as ContentfulBlogPost;
+        post.includes = entries.includes;
+        
+        return post;
+      } catch (error) {
+        console.error('[useContentfulBlogPostBySlug] Error:', error);
+        throw error;
+      }
     },
-    enabled: !!slug
+    enabled: !!slug,
   });
 }
+
+// Re-export the type for use in other files
+export type { ContentfulBlogPost };
