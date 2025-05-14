@@ -54,7 +54,8 @@ export interface CMSMachine {
   description: string;
   features?: string[];
   images?: CMSImage[];
-  thumbnail?: CMSImage;  // Added thumbnail property to CMSMachine
+  thumbnail?: CMSImage;
+  mainImage?: CMSImage;  // Added explicit mainImage property
   product_types?: CMSProductType[];
   created_at?: string;
   updated_at?: string;

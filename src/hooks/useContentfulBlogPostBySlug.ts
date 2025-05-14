@@ -1,88 +1,56 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
-import { Entry } from 'contentful';
-import { Document } from '@contentful/rich-text-types';
+import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
+import { ContentfulAsset } from '@/types/contentful';
 
 export interface ContentfulBlogPost {
   sys: {
     id: string;
-    createdAt: string;
-    updatedAt: string;
   };
   fields: {
     title: string;
     slug: string;
-    content: Document;
+    publishDate?: string;
+    content?: any;
     excerpt?: string;
-    publishDate: string;
-    featuredImage?: {
-      fields: {
-        file: {
-          url: string;
-        };
-        title: string;
-      };
-    };
+    featuredImage?: ContentfulAsset;
+    author?: string;
+    tags?: string[];
   };
   includes?: {
-    Asset?: Array<{
-      sys: {
-        id: string;
-      };
-      fields: {
-        title: string;
-        file: {
-          url: string;
-          contentType: string;
-          details?: {
-            image?: {
-              width: number;
-              height: number;
-            };
-          };
-        };
-      };
-    }>;
+    Asset?: any[];
   };
 }
 
-export function useContentfulBlogPostBySlug(slug: string | undefined) {
+export function useContentfulBlogPostBySlug(slug?: string) {
   return useQuery({
     queryKey: ['contentful', 'blogPost', slug],
     queryFn: async () => {
       if (!slug) {
-        console.warn('[useContentfulBlogPostBySlug] No slug provided');
         return null;
       }
       
       try {
-        console.log(`[useContentfulBlogPostBySlug] Fetching blog post with slug: ${slug}`);
-        const client = await getContentfulClient();
-        
-        const entries = await client.getEntries({
-          content_type: 'blogPost',
+        const query = {
           'fields.slug': slug,
-          include: 3 // Include 3 levels of linked entries
-        });
+          include: 2, // Include linked assets
+          limit: 1
+        };
         
-        if (entries.items.length === 0) {
-          console.warn(`[useContentfulBlogPostBySlug] No blog post found with slug: ${slug}`);
+        const entries = await fetchContentfulEntries('blogPost', query);
+        
+        if (!entries || entries.length === 0) {
+          console.log(`[useContentfulBlogPostBySlug] No blog post found with slug: ${slug}`);
           return null;
         }
         
-        const post = entries.items[0] as unknown as ContentfulBlogPost;
-        post.includes = entries.includes;
-        
-        return post;
+        // Return the first matching post
+        return entries[0] as ContentfulBlogPost;
       } catch (error) {
-        console.error('[useContentfulBlogPostBySlug] Error:', error);
-        throw error;
+        console.error(`[useContentfulBlogPostBySlug] Error fetching blog post: ${slug}`, error);
+        return null;
       }
     },
-    enabled: !!slug,
+    enabled: !!slug
   });
 }
-
-// Re-export the type for use in other files
-export type { ContentfulBlogPost };

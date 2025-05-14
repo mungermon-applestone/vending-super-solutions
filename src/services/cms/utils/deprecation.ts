@@ -1,175 +1,95 @@
 
-/**
- * Simplified utility for tracking deprecated features
- */
+import { toast } from 'sonner';
 
-export interface DeprecationStat {
-  component: string;
-  count: number;
-  lastUsed: Date;
-  messages: string[];
+// Track deprecated features usage
+const deprecatedUsage: Record<string, number> = {};
+
+/**
+ * Log a deprecation warning to the console
+ */
+export function logDeprecation(name: string, message: string = 'This feature is deprecated and will be removed in a future version.') {
+  console.warn(`⚠️ DEPRECATION WARNING: ${name} is deprecated. ${message}`);
+  trackDeprecatedUsage(name);
 }
 
-// In-memory store for deprecation stats (resets on page refresh)
-const deprecationStats: Record<string, DeprecationStat> = {};
-
-/**
- * Log a deprecation warning
- */
-export function logDeprecation(component: string, message: string, alternative?: string): void {
-  console.warn(`[DEPRECATED] ${component}: ${message}${alternative ? `. Use ${alternative} instead.` : ''}`);
-  
-  // Track usage
-  if (!deprecationStats[component]) {
-    deprecationStats[component] = {
-      component,
-      count: 0,
-      lastUsed: new Date(),
-      messages: []
-    };
-  }
-  
-  deprecationStats[component].count++;
-  deprecationStats[component].lastUsed = new Date();
-  deprecationStats[component].messages.push(message);
-}
-
-/**
- * Alias for logDeprecation (for backward compatibility)
- */
+// Alias for backward compatibility
 export const logDeprecationWarning = logDeprecation;
 
 /**
- * Get statistics about deprecated feature usage
+ * Show a toast notification about deprecation
  */
-export function getDeprecationStats(): DeprecationStat[] {
-  return Object.values(deprecationStats)
-    .sort((a, b) => b.count - a.count);
+export function showDeprecationToast(feature: string, alternative?: string) {
+  const message = alternative
+    ? `${feature} is deprecated. Please use ${alternative} instead.`
+    : `${feature} is deprecated and will be removed in a future version.`;
+    
+  toast.warning(message, {
+    id: `deprecation-${feature.replace(/\s+/g, '-')}`,
+    duration: 6000,
+  });
+  
+  trackDeprecatedUsage(feature);
 }
 
 /**
- * Reset the deprecation tracker
+ * Track usage of deprecated features
  */
-export function resetDeprecationTracker(): void {
-  Object.keys(deprecationStats).forEach(key => {
-    delete deprecationStats[key];
+export function trackDeprecatedUsage(feature: string) {
+  deprecatedUsage[feature] = (deprecatedUsage[feature] || 0) + 1;
+}
+
+/**
+ * Get usage statistics for deprecated features
+ */
+export function getDeprecatedUsage() {
+  return { ...deprecatedUsage };
+}
+
+/**
+ * Reset deprecation usage tracking
+ */
+export function resetDeprecationTracker() {
+  Object.keys(deprecatedUsage).forEach(key => {
+    delete deprecatedUsage[key];
   });
 }
 
 /**
- * Alias for backward compatibility
+ * Throw an error for completely removed functionality
  */
-export const trackDeprecatedFeatureUsage = (component: string, message: string) => {
-  logDeprecation(component, message);
-};
-
-/**
- * Alias for backward compatibility
- */
-export const getDeprecationUsageStats = getDeprecationStats;
-
-/**
- * Create read-only operations for deprecated content types
- */
-export function createReadOnlyContentTypeOperations(contentType: string) {
-  return {
-    fetchAll: async () => {
-      logDeprecation(`${contentType}.fetchAll`, `This content type is read-only`);
-      return [];
-    },
-    fetchBySlug: async () => {
-      logDeprecation(`${contentType}.fetchBySlug`, `This content type is read-only`);
-      return null;
-    },
-    fetchById: async () => {
-      logDeprecation(`${contentType}.fetchById`, `This content type is read-only`);
-      return null;
-    },
-    create: async () => {
-      logDeprecation(`${contentType}.create`, `This content type is read-only`);
-      throw new Error(`${contentType} is read-only`);
-    },
-    update: async () => {
-      logDeprecation(`${contentType}.update`, `This content type is read-only`);
-      throw new Error(`${contentType} is read-only`);
-    },
-    delete: async () => {
-      logDeprecation(`${contentType}.delete`, `This content type is read-only`);
-      throw new Error(`${contentType} is read-only`);
-    }
-  };
+export function throwDeprecatedOperationError(operation: string): never {
+  const error = new Error(`${operation} has been removed. Please use the new Contentful API instead.`);
+  console.error(`🚫 DEPRECATED OPERATION: ${error.message}`);
+  throw error;
 }
 
 /**
- * Create a deprecated write operation wrapper
+ * Get a redirect URL to view/edit content in Contentful
  */
-export function createDeprecatedWriteOperation(operation: string, contentType: string) {
-  return async () => {
-    logDeprecation(`${contentType}.${operation}`, `This operation is deprecated`);
-    throw new Error(`${contentType}.${operation} is deprecated`);
-  };
-}
-
-/**
- * Create a read-only adapter for contentful types
- */
-export function createReadOnlyAdapter<T extends object>(
-  contentType: string,
-  readOperations: Partial<T>,
-  deprecatedOperations: string[] = []
-) {
-  const adapter: any = { ...readOperations };
+export function getContentfulRedirectUrl({
+  spaceId,
+  environmentId = 'master',
+  entryId,
+  contentTypeId,
+  mode = 'entry'
+}: {
+  spaceId: string;
+  environmentId?: string;
+  entryId?: string;
+  contentTypeId?: string;
+  mode?: 'entry' | 'content-type' | 'space';
+}): string {
+  // Base URL for Contentful web app
+  const baseUrl = 'https://app.contentful.com';
   
-  // Add deprecated operations
-  deprecatedOperations.forEach(operation => {
-    adapter[operation] = () => {
-      logDeprecation(`${contentType}.${operation}`, `This operation is deprecated`);
-      throw new Error(`${contentType}.${operation} is not supported`);
-    };
-  });
-  
-  return adapter as T;
-}
-
-/**
- * Get Contentful URL for viewing or editing content
- */
-export function getContentfulRedirectUrl(
-  contentType?: string,
-  entryId?: string,
-  spaceId?: string,
-  environmentId: string = 'master'
-): string {
-  // Use the provided space ID or fall back to the configured one
-  const actualSpaceId = spaceId || import.meta.env.VITE_CONTENTFUL_SPACE_ID || '';
-  
-  // Base Contentful URL
-  const baseUrl = `https://app.contentful.com/spaces/${actualSpaceId}`;
-  
-  // If no content type or entry ID is provided, just open Contentful
-  if (!contentType && !entryId) {
-    return baseUrl;
-  }
-  
-  // Environment part of the URL
-  const environmentPart = environmentId ? `/environments/${environmentId}` : '';
-  
-  // If we have both a content type and an entry ID, link to the specific entry
-  if (contentType && entryId) {
-    return `${baseUrl}${environmentPart}/entries/${entryId}`;
-  }
-  
-  // If we only have a content type, link to the content type's entries
-  if (contentType) {
-    return `${baseUrl}${environmentPart}/entries?contentTypeId=${contentType}`;
-  }
-  
-  // If we only have an entry ID, link directly to the entry
-  if (entryId) {
-    return `${baseUrl}${environmentPart}/entries/${entryId}`;
+  if (mode === 'entry' && entryId) {
+    return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}/entries/${entryId}`;
+  } else if (mode === 'content-type' && contentTypeId) {
+    return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}/content_types/${contentTypeId}`;
+  } else if (mode === 'space') {
+    return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}`;
   }
   
   // Default fallback
-  return baseUrl;
+  return `${baseUrl}/spaces/${spaceId}`;
 }
-

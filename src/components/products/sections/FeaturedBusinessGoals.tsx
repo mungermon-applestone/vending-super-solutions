@@ -44,7 +44,11 @@ const FeaturedBusinessGoals = ({ entryId }: { entryId: string }) => {
   if ((error || !isConfigured) && !isLoading) {
     return (
       <>
-        <ContentfulConfigWarning onRetry={handleRetry} showDetails={false} />
+        <ContentfulConfigWarning 
+          onRetry={handleRetry} 
+          showDetails={false}
+          message="Unable to load business goals content."
+        />
         {/* Show mock data as fallback */}
         {!goals || goals.length === 0 ? null : (
           <BusinessGoalsCompact goals={goals} columnCount={3} />

@@ -1,101 +1,67 @@
 
-/**
- * CMS configuration and utility functions
- */
-
-/**
- * Contentful model names
- */
-export const CMS_MODELS = {
-  BLOG_POST: 'blogPost',
-  BUSINESS_GOAL: 'businessGoal',
-  CASE_STUDY: 'caseStudy',
-  LANDING_PAGE: 'landingPage',
-  MACHINE: 'machine',
-  PRODUCT_TYPE: 'productType',
-  TECHNOLOGY: 'technology',
-  TESTIMONIAL: 'testimonial'
+// Get runtime environment configuration from public/api/runtime-config when available
+const getRuntimeConfig = () => {
+  try {
+    // Try to load from runtime-config if available
+    if (typeof window !== 'undefined') {
+      const runtimeConfig = window.__RUNTIME_CONFIG__ || {};
+      return runtimeConfig;
+    }
+  } catch (e) {
+    console.warn('[cms] Runtime config not available:', e);
+  }
+  return {};
 };
 
-/**
- * Contentful configuration
- */
+// Get environment variables with fallbacks
+// Priority: runtime config > process.env > hardcoded defaults
+const getEnvVar = (name: string, defaultValue: string = ''): string => {
+  const runtimeConfig = getRuntimeConfig();
+  return runtimeConfig[name] || (import.meta.env && import.meta.env[name]) || process.env[name] || defaultValue;
+};
+
+// Contentful configuration
 export const CONTENTFUL_CONFIG = {
-  // Use env variables with runtime config fallbacks
-  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || 
-           (typeof window !== 'undefined' && window.env?.VITE_CONTENTFUL_SPACE_ID) || 
-           '',
-  
-  DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 
-                 (typeof window !== 'undefined' && window.env?.VITE_CONTENTFUL_DELIVERY_TOKEN) || 
-                 '',
-  
-  ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 
-                 (typeof window !== 'undefined' && window.env?.VITE_CONTENTFUL_ENVIRONMENT_ID) || 
-                 'master'
+  SPACE_ID: getEnvVar('VITE_CONTENTFUL_SPACE_ID', 'al01e4yh2wq4'), 
+  DELIVERY_TOKEN: getEnvVar('VITE_CONTENTFUL_DELIVERY_TOKEN', 'fxpQth03vfdKzI4VNT_fYg8cD5BwoTiGaa6INIyYync'),
+  ENVIRONMENT_ID: getEnvVar('VITE_CONTENTFUL_ENVIRONMENT_ID', 'master'),
+  PREVIEW_TOKEN: getEnvVar('VITE_CONTENTFUL_PREVIEW_TOKEN', ''),
 };
 
-/**
- * Whether Contentful is configured with environment variables
- */
+// Content model identifiers
+export const CMS_MODELS = {
+  PRODUCT_TYPE: 'productType',
+  BUSINESS_GOAL: 'businessGoal',
+  MACHINE: 'machine',
+  FEATURE: 'feature',
+  BLOG_POST: 'blogPost',
+  TECHNOLOGY: 'technology',
+  HOME_PAGE_CONTENT: 'homePageContent',
+  HERO: 'hero',
+};
+
+// Check if Contentful is properly configured
 export function isContentfulConfigured(): boolean {
-  return Boolean(
-    CONTENTFUL_CONFIG.SPACE_ID && 
-    CONTENTFUL_CONFIG.DELIVERY_TOKEN
-  );
+  const hasConfig = !!(CONTENTFUL_CONFIG.SPACE_ID && CONTENTFUL_CONFIG.DELIVERY_TOKEN);
+  console.log('[CMS Config] Contentful configuration status:', hasConfig ? 'Valid' : 'Invalid');
+  return hasConfig;
 }
 
-/**
- * Whether Contentful Management API is configured
- */
-export function isContentfulManagementConfigured(): boolean {
-  return Boolean(import.meta.env.VITE_CONTENTFUL_MANAGEMENT_TOKEN);
-}
+// Check if we're running in development mode
+export const IS_DEVELOPMENT = process.env.NODE_ENV === 'development' || import.meta.env?.DEV === true;
 
-/**
- * Get the Contentful Space ID
- */
-export function getContentfulSpaceId(): string {
-  return CONTENTFUL_CONFIG.SPACE_ID;
-}
-
-/**
- * Get the Contentful Environment ID
- */
-export function getContentfulEnvironmentId(): string {
-  return CONTENTFUL_CONFIG.ENVIRONMENT_ID;
-}
-
-/**
- * Log the current Contentful configuration (redacting tokens)
- */
-export function logContentfulConfig(): void {
-  console.log('[CMS] Current Contentful configuration:', {
-    SPACE_ID: CONTENTFUL_CONFIG.SPACE_ID || 'Not set',
-    ENVIRONMENT_ID: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'Not set',
-    DELIVERY_TOKEN: CONTENTFUL_CONFIG.DELIVERY_TOKEN ? '[REDACTED]' : 'Not set',
-    isConfigured: isContentfulConfigured(),
-    browserEnv: typeof window !== 'undefined' && window.env ? 'Available' : 'Not available'
-  });
-}
-
-/**
- * Check if the current environment is a preview environment
- */
+// Check if we're in a preview environment
 export function isPreviewEnvironment(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    (window.location.hostname.includes('preview') ||
-     window.location.hostname.includes('staging') ||
-     window.location.hostname.includes('lovable') ||
-     window.location.hostname === 'localhost' ||
-     window.location.hostname === '127.0.0.1')
-  );
+  const isPreview = import.meta.env?.VITE_CONTENTFUL_PREVIEW === 'true' || 
+                   process.env.CONTENTFUL_PREVIEW === 'true' ||
+                   !!CONTENTFUL_CONFIG.PREVIEW_TOKEN;
+  return isPreview;
 }
 
-/**
- * Development mode flag
- */
-export const IS_DEVELOPMENT = import.meta.env.DEV || 
-  (typeof window !== 'undefined' && window.location.hostname === 'localhost');
-
+// Declare window runtime config
+declare global {
+  interface Window {
+    __RUNTIME_CONFIG__?: Record<string, string>;
+    _devMockData?: Record<string, any>;
+  }
+}

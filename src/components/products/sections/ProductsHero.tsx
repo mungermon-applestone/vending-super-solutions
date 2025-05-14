@@ -6,7 +6,7 @@ import { useHeroContent } from '@/hooks/cms/useHeroContent';
 import { Loader2 } from 'lucide-react';
 
 export default function ProductsHero() {
-  const { data: heroContent, isLoading, error } = useHeroContent("products");
+  const { data: heroContent, isLoading, error } = useHeroContent();
 
   if (isLoading) {
     return (
@@ -64,23 +64,23 @@ export default function ProductsHero() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-vending-blue-dark">
-              {heroContent.title}
+              {heroContent.title || heroContent.headline}
             </h1>
             <p className="text-xl text-gray-700 max-w-2xl">
-              {heroContent.subtitle}
+              {heroContent.subtitle || heroContent.subheading}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              {heroContent.primaryButtonUrl && (
+              {(heroContent.primaryButtonUrl || heroContent.ctaLink) && (
                 <Button asChild size="lg">
-                  <Link to={heroContent.primaryButtonUrl}>
-                    {heroContent.primaryButtonText} <ExternalLink className="ml-2 h-5 w-5" />
+                  <Link to={heroContent.primaryButtonUrl || heroContent.ctaLink}>
+                    {heroContent.primaryButtonText || heroContent.ctaText} <ExternalLink className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
               )}
-              {heroContent.secondaryButtonUrl && (
+              {(heroContent.secondaryButtonUrl || heroContent.secondaryCTALink) && (
                 <Button asChild variant="outline" size="lg">
-                  <Link to={heroContent.secondaryButtonUrl}>
-                    {heroContent.secondaryButtonText}
+                  <Link to={heroContent.secondaryButtonUrl || heroContent.secondaryCTALink}>
+                    {heroContent.secondaryButtonText || heroContent.secondaryCTAText}
                   </Link>
                 </Button>
               )}
@@ -89,8 +89,8 @@ export default function ProductsHero() {
           <div className="relative">
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
               <img 
-                src={heroContent.image.url}
-                alt={heroContent.image.alt}
+                src={heroContent.image?.url || heroContent.backgroundImage || "https://images.unsplash.com/photo-1556742031-c6961e8560b0?ixlib=rb-4.0.3"}
+                alt={heroContent.image?.alt || heroContent.backgroundImageAlt || "Vending Machine Products"}
                 className="w-full h-auto object-cover"
               />
             </div>

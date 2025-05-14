@@ -17,13 +17,18 @@ const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
   
   // Determine which image to use - thumbnail has priority, then mainImage, then first image from array
   const hasThumbnail = !!machine.thumbnail?.url;
-  const hasMainImage = !!machine.mainImage?.url;
+  const hasMainImage = machine.mainImage?.url || (machine.images && machine.images.length > 0 && machine.images[0].url);
   const hasImages = Array.isArray(machine.images) && machine.images.length > 0;
   
   // Determine the image to display
-  const displayImage = hasThumbnail ? machine.thumbnail : 
-    (hasMainImage ? machine.mainImage : 
-      (hasImages ? machine.images[0] : undefined));
+  let displayImage;
+  if (hasThumbnail) {
+    displayImage = machine.thumbnail;
+  } else if (machine.mainImage) {
+    displayImage = machine.mainImage;
+  } else if (hasImages) {
+    displayImage = machine.images[0];
+  }
   
   // Get machine type or default to 'vending'
   const machineType = machine.type || 'vending';

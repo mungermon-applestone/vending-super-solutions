@@ -17,8 +17,10 @@ const MachineGrid: React.FC<MachineGridProps> = ({ machines, title }) => {
     id: machine.id,
     title: machine.title,
     hasThumbnail: !!machine.thumbnail,
+    hasImages: Array.isArray(machine.images) && machine.images.length > 0,
     hasMainImage: !!machine.mainImage,
     thumbnailUrl: machine.thumbnail?.url || 'none',
+    firstImageUrl: machine.images && machine.images.length > 0 ? machine.images[0]?.url || 'none' : 'none',
     mainImageUrl: machine.mainImage?.url || 'none'
   })));
   
