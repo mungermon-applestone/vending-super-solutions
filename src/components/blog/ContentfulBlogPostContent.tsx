@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ContentfulBlogPost } from "@/hooks/useContentfulBlogPostBySlug";
+import { ContentfulBlogPost } from "@/hooks/useContentfulBlogPosts";
 import ContentfulBlogPostHeader from "./ContentfulBlogPostHeader";
 import ContentfulBlogPostBody from "./ContentfulBlogPostBody";
 import ContentfulBlogPostFooter from "./ContentfulBlogPostFooter";

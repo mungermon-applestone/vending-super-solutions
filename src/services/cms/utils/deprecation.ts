@@ -5,6 +5,7 @@
 
 // Store deprecation notices to avoid repeating them
 const deprecationNotices: Record<string, boolean> = {};
+const usageStatistics: Record<string, { count: number, lastOccurred: string }> = {};
 
 /**
  * Log a deprecation warning to the console
@@ -30,23 +31,49 @@ export function logDeprecation(item: string, message: string, recommendation?: s
   // Mark this deprecation as having been logged
   deprecationNotices[key] = true;
   
-  // Also track using our deprecation statistics if available
-  try {
-    trackDeprecation(item, message, recommendation);
-  } catch (err) {
-    // Fail silently if tracking isn't available
-  }
+  // Also track usage statistics
+  trackUsage(item);
 }
 
 /**
- * Track deprecation usage for statistical purposes
- * This is an internal function that might not work in all environments
+ * Legacy name for logDeprecation - maintained for backward compatibility
  */
-function trackDeprecation(item: string, message: string, recommendation?: string): void {
-  // Implementation might vary depending on tracking system
-  if (typeof window !== 'undefined' && (window as any).__trackDeprecation) {
-    (window as any).__trackDeprecation(item, message, recommendation);
+export const logDeprecationWarning = logDeprecation;
+
+/**
+ * Track usage of deprecated features
+ */
+function trackUsage(feature: string): void {
+  if (!usageStatistics[feature]) {
+    usageStatistics[feature] = { count: 0, lastOccurred: new Date().toISOString() };
   }
+  
+  usageStatistics[feature].count += 1;
+  usageStatistics[feature].lastOccurred = new Date().toISOString();
+}
+
+/**
+ * Get statistics about deprecation usage
+ */
+export function getDeprecationStats(): DeprecationStat[] {
+  return Object.entries(usageStatistics)
+    .map(([item, data]) => ({
+      id: `stat-${item.replace(/[^a-z0-9]/gi, '-')}`,
+      item,
+      count: data.count,
+      timestamp: data.lastOccurred,
+      lastOccurred: data.lastOccurred
+    }))
+    .sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Reset the deprecation tracker
+ */
+export function resetDeprecationTracker(): void {
+  Object.keys(usageStatistics).forEach(key => {
+    delete usageStatistics[key];
+  });
 }
 
 /**
@@ -115,30 +142,63 @@ export function createReadOnlyContentTypeOperations<T>(
 }
 
 /**
- * Create deprecated write operation with warning
+ * Generate a URL that redirects to Contentful
  */
-export function createDeprecatedWriteOperation(
-  operationName: string,
-  contentType: string
-): (...args: any[]) => Promise<never> {
-  return (...args: any[]) => {
-    logDeprecation(
-      `${contentType}.${operationName}()`,
-      `This operation is no longer supported through the API`,
-      `Use the Contentful UI to manage ${contentType} content`
-    );
-    return Promise.reject(new Error(`${contentType}.${operationName} is deprecated`));
-  };
+export function getContentfulRedirectUrl(
+  contentType?: string,
+  entryId?: string
+): string {
+  const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID || '';
+  const environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+  const baseUrl = 'https://app.contentful.com';
+  
+  if (!contentType) {
+    // Just open Contentful
+    return `${baseUrl}/spaces/${spaceId}/home`;
+  }
+  
+  if (!entryId) {
+    // Open the content type
+    return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}/entries?contentTypeId=${contentType}`;
+  }
+  
+  // Open the specific entry
+  return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}/entries/${entryId}`;
+}
+
+/**
+ * Show a deprecation toast (placeholder for future implementation)
+ */
+export function showDeprecationToast(feature: string, message: string): void {
+  // This will be implemented in the future
+  console.warn(`[DEPRECATED FEATURE] ${feature}: ${message}`);
+  logDeprecation(feature, message);
+}
+
+/**
+ * Throw a deprecated operation error
+ */
+export function throwDeprecatedOperationError(operation: string, alternativeMethod?: string): never {
+  const message = `Operation ${operation} is deprecated and no longer supported.` + 
+    (alternativeMethod ? ` Use ${alternativeMethod} instead.` : '');
+  
+  logDeprecation(operation, message);
+  throw new Error(message);
 }
 
 // Export a simple DeprecationStat interface for the admin page
 export interface DeprecationStat {
   id: string;
   item: string;
-  message: string;
-  recommendation?: string;
-  component?: string;
   count: number;
   timestamp: string;
   lastOccurred: string;
+  message?: string;
+  recommendation?: string;
+  component?: string;
 }
+
+// For backward compatibility, provide these aliases
+export const trackDeprecatedUsage = trackUsage;
+export const getDeprecatedUsage = getDeprecationStats;
+

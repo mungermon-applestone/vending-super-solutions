@@ -9,6 +9,9 @@ export interface ContentfulBlogPostBySlugOptions {
   preview?: boolean;
 }
 
+// Re-export ContentfulBlogPost interface to ensure it's available
+export type { ContentfulBlogPost };
+
 export function useContentfulBlogPostBySlug(slug?: string, options?: ContentfulBlogPostBySlugOptions) {
   return useQuery({
     queryKey: ['contentful', 'blogPost', slug, options?.preview],
@@ -44,28 +47,31 @@ export function useContentfulBlogPostBySlug(slug?: string, options?: ContentfulB
         // Featured image handling
         let featuredImage = undefined;
         if (entry.fields.featuredImage) {
-          featuredImage = {
-            url: `https:${entry.fields.featuredImage.fields.file.url}`,
-            title: entry.fields.featuredImage.fields.title || '',
-            width: entry.fields.featuredImage.fields.file.details?.image?.width,
-            height: entry.fields.featuredImage.fields.file.details?.image?.height
-          };
+          const image = entry.fields.featuredImage;
+          if (image && typeof image === 'object' && 'fields' in image && image.fields && image.fields.file) {
+            featuredImage = {
+              url: `https:${image.fields.file.url}`,
+              title: image.fields.title || '',
+              width: image.fields.file.details?.image?.width,
+              height: image.fields.file.details?.image?.height
+            };
+          }
         }
         
-        const publishDate = entry.fields.publishDate || '';
+        const publishDate = entry.fields.publishDate ? String(entry.fields.publishDate) : '';
         
         // Return in ContentfulBlogPost format to match useContentfulBlogPosts
         const blogPost: ContentfulBlogPost = {
           id: entry.sys.id,
-          title: entry.fields.title || 'Untitled',
-          slug: entry.fields.slug,
+          title: String(entry.fields.title || 'Untitled'),
+          slug: String(entry.fields.slug),
           content: entry.fields.content,
-          excerpt: entry.fields.excerpt,
+          excerpt: entry.fields.excerpt ? String(entry.fields.excerpt) : undefined,
           publishDate: publishDate,
           published_at: publishDate,
           featuredImage,
-          author: entry.fields.author,
-          tags: entry.fields.tags || [],
+          author: entry.fields.author ? String(entry.fields.author) : undefined,
+          tags: Array.isArray(entry.fields.tags) ? entry.fields.tags.map(tag => String(tag)) : [],
           sys: {
             id: entry.sys.id,
             createdAt: entry.sys.createdAt,

@@ -7,7 +7,36 @@ import BlogPostContent from '@/components/blog/BlogPostContent';
 import ContentfulBlogPostContent from '@/components/blog/ContentfulBlogPostContent';
 import { useBlogPostBySlug, useAdjacentPosts } from '@/hooks/useBlogData';
 import { SimpleContactCTA } from '@/components/common';
-import { convertContentfulBlogPostToBlogPost, convertAdjacentPostToContentful } from '@/utils/contentfulTypeGuards';
+import { ContentfulBlogPost } from '@/hooks/useContentfulBlogPosts';
+
+// Helper function to convert adjacent posts to the format expected by ContentfulBlogPostContent
+const convertAdjacentPostToContentful = (post: any) => {
+  if (!post) return null;
+  return {
+    slug: post.slug,
+    title: post.title
+  };
+};
+
+// Convert Contentful blog post to compatible BlogPost format
+const convertContentfulBlogPostToBlogPost = (contentfulPost: ContentfulBlogPost | null) => {
+  if (!contentfulPost) return null;
+  
+  return {
+    id: contentfulPost.id,
+    title: contentfulPost.title,
+    slug: contentfulPost.slug,
+    content: contentfulPost.content,
+    excerpt: contentfulPost.excerpt,
+    status: 'published',
+    published_at: contentfulPost.publishDate || contentfulPost.published_at,
+    created_at: contentfulPost.created_at || '',
+    updated_at: contentfulPost.updated_at || '',
+    featuredImage: contentfulPost.featuredImage,
+    author: contentfulPost.author,
+    tags: contentfulPost.tags
+  };
+};
 
 const BlogPostDetail = () => {
   const { slug } = useParams<{ slug: string }>();

@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { isContentfulEntry, isContentfulAsset } from '@/utils/contentfulTypeGuards';
-import { CMSMachine } from '@/types/cms';
+import { CMSMachine, CMSImage } from '@/types/cms';
 
 /**
  * Transform a Contentful machine entry to our CMSMachine format
@@ -35,7 +35,7 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
   
   // Handle features
   const features = Array.isArray(entry.fields.features)
-    ? entry.fields.features.map((feature: any) => feature.toString())
+    ? entry.fields.features.map((feature: any) => String(feature))
     : [];
   
   // Handle specifications
@@ -43,38 +43,43 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
   if (entry.fields.specifications && Array.isArray(entry.fields.specifications)) {
     entry.fields.specifications.forEach((spec: any) => {
       if (spec.fields && spec.fields.name && spec.fields.value) {
-        specs[spec.fields.name] = spec.fields.value.toString();
+        specs[spec.fields.name] = String(spec.fields.value);
       }
     });
   }
   
+  // Create the machine object with proper type casting
   return {
     id: entry.sys.id,
-    title: entry.fields.title || '',
-    name: entry.fields.title || '', // For backwards compatibility
-    slug: entry.fields.slug || '',
-    type: entry.fields.type || 'vending',
-    description: entry.fields.description || '',
+    title: String(entry.fields.title || ''),
+    name: String(entry.fields.title || ''), // For backwards compatibility
+    slug: String(entry.fields.slug || ''),
+    type: String(entry.fields.type || 'vending'),
+    description: String(entry.fields.description || ''),
     // Use description as shortDescription if not provided
-    description: entry.fields.description || '',
-    temperature: entry.fields.temperature || 'ambient',
+    shortDescription: String(entry.fields.shortDescription || entry.fields.description || ''),
+    temperature: String(entry.fields.temperature || 'ambient'),
     mainImage: mainImageUrl ? {
       url: mainImageUrl,
-      alt: mainImageAlt
+      alt: mainImageAlt,
+      id: entry.fields.mainImage?.sys?.id // Add id for compatibility
     } : undefined,
-    images: galleryImages.length > 0 ? galleryImages : undefined,
+    images: galleryImages.length > 0 ? galleryImages.map(img => ({
+      ...img,
+      id: Math.random().toString(36).substring(2) // Add a placeholder id
+    })) : undefined,
     features,
     specs,
     visible: entry.fields.visible !== false, // Default to true if not specified
     featured: !!entry.fields.featured,
-    displayOrder: entry.fields.displayOrder || 0,
-    createdAt: entry.sys.createdAt || '',
-    updatedAt: entry.sys.updatedAt || '',
+    displayOrder: Number(entry.fields.displayOrder || 0),
+    createdAt: String(entry.sys.createdAt || ''),
+    updatedAt: String(entry.sys.updatedAt || ''),
     // Include legacy naming convention
-    created_at: entry.sys.createdAt || '',
-    updated_at: entry.sys.updatedAt || '',
+    created_at: String(entry.sys.createdAt || ''),
+    updated_at: String(entry.sys.updatedAt || ''),
     showOnHomepage: !!entry.fields.showOnHomepage,
-    homepageOrder: entry.fields.homepageOrder || null
+    homepageOrder: entry.fields.homepageOrder ? Number(entry.fields.homepageOrder) : null
   };
 }
 

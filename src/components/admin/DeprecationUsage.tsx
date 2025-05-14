@@ -86,9 +86,9 @@ const DeprecationUsage: React.FC<DeprecationUsageProps> = ({
                 </h4>
                 <div className="space-y-2">
                   {displayStats.map(stat => (
-                    <div key={stat.feature} className="space-y-1">
+                    <div key={stat.id} className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="font-medium text-gray-700">{stat.feature}</span>
+                        <span className="font-medium text-gray-700">{stat.item}</span>
                         <span className="text-gray-500">{stat.count} uses</span>
                       </div>
                       <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -107,8 +107,8 @@ const DeprecationUsage: React.FC<DeprecationUsageProps> = ({
             
             <ul className="divide-y">
               {displayStats.map(stat => (
-                <li key={stat.feature} className="py-2 flex justify-between items-center">
-                  <span className="font-medium text-sm">{stat.feature}</span>
+                <li key={stat.id} className="py-2 flex justify-between items-center">
+                  <span className="font-medium text-sm">{stat.item}</span>
                   <span className="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full">
                     {stat.count} {stat.count === 1 ? 'use' : 'uses'}
                   </span>
