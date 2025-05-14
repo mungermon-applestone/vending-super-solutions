@@ -4,9 +4,11 @@ import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { Entry, EntrySkeletonType } from 'contentful';
 import { isContentfulEntry, isContentfulAsset } from '@/services/cms/utils/contentfulHelpers';
 import { safeString, safeAssetToImage } from '@/services/cms/utils/safeTypeUtilities';
+import { CMSBusinessGoal } from '@/types/cms';
+import { transformBusinessGoal } from '@/hooks/cms/transformers/businessGoalTransformer';
 
 // Helper function to transform Contentful entries
-function transformBusinessGoal(entry: Entry<EntrySkeletonType, undefined, string>) {
+function transformBusinessGoalBasic(entry: Entry<EntrySkeletonType, undefined, string>): CMSBusinessGoal | null {
   if (!isContentfulEntry(entry)) {
     console.error('[useContentfulBusinessGoals] Entry is not a valid Contentful entry:', entry);
     return null;
@@ -34,7 +36,9 @@ function transformBusinessGoal(entry: Entry<EntrySkeletonType, undefined, string
     icon: safeString(fields.icon || ''),
     benefits: Array.isArray(fields.benefits) ? fields.benefits.map(benefit => safeString(benefit)) : [],
     visible: fields.visible === true,
-    image: imageData
+    image: imageData,
+    createdAt: entry.sys.createdAt,
+    updatedAt: entry.sys.updatedAt
   };
 }
 
@@ -56,8 +60,8 @@ export function useContentfulBusinessGoals(filters?: Record<string, any>) {
         
         // Map entries to our application format
         return entries
-          .map(transformBusinessGoal)
-          .filter(Boolean);
+          .map(transformBusinessGoalBasic)
+          .filter(Boolean) as CMSBusinessGoal[];
       } catch (error) {
         console.error('[useContentfulBusinessGoals] Error fetching business goals:', error);
         throw error;

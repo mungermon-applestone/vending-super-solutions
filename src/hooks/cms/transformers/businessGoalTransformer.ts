@@ -1,7 +1,7 @@
 
 import { isContentfulEntry, isContentfulAsset } from '@/services/cms/utils/contentfulHelpers';
 import { safeString, safeArrayField } from '@/services/cms/utils/safeTypeUtilities';
-import { CMSBusinessGoal, CMSImage } from '@/types/cms';
+import { CMSBusinessGoal, CMSImage, CMSFeature } from '@/types/cms';
 import { Entry, EntrySkeletonType } from 'contentful';
 
 /**
@@ -32,8 +32,35 @@ export function transformBusinessGoal(entry: Entry<EntrySkeletonType, undefined,
     .map((benefit: any) => safeString(benefit))
     .filter(Boolean);
   
-  // Extract features (these could be links to other entries)
-  const features = safeArrayField(fields, 'features');
+  // Extract and transform features (these could be links to other entries)
+  const features = safeArrayField(fields, 'features')
+    .map((feature: any) => {
+      if (isContentfulEntry(feature)) {
+        const featureFields = feature.fields;
+        
+        // Create a screenshot object if present
+        let screenshot = undefined;
+        if (featureFields.screenshot && isContentfulAsset(featureFields.screenshot)) {
+          screenshot = {
+            id: featureFields.screenshot.sys?.id,
+            url: `https:${featureFields.screenshot.fields?.file?.url || ''}`,
+            alt: safeString(featureFields.screenshot.fields?.title || featureFields.title || ''),
+            width: featureFields.screenshot.fields?.file?.details?.image?.width,
+            height: featureFields.screenshot.fields?.file?.details?.image?.height
+          };
+        }
+        
+        // Return a properly formatted feature
+        return {
+          title: safeString(featureFields.title),
+          description: safeString(featureFields.description),
+          icon: safeString(featureFields.icon),
+          screenshot
+        } as CMSFeature;
+      }
+      return null;
+    })
+    .filter(Boolean) as CMSFeature[];
   
   return {
     id: entry.sys.id,

@@ -46,6 +46,13 @@ export interface CMSProductType {
   updatedAt?: string;
 }
 
+export interface CMSFeature {
+  title: string;
+  description: string;
+  icon?: string;
+  screenshot?: CMSImage;
+}
+
 export interface CMSBusinessGoal {
   id: string;
   title: string;
@@ -54,7 +61,7 @@ export interface CMSBusinessGoal {
   icon?: string;
   image?: CMSImage;
   benefits?: string[];
-  features?: any[];
+  features?: CMSFeature[];
   visible?: boolean;
   created_at?: string;
   updated_at?: string;

@@ -1,6 +1,4 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { CMSMachine } from '@/types/cms';
 import { useContentfulMachines, useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 
 /**

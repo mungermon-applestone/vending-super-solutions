@@ -6,6 +6,7 @@ import { NavigateFunction } from 'react-router-dom';
 import { useProductType } from '@/hooks/cms/useProductTypes';
 import { ProductFormData } from '@/types/forms';
 import { createProduct, updateProduct } from '@/services/cms/products';
+import { CMSProductType } from '@/types/cms';
 
 /**
  * Custom hook for handling product editor form state and operations
@@ -87,19 +88,22 @@ export const useProductEditorForm = (
       
       try {
         // Deep clone any objects to avoid reference issues
-        const deepClone = (obj) => JSON.parse(JSON.stringify(obj));
+        const deepClone = (obj: any) => JSON.parse(JSON.stringify(obj));
+        
+        // Cast existingProduct to the correct type
+        const product = existingProduct as CMSProductType;
         
         // Create a new object from the existing product data to avoid reference issues
         const productData: ProductFormData = {
-          title: existingProduct.title || '',
-          slug: existingProduct.slug || '',
-          description: existingProduct.description || '',
-          image: deepClone(existingProduct.image) || { url: '', alt: '' },
-          benefits: existingProduct.benefits && existingProduct.benefits.length > 0 
-            ? [...existingProduct.benefits] 
+          title: product.title || '',
+          slug: product.slug || '',
+          description: product.description || '',
+          image: deepClone(product.image) || { url: '', alt: '' },
+          benefits: Array.isArray(product.benefits) && product.benefits.length > 0 
+            ? [...product.benefits] 
             : [''],
-          features: existingProduct.features && existingProduct.features.length > 0 
-            ? deepClone(existingProduct.features.map(feature => ({
+          features: Array.isArray(product.features) && product.features.length > 0 
+            ? deepClone(product.features.map(feature => ({
                 title: feature.title || '',
                 description: feature.description || '',
                 icon: typeof feature.icon === 'string' ? feature.icon : 'check',

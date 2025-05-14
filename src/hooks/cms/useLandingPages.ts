@@ -25,9 +25,9 @@ export function useLandingPages() {
         return []; 
       }
     },
-    ...createQueryOptions(),
+    ...createQueryOptions<LandingPage[]>(),
     retry: 3,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true,
     refetchOnMount: true,
   });
@@ -49,8 +49,8 @@ export function useLandingPageByKey(key: string) {
       }
     },
     enabled: !!key,
-    ...createQueryOptions(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    ...createQueryOptions<LandingPage | null>(),
+    gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true, // Refetch when window gets focus
     refetchInterval: 60 * 1000, // Refetch every minute
     refetchOnMount: 'always', // Always refetch when component mounts

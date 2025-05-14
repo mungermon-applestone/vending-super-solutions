@@ -19,7 +19,6 @@ const ContentfulBlogPostDetail = () => {
         fallback={
           <div className="container mx-auto p-4">
             <ContentfulFallbackMessage
-              title="Blog Post Not Available"
               message="We're having trouble loading this blog post. Please check your Contentful configuration."
               contentType="blog post"
               showRefresh={true}
@@ -36,7 +35,7 @@ const ContentfulBlogPostDetail = () => {
 };
 
 const BlogPostContent = ({ slug }: { slug: string | undefined }) => {
-  const { data: post, isLoading, error } = useContentfulBlogPostBySlug({ slug });
+  const { data: post, isLoading, error } = useContentfulBlogPostBySlug(slug);
   const navigate = useNavigate();
   
   React.useEffect(() => {
@@ -66,7 +65,6 @@ const BlogPostContent = ({ slug }: { slug: string | undefined }) => {
     return (
       <div className="container mx-auto py-12">
         <ContentfulFallbackMessage
-          title="Error Loading Blog Post"
           message={error instanceof Error ? error.message : 'An unknown error occurred'}
           contentType="blog post"
           actionText="Return to Blog"
@@ -81,7 +79,6 @@ const BlogPostContent = ({ slug }: { slug: string | undefined }) => {
     return (
       <div className="container mx-auto py-12">
         <ContentfulFallbackMessage
-          title="Blog Post Not Found"
           message={`We couldn't find the blog post "${slug}" in our database.`}
           contentType="blog post"
           actionText="Return to Blog"
@@ -92,10 +89,20 @@ const BlogPostContent = ({ slug }: { slug: string | undefined }) => {
     );
   }
 
+  // Properly format the data for the ContentfulBlogPostContent component
+  const adjacentPosts = {
+    previous: null,
+    next: null
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="container mx-auto py-12 flex-grow">
-        <ContentfulBlogPostContent post={post} />
+        <ContentfulBlogPostContent 
+          post={post} 
+          previousPost={adjacentPosts.previous}
+          nextPost={adjacentPosts.next}
+        />
       </div>
       <SimpleContactCTA className="w-full mt-auto" />
     </div>

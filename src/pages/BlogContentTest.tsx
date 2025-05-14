@@ -4,7 +4,7 @@ import { useContentfulBlogPostBySlug } from '@/hooks/useContentfulBlogPostBySlug
 
 const BlogContentTest: React.FC = () => {
   // Using a hardcoded slug for testing purposes
-  const { data: post, isLoading, error } = useContentfulBlogPostBySlug({ slug: 'test-blog-post' });
+  const { data: post, isLoading, error } = useContentfulBlogPostBySlug('test-blog-post');
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error instanceof Error ? error.message : 'Unknown error'}</div>;
