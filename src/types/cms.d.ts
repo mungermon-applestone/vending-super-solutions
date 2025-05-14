@@ -3,6 +3,7 @@
 export interface CMSMachine {
   id: string;
   title: string;
+  name?: string; // Added for backwards compatibility
   slug: string;
   type: string;  // Allow any string for backward compatibility
   description?: string;
@@ -21,7 +22,6 @@ export interface CMSMachine {
   updated_at?: string;
   createdAt?: string;
   updatedAt?: string;
-  name?: string; // For backwards compatibility with some components
   showOnHomepage?: boolean;
   homepageOrder?: number | null;
 }
@@ -130,6 +130,7 @@ export interface BlogPost {
     updatedAt?: string;
   };
   fields?: any;
+  includes?: any; // Added for rich text resolution
 }
 
 // Type for adjacent blog posts (prev/next)

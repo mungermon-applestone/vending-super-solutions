@@ -5,6 +5,7 @@ import { isContentfulEntry } from '@/utils/contentfulTypeGuards';
 import { safeString, safeAssetToImage } from '@/services/cms/utils/safeTypeUtilities';
 
 export interface HeroContent {
+  // Standard properties
   title: string;
   subtitle: string;
   primaryButtonText?: string;
@@ -19,6 +20,16 @@ export interface HeroContent {
     width?: number;
     height?: number;
   };
+  
+  // Legacy properties for backward compatibility
+  headline?: string;
+  subheading?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  secondaryCTAText?: string;
+  secondaryCTALink?: string;
+  backgroundImage?: string;
+  backgroundImageAlt?: string;
 }
 
 export function useHeroContent(pageKey?: string) {
@@ -26,8 +37,29 @@ export function useHeroContent(pageKey?: string) {
     queryKey: ['contentful', 'hero', pageKey],
     queryFn: async () => {
       try {
+        // If no page key is provided, return a simplified response
         if (!pageKey) {
-          throw new Error("Page key is required");
+          console.log('[useHeroContent] No page key provided, returning generic hero content');
+          return {
+            title: "Software Solutions for Vending",
+            subtitle: "Innovative technology that powers modern vending machines",
+            primaryButtonText: "Request Demo",
+            primaryButtonUrl: "/contact",
+            secondaryButtonText: "Learn More",
+            secondaryButtonUrl: "/products",
+            backgroundClass: "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light",
+            image: {
+              url: "https://images.unsplash.com/photo-1556742031-c6961e8560b0?ixlib=rb-4.0.3",
+              alt: "Vending Technology",
+            },
+            // Add legacy field mappings
+            headline: "Software Solutions for Vending",
+            subheading: "Innovative technology that powers modern vending machines",
+            ctaText: "Request Demo",
+            ctaLink: "/contact",
+            secondaryCTAText: "Learn More",
+            secondaryCTALink: "/products"
+          } as HeroContent;
         }
         
         // Query the hero content for the specific page
@@ -55,7 +87,8 @@ export function useHeroContent(pageKey?: string) {
           console.warn(`[useHeroContent] Missing image for hero content: ${pageKey}`);
         }
         
-        return {
+        // Create the result with both standard and legacy property names
+        const result = {
           title: safeString(entry.fields.title),
           subtitle: safeString(entry.fields.subtitle),
           primaryButtonText: safeString(entry.fields.primaryButtonText),
@@ -67,13 +100,24 @@ export function useHeroContent(pageKey?: string) {
           image: image || {
             url: '/placeholder-image.jpg',
             alt: 'Placeholder',
-          }
+          },
+          // Legacy field mappings
+          headline: safeString(entry.fields.title),
+          subheading: safeString(entry.fields.subtitle),
+          ctaText: safeString(entry.fields.primaryButtonText),
+          ctaLink: safeString(entry.fields.primaryButtonUrl),
+          secondaryCTAText: safeString(entry.fields.secondaryButtonText),
+          secondaryCTALink: safeString(entry.fields.secondaryButtonUrl),
+          backgroundImage: safeString(entry.fields.backgroundImageUrl),
+          backgroundImageAlt: safeString(entry.fields.title)
         } as HeroContent;
+        
+        return result;
       } catch (error) {
         console.error(`[useHeroContent] Error fetching hero content for page: ${pageKey}`, error);
         return null;
       }
     },
-    enabled: !!pageKey
+    enabled: true
   });
 }

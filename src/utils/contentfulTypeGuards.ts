@@ -1,75 +1,60 @@
 
-import { Entry, Asset } from 'contentful';
+import { ContentfulAsset } from '@/types/contentful';
 import { ContentfulBlogPost } from '@/hooks/useContentfulBlogPosts';
-import { BlogPost, AdjacentPost } from '@/types/blog';
+import { BlogPost } from '@/types/cms';
 
 /**
- * Check if an object is a Contentful Entry
+ * Type guard for Contentful entries
  */
-export function isContentfulEntry(obj: any): obj is Entry<any> {
+export function isContentfulEntry(obj: any): boolean {
+  return obj && typeof obj === 'object' && obj.sys && obj.sys.id && obj.fields;
+}
+
+/**
+ * Type guard for Contentful assets
+ */
+export function isContentfulAsset(obj: any): obj is ContentfulAsset {
   return (
-    obj &&
-    typeof obj === 'object' &&
-    obj.sys &&
-    obj.sys.id &&
-    obj.fields &&
-    typeof obj.fields === 'object'
+    obj && 
+    typeof obj === 'object' && 
+    obj.sys && 
+    obj.fields && 
+    obj.fields.file && 
+    typeof obj.fields.file === 'object'
   );
 }
 
 /**
- * Check if an object is a Contentful Asset
+ * Type guard for rich text document
  */
-export function isContentfulAsset(obj: any): obj is Asset {
+export function isRichTextDocument(obj: any): boolean {
   return (
     obj &&
     typeof obj === 'object' &&
-    obj.sys &&
-    obj.sys.id &&
-    obj.fields &&
-    obj.fields.file &&
-    obj.fields.file.url
+    obj.nodeType === 'document' &&
+    Array.isArray(obj.content)
   );
 }
 
 /**
- * Convert a ContentfulBlogPost to a regular BlogPost
+ * Convert ContentfulBlogPost to standard BlogPost format
  */
-export function convertContentfulBlogPostToBlogPost(post: ContentfulBlogPost | null): BlogPost | null {
-  if (!post) return null;
-  
+export function convertContentfulBlogPostToBlogPost(contentfulPost: ContentfulBlogPost): BlogPost {
   return {
-    id: post.id,
-    title: post.title,
-    slug: post.slug,
-    content: post.content,
-    excerpt: post.excerpt,
-    status: 'published' as 'published' | 'draft', // Cast to satisfy TypeScript
-    published_at: post.publishDate || post.published_at || '',
-    created_at: post.created_at || post.sys?.createdAt || '',
-    updated_at: post.updated_at || post.sys?.updatedAt || '',
-    featuredImage: post.featuredImage,
-    author: post.author,
-    tags: post.tags || [],
-    sys: post.sys
+    id: contentfulPost.id,
+    title: contentfulPost.title,
+    slug: contentfulPost.slug,
+    content: contentfulPost.content || '',
+    excerpt: contentfulPost.excerpt,
+    status: contentfulPost.status || 'published',
+    published_at: contentfulPost.publishDate || contentfulPost.published_at,
+    created_at: contentfulPost.sys?.createdAt || contentfulPost.created_at || new Date().toISOString(),
+    updated_at: contentfulPost.sys?.updatedAt || contentfulPost.updated_at || new Date().toISOString(),
+    featuredImage: contentfulPost.featuredImage,
+    author: contentfulPost.author,
+    tags: contentfulPost.tags,
+    sys: contentfulPost.sys,
+    fields: contentfulPost.fields,
+    includes: contentfulPost.includes
   };
-}
-
-/**
- * Convert an AdjacentPost to the format needed for ContentfulBlogPostContent
- */
-export function convertAdjacentPostToContentful(post: AdjacentPost | null) {
-  if (!post) return null;
-  return {
-    slug: post.slug,
-    title: post.title
-  };
-}
-
-/**
- * Safe type checking for content types
- */
-export function safeContentfulFieldAccess<T>(obj: any, field: string, defaultValue: T): T {
-  if (!obj || !obj.fields) return defaultValue;
-  return obj.fields[field] !== undefined ? obj.fields[field] : defaultValue;
 }

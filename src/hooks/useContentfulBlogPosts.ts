@@ -42,9 +42,7 @@ export interface ContentfulBlogPost {
   created_at?: string;
   updated_at?: string;
   // Support for includes (used for rich text resolution)
-  includes?: {
-    Asset?: any[];
-  };
+  includes?: any;
 }
 
 export interface BlogPostQueryOptions {
@@ -89,7 +87,7 @@ export function useContentfulBlogPosts(options?: BlogPostQueryOptions) {
           
           const publishDate = entry.fields?.publishDate ? safeString(entry.fields.publishDate) : undefined;
           
-          return {
+          const blogPost: ContentfulBlogPost = {
             id: entry.sys?.id || '',
             title: safeString(entry.fields?.title || 'Untitled'),
             slug: safeString(entry.fields?.slug || ''),
@@ -110,9 +108,15 @@ export function useContentfulBlogPosts(options?: BlogPostQueryOptions) {
             fields: entry.fields,
             status: 'published', // Default status for Contentful posts
             created_at: entry.sys?.createdAt,
-            updated_at: entry.sys?.updatedAt,
-            includes: entry.includes // Keep includes for rich text resolution
+            updated_at: entry.sys?.updatedAt
           };
+          
+          // Add includes for rich text resolution if they exist in the original entry
+          if ((entry as any).includes) {
+            blogPost.includes = (entry as any).includes;
+          }
+          
+          return blogPost;
         }).filter(Boolean) as ContentfulBlogPost[];
       } catch (error) {
         console.error('[useContentfulBlogPosts] Error fetching blog posts:', error);

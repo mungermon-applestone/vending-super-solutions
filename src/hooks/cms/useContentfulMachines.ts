@@ -18,9 +18,12 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
   
   if (entry.fields.mainImage && isContentfulAsset(entry.fields.mainImage)) {
     const imageUrl = entry.fields.mainImage.fields.file.url;
+    const fixedImageUrl = typeof imageUrl === 'string' ? 
+      (imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl) : '';
+    
     mainImage = {
       id: entry.fields.mainImage.sys?.id,
-      url: imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl,
+      url: fixedImageUrl,
       alt: safeString(entry.fields.mainImage.fields.title || entry.fields.title || ''),
       width: entry.fields.mainImage.fields.file.details?.image?.width,
       height: entry.fields.mainImage.fields.file.details?.image?.height
@@ -33,9 +36,12 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
     for (const asset of entry.fields.gallery) {
       if (isContentfulAsset(asset) && asset.fields && asset.fields.file) {
         const imageUrl = asset.fields.file.url;
+        const fixedImageUrl = typeof imageUrl === 'string' ? 
+          (imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl) : '';
+        
         galleryImages.push({
           id: asset.sys?.id,
-          url: imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl,
+          url: fixedImageUrl,
           alt: safeString(asset.fields.title || ''),
           width: asset.fields.file.details?.image?.width,
           height: asset.fields.file.details?.image?.height

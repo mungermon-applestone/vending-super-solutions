@@ -47,10 +47,11 @@ export function useContentfulBlogPostBySlug(slug?: string, options?: ContentfulB
 
         // Featured image handling
         let featuredImage = undefined;
+        
         if (entry.fields.featuredImage && isContentfulAsset(entry.fields.featuredImage)) {
           featuredImage = {
             url: `https:${entry.fields.featuredImage.fields.file.url}`,
-            title: safeString(entry.fields.featuredImage.fields.title),
+            title: safeString(entry.fields.featuredImage.fields.title || entry.fields.title || ''),
             width: entry.fields.featuredImage.fields.file.details?.image?.width,
             height: entry.fields.featuredImage.fields.file.details?.image?.height
           };
@@ -87,10 +88,13 @@ export function useContentfulBlogPostBySlug(slug?: string, options?: ContentfulB
           },
           status: 'published',
           created_at: entry.sys.createdAt || '',
-          updated_at: entry.sys.updatedAt || '',
-          // Add support for includes to make content resolution work
-          includes: entry.includes
+          updated_at: entry.sys.updatedAt || ''
         };
+        
+        // Add includes for rich text resolution if they exist in the original entry
+        if ((entry as any).includes) {
+          blogPost.includes = (entry as any).includes;
+        }
         
         return blogPost;
       } catch (error) {

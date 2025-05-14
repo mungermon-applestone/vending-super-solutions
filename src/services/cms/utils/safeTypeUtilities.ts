@@ -1,116 +1,105 @@
 
+import { ContentfulAsset } from '@/types/contentful';
+import { CMSImage } from '@/types/cms';
+
 /**
- * Safe conversion of any value to string
+ * Safely convert any value to a string, handling null and undefined
  */
-export function safeString(value: any, fallback: string = ''): string {
-  if (value === null || value === undefined) return fallback;
+export function safeString(value: any): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
   return String(value);
 }
 
 /**
- * Safe conversion of any value to number
+ * Safely convert Contentful asset to CMSImage format
  */
-export function safeNumber(value: any, fallback: number = 0): number {
-  if (value === null || value === undefined) return fallback;
-  const num = Number(value);
-  return isNaN(num) ? fallback : num;
-}
-
-/**
- * Safe conversion of any value to boolean
- */
-export function safeBoolean(value: any, fallback: boolean = false): boolean {
-  if (value === null || value === undefined) return fallback;
-  if (typeof value === 'boolean') return value;
-  if (typeof value === 'string') {
-    return value.toLowerCase() === 'true' || value === '1';
-  }
-  if (typeof value === 'number') return value !== 0;
-  return Boolean(value);
-}
-
-/**
- * Safe conversion of any value to array
- */
-export function safeArray<T>(value: any, mapper?: (item: any) => T): T[] {
-  if (!value) return [];
-  if (!Array.isArray(value)) return [];
-  
-  if (mapper) {
-    return value.map(mapper).filter(Boolean);
-  }
-  
-  return value;
-}
-
-/**
- * Safe access to an array field in an object
- */
-export function safeArrayField(obj: any, fieldName: string): any[] {
-  if (!obj || !obj.fields || !Array.isArray(obj.fields[fieldName])) {
-    return [];
-  }
-  return obj.fields[fieldName];
-}
-
-/**
- * Convert a Contentful asset to a CMS image object
- */
-export function safeAssetToImage(asset: any) {
+export function safeAssetToImage(asset: any): CMSImage | null {
   if (!asset || !asset.fields || !asset.fields.file) {
     return null;
   }
-  
+
   try {
+    const imageUrl = asset.fields.file.url;
+    const fixedImageUrl = typeof imageUrl === 'string' ? 
+      (imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl) : '';
+
     return {
-      id: asset.sys?.id || '',
-      url: `https:${asset.fields.file.url}`,
-      alt: asset.fields.title || '',
+      id: asset.sys?.id,
+      url: fixedImageUrl,
+      alt: safeString(asset.fields.title || ''),
+      filename: safeString(asset.fields.file.fileName),
       width: asset.fields.file.details?.image?.width,
       height: asset.fields.file.details?.image?.height
     };
   } catch (error) {
-    console.error('Error converting asset to image:', error);
+    console.error('[safeAssetToImage] Error converting asset to image format:', error);
     return null;
   }
 }
 
 /**
- * Safe access to an object's property
+ * Safely handle an array field, ensuring it's an array
  */
-export function safeObjectProperty<T>(obj: any, path: string, defaultValue: T): T {
-  if (!obj) return defaultValue;
-  
-  const parts = path.split('.');
-  let current = obj;
-  
-  for (const part of parts) {
-    if (current === null || current === undefined || typeof current !== 'object') {
-      return defaultValue;
-    }
-    current = current[part];
+export function safeArrayField<T>(field: any, defaultValue: T[] = []): T[] {
+  if (!field) {
+    return defaultValue;
   }
-  
-  return (current === undefined || current === null) ? defaultValue : current as T;
+
+  if (Array.isArray(field)) {
+    return field;
+  }
+
+  return defaultValue;
 }
 
 /**
- * Safe conversion of Contentful fields
+ * Safely handle a nested object field
  */
-export function safeContentfulField<T>(
-  entry: any, 
-  fieldName: string, 
-  transformer: (value: any) => T,
-  defaultValue: T
-): T {
-  if (!entry || !entry.fields || entry.fields[fieldName] === undefined) {
+export function safeObjectField<T>(field: any, defaultValue: T): T {
+  if (!field || typeof field !== 'object') {
     return defaultValue;
   }
-  
+
+  return field;
+}
+
+/**
+ * Safely handle a numeric field
+ */
+export function safeNumber(value: any, defaultValue: number = 0): number {
+  if (value === null || value === undefined) {
+    return defaultValue;
+  }
+
+  const num = Number(value);
+  return isNaN(num) ? defaultValue : num;
+}
+
+/**
+ * Safely handle a boolean field
+ */
+export function safeBoolean(value: any, defaultValue: boolean = false): boolean {
+  if (value === null || value === undefined) {
+    return defaultValue;
+  }
+
+  return Boolean(value);
+}
+
+/**
+ * Safely handle a date field
+ */
+export function safeDate(value: any, defaultValue: Date = new Date()): Date {
+  if (!value) {
+    return defaultValue;
+  }
+
   try {
-    return transformer(entry.fields[fieldName]);
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? defaultValue : date;
   } catch (error) {
-    console.warn(`Error transforming Contentful field ${fieldName}:`, error);
     return defaultValue;
   }
 }

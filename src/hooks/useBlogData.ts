@@ -3,7 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useContentfulBlogPosts, ContentfulBlogPost } from '@/hooks/useContentfulBlogPosts';
 import { useContentfulBlogPostBySlug } from '@/hooks/useContentfulBlogPostBySlug';
 import { AdjacentPost } from '@/types/blog';
-import { convertContentfulBlogPostToBlogPost } from '@/utils/contentfulTypeGuards';
+
+/**
+ * Hook to fetch all blog posts
+ */
+export function useBlogPosts() {
+  return useContentfulBlogPosts();
+}
 
 /**
  * Get a blog post by its slug
@@ -58,3 +64,14 @@ export function useAdjacentPosts(currentSlug?: string) {
     enabled: !isLoading && posts.length > 0 && !!currentSlug
   });
 }
+
+// Add these stubs for backward compatibility
+export const useCreateBlogPost = () => {
+  console.warn('useCreateBlogPost is deprecated and not implemented with Contentful');
+  return { mutateAsync: () => Promise.reject('Not implemented') };
+};
+
+export const useUpdateBlogPost = () => {
+  console.warn('useUpdateBlogPost is deprecated and not implemented with Contentful');
+  return { mutateAsync: () => Promise.reject('Not implemented') };
+};

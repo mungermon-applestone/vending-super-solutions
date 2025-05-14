@@ -11,7 +11,7 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   
   // Handle both new and legacy formats
-  const testimonials = data.fields?.testimonials || [];
+  const testimonials = data.fields?.testimonials || data.testimonials || [];
 
   if (!testimonials.length) {
     return null;
@@ -30,37 +30,43 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
   if (!currentTestimonial) return null;
 
   // Get section title and subtitle from either format
-  const title = data.fields?.title || "Trusted by Industry Leaders";
-  const subtitle = data.fields?.subtitle || "Hear what our clients have to say about our solutions";
+  const title = data.fields?.title || data.title || "Trusted by Industry Leaders";
+  const subtitle = data.fields?.subtitle || data.subtitle || "Hear what our clients have to say about our solutions";
 
   // Helper function to determine if it's a ContentfulTestimonial
-  const isContentfulFormat = (test: any): test is ContentfulTestimonial => {
+  const isContentfulFormat = (test: any): boolean => {
     return test && test.fields && (test.fields.author || test.fields.quote);
   };
 
   // Extract testimonial data based on format
-  const testimonialData = isContentfulFormat(currentTestimonial)
-    ? {
-        quote: currentTestimonial.fields.quote || '',
-        author: currentTestimonial.fields.author || '',
-        position: currentTestimonial.fields.position || '',
-        company: currentTestimonial.fields.company || '',
-        rating: currentTestimonial.fields.rating || 5,
-        image: currentTestimonial.fields.image
-      }
-    : {
-        quote: currentTestimonial.testimonial || '',
-        author: currentTestimonial.name || '',
-        position: currentTestimonial.title || '',
-        company: currentTestimonial.company || '',
-        rating: currentTestimonial.rating || 5,
-        image: currentTestimonial.image_url ? { 
-          fields: { 
-            file: { url: currentTestimonial.image_url },
-            title: currentTestimonial.name || '' 
-          } 
-        } : null
-      };
+  let testimonialData;
+  
+  if (isContentfulFormat(currentTestimonial)) {
+    // It's in Contentful format with fields.author, fields.quote, etc.
+    testimonialData = {
+      quote: currentTestimonial.fields.quote || '',
+      author: currentTestimonial.fields.author || '',
+      position: currentTestimonial.fields.position || '',
+      company: currentTestimonial.fields.company || '',
+      rating: currentTestimonial.fields.rating || 5,
+      image: currentTestimonial.fields.image
+    };
+  } else {
+    // It's in the CMS format with direct properties
+    testimonialData = {
+      quote: currentTestimonial.testimonial || '',
+      author: currentTestimonial.name || '',
+      position: currentTestimonial.title || '',
+      company: currentTestimonial.company || '',
+      rating: currentTestimonial.rating || 5,
+      image: currentTestimonial.image_url ? { 
+        fields: { 
+          file: { url: currentTestimonial.image_url },
+          title: currentTestimonial.name || '' 
+        } 
+      } : null
+    };
+  }
 
   return (
     <section className="py-16 md:py-24 bg-gray-50">
