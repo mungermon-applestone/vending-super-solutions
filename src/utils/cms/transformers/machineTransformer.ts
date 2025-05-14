@@ -1,6 +1,5 @@
 
-import { Entry, Asset } from 'contentful';
-import { CMSMachine, CMSImage } from '@/types/cms';
+import { CMSImage, CMSMachine } from '@/types/cms';
 
 /**
  * Transforms a Contentful machine entry into our application's CMSMachine format
@@ -8,7 +7,7 @@ import { CMSMachine, CMSImage } from '@/types/cms';
  * @param entry - Contentful entry for a machine
  * @returns CMSMachine - Transformed machine object
  */
-export function transformMachineFromContentful(entry: Entry<any>): CMSMachine {
+export function transformMachineFromContentful(entry: any): CMSMachine {
   if (!entry || !entry.fields) {
     console.error('[machineTransformer] Invalid entry provided:', entry);
     throw new Error('Invalid Contentful entry provided');
@@ -26,7 +25,7 @@ export function transformMachineFromContentful(entry: Entry<any>): CMSMachine {
     // Transform gallery images
     const images: CMSImage[] = [];
     if (Array.isArray(fields.images)) {
-      fields.images.forEach(imageAsset => {
+      fields.images.forEach((imageAsset: any) => {
         if (imageAsset && imageAsset.fields) {
           const image = transformContentfulAsset(imageAsset);
           if (image) images.push(image);
@@ -36,7 +35,7 @@ export function transformMachineFromContentful(entry: Entry<any>): CMSMachine {
     
     // Transform features
     const features: string[] = Array.isArray(fields.features) 
-      ? fields.features.filter(f => typeof f === 'string') 
+      ? fields.features.filter((f: any) => typeof f === 'string') 
       : [];
     
     // Build specs object from individual specification fields
@@ -63,21 +62,20 @@ export function transformMachineFromContentful(entry: Entry<any>): CMSMachine {
     // Build the machine object
     const machine: CMSMachine = {
       id: entry.sys.id,
-      contentType: 'machine',
       title: String(fields.title || ''),
-      name: String(fields.title || ''), // Some components use name instead of title
       slug: String(fields.slug || ''),
-      description: String(fields.description || ''),
       type: String(fields.type || ''),
-      mainImage,
-      thumbnail,
-      images,
-      features,
-      specs,
-      featured: Boolean(fields.visible),
-      displayOrder: typeof fields.displayOrder === 'number' ? fields.displayOrder : 999,
+      description: String(fields.description || ''),
+      images: images,
+      thumbnail: thumbnail,
+      mainImage: mainImage,
+      features: features,
+      specs: specs,
       temperature: fields.temperature ? String(fields.temperature) : 'ambient',
-      shortDescription: fields.shortDescription ? String(fields.shortDescription) : '',
+      visible: Boolean(fields.visible),
+      displayOrder: typeof fields.displayOrder === 'number' ? fields.displayOrder : 999,
+      showOnHomepage: Boolean(fields.showOnHomepage),
+      homepageOrder: typeof fields.homepageOrder === 'number' ? fields.homepageOrder : null,
       createdAt: entry.sys.createdAt,
       updatedAt: entry.sys.updatedAt
     };
@@ -90,15 +88,7 @@ export function transformMachineFromContentful(entry: Entry<any>): CMSMachine {
 }
 
 /**
- * Transform a Contentful entry to our CMSMachine format
- * This is the main function used by the hooks
- */
-export function transformContentfulEntry(entry: any): CMSMachine {
-  return transformMachineFromContentful(entry);
-}
-
-/**
- * Transforms a Contentful asset to our CMSImage format
+ * Transform a Contentful asset to our CMSImage format
  * 
  * @param asset - Contentful asset
  * @returns CMSImage - Transformed image object
@@ -106,6 +96,7 @@ export function transformContentfulEntry(entry: any): CMSMachine {
 function transformContentfulAsset(asset: any): CMSImage {
   if (!asset || !asset.fields || !asset.fields.file) {
     return {
+      id: 'missing-image',
       url: '',
       alt: '',
       width: 0,
@@ -117,9 +108,18 @@ function transformContentfulAsset(asset: any): CMSImage {
   const imageDetails = file.details && file.details.image;
   
   return {
+    id: asset.sys.id,
     url: file.url ? `https:${file.url}` : '',
     alt: asset.fields.title || '',
     width: imageDetails ? imageDetails.width : 0,
     height: imageDetails ? imageDetails.height : 0
   };
+}
+
+/**
+ * Transform a Contentful entry to our CMSMachine format
+ * This is the main function used by the hooks
+ */
+export function transformContentfulEntry(entry: any): CMSMachine {
+  return transformMachineFromContentful(entry);
 }

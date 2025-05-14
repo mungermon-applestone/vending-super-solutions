@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { CMSProductType } from '@/types/cms';
 import { toast } from 'sonner';
-import { productFallbacks } from '@/data/productFallbacks';
 
 export function useContentfulProduct(slug: string) {
   return useQuery({
@@ -18,12 +17,12 @@ export function useContentfulProduct(slug: string) {
       
       let client;
       try {
-        client = await getContentfulClient();
+        client = getContentfulClient();
       } catch (clientError) {
         console.error('[useContentfulProduct] Failed to initialize Contentful client, trying refresh', clientError);
         // Try refreshing the client
         try {
-          client = await refreshContentfulClient();
+          client = refreshContentfulClient();
         } catch (refreshError) {
           console.error('[useContentfulProduct] Failed to refresh Contentful client', refreshError);
           throw new Error(`Failed to initialize Contentful client: ${refreshError instanceof Error ? refreshError.message : 'Unknown error'}`);
@@ -63,13 +62,6 @@ export function useContentfulProduct(slug: string) {
       
       if (!entries || !entries.items.length) {
         console.error(`[useContentfulProduct] No product found with any slug variations: ${slugVariations.join(', ')}`);
-        
-        // Check if we have a fallback for this product
-        if (productFallbacks[slug]) {
-          console.warn(`[useContentfulProduct] Using fallback data for slug: ${slug}`);
-          throw new Error(`Product not found in Contentful: ${slug}`);
-        }
-        
         throw new Error(`Product not found in Contentful: ${slug}`);
       }
       

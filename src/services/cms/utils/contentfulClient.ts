@@ -39,6 +39,26 @@ export function getContentfulClient(): ContentfulClientApi | null {
 }
 
 /**
+ * Refresh the Contentful client (create a new instance)
+ * This function is needed by useContentfulProduct.ts
+ */
+export function refreshContentfulClient(): ContentfulClientApi | null {
+  // Clear the cached client
+  contentfulClient = null;
+  // Return a fresh client
+  return getContentfulClient();
+}
+
+/**
+ * Reset the Contentful client (clear the cached instance)
+ * This function is needed by useContentfulProduct.ts
+ */
+export function resetContentfulClient(): void {
+  contentfulClient = null;
+  console.log('[contentfulClient] Client instance reset');
+}
+
+/**
  * Alias for getContentfulClient for backward compatibility
  */
 export const getContentfulClientInstance = getContentfulClient;

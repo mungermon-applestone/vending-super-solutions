@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { CMSMachine } from '@/types/cms';
 import { transformMachineFromContentful } from '@/utils/cms/transformers/machineTransformer';
-import { fallbackMachineData } from '@/data/fallbacks/machineFallbacks';
 import { toast } from 'sonner';
 
 /**
@@ -32,13 +31,6 @@ export function useContentfulMachines() {
         
         if (!response || response.length === 0) {
           console.log('[useContentfulMachines] No machines found in Contentful');
-          
-          if (window.location.hostname.includes('lovable')) {
-            console.log('[useContentfulMachines] Using fallback data in preview');
-            toast.info('Using fallback machine data in preview environment');
-            return Object.values(fallbackMachineData);
-          }
-          
           return [];
         }
         
@@ -60,12 +52,6 @@ export function useContentfulMachines() {
           error,
           timestamp: new Date().toISOString()
         });
-        
-        if (window.location.hostname.includes('lovable')) {
-          console.log('[useContentfulMachines] Using fallback data after error in preview');
-          toast.info('Using fallback machine data in preview environment');
-          return Object.values(fallbackMachineData);
-        }
         throw error;
       }
     }
@@ -87,26 +73,6 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
       console.log('[useContentfulMachine] Fetching machine with idOrSlug:', idOrSlug);
       
       try {
-        // Special handling for divi-wp
-        if (idOrSlug === 'divi-wp') {
-          console.log('[useContentfulMachine] Special case: directly fetching divi-wp with ID: 1omUbnEhB6OeBFpwPFj1Ww');
-          
-          try {
-            const entry = await fetchContentfulEntry('1omUbnEhB6OeBFpwPFj1Ww');
-            if (entry) {
-              return transformMachineFromContentful(entry as any);
-            }
-          } catch (diviError) {
-            console.error('[useContentfulMachine] Error fetching divi-wp by ID:', diviError);
-          }
-          
-          if (window.location.hostname.includes('lovable')) {
-            console.log('[useContentfulMachine] Using fallback data for divi-wp in preview');
-            toast.info('Using fallback data for DIVI-WP in preview environment');
-            return fallbackMachineData['divi-wp'];
-          }
-        }
-        
         // Try fetching by ID first if it looks like an ID
         if (idOrSlug.length > 10) {
           try {
@@ -127,32 +93,17 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         });
         
         if (entries.length === 0) {
-          console.warn('[useContentfulMachine] No machine found with slug:', idOrSlug);
-          
-          if (window.location.hostname.includes('lovable') && fallbackMachineData[idOrSlug]) {
-            console.log('[useContentfulMachine] Using fallback data for:', idOrSlug);
-            return fallbackMachineData[idOrSlug];
-          }
-          
+          console.log(`[useContentfulMachine] No machine found with slug: ${idOrSlug}`);
           return null;
         }
         
         return transformMachineFromContentful(entries[0] as any);
         
       } catch (error) {
-        console.error(`[useContentfulMachine] Error:`, error);
-        
-        if (window.location.hostname.includes('lovable') && fallbackMachineData[idOrSlug]) {
-          console.log('[useContentfulMachine] Using fallback data for:', idOrSlug);
-          return fallbackMachineData[idOrSlug];
-        }
-        
-        toast.error(`Failed to load machine data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        console.error(`[useContentfulMachine] Error fetching machine: ${idOrSlug}`, error);
         throw error;
       }
     },
     enabled: !!idOrSlug
   });
 }
-
-export default { useContentfulMachines, useContentfulMachine };
