@@ -1,43 +1,36 @@
 
-import { CMSProvider, forceCMSProvider } from '@/config/cms';
-import { refreshContentfulClient } from './utils/contentfulClient';
+import { getContentfulClient, refreshContentfulClient, testContentfulConnection } from './utils/contentfulClient';
 
 /**
- * Force Contentful as the CMS provider and refresh the client
- * 
- * @returns Promise resolved when initialization is complete
+ * Force the CMS provider to be Contentful
  */
-export async function forceContentfulProvider(): Promise<boolean> {
+export function forceContentfulProvider(): void {
   console.log('[cmsInit] Forcing Contentful provider');
-  
-  try {
-    // Set Contentful as the provider
-    forceCMSProvider(CMSProvider.CONTENTFUL);
-    
-    // Refresh the client to ensure it's using the latest config
-    const client = await refreshContentfulClient();
-    
-    // Mark as initialized in window for other components to check
-    if (typeof window !== 'undefined') {
-      window._contentfulInitialized = true;
-    }
-    
-    return !!client;
-  } catch (error) {
-    console.error('[cmsInit] Error initializing Contentful:', error);
-    return false;
-  }
+  // Nothing to do since we're always using Contentful
 }
 
 /**
- * Initialize the CMS with the default provider
- * Currently always uses Contentful
- * 
- * @returns Promise resolved when initialization is complete
+ * Reset any CMS provider settings
  */
-export async function initCMS(): Promise<boolean> {
+export function resetCmsProvider(): void {
+  // Nothing to do in the simplified architecture
+}
+
+/**
+ * Initialize the CMS connection
+ */
+export async function initializeCms(): Promise<boolean> {
   try {
-    return await forceContentfulProvider();
+    console.log('[cmsInit] Initializing Contentful CMS');
+    const client = getContentfulClient();
+    if (!client) {
+      console.error('[cmsInit] Failed to initialize Contentful client');
+      return false;
+    }
+    
+    // Test the connection
+    const test = await testContentfulConnection();
+    return test.success;
   } catch (error) {
     console.error('[cmsInit] Error initializing CMS:', error);
     return false;
@@ -45,21 +38,16 @@ export async function initCMS(): Promise<boolean> {
 }
 
 /**
- * Get CMS initialization status
+ * Refresh the CMS connection
  */
-export function getCMSInitializationStatus(): {
-  initialized: boolean;
-  provider: CMSProvider;
-  source: string;
-} {
-  const initialized = typeof window !== 'undefined' ? !!window._contentfulInitialized : false;
-  const source = typeof window !== 'undefined' && window._contentfulInitializedSource 
-    ? window._contentfulInitializedSource 
-    : 'unknown';
-    
-  return {
-    initialized,
-    provider: CMSProvider.CONTENTFUL,
-    source
-  };
+export async function refreshCmsConnection(): Promise<boolean> {
+  try {
+    console.log('[cmsInit] Refreshing CMS connection');
+    await refreshContentfulClient();
+    const test = await testContentfulConnection();
+    return test.success;
+  } catch (error) {
+    console.error('[cmsInit] Error refreshing CMS connection:', error);
+    return false;
+  }
 }

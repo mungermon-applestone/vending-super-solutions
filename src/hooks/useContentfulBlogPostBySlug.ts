@@ -1,94 +1,47 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { getContentfulClient, refreshContentfulClient } from "@/services/cms/utils/contentfulClient";
-import { Document } from "@contentful/rich-text-types";
-import { Asset, Entry } from "contentful";
-import { CMS_MODELS } from "@/config/cms";
-import { toast } from "sonner";
-
-export interface BlogPostFields {
-  title: string;
-  slug: string;
-  content?: Document;
-  excerpt?: string;
-  publishDate?: string;
-  featuredImage?: Asset;
-  author?: string;
-  tags?: string[];
-}
+import { useQuery } from '@tanstack/react-query';
+import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
+import { CMS_MODELS } from '@/config/cms';
 
 export interface ContentfulBlogPost {
   sys: {
     id: string;
-    contentType: {
-      sys: {
-        id: string;
-      }
-    }
+    createdAt: string;
+    updatedAt: string;
   };
-  fields: BlogPostFields;
+  fields: {
+    title: string;
+    slug: string;
+    content: any;
+    excerpt?: string;
+    publishDate?: string;
+    featuredImage?: any;
+  };
   includes?: {
-    Asset?: Asset[];
-    Entry?: Entry<any>[];
+    Asset?: any[];
   };
 }
 
-interface UseContentfulBlogPostBySlugOptions {
-  slug: string | undefined;
-}
-
-export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlugOptions) {
+export function useContentfulBlogPostBySlug(slug: string | undefined) {
   return useQuery({
-    queryKey: ["contentful-blog-post", slug],
-    enabled: !!slug,
+    queryKey: ['contentful', 'blogPost', slug],
     queryFn: async () => {
-      console.log('[useContentfulBlogPostBySlug] Fetching post with slug:', slug);
-      
-      if (!slug) throw new Error("No slug provided");
+      if (!slug) return null;
       
       try {
-        // Try to get a fresh client first
-        await refreshContentfulClient();
-        const client = await getContentfulClient();
-        
-        console.log(`[useContentfulBlogPostBySlug] Querying for blog post with slug: "${slug}"`);
-        
-        const response = await client.getEntries({
-          content_type: CMS_MODELS.BLOG_POST,
-          "fields.slug": slug,
-          include: 3,
-          limit: 1,
+        const entries = await fetchContentfulEntries(CMS_MODELS.BLOG_POST, {
+          'fields.slug': slug,
+          include: 3
         });
         
-        console.log('[useContentfulBlogPostBySlug] Raw response:', response);
-        console.log('[useContentfulBlogPostBySlug] Response items count:', response.items.length);
+        if (!entries || entries.length === 0) return null;
         
-        if (!response.items.length) {
-          console.error(`[useContentfulBlogPostBySlug] No blog post found with slug: ${slug}`);
-          throw new Error(`Blog post not found for slug: ${slug}`);
-        }
-        
-        const post = response.items[0];
-        const enhancedPost = {
-          ...post,
-          includes: response.includes
-        };
-        
-        console.log('[useContentfulBlogPostBySlug] Enhanced post:', enhancedPost);
-        
-        return enhancedPost as unknown as ContentfulBlogPost;
+        return entries[0] as ContentfulBlogPost;
       } catch (error) {
         console.error('[useContentfulBlogPostBySlug] Error fetching blog post:', error);
-        throw error;
+        return null;
       }
     },
-    retry: 1,
-    retryDelay: 1000,
-    meta: {
-      onError: (error: Error) => {
-        toast.error(`Error loading blog post: ${error.message}`);
-        console.error('[useContentfulBlogPostBySlug] Error:', error);
-      }
-    }
+    enabled: !!slug
   });
 }

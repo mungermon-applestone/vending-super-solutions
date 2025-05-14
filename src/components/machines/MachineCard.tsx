@@ -12,12 +12,12 @@ interface MachineCardProps {
 }
 
 const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
-  // Use title or name, whichever is available
-  const displayTitle = machine.title || machine.name || 'Unnamed Machine';
+  // Use title as the display name
+  const displayTitle = machine.title || 'Unnamed Machine';
   
   // Determine which image to use - thumbnail has priority, then mainImage, then first image from array
-  const hasMainImage = !!machine.mainImage?.url;
   const hasThumbnail = !!machine.thumbnail?.url;
+  const hasMainImage = !!machine.mainImage?.url;
   const hasImages = Array.isArray(machine.images) && machine.images.length > 0;
   
   // Determine the image to display

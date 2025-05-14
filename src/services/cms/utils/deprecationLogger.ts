@@ -1,39 +1,18 @@
 
-/**
- * Utility functions for logging deprecation warnings
- * This helps track which legacy features are being used
- */
+import { logDeprecation, getDeprecationStats, resetDeprecationTracker } from './deprecation';
 
-const loggedDeprecations = new Set<string>();
+export { logDeprecation as logDeprecationWarning, getDeprecationStats, resetDeprecationTracker };
 
 /**
- * Log a deprecation warning once per key
- * 
- * @param key - Unique identifier for this deprecation
- * @param message - Warning message
- * @param recommendation - Recommended alternative
+ * Track deprecated feature usage (alias)
  */
-export function logDeprecationWarning(key: string, message: string, recommendation?: string) {
-  // Only log each deprecation once per session
-  if (loggedDeprecations.has(key)) return;
-  
-  loggedDeprecations.add(key);
-  
-  console.warn(
-    `[DEPRECATED] ${message}` + 
-    (recommendation ? `\nRecommendation: ${recommendation}` : '')
-  );
+export function trackDeprecatedFeatureUsage(feature: string, details?: string): void {
+  logDeprecation(feature, details || `Feature "${feature}" used`);
 }
 
 /**
- * Log usage of deprecated code paths
- * 
- * @param key - Unique identifier for this deprecation
- * @param message - Warning message
- * @param recommendation - Recommended alternative
+ * Get usage statistics (alias)
  */
-export function logDeprecation(key: string, message: string, recommendation?: string) {
-  if (import.meta.env.DEV) {
-    logDeprecationWarning(key, message, recommendation);
-  }
+export function getDeprecationUsageStats() {
+  return getDeprecationStats();
 }

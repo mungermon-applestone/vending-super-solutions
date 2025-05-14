@@ -1,94 +1,106 @@
-import { logDeprecationWarning } from './deprecationLogger';
 
 /**
- * Log a deprecation warning once per key
- * Re-export for backward compatibility
+ * Simplified utility for tracking deprecated features
  */
-export { logDeprecationWarning } from './deprecationLogger';
 
-/**
- * Log usage of deprecated code paths
- */
-export function logDeprecation(key: string, message: string, recommendation?: string) {
-  logDeprecationWarning(key, message, recommendation);
+export interface DeprecationStat {
+  component: string;
+  count: number;
+  lastUsed: Date;
+  messages: string[];
 }
 
-/**
- * Utility functions for deprecation warnings and backwards compatibility
- */
+// In-memory store for deprecation stats (resets on page refresh)
+const deprecationStats: Record<string, DeprecationStat> = {};
 
 /**
- * Log a deprecation warning for CMS components
- * @param component The component or function name being deprecated
- * @param message The deprecation message
- * @param recommendation Alternative recommendation
+ * Log a deprecation warning
  */
-export function logDeprecation(component: string, message: string, recommendation?: string): void {
-  const warningMessage = `[DEPRECATED] ${component}: ${message}` +
-    (recommendation ? `\nRecommendation: ${recommendation}` : '');
+export function logDeprecation(component: string, message: string, alternative?: string): void {
+  console.warn(`[DEPRECATED] ${component}: ${message}${alternative ? `. Use ${alternative} instead.` : ''}`);
   
-  console.warn(warningMessage);
-}
-
-/**
- * Create a URL for viewing/editing content in Contentful
- */
-export function getContentfulRedirectUrl(
-  contentType?: string,
-  entryId?: string,
-  spaceId: string = import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
-  environmentId: string = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
-): string {
-  // Base Contentful web app URL
-  const baseUrl = 'https://app.contentful.com';
-  
-  // If we don't have a space ID, return the Contentful login
-  if (!spaceId) {
-    return baseUrl;
-  }
-  
-  // If we don't have a content type, just go to the space
-  if (!contentType) {
-    return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}`;
-  }
-  
-  // If we have an entry ID, go to that specific entry
-  if (entryId) {
-    return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}/entries/${entryId}`;
-  }
-  
-  // Otherwise, go to the content model for that content type
-  return `${baseUrl}/spaces/${spaceId}/environments/${environmentId}/content_types/${contentType}`;
-}
-
-/**
- * Creates a read-only version of an adapter with deprecation warnings
- * @param contentType The content type name
- * @param readOperations The read operations to keep
- * @param disabledOperations The operations to disable
- * @returns A read-only adapter
- */
-export function createReadOnlyAdapter<T extends Record<string, any>>(
-  contentType: string,
-  readOperations: Partial<T>,
-  disabledOperations: string[]
-): T {
-  const adapter = { ...readOperations } as any;
-  
-  // Add stub implementations for disabled operations
-  disabledOperations.forEach(op => {
-    adapter[op] = (...args: any[]) => {
-      const idArg = args[0] ? ` for ID ${args[0]}` : '';
-      logDeprecation(
-        `${contentType}.${op}()`,
-        `Write operation "${op}"${idArg} is deprecated`,
-        `Use Contentful directly for content management`
-      );
-      throw new Error(
-        `Operation "${op}" for ${contentType} is no longer supported. Please use Contentful directly.`
-      );
+  // Track usage
+  if (!deprecationStats[component]) {
+    deprecationStats[component] = {
+      component,
+      count: 0,
+      lastUsed: new Date(),
+      messages: []
     };
-  });
+  }
   
-  return adapter as T;
+  deprecationStats[component].count++;
+  deprecationStats[component].lastUsed = new Date();
+  deprecationStats[component].messages.push(message);
+}
+
+/**
+ * Get statistics about deprecated feature usage
+ */
+export function getDeprecationStats(): DeprecationStat[] {
+  return Object.values(deprecationStats)
+    .sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Reset the deprecation tracker
+ */
+export function resetDeprecationTracker(): void {
+  Object.keys(deprecationStats).forEach(key => {
+    delete deprecationStats[key];
+  });
+}
+
+/**
+ * Alias for backward compatibility
+ */
+export const trackDeprecatedFeatureUsage = (component: string, message: string) => {
+  logDeprecation(component, message);
+};
+
+/**
+ * Alias for backward compatibility
+ */
+export const getDeprecationUsageStats = getDeprecationStats;
+
+/**
+ * Create read-only operations for deprecated content types
+ */
+export function createReadOnlyContentTypeOperations(contentType: string) {
+  return {
+    fetchAll: async () => {
+      logDeprecation(`${contentType}.fetchAll`, `This content type is read-only`);
+      return [];
+    },
+    fetchBySlug: async () => {
+      logDeprecation(`${contentType}.fetchBySlug`, `This content type is read-only`);
+      return null;
+    },
+    fetchById: async () => {
+      logDeprecation(`${contentType}.fetchById`, `This content type is read-only`);
+      return null;
+    },
+    create: async () => {
+      logDeprecation(`${contentType}.create`, `This content type is read-only`);
+      throw new Error(`${contentType} is read-only`);
+    },
+    update: async () => {
+      logDeprecation(`${contentType}.update`, `This content type is read-only`);
+      throw new Error(`${contentType} is read-only`);
+    },
+    delete: async () => {
+      logDeprecation(`${contentType}.delete`, `This content type is read-only`);
+      throw new Error(`${contentType} is read-only`);
+    }
+  };
+}
+
+/**
+ * Create a deprecated write operation wrapper
+ */
+export function createDeprecatedWriteOperation(operation: string, contentType: string) {
+  return async () => {
+    logDeprecation(`${contentType}.${operation}`, `This operation is deprecated`);
+    throw new Error(`${contentType}.${operation} is deprecated`);
+  };
 }

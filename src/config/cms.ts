@@ -4,6 +4,20 @@
  */
 
 /**
+ * Contentful model names
+ */
+export const CMS_MODELS = {
+  BLOG_POST: 'blogPost',
+  BUSINESS_GOAL: 'businessGoal',
+  CASE_STUDY: 'caseStudy',
+  LANDING_PAGE: 'landingPage',
+  MACHINE: 'machine',
+  PRODUCT_TYPE: 'productType',
+  TECHNOLOGY: 'technology',
+  TESTIMONIAL: 'testimonial'
+};
+
+/**
  * Contentful configuration
  */
 export const CONTENTFUL_CONFIG = {
@@ -66,80 +80,7 @@ export function logContentfulConfig(): void {
 }
 
 /**
- * CMS provider names
+ * Development mode flag
  */
-export enum CMSProvider {
-  CONTENTFUL = 'contentful',
-  STRAPI = 'strapi',
-  SUPABASE = 'supabase'
-}
-
-/**
- * Forces a specific CMS provider to be used
- */
-let forcedProvider: CMSProvider | null = null;
-
-/**
- * Force a specific CMS provider to be used
- */
-export function forceCMSProvider(provider: CMSProvider): void {
-  console.log(`[CMS] Forcing provider: ${provider}`);
-  forcedProvider = provider;
-}
-
-/**
- * Force Contentful provider specifically
- */
-export function forceContentfulProvider(): void {
-  forceCMSProvider(CMSProvider.CONTENTFUL);
-}
-
-/**
- * Reset any forced CMS provider to use the default
- */
-export function resetCMSProvider(): void {
-  console.log('[CMS] Resetting to default provider');
-  forcedProvider = null;
-}
-
-/**
- * Get the current CMS provider
- * This is the main function to determine which CMS to use
- */
-export function getCurrentCMSProvider(): CMSProvider {
-  // If a provider is forced, use it
-  if (forcedProvider) {
-    return forcedProvider;
-  }
-  
-  // Contentful is the primary provider if configured
-  if (isContentfulConfigured()) {
-    return CMSProvider.CONTENTFUL;
-  }
-  
-  // Fallback to Contentful regardless, using hardcoded/runtime configs
-  return CMSProvider.CONTENTFUL;
-}
-
-/**
- * Check if we are in a preview environment
- */
-export function isPreviewEnvironment(): boolean {
-  if (typeof window === 'undefined') return false;
-  
-  // Check if current URL is localhost or other dev environments
-  const hostname = window.location.hostname;
-  return hostname === 'localhost' || 
-         hostname === '127.0.0.1' || 
-         hostname.includes('.lovable.app') || 
-         hostname.includes('-preview');
-}
-
-/**
- * Get the initialization source for Contentful
- */
-export function getContentfulInitSource(): string {
-  return typeof window !== 'undefined' && window._contentfulInitializedSource 
-    ? window._contentfulInitializedSource 
-    : 'unknown';
-}
+export const IS_DEVELOPMENT = import.meta.env.DEV || 
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost');

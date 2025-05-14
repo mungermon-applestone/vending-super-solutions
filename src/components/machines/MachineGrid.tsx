@@ -15,7 +15,7 @@ const MachineGrid: React.FC<MachineGridProps> = ({ machines, title }) => {
   console.log(`[MachineGrid] Rendering ${machines.length} machines with title: ${title}`);
   console.log('[MachineGrid] Machines data:', machines.map(machine => ({
     id: machine.id,
-    title: machine.title || machine.name,
+    title: machine.title,
     hasThumbnail: !!machine.thumbnail,
     hasMainImage: !!machine.mainImage,
     thumbnailUrl: machine.thumbnail?.url || 'none',

@@ -2,7 +2,43 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { CMSBusinessGoal } from '@/types/cms';
-import { ContentfulBusinessGoal, ContentfulVideo } from '@/types/contentful';
+
+// Types for Contentful response objects
+interface ContentfulVideo {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title?: string;
+    file?: {
+      url: string;
+      contentType: string;
+    };
+  };
+}
+
+interface ContentfulBusinessGoal {
+  sys: {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  fields: {
+    title: string;
+    slug: string;
+    description: string;
+    icon?: string;
+    image?: any;
+    benefits?: string[];
+    features?: any[];
+    visible?: boolean;
+    video?: ContentfulVideo;
+    recommendedMachines?: any[];
+    showOnHomepage?: boolean;
+    homepageOrder?: number;
+    displayOrder?: number;
+  };
+}
 
 export function useContentfulBusinessGoals(options?: {
   showOnHomepage?: boolean;
@@ -30,7 +66,7 @@ export function useContentfulBusinessGoals(options?: {
         
         queryParams['order'] = orderField;
         
-        const entries = await fetchContentfulEntries<ContentfulBusinessGoal>('businessGoal', queryParams);
+        const entries = await fetchContentfulEntries('businessGoal', queryParams);
         
         console.log('[useContentfulBusinessGoals] Raw entries:', entries);
         
@@ -162,7 +198,7 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
       
       console.log(`[useContentfulBusinessGoal] Fetching business goal with slug: ${slug}`);
       try {
-        const entries = await fetchContentfulEntries<ContentfulBusinessGoal>('businessGoal', {
+        const entries = await fetchContentfulEntries('businessGoal', {
           'fields.slug': slug
         });
         
@@ -253,7 +289,7 @@ export function useContentfulBusinessGoal(slug: string | undefined) {
                     id: 'invalid-machine',
                     slug: 'unavailable',
                     title: 'Unavailable Machine',
-                    description: 'This machine information is not available',
+                    description: 'This machine is not available',
                     image: undefined
                   };
                 }

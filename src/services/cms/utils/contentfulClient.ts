@@ -84,6 +84,26 @@ export function resetContentfulClient(): void {
 export const getContentfulClientInstance = getContentfulClient;
 
 /**
+ * Test if the Contentful connection is working
+ */
+export async function testContentfulConnection(): Promise<{ success: boolean; message: string }> {
+  try {
+    const client = getContentfulClient();
+    if (!client) {
+      return { success: false, message: 'Contentful client could not be initialized' };
+    }
+    
+    // Try to get the space to verify the connection works
+    await client.getSpace();
+    return { success: true, message: 'Contentful connection successful' };
+  } catch (error) {
+    console.error('[testContentfulConnection] Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, message: `Contentful connection failed: ${errorMessage}` };
+  }
+}
+
+/**
  * Fetch multiple entries from Contentful
  * 
  * @param contentType Content type ID
@@ -138,11 +158,6 @@ export async function fetchContentfulEntry(entryId: string): Promise<any | null>
 }
 
 /**
- * Export the test connection function
- */
-export { testContentfulConnection } from './testContentfulConnection';
-
-/**
  * Check if Contentful is configured
  */
 export function isContentfulConfigured(): boolean {
@@ -150,3 +165,6 @@ export function isContentfulConfigured(): boolean {
   const accessToken = CONTENTFUL_CONFIG.DELIVERY_TOKEN;
   return Boolean(spaceId && accessToken);
 }
+
+// Added for backwards compatibility
+export const validateContentfulClient = isContentfulConfigured;

@@ -1,71 +1,68 @@
 
+import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { IS_DEVELOPMENT } from '@/config/cms';
-import { CMSContentTypeFactory } from './contentTypeFactory';
-import { useMockData, getMockData } from './mockDataHandler';
 
 /**
- * Generic function for fetching data from the CMS (either mock or Supabase)
- * @param contentType The type of content to fetch
- * @param params Query parameters to filter results
- * @returns Promise resolving to the requested data
+ * Generic function to fetch content from the CMS
+ * @param contentType The content type to fetch
+ * @param options Query options
+ * @returns The fetched data
  */
-export async function fetchFromCMS<T>(contentType: string, params: Record<string, any> = {}): Promise<T[]> {
-  console.log(`[fetchFromCMS] Fetching ${contentType} with params:`, params);
-  
+export async function fetchFromCMS<T>(
+  contentType: string,
+  options?: {
+    slug?: string;
+    id?: string;
+    limit?: number;
+    includeMocks?: boolean;
+  }
+): Promise<T | T[] | null> {
   try {
-    // If mock data is enabled, use it instead of actual API calls
-    if (useMockData) {
-      return await getMockData<T>(contentType, params);
+    // Allow overriding with mock data in development
+    if (IS_DEVELOPMENT && options?.includeMocks && window._devMockData?.[contentType]) {
+      console.log(`[fetchFromCMS] Using mock data for ${contentType}`);
+      return window._devMockData[contentType] as T;
     }
     
-    // Use our factory to get the right operations for this content type
-    try {
-      const contentTypeOps = CMSContentTypeFactory.getOperations<T>(contentType);
-      return await contentTypeOps.fetchAll({ filters: params });
-    } catch (error) {
-      // If the content type isn't registered in our factory yet,
-      // fall back to the direct import approach
-      console.log(`[fetchFromCMS] Content type "${contentType}" not registered in factory, using direct imports.`);
-      
+    // Try to fetch by ID first
+    if (options?.id) {
       try {
-        // Otherwise delegate to the appropriate handler based on content type
-        switch (contentType) {
-          case 'machines':
-            const { fetchMachines } = await import('./contentTypes/machines');
-            return await fetchMachines(params) as unknown as T[];
-          case 'product-types':
-            const { fetchProductTypes } = await import('./contentTypes/productTypes');
-            const result = await fetchProductTypes(params) as unknown as T[];
-            console.log(`[fetchFromCMS] Fetched ${result.length} product types`);
-            return result;
-          case 'testimonials':
-            const { fetchTestimonials } = await import('./contentTypes/testimonials');
-            return await fetchTestimonials() as unknown as T[];
-          case 'business-goals':
-            const { fetchBusinessGoals } = await import('./contentTypes/businessGoals');
-            return await fetchBusinessGoals() as unknown as T[];
-          case 'technologies':
-            const { fetchTechnologies } = await import('./contentTypes/technologies');
-            return await fetchTechnologies() as unknown as T[];
-          case 'case-studies':
-            const { fetchCaseStudies } = await import('./contentTypes/caseStudies');
-            return await fetchCaseStudies() as unknown as T[];
-          case 'landing-pages':
-            const { fetchLandingPages } = await import('./contentTypes/landingPages');
-            return await fetchLandingPages() as unknown as T[];
-          default:
-            console.warn(`[fetchFromCMS] Unknown content type: ${contentType}`);
-            return [] as T[];
-        }
-      } catch (innerError) {
-        console.error(`[fetchFromCMS] Error importing module for content type ${contentType}:`, innerError);
-        // Return empty array instead of throwing to prevent blank screens
-        return [] as T[];
+        const entry = await fetchContentfulEntry(options.id);
+        return entry as T;
+      } catch (idError) {
+        console.warn(`[fetchFromCMS] Failed to fetch ${contentType} by ID:`, idError);
+        // Fall back to slug search
       }
     }
+    
+    // Try to fetch by slug if provided
+    if (options?.slug) {
+      const query = {
+        'fields.slug': options.slug,
+        limit: 1
+      };
+      
+      const entries = await fetchContentfulEntries(contentType, query);
+      
+      if (entries && entries.length > 0) {
+        return entries[0] as T;
+      }
+      
+      console.log(`[fetchFromCMS] No ${contentType} found with slug: ${options.slug}`);
+      return null;
+    }
+    
+    // Fetch all entries if no specific ID or slug
+    const query = options?.limit ? { limit: options.limit } : undefined;
+    const entries = await fetchContentfulEntries(contentType, query);
+    
+    if (entries && entries.length > 0) {
+      return entries as T[];
+    }
+    
+    return [];
   } catch (error) {
     console.error(`[fetchFromCMS] Error fetching ${contentType}:`, error);
-    // Return empty array instead of throwing to prevent blank screens
-    return [] as T[];
+    return null;
   }
 }

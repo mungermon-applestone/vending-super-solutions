@@ -2,19 +2,62 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { CMSMachine } from '@/types/cms';
-import { transformMachineFromContentful } from '@/utils/cms/transformers/machineTransformer';
-import { toast } from 'sonner';
 
 /**
- * Type for raw Contentful entry before transformation
+ * Transform a Contentful machine entry into our app's CMSMachine format
  */
-interface ContentfulRawEntry {
-  sys: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
+function transformMachineFromContentful(entry: any): CMSMachine {
+  console.log('[transformMachineFromContentful] Transforming machine:', entry.sys.id);
+  
+  // Extract images from the entry
+  const images = entry.fields.images?.map((image: any) => ({
+    id: image.sys?.id,
+    url: `https:${image.fields?.file?.url}`,
+    alt: image.fields?.title || entry.fields.title,
+    width: image.fields?.file?.details?.image?.width,
+    height: image.fields?.file?.details?.image?.height
+  })) || [];
+  
+  // Get the main image (first image or undefined)
+  const mainImage = images.length > 0 ? images[0] : undefined;
+  
+  // Get or create a thumbnail
+  const thumbnail = entry.fields.thumbnail
+    ? {
+        id: entry.fields.thumbnail.sys?.id,
+        url: `https:${entry.fields.thumbnail.fields?.file?.url}`,
+        alt: entry.fields.thumbnail.fields?.title || entry.fields.title,
+        width: entry.fields.thumbnail.fields?.file?.details?.image?.width,
+        height: entry.fields.thumbnail.fields?.file?.details?.image?.height
+      }
+    : mainImage;
+  
+  // Extract features
+  const features = entry.fields.features?.map((feature: string) => feature) || [];
+  
+  // Extract specs
+  const specs = entry.fields.specs || {};
+  
+  // Transform to our app's machine format
+  return {
+    id: entry.sys.id,
+    title: entry.fields.title || 'Untitled Machine',
+    slug: entry.fields.slug || entry.sys.id,
+    description: entry.fields.description || '',
+    shortDescription: entry.fields.shortDescription,
+    type: entry.fields.type || 'vending',
+    mainImage,
+    thumbnail,
+    images,
+    features,
+    specs,
+    temperature: entry.fields.temperature || 'ambient',
+    featured: entry.fields.featured || false,
+    displayOrder: entry.fields.displayOrder || 0,
+    createdAt: entry.sys.createdAt,
+    updatedAt: entry.sys.updatedAt,
+    visible: entry.fields.visible !== false // Default to true if not specified
   };
-  fields: Record<string, any>;
 }
 
 /**
@@ -37,7 +80,7 @@ export function useContentfulMachines() {
         // Transform each machine entry
         const machines = response.map(entry => {
           try {
-            return transformMachineFromContentful(entry as any);
+            return transformMachineFromContentful(entry);
           } catch (transformError) {
             console.error('[useContentfulMachines] Error transforming machine:', transformError);
             return null;
@@ -79,7 +122,7 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
             console.log('[useContentfulMachine] Trying direct ID fetch:', idOrSlug);
             const entry = await fetchContentfulEntry(idOrSlug);
             if (entry) {
-              return transformMachineFromContentful(entry as any);
+              return transformMachineFromContentful(entry);
             }
           } catch (idError) {
             console.log('[useContentfulMachine] Could not fetch by ID:', idError);
@@ -97,7 +140,7 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
           return null;
         }
         
-        return transformMachineFromContentful(entries[0] as any);
+        return transformMachineFromContentful(entries[0]);
         
       } catch (error) {
         console.error(`[useContentfulMachine] Error fetching machine: ${idOrSlug}`, error);
@@ -107,3 +150,6 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
     enabled: !!idOrSlug
   });
 }
+
+// Export the transformer function to be used elsewhere
+export { transformMachineFromContentful };
