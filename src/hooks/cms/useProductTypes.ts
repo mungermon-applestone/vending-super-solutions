@@ -92,5 +92,3 @@ export function useProductType(slug: string | undefined, uuid: string | null = n
     ...createQueryOptions<CMSProductType | null>()
   });
 }
-
-// Removed the useCloneProductType function as it's now imported from useCloneCMS.ts

@@ -1,7 +1,4 @@
 
-import { Entry, Asset, EntrySkeletonType } from 'contentful';
-import { isContentfulEntry, isContentfulAsset } from './contentfulHelpers';
-
 /**
  * Safely convert any value to a string
  */
@@ -35,7 +32,7 @@ export function safeArrayField<T>(fields: any, fieldName: string): T[] {
  */
 export function safeAssetUrl(asset: any): string {
   if (!asset) return '';
-  if (isContentfulAsset(asset) && asset.fields?.file?.url) {
+  if (asset && asset.fields && asset.fields.file && asset.fields.file.url) {
     const url = asset.fields.file.url;
     return url.startsWith('//') ? `https:${url}` : url;
   }
@@ -48,13 +45,13 @@ export function safeAssetUrl(asset: any): string {
 export function safeAssetToImage(asset: any): { url: string; alt: string; width?: number; height?: number } | null {
   if (!asset) return null;
   
-  if (isContentfulAsset(asset) && asset.fields?.file?.url) {
+  if (asset && asset.fields && asset.fields.file && asset.fields.file.url) {
     const url = asset.fields.file.url.startsWith('//') ? 
       `https:${asset.fields.file.url}` : asset.fields.file.url;
     
     return {
       url,
-      alt: asset.fields.title || '',
+      alt: safeString(asset.fields.title) || '',
       width: asset.fields.file.details?.image?.width,
       height: asset.fields.file.details?.image?.height
     };

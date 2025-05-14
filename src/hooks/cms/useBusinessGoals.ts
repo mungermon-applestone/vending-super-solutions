@@ -1,50 +1,97 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { CMSBusinessGoal } from '@/types/cms';
+import { normalizeSlug, getSlugVariations } from '@/services/cms/utils/slugMatching';
+import { transformBusinessGoal } from './transformers/businessGoalTransformer';
 
 /**
- * Custom hook to fetch all business goals
+ * Hook to fetch all business goals
  */
-export function useBusinessGoals(options?: { 
-  visibleOnly?: boolean,
-  showOnHomepageOnly?: boolean 
-}) {
+export function useBusinessGoals(filters?: Record<string, any>) {
   return useQuery({
-    queryKey: ['businessGoals', options],
+    queryKey: ['businessGoals', filters],
     queryFn: async () => {
-      console.log('[useBusinessGoals] Fetching business goals with options:', options);
+      try {
+        // Convert filters to Contentful query params
+        const queryParams = filters ? {
+          ...(filters.visible !== undefined ? { 'fields.visible': filters.visible } : {}),
+          ...(filters.showOnHomepage ? { 'fields.showOnHomepage': true } : {})
+        } : {};
+        
+        // Add default ordering
+        const params = {
+          order: 'fields.displayOrder,fields.title',
+          ...queryParams
+        };
+        
+        // Fetch business goals from Contentful
+        const entries = await fetchContentfulEntries('businessGoal', params);
+        
+        if (!entries || !Array.isArray(entries)) {
+          return [];
+        }
+        
+        // Transform entries to our application format
+        return entries.map(entry => transformBusinessGoal(entry)).filter(Boolean) as CMSBusinessGoal[];
+      } catch (error) {
+        console.error('Error fetching business goals:', error);
+        throw error;
+      }
+    }
+  });
+}
+
+/**
+ * Hook to fetch a specific business goal by slug
+ */
+export function useBusinessGoal(slug: string | undefined) {
+  return useQuery({
+    queryKey: ['businessGoal', slug],
+    queryFn: async () => {
+      if (!slug) return null;
+      
+      const normalizedSlug = normalizeSlug(slug);
+      console.log(`[useBusinessGoal] Looking up business goal with slug: "${normalizedSlug}"`);
       
       try {
-        // Dynamically import to avoid circular dependencies
-        const { fetchBusinessGoals } = await import('@/services/cms/contentTypes/businessGoals');
+        // Try direct lookup first
+        const entries = await fetchContentfulEntries('businessGoal', {
+          'fields.slug': normalizedSlug,
+          limit: 1
+        });
         
-        // Now we call fetchBusinessGoals without any parameter since it doesn't expect one
-        const businessGoals = await fetchBusinessGoals();
-        
-        // Apply client-side filtering based on options if needed
-        let filteredGoals = businessGoals;
-        
-        if (options?.visibleOnly) {
-          filteredGoals = filteredGoals.filter(goal => goal.visible);
+        // Check if we found a match
+        if (entries && entries.length > 0) {
+          return transformBusinessGoal(entries[0]);
         }
         
-        if (options?.showOnHomepageOnly) {
-          filteredGoals = filteredGoals.filter(goal => goal.showOnHomepage);
+        // If not found, try slug variations
+        console.log(`[useBusinessGoal] Direct lookup failed, trying variations for: "${normalizedSlug}"`);
+        const variations = getSlugVariations(normalizedSlug);
+        
+        for (const variation of variations) {
+          if (variation === normalizedSlug) continue; // Skip the one we already tried
+          
+          console.log(`[useBusinessGoal] Trying variation: "${variation}"`);
+          const entriesFromVariation = await fetchContentfulEntries('businessGoal', {
+            'fields.slug': variation,
+            limit: 1
+          });
+          
+          if (entriesFromVariation && entriesFromVariation.length > 0) {
+            console.log(`[useBusinessGoal] Found with variation: "${variation}"`);
+            return transformBusinessGoal(entriesFromVariation[0]);
+          }
         }
         
-        console.log(`[useBusinessGoals] Successfully fetched ${filteredGoals.length} business goals`);
-        return filteredGoals;
+        console.log(`[useBusinessGoal] No business goal found for slug "${normalizedSlug}" or variations`);
+        return null;
       } catch (error) {
-        console.error('[useBusinessGoals] Error fetching business goals:', error);
+        console.error(`[useBusinessGoal] Error fetching business goal with slug "${normalizedSlug}":`, error);
         throw error;
       }
     },
-    retry: 1,
-    meta: {
-      onError: (error: Error) => {
-        toast.error(`Error loading business goals: ${error.message}`);
-      }
-    }
+    enabled: !!slug
   });
 }

@@ -16,6 +16,24 @@ export function prepareSlug(text: string): string {
 }
 
 /**
+ * Normalize a slug by removing special characters and standardizing format
+ */
+export function normalizeSlug(slug: string): string {
+  if (!slug) return '';
+  
+  // Convert to lowercase and trim whitespace
+  const normalized = slug.toLowerCase().trim();
+  
+  // Handle URL-encoded characters if any
+  try {
+    return decodeURIComponent(normalized);
+  } catch (e) {
+    // If decoding fails (e.g., not encoded), return the original normalized string
+    return normalized;
+  }
+}
+
+/**
  * Map a URL slug to the format used in the database
  * This handles common transformations needed for matching
  */
@@ -29,6 +47,33 @@ export function mapUrlSlugToDatabaseSlug(urlSlug: string): string {
     .toLowerCase()
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * Get canonical form of a slug (the preferred form for URLs)
+ */
+export function getCanonicalSlug(slug: string): string {
+  if (!slug) return '';
+
+  // Normalize first
+  const normalizedSlug = normalizeSlug(slug);
+  
+  // Apply any specific business rules for canonical form
+  // For example, ensure consistent separator usage
+  return normalizedSlug.replace(/_/g, '-');
+}
+
+/**
+ * Resolve a slug to its canonical form, considering any aliases or redirects
+ */
+export function resolveSlug(slug: string): string {
+  if (!slug) return '';
+  
+  // First normalize the slug
+  const normalizedSlug = normalizeSlug(slug);
+  
+  // Get canonical form
+  return getCanonicalSlug(normalizedSlug);
 }
 
 /**
@@ -65,4 +110,36 @@ export function slugsMatch(slug1: string, slug2: string): boolean {
   const normalized2 = mapUrlSlugToDatabaseSlug(slug2);
   
   return normalized1 === normalized2;
+}
+
+/**
+ * Generate variations of a slug to support fuzzy matching
+ */
+export function getSlugVariations(slug: string): string[] {
+  if (!slug) return [];
+  
+  const variations = [slug];
+  
+  // Add or remove -vending suffix
+  if (slug.endsWith('-vending')) {
+    variations.push(slug.replace('-vending', ''));
+  } else {
+    variations.push(`${slug}-vending`);
+  }
+  
+  // Handle common word separators (dash vs underscore)
+  if (slug.includes('-')) {
+    variations.push(slug.replace(/-/g, '_'));
+  } else if (slug.includes('_')) {
+    variations.push(slug.replace(/_/g, '-'));
+  }
+  
+  // Handle common plural/singular variations
+  if (slug.endsWith('s')) {
+    variations.push(slug.slice(0, -1)); // Remove trailing 's'
+  } else {
+    variations.push(`${slug}s`); // Add trailing 's'
+  }
+  
+  return [...new Set(variations)]; // Remove duplicates
 }

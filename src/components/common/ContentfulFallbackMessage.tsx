@@ -12,6 +12,12 @@ interface ContentfulFallbackMessageProps {
   showAdminLink?: boolean;
   className?: string;
   onRefresh?: () => void;
+  // Added missing props based on error messages
+  title?: string;
+  onAction?: () => Promise<any>;
+  actionText?: string;
+  actionHref?: string;
+  showAdmin?: boolean;
 }
 
 /**
@@ -23,10 +29,17 @@ const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
   showRefresh = true,
   showAdminLink = true,
   className = '',
-  onRefresh
+  onRefresh,
+  title,
+  onAction,
+  actionText,
+  actionHref,
+  showAdmin
 }) => {
   const handleRefresh = () => {
-    if (onRefresh) {
+    if (onAction) {
+      onAction();
+    } else if (onRefresh) {
       onRefresh();
     } else {
       window.location.reload();
@@ -35,7 +48,7 @@ const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
 
   return (
     <Alert variant="default" className={`mb-4 ${className}`}>
-      <AlertTitle>Contentful {contentType} not available</AlertTitle>
+      <AlertTitle>{title || `Contentful ${contentType} not available`}</AlertTitle>
       <AlertDescription>
         <p className="mb-4">
           {message || `We couldn't load the ${contentType} from Contentful. This could be due to missing content or configuration issues.`}
@@ -49,11 +62,25 @@ const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
               className="flex items-center gap-1"
             >
               <RefreshCw className="h-4 w-4" />
-              <span>Refresh</span>
+              <span>{actionText || "Refresh"}</span>
             </Button>
           )}
           
-          {showAdminLink && (
+          {actionHref && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              asChild
+              className="flex items-center gap-1"
+            >
+              <Link to={actionHref}>
+                <Settings className="h-4 w-4" />
+                <span>{actionText || "Action"}</span>
+              </Link>
+            </Button>
+          )}
+          
+          {(showAdminLink || showAdmin) && (
             <Button 
               variant="outline" 
               size="sm" 

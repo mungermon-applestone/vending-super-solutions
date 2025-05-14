@@ -22,7 +22,7 @@ function transformMachineFromContentful(entry: any): CMSMachine {
         return {
           id: image.sys?.id || '',
           url: `https:${image.fields?.file?.url || ''}`,
-          alt: image.fields?.title || entry.fields.title || '',
+          alt: safeString(image.fields?.title || entry.fields.title || ''),
           width: image.fields?.file?.details?.image?.width,
           height: image.fields?.file?.details?.image?.height
         };
@@ -40,7 +40,7 @@ function transformMachineFromContentful(entry: any): CMSMachine {
     thumbnail = {
       id: entry.fields.thumbnail.sys?.id || '',
       url: `https:${entry.fields.thumbnail.fields?.file?.url || ''}`,
-      alt: entry.fields.thumbnail.fields?.title || entry.fields.title || '',
+      alt: safeString(entry.fields.thumbnail.fields?.title || entry.fields.title || ''),
       width: entry.fields.thumbnail.fields?.file?.details?.image?.width,
       height: entry.fields.thumbnail.fields?.file?.details?.image?.height
     };

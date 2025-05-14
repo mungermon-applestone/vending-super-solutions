@@ -6,13 +6,15 @@ export interface CMSMachine {
   slug: string;
   type: string;
   description?: string;
+  shortDescription?: string;
   temperature?: 'ambient' | 'refrigerated' | 'frozen' | 'heated';
-  mainImage?: CMSImage; // Adding this for backward compatibility
+  mainImage?: CMSImage; 
   thumbnail?: CMSImage;
   images?: CMSImage[];
   features?: string[];
   specs?: Record<string, string>;
   visible?: boolean;
+  featured?: boolean;
   displayOrder?: number;
   // Support both naming conventions
   created_at?: string;
@@ -26,6 +28,8 @@ export interface CMSImage {
   url: string;
   alt?: string;
   filename?: string;
+  width?: number;
+  height?: number;
 }
 
 export interface CMSProductType {
@@ -35,6 +39,36 @@ export interface CMSProductType {
   description?: string;
   image?: CMSImage;
   displayOrder?: number;
+  visible?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CMSBusinessGoal {
+  id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  icon?: string;
+  image?: CMSImage;
+  benefits?: string[];
+  features?: any[];
+  visible?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CMSTechnology {
+  id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  image?: CMSImage;
+  sections?: any[];
   visible?: boolean;
   created_at?: string;
   updated_at?: string;

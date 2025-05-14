@@ -3,7 +3,7 @@
 declare global {
   interface Window {
     __RUNTIME_CONFIG__?: Record<string, string>;
-    _contentfulInitialized?: boolean;
+    _contentfulInitialized?: boolean | string;
     _contentfulInitializedSource?: string;
   }
 }

@@ -21,7 +21,7 @@ function transformBusinessGoal(entry: Entry<EntrySkeletonType, undefined, string
     imageData = {
       id: fields.image.sys.id,
       url: `https:${fields.image.fields.file.url}`,
-      alt: fields.image.fields.title || ''
+      alt: safeString(fields.image.fields.title) || ''
     };
   }
   
@@ -38,14 +38,15 @@ function transformBusinessGoal(entry: Entry<EntrySkeletonType, undefined, string
   };
 }
 
-export function useContentfulBusinessGoals() {
+export function useContentfulBusinessGoals(filters?: Record<string, any>) {
   return useQuery({
-    queryKey: ['contentful', 'businessGoals'],
+    queryKey: ['contentful', 'businessGoals', filters],
     queryFn: async () => {
       try {
         // Fetch business goals from Contentful
         const entries = await fetchContentfulEntries('businessGoal', {
-          order: 'fields.title'
+          order: 'fields.title',
+          ...(filters || {})
         });
         
         if (!entries || !Array.isArray(entries)) {

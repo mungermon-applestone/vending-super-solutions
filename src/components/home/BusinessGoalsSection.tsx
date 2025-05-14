@@ -44,7 +44,7 @@ const BusinessGoalsSection: React.FC = () => {
     isLoading, 
     isError, 
     refetch 
-  } = useContentfulBusinessGoals({ showOnHomepage: true });
+  } = useContentfulBusinessGoals();
 
   // Filter to show only visible goals (if any)
   const visibleGoals = businessGoals.filter(goal => goal.visible !== false).slice(0, 3);
