@@ -1,20 +1,20 @@
 
 export interface HomePageContent {
   // Product categories section
-  productCategoriesTitle: string;
-  productCategoriesDescription: string;
+  productCategoriesTitle?: string;
+  productCategoriesDescription?: string;
   
   // Business goals section
-  businessGoalsTitle: string;
-  businessGoalsDescription: string;
+  businessGoalsTitle?: string;
+  businessGoalsDescription?: string;
   
   // Available machines section
   availableMachines?: string;
   availableMachinesDescription?: string;
   
   // CTA section
-  ctaSectionTitle: string;
-  ctaSectionDescription: string;
+  ctaSectionTitle?: string;
+  ctaSectionDescription?: string;
   ctaPrimaryButtonText?: string;
   ctaPrimaryButtonUrl?: string;
   ctaSecondaryButtonText?: string;
@@ -27,19 +27,21 @@ export interface HomePageContent {
   heroCTALink?: string;
   heroImage?: string;
   
-  // Secondary CTA Button properties
-  ctaSecondaryButtonText?: string;
-  ctaSecondaryButtonUrl?: string;
-  
   // For backward compatibility with older components
-  title?: string;
-  subtitle?: string;
   headline?: string;
   subheading?: string;
+  title?: string;
+  subtitle?: string;
   primaryButtonText?: string;
   primaryButtonUrl?: string;
   secondaryButtonText?: string;
   secondaryButtonUrl?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  secondaryCTAText?: string;
+  secondaryCTALink?: string;
+  
+  // Background styling
   backgroundClass?: string;
   
   // Image properties

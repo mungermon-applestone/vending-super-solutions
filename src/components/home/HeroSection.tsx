@@ -27,6 +27,22 @@ const HeroSection: React.FC = () => {
     ctaSecondaryButtonUrl: defaultHero.secondaryCTALink
   };
 
+  // Helper function to safely get text content with fallbacks
+  const getTextContent = (primaryKey: string, fallbackKeys: string[], defaultValue: string): string => {
+    if (hero && primaryKey in hero && hero[primaryKey as keyof typeof hero]) {
+      return hero[primaryKey as keyof typeof hero] as string;
+    }
+    
+    // Try fallback keys
+    for (const key of fallbackKeys) {
+      if (hero && key in hero && hero[key as keyof typeof hero]) {
+        return hero[key as keyof typeof hero] as string;
+      }
+    }
+    
+    return defaultValue;
+  };
+
   // Determine the background style
   const backgroundStyle = homeContent?.heroImage
     ? { backgroundImage: `url(${homeContent.heroImage})` }
@@ -47,6 +63,14 @@ const HeroSection: React.FC = () => {
     );
   }
 
+  // Use the helper function to get content with fallbacks
+  const headlineText = getTextContent('heroHeadline', ['headline', 'title'], defaultHero.headline);
+  const subheadingText = getTextContent('heroSubheading', ['subheading', 'subtitle'], defaultHero.subheading);
+  const primaryButtonText = getTextContent('heroCTAText', ['ctaText', 'primaryButtonText'], defaultHero.ctaText);
+  const primaryButtonUrl = getTextContent('heroCTALink', ['ctaLink', 'primaryButtonUrl'], defaultHero.ctaLink);
+  const secondaryButtonText = getTextContent('ctaSecondaryButtonText', ['secondaryButtonText', 'secondaryCTAText'], defaultHero.secondaryCTAText);
+  const secondaryButtonUrl = getTextContent('ctaSecondaryButtonUrl', ['secondaryButtonUrl', 'secondaryCTALink'], defaultHero.secondaryCTALink);
+
   return (
     <section className="relative min-h-[600px] flex items-center py-20">
       {/* Background */}
@@ -61,22 +85,22 @@ const HeroSection: React.FC = () => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="w-full md:w-2/3 lg:w-1/2">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-            {hero.heroHeadline || hero.headline || hero.title}
+            {headlineText}
           </h1>
           <p className="text-lg md:text-xl text-white/90 mb-8">
-            {hero.heroSubheading || hero.subheading || hero.subtitle}
+            {subheadingText}
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
-              <Link to={hero.heroCTALink || hero.ctaLink || hero.primaryButtonUrl || '/contact'}>
-                {hero.heroCTAText || hero.ctaText || hero.primaryButtonText || 'Get Started'}
+              <Link to={primaryButtonUrl}>
+                {primaryButtonText}
               </Link>
             </Button>
             
-            {(hero.ctaSecondaryButtonText || hero.secondaryButtonText || hero.secondaryCTAText) && (
+            {secondaryButtonText && (
               <Button asChild variant="outline" size="lg" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
-                <Link to={hero.ctaSecondaryButtonUrl || hero.secondaryButtonUrl || hero.secondaryCTALink || '/about'}>
-                  {hero.ctaSecondaryButtonText || hero.secondaryButtonText || hero.secondaryCTAText || 'Learn More'}
+                <Link to={secondaryButtonUrl}>
+                  {secondaryButtonText}
                 </Link>
               </Button>
             )}

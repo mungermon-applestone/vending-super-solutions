@@ -20,3 +20,31 @@ export interface CMSMachine {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface CMSImage {
+  id?: string;
+  url: string;
+  alt?: string;
+  filename?: string;
+}
+
+export interface CMSProductType {
+  id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  image?: CMSImage;
+  displayOrder?: number;
+  visible?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface QueryOptions {
+  limit?: number;
+  skip?: number;
+  order?: string;
+  filters?: Record<string, any>;
+}

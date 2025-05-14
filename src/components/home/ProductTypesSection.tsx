@@ -88,14 +88,34 @@ const ProductTypesSection = () => {
     firstItem: featuredProductTypes[0]?.title
   });
 
+  // Helper function to safely get text content with fallbacks
+  const getTextContent = (primaryKey: string, fallbackKeys: string[], defaultValue: string): string => {
+    if (homeContent && primaryKey in homeContent && homeContent[primaryKey as keyof typeof homeContent]) {
+      return homeContent[primaryKey as keyof typeof homeContent] as string;
+    }
+    
+    // Try fallback keys
+    for (const key of fallbackKeys) {
+      if (homeContent && key in homeContent && homeContent[key as keyof typeof homeContent]) {
+        return homeContent[key as keyof typeof homeContent] as string;
+      }
+    }
+    
+    return defaultValue;
+  };
+
   // Get section title and description with fallbacks
-  const sectionTitle = homeContent?.productCategoriesTitle || 
-                      homeContent?.title || 
-                      "Featured Product Categories";
+  const sectionTitle = getTextContent(
+    'productCategoriesTitle', 
+    ['title'], 
+    "Featured Product Categories"
+  );
                       
-  const sectionDescription = homeContent?.productCategoriesDescription || 
-                            homeContent?.subtitle || 
-                            "Find the perfect vending solution for your product type.";
+  const sectionDescription = getTextContent(
+    'productCategoriesDescription', 
+    ['subtitle'], 
+    "Find the perfect vending solution for your product type."
+  );
   
   return (
     <section className="py-16 md:py-24">
