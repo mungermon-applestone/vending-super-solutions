@@ -44,6 +44,7 @@ export interface BlogPostQueryOptions {
   order?: string;
 }
 
+// Updated hook to not require parameters
 export function useContentfulBlogPosts(options?: BlogPostQueryOptions) {
   return useQuery({
     queryKey: ['contentful', 'blogPosts', options],

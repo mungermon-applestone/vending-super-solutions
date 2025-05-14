@@ -9,7 +9,9 @@ interface TestimonialsSectionProps {
 
 export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const testimonials = data.fields?.testimonials?.filter(t => t.fields?.visible !== false) || [];
+  
+  // Handle both new and legacy formats
+  const testimonials = data.fields?.testimonials || [];
 
   if (!testimonials.length) {
     return null;
@@ -26,15 +28,19 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
   const currentTestimonial = testimonials[activeIndex]?.fields;
   if (!currentTestimonial) return null;
 
+  // Get section title and subtitle from either format
+  const title = data.fields?.title || "Trusted by Industry Leaders";
+  const subtitle = data.fields?.subtitle || "Hear what our clients have to say about our solutions";
+
   return (
     <section className="py-16 md:py-24 bg-gray-50">
       <div className="container-wide">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-            {data.fields?.title || "Trusted by Industry Leaders"}
+            {title}
           </h2>
           <p className="subtitle mx-auto text-gray-600">
-            {data.fields?.subtitle || "Hear what our clients have to say about our solutions"}
+            {subtitle}
           </p>
         </div>
 

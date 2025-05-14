@@ -61,6 +61,15 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
     });
   }
   
+  // Extract machine type with validation
+  let machineType: "vending" | "locker" = "vending"; // Default value
+  if (entry.fields.type) {
+    const typeStr = safeString(entry.fields.type).toLowerCase();
+    if (typeStr === "locker") {
+      machineType = "locker";
+    }
+  }
+  
   // Transform to our app's machine format
   return {
     id: entry.sys.id,
@@ -68,17 +77,20 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
     slug: safeString(entry.fields.slug || entry.sys.id),
     description: safeString(entry.fields.description || ''),
     shortDescription: safeString(entry.fields.shortDescription || ''),
-    type: safeString(entry.fields.type || 'vending'),
+    type: machineType,
     mainImage,
     thumbnail,
     images,
     features,
     specs,
-    temperature: safeString(entry.fields.temperature || 'ambient'),
+    temperature: safeString(entry.fields.temperature || 'ambient') as any,
     featured: Boolean(entry.fields.featured) || false,
     displayOrder: Number(entry.fields.displayOrder) || 0,
     created_at: entry.sys.createdAt,
     updated_at: entry.sys.updatedAt,
+    createdAt: entry.sys.createdAt, // Compatibility field
+    updatedAt: entry.sys.updatedAt, // Compatibility field
+    name: safeString(entry.fields.title || 'Untitled Machine'), // Compatibility field
     visible: entry.fields.visible !== false // Default to true if not specified
   };
 }

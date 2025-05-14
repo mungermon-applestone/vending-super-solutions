@@ -1,31 +1,79 @@
 
-import { CMSTestimonial, ContentfulTestimonialSection } from '@/types/cms';
+import { CMSTestimonial } from '@/types/cms';
 
-// This is a compatibility interface to ensure existing code works with new types
 export interface ContentfulTestimonial {
-  id: string;
-  name: string;
-  title: string;
-  company: string;
-  testimonial: string;
-  rating?: number;
-  image_url?: string;
+  sys: {
+    id: string;
+    contentType?: {
+      sys: {
+        id: string;
+      };
+    };
+  };
+  fields: {
+    author: string;
+    position?: string;
+    company?: string;
+    quote: string;
+    rating?: number;
+    image?: any;
+    visible?: boolean;
+  };
 }
 
-// For backward compatibility - maps the array of testimonials to the section format
-export function convertTestimonialsToSection(testimonials: Array<any>): ContentfulTestimonialSection {
+export interface ContentfulTestimonialSection {
+  sys?: {
+    id: string;
+  };
+  fields?: {
+    title?: string;
+    subtitle?: string;
+    testimonials: ContentfulTestimonial[];
+    background?: string;
+    displayStyle?: string;
+  };
+}
+
+// Utility function to convert ContentfulTestimonial to CMSTestimonial
+export function convertToTestimonial(contentfulTestimonial: ContentfulTestimonial): CMSTestimonial {
   return {
-    title: 'What Our Customers Say',
-    subtitle: 'Read testimonials from our satisfied clients',
-    testimonials: testimonials.map(t => ({
-      id: t.id || '',
-      name: t.name || '',
-      title: t.title || '',
-      company: t.company || '',
-      testimonial: t.testimonial || '',
-      rating: t.rating,
-      image_url: t.image_url
-    })),
-    displayStyle: 'cards'
+    id: contentfulTestimonial.sys?.id || '',
+    name: contentfulTestimonial.fields.author,
+    title: contentfulTestimonial.fields.position || '',
+    company: contentfulTestimonial.fields.company || '',
+    testimonial: contentfulTestimonial.fields.quote,
+    rating: contentfulTestimonial.fields.rating,
+    image_url: contentfulTestimonial.fields.image?.fields?.file?.url 
+      ? `https:${contentfulTestimonial.fields.image.fields.file.url}` 
+      : undefined
+  };
+}
+
+// Convert ContentfulTestimonialSection to the format expected by our components
+export function convertTestimonialsToSection(testimonials: CMSTestimonial[]): ContentfulTestimonialSection {
+  return {
+    fields: {
+      title: "What Our Clients Say",
+      subtitle: "Don't just take our word for it",
+      testimonials: testimonials.map(t => ({
+        sys: { id: t.id },
+        fields: {
+          author: t.name,
+          position: t.title,
+          company: t.company,
+          quote: t.testimonial,
+          rating: t.rating,
+          image: t.image_url ? {
+            fields: {
+              file: {
+                url: t.image_url.replace('https:', ''),
+              },
+              title: t.name
+            }
+          } : undefined,
+          visible: true
+        }
+      }))
+    }
   };
 }

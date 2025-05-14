@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ContentfulTestimonialSection } from '@/types/cms';
+import { ContentfulTestimonialSection } from '@/types/contentful/testimonial';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import { convertTestimonialsToSection } from '@/types/contentful/testimonial';
 

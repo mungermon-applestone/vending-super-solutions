@@ -4,7 +4,7 @@ export interface CMSMachine {
   id: string;
   title: string;
   slug: string;
-  type: string;
+  type: "vending" | "locker";  // Fixed to only allow specific values
   description?: string;
   shortDescription?: string;
   temperature?: 'ambient' | 'refrigerated' | 'frozen' | 'heated';

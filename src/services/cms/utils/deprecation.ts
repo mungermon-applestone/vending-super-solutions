@@ -1,128 +1,181 @@
 
+import { toast } from 'sonner';
+
+interface DeprecationStat {
+  id: string;
+  component: string;
+  message: string;
+  suggestion?: string;
+  timestamp: string;
+  count: number;
+}
+
+// Store for tracking deprecated usages
+const deprecationUsage: Record<string, DeprecationStat> = {};
+
 /**
- * Utility functions for tracking and managing deprecated features
+ * Log a deprecation warning to the console
  */
-
-// In-memory storage for deprecated feature usage stats
-const deprecationStats: Record<string, { count: number, lastUsed: Date, messages: string[] }> = {};
-
-// Track usage of deprecated features
 export function logDeprecation(
-  feature: string,
+  component: string,
   message: string,
   suggestion?: string
-): void {
-  console.warn(`[DEPRECATED] ${feature}: ${message}`);
+) {
+  const id = `${component}:${message}`;
   
-  if (suggestion) {
-    console.info(`[SUGGESTION] ${suggestion}`);
-  }
+  console.warn(`⚠️ DEPRECATION WARNING: ${component} is deprecated.`, message, suggestion ? `Use ${suggestion} instead.` : '');
   
-  // Track usage for stats
-  if (!deprecationStats[feature]) {
-    deprecationStats[feature] = {
-      count: 0,
-      lastUsed: new Date(),
-      messages: []
+  // Track the usage for statistical purposes
+  trackDeprecatedUsage(component, message, suggestion);
+  
+  return id;
+}
+
+/**
+ * Show a toast notification for a deprecated function
+ */
+export function showDeprecationToast(
+  component: string,
+  message: string,
+  suggestion?: string
+) {
+  // Log to console first
+  const id = logDeprecation(component, message, suggestion);
+  
+  // Show toast
+  toast.warning(
+    `Deprecated: ${component}`, 
+    {
+      description: suggestion || message,
+      duration: 5000,
+    }
+  );
+  
+  return id;
+}
+
+/**
+ * Track usage of deprecated functions for reporting
+ */
+export function trackDeprecatedUsage(
+  component: string,
+  message: string,
+  suggestion?: string
+) {
+  const id = `${component}:${message}`;
+  
+  if (deprecationUsage[id]) {
+    deprecationUsage[id].count += 1;
+    deprecationUsage[id].timestamp = new Date().toISOString();
+  } else {
+    deprecationUsage[id] = {
+      id,
+      component,
+      message,
+      suggestion,
+      timestamp: new Date().toISOString(),
+      count: 1
     };
   }
-  
-  deprecationStats[feature].count += 1;
-  deprecationStats[feature].lastUsed = new Date();
-  
-  // Store the message (limit to most recent 5)
-  if (deprecationStats[feature].messages.length >= 5) {
-    deprecationStats[feature].messages.pop();
-  }
-  deprecationStats[feature].messages.unshift(message);
 }
 
 /**
- * Alias for backward compatibility
+ * Get all deprecation usage statistics
  */
-export const logDeprecationWarning = logDeprecation;
+export function getDeprecatedUsage(): DeprecationStat[] {
+  return Object.values(deprecationUsage).sort((a, b) => b.count - a.count);
+}
 
 /**
- * Generate a Contentful URL to redirect users to the appropriate content
- * Supports both object pattern and individual parameter calls for backward compatibility
+ * Get deprecation statistics in a formatted way
+ */
+export function getDeprecationStats(): {
+  total: number;
+  uniqueComponents: number;
+  stats: DeprecationStat[];
+} {
+  const stats = getDeprecatedUsage();
+  
+  return {
+    total: stats.reduce((sum, stat) => sum + stat.count, 0),
+    uniqueComponents: new Set(stats.map(stat => stat.component)).size,
+    stats
+  };
+}
+
+/**
+ * Reset the deprecation tracker (mainly for testing)
+ */
+export function resetDeprecationTracker() {
+  Object.keys(deprecationUsage).forEach(key => {
+    delete deprecationUsage[key];
+  });
+}
+
+/**
+ * Throw an error for deprecated operations that are no longer supported
+ */
+export function throwDeprecatedOperationError(
+  operation: string,
+  message?: string
+): never {
+  const errorMessage = `Operation '${operation}' is deprecated and no longer supported. ${message || ''}`;
+  console.error(`❌ DEPRECATED OPERATION: ${errorMessage}`);
+  throw new Error(errorMessage);
+}
+
+/**
+ * Get a URL for redirecting to Contentful for a specific content type
  */
 export function getContentfulRedirectUrl(
-  contentTypeOrOptions: string | { 
-    contentTypeId?: string; 
-    entryId?: string;
-    spaceId?: string;
-    environmentId?: string;
-    mode?: 'space' | 'entry' | 'content-type';
-  },
-  entryId?: string,
-  spaceId?: string,
-  environmentId?: string
+  contentType: string,
+  contentId?: string
 ): string {
-  // Default configuration
-  const defaultSpaceId = process.env.CONTENTFUL_SPACE_ID || 'al01e4yh2wq4';
-  const defaultEnvironmentId = process.env.CONTENTFUL_ENVIRONMENT_ID || 'master';
+  // Detect environment variables for Contentful
+  const spaceId = process.env.VITE_CONTENTFUL_SPACE_ID || 'unknown-space-id';
+  const envId = process.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
   
-  // Handle both call patterns
-  if (typeof contentTypeOrOptions === 'object') {
-    // Object parameter pattern
-    const options = contentTypeOrOptions;
-    const space = options.spaceId || defaultSpaceId;
-    const environment = options.environmentId || defaultEnvironmentId;
-    
-    if (options.entryId) {
-      // Entry mode
-      return `https://app.contentful.com/spaces/${space}/environments/${environment}/entries/${options.entryId}`;
-    } else if (options.contentTypeId) {
-      // Content type mode
-      return `https://app.contentful.com/spaces/${space}/environments/${environment}/content_types/${options.contentTypeId}`;
-    } else {
-      // Space mode
-      return `https://app.contentful.com/spaces/${space}/environments/${environment}`;
-    }
-  } else {
-    // Legacy parameter pattern with individual arguments
-    const contentTypeId = contentTypeOrOptions;
-    const actualSpaceId = spaceId || defaultSpaceId;
-    const actualEnvironmentId = environmentId || defaultEnvironmentId;
-    
-    if (entryId) {
-      // Entry mode
-      return `https://app.contentful.com/spaces/${actualSpaceId}/environments/${actualEnvironmentId}/entries/${entryId}`;
-    } else if (contentTypeId) {
-      // Content type mode
-      return `https://app.contentful.com/spaces/${actualSpaceId}/environments/${actualEnvironmentId}/content_types/${contentTypeId}`;
-    } else {
-      // Space mode
-      return `https://app.contentful.com/spaces/${actualSpaceId}/environments/${actualEnvironmentId}`;
-    }
+  // Base URL for Contentful web app
+  const baseUrl = 'https://app.contentful.com';
+  
+  if (contentId) {
+    // URL for editing a specific entry
+    return `${baseUrl}/spaces/${spaceId}/environments/${envId}/entries/${contentId}`;
   }
+  
+  // URL for content type listing
+  return `${baseUrl}/spaces/${spaceId}/environments/${envId}/entries?contentTypeId=${contentType}`;
 }
 
 /**
- * Stats functions for deprecation tracking
+ * Create wrapper for operations that now should use Contentful UI
  */
-export interface DeprecationStat {
-  feature: string;
-  count: number;
-  lastUsed: Date;
-  messages: string[];
-}
-
-export function getDeprecationStats(): DeprecationStat[] {
-  return Object.entries(deprecationStats).map(([feature, data]) => ({
-    feature,
-    count: data.count,
-    lastUsed: data.lastUsed,
-    messages: [...data.messages]
-  }));
+export function createDeprecatedWriteOperation(
+  operationName: string,
+  entityType: string
+): (...args: any[]) => Promise<any> {
+  return async (...args: any[]) => {
+    const message = `${operationName} for ${entityType} through the API is deprecated.`;
+    const suggestion = `Use Contentful UI to manage ${entityType} content.`;
+    
+    logDeprecation(`${entityType}.${operationName}`, message, suggestion);
+    
+    console.warn(`[DEPRECATED] ${message} ${suggestion}`);
+    return null;
+  };
 }
 
 /**
- * Reset the deprecation tracker (clear all stats)
+ * Create a set of read-only content type operations
  */
-export function resetDeprecationTracker(): void {
-  Object.keys(deprecationStats).forEach(key => {
-    delete deprecationStats[key];
-  });
-  console.log('[Deprecation] Usage tracker has been reset');
+export function createReadOnlyContentTypeOperations(entityType: string): {
+  create: (...args: any[]) => Promise<any>;
+  update: (...args: any[]) => Promise<any>;
+  delete: (...args: any[]) => Promise<any>;
+} {
+  return {
+    create: createDeprecatedWriteOperation('create', entityType),
+    update: createDeprecatedWriteOperation('update', entityType),
+    delete: createDeprecatedWriteOperation('delete', entityType),
+  };
 }

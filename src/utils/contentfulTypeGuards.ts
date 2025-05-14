@@ -21,7 +21,7 @@ export function isContentfulAsset(value: any): value is Asset<undefined, string>
 /**
  * Convert a Contentful blog post to our application's BlogPost format
  */
-export function convertToBlogPost(entry: Entry<any, undefined, string>): BlogPost {
+export function convertToBlogPost(entry: Entry<any, undefined, string>): ContentfulBlogPost {
   if (!isContentfulEntry(entry)) {
     throw new Error('Invalid Contentful entry provided');
   }
@@ -37,20 +37,24 @@ export function convertToBlogPost(entry: Entry<any, undefined, string>): BlogPos
     };
   }
   
-  // Convert to our application's blog post format
+  // Return in ContentfulBlogPost format (with sys and fields)
   return {
-    id: entry.sys.id,
-    title: safeString(fields.title || 'Untitled'),
-    slug: safeString(fields.slug || ''),
-    content: fields.content || '',
-    excerpt: fields.excerpt ? safeString(fields.excerpt) : undefined,
-    publishDate: fields.publishDate,
-    status: 'published', // Assume published if coming from Contentful
-    featuredImage,
-    author: fields.author ? safeString(fields.author) : undefined,
-    tags: Array.isArray(fields.tags) ? fields.tags.map(tag => safeString(tag)) : [],
-    created_at: entry.sys.createdAt,
-    updated_at: entry.sys.updatedAt
+    sys: {
+      id: entry.sys.id,
+      createdAt: entry.sys.createdAt,
+      updatedAt: entry.sys.updatedAt
+    },
+    fields: {
+      title: safeString(fields.title || 'Untitled'),
+      slug: safeString(fields.slug || ''),
+      content: fields.content || '',
+      excerpt: safeString(fields.excerpt || ''),
+      publishDate: fields.publishDate,
+      featuredImage: fields.featuredImage,
+      author: safeString(fields.author || ''),
+      tags: Array.isArray(fields.tags) ? fields.tags.map(tag => safeString(tag)) : []
+    },
+    includes: entry.includes
   };
 }
 
@@ -76,16 +80,16 @@ export function convertContentfulBlogPostToBlogPost(post: ContentfulBlogPost): B
     slug: post.fields?.slug || '',
     content: post.fields?.content || '',
     excerpt: post.fields?.excerpt,
-    publishDate: post.fields?.publishDate,
+    status: 'published',
+    published_at: post.fields?.publishDate,
+    created_at: post.sys?.createdAt || '',
+    updated_at: post.sys?.updatedAt || '',
     featuredImage: post.fields?.featuredImage ? {
-      url: `https:${post.fields.featuredImage.fields.file.url}`,
-      title: post.fields.featuredImage.fields.title || post.fields.title || ''
+      url: `https:${post.fields.featuredImage.fields?.file?.url || ''}`,
+      title: post.fields.featuredImage.fields?.title || post.fields?.title || ''
     } : undefined,
     author: post.fields?.author,
-    tags: post.fields?.tags || [],
-    status: 'published',
-    created_at: post.sys?.createdAt || '',
-    updated_at: post.sys?.updatedAt || ''
+    tags: post.fields?.tags || []
   };
 }
 
@@ -110,7 +114,7 @@ export function convertBlogPostToContentful(post: BlogPost): ContentfulBlogPost 
     slug: post.slug || '',
     content: post.content || '',
     excerpt: post.excerpt || '',
-    publishDate: post.publishDate || post.created_at || '',
+    publishDate: post.published_at || post.created_at || '',
   };
   
   // Add featured image if available
