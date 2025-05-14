@@ -35,26 +35,31 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
 
   // Helper function to determine if it's a ContentfulTestimonial
   const isContentfulFormat = (test: any): test is ContentfulTestimonial => {
-    return test && test.fields && test.fields.author;
+    return test && test.fields && (test.fields.author || test.fields.quote);
   };
 
   // Extract testimonial data based on format
   const testimonialData = isContentfulFormat(currentTestimonial)
     ? {
-        quote: currentTestimonial.fields.quote,
-        author: currentTestimonial.fields.author,
-        position: currentTestimonial.fields.position,
-        company: currentTestimonial.fields.company,
-        rating: currentTestimonial.fields.rating,
+        quote: currentTestimonial.fields.quote || '',
+        author: currentTestimonial.fields.author || '',
+        position: currentTestimonial.fields.position || '',
+        company: currentTestimonial.fields.company || '',
+        rating: currentTestimonial.fields.rating || 5,
         image: currentTestimonial.fields.image
       }
     : {
-        quote: currentTestimonial.testimonial,
-        author: currentTestimonial.name,
-        position: currentTestimonial.title,
-        company: currentTestimonial.company,
-        rating: currentTestimonial.rating,
-        image: currentTestimonial.image_url ? { fields: { file: { url: currentTestimonial.image_url } } } : null
+        quote: currentTestimonial.testimonial || '',
+        author: currentTestimonial.name || '',
+        position: currentTestimonial.title || '',
+        company: currentTestimonial.company || '',
+        rating: currentTestimonial.rating || 5,
+        image: currentTestimonial.image_url ? { 
+          fields: { 
+            file: { url: currentTestimonial.image_url },
+            title: currentTestimonial.name || '' 
+          } 
+        } : null
       };
 
   return (

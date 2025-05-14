@@ -8,10 +8,10 @@ import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { Loader2 } from 'lucide-react';
 import { SimpleContactCTA } from '@/components/common';
+import { ContentfulBlogPost } from '@/hooks/useContentfulBlogPosts';
 
 const ContentfulBlogPostDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
   
   return (
     <Layout>
@@ -99,7 +99,7 @@ const BlogPostContent = ({ slug }: { slug: string | undefined }) => {
     <div className="flex flex-col min-h-screen">
       <div className="container mx-auto py-12 flex-grow">
         <ContentfulBlogPostContent 
-          post={post} 
+          post={post as ContentfulBlogPost} 
           previousPost={adjacentPosts.previous}
           nextPost={adjacentPosts.next}
         />

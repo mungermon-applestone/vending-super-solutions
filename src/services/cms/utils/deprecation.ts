@@ -1,138 +1,144 @@
 
 /**
- * Utility to track and manage deprecated feature usage
+ * Utilities for handling and logging deprecation warnings
  */
 
-// Define the type for deprecation stats
-export interface DeprecationStat {
-  feature: string;
-  count: number;
-  lastUsed: string;
-  alternatives?: string;
-}
-
-// Local storage key for tracking deprecated features
-const STORAGE_KEY = 'deprecated_feature_usage';
+// Store deprecation notices to avoid repeating them
+const deprecationNotices: Record<string, boolean> = {};
 
 /**
- * Log deprecation warning for a feature
+ * Log a deprecation warning to the console
  * 
- * @param feature Name of the deprecated feature
- * @param details Optional details about the deprecation
- * @param alternative Optional alternative solution to recommend
+ * @param item The item (function, component, etc.) that is deprecated
+ * @param message The deprecation message explaining why it's deprecated
+ * @param recommendation Optional recommendation for what to use instead
  */
-export function logDeprecation(
-  feature: string,
-  details?: string,
-  alternative?: string
-): void {
-  // Log to console
-  console.warn(
-    `[DEPRECATED] ${feature} is deprecated.${details ? ' ' + details : ''}${
-      alternative ? '\nRecommendation: ' + alternative : ''
-    }`
-  );
-
-  // Track usage in localStorage if available
-  if (typeof window !== 'undefined' && window.localStorage) {
-    try {
-      // Get existing stats
-      const existingData = localStorage.getItem(STORAGE_KEY);
-      const stats: Record<string, DeprecationStat> = existingData
-        ? JSON.parse(existingData)
-        : {};
-
-      // Update stats for this feature
-      const existingStat = stats[feature] || {
-        feature,
-        count: 0,
-        lastUsed: '',
-        alternatives: alternative,
-      };
-
-      stats[feature] = {
-        ...existingStat,
-        count: existingStat.count + 1,
-        lastUsed: new Date().toISOString(),
-        alternatives: alternative || existingStat.alternatives,
-      };
-
-      // Save updated stats
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
-    } catch (e) {
-      // Fail silently if localStorage is not available
-      console.debug('[Deprecation] Failed to track usage:', e);
-    }
-  }
-}
-
-// Alias for backward compatibility
-export const logDeprecationWarning = logDeprecation;
-
-/**
- * Get statistics about deprecated feature usage
- * 
- * @returns Array of deprecation statistics
- */
-export function getDeprecationStats(): DeprecationStat[] {
-  if (typeof window === 'undefined' || !window.localStorage) {
-    return [];
-  }
-
-  try {
-    const statsData = localStorage.getItem(STORAGE_KEY);
-    if (!statsData) {
-      return [];
-    }
-
-    const stats: Record<string, DeprecationStat> = JSON.parse(statsData);
-    
-    // Convert to array and sort by frequency (most used first)
-    return Object.values(stats).sort((a, b) => b.count - a.count);
-  } catch (e) {
-    console.error('[Deprecation] Failed to retrieve usage stats:', e);
-    return [];
-  }
-}
-
-/**
- * Reset the deprecation tracker
- */
-export function resetDeprecationTracker(): void {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (e) {
-      console.error('[Deprecation] Failed to reset tracker:', e);
-    }
-  }
-}
-
-/**
- * Generate a URL for Contentful
- */
-export function getContentfulRedirectUrl(
-  contentType?: string,
-  contentId?: string,
-  spaceId?: string,
-  environmentId: string = 'master'
-): string {
-  const effectiveSpaceId = spaceId || import.meta.env.VITE_CONTENTFUL_SPACE_ID || '';
+export function logDeprecation(item: string, message: string, recommendation?: string): void {
+  const key = `${item}:${message}`;
   
-  if (!effectiveSpaceId) {
-    return 'https://app.contentful.com/';
+  // Avoid logging the same deprecation multiple times per session
+  if (deprecationNotices[key]) {
+    return;
   }
-
-  const baseUrl = `https://app.contentful.com/spaces/${effectiveSpaceId}/environments/${environmentId}`;
-
-  if (contentId) {
-    return `${baseUrl}/entries/${contentId}`;
+  
+  console.warn(`[DEPRECATED] ${item}: ${message}`);
+  
+  if (recommendation) {
+    console.warn(`[RECOMMENDATION] ${recommendation}`);
   }
-
-  if (contentType) {
-    return `${baseUrl}/entries?contentTypeId=${contentType}`;
+  
+  // Mark this deprecation as having been logged
+  deprecationNotices[key] = true;
+  
+  // Also track using our deprecation statistics if available
+  try {
+    trackDeprecation(item, message, recommendation);
+  } catch (err) {
+    // Fail silently if tracking isn't available
   }
-
-  return baseUrl;
 }
 
+/**
+ * Track deprecation usage for statistical purposes
+ * This is an internal function that might not work in all environments
+ */
+function trackDeprecation(item: string, message: string, recommendation?: string): void {
+  // Implementation might vary depending on tracking system
+  if (typeof window !== 'undefined' && (window as any).__trackDeprecation) {
+    (window as any).__trackDeprecation(item, message, recommendation);
+  }
+}
+
+/**
+ * Create a compatible wrapper for a deprecated function
+ * 
+ * @param oldFn The name of the deprecated function
+ * @param newFn The new function to use
+ * @param message Optional custom deprecation message
+ * @returns A wrapped function that warns about deprecation
+ */
+export function createDeprecatedWrapper<T extends (...args: any[]) => any>(
+  oldFn: string, 
+  newFn: T, 
+  message?: string
+): T {
+  return ((...args: Parameters<T>): ReturnType<T> => {
+    logDeprecation(
+      oldFn,
+      message || `This function is deprecated and will be removed in a future version.`,
+      `Use ${newFn.name || 'the new implementation'} instead.`
+    );
+    return newFn(...args);
+  }) as T;
+}
+
+/**
+ * Create read-only operations with deprecation warnings
+ * @param contentType The content type name
+ * @param operations The actual operations to use
+ */
+export function createReadOnlyContentTypeOperations<T>(
+  contentType: string,
+  operations: any
+): any {
+  return {
+    ...operations,
+    
+    // Override write operations with warnings
+    create: (...args: any[]) => {
+      logDeprecation(
+        `${contentType}.create()`,
+        `Direct creation is no longer supported through the API`,
+        `Use the Contentful UI to create ${contentType} content`
+      );
+      return Promise.reject(new Error(`${contentType}.create is deprecated`));
+    },
+    
+    update: (...args: any[]) => {
+      logDeprecation(
+        `${contentType}.update()`,
+        `Direct updates are no longer supported through the API`,
+        `Use the Contentful UI to update ${contentType} content`
+      );
+      return Promise.reject(new Error(`${contentType}.update is deprecated`));
+    },
+    
+    delete: (...args: any[]) => {
+      logDeprecation(
+        `${contentType}.delete()`,
+        `Direct deletion is no longer supported through the API`,
+        `Use the Contentful UI to delete ${contentType} content`
+      );
+      return Promise.reject(new Error(`${contentType}.delete is deprecated`));
+    }
+  };
+}
+
+/**
+ * Create deprecated write operation with warning
+ */
+export function createDeprecatedWriteOperation(
+  operationName: string,
+  contentType: string
+): (...args: any[]) => Promise<never> {
+  return (...args: any[]) => {
+    logDeprecation(
+      `${contentType}.${operationName}()`,
+      `This operation is no longer supported through the API`,
+      `Use the Contentful UI to manage ${contentType} content`
+    );
+    return Promise.reject(new Error(`${contentType}.${operationName} is deprecated`));
+  };
+}
+
+// Export a simple DeprecationStat interface for the admin page
+export interface DeprecationStat {
+  id: string;
+  item: string;
+  message: string;
+  recommendation?: string;
+  component?: string;
+  count: number;
+  timestamp: string;
+  lastOccurred: string;
+}

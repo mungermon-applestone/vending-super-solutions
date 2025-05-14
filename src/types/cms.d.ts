@@ -89,8 +89,10 @@ export interface CMSTechnology {
 export interface QueryOptions {
   limit?: number;
   skip?: number;
+  offset?: number; // Added for compatibility with some API calls
   order?: string;
   filters?: Record<string, any>;
+  status?: string; // For content with draft/published status
 }
 
 export interface CMSTestimonial {

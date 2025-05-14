@@ -1,6 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
+import { ContentfulTestimonialSection, convertTestimonialsToSection } from '@/types/contentful/testimonial';
 
 export function useTestimonialSection() {
   return useQuery({
@@ -10,13 +11,14 @@ export function useTestimonialSection() {
         const entries = await fetchContentfulEntries('testimonial');
         
         if (!entries || entries.length === 0) {
-          return [];
+          return null;
         }
         
-        return entries.map((entry: any) => ({
+        // Convert the testimonials to the expected format
+        const testimonials = entries.map((entry: any) => ({
           id: entry.sys.id,
-          name: entry.fields.name || '',
-          title: entry.fields.title || '',
+          name: entry.fields.author || '',
+          title: entry.fields.position || '',
           company: entry.fields.company || '',
           testimonial: entry.fields.quote || '',
           rating: entry.fields.rating || 5,
@@ -24,9 +26,12 @@ export function useTestimonialSection() {
             ? `https:${entry.fields.image.fields.file.url}`
             : undefined
         }));
+        
+        // Create a section with these testimonials
+        return convertTestimonialsToSection(testimonials);
       } catch (error) {
         console.error('Error fetching testimonials:', error);
-        return [];
+        return null;
       }
     },
     staleTime: 1000 * 60 * 5, // 5 minutes

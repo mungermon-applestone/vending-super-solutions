@@ -21,7 +21,7 @@ export interface ContentfulBlogPost {
   };
   author?: string;
   tags?: string[];
-  sys?: {
+  sys: {
     id: string;
     createdAt?: string;
     updatedAt?: string;
@@ -41,6 +41,10 @@ export interface ContentfulBlogPost {
   published_at?: string;
   created_at?: string;
   updated_at?: string;
+  // Support for includes (used for rich text resolution)
+  includes?: {
+    Asset?: any[];
+  };
 }
 
 export interface BlogPostQueryOptions {
@@ -59,7 +63,8 @@ export function useContentfulBlogPosts(options?: BlogPostQueryOptions) {
         const queryOptions: Record<string, any> = {
           limit: options?.limit || 100,
           skip: options?.skip || 0,
-          order: options?.order || '-fields.publishDate'
+          order: options?.order || '-fields.publishDate',
+          include: 2, // Include linked assets and entries for rich text resolution
         };
         
         const entries = await fetchContentfulEntries(CMS_MODELS.BLOG_POST, queryOptions);
@@ -105,7 +110,8 @@ export function useContentfulBlogPosts(options?: BlogPostQueryOptions) {
             fields: entry.fields,
             status: 'published', // Default status for Contentful posts
             created_at: entry.sys?.createdAt,
-            updated_at: entry.sys?.updatedAt
+            updated_at: entry.sys?.updatedAt,
+            includes: entry.includes // Keep includes for rich text resolution
           };
         }).filter(Boolean) as ContentfulBlogPost[];
       } catch (error) {

@@ -7,7 +7,7 @@ import BlogPostContent from '@/components/blog/BlogPostContent';
 import ContentfulBlogPostContent from '@/components/blog/ContentfulBlogPostContent';
 import { useBlogPostBySlug, useAdjacentPosts } from '@/hooks/useBlogData';
 import { SimpleContactCTA } from '@/components/common';
-import { convertContentfulBlogPostToBlogPost } from '@/utils/contentfulTypeGuards';
+import { convertContentfulBlogPostToBlogPost, convertAdjacentPostToContentful } from '@/utils/contentfulTypeGuards';
 
 const BlogPostDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -28,6 +28,15 @@ const BlogPostDetail = () => {
     }
   }, [post, compatiblePost, isLoading, navigate]);
 
+  // Convert adjacent posts to Contentful format for ContentfulBlogPostContent
+  const contentfulPreviousPost = adjacentPosts?.previous 
+    ? convertAdjacentPostToContentful(adjacentPosts.previous)
+    : null;
+  
+  const contentfulNextPost = adjacentPosts?.next
+    ? convertAdjacentPostToContentful(adjacentPosts.next)
+    : null;
+
   return (
     <Layout>
       <div className="flex flex-col min-h-screen">
@@ -44,8 +53,8 @@ const BlogPostDetail = () => {
             post.fields ? (
               <ContentfulBlogPostContent 
                 post={post} 
-                previousPost={adjacentPosts?.previous} 
-                nextPost={adjacentPosts?.next} 
+                previousPost={contentfulPreviousPost} 
+                nextPost={contentfulNextPost} 
               />
             ) : (
               <BlogPostContent 
