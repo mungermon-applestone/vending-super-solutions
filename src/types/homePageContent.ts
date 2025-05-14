@@ -27,12 +27,26 @@ export interface HomePageContent {
   heroCTALink?: string;
   heroImage?: string;
   
+  // Secondary CTA Button properties
+  ctaSecondaryButtonText?: string;
+  ctaSecondaryButtonUrl?: string;
+  
   // For backward compatibility with older components
   title?: string;
   subtitle?: string;
+  headline?: string;
+  subheading?: string;
   primaryButtonText?: string;
   primaryButtonUrl?: string;
   secondaryButtonText?: string;
   secondaryButtonUrl?: string;
   backgroundClass?: string;
+  
+  // Image properties
+  backgroundImage?: string;
+  backgroundImageAlt?: string;
+  image?: {
+    url: string;
+    alt: string;
+  };
 }

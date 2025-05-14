@@ -87,6 +87,15 @@ const ProductTypesSection = () => {
     featuredCount: featuredProductTypes.length,
     firstItem: featuredProductTypes[0]?.title
   });
+
+  // Get section title and description with fallbacks
+  const sectionTitle = homeContent?.productCategoriesTitle || 
+                      homeContent?.title || 
+                      "Featured Product Categories";
+                      
+  const sectionDescription = homeContent?.productCategoriesDescription || 
+                            homeContent?.subtitle || 
+                            "Find the perfect vending solution for your product type.";
   
   return (
     <section className="py-16 md:py-24">
@@ -94,10 +103,10 @@ const ProductTypesSection = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-              {homeContent?.productCategoriesTitle || "Featured Product Categories"}
+              {sectionTitle}
             </h2>
             <p className="subtitle max-w-2xl">
-              {homeContent?.productCategoriesDescription || "Find the perfect vending solution for your product type."}
+              {sectionDescription}
             </p>
           </div>
           <Button asChild className="mt-4 md:mt-0">

@@ -123,7 +123,9 @@ export async function refreshContentfulClient() {
 
 /**
  * Reset the Contentful client (for testing or cleanup)
+ * @export - explicitly exported to be used in components
  */
 export function resetContentfulClient() {
   contentfulClient = null;
+  console.log('[contentfulClient] Client reset successfully');
 }

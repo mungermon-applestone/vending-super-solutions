@@ -87,8 +87,8 @@ export const fallbackMachines: CMSMachine[] = [
     },
     visible: true,
     displayOrder: 1,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   },
   {
     id: 'fallback-machine-2',
@@ -109,8 +109,8 @@ export const fallbackMachines: CMSMachine[] = [
     },
     visible: true,
     displayOrder: 2,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }
 ];
 

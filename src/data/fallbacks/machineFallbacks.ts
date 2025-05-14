@@ -41,8 +41,8 @@ export const MACHINE_FALLBACKS: CMSMachine[] = [
       'Capacity': 'Up to 500 items'
     },
     temperature: 'ambient',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   },
   {
     id: 'fallback-vending-machine-2',
@@ -80,8 +80,8 @@ export const MACHINE_FALLBACKS: CMSMachine[] = [
       'Temperature Range': '33°F - 41°F'
     },
     temperature: 'refrigerated',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }
 ];
 

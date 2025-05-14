@@ -22,7 +22,9 @@ const HeroSection: React.FC = () => {
     heroHeadline: defaultHero.headline,
     heroSubheading: defaultHero.subheading,
     heroCTAText: defaultHero.ctaText,
-    heroCTALink: defaultHero.ctaLink
+    heroCTALink: defaultHero.ctaLink,
+    ctaSecondaryButtonText: defaultHero.secondaryCTAText,
+    ctaSecondaryButtonUrl: defaultHero.secondaryCTALink
   };
 
   // Determine the background style
@@ -59,22 +61,22 @@ const HeroSection: React.FC = () => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="w-full md:w-2/3 lg:w-1/2">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-            {hero.heroHeadline}
+            {hero.heroHeadline || hero.headline || hero.title}
           </h1>
           <p className="text-lg md:text-xl text-white/90 mb-8">
-            {hero.heroSubheading}
+            {hero.heroSubheading || hero.subheading || hero.subtitle}
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
-              <Link to={hero.heroCTALink || '/contact'}>
-                {hero.heroCTAText}
+              <Link to={hero.heroCTALink || hero.ctaLink || hero.primaryButtonUrl || '/contact'}>
+                {hero.heroCTAText || hero.ctaText || hero.primaryButtonText || 'Get Started'}
               </Link>
             </Button>
             
-            {hero.ctaSecondaryButtonText && (
+            {(hero.ctaSecondaryButtonText || hero.secondaryButtonText || hero.secondaryCTAText) && (
               <Button asChild variant="outline" size="lg" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
-                <Link to={hero.ctaSecondaryButtonUrl || '/about'}>
-                  {hero.ctaSecondaryButtonText}
+                <Link to={hero.ctaSecondaryButtonUrl || hero.secondaryButtonUrl || hero.secondaryCTALink || '/about'}>
+                  {hero.ctaSecondaryButtonText || hero.secondaryButtonText || hero.secondaryCTAText || 'Learn More'}
                 </Link>
               </Button>
             )}

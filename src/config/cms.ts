@@ -58,6 +58,17 @@ export function isPreviewEnvironment(): boolean {
   return isPreview;
 }
 
+// Log Contentful configuration for debugging
+export function logContentfulConfig(): void {
+  console.log('[CMS Config] Current Contentful configuration:', {
+    spaceId: CONTENTFUL_CONFIG.SPACE_ID ? `${CONTENTFUL_CONFIG.SPACE_ID.substring(0, 4)}...` : 'undefined',
+    hasDeliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
+    environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master',
+    isConfigured: isContentfulConfigured(),
+    isPreview: isPreviewEnvironment()
+  });
+}
+
 // Declare window runtime config
 declare global {
   interface Window {
