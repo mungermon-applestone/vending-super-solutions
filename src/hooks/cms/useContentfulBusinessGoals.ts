@@ -37,8 +37,8 @@ function transformBusinessGoalBasic(entry: Entry<EntrySkeletonType, undefined, s
     benefits: Array.isArray(fields.benefits) ? fields.benefits.map(benefit => safeString(benefit)) : [],
     visible: fields.visible === true,
     image: imageData,
-    createdAt: entry.sys.createdAt,
-    updatedAt: entry.sys.updatedAt
+    created_at: entry.sys.createdAt,
+    updated_at: entry.sys.updatedAt
   };
 }
 
@@ -102,3 +102,6 @@ export function useContentfulBusinessGoalBySlug(slug: string) {
     enabled: !!slug
   });
 }
+
+// Export an alias for useContentfulBusinessGoalBySlug for backward compatibility
+export const useContentfulBusinessGoal = useContentfulBusinessGoalBySlug;

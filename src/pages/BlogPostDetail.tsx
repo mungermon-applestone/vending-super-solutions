@@ -4,8 +4,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import BlogPostContent from '@/components/blog/BlogPostContent';
+import ContentfulBlogPostContent from '@/components/blog/ContentfulBlogPostContent';
 import { useBlogPostBySlug, useAdjacentPosts } from '@/hooks/useBlogData';
 import { SimpleContactCTA } from '@/components/common';
+import { convertContentfulBlogPostToBlogPost } from '@/utils/contentfulTypeGuards';
 
 const BlogPostDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -16,12 +18,15 @@ const BlogPostDetail = () => {
   
   const isLoading = isLoadingPost || isLoadingAdjacent;
   
+  // Convert Contentful blog post to compatible format if needed
+  const compatiblePost = post ? convertContentfulBlogPostToBlogPost(post) : null;
+  
   // Handle 404 for non-existent or non-published posts
   React.useEffect(() => {
-    if (!isLoading && (!post || (post.status !== 'published' && !window.location.pathname.includes('/admin')))) {
+    if (!isLoading && (!post || (compatiblePost?.status !== 'published' && !window.location.pathname.includes('/admin')))) {
       navigate('/not-found', { replace: true });
     }
-  }, [post, isLoading, navigate]);
+  }, [post, compatiblePost, isLoading, navigate]);
 
   return (
     <Layout>
@@ -36,11 +41,19 @@ const BlogPostDetail = () => {
               <p className="text-red-500">Something went wrong. Please try again later.</p>
             </div>
           ) : post ? (
-            <BlogPostContent 
-              post={post} 
-              previousPost={adjacentPosts?.previous} 
-              nextPost={adjacentPosts?.next} 
-            />
+            post.fields ? (
+              <ContentfulBlogPostContent 
+                post={post} 
+                previousPost={adjacentPosts?.previous} 
+                nextPost={adjacentPosts?.next} 
+              />
+            ) : (
+              <BlogPostContent 
+                post={compatiblePost} 
+                previousPost={adjacentPosts?.previous} 
+                nextPost={adjacentPosts?.next} 
+              />
+            )
           ) : null}
         </div>
         
@@ -49,9 +62,9 @@ const BlogPostDetail = () => {
           className="w-full mt-auto"
           title="Have Questions About This Article?"
           description="Our team is ready to help you implement these insights in your business."
-          formType={`Blog Post: ${post?.title || slug}`}
+          formType={`Blog Post: ${compatiblePost?.title || post?.fields?.title || slug}`}
           initialValues={{
-            subject: `Question about: ${post?.title || slug}`
+            subject: `Question about: ${compatiblePost?.title || post?.fields?.title || slug}`
           }}
         />
       </div>

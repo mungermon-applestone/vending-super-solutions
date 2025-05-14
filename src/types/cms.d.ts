@@ -89,3 +89,22 @@ export interface QueryOptions {
   order?: string;
   filters?: Record<string, any>;
 }
+
+export interface CMSTestimonial {
+  id: string;
+  name: string;
+  title: string;
+  company: string;
+  testimonial: string;
+  rating?: number;
+  image_url?: string;
+}
+
+// Interface for a testimonial section with multiple testimonials
+export interface ContentfulTestimonialSection {
+  title?: string;
+  subtitle?: string;
+  testimonials: CMSTestimonial[];
+  background?: string;
+  displayStyle?: string;
+}

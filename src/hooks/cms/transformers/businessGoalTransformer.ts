@@ -72,7 +72,7 @@ export function transformBusinessGoal(entry: Entry<EntrySkeletonType, undefined,
     benefits,
     features,
     visible: fields.visible !== false, // Default to true
-    createdAt: entry.sys.createdAt,
-    updatedAt: entry.sys.updatedAt
+    created_at: entry.sys.createdAt,
+    updated_at: entry.sys.updatedAt
   };
 }

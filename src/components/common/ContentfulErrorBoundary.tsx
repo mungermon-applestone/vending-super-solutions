@@ -8,6 +8,7 @@ interface Props {
   children: ReactNode;
   contentType?: string;
   fallbackComponent?: ReactNode;
+  fallback?: ReactNode; // Added for compatibility
   onReset?: () => void;
 }
 
@@ -52,12 +53,12 @@ class ContentfulErrorBoundary extends Component<Props, State> {
 
   render(): ReactNode {
     const { hasError, error } = this.state;
-    const { children, contentType, fallbackComponent } = this.props;
+    const { children, contentType, fallbackComponent, fallback } = this.props;
 
     if (hasError) {
       // If a custom fallback component is provided, use it
-      if (fallbackComponent) {
-        return fallbackComponent;
+      if (fallbackComponent || fallback) {
+        return fallbackComponent || fallback;
       }
 
       // Default error UI

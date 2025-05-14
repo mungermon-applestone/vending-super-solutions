@@ -67,7 +67,7 @@ function transformMachineFromContentful(entry: any): CMSMachine {
     title: safeString(entry.fields.title || 'Untitled Machine'),
     slug: safeString(entry.fields.slug || entry.sys.id),
     description: safeString(entry.fields.description || ''),
-    shortDescription: entry.fields.shortDescription ? safeString(entry.fields.shortDescription) : undefined,
+    shortDescription: safeString(entry.fields.shortDescription || ''),
     type: safeString(entry.fields.type || 'vending') as 'vending' | 'locker', // Force to one of the allowed types
     mainImage,
     thumbnail,
@@ -77,8 +77,8 @@ function transformMachineFromContentful(entry: any): CMSMachine {
     temperature: safeString(entry.fields.temperature || 'ambient'),
     featured: Boolean(entry.fields.featured) || false,
     displayOrder: Number(entry.fields.displayOrder) || 0,
-    createdAt: entry.sys.createdAt,
-    updatedAt: entry.sys.updatedAt,
+    created_at: entry.sys.createdAt,
+    updated_at: entry.sys.updatedAt,
     visible: entry.fields.visible !== false // Default to true if not specified
   };
 }

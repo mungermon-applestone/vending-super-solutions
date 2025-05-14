@@ -28,7 +28,7 @@ export function useContentfulBlogPosts() {
     queryKey: ['contentful', 'blogPosts'],
     queryFn: async () => {
       try {
-        const entries = await fetchContentfulEntries(CMS_MODELS.BLOG_POST, {
+        const entries = await fetchContentfulEntries(CMS_MODELS ? CMS_MODELS.BLOG_POST : 'blogPost', {
           order: '-fields.publishDate'
         });
         

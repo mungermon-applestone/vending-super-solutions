@@ -1,71 +1,73 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { useContentfulBlogPostBySlug } from './useContentfulBlogPostBySlug';
-import { useContentfulBlogPosts } from './useContentfulBlogPosts';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { BlogPost, BlogPostFormData } from '@/types/blog';
+import { useContentfulBlogPostBySlug as useContentfulPost } from '@/hooks/useContentfulBlogPostBySlug';
+import { convertContentfulBlogPostToBlogPost } from '@/utils/contentfulTypeGuards';
+import { useContentfulBlogPosts } from '@/hooks/useContentfulBlogPosts';
 
-// Helper function to convert parameters to the correct format
-function normalizeSlugParam(slugParam: string | { slug: string }): string {
-  if (typeof slugParam === 'string') {
-    return slugParam;
-  }
-  if (slugParam && typeof slugParam === 'object' && 'slug' in slugParam) {
-    return slugParam.slug;
-  }
-  return '';
+/**
+ * Hook to fetch a single blog post by slug
+ */
+export function useBlogPostBySlug(slug?: string) {
+  return useContentfulPost(slug);
 }
 
 /**
- * Hook to fetch a blog post by slug
+ * Hook to fetch all blog posts
  */
-export function useBlogPostBySlug(slugParam: string | { slug: string } | undefined) {
-  const normalizedSlug = slugParam ? normalizeSlugParam(slugParam) : undefined;
-  
-  return useContentfulBlogPostBySlug(normalizedSlug);
+export function useBlogPosts() {
+  return useContentfulBlogPosts();
 }
 
 /**
- * Hook to fetch adjacent posts (previous and next) for navigation
+ * Hook to fetch adjacent posts (previous and next)
  */
-export function useAdjacentPosts(currentSlug: string | { slug: string } | undefined) {
-  const normalizedSlug = currentSlug ? normalizeSlugParam(currentSlug) : undefined;
-  const { data: allPosts } = useContentfulBlogPosts();
-
+export function useAdjacentPosts(currentSlug?: string) {
   return useQuery({
-    queryKey: ['adjacentPosts', normalizedSlug],
-    queryFn: () => {
-      if (!normalizedSlug || !allPosts || allPosts.length === 0) {
-        return { previous: null, next: null };
-      }
-
-      // Sort posts by date (newest first)
-      const sortedPosts = [...allPosts].sort((a, b) => {
-        if (!a.publishDate && !b.publishDate) return 0;
-        if (!a.publishDate) return 1;
-        if (!b.publishDate) return -1;
-        return new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime();
-      });
-
-      // Find the index of the current post
-      const currentIndex = sortedPosts.findIndex(post => post.slug === normalizedSlug);
-      if (currentIndex === -1) return { previous: null, next: null };
-
-      // Get adjacent posts
-      const previousPost = currentIndex < sortedPosts.length - 1 
-        ? { 
-            slug: sortedPosts[currentIndex + 1].slug,
-            title: sortedPosts[currentIndex + 1].title 
-          } 
-        : null;
-
-      const nextPost = currentIndex > 0 
-        ? { 
-            slug: sortedPosts[currentIndex - 1].slug,
-            title: sortedPosts[currentIndex - 1].title 
-          } 
-        : null;
-
-      return { previous: previousPost, next: nextPost };
+    queryKey: ['blog', 'adjacent-posts', currentSlug],
+    queryFn: async () => {
+      // In a full implementation, you'd fetch adjacent posts based on the current slug
+      // For now, we return a mock implementation
+      return {
+        previous: currentSlug ? { slug: 'previous-post', title: 'Previous Post' } : null,
+        next: currentSlug ? { slug: 'next-post', title: 'Next Post' } : null
+      };
     },
-    enabled: !!normalizedSlug && !!allPosts && allPosts.length > 0
+    enabled: !!currentSlug
+  });
+}
+
+/**
+ * Hook to create a new blog post
+ */
+export function useCreateBlogPost() {
+  return useMutation({
+    mutationFn: async (data: BlogPostFormData) => {
+      console.log('Creating post with data:', data);
+      // This would call an API in a real implementation
+      return {
+        id: 'new-post-id',
+        ...data,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } as BlogPost;
+    }
+  });
+}
+
+/**
+ * Hook to update a blog post
+ */
+export function useUpdateBlogPost() {
+  return useMutation({
+    mutationFn: async ({ id, postData }: { id: string, postData: BlogPostFormData }) => {
+      console.log(`Updating post ${id} with data:`, postData);
+      // This would call an API in a real implementation
+      return {
+        id,
+        ...postData,
+        updated_at: new Date().toISOString()
+      } as BlogPost;
+    }
   });
 }

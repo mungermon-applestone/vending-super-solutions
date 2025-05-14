@@ -14,7 +14,7 @@ interface ContentfulFallbackMessageProps {
   onRefresh?: () => void;
   // Added missing props based on error messages
   title?: string;
-  onAction?: () => Promise<any>;
+  onAction?: () => Promise<any> | void;
   actionText?: string;
   actionHref?: string;
   showAdmin?: boolean;

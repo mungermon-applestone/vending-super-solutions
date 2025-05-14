@@ -1,3 +1,4 @@
+
 import React from "react";
 import Layout from "@/components/layout/Layout";
 import { useContentfulBlogPosts } from "@/hooks/useContentfulBlogPosts";
@@ -9,7 +10,7 @@ import BlogHeroCard from "@/components/blog/BlogHeroCard";
 import Image from "@/components/common/Image";
 import ContentfulErrorBoundary from "@/components/common/ContentfulErrorBoundary";
 import ContentfulFallbackMessage from "@/components/common/ContentfulFallbackMessage";
-import ContentfulInitializer from "@/components/blog/ContentfulInitializer";
+import ContentfulInitializer from "@/components/contentful/ContentfulInitializer";
 import { SimpleContactCTA } from "@/components/common";
 
 const BlogPage: React.FC = () => {
@@ -37,10 +38,7 @@ const BlogPageContent: React.FC = () => {
     data: blogPosts = [], 
     isLoading: isLoadingPosts,
     error: postsError 
-  } = useContentfulBlogPosts({ 
-    limit: 10,
-    order: "-fields.publishDate" // Explicitly set reverse chronological order
-  });
+  } = useContentfulBlogPosts();
 
   // Enhanced logging for debugging
   React.useEffect(() => {
