@@ -21,6 +21,7 @@ export interface CMSMachine {
   updated_at?: string;
   createdAt?: string;
   updatedAt?: string;
+  name?: string; // For backwards compatibility with some components
 }
 
 export interface CMSImage {

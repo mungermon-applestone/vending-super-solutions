@@ -1,10 +1,8 @@
-
-import { ContentfulClientApi, EntryCollection, Entry, Asset } from 'contentful';
-import { getContentfulClientInstance } from '@/services/cms/utils/contentfulClient';
-import { transformMachineFromContentful } from '@/utils/cms/transformers/machineTransformer';
-import { validateMachineData } from '@/utils/cms/validation/machineValidation';
-import { CMSMachine, MachineFeature, MachineSpecification } from './types';
+import { EntryCollection, Entry } from 'contentful';
+import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { transformMachineFromContentful } from '@/hooks/cms/useContentfulMachines';
 import { logDeprecation } from '@/services/cms/utils/deprecation';
+import { CMSMachine } from '@/types/cms';
 
 /**
  * Contentful Machine Adapter Implementation
@@ -19,7 +17,7 @@ export const contentfulMachineAdapter = {
   getMachines: async (): Promise<CMSMachine[]> => {
     try {
       console.log('[contentfulMachineAdapter] Fetching all machines');
-      const client = getContentfulClientInstance();
+      const client = await getContentfulClient();
       
       if (!client) {
         console.error('[contentfulMachineAdapter] Contentful client is not available');
@@ -34,12 +32,15 @@ export const contentfulMachineAdapter = {
       
       console.log(`[contentfulMachineAdapter] Fetched ${response.items.length} machines`);
       
-      // Transform and validate each machine entry
+      // Transform each machine entry
       const machines = response.items.map(entry => {
-        const machine = transformMachineFromContentful(entry);
-        validateMachineData(machine);
-        return machine;
-      });
+        try {
+          return transformMachineFromContentful(entry);
+        } catch (error) {
+          console.error('[contentfulMachineAdapter] Error transforming machine:', error);
+          return null;
+        }
+      }).filter(Boolean) as CMSMachine[];
       
       return machines;
     } catch (error) {
@@ -63,7 +64,7 @@ export const contentfulMachineAdapter = {
         return null;
       }
       
-      const client = getContentfulClientInstance();
+      const client = await getContentfulClient();
       
       if (!client) {
         console.error('[contentfulMachineAdapter] Contentful client is not available');
@@ -81,10 +82,7 @@ export const contentfulMachineAdapter = {
         return null;
       }
       
-      const machine = transformMachineFromContentful(response.items[0]);
-      validateMachineData(machine);
-      
-      return machine;
+      return transformMachineFromContentful(response.items[0]);
     } catch (error) {
       console.error(`[contentfulMachineAdapter] Error fetching machine by slug ${slug}:`, error);
       return null;
@@ -155,7 +153,7 @@ export const contentfulMachineAdapter = {
   getFeaturedMachines: async (limit: number = 4): Promise<CMSMachine[]> => {
     try {
       console.log(`[contentfulMachineAdapter] Fetching featured machines (limit: ${limit})`);
-      const client = getContentfulClientInstance();
+      const client = await getContentfulClient();
       
       if (!client) {
         console.error('[contentfulMachineAdapter] Contentful client is not available');
@@ -173,10 +171,13 @@ export const contentfulMachineAdapter = {
       console.log(`[contentfulMachineAdapter] Fetched ${response.items.length} featured machines`);
       
       const machines = response.items.map(entry => {
-        const machine = transformMachineFromContentful(entry);
-        validateMachineData(machine);
-        return machine;
-      });
+        try {
+          return transformMachineFromContentful(entry);
+        } catch (error) {
+          console.error('[contentfulMachineAdapter] Error transforming machine:', error);
+          return null;
+        }
+      }).filter(Boolean) as CMSMachine[];
       
       return machines;
     } catch (error) {
@@ -200,7 +201,7 @@ export const contentfulMachineAdapter = {
         return [];
       }
       
-      const client = getContentfulClientInstance();
+      const client = await getContentfulClient();
       
       if (!client) {
         console.error('[contentfulMachineAdapter] Contentful client is not available');
@@ -217,10 +218,13 @@ export const contentfulMachineAdapter = {
       console.log(`[contentfulMachineAdapter] Fetched ${response.items.length} machines of type ${type}`);
       
       const machines = response.items.map(entry => {
-        const machine = transformMachineFromContentful(entry);
-        validateMachineData(machine);
-        return machine;
-      });
+        try {
+          return transformMachineFromContentful(entry);
+        } catch (error) {
+          console.error('[contentfulMachineAdapter] Error transforming machine:', error);
+          return null;
+        }
+      }).filter(Boolean) as CMSMachine[];
       
       return machines;
     } catch (error) {

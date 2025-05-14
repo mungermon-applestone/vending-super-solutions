@@ -3,6 +3,13 @@
  * Content Management System configuration
  */
 
+// Contentful configuration
+export const CONTENTFUL_CONFIG = {
+  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
+  DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || '',
+  ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master',
+};
+
 // Contentful model IDs
 export const CMS_MODELS = {
   // Core content types
@@ -42,4 +49,16 @@ export function isPreviewEnvironment(): boolean {
     window.location.hostname.includes('staging') ||
     window.location.search.includes('preview=true')
   );
+}
+
+/**
+ * Log Contentful configuration for debugging
+ */
+export function logContentfulConfig(): void {
+  console.log('[CMS Config] Current Contentful configuration:', {
+    spaceId: CONTENTFUL_CONFIG.SPACE_ID,
+    hasToken: Boolean(CONTENTFUL_CONFIG.DELIVERY_TOKEN),
+    environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID,
+    isConfigured: isContentfulConfigured()
+  });
 }

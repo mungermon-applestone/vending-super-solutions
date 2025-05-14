@@ -64,7 +64,9 @@ export function convertContentfulBlogPostToBlogPost(post: ContentfulBlogPost): B
       title: '',
       slug: '',
       content: '',
-      status: 'draft'
+      status: 'draft',
+      created_at: '',
+      updated_at: ''
     };
   }
   
@@ -82,7 +84,63 @@ export function convertContentfulBlogPostToBlogPost(post: ContentfulBlogPost): B
     author: post.fields?.author,
     tags: post.fields?.tags || [],
     status: 'published',
-    created_at: post.sys?.createdAt,
-    updated_at: post.sys?.updatedAt
+    created_at: post.sys?.createdAt || '',
+    updated_at: post.sys?.updatedAt || ''
+  };
+}
+
+/**
+ * Convert our app's BlogPost to Contentful format
+ * This is needed for components expecting Contentful structure
+ */
+export function convertBlogPostToContentful(post: BlogPost): ContentfulBlogPost {
+  if (!post) {
+    return {
+      sys: { id: '' },
+      fields: {
+        title: '',
+        slug: '',
+      }
+    };
+  }
+  
+  // Create a fields object that matches the Contentful structure
+  const fields: any = {
+    title: post.title || 'Untitled',
+    slug: post.slug || '',
+    content: post.content || '',
+    excerpt: post.excerpt || '',
+    publishDate: post.publishDate || post.created_at || '',
+  };
+  
+  // Add featured image if available
+  if (post.featuredImage && post.featuredImage.url) {
+    fields.featuredImage = {
+      fields: {
+        title: post.featuredImage.title || post.title,
+        file: {
+          url: post.featuredImage.url.replace(/^https:/, ''),
+          details: {
+            image: {
+              width: post.featuredImage.width || 800,
+              height: post.featuredImage.height || 600,
+            }
+          }
+        }
+      }
+    };
+  }
+  
+  // Add author and tags if available
+  if (post.author) fields.author = post.author;
+  if (Array.isArray(post.tags)) fields.tags = post.tags;
+  
+  return {
+    sys: { 
+      id: post.id || '',
+      createdAt: post.created_at || '',
+      updatedAt: post.updated_at || ''
+    },
+    fields
   };
 }

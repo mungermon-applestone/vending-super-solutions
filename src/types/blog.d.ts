@@ -17,9 +17,9 @@ export interface BlogPost {
   };
   author?: string;
   tags?: string[];
-  status?: 'published' | 'draft';
-  created_at?: string;
-  updated_at?: string;
+  status: 'published' | 'draft';
+  created_at: string;
+  updated_at: string;
 }
 
 // Form data interface for blog post editor
@@ -45,7 +45,9 @@ export function convertToCompatibleBlogPost(post: ContentfulBlogPost): BlogPost 
       title: '',
       slug: '',
       content: '',
-      status: 'draft'
+      status: 'draft',
+      created_at: '',
+      updated_at: ''
     };
   }
   
@@ -64,7 +66,7 @@ export function convertToCompatibleBlogPost(post: ContentfulBlogPost): BlogPost 
     } : undefined,
     author: post.fields.author,
     tags: post.fields.tags || [],
-    created_at: post.sys.createdAt,
-    updated_at: post.sys.updatedAt
+    created_at: post.sys.createdAt || '',
+    updated_at: post.sys.updatedAt || ''
   };
 }

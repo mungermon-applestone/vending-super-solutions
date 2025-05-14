@@ -8,7 +8,7 @@ import { safeString, safeArrayField, safeAssetToImage } from '@/services/cms/uti
 /**
  * Transform a Contentful machine entry into our app's CMSMachine format
  */
-function transformMachineFromContentful(entry: any): CMSMachine {
+export function transformMachineFromContentful(entry: any): CMSMachine {
   if (!isContentfulEntry(entry)) {
     throw new Error('Invalid Contentful entry provided to transformer');
   }
@@ -68,7 +68,7 @@ function transformMachineFromContentful(entry: any): CMSMachine {
     slug: safeString(entry.fields.slug || entry.sys.id),
     description: safeString(entry.fields.description || ''),
     shortDescription: safeString(entry.fields.shortDescription || ''),
-    type: safeString(entry.fields.type || 'vending') as 'vending' | 'locker', // Force to one of the allowed types
+    type: safeString(entry.fields.type || 'vending'),
     mainImage,
     thumbnail,
     images,
@@ -182,6 +182,3 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
     enabled: !!idOrSlug
   });
 }
-
-// Export the transformer function to be used elsewhere
-export { transformMachineFromContentful };
