@@ -1,6 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 
 interface ContentfulQueryOptions<T> {
   queryKey: string[];
@@ -10,6 +11,8 @@ interface ContentfulQueryOptions<T> {
   retryLimit?: number;
   onSuccess?: (data: T) => void;
   onError?: (error: Error) => void;
+  refetchInterval?: number | false;
+  cacheTime?: number;
 }
 
 /**
@@ -23,7 +26,9 @@ export function useContentful<T>({
   enableToasts = true,
   retryLimit = 2,
   onSuccess,
-  onError
+  onError,
+  refetchInterval = false,
+  cacheTime
 }: ContentfulQueryOptions<T>) {
   const query = useQuery({
     queryKey,
@@ -34,35 +39,45 @@ export function useContentful<T>({
       } catch (error) {
         // Enhanced error logging
         console.error(`[useContentful] Error fetching ${queryKey.join('/')}:`, error);
-        console.error(`[useContentful] Stack trace:`, error instanceof Error ? error.stack : 'No stack trace');
         
-        // Check for common Contentful errors
-        let errorMessage = 'Error fetching content';
-        
-        if (error instanceof Error) {
-          errorMessage = error.message;
+        // Try refreshing the client if there was an error
+        try {
+          console.log('[useContentful] Attempting to refresh client and retry query');
+          await refreshContentfulClient();
+          return await queryFn();
+        } catch (retryError) {
+          console.error(`[useContentful] Retry also failed:`, retryError);
           
-          // Check for specific Contentful error patterns
-          if (errorMessage.includes('space') && errorMessage.includes('access token')) {
-            errorMessage = 'Invalid Contentful space or access token';
-          } else if (errorMessage.includes('content type')) {
-            errorMessage = 'Content type not found in Contentful';
-          } else if (errorMessage.includes('entry') && errorMessage.includes('not found')) {
-            errorMessage = 'Content entry not found in Contentful';
-          } else if (errorMessage.includes('Network Error')) {
-            errorMessage = 'Network error while connecting to Contentful';
+          // Format the error message
+          let errorMessage = 'Error fetching content';
+          
+          if (error instanceof Error) {
+            errorMessage = error.message;
+            
+            // Check for specific Contentful error patterns
+            if (errorMessage.includes('space') && errorMessage.includes('access token')) {
+              errorMessage = 'Invalid Contentful space or access token';
+            } else if (errorMessage.includes('content type')) {
+              errorMessage = 'Content type not found in Contentful';
+            } else if (errorMessage.includes('entry') && errorMessage.includes('not found')) {
+              errorMessage = 'Content entry not found in Contentful';
+            } else if (errorMessage.includes('Network Error')) {
+              errorMessage = 'Network error while connecting to Contentful';
+            }
           }
+          
+          // Re-throw the error with a more helpful message
+          throw new Error(`Contentful error: ${errorMessage}`);
         }
-        
-        // Re-throw the error with a more helpful message
-        throw new Error(`Contentful error: ${errorMessage}`);
       }
     },
     retry: retryLimit,
     initialData: fallbackData,
+    gcTime: cacheTime,
+    refetchInterval,
     refetchOnWindowFocus: false,
     meta: {
-      onSuccess: (data) => {
+      onSuccess: (data: T) => {
         console.log(`[useContentful] Successfully fetched data for ${queryKey.join('/')}`);
         if (onSuccess) onSuccess(data);
       },

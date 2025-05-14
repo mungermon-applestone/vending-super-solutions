@@ -1,82 +1,65 @@
 
-import React, { ErrorInfo, Component, ReactNode } from 'react';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle } from 'lucide-react';
+import React from 'react';
+import { isContentfulConfigured } from '@/config/cms';
 
-interface Props {
-  children: ReactNode;
-  fallback?: ReactNode;
-  contentType: string;
+interface ContentfulErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+  contentType?: string;
 }
 
-interface State {
+interface ContentfulErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
 }
 
 /**
- * A component that catches errors in Contentful data rendering and displays
- * a helpful fallback UI instead of crashing the app.
+ * Error boundary specifically for Contentful-related errors
+ * Catches errors in children and displays a fallback UI
  */
-class ContentfulErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
+class ContentfulErrorBoundary extends React.Component<
+  ContentfulErrorBoundaryProps, 
+  ContentfulErrorBoundaryState
+> {
+  constructor(props: ContentfulErrorBoundaryProps) {
     super(props);
-    this.state = {
-      hasError: false,
-      error: null
-    };
+    this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error: Error): State {
-    return {
-      hasError: true,
-      error
-    };
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error(`[ContentfulErrorBoundary] Error rendering ${this.props.contentType}:`, error);
-    console.error(`[ContentfulErrorBoundary] Component stack:`, errorInfo.componentStack);
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error(`[ContentfulErrorBoundary] Error rendering ${this.props.contentType || 'component'}:`, error);
+    console.error('[ContentfulErrorBoundary] Component stack:', errorInfo.componentStack);
   }
 
-  render(): ReactNode {
+  render() {
+    const { children, fallback, contentType = 'content' } = this.props;
     const { hasError, error } = this.state;
-    const { children, fallback, contentType } = this.props;
-
-    if (hasError) {
-      // If there's a custom fallback, use it
-      if (fallback) {
-        return fallback;
-      }
-
-      // Default fallback UI
-      return (
-        <div className="p-6 border border-amber-200 bg-amber-50 rounded-lg text-center">
-          <div className="flex justify-center mb-4">
-            <AlertTriangle size={32} className="text-amber-600" />
-          </div>
-          <h3 className="text-lg font-semibold text-amber-800 mb-2">
-            Content Display Error
-          </h3>
-          <p className="text-amber-700 mb-4">
-            There was an error displaying {contentType} content.
-          </p>
-          {error && (
-            <p className="text-sm text-amber-600 bg-amber-100 p-3 rounded mb-4 max-w-md mx-auto overflow-auto">
-              {error.message}
-            </p>
-          )}
-          <Button
-            variant="outline"
-            onClick={() => window.location.reload()}
-            className="border-amber-400 text-amber-700 hover:bg-amber-100"
-          >
-            Try Again
-          </Button>
+    
+    // If Contentful is not configured, show a special message
+    if (!isContentfulConfigured()) {
+      return fallback || (
+        <div className="p-4 border border-yellow-200 bg-yellow-50 rounded-md">
+          <p className="text-yellow-800">Contentful is not configured. Please set up your environment variables.</p>
         </div>
       );
     }
 
+    // If there's an error, show the fallback or default error message
+    if (hasError) {
+      return fallback || (
+        <div className="p-4 border border-red-200 bg-red-50 rounded-md">
+          <p className="text-red-800">
+            Error loading {contentType}: {error?.message || 'Unknown error'}
+          </p>
+        </div>
+      );
+    }
+
+    // No error, render children
     return children;
   }
 }

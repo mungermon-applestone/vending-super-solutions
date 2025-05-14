@@ -1,5 +1,6 @@
 
 import { createClient, ContentfulClientApi, Entry, EntryCollection } from 'contentful';
+import { CONTENTFUL_CONFIG } from '@/config/cms';
 
 // Cache the client instance to avoid recreating it
 let contentfulClient: ContentfulClientApi | null = null;
@@ -11,18 +12,22 @@ export function getContentfulClient(): ContentfulClientApi | null {
   // If we've already created a client, return it
   if (contentfulClient) return contentfulClient;
   
-  // Get configuration from environment variables
-  const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
-  const accessToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
-  const environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
-  
-  // Log configuration status for debugging
-  if (!spaceId || !accessToken) {
-    console.warn('[contentfulClient] Missing Contentful configuration.');
-    return null;
-  }
-  
   try {
+    // Get configuration from environment variables
+    const spaceId = CONTENTFUL_CONFIG.SPACE_ID;
+    const accessToken = CONTENTFUL_CONFIG.DELIVERY_TOKEN;
+    const environmentId = CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master';
+    
+    // Log configuration status for debugging
+    if (!spaceId || !accessToken) {
+      console.warn('[contentfulClient] Missing Contentful configuration.', {
+        spaceId: spaceId ? 'Set' : 'Missing',
+        accessToken: accessToken ? 'Set' : 'Missing',
+        environmentId
+      });
+      return null;
+    }
+    
     // Create and cache the client
     contentfulClient = createClient({
       space: spaceId,
@@ -40,18 +45,33 @@ export function getContentfulClient(): ContentfulClientApi | null {
 
 /**
  * Refresh the Contentful client (create a new instance)
- * This function is needed by useContentfulProduct.ts
  */
-export function refreshContentfulClient(): ContentfulClientApi | null {
-  // Clear the cached client
-  contentfulClient = null;
-  // Return a fresh client
-  return getContentfulClient();
+export async function refreshContentfulClient(): Promise<ContentfulClientApi | null> {
+  try {
+    console.log('[contentfulClient] Refreshing client with current config');
+    
+    // Clear the cached client
+    contentfulClient = null;
+    
+    // If we're in a browser environment, try to reload configuration from runtime
+    if (typeof window !== 'undefined' && window._refreshContentfulAfterConfig) {
+      try {
+        await window._refreshContentfulAfterConfig();
+      } catch (refreshError) {
+        console.warn('[contentfulClient] Error refreshing runtime config:', refreshError);
+      }
+    }
+    
+    // Return a fresh client
+    return getContentfulClient();
+  } catch (error) {
+    console.error('[contentfulClient] Error refreshing client:', error);
+    return null;
+  }
 }
 
 /**
  * Reset the Contentful client (clear the cached instance)
- * This function is needed by useContentfulProduct.ts
  */
 export function resetContentfulClient(): void {
   contentfulClient = null;
@@ -70,7 +90,7 @@ export const getContentfulClientInstance = getContentfulClient;
  * @param query Optional query parameters
  * @returns Array of entries
  */
-export async function fetchContentfulEntries<T>(contentType: string, query: Record<string, any> = {}): Promise<T[]> {
+export async function fetchContentfulEntries(contentType: string, query: Record<string, any> = {}): Promise<any[]> {
   const client = getContentfulClient();
   if (!client) {
     console.error('[contentfulClient] Contentful client is not available');
@@ -78,17 +98,16 @@ export async function fetchContentfulEntries<T>(contentType: string, query: Reco
   }
   
   try {
+    console.log(`[contentfulClient] Fetching entries of type ${contentType} with query:`, query);
+    
     const response: EntryCollection<any> = await client.getEntries({
       content_type: contentType,
+      include: 2,  // Include 2 levels of linked entries
       ...query
     });
     
-    return response.items.map(item => {
-      return {
-        ...item.fields,
-        id: item.sys.id
-      } as unknown as T;
-    });
+    console.log(`[contentfulClient] Fetched ${response.items.length} entries of type ${contentType}`);
+    return response.items;
   } catch (error) {
     console.error(`[contentfulClient] Error fetching entries of type ${contentType}:`, error);
     return [];
@@ -101,7 +120,7 @@ export async function fetchContentfulEntries<T>(contentType: string, query: Reco
  * @param entryId Entry ID
  * @returns Entry or null if not found
  */
-export async function fetchContentfulEntry<T>(entryId: string): Promise<T | null> {
+export async function fetchContentfulEntry(entryId: string): Promise<any | null> {
   const client = getContentfulClient();
   if (!client) {
     console.error('[contentfulClient] Contentful client is not available');
@@ -109,12 +128,9 @@ export async function fetchContentfulEntry<T>(entryId: string): Promise<T | null
   }
   
   try {
-    const entry: Entry<any> = await client.getEntry(entryId);
-    
-    return {
-      ...entry.fields,
-      id: entry.sys.id
-    } as unknown as T;
+    console.log(`[contentfulClient] Fetching entry with ID ${entryId}`);
+    const entry: Entry<any> = await client.getEntry(entryId, { include: 2 });
+    return entry;
   } catch (error) {
     console.error(`[contentfulClient] Error fetching entry with ID ${entryId}:`, error);
     return null;
@@ -122,12 +138,15 @@ export async function fetchContentfulEntry<T>(entryId: string): Promise<T | null
 }
 
 /**
+ * Export the test connection function
+ */
+export { testContentfulConnection } from './testContentfulConnection';
+
+/**
  * Check if Contentful is configured
- * 
- * @returns boolean indicating if Contentful is configured
  */
 export function isContentfulConfigured(): boolean {
-  const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
-  const accessToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
+  const spaceId = CONTENTFUL_CONFIG.SPACE_ID;
+  const accessToken = CONTENTFUL_CONFIG.DELIVERY_TOKEN;
   return Boolean(spaceId && accessToken);
 }

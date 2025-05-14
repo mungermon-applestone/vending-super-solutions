@@ -4,12 +4,30 @@
  */
 
 /**
+ * Contentful configuration
+ */
+export const CONTENTFUL_CONFIG = {
+  // Use env variables with runtime config fallbacks
+  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || 
+           (typeof window !== 'undefined' && window.env?.VITE_CONTENTFUL_SPACE_ID) || 
+           '',
+  
+  DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || 
+                 (typeof window !== 'undefined' && window.env?.VITE_CONTENTFUL_DELIVERY_TOKEN) || 
+                 '',
+  
+  ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 
+                 (typeof window !== 'undefined' && window.env?.VITE_CONTENTFUL_ENVIRONMENT_ID) || 
+                 'master'
+};
+
+/**
  * Whether Contentful is configured with environment variables
  */
 export function isContentfulConfigured(): boolean {
   return Boolean(
-    import.meta.env.VITE_CONTENTFUL_SPACE_ID && 
-    import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN
+    CONTENTFUL_CONFIG.SPACE_ID && 
+    CONTENTFUL_CONFIG.DELIVERY_TOKEN
   );
 }
 
@@ -24,14 +42,27 @@ export function isContentfulManagementConfigured(): boolean {
  * Get the Contentful Space ID
  */
 export function getContentfulSpaceId(): string {
-  return import.meta.env.VITE_CONTENTFUL_SPACE_ID || '';
+  return CONTENTFUL_CONFIG.SPACE_ID;
 }
 
 /**
  * Get the Contentful Environment ID
  */
 export function getContentfulEnvironmentId(): string {
-  return import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+  return CONTENTFUL_CONFIG.ENVIRONMENT_ID;
+}
+
+/**
+ * Log the current Contentful configuration (redacting tokens)
+ */
+export function logContentfulConfig(): void {
+  console.log('[CMS] Current Contentful configuration:', {
+    SPACE_ID: CONTENTFUL_CONFIG.SPACE_ID || 'Not set',
+    ENVIRONMENT_ID: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'Not set',
+    DELIVERY_TOKEN: CONTENTFUL_CONFIG.DELIVERY_TOKEN ? '[REDACTED]' : 'Not set',
+    isConfigured: isContentfulConfigured(),
+    browserEnv: typeof window !== 'undefined' && window.env ? 'Available' : 'Not available'
+  });
 }
 
 /**
@@ -57,6 +88,13 @@ export function forceCMSProvider(provider: CMSProvider): void {
 }
 
 /**
+ * Force Contentful provider specifically
+ */
+export function forceContentfulProvider(): void {
+  forceCMSProvider(CMSProvider.CONTENTFUL);
+}
+
+/**
  * Reset any forced CMS provider to use the default
  */
 export function resetCMSProvider(): void {
@@ -79,6 +117,29 @@ export function getCurrentCMSProvider(): CMSProvider {
     return CMSProvider.CONTENTFUL;
   }
   
-  // Fallback to Strapi (legacy provider)
-  return CMSProvider.STRAPI;
+  // Fallback to Contentful regardless, using hardcoded/runtime configs
+  return CMSProvider.CONTENTFUL;
+}
+
+/**
+ * Check if we are in a preview environment
+ */
+export function isPreviewEnvironment(): boolean {
+  if (typeof window === 'undefined') return false;
+  
+  // Check if current URL is localhost or other dev environments
+  const hostname = window.location.hostname;
+  return hostname === 'localhost' || 
+         hostname === '127.0.0.1' || 
+         hostname.includes('.lovable.app') || 
+         hostname.includes('-preview');
+}
+
+/**
+ * Get the initialization source for Contentful
+ */
+export function getContentfulInitSource(): string {
+  return typeof window !== 'undefined' && window._contentfulInitializedSource 
+    ? window._contentfulInitializedSource 
+    : 'unknown';
 }

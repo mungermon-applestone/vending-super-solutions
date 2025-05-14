@@ -18,25 +18,20 @@ const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
   // Determine which image to use - thumbnail has priority, then mainImage, then first image from array
   const hasMainImage = !!machine.mainImage?.url;
   const hasThumbnail = !!machine.thumbnail?.url;
-  const hasImages = machine.images && machine.images.length > 0;
-  
-  // Log the image selection for debugging
-  console.log(`[MachineCard] Rendering ${displayTitle}:`, {
-    hasThumbnail,
-    hasMainImage,
-    hasImages,
-    imageSource: hasThumbnail ? 'thumbnail' : (hasMainImage ? 'mainImage' : (hasImages ? 'first image' : 'none'))
-  });
+  const hasImages = Array.isArray(machine.images) && machine.images.length > 0;
   
   // Determine the image to display
   const displayImage = hasThumbnail ? machine.thumbnail : 
     (hasMainImage ? machine.mainImage : 
       (hasImages ? machine.images[0] : undefined));
   
+  // Get machine type or default to 'vending'
+  const machineType = machine.type || 'vending';
+  
   return (
     <Card key={machine.id} className="overflow-hidden flex flex-col h-full">
       <div className="relative h-48 bg-gray-50 flex items-center justify-center">
-        {displayImage ? (
+        {displayImage?.url ? (
           <Image 
             src={displayImage.url} 
             alt={displayImage.alt || displayTitle} 
@@ -46,7 +41,7 @@ const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
           />
         ) : (
           <div className="flex items-center justify-center h-full">
-            {machine.type === 'vending' ? (
+            {machineType === 'vending' ? (
               <Server className="h-16 w-16 text-gray-300" />
             ) : (
               <HardDrive className="h-16 w-16 text-gray-300" />
