@@ -7,6 +7,11 @@ interface TestimonialsSectionProps {
   data: ContentfulTestimonialSection;
 }
 
+// Type guard to check if a testimonial is in Contentful format
+const isContentfulTestimonial = (testimonial: any): boolean => {
+  return testimonial && typeof testimonial === 'object' && testimonial.fields !== undefined;
+};
+
 export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   
@@ -36,7 +41,7 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
   // Helper function to extract testimonial data regardless of format
   const getTestimonialData = () => {
     // Check if it's in Contentful format with fields property
-    if (currentTestimonial.fields) {
+    if (isContentfulTestimonial(currentTestimonial)) {
       return {
         quote: currentTestimonial.fields.quote || '',
         author: currentTestimonial.fields.author || '',
@@ -49,15 +54,15 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
     
     // It's in the CMS format with direct properties
     return {
-      quote: (currentTestimonial as any).testimonial || '',
-      author: (currentTestimonial as any).name || '',
-      position: (currentTestimonial as any).title || '',
-      company: (currentTestimonial as any).company || '',
-      rating: (currentTestimonial as any).rating || 5,
-      image: (currentTestimonial as any).image_url ? { 
+      quote: currentTestimonial.testimonial || '',
+      author: currentTestimonial.name || '',
+      position: currentTestimonial.title || '',
+      company: currentTestimonial.company || '',
+      rating: currentTestimonial.rating || 5,
+      image: currentTestimonial.image_url ? { 
         fields: { 
-          file: { url: (currentTestimonial as any).image_url },
-          title: (currentTestimonial as any).name || '' 
+          file: { url: currentTestimonial.image_url },
+          title: currentTestimonial.name || '' 
         } 
       } : null
     };

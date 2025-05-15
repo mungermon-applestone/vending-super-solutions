@@ -1,5 +1,5 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { BlogPost, AdjacentPost } from '@/types/cms';
 import { isContentfulEntry } from '@/utils/contentfulTypeGuards';
@@ -25,6 +25,11 @@ export function useBlogPosts(options = { limit: 10, skip: 0 }) {
         return entries
           .filter(entry => entry && isContentfulEntry(entry) && entry.fields.visible !== false)
           .map(entry => {
+            if (!isContentfulEntry(entry)) {
+              console.error("[useBlogPosts] Invalid entry format:", entry);
+              return null;
+            }
+            
             const featuredImage = entry.fields.featuredImage ? {
               url: `https:${entry.fields.featuredImage.fields?.file?.url || ''}`,
               title: entry.fields.featuredImage.fields?.title || '',
@@ -49,7 +54,8 @@ export function useBlogPosts(options = { limit: 10, skip: 0 }) {
               fields: entry.fields,
               includes: entry.includes
             } as BlogPost;
-          });
+          })
+          .filter(Boolean) as BlogPost[];
       } catch (error) {
         console.error('[useBlogPosts] Error fetching blog posts:', error);
         throw error;
@@ -81,6 +87,10 @@ export function useBlogPostBySlug(slug: string | undefined) {
         }
         
         const post = entries[0];
+        if (!isContentfulEntry(post)) {
+          console.error("[useBlogPostBySlug] Invalid post format:", post);
+          return null;
+        }
         
         const featuredImage = post.fields.featuredImage ? {
           url: `https:${post.fields.featuredImage.fields?.file?.url || ''}`,
@@ -137,8 +147,15 @@ export function useAdjacentPosts(slug: string | undefined) {
           return { previous: null, next: null };
         }
         
-        const visiblePosts = allPosts.filter(post => post && isContentfulEntry(post) && post.fields.visible !== false);
-        const currentPostIndex = visiblePosts.findIndex(post => post.fields.slug === slug);
+        const visiblePosts = allPosts.filter(post => 
+          post && 
+          isContentfulEntry(post) && 
+          post.fields.visible !== false
+        );
+        
+        const currentPostIndex = visiblePosts.findIndex(post => 
+          isContentfulEntry(post) && post.fields.slug === slug
+        );
         
         if (currentPostIndex === -1) {
           return { previous: null, next: null };
@@ -148,11 +165,11 @@ export function useAdjacentPosts(slug: string | undefined) {
         const nextPost = currentPostIndex < visiblePosts.length - 1 ? visiblePosts[currentPostIndex + 1] : null;
         
         return {
-          previous: previousPost ? {
+          previous: previousPost && isContentfulEntry(previousPost) ? {
             slug: previousPost.fields.slug,
             title: previousPost.fields.title
           } as AdjacentPost : null,
-          next: nextPost ? {
+          next: nextPost && isContentfulEntry(nextPost) ? {
             slug: nextPost.fields.slug,
             title: nextPost.fields.title
           } as AdjacentPost : null
@@ -163,5 +180,54 @@ export function useAdjacentPosts(slug: string | undefined) {
       }
     },
     enabled: !!slug
+  });
+}
+
+/**
+ * Hook for creating a blog post
+ */
+export function useCreateBlogPost() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (postData: any) => {
+      console.log("[useCreateBlogPost] This is a stub implementation while migrating to Contentful");
+      console.warn("[useCreateBlogPost] Blog post creation is now handled through Contentful UI");
+      
+      // Return a mock response for compatibility
+      return {
+        id: `temp-${Date.now()}`,
+        ...postData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blog'] });
+    }
+  });
+}
+
+/**
+ * Hook for updating a blog post
+ */
+export function useUpdateBlogPost() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, postData }: { id: string, postData: any }) => {
+      console.log("[useUpdateBlogPost] This is a stub implementation while migrating to Contentful");
+      console.warn("[useUpdateBlogPost] Blog post updates are now handled through Contentful UI");
+      
+      // Return a mock response for compatibility
+      return {
+        id,
+        ...postData,
+        updated_at: new Date().toISOString()
+      };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blog'] });
+    }
   });
 }

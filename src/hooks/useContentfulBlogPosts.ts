@@ -1,18 +1,27 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
-import { CMS_MODELS } from '@/config/cms';
-import { isContentfulEntry, isContentfulAsset } from '@/utils/contentfulTypeGuards';
-import { safeString } from '@/services/cms/utils/safeTypeUtilities';
+import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 
-// Export the interface for blog posts
 export interface ContentfulBlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  publishDate?: string;
+  id?: string;
+  sys?: {
+    id: string;
+    createdAt?: string;
+    updatedAt?: string;
+    contentType?: {
+      sys: {
+        id: string;
+      }
+    };
+  };
+  title?: string;
+  slug?: string;
   content?: any;
   excerpt?: string;
+  publishDate?: string;
+  published_at?: string;
+  created_at?: string;
+  updated_at?: string;
   featuredImage?: {
     url: string;
     title: string;
@@ -21,11 +30,7 @@ export interface ContentfulBlogPost {
   };
   author?: string;
   tags?: string[];
-  sys: {
-    id: string;
-    createdAt?: string;
-    updatedAt?: string;
-  };
+  status?: 'draft' | 'published' | 'archived';
   fields?: {
     title: string;
     slug: string;
@@ -35,93 +40,95 @@ export interface ContentfulBlogPost {
     featuredImage?: any;
     author?: string;
     tags?: string[];
+    status?: 'draft' | 'published' | 'archived';
+    visible?: boolean;
   };
-  // For BlogPost compatibility
-  status?: string;
-  published_at?: string;
-  created_at?: string;
-  updated_at?: string;
-  // Support for includes (used for rich text resolution)
   includes?: any;
 }
 
-export interface BlogPostQueryOptions {
-  limit?: number;
-  skip?: number;
-  order?: string;
-  status?: string; // Added for compatibility
-}
-
-// Updated hook to not require parameters
-export function useContentfulBlogPosts(options?: BlogPostQueryOptions) {
+/**
+ * Hook to fetch all blog posts with options
+ */
+export function useContentfulBlogPosts(options = { limit: 10, skip: 0 }) {
   return useQuery({
     queryKey: ['contentful', 'blogPosts', options],
     queryFn: async () => {
       try {
-        const queryOptions: Record<string, any> = {
-          limit: options?.limit || 100,
-          skip: options?.skip || 0,
-          order: options?.order || '-fields.publishDate',
-          include: 2, // Include linked assets and entries for rich text resolution
-        };
+        const entries = await fetchContentfulEntries('blogPost', {
+          order: '-fields.publishDate',
+          limit: options.limit,
+          skip: options.skip,
+          include: 2
+        });
         
-        const entries = await fetchContentfulEntries(CMS_MODELS.BLOG_POST, queryOptions);
-        
-        // Transform entries to match expected format
-        return entries.map(entry => {
-          if (!isContentfulEntry(entry)) {
-            console.error('[useContentfulBlogPosts] Invalid entry format:', entry);
-            return null;
-          }
-          
-          // Featured image handling with type safety
-          let featuredImage = undefined;
-          if (entry.fields.featuredImage && isContentfulAsset(entry.fields.featuredImage)) {
-            featuredImage = {
-              url: `https:${entry.fields.featuredImage.fields.file.url}`,
-              title: safeString(entry.fields.featuredImage.fields.title || ''),
-              width: entry.fields.featuredImage.fields.file?.details?.image?.width,
-              height: entry.fields.featuredImage.fields.file?.details?.image?.height
-            };
-          }
-          
-          const publishDate = entry.fields?.publishDate ? safeString(entry.fields.publishDate) : undefined;
-          
-          const blogPost: ContentfulBlogPost = {
-            id: entry.sys?.id || '',
-            title: safeString(entry.fields?.title || 'Untitled'),
-            slug: safeString(entry.fields?.slug || ''),
-            publishDate,
-            published_at: publishDate, // For backward compatibility
-            content: entry.fields?.content,
-            excerpt: entry.fields?.excerpt ? safeString(entry.fields.excerpt) : undefined,
-            featuredImage,
-            author: entry.fields?.author ? safeString(entry.fields.author) : undefined,
-            tags: Array.isArray(entry.fields?.tags) 
-              ? entry.fields.tags.map(tag => safeString(tag)) 
-              : [],
-            sys: {
-              id: entry.sys?.id || '',
-              createdAt: entry.sys?.createdAt,
-              updatedAt: entry.sys?.updatedAt
-            },
-            fields: entry.fields,
-            status: 'published', // Default status for Contentful posts
-            created_at: entry.sys?.createdAt,
-            updated_at: entry.sys?.updatedAt
-          };
-          
-          // Add includes for rich text resolution if they exist in the original entry
-          if ((entry as any).includes) {
-            blogPost.includes = (entry as any).includes;
-          }
-          
-          return blogPost;
-        }).filter(Boolean) as ContentfulBlogPost[];
+        return entries.map(entry => ({
+          sys: entry.sys,
+          id: entry.sys.id,
+          title: entry.fields.title,
+          slug: entry.fields.slug,
+          content: entry.fields.content,
+          excerpt: entry.fields.excerpt,
+          publishDate: entry.fields.publishDate,
+          status: entry.fields.status || 'published',
+          author: entry.fields.author,
+          tags: entry.fields.tags || [],
+          fields: entry.fields,
+          includes: entry.includes
+        }));
       } catch (error) {
-        console.error('[useContentfulBlogPosts] Error fetching blog posts:', error);
+        console.error('Error fetching blog posts from Contentful:', error);
         return [];
       }
-    }
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+/**
+ * Hook to fetch a single blog post by slug
+ */
+export function useContentfulBlogPost(slug: string | undefined) {
+  return useQuery({
+    queryKey: ['contentful', 'blogPost', slug],
+    queryFn: async () => {
+      if (!slug) return null;
+      
+      try {
+        const entries = await fetchContentfulEntries('blogPost', {
+          'fields.slug': slug,
+          include: 10 // Deep include for rich text content
+        });
+        
+        if (!entries || entries.length === 0) return null;
+        
+        const entry = entries[0];
+        
+        return {
+          sys: entry.sys,
+          id: entry.sys.id,
+          title: entry.fields.title,
+          slug: entry.fields.slug,
+          content: entry.fields.content,
+          excerpt: entry.fields.excerpt,
+          publishDate: entry.fields.publishDate,
+          status: entry.fields.status || 'published',
+          author: entry.fields.author,
+          tags: entry.fields.tags || [],
+          fields: entry.fields,
+          includes: entry.includes,
+          featuredImage: entry.fields.featuredImage ? {
+            url: `https:${entry.fields.featuredImage.fields?.file?.url}`,
+            title: entry.fields.featuredImage.fields?.title || '',
+            width: entry.fields.featuredImage.fields?.file?.details?.image?.width,
+            height: entry.fields.featuredImage.fields?.file?.details?.image?.height
+          } : undefined
+        };
+      } catch (error) {
+        console.error(`Error fetching blog post with slug ${slug}:`, error);
+        return null;
+      }
+    },
+    enabled: !!slug,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

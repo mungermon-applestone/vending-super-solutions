@@ -65,10 +65,13 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
     });
   }
   
+  const title = safeString(entry.fields.title);
+  
   // Create the machine object with proper type casting
   const result: CMSMachine = {
     id: entry.sys.id,
-    title: safeString(entry.fields.title),
+    title: title,
+    name: title, // Explicitly set name to be the same as title for compatibility
     slug: safeString(entry.fields.slug),
     type: safeString(entry.fields.type || 'vending') as any, // Cast to satisfy TypeScript
     description: safeString(entry.fields.description),
@@ -90,9 +93,6 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
     showOnHomepage: !!entry.fields.showOnHomepage,
     homepageOrder: entry.fields.homepageOrder ? Number(entry.fields.homepageOrder) : null
   };
-  
-  // For backward compatibility
-  result.name = result.title;
   
   return result;
 }
