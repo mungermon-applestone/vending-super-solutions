@@ -2,7 +2,7 @@
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Info } from 'lucide-react';
 
@@ -23,13 +23,13 @@ const AdminPage: React.FC = () => {
         
         <Alert className="mb-6">
           <Info className="h-4 w-4" />
-          <AlertTitle>Contentful CMS Integration</AlertTitle>
-          <AlertDescription>
-            <p className="mb-2">
+          <div>
+            <h4 className="font-medium">Contentful CMS Integration</h4>
+            <p className="text-sm">
               This application now uses Contentful as the content management system.
               All content is managed directly through the Contentful web interface.
             </p>
-          </AlertDescription>
+          </div>
         </Alert>
         
         <Card>

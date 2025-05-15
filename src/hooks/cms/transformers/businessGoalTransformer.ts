@@ -1,7 +1,6 @@
 
 import { Asset, Entry } from "contentful";
 import { CMSBusinessGoal, CMSImage } from "@/types/cms";
-import { transformContentfulAsset } from "./testimonialTransformer";
 
 // Interface for the structure of a Contentful Business Goal entry
 export interface ContentfulBusinessGoal {
@@ -19,6 +18,23 @@ export interface ContentfulBusinessGoal {
     id: string;
     createdAt?: string;
     updatedAt?: string;
+  };
+}
+
+/**
+ * Transform a Contentful asset to a CMSImage
+ */
+export function transformContentfulAsset(asset: any | undefined): CMSImage | undefined {
+  if (!asset || !asset.fields || !asset.fields.file || !asset.fields.file.url) {
+    return undefined;
+  }
+  
+  return {
+    id: asset.sys?.id || '',
+    url: `https:${asset.fields.file.url}`,
+    alt: asset.fields.title || '',
+    width: asset.fields.file.details?.image?.width,
+    height: asset.fields.file.details?.image?.height
   };
 }
 

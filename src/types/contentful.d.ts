@@ -61,3 +61,6 @@ export interface ContentfulRichTextDocument {
   data: object;
   content: any[];
 }
+
+// Export the Document type from @contentful/rich-text-types for convenience
+export { Document } from '@contentful/rich-text-types';

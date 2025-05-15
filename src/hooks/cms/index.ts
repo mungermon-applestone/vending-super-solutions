@@ -47,7 +47,7 @@ export {
   useContentfulBusinessGoalBySlug,
 };
 
-// Backward compatibility exports
+// For backward compatibility
 export const useBlogPosts = useContentfulBlogPosts;
 export const useBlogPostBySlug = useContentfulBlogPostBySlug;
 export const useAdjacentPosts = useContentfulAdjacentBlogPosts;

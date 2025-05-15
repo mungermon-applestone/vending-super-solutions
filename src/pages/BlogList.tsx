@@ -3,21 +3,28 @@ import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Link } from 'react-router-dom';
 import BlogCard from '@/components/blog/BlogCard';
-import Pagination from '@/components/ui/Pagination';
-import { useContentfulBlogPosts } from '@/hooks/useBlogData';
+import Pagination from '@/components/ui/pagination';
+import { useContentfulBlogPosts } from '@/hooks/cms';
 import { useSearchParams } from 'react-router-dom';
 
 const BlogList: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   
-  const { data, isLoading, isError } = useContentfulBlogPosts(currentPage);
+  const { data: blogPosts, isLoading, isError } = useContentfulBlogPosts();
+  
+  // Pagination logic
+  const postsPerPage = 9;
+  const totalPosts = blogPosts?.length || 0;
+  const totalPages = Math.ceil(totalPosts / postsPerPage);
+  
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const endIndex = startIndex + postsPerPage;
+  const currentPosts = blogPosts?.slice(startIndex, endIndex) || [];
   
   const handlePageChange = (page: number) => {
     setSearchParams({ page: page.toString() });
   };
-  
-  const totalPages = data ? Math.ceil(data.total / data.limit) : 0;
 
   return (
     <Layout>
@@ -38,9 +45,9 @@ const BlogList: React.FC = () => {
             <h3 className="text-xl font-medium text-red-600 mb-2">Error loading blog posts</h3>
             <p className="text-gray-600">Please try again later.</p>
           </div>
-        ) : data?.posts && data.posts.length > 0 ? (
+        ) : currentPosts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data.posts.map((post) => (
+            {currentPosts.map((post) => (
               <BlogCard key={post.id} post={post} />
             ))}
           </div>
@@ -56,7 +63,7 @@ const BlogList: React.FC = () => {
           </div>
         )}
 
-        {data && totalPages > 1 && (
+        {totalPages > 1 && (
           <div className="mt-10">
             <Pagination
               currentPage={currentPage}

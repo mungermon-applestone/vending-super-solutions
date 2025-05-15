@@ -1,69 +1,48 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
 import { BlogPost } from '@/types/contentful';
 import { formatDistanceToNow } from 'date-fns';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 
 interface BlogCardProps {
   post: BlogPost;
 }
 
-export function BlogCard({ post }: BlogCardProps) {
-  const formattedDate = post.published_date
-    ? formatDistanceToNow(new Date(post.published_date), { addSuffix: true })
-    : 'Unpublished';
+const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
+  const publishedDate = post.published_date ? new Date(post.published_date) : null;
   
-  const truncatedSummary = post.summary && post.summary.length > 160 
-    ? `${post.summary.substring(0, 160)}...` 
-    : post.summary;
-
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
-        <CardTitle className="text-xl">
-          <Link to={`/blog/${post.slug}`} className="hover:text-blue-600 transition-colors">
-            {post.title}
-          </Link>
-        </CardTitle>
-        <CardDescription className="flex items-center text-sm text-muted-foreground">
-          {post.author && (
-            <span className="mr-2">{post.author}</span>
-          )}
-          <span className="mr-2">•</span>
-          <span>{formattedDate}</span>
-          {post.reading_time && (
-            <>
-              <span className="mx-2">•</span>
-              <span>{post.reading_time} min read</span>
-            </>
-          )}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex-grow">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+      <Link to={`/blog/${post.slug}`}>
         {post.featured_image && (
-          <div className="mb-4">
-            <img 
-              src={post.featured_image} 
-              alt={post.title} 
-              className="w-full h-40 object-cover rounded-md"
-            />
-          </div>
+          <img 
+            src={post.featured_image} 
+            alt={post.title} 
+            className="w-full h-48 object-cover"
+          />
         )}
-        <p className="text-muted-foreground">
-          {truncatedSummary || "No summary available for this post."}
-        </p>
-      </CardContent>
-      <CardFooter>
-        <Button variant="outline" asChild className="w-full">
-          <Link to={`/blog/${post.slug}`}>
-            Read More
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
+        <div className="p-5">
+          <h3 className="text-xl font-bold mb-2 line-clamp-2">{post.title}</h3>
+          
+          {post.summary && (
+            <p className="text-gray-600 mb-4 line-clamp-3">{post.summary}</p>
+          )}
+          
+          <div className="flex items-center justify-between text-sm text-gray-500">
+            {publishedDate ? (
+              <span>{formatDistanceToNow(publishedDate, { addSuffix: true })}</span>
+            ) : (
+              <span>Draft</span>
+            )}
+            
+            {post.category && (
+              <span className="bg-gray-100 px-2 py-1 rounded">{post.category}</span>
+            )}
+          </div>
+        </div>
+      </Link>
+    </div>
   );
-}
+};
 
 export default BlogCard;

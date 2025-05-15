@@ -2,7 +2,7 @@
 import React from 'react';
 import { useContentfulBusinessGoalBySlug } from '@/hooks/cms/useContentfulBusinessGoals';
 import { Loader } from '@/components/ui/loader';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/card';
+import { Alert } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 
 interface BusinessGoalDetailProps {
@@ -24,10 +24,12 @@ const BusinessGoalDetail = ({ slug }: BusinessGoalDetailProps) => {
     return (
       <Alert variant="destructive">
         <Info className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          Failed to load business goal data. Please try again later.
-        </AlertDescription>
+        <div>
+          <h4 className="font-medium">Error</h4>
+          <p className="text-sm">
+            Failed to load business goal data. Please try again later.
+          </p>
+        </div>
       </Alert>
     );
   }

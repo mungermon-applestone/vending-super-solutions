@@ -8,28 +8,22 @@ import { Loader } from '@/components/ui/loader';
 
 const BusinessGoalDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: businessGoal, isLoading, error } = useContentfulBusinessGoalBySlug(slug);
+  
+  if (!slug) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-8 text-center">
+          <h1 className="text-2xl font-bold">Error: Missing Business Goal ID</h1>
+          <p className="mt-4">No business goal slug was provided.</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
       <div className="container mx-auto py-8">
-        {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader size="lg" />
-          </div>
-        ) : error ? (
-          <div className="text-center text-red-500">
-            <h2 className="text-2xl font-bold">Error Loading Business Goal</h2>
-            <p>{error instanceof Error ? error.message : 'Unknown error occurred'}</p>
-          </div>
-        ) : !businessGoal ? (
-          <div className="text-center">
-            <h2 className="text-2xl font-bold">Business Goal Not Found</h2>
-            <p>The business goal you're looking for does not exist or has been removed.</p>
-          </div>
-        ) : (
-          <BusinessGoalDetail businessGoal={businessGoal} />
-        )}
+        <BusinessGoalDetail slug={slug} />
       </div>
     </Layout>
   );
