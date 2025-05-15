@@ -9,8 +9,8 @@ let contentfulClientInstance: ContentfulClientApi | null = null;
  * Create and export the Contentful client using environment variables
  */
 export const contentfulClient = createClient({
-  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID || "",
-  accessToken: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || "",
+  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID || "al01e4yh2wq4",
+  accessToken: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || "fxpQth03vfdKzI4VNT_fYg8cD5BwoTiGaa6INIyYync",
   environment: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || "master",
 });
 
