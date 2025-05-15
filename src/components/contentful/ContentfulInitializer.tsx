@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
-import { testContentfulConnection, refreshContentfulClient } from '@/services/contentful/client';
+import { testContentfulConnection, refreshContentfulClient, isContentfulConfigured } from '@/services/contentful/client';
 import { forceContentfulProvider } from '@/services/cms/cmsInit';
-import { isContentfulConfigured, isPreviewEnvironment } from '@/config/cms';
+import { isPreviewEnvironment } from '@/config/cms';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -150,18 +150,5 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
   // Render children when initialized or attempted initialization
   return shouldShowChildren ? <>{children}</> : null;
 };
-
-// Add this declaration to fix TypeScript errors
-declare global {
-  interface Window {
-    _contentfulInitialized?: boolean;
-    _contentfulInitializedSource?: string;
-    env?: {
-      VITE_CONTENTFUL_SPACE_ID?: string;
-      VITE_CONTENTFUL_DELIVERY_TOKEN?: string;
-      VITE_CONTENTFUL_ENVIRONMENT?: string;
-    };
-  }
-}
 
 export default ContentfulInitializer;

@@ -13,12 +13,12 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 
 const Blog = () => {
-  const { isInitialized, error: initError } = useContentfulInit();
+  const { isConnected, error: initError } = useContentfulInit();
   const { data: posts = [], isLoading, error: postsError, refetch } = useContentfulBlogPosts({
     order: '-fields.publishDate' // Explicitly set reverse chronological order
   });
 
-  console.log('[Blog] Contentful initialization status:', { isInitialized, error: initError?.message });
+  console.log('[Blog] Contentful initialization status:', { isConnected, error: initError?.message });
   console.log('[Blog] Posts fetch status:', { 
     isLoading, 
     postsCount: posts.length,
@@ -44,7 +44,7 @@ const Blog = () => {
     );
   }
 
-  if (!isInitialized || isLoading) {
+  if (!isConnected || isLoading) {
     return (
       <Layout>
         <div className="container mx-auto py-16 flex justify-center">

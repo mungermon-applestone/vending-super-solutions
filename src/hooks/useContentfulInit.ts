@@ -70,5 +70,11 @@ export function useContentfulInit() {
     }
   };
   
-  return { isConnected, isLoading, error, refreshConnection };
+  return { 
+    isConnected, 
+    isLoading, 
+    error, 
+    refreshConnection,
+    isInitialized: isConnected // Alias for backward compatibility
+  };
 }

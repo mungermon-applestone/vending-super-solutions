@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { useContactFAQ, FAQ } from '@/hooks/useContactFAQ';
 import ContactFormNew from '@/components/contact/ContactFormNew';
@@ -24,6 +24,14 @@ const ContactContentful = () => {
   const isLoading = isConnectionLoading || isFAQsLoading;
   const error = faqError;
 
+  // Default contact data
+  const contactData = {
+    email: 'info@contentful@example.com',
+    phone: '+1 (555) 987-6543',
+    address: '456 Contentful Ave, Suite 200, San Francisco, CA 94103',
+    hours: 'Monday - Friday: 8:00 AM - 6:00 PM'
+  };
+
   if (isLoading) {
     return <ContactLoadingState />;
   }
@@ -38,7 +46,7 @@ const ContactContentful = () => {
         <h1 className="text-4xl font-bold mb-6">Contact Us</h1>
         
         <div className="mb-16">
-          <ContactCards />
+          <ContactCards data={contactData} />
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">

@@ -19,14 +19,14 @@ export function useTestimonialSection(sectionId: string) {
         }
 
         const section = response.items[0];
-        const testimonials = section.fields.testimonials?.map(
+        const testimonials = section.fields?.testimonials?.map(
           transformContentfulTestimonial
         ) || [];
 
         return {
           id: section.sys.id,
-          title: section.fields.title || "What Our Clients Say",
-          subtitle: section.fields.subtitle || "",
+          title: section.fields?.title || "What Our Clients Say",
+          subtitle: section.fields?.subtitle || "",
           testimonials,
         };
       } catch (error) {

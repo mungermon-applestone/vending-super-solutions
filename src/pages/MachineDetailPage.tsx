@@ -16,7 +16,9 @@ const MachineDetailPage = () => {
 
   // Force use of Contentful provider for this page
   useEffect(() => {
-    forceContentfulProvider();
+    if (typeof forceContentfulProvider === 'function') {
+      forceContentfulProvider();
+    }
     // Scroll to the top of the page when component mounts
     window.scrollTo(0, 0);
   }, []);

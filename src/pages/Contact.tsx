@@ -24,6 +24,14 @@ const Contact = () => {
     isLoading
   });
   
+  // Default contact data
+  const contactData = {
+    email: 'info@example.com',
+    phone: '+1 (555) 123-4567',
+    address: '123 Business Ave, Suite 100, New York, NY 10001',
+    hours: 'Monday - Friday: 9:00 AM - 5:00 PM'
+  };
+  
   return (
     <Layout>
       <div className="container py-12">
@@ -31,7 +39,7 @@ const Contact = () => {
         
         {/* Contact cards section */}
         <div className="mb-16">
-          <ContactCards />
+          <ContactCards data={contactData} />
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">

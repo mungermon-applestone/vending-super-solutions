@@ -1,14 +1,18 @@
 
 export interface ContentfulTestimonialSection {
-  sys?: {
+  sys: {
     id: string;
   };
-  fields?: {
+  fields: {
     title?: string;
     subtitle?: string;
     testimonials?: ContentfulTestimonial[];
     pageKey?: string;
   };
+  id?: string;
+  title?: string;
+  subtitle?: string;
+  testimonials?: ContentfulTestimonial[];
 }
 
 export interface ContentfulTestimonial {
