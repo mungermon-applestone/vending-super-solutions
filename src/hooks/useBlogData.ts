@@ -3,6 +3,21 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { BlogPost, AdjacentPost } from '@/types/cms';
 import { isContentfulEntry } from '@/utils/contentfulTypeGuards';
+import { safeString } from '@/services/cms/utils/safeTypeUtilities';
+
+// Helper to safely extract string fields from Contentful entries
+function getEntryField(entry: any, fieldName: string, defaultValue: string = ''): string {
+  if (!entry || !entry.fields || typeof entry.fields !== 'object') {
+    return defaultValue;
+  }
+  
+  const field = entry.fields[fieldName];
+  if (field === null || field === undefined) {
+    return defaultValue;
+  }
+  
+  return safeString(field);
+}
 
 /**
  * Hook to fetch all blog posts
@@ -23,7 +38,7 @@ export function useBlogPosts(options = { limit: 10, skip: 0 }) {
         }
         
         return entries
-          .filter(entry => entry && isContentfulEntry(entry) && entry.fields.visible !== false)
+          .filter(entry => isContentfulEntry(entry) && entry.fields.visible !== false)
           .map(entry => {
             if (!isContentfulEntry(entry)) {
               console.error("[useBlogPosts] Invalid entry format:", entry);
@@ -39,17 +54,17 @@ export function useBlogPosts(options = { limit: 10, skip: 0 }) {
             
             return {
               id: entry.sys.id,
-              title: entry.fields.title,
-              slug: entry.fields.slug,
-              excerpt: entry.fields.excerpt,
+              title: getEntryField(entry, 'title'),
+              slug: getEntryField(entry, 'slug'),
+              excerpt: getEntryField(entry, 'excerpt'),
               content: entry.fields.content,
-              status: entry.fields.status || 'published',
-              published_at: entry.fields.publishDate,
-              created_at: entry.sys.createdAt,
-              updated_at: entry.sys.updatedAt,
+              status: getEntryField(entry, 'status', 'published') as 'draft' | 'published' | 'archived',
+              published_at: getEntryField(entry, 'publishDate'),
+              created_at: entry.sys.createdAt || new Date().toISOString(),
+              updated_at: entry.sys.updatedAt || new Date().toISOString(),
               featuredImage,
-              author: entry.fields.author,
-              tags: entry.fields.tags,
+              author: getEntryField(entry, 'author'),
+              tags: Array.isArray(entry.fields.tags) ? entry.fields.tags : [],
               sys: entry.sys,
               fields: entry.fields,
               includes: entry.includes
@@ -101,21 +116,21 @@ export function useBlogPostBySlug(slug: string | undefined) {
         
         return {
           id: post.sys.id,
-          title: post.fields.title,
-          slug: post.fields.slug,
-          excerpt: post.fields.excerpt,
+          title: getEntryField(post, 'title'),
+          slug: getEntryField(post, 'slug'),
+          excerpt: getEntryField(post, 'excerpt'),
           content: post.fields.content,
-          status: post.fields.status || 'published',
-          published_at: post.fields.publishDate,
-          created_at: post.sys.createdAt,
-          updated_at: post.sys.updatedAt,
+          status: getEntryField(post, 'status', 'published') as 'draft' | 'published' | 'archived',
+          published_at: getEntryField(post, 'publishDate'),
+          created_at: post.sys.createdAt || new Date().toISOString(),
+          updated_at: post.sys.updatedAt || new Date().toISOString(),
           featuredImage,
-          author: post.fields.author,
-          tags: post.fields.tags,
+          author: getEntryField(post, 'author'),
+          tags: Array.isArray(post.fields.tags) ? post.fields.tags : [],
           sys: post.sys,
           fields: post.fields,
           includes: post.includes
-        };
+        } as BlogPost;
       } catch (error) {
         console.error(`[useBlogPostBySlug] Error fetching blog post with slug: ${slug}`, error);
         throw error;
@@ -148,13 +163,11 @@ export function useAdjacentPosts(slug: string | undefined) {
         }
         
         const visiblePosts = allPosts.filter(post => 
-          post && 
-          isContentfulEntry(post) && 
-          post.fields.visible !== false
+          isContentfulEntry(post) && post.fields.visible !== false
         );
         
         const currentPostIndex = visiblePosts.findIndex(post => 
-          isContentfulEntry(post) && post.fields.slug === slug
+          isContentfulEntry(post) && getEntryField(post, 'slug') === slug
         );
         
         if (currentPostIndex === -1) {
@@ -166,12 +179,12 @@ export function useAdjacentPosts(slug: string | undefined) {
         
         return {
           previous: previousPost && isContentfulEntry(previousPost) ? {
-            slug: previousPost.fields.slug,
-            title: previousPost.fields.title
+            slug: getEntryField(previousPost, 'slug'),
+            title: getEntryField(previousPost, 'title')
           } as AdjacentPost : null,
           next: nextPost && isContentfulEntry(nextPost) ? {
-            slug: nextPost.fields.slug,
-            title: nextPost.fields.title
+            slug: getEntryField(nextPost, 'slug'),
+            title: getEntryField(nextPost, 'title')
           } as AdjacentPost : null
         };
       } catch (error) {

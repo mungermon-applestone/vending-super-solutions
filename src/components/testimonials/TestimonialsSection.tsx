@@ -7,9 +7,13 @@ interface TestimonialsSectionProps {
   data: ContentfulTestimonialSection;
 }
 
-// Type guard to check if a testimonial is in Contentful format
+// Type guard functions to check testimonial format
 const isContentfulTestimonial = (testimonial: any): boolean => {
   return testimonial && typeof testimonial === 'object' && testimonial.fields !== undefined;
+};
+
+const isCMSTestimonial = (testimonial: any): boolean => {
+  return testimonial && typeof testimonial === 'object' && testimonial.name !== undefined && testimonial.testimonial !== undefined;
 };
 
 export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
@@ -40,7 +44,6 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
 
   // Helper function to extract testimonial data regardless of format
   const getTestimonialData = () => {
-    // Check if it's in Contentful format with fields property
     if (isContentfulTestimonial(currentTestimonial)) {
       return {
         quote: currentTestimonial.fields.quote || '',
@@ -48,23 +51,31 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
         position: currentTestimonial.fields.position || '',
         company: currentTestimonial.fields.company || '',
         rating: currentTestimonial.fields.rating || 5,
-        image: currentTestimonial.fields.image
+        imageUrl: currentTestimonial.fields.image?.fields?.file?.url ? 
+          `https:${currentTestimonial.fields.image.fields.file.url}` : undefined,
+        imageAlt: currentTestimonial.fields.image?.fields?.title || ''
+      };
+    } else if (isCMSTestimonial(currentTestimonial)) {
+      return {
+        quote: currentTestimonial.testimonial || '',
+        author: currentTestimonial.name || '',
+        position: currentTestimonial.title || '',
+        company: currentTestimonial.company || '',
+        rating: currentTestimonial.rating || 5,
+        imageUrl: currentTestimonial.image_url || undefined,
+        imageAlt: currentTestimonial.name || ''
       };
     }
     
-    // It's in the CMS format with direct properties
+    // Fallback for unknown format
     return {
-      quote: currentTestimonial.testimonial || '',
-      author: currentTestimonial.name || '',
-      position: currentTestimonial.title || '',
-      company: currentTestimonial.company || '',
-      rating: currentTestimonial.rating || 5,
-      image: currentTestimonial.image_url ? { 
-        fields: { 
-          file: { url: currentTestimonial.image_url },
-          title: currentTestimonial.name || '' 
-        } 
-      } : null
+      quote: '',
+      author: '',
+      position: '',
+      company: '',
+      rating: 5,
+      imageUrl: undefined,
+      imageAlt: ''
     };
   };
 
@@ -108,10 +119,10 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
 
               {/* Author info */}
               <div className="text-center">
-                {testimonialData.image?.fields?.file?.url && (
+                {testimonialData.imageUrl && (
                   <img 
-                    src={`https:${testimonialData.image.fields.file.url}`}
-                    alt={testimonialData.image.fields.title || testimonialData.author}
+                    src={testimonialData.imageUrl}
+                    alt={testimonialData.imageAlt}
                     className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
                   />
                 )}

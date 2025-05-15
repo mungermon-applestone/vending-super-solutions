@@ -1,6 +1,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
+import { isContentfulEntry } from '@/utils/contentfulTypeGuards';
+import { safeString } from '@/services/cms/utils/safeTypeUtilities';
 
 export interface ContentfulBlogPost {
   id?: string;
@@ -47,6 +49,22 @@ export interface ContentfulBlogPost {
 }
 
 /**
+ * Safely extract string field from Contentful entry
+ */
+function getEntryStringField(entry: any, fieldName: string, defaultValue: string = ''): string {
+  if (!entry || !entry.fields || typeof entry.fields !== 'object') {
+    return defaultValue;
+  }
+  
+  const field = entry.fields[fieldName];
+  if (field === null || field === undefined) {
+    return defaultValue;
+  }
+  
+  return String(field);
+}
+
+/**
  * Hook to fetch all blog posts with options
  */
 export function useContentfulBlogPosts(options = { limit: 10, skip: 0 }) {
@@ -54,27 +72,58 @@ export function useContentfulBlogPosts(options = { limit: 10, skip: 0 }) {
     queryKey: ['contentful', 'blogPosts', options],
     queryFn: async () => {
       try {
-        const entries = await fetchContentfulEntries('blogPost', {
-          order: '-fields.publishDate',
+        const queryOptions = {
           limit: options.limit,
           skip: options.skip,
           include: 2
-        });
+        };
         
-        return entries.map(entry => ({
-          sys: entry.sys,
-          id: entry.sys.id,
-          title: entry.fields.title,
-          slug: entry.fields.slug,
-          content: entry.fields.content,
-          excerpt: entry.fields.excerpt,
-          publishDate: entry.fields.publishDate,
-          status: entry.fields.status || 'published',
-          author: entry.fields.author,
-          tags: entry.fields.tags || [],
-          fields: entry.fields,
-          includes: entry.includes
-        }));
+        // Add order if it exists in the options
+        if ('order' in options && typeof options.order === 'string') {
+          Object.assign(queryOptions, { order: options.order });
+        } else {
+          // Default sorting
+          Object.assign(queryOptions, { order: '-fields.publishDate' });
+        }
+        
+        const entries = await fetchContentfulEntries('blogPost', queryOptions);
+        
+        return entries.map(entry => {
+          const processedEntry: ContentfulBlogPost = {
+            sys: entry.sys,
+            id: entry.sys.id,
+            title: getEntryStringField(entry, 'title'),
+            slug: getEntryStringField(entry, 'slug'),
+            content: entry.fields?.content,
+            excerpt: getEntryStringField(entry, 'excerpt'),
+            publishDate: getEntryStringField(entry, 'publishDate'),
+            status: getEntryStringField(entry, 'status', 'published') as 'draft' | 'published' | 'archived',
+            author: getEntryStringField(entry, 'author'),
+            tags: Array.isArray(entry.fields?.tags) ? entry.fields.tags : [],
+            fields: entry.fields,
+          };
+          
+          // Handle includes data
+          if (typeof entry.includes === 'object') {
+            processedEntry.includes = entry.includes;
+          }
+          
+          // Handle featured image if it exists
+          if (entry.fields?.featuredImage) {
+            try {
+              processedEntry.featuredImage = {
+                url: `https:${entry.fields.featuredImage.fields?.file?.url || ''}`,
+                title: entry.fields.featuredImage.fields?.title || '',
+                width: entry.fields.featuredImage.fields?.file?.details?.image?.width,
+                height: entry.fields.featuredImage.fields?.file?.details?.image?.height
+              };
+            } catch (e) {
+              console.error('Error processing featured image:', e);
+            }
+          }
+          
+          return processedEntry;
+        });
       } catch (error) {
         console.error('Error fetching blog posts from Contentful:', error);
         return [];
@@ -103,26 +152,36 @@ export function useContentfulBlogPost(slug: string | undefined) {
         
         const entry = entries[0];
         
-        return {
+        const result: ContentfulBlogPost = {
           sys: entry.sys,
           id: entry.sys.id,
-          title: entry.fields.title,
-          slug: entry.fields.slug,
-          content: entry.fields.content,
-          excerpt: entry.fields.excerpt,
-          publishDate: entry.fields.publishDate,
-          status: entry.fields.status || 'published',
-          author: entry.fields.author,
-          tags: entry.fields.tags || [],
+          title: getEntryStringField(entry, 'title'),
+          slug: getEntryStringField(entry, 'slug'),
+          content: entry.fields?.content,
+          excerpt: getEntryStringField(entry, 'excerpt'),
+          publishDate: getEntryStringField(entry, 'publishDate'),
+          status: getEntryStringField(entry, 'status', 'published') as 'draft' | 'published' | 'archived',
+          author: getEntryStringField(entry, 'author'),
+          tags: Array.isArray(entry.fields?.tags) ? entry.fields.tags : [],
           fields: entry.fields,
-          includes: entry.includes,
-          featuredImage: entry.fields.featuredImage ? {
-            url: `https:${entry.fields.featuredImage.fields?.file?.url}`,
+        };
+        
+        // Handle includes data
+        if (typeof entry.includes === 'object') {
+          result.includes = entry.includes;
+        }
+        
+        // Handle featured image if it exists
+        if (entry.fields?.featuredImage) {
+          result.featuredImage = {
+            url: `https:${entry.fields.featuredImage.fields?.file?.url || ''}`,
             title: entry.fields.featuredImage.fields?.title || '',
             width: entry.fields.featuredImage.fields?.file?.details?.image?.width,
             height: entry.fields.featuredImage.fields?.file?.details?.image?.height
-          } : undefined
-        };
+          };
+        }
+        
+        return result;
       } catch (error) {
         console.error(`Error fetching blog post with slug ${slug}:`, error);
         return null;

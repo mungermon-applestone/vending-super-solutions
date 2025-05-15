@@ -42,7 +42,8 @@ export function isRichTextDocument(obj: any): boolean {
 export function convertContentfulBlogPostToBlogPost(contentfulPost: ContentfulBlogPost): BlogPost {
   return {
     id: contentfulPost.id || contentfulPost.sys?.id || '',
-    title: contentfulPost.title || contentfulPost.fields?.title || '',
+    title: typeof contentfulPost.title === 'string' ? contentfulPost.title : 
+      (contentfulPost.fields?.title || ''),
     slug: contentfulPost.slug || contentfulPost.fields?.slug || '',
     content: contentfulPost.content || contentfulPost.fields?.content || '',
     excerpt: contentfulPost.excerpt || contentfulPost.fields?.excerpt || '',

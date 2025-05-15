@@ -15,7 +15,8 @@ import { RefreshCw } from 'lucide-react';
 const Blog = () => {
   const { isInitialized, error: initError } = useContentfulInit();
   const { data: posts = [], isLoading, error: postsError, refetch } = useContentfulBlogPosts({
-    order: '-fields.publishDate' // Explicitly set reverse chronological order
+    limit: 10,
+    skip: 0
   });
 
   console.log('[Blog] Contentful initialization status:', { isInitialized, error: initError?.message });
@@ -63,7 +64,7 @@ const Blog = () => {
         {posts.length > 0 ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => (
-              <BlogPostCard key={post.id} post={post} />
+              <BlogPostCard key={post.id || post.sys?.id} post={post} />
             ))}
           </div>
         ) : (
@@ -77,35 +78,55 @@ const Blog = () => {
 };
 
 const BlogPostCard = ({ post }: { post: ContentfulBlogPost }) => {
+  // Extract title safely from various possible formats
+  const title = typeof post.title === 'string' ? post.title : 
+    (post.fields?.title || 'Untitled Post');
+  
+  // Extract slug safely
+  const slug = post.slug || post.fields?.slug || '';
+  
+  // Extract excerpt safely
+  const excerpt = post.excerpt || post.fields?.excerpt || '';
+  
+  // Get publish date from various possible formats
+  const publishDate = post.publishDate || post.fields?.publishDate || post.published_at || '';
+  
+  // Handle featured image in different formats
+  const featuredImage = post.featuredImage || 
+    (post.fields?.featuredImage ? {
+      url: `https:${post.fields.featuredImage.fields?.file?.url || ''}`,
+      title: post.fields.featuredImage.fields?.title || '',
+    } : undefined);
+
   return (
     <Card className="h-full flex flex-col hover:shadow-md transition-shadow">
       <CardHeader>
         <CardTitle className="text-xl">
-          <Link to={`/blog/${post.slug}`} className="hover:underline">
-            {post.title}
+          <Link to={`/blog/${slug}`} className="hover:underline">
+            {title}
           </Link>
         </CardTitle>
       </CardHeader>
       
       <CardContent className="flex-grow">
-        {post.featuredImage && (
+        {featuredImage && featuredImage.url && (
           <div className="mb-4">
             <AspectRatio ratio={16/9} className="bg-gray-100 rounded-md overflow-hidden">
               <img 
-                src={post.featuredImage.url} 
-                alt={post.featuredImage.title} 
+                src={featuredImage.url} 
+                alt={featuredImage.title || title} 
                 className="w-full h-full object-cover"
               />
             </AspectRatio>
           </div>
         )}
-        <p className="text-gray-600 line-clamp-3">{post.excerpt}</p>
+        <p className="text-gray-600 line-clamp-3">{excerpt}</p>
       </CardContent>
       
       <CardFooter className="text-sm text-gray-500">
-        {post.publishDate && (
-          <time dateTime={post.publishDate}>
-            Published {formatDistanceToNow(new Date(post.publishDate), { addSuffix: true })}
+        {publishDate && (
+          <time dateTime={publishDate}>
+            Published {formatDistanceToNow(new Date(publishDate), { addSuffix: true })}
           </time>
         )}
       </CardFooter>

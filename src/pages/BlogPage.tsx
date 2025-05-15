@@ -12,6 +12,7 @@ import ContentfulErrorBoundary from "@/components/common/ContentfulErrorBoundary
 import ContentfulFallbackMessage from "@/components/common/ContentfulFallbackMessage";
 import ContentfulInitializer from "@/components/contentful/ContentfulInitializer";
 import { SimpleContactCTA } from "@/components/common";
+import { ContentfulBlogPost } from "@/hooks/useContentfulBlogPosts";
 
 const BlogPage: React.FC = () => {
   return (
@@ -69,9 +70,32 @@ const BlogPageContent: React.FC = () => {
     );
   }
 
+  // Process blog posts to ensure they have the needed properties
+  const processedPosts = blogPosts.map(post => {
+    const title = typeof post.title === 'string' ? post.title : 
+      (post.fields?.title || 'Untitled Post');
+    const slug = post.slug || post.fields?.slug || '';
+    const excerpt = post.excerpt || post.fields?.excerpt || '';
+    const publishDate = post.publishDate || post.fields?.publishDate || post.published_at || '';
+    const featuredImage = post.featuredImage || 
+      (post.fields?.featuredImage ? {
+        url: `https:${post.fields.featuredImage.fields?.file?.url || ''}`,
+        title: post.fields.featuredImage.fields?.title || ''
+      } : undefined);
+      
+    return {
+      ...post,
+      title,
+      slug,
+      excerpt,
+      publishDate,
+      featuredImage
+    } as ContentfulBlogPost;
+  });
+
   // Safely handle blog posts data - ensure they're ordered by publishDate
-  const latestPost = blogPosts && blogPosts.length > 0 ? blogPosts[0] : null;
-  const olderPosts = blogPosts && blogPosts.length > 1 ? blogPosts.slice(1) : [];
+  const latestPost = processedPosts && processedPosts.length > 0 ? processedPosts[0] : null;
+  const olderPosts = processedPosts && processedPosts.length > 1 ? processedPosts.slice(1) : [];
 
   return (
     <ContentfulErrorBoundary contentType="blog">
@@ -96,12 +120,12 @@ const BlogPageContent: React.FC = () => {
             {olderPosts.length > 0 ? (
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {olderPosts.map((post) => (
-                  <Card key={post.id} className="flex flex-col h-full shadow-md hover:shadow-lg transition-shadow">
+                  <Card key={post.id || post.sys?.id} className="flex flex-col h-full shadow-md hover:shadow-lg transition-shadow">
                     {post.featuredImage?.url && (
                       <div className="relative w-full h-48 rounded-t-lg overflow-hidden">
                         <Image
                           src={post.featuredImage.url}
-                          alt={post.featuredImage.title || post.title}
+                          alt={post.featuredImage.title || String(post.title)}
                           className="object-cover w-full h-full"
                         />
                       </div>
