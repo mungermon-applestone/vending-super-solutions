@@ -1,13 +1,17 @@
 
-import { Route } from "react-router-dom";
-import BusinessGoalDetail from "../pages/BusinessGoalDetail";
-import BusinessGoalDetailPage from "../pages/BusinessGoalDetailPage";
+import React from "react";
+import BusinessGoalDetailPage from "@/pages/BusinessGoalDetailPage";
 
-export const businessGoalRoutes = (
-  <>
-    {/* Support both page implementations and URL patterns for backward compatibility */}
-    <Route path="/goals/:slug" element={<BusinessGoalDetail />} />
-    <Route path="/business-goals/:slug" element={<BusinessGoalDetailPage />} />
-    <Route path="/business/:slug" element={<BusinessGoalDetailPage />} /> 
-  </>
-);
+// Export an array of route objects for React Router v6
+export const businessGoalRoutes = [
+  {
+    path: "/goals/:slug",
+    element: <BusinessGoalDetailPage />
+  },
+  {
+    path: "/business/:slug",
+    element: <BusinessGoalDetailPage />
+  }
+];
+
+export default businessGoalRoutes;

@@ -4,125 +4,86 @@ import { contentfulClient } from '@/integrations/contentful/client';
 import { BlogPost, AdjacentPost } from '@/types/contentful';
 
 /**
- * Safely access nested Contentful fields
- */
-const getField = <T>(entry: any, fieldPath: string, defaultValue: T): T => {
-  try {
-    const paths = fieldPath.split('.');
-    let value = entry?.fields;
-    
-    for (const path of paths) {
-      if (value && typeof value === 'object' && path in value) {
-        value = value[path];
-      } else {
-        return defaultValue;
-      }
-    }
-    
-    return value !== undefined && value !== null ? value : defaultValue;
-  } catch (e) {
-    console.error(`Error accessing field ${fieldPath}:`, e);
-    return defaultValue;
-  }
-};
-
-/**
- * Transform a Contentful blog post entry to our application's BlogPost type
- */
-function transformContentfulBlogPost(entry: any): BlogPost {
-  return {
-    id: entry.sys.id,
-    title: getField(entry, 'title', 'Untitled Post'),
-    slug: getField(entry, 'slug', ''),
-    author: getField(entry, 'author', 'Anonymous'),
-    summary: getField(entry, 'summary', ''),
-    content: getField(entry, 'content', ''),
-    status: getField(entry, 'status', 'draft'),
-    featured_image: getField<any>(entry, 'featuredImage', null)?.fields?.file?.url 
-      ? `https:${getField<any>(entry, 'featuredImage', null).fields.file.url}` 
-      : undefined,
-    published_date: getField(entry, 'publishedDate', null) 
-      ? new Date(getField(entry, 'publishedDate', '')).toISOString()
-      : undefined,
-    tags: getField(entry, 'tags', []),
-    category: getField(entry, 'category', ''),
-    reading_time: getField(entry, 'readingTime', 0) || calculateReadingTime(getField(entry, 'content', '')),
-  };
-}
-
-/**
- * Transform a Contentful entry to an AdjacentPost type (used for prev/next navigation)
- */
-function transformToAdjacentPost(entry: any): AdjacentPost {
-  return {
-    id: entry.sys.id,
-    title: getField(entry, 'title', 'Untitled Post'),
-    slug: getField(entry, 'slug', ''),
-  };
-}
-
-/**
- * Calculate estimated reading time based on word count
- */
-function calculateReadingTime(content: string): number {
-  if (!content) return 1;
-  
-  const wordsPerMinute = 200;
-  const words = content.trim().split(/\s+/).length;
-  const readingTime = Math.ceil(words / wordsPerMinute);
-  
-  return Math.max(1, readingTime); // Minimum 1 minute
-}
-
-/**
- * Hook to fetch a list of blog posts from Contentful
+ * Hook to fetch all blog posts 
  */
 export function useContentfulBlogPosts() {
   return useQuery({
-    queryKey: ['contentful', 'blogPosts'],
+    queryKey: ['contentful', 'blog-posts'],
     queryFn: async (): Promise<BlogPost[]> => {
       try {
         const response = await contentfulClient.getEntries({
           content_type: 'blogPost',
-          order: ['-fields.publishedDate'],
+          order: ['-fields.publishDate'], // Most recent first
+          select: ['fields.title', 'fields.slug', 'fields.summary', 'fields.publishDate', 'fields.featuredImage', 'fields.category', 'fields.tags']
         });
-        
-        return response.items.map(transformContentfulBlogPost);
+
+        return response.items.map(item => {
+          const fields = item.fields;
+          return {
+            id: item.sys.id,
+            title: fields.title as string,
+            slug: fields.slug as string,
+            summary: fields.summary as string || '',
+            content: '', // Not fetched in this query for performance
+            published_date: fields.publishDate as string || '',
+            featured_image: fields.featuredImage ? 
+              `https:${(fields.featuredImage as any).fields.file.url}` : undefined,
+            category: fields.category as string || '',
+            tags: fields.tags as string[] || [],
+          };
+        });
       } catch (error) {
         console.error('Error fetching blog posts from Contentful:', error);
-        return [];
+        throw error;
       }
-    },
+    }
   });
 }
 
 /**
  * Hook to fetch a single blog post by slug
  */
-export function useContentfulBlogPostBySlug(slug: string | undefined) {
+export function useContentfulBlogPostBySlug(slug: string) {
   return useQuery({
-    queryKey: ['contentful', 'blogPost', slug],
+    queryKey: ['contentful', 'blog-post', slug],
     queryFn: async (): Promise<BlogPost | null> => {
       if (!slug) return null;
-      
+
       try {
         const response = await contentfulClient.getEntries({
           content_type: 'blogPost',
           'fields.slug': slug,
           limit: 1,
+          include: 2 // Include linked assets and entries
         });
-        
+
         if (response.items.length === 0) {
           return null;
         }
-        
-        return transformContentfulBlogPost(response.items[0]);
+
+        const item = response.items[0];
+        const fields = item.fields;
+
+        return {
+          id: item.sys.id,
+          title: fields.title as string,
+          slug: fields.slug as string,
+          summary: fields.summary as string || '',
+          content: fields.content as string,
+          published_date: fields.publishDate as string || '',
+          featured_image: fields.featuredImage ? 
+            `https:${(fields.featuredImage as any).fields.file.url}` : undefined,
+          category: fields.category as string || '',
+          tags: fields.tags as string[] || [],
+          author: fields.author as string || '',
+          reading_time: fields.readingTime as number || 0,
+        };
       } catch (error) {
-        console.error(`Error fetching blog post with slug "${slug}" from Contentful:`, error);
-        return null;
+        console.error(`Error fetching blog post with slug "${slug}":`, error);
+        throw error;
       }
     },
-    enabled: !!slug,
+    enabled: !!slug
   });
 }
 
@@ -131,70 +92,89 @@ export function useContentfulBlogPostBySlug(slug: string | undefined) {
  */
 export function useContentfulFeaturedBlogPosts(limit = 3) {
   return useQuery({
-    queryKey: ['contentful', 'featuredBlogPosts', limit],
+    queryKey: ['contentful', 'featured-blog-posts', limit],
     queryFn: async (): Promise<BlogPost[]> => {
       try {
         const response = await contentfulClient.getEntries({
           content_type: 'blogPost',
           'fields.featured': true,
-          order: ['-fields.publishedDate'],
-          limit,
+          order: ['-fields.publishDate'], // Most recent first
+          limit: limit
         });
-        
-        return response.items.map(transformContentfulBlogPost);
+
+        return response.items.map(item => {
+          const fields = item.fields;
+          return {
+            id: item.sys.id,
+            title: fields.title as string,
+            slug: fields.slug as string,
+            summary: fields.summary as string || '',
+            content: '', // Not fetched in this query for performance
+            published_date: fields.publishDate as string || '',
+            featured_image: fields.featuredImage ? 
+              `https:${(fields.featuredImage as any).fields.file.url}` : undefined,
+            category: fields.category as string || '',
+            tags: fields.tags as string[] || [],
+          };
+        });
       } catch (error) {
         console.error('Error fetching featured blog posts from Contentful:', error);
-        return [];
+        throw error;
       }
-    },
+    }
   });
 }
 
 /**
- * Hook to fetch adjacent blog posts for navigation
+ * Hook to fetch adjacent blog posts (next and previous)
  */
-export function useContentfulAdjacentBlogPosts(slug: string | undefined) {
+export function useContentfulAdjacentBlogPosts(slug: string) {
   return useQuery({
-    queryKey: ['contentful', 'adjacentPosts', slug],
-    queryFn: async () => {
-      if (!slug) return { previous: null, next: null };
-      
+    queryKey: ['contentful', 'adjacent-blog-posts', slug],
+    queryFn: async (): Promise<{ previous: AdjacentPost | null, next: AdjacentPost | null }> => {
+      if (!slug) {
+        return { previous: null, next: null };
+      }
+
       try {
-        // First, get all posts sorted by publishedDate
-        const allPosts = await contentfulClient.getEntries({
+        // Fetch all blog posts to determine ordering
+        const response = await contentfulClient.getEntries({
           content_type: 'blogPost',
-          order: ['fields.publishedDate'],
-          select: 'sys.id,fields.title,fields.slug,fields.publishedDate',
+          order: ['fields.publishDate'], // Chronological order
+          select: ['fields.title', 'fields.slug', 'fields.publishDate']
         });
+
+        const posts = response.items;
+        let previousPost = null;
+        let nextPost = null;
         
-        if (allPosts.items.length === 0) {
-          return { previous: null, next: null };
+        // Find the current post index
+        const currentIndex = posts.findIndex(post => post.fields.slug === slug);
+        
+        if (currentIndex > 0) {
+          const prev = posts[currentIndex - 1];
+          previousPost = {
+            id: prev.sys.id,
+            title: prev.fields.title as string,
+            slug: prev.fields.slug as string,
+          };
         }
         
-        // Find the index of the current post
-        const currentIndex = allPosts.items.findIndex(
-          item => getField(item, 'slug', '') === slug
-        );
-        
-        if (currentIndex === -1) {
-          return { previous: null, next: null };
+        if (currentIndex < posts.length - 1 && currentIndex !== -1) {
+          const next = posts[currentIndex + 1];
+          nextPost = {
+            id: next.sys.id,
+            title: next.fields.title as string,
+            slug: next.fields.slug as string,
+          };
         }
         
-        // Get previous and next posts
-        const previousPost = currentIndex > 0 
-          ? transformToAdjacentPost(allPosts.items[currentIndex - 1]) 
-          : null;
-          
-        const nextPost = currentIndex < allPosts.items.length - 1 
-          ? transformToAdjacentPost(allPosts.items[currentIndex + 1]) 
-          : null;
-          
         return { previous: previousPost, next: nextPost };
       } catch (error) {
-        console.error(`Error fetching adjacent posts for slug "${slug}" from Contentful:`, error);
+        console.error(`Error fetching adjacent blog posts for "${slug}":`, error);
         return { previous: null, next: null };
       }
     },
-    enabled: !!slug,
+    enabled: !!slug
   });
 }

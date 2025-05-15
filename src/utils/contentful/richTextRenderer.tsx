@@ -1,106 +1,151 @@
 
 import React from 'react';
 import { BLOCKS, INLINES, MARKS, Document } from '@contentful/rich-text-types';
-import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
+import { Options, documentToReactComponents } from '@contentful/rich-text-react-renderer';
+import { Asset } from 'contentful';
+import { Link } from 'react-router-dom';
 
 interface RenderOptions {
-  includedAssets?: any[];
+  includedAssets?: Asset[];
 }
 
 /**
- * Render Contentful rich text to React components
- * @param document Contentful Rich Text document
- * @param options Rendering options
- * @returns React components
+ * Renders Contentful rich text content with custom components
  */
-export function renderRichText(document: Document, options: RenderOptions = {}) {
-  // Extract assets from options
+export const renderRichText = (document: Document, options: RenderOptions = {}) => {
+  if (!document) return null;
+  
   const { includedAssets = [] } = options;
   
-  // Create a map of asset IDs to assets for easy lookup
-  const assetMap = includedAssets.reduce((map, asset) => {
-    map[asset.sys.id] = asset;
-    return map;
-  }, {});
+  // Find an asset by ID in the included assets
+  const findAssetById = (id: string): Asset | undefined => {
+    return includedAssets.find(asset => asset.sys.id === id);
+  };
   
-  const renderOptions = {
+  // Create rendering options for the rich text renderer
+  const renderOptions: Options = {
     renderMark: {
       [MARKS.BOLD]: (text) => <strong>{text}</strong>,
       [MARKS.ITALIC]: (text) => <em>{text}</em>,
       [MARKS.UNDERLINE]: (text) => <u>{text}</u>,
-      [MARKS.CODE]: (text) => <code className="bg-gray-100 p-1 rounded">{text}</code>,
+      [MARKS.CODE]: (text) => <code className="bg-gray-100 p-1 rounded font-mono text-sm">{text}</code>,
     },
     renderNode: {
       [BLOCKS.PARAGRAPH]: (node, children) => <p className="mb-4">{children}</p>,
-      [BLOCKS.HEADING_1]: (node, children) => <h1 className="text-3xl font-bold mb-4">{children}</h1>,
-      [BLOCKS.HEADING_2]: (node, children) => <h2 className="text-2xl font-bold mb-3">{children}</h2>,
-      [BLOCKS.HEADING_3]: (node, children) => <h3 className="text-xl font-bold mb-2">{children}</h3>,
-      [BLOCKS.HEADING_4]: (node, children) => <h4 className="text-lg font-bold mb-2">{children}</h4>,
-      [BLOCKS.HEADING_5]: (node, children) => <h5 className="text-base font-bold mb-2">{children}</h5>,
-      [BLOCKS.HEADING_6]: (node, children) => <h6 className="text-sm font-bold mb-2">{children}</h6>,
-      [BLOCKS.UL_LIST]: (node, children) => <ul className="list-disc pl-5 mb-4">{children}</ul>,
-      [BLOCKS.OL_LIST]: (node, children) => <ol className="list-decimal pl-5 mb-4">{children}</ol>,
+      [BLOCKS.HEADING_1]: (node, children) => <h1 className="text-3xl font-bold mt-8 mb-4">{children}</h1>,
+      [BLOCKS.HEADING_2]: (node, children) => <h2 className="text-2xl font-bold mt-8 mb-3">{children}</h2>,
+      [BLOCKS.HEADING_3]: (node, children) => <h3 className="text-xl font-semibold mt-6 mb-3">{children}</h3>,
+      [BLOCKS.HEADING_4]: (node, children) => <h4 className="text-lg font-semibold mt-5 mb-2">{children}</h4>,
+      [BLOCKS.HEADING_5]: (node, children) => <h5 className="text-base font-semibold mt-4 mb-2">{children}</h5>,
+      [BLOCKS.HEADING_6]: (node, children) => <h6 className="text-sm font-semibold mt-4 mb-2">{children}</h6>,
+      [BLOCKS.UL_LIST]: (node, children) => <ul className="list-disc pl-10 mb-6">{children}</ul>,
+      [BLOCKS.OL_LIST]: (node, children) => <ol className="list-decimal pl-10 mb-6">{children}</ol>,
       [BLOCKS.LIST_ITEM]: (node, children) => <li className="mb-1">{children}</li>,
+      [BLOCKS.HR]: () => <hr className="my-8" />,
       [BLOCKS.QUOTE]: (node, children) => (
-        <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4">{children}</blockquote>
+        <blockquote className="border-l-4 border-gray-200 pl-4 py-1 my-6 italic text-gray-700">
+          {children}
+        </blockquote>
       ),
-      [BLOCKS.HR]: () => <hr className="my-6" />,
+      
+      // Handle embedded assets
       [BLOCKS.EMBEDDED_ASSET]: (node) => {
-        const assetId = node.data.target.sys.id;
-        const asset = assetMap[assetId];
+        const assetId = node.data?.target?.sys?.id;
+        if (!assetId) return null;
         
-        if (!asset) {
-          console.warn(`Asset with ID ${assetId} not found in included assets`);
+        const asset = findAssetById(assetId);
+        if (!asset || !asset.fields || !asset.fields.file) {
+          console.warn('[richTextRenderer] Asset not found or invalid:', assetId);
           return null;
         }
         
-        const { title, description, file } = asset.fields;
-        const { url, contentType } = file;
+        const { file, title, description } = asset.fields;
+        const url = file.url;
+        const contentType = file.contentType || '';
         
-        // Handle different asset types
-        if (contentType.startsWith('image/')) {
+        // Handle images
+        if (contentType.includes('image')) {
           return (
-            <img
-              src={url.startsWith('//') ? `https:${url}` : url}
-              alt={description || title || 'Image'}
-              className="max-w-full my-4 rounded"
-            />
-          );
-        } else if (contentType.startsWith('video/')) {
-          return (
-            <video
-              controls
-              className="max-w-full my-4 rounded"
-              title={title || 'Video'}
-            >
-              <source src={url.startsWith('//') ? `https:${url}` : url} type={contentType} />
-              Your browser does not support the video tag.
-            </video>
+            <figure className="my-8">
+              <img 
+                src={`https:${url}`} 
+                alt={description || title || 'Content image'} 
+                className="rounded-lg max-w-full mx-auto"
+              />
+              {title && <figcaption className="text-center text-sm text-gray-500 mt-2">{title}</figcaption>}
+            </figure>
           );
         }
         
-        // Fallback for other asset types
-        return <a href={url} target="_blank" rel="noreferrer">{title || 'Download asset'}</a>;
+        // Handle videos
+        if (contentType.includes('video')) {
+          return (
+            <figure className="my-8">
+              <video 
+                controls 
+                className="rounded-lg max-w-full mx-auto"
+                title={title || 'Content video'}
+              >
+                <source src={`https:${url}`} type={contentType} />
+                Your browser does not support the video tag.
+              </video>
+              {title && <figcaption className="text-center text-sm text-gray-500 mt-2">{title}</figcaption>}
+            </figure>
+          );
+        }
+        
+        // Handle PDFs and other files
+        return (
+          <div className="my-6 p-4 border rounded-lg bg-gray-50">
+            <a 
+              href={`https:${url}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline flex items-center"
+            >
+              📎 {title || 'Download file'}
+            </a>
+            {description && <p className="text-sm text-gray-500 mt-1">{description}</p>}
+          </div>
+        );
       },
+      
+      // Handle hyperlinks
       [INLINES.HYPERLINK]: (node, children) => {
         const { uri } = node.data;
+        const isInternal = uri.startsWith('/') || uri.includes(window.location.hostname);
+        
+        if (isInternal) {
+          // Handle internal links with React Router
+          const path = uri.replace(/https?:\/\/[^/]+/, '');
+          return <Link to={path} className="text-blue-600 hover:underline">{children}</Link>;
+        }
+        
+        // External links
         return (
           <a 
             href={uri} 
-            target={uri.startsWith('http') ? '_blank' : undefined}
-            rel={uri.startsWith('http') ? 'noreferrer' : undefined}
+            target="_blank" 
+            rel="noopener noreferrer"
             className="text-blue-600 hover:underline"
           >
             {children}
           </a>
         );
       },
+      
+      // Handle entry hyperlinks
       [INLINES.ENTRY_HYPERLINK]: (node, children) => {
-        // This could be expanded to handle different types of linked entries
+        // Would need to implement entry resolution
         return <span className="text-blue-600">{children}</span>;
       },
     },
   };
   
-  return documentToReactComponents(document, renderOptions);
-}
+  try {
+    return documentToReactComponents(document, renderOptions);
+  } catch (error) {
+    console.error('[richTextRenderer] Error rendering rich text:', error);
+    return <p className="text-red-500">Error rendering content. Please try again later.</p>;
+  }
+};

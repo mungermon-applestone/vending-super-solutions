@@ -1,10 +1,11 @@
+
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CMSBusinessGoal } from '@/types/cms';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
+import MachineTypeIcon from '@/components/ui/icons/MachineTypeIcon';
 import BusinessGoalsCompact from './BusinessGoalsCompact';
 
 interface BusinessGoalsGridProps {

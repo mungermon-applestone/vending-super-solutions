@@ -16,7 +16,7 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
 
 // Import business goal routes
-import businessGoalRoutes from "./routes/businessGoalRoutes";
+import { businessGoalRoutes } from "./routes/businessGoalRoutes";
 
 // Create and export the router
 export const router = createBrowserRouter([
@@ -60,7 +60,7 @@ export const router = createBrowserRouter([
         path: "/terms-of-service",
         element: <TermsOfService />,
       },
-      // Include business goal routes
+      // Include business goal routes as separate routes
       ...businessGoalRoutes,
     ],
   },

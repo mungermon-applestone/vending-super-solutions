@@ -1,4 +1,3 @@
-
 /**
  * Slug matching functionality - main entry point
  * Centralized module for all slug handling
@@ -60,6 +59,64 @@ export {
 export { 
   exactSlugMatch 
 } from './slug/normalize';
+
+/**
+ * Normalize a slug to canonical format
+ * Removes special characters and ensures consistent formatting
+ */
+export function normalizeSlug(slug: string): string {
+  if (!slug) return '';
+  
+  // Convert to lowercase, replace spaces with hyphens
+  let normalizedSlug = slug.toLowerCase().trim();
+  
+  // Replace non-alphanumeric characters (except hyphens) with hyphens
+  normalizedSlug = normalizedSlug.replace(/[^a-z0-9-]/g, '-');
+  
+  // Replace multiple consecutive hyphens with a single hyphen
+  normalizedSlug = normalizedSlug.replace(/-+/g, '-');
+  
+  // Remove leading and trailing hyphens
+  normalizedSlug = normalizedSlug.replace(/^-|-$/g, '');
+  
+  return normalizedSlug;
+}
+
+/**
+ * Get the canonical form of a slug
+ * This will be used to ensure consistent routing
+ */
+export function getCanonicalSlug(slug: string): string {
+  return normalizeSlug(slug);
+}
+
+/**
+ * Map of redirects for legacy slugs
+ */
+const slugRedirectMap: Record<string, string> = {
+  // Add any specific legacy slug mappings here
+  'business-goals': 'business-goals',
+  'goals': 'business-goals',
+  'business': 'business-goals',
+};
+
+/**
+ * Resolve a slug to its canonical form, handling any legacy redirects
+ */
+export function resolveSlug(slug: string): string {
+  if (!slug) return '';
+  
+  // First normalize the slug
+  const normalizedSlug = normalizeSlug(slug);
+  
+  // Check if we have a specific redirect for this slug
+  if (slugRedirectMap[normalizedSlug]) {
+    return slugRedirectMap[normalizedSlug];
+  }
+  
+  // Otherwise return the normalized slug
+  return normalizedSlug;
+}
 
 /**
  * Comprehensive function to resolve a slug to its best match

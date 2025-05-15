@@ -1,13 +1,10 @@
 
 import React, { lazy, Suspense } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import routes from './routes';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './routes';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
-
-// Create optimized router with performance monitoring
-const router = createBrowserRouter(routes);
 
 // Loading fallback component
 const LoadingFallback = () => (
