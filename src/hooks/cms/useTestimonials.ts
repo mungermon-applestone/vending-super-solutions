@@ -1,16 +1,19 @@
 
-import { useQuery } from '@tanstack/react-query';
-import * as cmsService from '@/services/cms';
-import { CMSTestimonial } from '@/types/cms';
-import { createQueryOptions } from './useQueryDefaults';
+import { useContentfulTestimonials } from "./useContentfulTestimonials";
+import { logDeprecation } from "@/services/cms/utils/deprecation";
 
 /**
  * Hook to fetch all testimonials
+ * This is a wrapper around useContentfulTestimonials for backward compatibility
  */
 export function useTestimonials() {
-  return useQuery({
-    queryKey: ['testimonials'],
-    queryFn: cmsService.getTestimonials,
-    ...createQueryOptions<CMSTestimonial[]>()
-  });
+  logDeprecation("useTestimonials", "Use useContentfulTestimonials directly");
+  return useContentfulTestimonials();
 }
+
+/**
+ * Export all testimonial hooks
+ */
+export {
+  useContentfulTestimonials
+};

@@ -1,51 +1,30 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { CMSBusinessGoal } from '@/types/cms';
+import { useContentfulBusinessGoals, useContentfulBusinessGoalBySlug } from "./useContentfulBusinessGoals";
+import { logDeprecation } from "@/services/cms/utils/deprecation";
 
 /**
- * Custom hook to fetch all business goals
+ * Hook to fetch all business goals
+ * This is a wrapper around useContentfulBusinessGoals for backward compatibility
  */
-export function useBusinessGoals(options?: { 
-  visibleOnly?: boolean,
-  showOnHomepageOnly?: boolean 
-}) {
-  return useQuery({
-    queryKey: ['businessGoals', options],
-    queryFn: async () => {
-      console.log('[useBusinessGoals] Fetching business goals with options:', options);
-      
-      try {
-        // Dynamically import to avoid circular dependencies
-        const { fetchBusinessGoals } = await import('@/services/cms/contentTypes/businessGoals');
-        
-        const filters: Record<string, any> = {};
-        
-        if (options?.visibleOnly) {
-          filters.visible = true;
-        }
-        
-        if (options?.showOnHomepageOnly) {
-          filters.showOnHomepage = true;
-        }
-        
-        const businessGoals = await fetchBusinessGoals({ 
-          filters,
-          sort: options?.showOnHomepageOnly ? 'homepage_order' : 'display_order'
-        });
-        
-        console.log(`[useBusinessGoals] Successfully fetched ${businessGoals.length} business goals`);
-        return businessGoals;
-      } catch (error) {
-        console.error('[useBusinessGoals] Error fetching business goals:', error);
-        throw error;
-      }
-    },
-    retry: 1,
-    meta: {
-      onError: (error: Error) => {
-        toast.error(`Error loading business goals: ${error.message}`);
-      }
-    }
-  });
+export function useBusinessGoals() {
+  logDeprecation("useBusinessGoals", "Use useContentfulBusinessGoals directly");
+  return useContentfulBusinessGoals();
 }
+
+/**
+ * Hook to fetch a single business goal by slug
+ * This is a wrapper around useContentfulBusinessGoalBySlug for backward compatibility
+ * @param slug The slug of the business goal to fetch
+ */
+export function useBusinessGoalBySlug(slug: string | undefined) {
+  logDeprecation("useBusinessGoalBySlug", "Use useContentfulBusinessGoalBySlug directly");
+  return useContentfulBusinessGoalBySlug(slug);
+}
+
+/**
+ * Export all business goal hooks
+ */
+export {
+  useContentfulBusinessGoals,
+  useContentfulBusinessGoalBySlug
+};

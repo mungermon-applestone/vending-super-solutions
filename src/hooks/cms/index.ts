@@ -1,29 +1,14 @@
+// Re-export all CMS hooks for ease of use
+// All hooks should use Contentful as the source of truth
 
-import { useProductTypes, useProductType } from './useProductTypes';
-import { useBusinessGoals } from './useBusinessGoals';
-import { useBusinessGoal } from './useBusinessGoal';
-import { useMachines, useMachine } from './useMachines';
-import { useTechnologies, useTechnology } from './useTechnologies';
-import { useTestimonials } from './useTestimonials';
-import { 
-  useCloneProductType,
-  useCloneBusinessGoal,
-  useCloneTechnology,
-  useCloneMachine
-} from './useCloneCMS';
-
+// Business Goals
 export {
-  useProductTypes, 
-  useProductType,
+  useContentfulBusinessGoals,
+  useContentfulBusinessGoalBySlug,
+  // Legacy hooks (using Contentful internally)
   useBusinessGoals,
-  useBusinessGoal,
-  useMachines,
-  useMachine,
-  useTechnologies,
-  useTechnology,
-  useTestimonials,
-  useCloneProductType,
-  useCloneBusinessGoal,
-  useCloneTechnology,
-  useCloneMachine
-};
+  useBusinessGoalBySlug
+} from './useBusinessGoals';
+
+// Export other hooks as they are implemented
+// Each content type should have its own file and transformer
