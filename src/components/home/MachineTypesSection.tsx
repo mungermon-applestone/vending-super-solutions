@@ -1,130 +1,104 @@
 
-import { Button } from '@/components/ui/button';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { getProductTypes } from '@/services/cms';
-import { CMSProductType } from '@/types/cms';
-import { normalizeSlug } from '@/services/cms/utils/slugMatching';
+import { createClient } from 'contentful';
+import { Loader2 } from 'lucide-react';
 
-interface ProductCardProps {
+// Contentful client setup
+const client = createClient({
+  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
+  accessToken: import.meta.env.VITE_CONTENTFUL_DELIVERY_API_KEY || '',
+});
+
+// Machine type interface
+interface MachineType {
+  id: string;
   title: string;
+  slug: string;
   description: string;
-  image?: string;
-  path: string;
+  imageUrl?: string;
 }
 
-const ProductCard = ({ title, description, image, path }: ProductCardProps) => {
-  return (
-    <div className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow">
-      <img 
-        src={image || "https://images.unsplash.com/photo-1604719312566-8912e9227c6a"} 
-        alt={title} 
-        className="w-full h-48 object-cover"
-      />
-      <div className="p-5">
-        <h3 className="text-xl font-semibold mb-2">{title}</h3>
-        <p className="text-gray-600 mb-4 line-clamp-2">{description}</p>
-        <Button asChild variant="outline" className="w-full">
-          <Link to={path} className="flex items-center justify-center">
-            Learn more <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-        </Button>
-      </div>
-    </div>
-  );
-};
+// Transform Contentful machine entry to our interface
+const transformMachine = (entry: any): MachineType => ({
+  id: entry.sys.id,
+  title: entry.fields.title || 'Untitled Machine',
+  slug: entry.fields.slug || '',
+  description: entry.fields.description || '',
+  imageUrl: entry.fields.image?.fields?.file?.url 
+    ? `https:${entry.fields.image.fields.file.url}` 
+    : undefined
+});
 
-const ProductTypesSection = () => {
-  const { data: productTypes = [], isLoading } = useQuery({
-    queryKey: ['productTypes'],
-    queryFn: () => getProductTypes(),
+const MachineTypesSection: React.FC = () => {
+  // Fetch machine types from Contentful
+  const { data: machineTypes, isLoading, error } = useQuery({
+    queryKey: ['machineTypes'],
+    queryFn: async () => {
+      const entries = await client.getEntries({
+        content_type: 'machine',
+        order: ['fields.title'],
+      });
+      
+      return entries.items.map(transformMachine);
+    }
   });
 
-  const staticProductTypes = [
-    {
-      title: "Grocery",
-      description: "Automate grocery sales with temperature-controlled vending for snacks, drinks, and everyday essentials.",
-      image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a",
-      path: "/products/grocery"
-    },
-    {
-      title: "Vape & Cannabis",
-      description: "Secure solutions for age-restricted products with ID verification and compliance features.",
-      image: "https://images.unsplash.com/photo-1560913210-91e811632701",
-      path: "/products/vape"
-    },
-    {
-      title: "Fresh Food",
-      description: "Temperature-monitored vending for fresh meals, salads, and sandwiches with extended shelf life tracking.",
-      image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-      path: "/products/fresh-food"
-    },
-    {
-      title: "Cosmetics",
-      description: "Premium display options for beauty products with detailed product information access.",
-      image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348",
-      path: "/products/cosmetics"
-    }
-  ];
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      </div>
+    );
+  }
 
-  const displayProductTypes = productTypes && productTypes.length > 0 
-    ? productTypes.map((product: CMSProductType) => ({
-        title: product.title,
-        description: product.description,
-        image: product.image?.url || "",
-        path: `/products/${normalizeSlug(product.slug)}`
-      }))
-    : staticProductTypes;
-  
-  const featuredProductTypes = displayProductTypes.slice(0, 4);
-  
+  if (error || !machineTypes) {
+    return (
+      <div className="bg-red-50 p-4 rounded-lg">
+        <p className="text-red-800">
+          Could not load machine types. Please try again later.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <section className="py-16 md:py-24">
-      <div className="container-wide">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-              Sell Any Product Type
-            </h2>
-            <p className="subtitle max-w-2xl">
-              Our versatile vending software adapts to various product categories, providing specialized features for each.
-            </p>
-          </div>
-          <Button asChild className="mt-4 md:mt-0">
-            <Link to="/products">View All Product Types</Link>
-          </Button>
+    <section className="py-16 bg-gray-50">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold">Our Machine Types</h2>
+          <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
+            We offer a variety of machine types to meet your specific needs
+          </p>
         </div>
-        
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="rounded-lg overflow-hidden shadow-md bg-white p-4">
-                <div className="animate-pulse">
-                  <div className="bg-gray-300 h-48 w-full mb-4"></div>
-                  <div className="h-6 bg-gray-300 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-gray-300 rounded w-full mb-4"></div>
-                  <div className="h-10 bg-gray-300 rounded w-full"></div>
-                </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {machineTypes.map((machine) => (
+            <div key={machine.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+              {machine.imageUrl && (
+                <img 
+                  src={machine.imageUrl} 
+                  alt={machine.title} 
+                  className="w-full h-48 object-cover"
+                />
+              )}
+              <div className="p-6">
+                <h3 className="text-xl font-bold mb-2">{machine.title}</h3>
+                <p className="text-gray-600 mb-4">{machine.description}</p>
+                <Link 
+                  to={`/machines/${machine.slug}`}
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Learn more
+                </Link>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProductTypes.map((product, index) => (
-              <ProductCard 
-                key={index}
-                title={product.title}
-                description={product.description}
-                image={product.image}
-                path={product.path}
-              />
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
 };
 
-export default ProductTypesSection;
+export default MachineTypesSection;

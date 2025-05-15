@@ -7,13 +7,6 @@ import { logDeprecation } from "@/services/cms/utils/deprecation";
  * This is a wrapper around useContentfulTestimonials for backward compatibility
  */
 export function useTestimonials() {
-  logDeprecation("useTestimonials", "Use useContentfulTestimonials directly");
+  logDeprecation("useTestimonials", "useContentfulTestimonials directly");
   return useContentfulTestimonials();
 }
-
-/**
- * Export all testimonial hooks
- */
-export {
-  useContentfulTestimonials
-};

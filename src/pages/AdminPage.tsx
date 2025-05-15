@@ -1,16 +1,21 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Info } from 'lucide-react';
-import { getContentfulRedirectUrl } from '@/services/cms/utils/deprecation';
+
+// Get Contentful space URL from environment variable
+const CONTENTFUL_SPACE_URL = import.meta.env.VITE_CONTENTFUL_SPACE_URL || 'https://app.contentful.com/';
 
 const AdminPage = () => {
+  const navigate = useNavigate();
+  
+  // Redirect to Contentful web app
   const openContentfulWebApp = () => {
-    const url = getContentfulRedirectUrl('');
-    window.open(url, '_blank');
+    window.open(CONTENTFUL_SPACE_URL, '_blank');
   };
 
   return (
@@ -20,14 +25,11 @@ const AdminPage = () => {
         
         <Alert className="mb-6">
           <Info className="h-4 w-4" />
-          <AlertTitle>CMS Migration Complete</AlertTitle>
+          <AlertTitle>Contentful CMS Integration</AlertTitle>
           <AlertDescription>
             <p className="mb-2">
-              This application now uses Contentful as the single source of truth for all content.
-              The legacy admin functionality has been removed in favor of direct Contentful management.
-            </p>
-            <p>
-              Please use the Contentful web app to manage your content.
+              This application now uses Contentful as the content management system.
+              All content is managed directly through the Contentful web interface.
             </p>
           </AlertDescription>
         </Alert>

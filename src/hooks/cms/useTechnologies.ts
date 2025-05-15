@@ -1,68 +1,77 @@
 
 import { useQuery } from '@tanstack/react-query';
-import * as cmsService from '@/services/cms';
+import { createClient } from 'contentful';
 import { CMSTechnology } from '@/types/cms';
-import { normalizeSlug, getSlugVariations } from '@/services/cms/utils/slugMatching';
-import { createQueryOptions } from './useQueryDefaults';
+
+// Contentful client setup
+const client = createClient({
+  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
+  accessToken: import.meta.env.VITE_CONTENTFUL_DELIVERY_API_KEY || '',
+});
+
+// Transform Contentful technology entry to our CMSTechnology type
+const transformTechnology = (entry: any): CMSTechnology => {
+  return {
+    id: entry.sys.id,
+    title: entry.fields.title || 'Untitled Technology',
+    slug: entry.fields.slug || '',
+    description: entry.fields.description || '',
+    image_url: entry.fields.image?.fields?.file?.url 
+      ? `https:${entry.fields.image.fields.file.url}` 
+      : undefined,
+    image_alt: entry.fields.imageAlt || '',
+    // You can add more fields as needed
+  };
+};
 
 /**
  * Hook to fetch all technologies
  */
-export function useTechnologies() {
+export function useContentfulTechnologies() {
   return useQuery({
     queryKey: ['technologies'],
-    queryFn: () => cmsService.getTechnologies(),
-    ...createQueryOptions<CMSTechnology[]>()
+    queryFn: async () => {
+      try {
+        const entries = await client.getEntries({
+          content_type: 'technology',
+          order: ['fields.title'],
+        });
+        
+        return entries.items.map(transformTechnology);
+      } catch (error) {
+        console.error('Failed to fetch technologies:', error);
+        throw error;
+      }
+    }
   });
 }
 
 /**
- * Hook to fetch a specific technology by slug
+ * Hook to fetch a technology by slug
  */
-export function useTechnology(slug: string | undefined) {
+export function useContentfulTechnologyBySlug(slug: string | undefined) {
   return useQuery({
     queryKey: ['technology', slug],
     queryFn: async () => {
-      if (!slug) {
-        console.warn('[useTechnology] Called with empty slug');
-        return null;
-      }
-      
-      const normalizedSlug = normalizeSlug(slug);
-      console.log(`[useTechnology] Looking up technology with slug: "${normalizedSlug}"`);
+      if (!slug) return null;
       
       try {
-        // Try direct lookup first
-        const result = await cmsService.getTechnologyBySlug(normalizedSlug);
+        const entries = await client.getEntries({
+          content_type: 'technology',
+          'fields.slug': slug,
+          limit: 1,
+        });
         
-        if (result) {
-          return result;
+        if (!entries.items.length) {
+          return null;
         }
         
-        // If direct lookup fails, try slug variations
-        console.log(`[useTechnology] Direct lookup failed, trying slug variations for: "${normalizedSlug}"`);
-        const variations = getSlugVariations(normalizedSlug);
-        
-        for (const variation of variations) {
-          if (variation === normalizedSlug) continue; // Skip the one we already tried
-          
-          console.log(`[useTechnology] Trying variation: "${variation}"`);
-          const resultFromVariation = await cmsService.getTechnologyBySlug(variation);
-          
-          if (resultFromVariation) {
-            console.log(`[useTechnology] Found technology with variation: "${variation}"`);
-            return resultFromVariation;
-          }
-        }
-        
-        console.warn(`[useTechnology] No technology found for slug "${normalizedSlug}" or variations`);
-        return null;
+        return transformTechnology(entries.items[0]);
       } catch (error) {
-        console.error(`[useTechnology] Error fetching technology "${normalizedSlug}":`, error);
-        return null;
+        console.error(`Failed to fetch technology with slug ${slug}:`, error);
+        throw error;
       }
     },
-    enabled: !!slug && slug.trim() !== '',
-    ...createQueryOptions<CMSTechnology | null>()
+    enabled: !!slug,
   });
 }

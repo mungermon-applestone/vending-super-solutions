@@ -1,157 +1,172 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { createClient } from 'contentful';
 import { BlogPost, AdjacentPost } from '@/types/cms';
-import { transformBlogPost, createAdjacentPost, ContentfulBlogPost } from '@/hooks/cms';
+import { transformContentfulBlogPost, transformToAdjacentPost } from './cms/transformers/blogPostTransformer';
 
-// Create a Contentful client
-const contentfulClient = createClient({
-  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID,
-  accessToken: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
-  environment: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || 'master',
+// Contentful client setup
+const client = createClient({
+  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
+  accessToken: import.meta.env.VITE_CONTENTFUL_DELIVERY_API_KEY || '',
 });
 
-// Helper function to validate and transform blog posts
-const transformContentfulBlogPost = (entry: any): BlogPost => {
-  const contentfulEntry = {
-    sys: entry.sys,
-    fields: {
-      title: entry.fields.title || '',
-      slug: entry.fields.slug || '',
-      content: entry.fields.content,
-      summary: entry.fields.summary,
-      author: entry.fields.author,
-      publishedDate: entry.fields.publishedDate,
-      category: entry.fields.category,
-      tags: entry.fields.tags,
-      image: entry.fields.image,
-      status: entry.fields.status || 'draft'
-    }
-  } as ContentfulBlogPost;
-  
-  return transformBlogPost(contentfulEntry);
-};
-
-// Hook to fetch all blog posts
-export const useBlogPosts = (params = { limit: 10, offset: 0 }) => {
+/**
+ * Hook to fetch all blog posts
+ */
+export function useBlogPosts() {
   return useQuery({
-    queryKey: ['blog-posts', params],
+    queryKey: ['blogPosts'],
     queryFn: async () => {
-      const response = await contentfulClient.getEntries({
-        content_type: 'blogPost',
-        limit: params.limit,
-        skip: params.offset,
-        order: '-fields.publishedDate',
-        ...((params as any).status ? { 'fields.status': (params as any).status } : {})
-      });
-
-      const posts = response.items.map(transformContentfulBlogPost);
-      return { posts, total: response.total };
+      try {
+        const entries = await client.getEntries({
+          content_type: 'blogPost',
+          'fields.status': 'published',
+          order: ['-fields.publishedDate'],
+        });
+        
+        return entries.items.map(entry => transformContentfulBlogPost(entry));
+      } catch (error) {
+        console.error('Failed to fetch blog posts:', error);
+        throw error;
+      }
     }
   });
-};
+}
 
-// Hook to fetch a single blog post by slug
-export const useBlogPostBySlug = (slug?: string) => {
+/**
+ * Hook to fetch a blog post by slug
+ */
+export function useBlogPostBySlug(slug: string | undefined) {
   return useQuery({
-    queryKey: ['blog-post', slug],
+    queryKey: ['blogPost', slug],
     queryFn: async () => {
       if (!slug) return null;
       
-      const response = await contentfulClient.getEntries({
-        content_type: 'blogPost',
-        'fields.slug': slug,
-        limit: 1
-      });
-
-      if (response.items.length === 0) return null;
-      
-      return transformContentfulBlogPost(response.items[0]);
-    },
-    enabled: !!slug
-  });
-};
-
-// Hook to fetch adjacent (previous/next) blog posts
-export const useAdjacentBlogPosts = (slug?: string) => {
-  return useQuery({
-    queryKey: ['adjacent-blog-posts', slug],
-    queryFn: async () => {
-      if (!slug) return { previous: null, next: null };
-
-      // Get all published posts sorted by publish date
-      const response = await contentfulClient.getEntries({
-        content_type: 'blogPost',
-        'fields.status': 'published',
-        order: '-fields.publishedDate',
-        limit: 100 // We need all posts to find adjacent ones
-      });
-
-      // Find the index of the current post
-      const currentIndex = response.items.findIndex(
-        item => item.fields.slug === slug
-      );
-
-      if (currentIndex === -1) return { previous: null, next: null };
-
-      // Get previous and next posts
-      const previousPost = currentIndex < response.items.length - 1 
-        ? createAdjacentPost(response.items[currentIndex + 1] as any) 
-        : null;
+      try {
+        const entries = await client.getEntries({
+          content_type: 'blogPost',
+          'fields.slug': slug,
+          limit: 1,
+        });
         
-      const nextPost = currentIndex > 0 
-        ? createAdjacentPost(response.items[currentIndex - 1] as any) 
-        : null;
-
-      return { previous: previousPost, next: nextPost };
+        if (!entries.items.length) {
+          return null;
+        }
+        
+        return transformContentfulBlogPost(entries.items[0]);
+      } catch (error) {
+        console.error(`Failed to fetch blog post with slug ${slug}:`, error);
+        throw error;
+      }
     },
-    enabled: !!slug
+    enabled: !!slug,
   });
-};
-
-// Types needed for blog mutations
-export interface BlogPostFormData {
-  title: string;
-  slug: string;
-  summary?: string;
-  content: any;
-  image?: {
-    url: string;
-    alt: string;
-  };
-  author?: string;
-  publishedDate?: string;
-  category?: string;
-  tags?: string[];
-  status: 'published' | 'draft';
 }
 
-// Since we're not implementing admin functionality, these are just placeholders
-// and will be replaced or removed in the future
-export const useCreateBlogPost = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (data: BlogPostFormData) => {
-      console.warn('Admin functionality has been removed. Blog creation not available.');
-      return null;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
+/**
+ * Hook to fetch featured blog posts
+ */
+export function useFeaturedBlogPosts(limit = 3) {
+  return useQuery({
+    queryKey: ['featuredBlogPosts', limit],
+    queryFn: async () => {
+      try {
+        const entries = await client.getEntries({
+          content_type: 'blogPost',
+          'fields.status': 'published',
+          order: ['-fields.publishedDate'],
+          limit,
+        });
+        
+        return entries.items.map(entry => transformContentfulBlogPost(entry));
+      } catch (error) {
+        console.error('Failed to fetch featured blog posts:', error);
+        throw error;
+      }
     }
   });
-};
+}
 
-export const useUpdateBlogPost = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async ({ id, postData }: { id: string; postData: BlogPostFormData }) => {
-      console.warn('Admin functionality has been removed. Blog update not available.');
-      return null;
+/**
+ * Hook to fetch adjacent blog posts (previous and next)
+ */
+export function useAdjacentBlogPosts(currentSlug: string | undefined) {
+  return useQuery({
+    queryKey: ['adjacentBlogPosts', currentSlug],
+    queryFn: async () => {
+      if (!currentSlug) return { prev: null, next: null };
+      
+      try {
+        // Get all published posts ordered by date
+        const entries = await client.getEntries({
+          content_type: 'blogPost',
+          'fields.status': 'published',
+          order: ['-fields.publishedDate'],
+          select: 'sys.id,fields.title,fields.slug,fields.publishedDate',
+        });
+        
+        const posts = entries.items;
+        
+        // Find the index of the current post
+        const currentIndex = posts.findIndex(post => post.fields.slug === currentSlug);
+        
+        if (currentIndex === -1) {
+          return { prev: null, next: null };
+        }
+        
+        // Get adjacent posts
+        const prevPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
+        const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+        
+        return {
+          prev: prevPost ? transformToAdjacentPost(prevPost) : null,
+          next: nextPost ? transformToAdjacentPost(nextPost) : null,
+        };
+      } catch (error) {
+        console.error(`Failed to fetch adjacent posts for ${currentSlug}:`, error);
+        throw error;
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
-    }
+    enabled: !!currentSlug,
   });
-};
+}
+
+/**
+ * These functions below are stubs for preserving API compatibility
+ * They will be removed in a future update
+ */
+export function useCreateBlogPost() {
+  return {
+    mutateAsync: async () => {
+      throw new Error('Legacy CMS operations are no longer supported. Please use Contentful directly.');
+    },
+    isPending: false
+  };
+}
+
+export function useUpdateBlogPost() {
+  return {
+    mutateAsync: async () => {
+      throw new Error('Legacy CMS operations are no longer supported. Please use Contentful directly.');
+    },
+    isPending: false
+  };
+}
+
+export function useDeleteBlogPost() {
+  return {
+    mutateAsync: async () => {
+      throw new Error('Legacy CMS operations are no longer supported. Please use Contentful directly.');
+    },
+    isPending: false
+  };
+}
+
+export function useCloneBlogPost() {
+  return {
+    mutateAsync: async () => {
+      throw new Error('Legacy CMS operations are no longer supported. Please use Contentful directly.');
+    },
+    isPending: false
+  };
+}

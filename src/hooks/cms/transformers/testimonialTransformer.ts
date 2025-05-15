@@ -1,62 +1,73 @@
 
-import { Asset } from "contentful";
-import { CMSTestimonial, CMSImage } from "@/types/cms";
+import { Entry, Asset } from 'contentful';
+import { CMSTestimonial } from '@/types/cms';
 
-// Interface for the structure of a Contentful Testimonial entry
-export interface ContentfulTestimonial {
-  fields: {
-    name: string;
-    role?: string;
-    company?: string;
-    quote: string;
-    rating?: number;
-    image?: Asset;
-    visible?: boolean;
-  };
-  sys: {
-    id: string;
-    createdAt?: string;
-    updatedAt?: string;
+interface AssetDetails {
+  url: string;
+  fileName?: string;
+  contentType?: string;
+  details?: {
+    size?: number;
+    image?: {
+      width?: number;
+      height?: number;
+    };
   };
 }
 
+interface AssetFile {
+  url: string;
+  details?: {
+    size?: number;
+    image?: {
+      width?: number;
+      height?: number;
+    };
+  };
+  fileName?: string;
+  contentType?: string;
+}
+
 /**
- * Transform a contentful asset to our internal CMSImage format
- * @param asset Contentful asset
- * @returns Standardized CMSImage object
+ * Transform Contentful asset to URL
  */
-export function transformContentfulAsset(asset?: Asset): CMSImage | undefined {
-  if (!asset?.fields?.file?.url) return undefined;
+export function transformContentfulAsset(asset: Asset | undefined): string {
+  if (!asset || !asset.fields || !asset.fields.file) {
+    return '';
+  }
   
-  const url = asset.fields.file.url;
-  // Handle protocol-relative URLs
-  const finalUrl = url.startsWith('//') ? `https:${url}` : url;
-
-  return {
-    id: asset.sys?.id || "",
-    url: finalUrl,
-    alt: asset.fields.title || "",
-    width: asset.fields.file.details?.image?.width || 0,
-    height: asset.fields.file.details?.image?.height || 0,
-  };
+  const file = asset.fields.file;
+  let fileUrl = '';
+  
+  if (typeof file === 'string') {
+    fileUrl = file;
+  } else if (typeof file.url === 'string') {
+    fileUrl = file.url;
+  }
+  
+  // Make sure URLs are absolute
+  if (fileUrl && typeof fileUrl === 'string' && fileUrl.startsWith('//')) {
+    return `https:${fileUrl}`;
+  }
+  
+  return fileUrl;
 }
 
 /**
- * Transform a Contentful Testimonial entry to our internal CMSTestimonial format
- * @param entry Contentful Testimonial entry
- * @returns Standardized CMSTestimonial object
+ * Transform a Contentful testimonial entry to our application's CMSTestimonial type
  */
-export function transformTestimonial(entry: ContentfulTestimonial): CMSTestimonial {
-  return {
+export function transformContentfulTestimonial(entry: Entry<any>): CMSTestimonial {
+  const fields = entry.fields;
+  
+  const testimonial: CMSTestimonial = {
     id: entry.sys.id,
-    name: entry.fields.name || "",
-    role: entry.fields.role,
-    company: entry.fields.company,
-    quote: entry.fields.quote || "",
-    rating: entry.fields.rating,
-    image: transformContentfulAsset(entry.fields.image),
-    visible: entry.fields.visible !== false,
-    created_at: entry.sys.createdAt || "",
-    updated_at: entry.sys.updatedAt || "",
+    quote: fields.quote || '',
+    author: fields.author || 'Anonymous',
+    company: fields.company || undefined,
+    position: fields.position || undefined,
+    avatar_url: fields.avatar ? transformContentfulAsset(fields.avatar) : undefined,
+    logo_url: fields.companyLogo ? transformContentfulAsset(fields.companyLogo) : undefined,
   };
+  
+  return testimonial;
 }

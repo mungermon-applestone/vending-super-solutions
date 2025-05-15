@@ -1,19 +1,44 @@
 
-// Export transformers
-export { transformContentfulAsset } from './transformers/testimonialTransformer';
-export { transformBusinessGoal } from './transformers/businessGoalTransformer';
-export { transformTestimonial } from './transformers/testimonialTransformer';
-export { transformBlogPost, createAdjacentPost } from './transformers/blogPostTransformer';
+/**
+ * CMS Hooks
+ * 
+ * This file re-exports all CMS hooks for easy access
+ */
 
-// Export types from transformers
-export type { ContentfulBusinessGoal } from './transformers/businessGoalTransformer';
-export type { ContentfulTestimonial } from './transformers/testimonialTransformer';
-export type { ContentfulBlogPost } from './transformers/blogPostTransformer';
+// Business Goals
+import { 
+  useContentfulBusinessGoals, 
+  useContentfulBusinessGoalBySlug 
+} from './useContentfulBusinessGoals';
 
-// Re-export hooks
-export { useContentfulBusinessGoals, useContentfulBusinessGoalBySlug } from './useContentfulBusinessGoals';
-export { useContentfulTestimonials } from './useContentfulTestimonials';
+// Testimonials
+import { useContentfulTestimonials } from './useContentfulTestimonials';
 
-// Export types related to hooks
-export type { BusinessGoalsResponse } from './useContentfulBusinessGoals';
-export type { TestimonialsResponse } from './useContentfulTestimonials';
+// Blog
+import { 
+  useContentfulBlogPosts, 
+  useContentfulBlogPostBySlug,
+  useContentfulFeaturedBlogPosts,
+  useContentfulAdjacentBlogPosts
+} from './useContentfulBlogPosts';
+
+// Legacy hook re-exports for backward compatibility
+import { useBusinessGoals } from './useBusinessGoals';
+import { useTestimonials } from './useTestimonials';
+
+export {
+  // Business Goals
+  useContentfulBusinessGoals,
+  useContentfulBusinessGoalBySlug,
+  useBusinessGoals,
+  
+  // Testimonials
+  useContentfulTestimonials,
+  useTestimonials,
+  
+  // Blog
+  useContentfulBlogPosts,
+  useContentfulBlogPostBySlug,
+  useContentfulFeaturedBlogPosts,
+  useContentfulAdjacentBlogPosts
+};
