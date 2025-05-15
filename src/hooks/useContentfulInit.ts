@@ -1,79 +1,42 @@
 
-import { useState, useEffect } from 'react';
-import { testContentfulConnection, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
-import { isContentfulConfigured } from '@/config/cms';
+import { useEffect, useState } from 'react';
+import { forceContentfulProvider } from '@/services/cms/cmsInit';
+import { getContentfulClient, testContentfulConnection } from '@/services/cms/utils/contentfulClient';
+import { toast } from 'sonner';
 
-/**
- * Hook to initialize and test the Contentful connection
- */
 export function useContentfulInit() {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
-  const MAX_RETRIES = 3;
 
   useEffect(() => {
-    let isMounted = true;
-    
-    const initializeContentful = async () => {
-      if (!isMounted) return;
-      
-      setIsLoading(true);
-      setError(null);
-      
+    const initContentful = async () => {
       try {
-        // Check if Contentful is configured
-        if (!isContentfulConfigured()) {
-          throw new Error('CONTENTFUL_CONFIG_MISSING');
-        }
+        console.log('[useContentfulInit] Starting Contentful initialization');
         
-        // Try to refresh the client
-        await refreshContentfulClient();
+        // Force Contentful provider
+        forceContentfulProvider();
         
         // Test the connection
+        const client = await getContentfulClient();
         const testResult = await testContentfulConnection();
         
         if (!testResult.success) {
-          if (retryCount >= MAX_RETRIES) {
-            throw new Error(testResult.message || 'Could not connect to Contentful');
-          }
-          
-          // Auto-retry
-          setRetryCount(prev => prev + 1);
-          return;
+          throw new Error(testResult.message);
         }
         
-        // Mark as initialized
-        if (isMounted) {
-          setIsInitialized(true);
-          window._contentfulInitialized = true;
-        }
+        console.log('[useContentfulInit] Contentful initialized successfully');
+        setIsInitialized(true);
+        setError(null);
+        
       } catch (err) {
-        if (isMounted) {
-          console.error('[useContentfulInit] Error initializing Contentful:', err);
-          setError(err instanceof Error ? err : new Error('Unknown error initializing Contentful'));
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        console.error('[useContentfulInit] Initialization failed:', err);
+        setError(err instanceof Error ? err : new Error('Failed to initialize Contentful'));
+        toast.error('Failed to connect to CMS');
       }
     };
-    
-    // Initialize on mount
-    initializeContentful();
-    
-    // Cleanup
-    return () => {
-      isMounted = false;
-    };
-  }, [retryCount]);
 
-  return {
-    isInitialized,
-    isLoading,
-    error,
-    retry: () => setRetryCount(count => count + 1)
-  };
+    initContentful();
+  }, []);
+
+  return { isInitialized, error };
 }

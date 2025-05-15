@@ -1,225 +1,104 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
-import { isContentfulEntry } from '@/utils/contentfulTypeGuards';
-import { safeString, safeStringArray } from '@/services/cms/utils/safeTypeUtilities';
+import { useContentful } from '@/hooks/useContentful';
+import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { CMS_MODELS } from '@/config/cms';
+
+// Define interfaces for type safety
+interface ContentfulQueryParams {
+  content_type: string;
+  order: string;
+  limit: number;
+  skip: number;
+  'metadata.tags.sys.id[in]'?: string;
+}
 
 export interface ContentfulBlogPost {
-  id?: string;
-  sys?: {
-    id: string;
-    createdAt?: string;
-    updatedAt?: string;
-    contentType?: {
-      sys: {
-        id: string;
-      }
-    };
-  };
-  title?: string;
-  slug?: string;
-  content?: any;
+  id: string;
+  title: string;
+  slug: string;
+  content: any;
   excerpt?: string;
   publishDate?: string;
-  published_at?: string;
-  created_at?: string;
-  updated_at?: string;
   featuredImage?: {
     url: string;
     title: string;
-    width?: number;
-    height?: number;
   };
   author?: string;
   tags?: string[];
-  status?: 'draft' | 'published' | 'archived';
-  fields?: {
-    title: string;
-    slug: string;
-    publishDate?: string;
-    content?: any;
-    excerpt?: string;
-    featuredImage?: any;
-    author?: string;
-    tags?: string[];
-    status?: 'draft' | 'published' | 'archived';
-    visible?: boolean;
+}
+
+interface BlogPostsQueryOptions {
+  limit?: number;
+  skip?: number;
+  tag?: string;
+  order?: string;
+}
+
+const formatBlogPost = (item: any): ContentfulBlogPost => {
+  console.log('[formatBlogPost] Processing item:', { 
+    id: item.sys?.id,
+    title: item.fields?.title 
+  });
+
+  const fields = item.fields || {};
+  const featuredImage = fields.featuredImage?.fields
+    ? {
+        url: `https:${fields.featuredImage.fields.file.url}`,
+        title: fields.featuredImage.fields.title || ''
+      }
+    : undefined;
+
+  return {
+    id: item.sys?.id || '',
+    title: fields.title || 'Untitled',
+    slug: fields.slug || '',
+    content: fields.content || {},
+    excerpt: fields.excerpt || '',
+    publishDate: fields.publishDate || null,
+    featuredImage,
+    author: fields.author || '',
+    tags: fields.tags || []
   };
-  includes?: any;
-}
+};
 
-/**
- * Safely extract string field from Contentful entry
- */
-function getEntryStringField(entry: any, fieldName: string, defaultValue: string = ''): string {
-  if (!entry || !entry.fields || typeof entry.fields !== 'object') {
-    return defaultValue;
-  }
-  
-  const field = entry.fields[fieldName];
-  if (field === null || field === undefined) {
-    return defaultValue;
-  }
-  
-  return String(field);
-}
+export function useContentfulBlogPosts(options: BlogPostsQueryOptions = {}) {
+  // Default to reverse chronological order ('-fields.publishDate')
+  const { limit = 10, skip = 0, tag, order = '-fields.publishDate' } = options;
 
-/**
- * Hook to fetch all blog posts with options
- */
-export function useContentfulBlogPosts(options = { limit: 10, skip: 0 }) {
-  return useQuery({
-    queryKey: ['contentful', 'blogPosts', options],
+  return useContentful<ContentfulBlogPost[]>({
+    queryKey: ['contentful-blog-posts', String(limit), String(skip), tag, order],
     queryFn: async () => {
-      try {
-        const queryOptions = {
-          limit: options.limit,
-          skip: options.skip,
-          include: 2
-        };
-        
-        // Add order if it exists in the options
-        if ('order' in options && typeof options.order === 'string') {
-          Object.assign(queryOptions, { order: options.order });
-        } else {
-          // Default sorting
-          Object.assign(queryOptions, { order: '-fields.publishDate' });
-        }
-        
-        const entries = await fetchContentfulEntries('blogPost', queryOptions);
-        
-        return entries.map(entry => {
-          const processedEntry: ContentfulBlogPost = {
-            sys: entry.sys,
-            id: entry.sys.id,
-            title: getEntryStringField(entry, 'title'),
-            slug: getEntryStringField(entry, 'slug'),
-            content: entry.fields?.content,
-            excerpt: getEntryStringField(entry, 'excerpt'),
-            publishDate: getEntryStringField(entry, 'publishDate'),
-            status: getEntryStringField(entry, 'status', 'published') as 'draft' | 'published' | 'archived',
-            author: getEntryStringField(entry, 'author'),
-            tags: Array.isArray(entry.fields?.tags) ? safeStringArray(entry.fields.tags) : [],
-            fields: {
-              title: getEntryStringField(entry, 'title'),
-              slug: getEntryStringField(entry, 'slug'),
-              publishDate: getEntryStringField(entry, 'publishDate'),
-              content: entry.fields?.content,
-              excerpt: getEntryStringField(entry, 'excerpt'),
-              featuredImage: entry.fields?.featuredImage,
-              author: getEntryStringField(entry, 'author'),
-              tags: Array.isArray(entry.fields?.tags) ? safeStringArray(entry.fields.tags) : [],
-              visible: entry.fields?.visible !== false
-            }
-          };
-          
-          // Handle includes data if available
-          if (entry.includes) {
-            processedEntry.includes = entry.includes;
-          }
-          
-          // Handle featured image if it exists
-          if (entry.fields?.featuredImage) {
-            try {
-              const image = entry.fields.featuredImage;
-              if (image.fields?.file?.url) {
-                processedEntry.featuredImage = {
-                  url: `https:${image.fields.file.url}`,
-                  title: image.fields.title || '',
-                  width: image.fields.file.details?.image?.width,
-                  height: image.fields.file.details?.image?.height
-                };
-              }
-            } catch (e) {
-              console.error('Error processing featured image:', e);
-            }
-          }
-          
-          return processedEntry;
-        });
-      } catch (error) {
-        console.error('Error fetching blog posts from Contentful:', error);
+      console.log('[useContentfulBlogPosts] Fetching posts with options:', options);
+      
+      const client = await getContentfulClient();
+      
+      const queryParams: ContentfulQueryParams = {
+        content_type: CMS_MODELS.BLOG_POST,
+        order,
+        limit: limit,
+        skip: skip,
+        ...(tag && { 'metadata.tags.sys.id[in]': tag })
+      };
+
+      console.log('[useContentfulBlogPosts] Query params:', queryParams);
+      
+      const response = await client.getEntries(queryParams);
+      
+      console.log('[useContentfulBlogPosts] Raw response:', {
+        total: response.total,
+        items: response.items?.length
+      });
+
+      if (!Array.isArray(response.items)) {
+        console.error('[useContentfulBlogPosts] Invalid response format');
         return [];
       }
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-}
 
-/**
- * Hook to fetch a single blog post by slug
- */
-export function useContentfulBlogPost(slug: string | undefined) {
-  return useQuery({
-    queryKey: ['contentful', 'blogPost', slug],
-    queryFn: async () => {
-      if (!slug) return null;
+      const posts = response.items.map(formatBlogPost);
+      console.log('[useContentfulBlogPosts] Processed posts:', posts.length);
       
-      try {
-        const entries = await fetchContentfulEntries('blogPost', {
-          'fields.slug': slug,
-          include: 10 // Deep include for rich text content
-        });
-        
-        if (!entries || entries.length === 0) return null;
-        
-        const entry = entries[0];
-        
-        // Process featured image safely
-        let featuredImage = undefined;
-        if (entry.fields?.featuredImage) {
-          try {
-            const image = entry.fields.featuredImage;
-            if (image.fields?.file?.url) {
-              featuredImage = {
-                url: `https:${image.fields.file.url}`,
-                title: image.fields.title || '',
-                width: image.fields.file.details?.image?.width,
-                height: image.fields.file.details?.image?.height
-              };
-            }
-          } catch (e) {
-            console.error('Error processing featured image:', e);
-          }
-        }
-        
-        const result: ContentfulBlogPost = {
-          sys: entry.sys,
-          id: entry.sys.id,
-          title: getEntryStringField(entry, 'title'),
-          slug: getEntryStringField(entry, 'slug'),
-          content: entry.fields?.content,
-          excerpt: getEntryStringField(entry, 'excerpt'),
-          publishDate: getEntryStringField(entry, 'publishDate'),
-          status: getEntryStringField(entry, 'status', 'published') as 'draft' | 'published' | 'archived',
-          author: getEntryStringField(entry, 'author'),
-          tags: Array.isArray(entry.fields?.tags) ? safeStringArray(entry.fields.tags) : [],
-          fields: {
-            title: getEntryStringField(entry, 'title'),
-            slug: getEntryStringField(entry, 'slug'),
-            publishDate: getEntryStringField(entry, 'publishDate'),
-            content: entry.fields?.content,
-            excerpt: getEntryStringField(entry, 'excerpt'),
-            featuredImage: entry.fields?.featuredImage,
-            author: getEntryStringField(entry, 'author'),
-            tags: Array.isArray(entry.fields?.tags) ? safeStringArray(entry.fields.tags) : [],
-            visible: entry.fields?.visible !== false
-          },
-          featuredImage
-        };
-        
-        // Add includes if available
-        if (entry.includes) {
-          result.includes = entry.includes;
-        }
-        
-        return result;
-      } catch (error) {
-        console.error(`Error fetching blog post with slug ${slug}:`, error);
-        return null;
-      }
+      return posts;
     },
-    enabled: !!slug,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    enableToasts: true
   });
 }

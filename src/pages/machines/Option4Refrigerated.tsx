@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
@@ -7,8 +6,7 @@ import { useParams } from 'react-router-dom';
 
 const Option4Refrigerated = () => {
   const { machineType, machineId } = useParams<{ machineType: string, machineId: string }>();
-  // Update to use the hook with just machineId
-  const { data: machine, isLoading, error } = useMachineBySlug(machineId);
+  const { data: machine, isLoading, error } = useMachineBySlug(machineType, machineId);
 
   if (isLoading) {
     return (

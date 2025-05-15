@@ -6,8 +6,7 @@ import { useHeroContent } from '@/hooks/cms/useHeroContent';
 import { Loader2 } from 'lucide-react';
 
 export default function ProductsHero() {
-  // Hooks now accepts no arguments by default
-  const { data: heroContent, isLoading, error } = useHeroContent();
+  const { data: heroContent, isLoading, error } = useHeroContent("products");
 
   if (isLoading) {
     return (
@@ -59,40 +58,29 @@ export default function ProductsHero() {
     );
   }
 
-  // Safely convert any field values to string
-  const safeString = (value: any): string => {
-    if (value === null || value === undefined) return '';
-    return String(value);
-  };
-
-  // Safe background class handling
-  const backgroundClass = typeof heroContent.backgroundClass === 'string' 
-    ? heroContent.backgroundClass 
-    : "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light";
-
   return (
-    <section className={backgroundClass}>
+    <section className={heroContent.backgroundClass || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"}>
       <div className="container py-16 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-vending-blue-dark">
-              {safeString(heroContent.title || heroContent.headline)}
+              {heroContent.title}
             </h1>
             <p className="text-xl text-gray-700 max-w-2xl">
-              {safeString(heroContent.subtitle || heroContent.subheading)}
+              {heroContent.subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              {(heroContent.primaryButtonUrl || heroContent.ctaLink) && (
+              {heroContent.primaryButtonUrl && (
                 <Button asChild size="lg">
-                  <Link to={safeString(heroContent.primaryButtonUrl || heroContent.ctaLink)}>
-                    {safeString(heroContent.primaryButtonText || heroContent.ctaText)} <ExternalLink className="ml-2 h-5 w-5" />
+                  <Link to={heroContent.primaryButtonUrl}>
+                    {heroContent.primaryButtonText} <ExternalLink className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
               )}
-              {(heroContent.secondaryButtonUrl || heroContent.secondaryCTALink) && (
+              {heroContent.secondaryButtonUrl && (
                 <Button asChild variant="outline" size="lg">
-                  <Link to={safeString(heroContent.secondaryButtonUrl || heroContent.secondaryCTALink)}>
-                    {safeString(heroContent.secondaryButtonText || heroContent.secondaryCTAText)}
+                  <Link to={heroContent.secondaryButtonUrl}>
+                    {heroContent.secondaryButtonText}
                   </Link>
                 </Button>
               )}
@@ -101,16 +89,8 @@ export default function ProductsHero() {
           <div className="relative">
             <div className="bg-white rounded-lg shadow-xl overflow-hidden">
               <img 
-                src={safeString(
-                  heroContent.image?.url || 
-                  heroContent.backgroundImage || 
-                  "https://images.unsplash.com/photo-1556742031-c6961e8560b0?ixlib=rb-4.0.3"
-                )}
-                alt={safeString(
-                  heroContent.image?.alt || 
-                  heroContent.backgroundImageAlt || 
-                  "Vending Machine Products"
-                )}
+                src={heroContent.image.url}
+                alt={heroContent.image.alt}
                 className="w-full h-auto object-cover"
               />
             </div>

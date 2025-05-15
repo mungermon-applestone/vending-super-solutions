@@ -8,13 +8,9 @@ import { updateMachine } from '@/services/cms/contentTypes/machines/update';
 import { deleteMachine } from '@/services/cms/contentTypes/machines/delete';
 import { MachineFormValues } from '@/utils/machineMigration/types';
 import { useContentfulMachines, useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
-import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
 
 /**
  * Hook to fetch machines data
- * 
- * @remarks
- * CRITICAL PATH: This hook powers machine listings throughout the application.
  */
 export const useMachines = () => {
   // Use the Contentful machines hook to ensure consistent data source
@@ -33,9 +29,6 @@ export const useMachines = () => {
 
 /**
  * Hook to fetch a specific machine by ID
- * 
- * @remarks
- * CRITICAL PATH: This hook is used by machine detail pages.
  */
 export const useMachineById = (id: string | undefined) => {
   // Use the Contentful machine hook to ensure consistent data source
@@ -49,41 +42,13 @@ export const useMachineById = (id: string | undefined) => {
 
 /**
  * Hook to fetch a machine by slug
- * 
- * @remarks
- * CRITICAL PATH: This hook is used by ALL machine detail pages.
- * The implementation must handle both the legacy two-parameter and new one-parameter calls.
- * Modifications to this hook will affect all individual machine pages.
- * 
- * @param typeOrSlug Machine type (legacy) or slug
- * @param idOrSlug Machine ID or slug (legacy second parameter)
- * @deprecated This function signature will be changing to accept a single parameter (slug/ID) in future versions.
- * Use useContentfulMachine(slug) for future compatibility.
  */
-export const useMachineBySlug = (typeOrSlug: string | undefined, idOrSlug?: string | undefined) => {
-  // Handle both original two-parameter and new one-parameter calls
-  let machineSlug: string | undefined;
-  
-  if (idOrSlug) {
-    // Legacy two-parameter call: useMachineBySlug('vending', 'machine-slug')
-    machineSlug = idOrSlug;
-  } else {
-    // New one-parameter call: useMachineBySlug('machine-slug')
-    logDeprecationWarning(
-      'useMachineBySlug single parameter',
-      'The single parameter version of useMachineBySlug is deprecated.',
-      'Use useContentfulMachine(slug) from @/hooks/cms/useContentfulMachines instead.'
-    );
-    machineSlug = typeOrSlug;
-  }
-
+export const useMachineBySlug = (type: string | undefined, slug: string | undefined) => {
   return useQuery({
-    queryKey: ['machine', machineSlug],
+    queryKey: ['machine', type, slug],
     queryFn: async () => {
-      if (!machineSlug) return null;
-      
-      // For now, we'll use the existing machines function and filter by slug
-      const machines = await fetchMachines({ slug: machineSlug });
+      // For now, we'll use the existing machines function and filter by type and slug
+      const machines = await fetchMachines({ type, slug });
       
       if (machines.length > 0) {
         // Log machine data to help diagnose thumbnail issues
@@ -93,19 +58,11 @@ export const useMachineBySlug = (typeOrSlug: string | undefined, idOrSlug?: stri
           hasThumbnail: !!machines[0].thumbnail,
           thumbnailUrl: machines[0].thumbnail?.url || 'none'
         });
-        
-        return machines[0];
       }
       
-      // If not found by slug, try by ID
-      try {
-        return await fetchMachineById(machineSlug);
-      } catch (error) {
-        console.error(`[useMachineBySlug] Error fetching machine by ID ${machineSlug}:`, error);
-        return null;
-      }
+      return machines.length > 0 ? machines[0] : null;
     },
-    enabled: !!machineSlug,
+    enabled: !!type && !!slug,
   });
 };
 

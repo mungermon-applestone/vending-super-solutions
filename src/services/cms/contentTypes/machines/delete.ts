@@ -1,16 +1,26 @@
 
-import { mockDeleteMachine } from './mockAdapter';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Delete a machine from the CMS
- * @deprecated This method uses a mock implementation and will be removed in future versions.
- * Please use Contentful directly for machine content management.
  */
 export async function deleteMachine(id: string): Promise<boolean> {
-  console.warn('[deleteMachine] ⚠️ DEPRECATED: This method uses a mock implementation. Use Contentful for production data.');
   try {
-    // Use the mock implementation
-    return await mockDeleteMachine(id);
+    console.log(`[deleteMachine] Deleting machine with ID: ${id}`);
+    
+    // Note: We're relying on cascading deletes for related records in the database
+    const { error } = await supabase
+      .from('machines')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error(`[deleteMachine] Error deleting machine with ID ${id}:`, error);
+      throw error;
+    }
+    
+    console.log(`[deleteMachine] Successfully deleted machine with ID: ${id}`);
+    return true;
   } catch (error) {
     console.error(`[deleteMachine] Error:`, error);
     throw error;

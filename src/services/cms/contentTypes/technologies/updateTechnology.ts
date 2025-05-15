@@ -1,15 +1,42 @@
 
+import { supabase } from '@/integrations/supabase/client';
 import { CMSTechnology } from '@/types/cms';
-import { v4 as uuidv4 } from 'uuid';
+import { IS_DEVELOPMENT } from '@/config/cms';
 import { CreateTechnologyData } from './createTechnology';
 
 export interface UpdateTechnologyData extends CreateTechnologyData {
+  id: string;
+}
+
+// Define proper section type that matches the array elements
+interface Section {
   id?: string;
+  title: string;
+  description?: string;
+  section_type?: string;
+  display_order: number;
+  features?: Feature[];
+}
+
+// Define feature type
+interface Feature {
+  id?: string;
+  title: string;
+  description?: string;
+  icon?: string;
+  display_order: number;
+  items?: Item[];
+}
+
+// Define item type
+interface Item {
+  id?: string;
+  text: string;
+  display_order: number;
 }
 
 /**
  * Updates an existing technology entry in the database
- * @param slug The slug of the technology to update
  * @param data Technology data to update
  * @returns The updated technology object
  */
@@ -17,29 +44,110 @@ export const updateTechnology = async (
   slug: string, 
   data: Omit<CreateTechnologyData, 'id'>
 ): Promise<CMSTechnology> => {
-  console.log(`[updateTechnology] Mock: Updating technology with slug: ${slug}`);
+  console.log(`[updateTechnology] Updating technology with slug: ${slug}`);
   
   try {
-    // Generate a mock ID if none was provided
-    const mockId = uuidv4();
+    // First get the existing technology to verify it exists
+    const { data: existingTech, error: fetchError } = await supabase
+      .from('technologies')
+      .select('id')
+      .eq('slug', slug)
+      .single();
+      
+    if (fetchError) {
+      console.error('[updateTechnology] Error fetching technology:', fetchError);
+      throw new Error(`Technology with slug '${slug}' not found`);
+    }
     
-    // Create a mock updated technology
-    const updatedTechnology: CMSTechnology = {
-      id: mockId,
-      title: data.title,
-      slug: data.slug,
-      description: data.description || '',
-      visible: data.visible || false,
-      image_url: data.image_url,
-      image_alt: data.image_alt,
-      sections: data.sections ? transformSections(data.sections, mockId) : [],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+    const technologyId = existingTech.id;
     
-    console.log('[updateTechnology] Mock: Technology updated successfully');
+    // Update the main technology record
+    const { error: updateError } = await supabase
+      .from('technologies')
+      .update({
+        title: data.title,
+        slug: data.slug,
+        description: data.description,
+        image_url: data.image_url,
+        image_alt: data.image_alt,
+        visible: data.visible || false,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', technologyId);
+      
+    if (updateError) {
+      console.error('[updateTechnology] Error updating technology:', updateError);
+      throw new Error(`Failed to update technology: ${updateError.message}`);
+    }
+
+    // Handle sections - get existing sections first
+    const { data: existingSections } = await supabase
+      .from('technology_sections')
+      .select('id')
+      .eq('technology_id', technologyId);
+      
+    const existingSectionIds = (existingSections || []).map(section => section.id);
     
-    return updatedTechnology;
+    // If there are new sections to process
+    if (data.sections && data.sections.length > 0) {
+      // Process each section
+      for (let i = 0; i < data.sections.length; i++) {
+        const section = data.sections[i] as Section; // Cast to our extended type
+        
+        // If section has an ID, update it, otherwise create new
+        if (section.id) {
+          // Update existing section
+          await supabase
+            .from('technology_sections')
+            .update({
+              title: section.title,
+              description: section.description || null,
+              section_type: section.section_type || 'feature',
+              display_order: i, // Use index for display order
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', section.id);
+            
+          // Remove this ID from the list to track deletions
+          const index = existingSectionIds.indexOf(section.id);
+          if (index > -1) {
+            existingSectionIds.splice(index, 1);
+          }
+        } else {
+          // Create new section
+          const { data: newSection } = await supabase
+            .from('technology_sections')
+            .insert({
+              technology_id: technologyId,
+              title: section.title,
+              description: section.description || null,
+              section_type: section.section_type || 'feature',
+              display_order: i // Use index for display order
+            })
+            .select()
+            .single();
+            
+          // Update the section object with the new ID for feature processing
+          if (newSection) {
+            section.id = newSection.id;
+          }
+        }
+        
+        // Process features for this section
+        await processFeatures(section);
+      }
+    }
+    
+    // Delete sections that weren't updated
+    if (existingSectionIds.length > 0) {
+      await supabase
+        .from('technology_sections')
+        .delete()
+        .in('id', existingSectionIds);
+    }
+    
+    // Return the updated technology with all relations
+    return await fetchUpdatedTechnology(technologyId);
   } catch (error) {
     console.error('[updateTechnology] Error:', error);
     throw error;
@@ -47,61 +155,182 @@ export const updateTechnology = async (
 };
 
 /**
- * Helper function to transform sections into the correct format with the required fields
+ * Helper function to process section features
  */
-function transformSections(sections: any[], technologyId: string) {
-  return sections.map((section, index) => {
-    // Ensure each section has an id and technology_id
-    const sectionId = section.id || uuidv4();
+async function processFeatures(section: Section) {
+  if (!section.id || !section.features || section.features.length === 0) {
+    return;
+  }
+  
+  // Get existing features
+  const { data: existingFeatures } = await supabase
+    .from('technology_features')
+    .select('id')
+    .eq('section_id', section.id);
     
-    return {
-      id: sectionId,
-      technology_id: technologyId,
-      title: section.title,
-      description: section.description || '',
-      section_type: section.section_type || 'feature',
-      display_order: section.display_order || index,
-      features: transformFeatures(section.features || [], sectionId),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-  });
+  const existingFeatureIds = (existingFeatures || []).map(feature => feature.id);
+  
+  // Process each feature
+  for (let i = 0; i < section.features.length; i++) {
+    const feature = section.features[i];
+    
+    if (feature.id) {
+      // Update existing feature
+      await supabase
+        .from('technology_features')
+        .update({
+          title: feature.title,
+          description: feature.description || null,
+          icon: feature.icon || null,
+          display_order: i, // Use index for display order
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', feature.id);
+        
+      // Remove this ID from the list to track deletions
+      const index = existingFeatureIds.indexOf(feature.id);
+      if (index > -1) {
+        existingFeatureIds.splice(index, 1);
+      }
+    } else {
+      // Create new feature
+      const { data: newFeature } = await supabase
+        .from('technology_features')
+        .insert({
+          section_id: section.id,
+          title: feature.title,
+          description: feature.description || null,
+          icon: feature.icon || null,
+          display_order: i // Use index for display order
+        })
+        .select()
+        .single();
+        
+      // Update the feature object with the new ID for item processing
+      if (newFeature) {
+        feature.id = newFeature.id;
+      }
+    }
+    
+    // Process feature items
+    await processFeatureItems(feature);
+  }
+  
+  // Delete features that weren't updated
+  if (existingFeatureIds.length > 0) {
+    await supabase
+      .from('technology_features')
+      .delete()
+      .in('id', existingFeatureIds);
+  }
 }
 
 /**
- * Helper function to transform features into the correct format
+ * Helper function to process feature items
  */
-function transformFeatures(features: any[], sectionId: string) {
-  return features.map((feature, index) => {
-    // Ensure each feature has an id
-    const featureId = feature.id || uuidv4();
+async function processFeatureItems(feature: Feature) {
+  if (!feature.id || !feature.items || feature.items.length === 0) {
+    return;
+  }
+  
+  // Get existing items
+  const { data: existingItems } = await supabase
+    .from('technology_feature_items')
+    .select('id')
+    .eq('feature_id', feature.id);
     
-    return {
-      id: featureId,
-      section_id: sectionId,
-      title: feature.title || '',
-      description: feature.description || '',
-      icon: feature.icon || 'check',
-      display_order: feature.display_order || index,
-      items: transformItems(feature.items || [], featureId),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-  });
+  const existingItemIds = (existingItems || []).map(item => item.id);
+  
+  // Process each item
+  for (let i = 0; i < feature.items.length; i++) {
+    const item = feature.items[i];
+    
+    if (item.id) {
+      // Update existing item
+      await supabase
+        .from('technology_feature_items')
+        .update({
+          text: item.text,
+          display_order: i, // Use index for display order
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', item.id);
+        
+      // Remove this ID from the list to track deletions
+      const index = existingItemIds.indexOf(item.id);
+      if (index > -1) {
+        existingItemIds.splice(index, 1);
+      }
+    } else {
+      // Create new item
+      await supabase
+        .from('technology_feature_items')
+        .insert({
+          feature_id: feature.id,
+          text: item.text,
+          display_order: i // Use index for display order
+        });
+    }
+  }
+  
+  // Delete items that weren't updated
+  if (existingItemIds.length > 0) {
+    await supabase
+      .from('technology_feature_items')
+      .delete()
+      .in('id', existingItemIds);
+  }
 }
 
 /**
- * Helper function to transform items into the correct format
+ * Helper function to fetch the updated technology with all relations
  */
-function transformItems(items: any[], featureId: string) {
-  return items.map((item, index) => {
-    return {
-      id: item.id || uuidv4(),
-      feature_id: featureId,
-      text: item.text || '',
-      display_order: item.display_order || index,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-  });
-}
+const fetchUpdatedTechnology = async (id: string): Promise<CMSTechnology> => {
+  const { data: technology, error } = await supabase
+    .from('technologies')
+    .select('*')
+    .eq('id', id)
+    .single();
+    
+  if (error) {
+    throw error;
+  }
+  
+  // Fetch sections
+  const { data: sections } = await supabase
+    .from('technology_sections')
+    .select('*')
+    .eq('technology_id', id)
+    .order('display_order', { ascending: true });
+    
+  // For each section, fetch features
+  const sectionsWithFeatures = await Promise.all(
+    (sections || []).map(async (section) => {
+      const { data: features } = await supabase
+        .from('technology_features')
+        .select('*')
+        .eq('section_id', section.id)
+        .order('display_order', { ascending: true });
+        
+      // For each feature, fetch items
+      const featuresWithItems = await Promise.all(
+        (features || []).map(async (feature) => {
+          const { data: items } = await supabase
+            .from('technology_feature_items')
+            .select('*')
+            .eq('feature_id', feature.id)
+            .order('display_order', { ascending: true });
+            
+          return { ...feature, items: items || [] };
+        })
+      );
+      
+      return { ...section, features: featuresWithItems || [] };
+    })
+  );
+  
+  return { 
+    ...technology,
+    sections: sectionsWithFeatures
+  } as CMSTechnology;
+};

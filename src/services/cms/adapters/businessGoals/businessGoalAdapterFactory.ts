@@ -5,13 +5,21 @@ import { contentfulBusinessGoalAdapter } from './contentfulBusinessGoalAdapter';
 import { handleCMSError } from '@/services/cms/utils/errorHandling';
 
 /**
- * Factory function that returns the Contentful business goal adapter
- * regardless of configuration
+ * Factory function to get the appropriate business goal adapter based on configuration
  */
 export const getBusinessGoalAdapter = (config?: ContentProviderConfig): BusinessGoalAdapter => {
   try {
-    console.log('[businessGoalAdapterFactory] Using Contentful business goal adapter');
-    return contentfulBusinessGoalAdapter;
+    // Default to Contentful if no config provided
+    const providerType = config?.type || ContentProviderType.CONTENTFUL;
+    
+    switch (providerType) {
+      case ContentProviderType.CONTENTFUL:
+        console.log('[businessGoalAdapterFactory] Using Contentful business goal adapter');
+        return contentfulBusinessGoalAdapter;
+      default:
+        console.log('[businessGoalAdapterFactory] No specific adapter found, using Contentful as default');
+        return contentfulBusinessGoalAdapter;
+    }
   } catch (error) {
     console.error('[businessGoalAdapterFactory] Error creating business goal adapter:', error);
     throw handleCMSError(error, 'initialize', 'BusinessGoalAdapter');
@@ -19,7 +27,8 @@ export const getBusinessGoalAdapter = (config?: ContentProviderConfig): Business
 };
 
 /**
- * Check if the business goal adapter is valid
+ * Check if the configured CMS provider has a valid business goal adapter
+ * @param config The CMS provider configuration to check
  * @returns True if the adapter is available and valid
  */
 export async function validateBusinessGoalAdapter(config: ContentProviderConfig): Promise<boolean> {

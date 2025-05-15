@@ -14,8 +14,6 @@ const alertVariants = cva(
           "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
         warning:
           "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-300 [&>svg]:text-amber-600",
-        success: // Adding success variant
-          "border-green-200 bg-green-50 text-green-800 dark:border-green-300 [&>svg]:text-green-600",
       },
     },
     defaultVariants: {
@@ -24,23 +22,17 @@ const alertVariants = cva(
   }
 )
 
-// Define explicit interface to ensure TypeScript recognizes all variants
-interface AlertProps extends 
-  React.HTMLAttributes<HTMLDivElement>,
-  VariantProps<typeof alertVariants> {
-    variant?: "default" | "destructive" | "warning" | "success"; // Updated to include success
-}
-
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ className, variant, ...props }, ref) => (
-    <div
-      ref={ref}
-      role="alert"
-      className={cn(alertVariants({ variant }), className)}
-      {...props}
-    />
-  )
-)
+const Alert = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
+>(({ className, variant, ...props }, ref) => (
+  <div
+    ref={ref}
+    role="alert"
+    className={cn(alertVariants({ variant }), className)}
+    {...props}
+  />
+))
 Alert.displayName = "Alert"
 
 const AlertTitle = React.forwardRef<

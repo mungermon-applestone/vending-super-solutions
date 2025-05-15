@@ -1,17 +1,25 @@
 
-import { ContentProviderConfig } from '../types';
+import { ContentProviderConfig, ContentProviderType } from '../types';
 import { ProductAdapter } from './types';
 import { contentfulProductAdapter } from './contentfulProductAdapter';
 import { handleCMSError } from '@/services/cms/utils/errorHandling';
 
 /**
- * Factory function that always returns the Contentful product adapter
- * regardless of configuration
+ * Factory function to get the appropriate product adapter based on configuration
  */
 export const getProductAdapter = (config?: ContentProviderConfig): ProductAdapter => {
   try {
-    console.log('[productAdapterFactory] Using Contentful product adapter');
-    return contentfulProductAdapter;
+    // Default to Contentful if no config provided
+    const providerType = config?.type || ContentProviderType.CONTENTFUL;
+    
+    switch (providerType) {
+      case ContentProviderType.CONTENTFUL:
+        console.log('[productAdapterFactory] Using Contentful product adapter');
+        return contentfulProductAdapter;
+      default:
+        console.log('[productAdapterFactory] No specific adapter found, using Contentful as default');
+        return contentfulProductAdapter;
+    }
   } catch (error) {
     console.error('[productAdapterFactory] Error creating product adapter:', error);
     throw handleCMSError(error, 'initialize', 'ProductAdapter');
@@ -19,7 +27,8 @@ export const getProductAdapter = (config?: ContentProviderConfig): ProductAdapte
 };
 
 /**
- * Check if the product adapter is valid
+ * Check if the configured CMS provider has a valid product adapter
+ * @param config The CMS provider configuration to check
  * @returns True if the adapter is available and valid
  */
 export async function validateProductAdapter(config: ContentProviderConfig): Promise<boolean> {

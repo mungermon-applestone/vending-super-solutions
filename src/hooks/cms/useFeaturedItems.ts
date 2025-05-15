@@ -1,16 +1,12 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { businessGoalOperations } from '@/services/cms/contentTypes/businessGoals';
+import { fetchProductTypes } from '@/services/cms/contentTypes/productTypes/fetchProductTypes';
 import { fetchMachines } from '@/services/cms/contentTypes/machines/api';
-import { CMSBusinessGoal, CMSMachine } from '@/types/cms';
-import { useContentfulProducts } from './useContentfulProducts';
+import { fetchBusinessGoals } from '@/services/cms/contentTypes/businessGoals/fetchBusinessGoals';
+import { CMSBusinessGoal, CMSMachine, CMSProductType } from '@/types/cms';
 
 /**
  * Hook to fetch items for homepage display
- * 
- * @remarks
- * CRITICAL PATH: This hook powers the homepage content display.
- * Modifications can cause homepage sections to break.
  */
 export function useHomepageItems() {
   // Fetch featured products
@@ -21,9 +17,13 @@ export function useHomepageItems() {
   } = useQuery({
     queryKey: ['homepage', 'products'],
     queryFn: async () => {
-      // For mock implementation, just return an empty array
-      console.log(`[useHomepageItems] Mock: Would fetch featured products`);
-      return [];
+      const products = await fetchProductTypes({
+        showOnHomepage: true,
+        sort: 'fields.homepageOrder'
+      });
+      
+      console.log(`[useHomepageItems] Fetched ${products.length} featured products`);
+      return products;
     }
   });
   
@@ -35,7 +35,10 @@ export function useHomepageItems() {
   } = useQuery({
     queryKey: ['homepage', 'machines'],
     queryFn: async () => {
-      const machines = await fetchMachines();
+      const machines = await fetchMachines({
+        showOnHomepage: true,
+        sort: 'homepage_order'
+      });
       
       console.log(`[useHomepageItems] Fetched ${machines.length} featured machines`);
       return machines as CMSMachine[];
@@ -50,7 +53,10 @@ export function useHomepageItems() {
   } = useQuery({
     queryKey: ['homepage', 'businessGoals'],
     queryFn: async () => {
-      const goals = await businessGoalOperations.fetchAll();
+      const goals = await fetchBusinessGoals({
+        filters: { showOnHomepage: true },
+        sort: 'homepage_order'
+      });
       
       console.log(`[useHomepageItems] Fetched ${goals.length} featured business goals`);
       return goals;
@@ -68,32 +74,58 @@ export function useHomepageItems() {
 
 /**
  * Hook to fetch featured products for homepage
- * 
- * @remarks
- * CRITICAL PATH: This hook is used by the homepage to display product cards.
- * The implementation must return properly formatted product data with valid links.
- * 
- * Previously returned an empty array, which broke product cards on homepage.
- * Now uses useContentfulProducts() to ensure consistent data.
  */
 export function useFeaturedProducts() {
-  // Use the Contentful products hook instead of returning an empty array
-  // This will fetch real data from Contentful and ensure proper links
-  return useContentfulProducts();
+  return useQuery({
+    queryKey: ['homepage', 'products'],
+    queryFn: async () => {
+      console.log('[useFeaturedProducts] Fetching featured products for homepage');
+      
+      const products = await fetchProductTypes({
+        showOnHomepage: true,
+        sort: 'fields.homepageOrder'
+      });
+      
+      // Sort products by homepageOrder if available
+      const sortedProducts = [...products].sort((a, b) => {
+        const orderA = a.homepageOrder !== undefined ? a.homepageOrder : 999;
+        const orderB = b.homepageOrder !== undefined ? b.homepageOrder : 999;
+        return orderA - orderB;
+      });
+      
+      console.log(`[useFeaturedProducts] Fetched ${sortedProducts.length} products for homepage`);
+      
+      if (sortedProducts.length > 0) {
+        console.log('[useFeaturedProducts] First product:', {
+          title: sortedProducts[0]?.title,
+          slug: sortedProducts[0]?.slug,
+          homepageOrder: sortedProducts[0]?.homepageOrder
+        });
+      } else {
+        console.log('[useFeaturedProducts] No featured products found');
+      }
+      
+      return sortedProducts;
+    },
+    staleTime: 60000, // 1 minute before refetching
+    meta: {
+      onError: (error: Error) => {
+        console.error('[useFeaturedProducts] Error fetching featured products:', error);
+      }
+    }
+  });
 }
 
 /**
  * Hook to fetch featured machines for homepage
- * 
- * @remarks
- * CRITICAL PATH: This hook is used by the homepage to display machine cards.
  */
 export function useFeaturedMachines() {
   return useQuery({
     queryKey: ['homepage', 'machines'],
     queryFn: async () => {
       const machines = await fetchMachines({
-        // We would filter by showOnHomepage in a real implementation
+        showOnHomepage: true,
+        sort: 'homepage_order'
       });
       return machines as CMSMachine[];
     }
@@ -102,15 +134,15 @@ export function useFeaturedMachines() {
 
 /**
  * Hook to fetch featured business goals for homepage
- * 
- * @remarks
- * CRITICAL PATH: This hook is used by the homepage to display business goal cards.
  */
 export function useFeaturedBusinessGoals() {
   return useQuery({
     queryKey: ['homepage', 'businessGoals'],
     queryFn: async () => {
-      const goals = await businessGoalOperations.fetchAll();
+      const goals = await fetchBusinessGoals({
+        filters: { showOnHomepage: true },
+        sort: 'homepage_order'
+      });
       return goals;
     }
   });

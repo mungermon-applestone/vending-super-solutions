@@ -9,7 +9,6 @@ import { Link } from 'react-router-dom';
 import BlogSchemaData from '@/components/blog/BlogSchemaData';
 import SEO from '@/components/seo/SEO';
 import { useBreadcrumbs } from '@/context/BreadcrumbContext';
-import { convertContentfulBlogPostToBlogPost } from '@/utils/contentfulTypeGuards';
 
 const POSTS_PER_PAGE = 9;
 
@@ -18,10 +17,11 @@ const BlogList = () => {
   const { setBreadcrumbs } = useBreadcrumbs();
   
   // Get posts ordered by published_at in descending order (newest first)
-  const { data: contentfulPosts = [], isLoading, error } = useBlogPosts();
-  
-  // Convert Contentful posts to blog post format
-  const blogPosts = contentfulPosts.map(post => convertContentfulBlogPostToBlogPost(post));
+  const { data: blogPosts = [], isLoading, error } = useBlogPosts({ 
+    status: 'published',
+    limit: POSTS_PER_PAGE,
+    offset: page * POSTS_PER_PAGE
+  });
 
   useEffect(() => {
     setBreadcrumbs([

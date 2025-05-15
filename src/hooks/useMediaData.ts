@@ -2,21 +2,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   fetchMediaFiles, 
-  fetchMediaFileById,
-  uploadMedia,
+  fetchMediaFileById, 
+  uploadMedia, 
   updateMediaMetadata,
   deleteMedia,
-  getMediaUrl,
-  MediaFiltersParams,
-  MediaUpdateParams,
-  MediaUploadParams
-} from '@/types/mediaStubs';
+  getMediaUrl
+} from '@/services/cms/contentTypes/media';
+import { MediaFiltersParams, MediaUpdateParams, MediaUploadParams } from '@/types/media';
 
 // Hook for fetching media files
 export const useMediaFiles = (filters?: MediaFiltersParams) => {
   return useQuery({
     queryKey: ['media-files', filters],
-    queryFn: () => fetchMediaFiles(),
+    queryFn: () => fetchMediaFiles(filters || {}),
   });
 };
 
@@ -47,8 +45,9 @@ export const useUpdateMediaMetadata = () => {
   
   return useMutation({
     mutationFn: (params: MediaUpdateParams) => updateMediaMetadata(params),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['media-files'] });
+      queryClient.invalidateQueries({ queryKey: ['media-file', data.id] });
     },
   });
 };

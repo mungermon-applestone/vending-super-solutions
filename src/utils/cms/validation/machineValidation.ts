@@ -1,87 +1,53 @@
 
-import { CMSMachine } from '@/services/cms/adapters/machines/types';
+import { CMSMachine } from '@/types/cms';
 
 /**
- * Validates a machine object for required fields
- * Throws an error if validation fails
+ * Validates machine data to ensure it meets minimum requirements
  * 
- * @param machine - The machine object to validate
- * @returns boolean - True if validation passes
+ * @param machine - The machine data to validate
+ * @returns The validated machine data
+ * @throws Error if validation fails
  */
-export function validateMachineData(machine: CMSMachine): boolean {
-  // Check for required fields
-  if (!machine) {
-    throw new Error('Machine data is null or undefined');
+export const validateMachineData = (machine: CMSMachine): CMSMachine => {
+  // Ensure required fields are present
+  if (!machine.id) {
+    throw new Error('Machine must have an ID');
   }
   
-  if (!machine.name) {
-    throw new Error('Machine name is required');
+  if (!machine.title) {
+    throw new Error('Machine must have a title');
   }
   
   if (!machine.slug) {
-    throw new Error(`Machine slug is required for ${machine.name}`);
+    throw new Error('Machine must have a slug');
   }
   
-  // Validate slug format (lowercase, no spaces, only hyphens)
-  const validSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-  if (!validSlugPattern.test(machine.slug)) {
-    console.warn(`Machine slug "${machine.slug}" may not be properly formatted`);
-    // Don't throw an error as we want to be flexible with existing data
+  // Validate slug format
+  if (!/^[a-z0-9-]+$/.test(machine.slug)) {
+    console.warn(`Machine slug "${machine.slug}" contains invalid characters, this may cause issues`);
   }
   
-  // Check that image properties exist if specified
-  if (machine.mainImage && typeof machine.mainImage === 'object') {
-    if (!machine.mainImage.url) {
-      console.warn(`Machine ${machine.name} has a mainImage object but no URL`);
+  // Validate type
+  if (!['vending', 'locker'].includes(machine.type)) {
+    console.warn(`Machine type "${machine.type}" is not recognized, defaulting to "vending"`);
+    machine.type = 'vending';
+  }
+  
+  // Ensure arrays are defined
+  machine.features = machine.features || [];
+  machine.images = machine.images || [];
+  
+  // Validate thumbnail if present
+  if (machine.thumbnail) {
+    if (!machine.thumbnail.url) {
+      console.warn('Machine thumbnail missing URL, this may cause display issues');
+    }
+    if (!machine.thumbnail.alt) {
+      console.warn('Machine thumbnail missing alt text, adding default alt text');
+      machine.thumbnail.alt = `${machine.title} thumbnail`;
     }
   }
   
-  // Validate that features have required properties if present
-  if (machine.features && Array.isArray(machine.features)) {
-    machine.features.forEach((feature, index) => {
-      if (!feature.name) {
-        console.warn(`Machine ${machine.name} has a feature at index ${index} with no name`);
-      }
-    });
-  }
-  
-  // Validate specifications if present
-  if (machine.specifications && Array.isArray(machine.specifications)) {
-    machine.specifications.forEach((spec, index) => {
-      if (!spec.name) {
-        console.warn(`Machine ${machine.name} has a specification at index ${index} with no name`);
-      }
-      if (spec.value === undefined || spec.value === null) {
-        console.warn(`Machine ${machine.name} has a specification "${spec.name}" with no value`);
-      }
-    });
-  }
-  
-  return true;
-}
-
-/**
- * Validates an array of machines
- * Logs warnings for invalid machines but doesn't throw
- * 
- * @param machines - Array of machine objects to validate
- * @returns CMSMachine[] - Array of valid machines
- */
-export function validateMachines(machines: CMSMachine[]): CMSMachine[] {
-  if (!Array.isArray(machines)) {
-    console.error('Invalid machines data: expected an array');
-    return [];
-  }
-  
-  const validMachines = machines.filter(machine => {
-    try {
-      validateMachineData(machine);
-      return true;
-    } catch (error) {
-      console.error(`Validation failed for machine:`, error);
-      return false;
-    }
-  });
-  
-  return validMachines;
-}
+  // Return the validated machine
+  return machine;
+};

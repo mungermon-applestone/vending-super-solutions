@@ -15,9 +15,9 @@ import { SimpleContactCTA } from '@/components/common';
 
 const MachineDetail = () => {
   const { machineId, machineType } = useParams<{ machineType: string, machineId: string }>();
-  
-  // Use our specialized hook that handles fetching by slug with just the machineId
-  const { data: machine, isLoading, error } = useMachineBySlug(machineId);
+
+  // Use our specialized hook that handles fetching by slug
+  const { data: machine, isLoading, error } = useMachineBySlug(machineType, machineId);
   
   console.log("Fetching machine:", machineType, machineId);
   console.log("Machine data:", machine);

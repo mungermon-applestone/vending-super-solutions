@@ -1,143 +1,157 @@
 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import Layout from '@/components/layout/Layout';
+import { Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { fetchBlogPosts } from '@/services/cms/contentTypes/blog';
+import { useBlogPosts, useDeleteBlogPost, useCloneBlogPost } from '@/hooks/useBlogData';
+import { useToast } from '@/hooks/use-toast';
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Calendar, ChevronRight } from 'lucide-react';
-import { formatDate } from '@/utils/date';
-import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
-import ViewInContentful from '@/components/admin/ViewInContentful';
+} from "@/components/ui/table";
+import BlogHeader from '@/components/admin/blog/BlogHeader';
+import BlogPostTableRow from '@/components/admin/blog/BlogPostTableRow';
+import DeleteBlogPostDialog from '@/components/admin/blog/DeleteBlogPostDialog';
 import { BlogPost } from '@/types/blog';
-import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
 
 const AdminBlog = () => {
-  const navigate = useNavigate();
-  
-  // Log deprecation of this admin page
-  useEffect(() => {
-    logDeprecationWarning(
-      "AdminBlog",
-      "The Blog admin interface is deprecated and will be removed in a future version.",
-      "Please use Contentful to manage blog content."
-    );
-  }, []);
-  
-  // Fetch all blog posts - using TanStack Query v5 API pattern
-  const { data, isLoading } = useQuery({
-    queryKey: ['blogPosts'],
-    queryFn: async () => {
-      return await fetchBlogPosts();
+  const { toast } = useToast();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<{id: string, title: string} | null>(null);
+
+  // For cloning functionality
+  const cloneBlogPostMutation = useCloneBlogPost();
+  const [cloningPostId, setCloningPostId] = useState<string | null>(null);
+
+  const { data: posts = [], isLoading, refetch } = useBlogPosts();
+  const deleteMutation = useDeleteBlogPost();
+
+  const handleDeleteClick = (post: BlogPost) => {
+    console.log("[AdminBlog] Delete clicked for post:", post);
+    setPostToDelete({
+      id: post.id,
+      title: post.title
+    });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!postToDelete) return;
+    
+    try {
+      console.log("[AdminBlog] Confirming delete for post:", postToDelete);
+      await deleteMutation.mutateAsync(postToDelete.id);
+      setDeleteDialogOpen(false);
+      setPostToDelete(null);
+      toast({
+        title: "Post deleted",
+        description: `${postToDelete.title} has been deleted successfully.`
+      });
+    } catch (error) {
+      console.error('[AdminBlog] Error deleting post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete post. Please try again.",
+        variant: "destructive",
+      });
     }
-  });
+  };
   
-  // Make sure data is always an array
-  const blogPosts: BlogPost[] = Array.isArray(data) ? data : [];
+  const handleClonePost = async (post: BlogPost) => {
+    try {
+      setCloningPostId(post.id);
+      const clonedPost = await cloneBlogPostMutation.mutateAsync(post.id);
+      
+      if (clonedPost) {
+        toast({
+          title: "Post cloned",
+          description: `${post.title} has been cloned successfully.`
+        });
+      }
+    } catch (error) {
+      console.error('[AdminBlog] Error cloning post:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to clone post. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCloningPostId(null);
+    }
+  };
+
+  const handleRefresh = () => {
+    refetch();
+    toast({
+      title: "Refreshing...",
+      description: "Refreshing blog posts data from the database",
+    });
+  };
 
   return (
-    <DeprecatedAdminLayout
-      title="Blog Management"
-      description="View all blog posts (read-only)"
-      contentType="Blog Post"
-      backPath="/admin/dashboard"
-    >
-      <div className="flex justify-between mb-6">
-        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-          Read-Only View
-        </Badge>
-        <ViewInContentful 
-          contentType="blogPost"
-          className="bg-blue-50 text-blue-700 border-blue-200"
-        />
-      </div>
+    <Layout>
+      <div className="container mx-auto py-8">
+        <BlogHeader onRefresh={handleRefresh} />
 
-      <Card className="shadow-sm">
-        <CardContent className="pt-6">
-          {isLoading ? (
-            <div className="text-center py-10">Loading blog posts...</div>
-          ) : blogPosts.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-muted-foreground mb-4">No blog posts found</p>
-              <ViewInContentful 
-                contentType="blogPost"
-                variant="default"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              />
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          </div>
+        ) : posts && posts.length > 0 ? (
+          <div className="bg-white rounded-md shadow overflow-x-auto">
+            <div className="p-4 border-b">
+              <p className="text-sm text-gray-500">
+                Showing {posts.length} post{posts.length !== 1 && 's'}
+              </p>
             </div>
-          ) : (
             <Table>
-              <TableCaption>A list of all blog posts (read-only view).</TableCaption>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead className="w-[300px]">Title</TableHead>
+                  <TableHead>Slug</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
+                  <TableHead>Published Date</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {blogPosts.map((post) => (
-                  <TableRow key={post.id}>
-                    <TableCell className="font-medium">{post.title}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3 text-muted-foreground" />
-                        <span>{formatDate(post.published_at || post.created_at)}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={post.status === 'published' ? "default" : "outline"}>
-                        {post.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <ViewInContentful 
-                          contentType="blogPost"
-                          contentId={post.id}
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/blog/${post.slug}`)}
-                          className="h-8 px-2 w-8"
-                          title="View blog post"
-                        >
-                          <ChevronRight size={16} />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                {posts.map((post) => (
+                  <BlogPostTableRow
+                    key={post.id}
+                    post={post}
+                    onDeleteClick={() => handleDeleteClick(post)}
+                    onCloneClick={() => handleClonePost(post)}
+                    isCloningId={cloningPostId}
+                  />
                 ))}
               </TableBody>
             </Table>
-          )}
-        </CardContent>
-        <CardFooter className="border-t bg-gray-50 flex justify-between items-center">
-          <p className="text-sm text-muted-foreground">
-            This interface is read-only. All content management should be done in Contentful.
-          </p>
-          <ViewInContentful 
-            contentType="blogPost"
-            size="sm"
-          />
-        </CardFooter>
-      </Card>
-    </DeprecatedAdminLayout>
+          </div>
+        ) : (
+          <div className="bg-white rounded-md shadow p-8 text-center">
+            <p className="text-gray-500 mb-4">No blog posts found</p>
+            <Button asChild>
+              <Link to="/admin/blog/new">
+                <Plus className="h-4 w-4 mr-2" /> Create Your First Post
+              </Link>
+            </Button>
+          </div>
+        )}
+
+        <DeleteBlogPostDialog
+          isOpen={deleteDialogOpen}
+          setIsOpen={setDeleteDialogOpen}
+          postToDelete={postToDelete}
+          onConfirmDelete={confirmDelete}
+          isDeleting={deleteMutation.isPending}
+        />
+      </div>
+    </Layout>
   );
 };
 

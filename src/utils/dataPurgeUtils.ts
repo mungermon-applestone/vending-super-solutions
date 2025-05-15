@@ -1,21 +1,9 @@
 
-/**
- * @deprecated This module is deprecated and will be removed in future versions.
- * It re-exports functions from the legacy CMS module to maintain compatibility.
- */
-
-import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
-
-// Log deprecation warning when this module is imported
-logDeprecationWarning(
-  "utils/dataPurgeUtils.ts",
-  "This module is deprecated and will be removed in a future release.",
-  "Use Contentful directly for content management."
-);
+import { supabase } from '@/integrations/supabase/client';
 
 /**
- * @deprecated This function is deprecated and will be removed in future versions.
- * Complete purge of all product-related data - now a mock implementation
+ * Complete purge of all product-related data from the database
+ * This is a destructive operation and should be used with caution
  */
 export const purgeProductData = async (): Promise<{
   success: boolean;
@@ -24,26 +12,84 @@ export const purgeProductData = async (): Promise<{
   error?: string;
 }> => {
   try {
-    console.log('[DEPRECATED] Starting complete product data purge (MOCK)');
+    console.log('[dataPurgeUtils] Starting complete product data purge');
+    const tablesAffected: string[] = [];
+    const recordsDeleted: Record<string, number> = {};
+
+    // Delete in proper order to respect foreign key constraints
+    // 1. First delete product feature images
+    const { count: featureImageCount, error: featureImageError } = await supabase
+      .from('product_type_feature_images')
+      .delete({ count: 'exact' })
+      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
     
-    // Mock data for the purge operation
-    const tablesAffected = [
-      'product_type_feature_images', 
-      'product_type_features', 
-      'product_type_benefits', 
-      'product_type_images',
-      'product_types'
-    ];
+    if (featureImageError) {
+      console.error('[dataPurgeUtils] Error deleting product_type_feature_images:', featureImageError);
+      throw new Error(`Error deleting feature images: ${featureImageError.message}`);
+    }
     
-    const recordsDeleted = {
-      'product_type_feature_images': 12,
-      'product_type_features': 25, 
-      'product_type_benefits': 18, 
-      'product_type_images': 8,
-      'product_types': 6
-    };
+    tablesAffected.push('product_type_feature_images');
+    recordsDeleted['product_type_feature_images'] = featureImageCount || 0;
     
-    console.log('[DEPRECATED] Product data purge completed successfully (MOCK)');
+    // 2. Delete product features
+    const { count: featureCount, error: featureError } = await supabase
+      .from('product_type_features')
+      .delete({ count: 'exact' })
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    
+    if (featureError) {
+      console.error('[dataPurgeUtils] Error deleting product_type_features:', featureError);
+      throw new Error(`Error deleting features: ${featureError.message}`);
+    }
+    
+    tablesAffected.push('product_type_features');
+    recordsDeleted['product_type_features'] = featureCount || 0;
+    
+    // 3. Delete product benefits
+    const { count: benefitCount, error: benefitError } = await supabase
+      .from('product_type_benefits')
+      .delete({ count: 'exact' })
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    
+    if (benefitError) {
+      console.error('[dataPurgeUtils] Error deleting product_type_benefits:', benefitError);
+      throw new Error(`Error deleting benefits: ${benefitError.message}`);
+    }
+    
+    tablesAffected.push('product_type_benefits');
+    recordsDeleted['product_type_benefits'] = benefitCount || 0;
+    
+    // 4. Delete product images
+    const { count: imageCount, error: imageError } = await supabase
+      .from('product_type_images')
+      .delete({ count: 'exact' })
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    
+    if (imageError) {
+      console.error('[dataPurgeUtils] Error deleting product_type_images:', imageError);
+      throw new Error(`Error deleting images: ${imageError.message}`);
+    }
+    
+    tablesAffected.push('product_type_images');
+    recordsDeleted['product_type_images'] = imageCount || 0;
+    
+    // 5. Finally, delete product types
+    const { count: productCount, error: productError } = await supabase
+      .from('product_types')
+      .delete({ count: 'exact' })
+      .neq('id', '00000000-0000-0000-0000-000000000000');
+    
+    if (productError) {
+      console.error('[dataPurgeUtils] Error deleting product_types:', productError);
+      throw new Error(`Error deleting products: ${productError.message}`);
+    }
+    
+    tablesAffected.push('product_types');
+    recordsDeleted['product_types'] = productCount || 0;
+    
+    console.log('[dataPurgeUtils] Product data purge completed successfully');
+    console.log('[dataPurgeUtils] Tables affected:', tablesAffected);
+    console.log('[dataPurgeUtils] Records deleted:', recordsDeleted);
     
     return {
       success: true,
@@ -51,7 +97,7 @@ export const purgeProductData = async (): Promise<{
       recordsDeleted
     };
   } catch (error) {
-    console.error('[DEPRECATED] Error during product data purge:', error);
+    console.error('[dataPurgeUtils] Error during product data purge:', error);
     return {
       success: false,
       tablesAffected: [],

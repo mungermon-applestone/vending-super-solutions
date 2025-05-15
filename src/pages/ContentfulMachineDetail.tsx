@@ -1,76 +1,131 @@
-import { useState, useEffect, useMemo } from 'react';
+
+import React, { useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
+import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
-import MachineDetailHero from '@/components/machineDetail/MachineDetailHero';
-import MachineDetailFeatures from '@/components/machineDetail/MachineDetailFeatures';
-import MachineDetailSpecifications from '@/components/machineDetail/MachineDetailSpecifications';
-import MachineDetailGallery from '@/components/machineDetail/MachineDetailGallery';
-import MachineDetailInquiry from '@/components/machineDetail/MachineDetailInquiry';
-import MachineDetailDeployments from '@/components/machineDetail/MachineDetailDeployments';
-import { CMSImage } from '@/types/cms';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 
-const ContentfulMachineDetail = () => {
+const ContentfulMachineDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: machine, isLoading, error } = useContentfulMachine(slug);
+  const { data: testimonialSection } = useTestimonialSection('machines');
 
-  // Memoize the machine data to prevent unnecessary re-renders
-  const memoizedMachine = useMemo(() => machine, [machine]);
-
+  // Scroll to top when the component mounts or slug changes
   useEffect(() => {
-    if (error) {
-      console.error("Error fetching machine:", error);
-    }
-  }, [error]);
+    window.scrollTo(0, 0);
+  }, [slug]);
+
+  const formattedMachine = useMemo(() => {
+    if (!machine) return null;
+
+    // Create empty deployment examples if none exist
+    const deploymentExamples = machine.images && machine.images.length > 1 
+      ? machine.images.slice(1, 3).map((image, index) => ({
+          title: `Example ${index + 1}`,
+          description: 'Deployment example',
+          image: image
+        }))
+      : [];
+
+    // Ensure type is strictly "vending" or "locker" as a union type
+    const machineType = machine.type === 'locker' ? 'locker' : 'vending' as 'vending' | 'locker';
+
+    // Ensure all images have an id property
+    const processedImages = Array.isArray(machine.images) 
+      ? machine.images.map((img, index) => ({
+          id: img.id || `img-${machine.id}-${index}`, // Use existing id or create one
+          url: img.url,
+          alt: img.alt || machine.title
+        }))
+      : [];
+
+    return {
+      id: machine.id,
+      slug: machine.slug,
+      title: machine.title,
+      type: machineType,
+      temperature: machine.temperature || 'ambient',
+      description: machine.description,
+      images: processedImages, // Use the processed images with IDs
+      specs: machine.specs || {},
+      features: machine.features || [],
+      deploymentExamples,
+      testimonialSection
+    };
+  }, [machine, testimonialSection]);
 
   if (isLoading) {
     return (
       <Layout>
-        <div className="flex justify-center items-center min-h-screen">
-          <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
-        </div>
-      </Layout>
-    );
-  }
-
-  if (!memoizedMachine) {
-    return (
-      <Layout>
-        <div className="flex justify-center items-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold text-gray-700 mb-4">Machine Not Found</h2>
-            <p className="text-gray-500">Sorry, we couldn't find a machine with that ID.</p>
-            <Button asChild variant="outline" size="lg" className="mt-4">
-              <Link to="/machines">Back to Machines</Link>
-            </Button>
+        <div className="container py-12">
+          <Skeleton className="h-12 w-3/4 mb-4" />
+          <Skeleton className="h-6 w-1/2 mb-8" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            <Skeleton className="h-80 w-full" />
+            <div>
+              <Skeleton className="h-6 w-3/4 mb-4" />
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-4/5 mb-6" />
+              <Skeleton className="h-10 w-40" />
+            </div>
           </div>
         </div>
       </Layout>
     );
   }
 
-  return (
-    <Layout>
-      <div className="flex flex-col min-h-screen">
-        <MachineDetailHero
-          name={memoizedMachine.name || memoizedMachine.title}
-          description={memoizedMachine.description}
-          mainImage={memoizedMachine.mainImage as CMSImage}
-        />
-
-        <div className="container-wide py-12">
-          <MachineDetailFeatures features={memoizedMachine.features || []} />
-          <MachineDetailSpecifications specs={memoizedMachine.specs || {}} />
-          <MachineDetailGallery images={memoizedMachine.images || []} />
-          <MachineDetailDeployments machineType={memoizedMachine.type} />
+  if (error) {
+    return (
+      <Layout>
+        <div className="container py-12">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <p className="font-bold">Error loading machine details</p>
+            <p>{error instanceof Error ? error.message : 'Unknown error'}</p>
+            <Link to="/contentful/machines" className="mt-4 inline-block">
+              <Button variant="outline">Back to Machines</Button>
+            </Link>
+          </div>
         </div>
+      </Layout>
+    );
+  }
 
-        <MachineDetailInquiry machineName={memoizedMachine.name || memoizedMachine.title} />
-      </div>
-    </Layout>
-  );
+  if (!machine) {
+    return (
+      <Layout>
+        <div className="container py-12">
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
+            <p className="font-bold">Machine not found</p>
+            <p>The machine with slug "{slug}" could not be found.</p>
+            <Link to="/contentful/machines" className="mt-4 inline-block">
+              <Button variant="outline">Back to Machines</Button>
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!formattedMachine) {
+    return (
+      <Layout>
+        <div className="container py-12">
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
+            <p>Error formatting machine data. Please check the console for details.</p>
+            <Link to="/contentful/machines" className="mt-4 inline-block">
+              <Button variant="outline">Back to Machines</Button>
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  return <MachinePageTemplate machine={formattedMachine} />;
 };
 
 export default ContentfulMachineDetail;

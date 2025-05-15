@@ -1,145 +1,115 @@
 
 /**
- * Utility functions for slug management and matching
+ * Slug matching functionality - main entry point
+ * Centralized module for all slug handling
  */
+
+// Import necessary functions from modules
+import { normalizeSlug, getCanonicalSlug, getBasicVariations, BUSINESS_GOAL_SLUG_MAP, CANONICAL_SLUG_MAP, COMMON_PREFIXES, logSlugOperation } from './slug/common';
+
+// Import slug variation functionality
+import { getSlugVariations, slugsMatch, findBestSlugMatch } from './slug/variations';
+
+// Import mapping utilities
+import { mapUrlSlugToDatabaseSlug, mapDatabaseSlugToUrlSlug, registerSlugChange } from './slug/mapping';
+
+// Import UUID utilities
+import { extractUUID, createSlugWithUUID, parseSlugWithUUID } from './slug/uuid';
+
+// Import logging utilities
+import { logSlugSearch, logSlugResult, getSlugNotFoundMessage } from './slug/logging';
+
+// Import normalize utilities
+import { exactSlugMatch } from './slug/normalize';
+
+// Re-export all the imported functions for use by external modules
+export { 
+  normalizeSlug, 
+  getCanonicalSlug, 
+  getBasicVariations, 
+  BUSINESS_GOAL_SLUG_MAP,
+  CANONICAL_SLUG_MAP,
+  COMMON_PREFIXES,
+  logSlugOperation
+} from './slug/common';
+
+export { 
+  getSlugVariations,
+  slugsMatch, 
+  findBestSlugMatch 
+} from './slug/variations';
+
+export { 
+  mapUrlSlugToDatabaseSlug, 
+  mapDatabaseSlugToUrlSlug, 
+  registerSlugChange 
+} from './slug/mapping';
+
+export { 
+  extractUUID, 
+  createSlugWithUUID, 
+  parseSlugWithUUID 
+} from './slug/uuid';
+
+export { 
+  logSlugSearch, 
+  logSlugResult, 
+  getSlugNotFoundMessage 
+} from './slug/logging';
+
+export { 
+  exactSlugMatch 
+} from './slug/normalize';
 
 /**
- * Prepare a slug by trimming, lowercasing, and replacing spaces with hyphens
+ * Comprehensive function to resolve a slug to its best match
+ * @param inputSlug Original slug from URL or user input
+ * @param availableSlugs Array of available slugs in the database (optional)
+ * @returns The best matching slug or the canonical version if no match
  */
-export function prepareSlug(text: string): string {
-  return text
-    .trim()
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
-/**
- * Normalize a slug by removing special characters and standardizing format
- */
-export function normalizeSlug(slug: string): string {
-  if (!slug) return '';
+export function resolveSlug(inputSlug: string, availableSlugs?: string[]): string {
+  if (!inputSlug) return '';
   
-  // Convert to lowercase and trim whitespace
-  const normalized = slug.toLowerCase().trim();
+  console.log(`[resolveSlug] Processing input slug: "${inputSlug}"`);
   
-  // Handle URL-encoded characters if any
-  try {
-    return decodeURIComponent(normalized);
-  } catch (e) {
-    // If decoding fails (e.g., not encoded), return the original normalized string
-    return normalized;
-  }
-}
-
-/**
- * Map a URL slug to the format used in the database
- * This handles common transformations needed for matching
- */
-export function mapUrlSlugToDatabaseSlug(urlSlug: string): string {
-  if (!urlSlug) return '';
+  // Step 1: Normalize the input slug
+  const normalizedSlug = normalizeSlug(inputSlug);
+  console.log(`[resolveSlug] Normalized slug: "${normalizedSlug}"`);
   
-  // Remove any UUID that might be present
-  const baseSlug = urlSlug.split('__')[0];
+  // Step 2: Get the canonical form if it exists
+  const canonicalSlug = getCanonicalSlug(normalizedSlug);
+  console.log(`[resolveSlug] Canonical slug: "${canonicalSlug}"`);
   
-  return baseSlug
-    .toLowerCase()
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
-/**
- * Get canonical form of a slug (the preferred form for URLs)
- */
-export function getCanonicalSlug(slug: string): string {
-  if (!slug) return '';
-
-  // Normalize first
-  const normalizedSlug = normalizeSlug(slug);
-  
-  // Apply any specific business rules for canonical form
-  // For example, ensure consistent separator usage
-  return normalizedSlug.replace(/_/g, '-');
-}
-
-/**
- * Resolve a slug to its canonical form, considering any aliases or redirects
- */
-export function resolveSlug(slug: string): string {
-  if (!slug) return '';
-  
-  // First normalize the slug
-  const normalizedSlug = normalizeSlug(slug);
-  
-  // Get canonical form
-  return getCanonicalSlug(normalizedSlug);
-}
-
-/**
- * Parse a slug that might contain a UUID
- * Format: base-slug__uuid
- */
-export function parseSlugWithUUID(slug: string): { baseSlug: string; uuid: string | null } {
-  if (!slug) {
-    return { baseSlug: '', uuid: null };
-  }
-  
-  const parts = slug.split('__');
-  const baseSlug = parts[0];
-  const uuid = parts.length > 1 ? parts[1] : null;
-  
-  return { baseSlug, uuid };
-}
-
-/**
- * Extract a UUID from a slug if present
- */
-export function extractUUID(slug: string): string | null {
-  const { uuid } = parseSlugWithUUID(slug);
-  return uuid;
-}
-
-/**
- * Compare two slugs to see if they match, ignoring case and formatting differences
- */
-export function slugsMatch(slug1: string, slug2: string): boolean {
-  if (!slug1 || !slug2) return false;
-  
-  const normalized1 = mapUrlSlugToDatabaseSlug(slug1);
-  const normalized2 = mapUrlSlugToDatabaseSlug(slug2);
-  
-  return normalized1 === normalized2;
-}
-
-/**
- * Generate variations of a slug to support fuzzy matching
- */
-export function getSlugVariations(slug: string): string[] {
-  if (!slug) return [];
-  
-  const variations = [slug];
-  
-  // Add or remove -vending suffix
-  if (slug.endsWith('-vending')) {
-    variations.push(slug.replace('-vending', ''));
-  } else {
-    variations.push(`${slug}-vending`);
+  // Step 3: If we have available slugs, try to find a direct match
+  if (availableSlugs?.length) {
+    // Try with canonical slug first
+    if (availableSlugs.includes(canonicalSlug)) {
+      console.log(`[resolveSlug] Found direct match with canonical slug: "${canonicalSlug}"`);
+      return canonicalSlug;
+    }
+    
+    // Then try with normalized slug
+    if (availableSlugs.includes(normalizedSlug)) {
+      console.log(`[resolveSlug] Found direct match with normalized slug: "${normalizedSlug}"`);
+      return normalizedSlug;
+    }
+    
+    // Try the original slug
+    if (availableSlugs.includes(inputSlug)) {
+      console.log(`[resolveSlug] Found direct match with original slug: "${inputSlug}"`);
+      return inputSlug;
+    }
+    
+    // If no direct match, try finding a best match
+    const bestMatch = findBestSlugMatch(canonicalSlug || normalizedSlug, availableSlugs);
+    if (bestMatch) {
+      console.log(`[resolveSlug] Found best match: "${bestMatch}" for input: "${inputSlug}"`);
+      return bestMatch;
+    }
   }
   
-  // Handle common word separators (dash vs underscore)
-  if (slug.includes('-')) {
-    variations.push(slug.replace(/-/g, '_'));
-  } else if (slug.includes('_')) {
-    variations.push(slug.replace(/_/g, '-'));
-  }
-  
-  // Handle common plural/singular variations
-  if (slug.endsWith('s')) {
-    variations.push(slug.slice(0, -1)); // Remove trailing 's'
-  } else {
-    variations.push(`${slug}s`); // Add trailing 's'
-  }
-  
-  return [...new Set(variations)]; // Remove duplicates
+  // Step 4: Default to the canonical form, or normalized form if no canonical exists
+  const resultSlug = canonicalSlug || normalizedSlug;
+  console.log(`[resolveSlug] No match found, using ${canonicalSlug ? 'canonical' : 'normalized'} slug: "${resultSlug}"`);
+  return resultSlug;
 }

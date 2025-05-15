@@ -1,100 +1,226 @@
 
-import { BusinessGoalAdapter, BusinessGoalCreateInput, BusinessGoalUpdateInput } from '../types';
 import { CMSBusinessGoal } from '@/types/cms';
-import { logDeprecation } from '@/services/cms/utils/deprecation';
+import { BusinessGoalAdapter, BusinessGoalCreateInput, BusinessGoalUpdateInput } from '../types';
+import { buildBusinessGoalEndpoint, buildStrapiFilters, fetchFromStrapi } from './helpers';
+import { transformStrapiDataToBusinessGoal, transformInputToStrapiFormat } from './transformers';
+import { getStrapiApiKey, getStrapiBaseUrl, validateStrapiConfig } from '../../../utils/strapiConfig';
 
 /**
- * Adapter for Strapi-based business goals
- * This adapter is being deprecated in favor of Contentful
+ * Implementation of the Business Goal Adapter for Strapi CMS
  */
 export const strapiBusinessGoalAdapter: BusinessGoalAdapter = {
-  /**
-   * Get all business goals
-   */
-  getAll: async (options = {}): Promise<CMSBusinessGoal[]> => {
-    logDeprecation(
-      'strapiBusinessGoalAdapter.getAll',
-      'Using deprecated Strapi adapter for business goals',
-      'Use contentfulBusinessGoalAdapter instead'
-    );
+  getAll: async (): Promise<CMSBusinessGoal[]> => {
+    console.log('[strapiBusinessGoalAdapter] Fetching all business goals from Strapi');
     
-    console.log('[strapiBusinessGoalAdapter] getAll called with options:', options);
-    
-    // Return empty array - we're deprecating this adapter
-    return [];
+    try {
+      // Build the URL with query parameters
+      let url = buildBusinessGoalEndpoint();
+      const queryParams = buildStrapiFilters();
+      
+      // Add the query string to the URL
+      if (queryParams.toString()) {
+        url = `${url}?${queryParams.toString()}`;
+      }
+      
+      // Make the request to Strapi
+      const data = await fetchFromStrapi<any>(url);
+      
+      // Transform Strapi response to our internal format
+      return data.data.map((item: any) => transformStrapiDataToBusinessGoal(item));
+    } catch (error) {
+      console.error('[strapiBusinessGoalAdapter] Error fetching business goals:', error);
+      throw error;
+    }
   },
   
-  /**
-   * Get a business goal by slug
-   */
   getBySlug: async (slug: string): Promise<CMSBusinessGoal | null> => {
-    logDeprecation(
-      'strapiBusinessGoalAdapter.getBySlug',
-      `Looking up business goal with slug: ${slug}`,
-      'Use contentfulBusinessGoalAdapter instead'
-    );
+    console.log(`[strapiBusinessGoalAdapter] Fetching business goal with slug: ${slug}`);
     
-    console.log(`[strapiBusinessGoalAdapter] getBySlug called with slug: ${slug}`);
-    
-    // Return null - we're deprecating this adapter
-    return null;
+    try {
+      const url = buildBusinessGoalEndpoint(`?filters[slug][$eq]=${encodeURIComponent(slug)}`);
+      
+      // Add populate parameters
+      const queryParams = buildStrapiFilters();
+      const fullUrl = `${url}&${queryParams.toString()}`;
+      
+      const data = await fetchFromStrapi<any>(fullUrl);
+      
+      // Check if any results were found
+      if (!data.data || data.data.length === 0) {
+        return null;
+      }
+      
+      // Transform the first result from Strapi format to our internal format
+      return transformStrapiDataToBusinessGoal(data.data[0]);
+    } catch (error) {
+      console.error(`[strapiBusinessGoalAdapter] Error fetching business goal by slug "${slug}":`, error);
+      throw error;
+    }
   },
   
-  /**
-   * Get a business goal by ID
-   */
   getById: async (id: string): Promise<CMSBusinessGoal | null> => {
-    logDeprecation(
-      'strapiBusinessGoalAdapter.getById',
-      `Looking up business goal with id: ${id}`,
-      'Use contentfulBusinessGoalAdapter instead'
-    );
+    console.log(`[strapiBusinessGoalAdapter] Fetching business goal with ID: ${id}`);
     
-    console.log(`[strapiBusinessGoalAdapter] getById called with id: ${id}`);
-    
-    // Return null - we're deprecating this adapter
-    return null;
+    try {
+      const url = buildBusinessGoalEndpoint(id);
+      
+      // Add populate parameters
+      const queryParams = buildStrapiFilters();
+      const fullUrl = `${url}?${queryParams.toString()}`;
+      
+      const data = await fetchFromStrapi<any>(fullUrl).catch(error => {
+        if (error.message.includes('404')) {
+          return null;
+        }
+        throw error;
+      });
+      
+      if (!data) {
+        return null;
+      }
+      
+      // Transform from Strapi format to our internal format
+      return transformStrapiDataToBusinessGoal(data.data);
+    } catch (error) {
+      console.error(`[strapiBusinessGoalAdapter] Error fetching business goal by ID "${id}":`, error);
+      throw error;
+    }
   },
   
-  /**
-   * Create a business goal
-   */
   create: async (data: BusinessGoalCreateInput): Promise<CMSBusinessGoal> => {
-    logDeprecation(
-      'strapiBusinessGoalAdapter.create',
-      'Attempting to create a business goal via deprecated Strapi adapter',
-      'Use contentfulBusinessGoalAdapter instead'
-    );
+    console.log('[strapiBusinessGoalAdapter] Creating new business goal:', data);
     
-    console.error('[strapiBusinessGoalAdapter] create called but this method is deprecated');
-    throw new Error('This method is deprecated. Please use contentfulBusinessGoalAdapter instead.');
+    try {
+      validateStrapiConfig();
+      const baseUrl = getStrapiBaseUrl();
+      
+      // Transform our input data to Strapi format
+      const strapiData = transformInputToStrapiFormat(data);
+      
+      // Send the POST request to create the business goal
+      const response = await fetch(`${baseUrl}/business-goals`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getStrapiApiKey()}`
+        },
+        body: JSON.stringify({ data: strapiData })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to create business goal in Strapi: ${response.statusText}`);
+      }
+      
+      const responseData = await response.json();
+      
+      // Get the ID of the newly created business goal
+      const newId = responseData.data.id;
+      
+      // Fetch the complete business goal with all populated relations
+      return await strapiBusinessGoalAdapter.getById(newId);
+    } catch (error) {
+      console.error('[strapiBusinessGoalAdapter] Error creating business goal:', error);
+      throw error;
+    }
   },
   
-  /**
-   * Update a business goal
-   */
   update: async (id: string, data: BusinessGoalUpdateInput): Promise<CMSBusinessGoal> => {
-    logDeprecation(
-      'strapiBusinessGoalAdapter.update',
-      `Attempting to update business goal with id: ${id}`,
-      'Use contentfulBusinessGoalAdapter instead'
-    );
+    console.log(`[strapiBusinessGoalAdapter] Updating business goal with ID: ${id}`, data);
     
-    console.error('[strapiBusinessGoalAdapter] update called but this method is deprecated');
-    throw new Error('This method is deprecated. Please use contentfulBusinessGoalAdapter instead.');
+    try {
+      validateStrapiConfig();
+      const baseUrl = getStrapiBaseUrl();
+      
+      // Transform our input data to Strapi format
+      const strapiData = transformInputToStrapiFormat(data);
+      
+      // Send the PUT request to update the business goal
+      const response = await fetch(`${baseUrl}/business-goals/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getStrapiApiKey()}`
+        },
+        body: JSON.stringify({ data: strapiData })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update business goal in Strapi: ${response.statusText}`);
+      }
+      
+      // Fetch the updated business goal with all populated relations
+      return await strapiBusinessGoalAdapter.getById(id);
+    } catch (error) {
+      console.error(`[strapiBusinessGoalAdapter] Error updating business goal with ID "${id}":`, error);
+      throw error;
+    }
   },
   
-  /**
-   * Delete a business goal
-   */
   delete: async (id: string): Promise<boolean> => {
-    logDeprecation(
-      'strapiBusinessGoalAdapter.delete',
-      `Attempting to delete business goal with id: ${id}`,
-      'Use contentfulBusinessGoalAdapter instead'
-    );
+    console.log(`[strapiBusinessGoalAdapter] Deleting business goal with ID: ${id}`);
     
-    console.error('[strapiBusinessGoalAdapter] delete called but this method is deprecated');
-    throw new Error('This method is deprecated. Please use contentfulBusinessGoalAdapter instead.');
+    try {
+      validateStrapiConfig();
+      const baseUrl = getStrapiBaseUrl();
+      
+      // Send the DELETE request
+      const response = await fetch(`${baseUrl}/business-goals/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${getStrapiApiKey()}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete business goal in Strapi: ${response.statusText}`);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error(`[strapiBusinessGoalAdapter] Error deleting business goal with ID "${id}":`, error);
+      throw error;
+    }
+  },
+  
+  clone: async (id: string): Promise<CMSBusinessGoal | null> => {
+    console.log(`[strapiBusinessGoalAdapter] Cloning business goal with ID: ${id}`);
+    
+    try {
+      // First, get the business goal to clone
+      const businessGoal = await strapiBusinessGoalAdapter.getById(id);
+      if (!businessGoal) {
+        throw new Error(`Business goal with ID "${id}" not found`);
+      }
+      
+      // Create a new business goal based on the existing one
+      const clonedBusinessGoal: BusinessGoalCreateInput = {
+        title: `${businessGoal.title} (Copy)`,
+        slug: `${businessGoal.slug}-copy-${Math.floor(Date.now() / 1000)}`,
+        description: businessGoal.description,
+        visible: businessGoal.visible,
+        icon: businessGoal.icon,
+        image: businessGoal.image ? {
+          url: businessGoal.image.url,
+          alt: businessGoal.image.alt
+        } : undefined,
+        benefits: businessGoal.benefits,
+        features: businessGoal.features?.map(feature => ({
+          title: feature.title,
+          description: feature.description,
+          icon: typeof feature.icon === 'string' ? feature.icon : undefined,
+          screenshot: feature.screenshot ? {
+            url: feature.screenshot.url,
+            alt: feature.screenshot.alt
+          } : undefined,
+          display_order: feature.display_order
+        }))
+      };
+      
+      // Create the cloned business goal
+      return await strapiBusinessGoalAdapter.create(clonedBusinessGoal);
+    } catch (error) {
+      console.error(`[strapiBusinessGoalAdapter] Error cloning business goal with ID "${id}":`, error);
+      throw error;
+    }
   }
 };

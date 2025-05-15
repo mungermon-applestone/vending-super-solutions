@@ -1,26 +1,23 @@
 
-import { mockCreateBusinessGoal } from './mockAdapter';
-import { showDeprecationToast, throwDeprecatedOperationError } from '@/services/cms/utils/deprecationToastUtils';
-
-/**
- * Create a new business goal in the CMS
- * @deprecated This method is deprecated and will be removed in future versions.
- * Please use Contentful directly for business goal content management.
- */
+// This is a placeholder implementation since we're using the external service
 export async function createBusinessGoal(data: any): Promise<string> {
-  console.warn('[createBusinessGoal] ⚠️ DEPRECATED: Please use Contentful for content management.');
+  console.log('[createBusinessGoal] Using external service');
+  const { createBusinessGoal: externalCreate } = await import('@/services/businessGoal');
   
-  // Show toast notification
-  showDeprecationToast(
-    'Business goal creation is deprecated',
-    'Creating business goals is no longer supported. Please use Contentful directly.'
-  );
+  // Create a mock toast object to satisfy the parameter requirement
+  // This is needed since the external service expects a toast parameter
+  const mockToast = {
+    toast: () => {
+      return {
+        id: "mock-id",
+        dismiss: () => {},
+        update: () => {}
+      };
+    },
+    dismiss: () => {},
+    toasts: []
+  };
   
-  try {
-    // This will throw an error as the mock implementation is designed to prevent creation
-    return await mockCreateBusinessGoal(data);
-  } catch (error) {
-    console.error('[createBusinessGoal] Error:', error);
-    throw error;
-  }
+  // Call external create function with data and mock toast parameters
+  return await externalCreate(data, mockToast);
 }

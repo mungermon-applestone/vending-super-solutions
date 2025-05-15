@@ -1,146 +1,187 @@
-
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { Plus, Edit, ChevronRight, ExternalLink } from 'lucide-react';
+import React, { useEffect } from 'react';
+import Layout from '@/components/layout/Layout';
+import RunRegressionTest from '@/components/admin/testing/RunRegressionTest';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { PlusCircle, RefreshCw } from 'lucide-react';
 import {
   Table,
   TableBody,
   TableCaption,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { useToast } from '@/hooks/use-toast';
-import { getProductTypes } from '@/services/cms/products';
-import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
-import ViewInContentful from '@/components/admin/ViewInContentful';
-import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
+} from "@/components/ui/table";
+import { useProductTypes } from '@/hooks/cms/useProductTypes';
+import { CMSProductType } from '@/types/cms';
+import { Skeleton } from "@/components/ui/skeleton";
+import { EditProductDialog } from '@/components/admin/products/EditProductDialog';
+import { DeleteProductDialog } from '@/components/admin/products/DeleteProductDialog';
+import { useCloneProductType } from '@/hooks/cms/useCloneCMS';
+import { toast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
-const AdminProducts = () => {
+const AdminProducts: React.FC = () => {
+  const queryClient = useQueryClient();
+  const { data: products, isLoading, error, refetch, status, fetchStatus } = useProductTypes();
+  const { mutateAsync: cloneProductType, isPending: isCloning } = useCloneProductType();
   const navigate = useNavigate();
-  const { toast } = useToast();
   
-  // Log deprecation of this admin page
-  React.useEffect(() => {
-    logDeprecationWarning(
-      "AdminProducts",
-      "The Products admin interface is deprecated and will be removed in a future version.",
-      "Please use Contentful to manage product content."
-    );
-  }, []);
+  // Force refresh products when component mounts AND when products is empty
+  useEffect(() => {
+    console.log("[AdminProducts] Component mounted, refreshing products data");
+    queryClient.invalidateQueries({ queryKey: ['productTypes'] });
+  }, [queryClient]);
   
-  // Fetch all product types to display in the table
-  const { data: productTypes = [], error, isLoading: isLoadingProducts } = useQuery({
-    queryKey: ['productTypes'],
-    queryFn: async () => {
-      try {
-        return await getProductTypes();
-      } catch (error) {
-        console.error('[AdminProducts] Error fetching product types:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load products. Please try again.',
-          variant: 'destructive',
-        });
-        return [];
-      }
-    },
-  });
+  useEffect(() => {
+    // If products array is empty after loading completes, try refetching
+    if (!isLoading && products && products.length === 0) {
+      console.log("[AdminProducts] No products found after loading, triggering refetch");
+      refetch();
+    }
+  }, [products, isLoading, refetch]);
+  
+  const handleRefresh = () => {
+    console.log("[AdminProducts] Manual refresh requested");
+    queryClient.invalidateQueries({ queryKey: ['productTypes'] });
+    refetch();
+    toast({
+      title: "Refreshing products",
+      description: "Reloading product data from the database.",
+    });
+  };
+  
+  const handleClone = async (id: string) => {
+    try {
+      await cloneProductType(id);
+      toast({
+        title: "Product Cloned",
+        description: "Successfully cloned the product.",
+      });
+      refetch();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error Cloning Product",
+        description: error instanceof Error ? error.message : "An error occurred while cloning the product.",
+      });
+    }
+  };
+
+  const handleAddNewProduct = () => {
+    navigate('/admin/products/new');
+  };
+
+  const handleEditProduct = (slug: string) => {
+    navigate(`/admin/products/edit/${slug}`);
+  };
+
+  // Admin pages should always show refresh controls regardless of environment
 
   return (
-    <DeprecatedAdminLayout
-      title="Product Management"
-      description="View product types displayed on the site (read-only)"
-      contentType="Product"
-      backPath="/admin/dashboard"
-    >
-      <div className="flex justify-between mb-6">
-        <div>
-          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-            Read-Only View
-          </Badge>
+    <Layout>
+      <div className="container py-10">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Products</h1>
+            <p className="text-muted-foreground">
+              Manage your product types
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefresh}
+              disabled={isLoading || fetchStatus === 'fetching'}
+            >
+              <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <RunRegressionTest />
+          </div>
         </div>
-        <div className="flex gap-2">
-          <ViewInContentful 
-            contentType="product"
-            className="bg-blue-50 text-blue-700 border-blue-200"
-          />
-        </div>
-      </div>
-
-      <Card className="shadow-sm">
-        <CardContent className="pt-6">
-          {isLoadingProducts ? (
-            <div className="text-center py-10">Loading products...</div>
-          ) : productTypes.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-muted-foreground mb-4">No products found</p>
-              <ViewInContentful 
-                contentType="product" 
-                variant="default"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              />
-            </div>
-          ) : (
+        
+        {isLoading ? (
+          <div className="flex flex-col gap-4">
+            <Skeleton className="h-12 w-[200px]" />
+            <Skeleton className="h-8 w-[400px]" />
+            <Skeleton className="h-8 w-[400px]" />
+            <Skeleton className="h-8 w-[400px]" />
+          </div>
+        ) : error ? (
+          <div className="rounded-md border p-4">
+            <h3 className="mb-2 font-medium text-red-500">Error!</h3>
+            <p className="text-sm text-muted-foreground">
+              {error.message}
+            </p>
+            <Button onClick={() => refetch()} variant="secondary" size="sm" className="mt-2">
+              Try Again
+            </Button>
+          </div>
+        ) : products && products.length > 0 ? (
+          <div className="w-full">
             <Table>
-              <TableCaption>A list of all product types (read-only view).</TableCaption>
+              <TableCaption>A list of your product types.</TableCaption>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[100px]">ID</TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Slug</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {productTypes.map((product) => (
+                {products.map((product) => (
                   <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.title}</TableCell>
+                    <TableCell className="font-medium">{product.id}</TableCell>
+                    <TableCell>{product.title}</TableCell>
                     <TableCell>{product.slug}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <ViewInContentful 
-                          contentType="product"
-                          contentId={product.id}
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                          title="View in Contentful"
-                        >
-                          <ExternalLink size={16} />
-                        </ViewInContentful>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <EditProductDialog product={product} />
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
-                          onClick={() => navigate(`/products/${product.slug}`)}
-                          className="h-8 px-2 w-8"
-                          title="View product page"
+                          title="Clone Product"
+                          disabled={isCloning}
+                          onClick={() => handleClone(product.id)}
                         >
-                          <ChevronRight size={16} />
+                          Clone
                         </Button>
+                        <DeleteProductDialog product={product} />
                       </div>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={4}>
+                    <Button variant="secondary" onClick={handleAddNewProduct}>
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Add New Product
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
             </Table>
-          )}
-        </CardContent>
-        <CardFooter className="border-t bg-gray-50 flex justify-between items-center">
-          <p className="text-sm text-muted-foreground">
-            This interface is read-only. All content management should be done in Contentful.
-          </p>
-          <ViewInContentful 
-            contentType="product"
-            size="sm"
-          />
-        </CardFooter>
-      </Card>
-    </DeprecatedAdminLayout>
+          </div>
+        ) : (
+          <div className="rounded-md border p-4">
+            <h3 className="mb-2 font-medium">No Products Found</h3>
+            <p className="text-sm text-muted-foreground">
+              It looks like you haven't created any product types yet.
+            </p>
+            <Button variant="secondary" size="sm" className="mt-2" onClick={handleAddNewProduct}>
+              Create your first product
+            </Button>
+          </div>
+        )}
+      </div>
+    </Layout>
   );
 };
 

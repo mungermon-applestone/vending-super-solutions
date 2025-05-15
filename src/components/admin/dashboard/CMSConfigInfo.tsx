@@ -3,57 +3,57 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { getCMSInfo } from '@/services/cms/utils/cmsInfo';
-import { Database, Server, ExternalLink } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import DeprecatedInterfaceWarning from '@/components/admin/DeprecatedInterfaceWarning';
+import { Database, Server } from 'lucide-react';
 
 const CMSConfigInfo: React.FC = () => {
   const cmsInfo = getCMSInfo();
-  
-  const openContentful = () => {
-    window.open("https://app.contentful.com/", "_blank");
-  };
   
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
-          <Database className="h-5 w-5" />
-          Content Management
+          <Server className="h-5 w-5" />
+          CMS Provider
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <DeprecatedInterfaceWarning 
-          contentType="CMS Config" 
-          message="This admin panel is being phased out. Please use Contentful directly to manage content."
-        />
-        
-        <div className="flex flex-col gap-2 mt-4">
+        <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Active Provider:</span>
-            <Badge variant="outline">
-              <span className="flex items-center gap-1">
-                <Database className="h-3 w-3" /> Contentful
-              </span>
+            <Badge variant={cmsInfo.provider === 'Strapi' ? 'default' : 'outline'}>
+              {cmsInfo.provider === 'Strapi' ? (
+                <span className="flex items-center gap-1">
+                  <Server className="h-3 w-3" /> Strapi
+                </span>
+              ) : (
+                <span className="flex items-center gap-1">
+                  <Database className="h-3 w-3" /> Supabase
+                </span>
+              )}
             </Badge>
           </div>
           
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Status:</span>
-            <Badge variant={cmsInfo.isConfigured ? 'default' : 'destructive'}>
-              {cmsInfo.isConfigured ? 'Configured' : 'Not Configured'}
-            </Badge>
-          </div>
+          {cmsInfo.provider === 'Strapi' && (
+            <>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">API URL:</span>
+                <span className="text-sm font-mono truncate max-w-[200px]">
+                  {cmsInfo.apiUrl || 'Not configured'}
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Status:</span>
+                <Badge variant={cmsInfo.isConfigured ? 'default' : 'destructive'}>
+                  {cmsInfo.isConfigured ? 'Configured' : 'Not Configured'}
+                </Badge>
+              </div>
+            </>
+          )}
           
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="mt-2"
-            onClick={openContentful}
-          >
-            <ExternalLink className="mr-2 h-4 w-4" />
-            Open Contentful
-          </Button>
+          <p className="text-xs text-muted-foreground mt-2">
+            CMS provider is configured via environment variables in .env file.
+          </p>
         </div>
       </CardContent>
     </Card>

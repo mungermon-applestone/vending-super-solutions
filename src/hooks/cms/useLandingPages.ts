@@ -1,8 +1,9 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { LandingPage, LandingPageFormData } from '@/types/landingPage';
 import { fetchLandingPages, fetchLandingPageByKey, createLandingPage, updateLandingPage, deleteLandingPage } from '@/services/cms/contentTypes/landingPages';
 import { createQueryOptions } from './useQueryDefaults';
-import { LandingPage, LandingPageFormData } from '@/types/landingPage';
+import { initMockLandingPagesData } from '@/services/cms/initMockData';
 
 export function useLandingPages() {
   return useQuery<LandingPage[]>({
@@ -24,7 +25,9 @@ export function useLandingPages() {
         return []; 
       }
     },
-    ...createQueryOptions<LandingPage[]>(),
+    ...createQueryOptions(),
+    retry: 3,
+    staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true,
     refetchOnMount: true,
   });
@@ -46,8 +49,8 @@ export function useLandingPageByKey(key: string) {
       }
     },
     enabled: !!key,
-    ...createQueryOptions<LandingPage | null>(),
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    ...createQueryOptions(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true, // Refetch when window gets focus
     refetchInterval: 60 * 1000, // Refetch every minute
     refetchOnMount: 'always', // Always refetch when component mounts

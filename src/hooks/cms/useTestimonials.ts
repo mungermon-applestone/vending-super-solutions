@@ -1,31 +1,16 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
+import * as cmsService from '@/services/cms';
 import { CMSTestimonial } from '@/types/cms';
-import { transformContentfulTestimonial, ContentfulTestimonial } from '@/types/contentful/testimonial';
+import { createQueryOptions } from './useQueryDefaults';
 
 /**
- * Hook to fetch testimonials from Contentful
+ * Hook to fetch all testimonials
  */
 export function useTestimonials() {
   return useQuery({
-    queryKey: ['contentful', 'testimonials'],
-    queryFn: async () => {
-      try {
-        const entries = await fetchContentfulEntries('testimonial', {
-          'fields.visible': true,
-          order: '-sys.createdAt'
-        });
-        
-        // Transform to our standard format
-        return entries.map((entry: ContentfulTestimonial) => 
-          transformContentfulTestimonial(entry)
-        );
-      } catch (error) {
-        console.error('[useTestimonials] Error fetching testimonials:', error);
-        return [] as CMSTestimonial[];
-      }
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    queryKey: ['testimonials'],
+    queryFn: cmsService.getTestimonials,
+    ...createQueryOptions<CMSTestimonial[]>()
   });
 }

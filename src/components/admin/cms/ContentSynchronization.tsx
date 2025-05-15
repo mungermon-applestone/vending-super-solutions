@@ -130,7 +130,7 @@ const ContentSynchronization: React.FC = () => {
           <div>
             <CardTitle>Content Synchronization</CardTitle>
             <CardDescription>
-              Transfer content between {cmsInfo.provider === 'Contentful' ? 'Supabase and Contentful' : 'CMS providers'}
+              Transfer content between {cmsInfo.provider === 'Strapi' ? 'Supabase and Strapi' : 'CMS providers'}
             </CardDescription>
           </div>
           <ArrowLeftRight className="h-6 w-6 text-muted-foreground" />

@@ -1,55 +1,121 @@
 
-import { LandingPage, HeroContent } from '@/types/landingPage';
+import { LandingPage } from '@/types/landingPage';
+import { v4 as uuidv4 } from 'uuid';
 
-/**
- * Get mock landing pages data
- * @returns Array of mock landing pages
- */
-export const getMockLandingPages = (): LandingPage[] => {
+// Default mock landing pages
+export function getMockLandingPages(): LandingPage[] {
+  const timestamp = new Date().toISOString();
+  
   return [
     {
-      id: 'lp-001',
+      id: uuidv4(),
       page_key: 'home',
       page_name: 'Home Page',
-      hero_content_id: 'hc-001',
+      hero_content_id: uuidv4(),
       hero_content: {
-        id: 'hc-001',
-        title: 'Modern Vending Solutions',
-        subtitle: 'Transform your retail experience with cutting-edge vending technology',
-        image_url: '/images/hero-home.jpg',
-        image_alt: 'Modern vending machine in a bright retail space',
-        cta_primary_text: 'Explore Solutions',
-        cta_primary_url: '/solutions',
-        cta_secondary_text: 'Contact Sales',
-        cta_secondary_url: '/contact',
+        id: uuidv4(),
+        title: 'Vend Anything You Sell',
+        subtitle: 'Seamlessly integrate multiple vending machines with our advanced software solution. Sell any product, track inventory in real-time, and boost your revenue.',
+        image_url: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81',
+        image_alt: 'Vending Machine Software Interface',
+        cta_primary_text: 'Request a Demo',
+        cta_primary_url: '/contact',
+        cta_secondary_text: 'Explore Solutions',
+        cta_secondary_url: '/products',
         background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        created_at: timestamp,
+        updated_at: timestamp
       },
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      created_at: timestamp,
+      updated_at: timestamp
     },
     {
-      id: 'lp-002',
+      id: uuidv4(),
       page_key: 'products',
       page_name: 'Products Page',
-      hero_content_id: 'hc-002',
+      hero_content_id: uuidv4(),
       hero_content: {
-        id: 'hc-002',
-        title: 'Our Product Range',
-        subtitle: 'Discover our full range of vending solutions for every need',
-        image_url: '/images/products-hero.jpg',
-        image_alt: 'Array of vending machines showing product range',
-        cta_primary_text: 'View Products',
-        cta_primary_url: '/products',
-        cta_secondary_text: 'Request Demo',
-        cta_secondary_url: '/contact?demo=true',
-        background_class: 'bg-gradient-to-br from-vending-blue-dark via-vending-blue to-vending-blue-light',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        id: uuidv4(),
+        title: 'Custom Vending Solutions for Any Product',
+        subtitle: 'From food and beverages to electronics and PPE, our flexible vending solutions can accommodate nearly any product type.',
+        image_url: 'https://images.unsplash.com/photo-1588359348347-9bc6cbbb689e',
+        image_alt: 'Various products in vending machine display',
+        cta_primary_text: 'Request Product Demo',
+        cta_primary_url: '/contact',
+        cta_secondary_text: 'View Machine Types',
+        cta_secondary_url: '/machines',
+        background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
+        created_at: timestamp,
+        updated_at: timestamp
       },
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      id: uuidv4(),
+      page_key: 'machines',
+      page_name: 'Machines Page',
+      hero_content_id: uuidv4(),
+      hero_content: {
+        id: uuidv4(),
+        title: 'Our Machines',
+        subtitle: 'Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs.',
+        image_url: 'https://images.unsplash.com/photo-1493723843671-1d655e66ac1c',
+        image_alt: 'Various vending machines',
+        cta_primary_text: 'Vending Machines',
+        cta_primary_url: '#vending-machines',
+        cta_secondary_text: 'Smart Lockers',
+        cta_secondary_url: '#smart-lockers',
+        background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
+        created_at: timestamp,
+        updated_at: timestamp
+      },
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      id: uuidv4(),
+      page_key: 'technology',
+      page_name: 'Technology Page',
+      hero_content_id: uuidv4(),
+      hero_content: {
+        id: uuidv4(),
+        title: 'Enterprise-Grade Technology',
+        subtitle: 'Our platform is built with security, scalability, and flexibility in mind to power your vending operations.',
+        image_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b',
+        image_alt: 'Technology circuit board and digital interface',
+        cta_primary_text: 'Learn More',
+        cta_primary_url: '/contact',
+        cta_secondary_text: 'View Tech Specs',
+        cta_secondary_url: '#tech-details',
+        background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
+        created_at: timestamp,
+        updated_at: timestamp
+      },
+      created_at: timestamp,
+      updated_at: timestamp
+    },
+    {
+      id: uuidv4(),
+      page_key: 'business-goals',
+      page_name: 'Business Goals Page',
+      hero_content_id: uuidv4(),
+      hero_content: {
+        id: uuidv4(),
+        title: 'Business Goals',
+        subtitle: 'Our comprehensive vending solutions help you achieve your business goals with powerful technology and customizable options.',
+        image_url: 'https://images.unsplash.com/photo-1553877522-43269d4ea984',
+        image_alt: 'Business Goals',
+        cta_primary_text: 'Request a Demo',
+        cta_primary_url: '/contact',
+        cta_secondary_text: 'Explore Solutions',
+        cta_secondary_url: '/products',
+        background_class: 'bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light',
+        created_at: timestamp,
+        updated_at: timestamp
+      },
+      created_at: timestamp,
+      updated_at: timestamp
     }
   ];
-};
+}

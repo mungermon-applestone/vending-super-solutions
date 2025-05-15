@@ -1,34 +1,15 @@
+
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { ContentfulTestimonialSection, ContentfulTestimonial, transformContentfulTestimonial } from '@/types/contentful/testimonial';
-import { CMSTestimonial } from '@/types/cms';
+import { ContentfulTestimonialSection, ContentfulTestimonial } from '@/types/contentful/testimonial';
 
 interface TestimonialsSectionProps {
   data: ContentfulTestimonialSection;
 }
 
-/**
- * Safely extract testimonials from either format of testimonial section
- */
-function extractTestimonials(data: ContentfulTestimonialSection): CMSTestimonial[] {
-  // If we have contentful testimonials array, transform them to our standard format
-  if (data.fields?.testimonials && Array.isArray(data.fields.testimonials)) {
-    return data.fields.testimonials.map(item => transformContentfulTestimonial(item));
-  }
-  
-  // Otherwise use the already transformed testimonials
-  if (data.testimonials && Array.isArray(data.testimonials)) {
-    return data.testimonials;
-  }
-  
-  return [];
-}
-
 export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  
-  // Extract testimonials in a consistent format
-  const testimonials = extractTestimonials(data);
+  const testimonials = data.fields?.testimonials?.filter(t => t.fields?.visible !== false) || [];
 
   if (!testimonials.length) {
     return null;
@@ -42,23 +23,18 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
     setActiveIndex((prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length);
   };
 
-  // We now have a guaranteed CMSTestimonial format
-  const currentTestimonial = testimonials[activeIndex];
+  const currentTestimonial = testimonials[activeIndex]?.fields;
   if (!currentTestimonial) return null;
-
-  // Get section title and subtitle from either format
-  const title = data.fields?.title || data.title || "Trusted by Industry Leaders";
-  const subtitle = data.fields?.subtitle || data.subtitle || "Hear what our clients have to say about our solutions";
 
   return (
     <section className="py-16 md:py-24 bg-gray-50">
       <div className="container-wide">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-            {title}
+            {data.fields?.title || "Trusted by Industry Leaders"}
           </h2>
           <p className="subtitle mx-auto text-gray-600">
-            {subtitle}
+            {data.fields?.subtitle || "Hear what our clients have to say about our solutions"}
           </p>
         </div>
 
@@ -83,22 +59,22 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
 
               {/* Quote */}
               <blockquote className="text-xl md:text-2xl text-center font-medium text-gray-700 mb-8">
-                "{currentTestimonial.testimonial}"
+                "{currentTestimonial.quote}"
               </blockquote>
 
               {/* Author info */}
               <div className="text-center">
-                {currentTestimonial.image_url && (
+                {currentTestimonial.image?.fields?.file?.url && (
                   <img 
-                    src={currentTestimonial.image_url}
-                    alt={currentTestimonial.name}
+                    src={`https:${currentTestimonial.image.fields.file.url}`}
+                    alt={currentTestimonial.image.fields.title || currentTestimonial.author}
                     className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
                   />
                 )}
-                <div className="font-semibold text-lg">{currentTestimonial.name}</div>
+                <div className="font-semibold text-lg">{currentTestimonial.author}</div>
                 <div className="text-vending-gray-dark">
-                  {currentTestimonial.title}
-                  {currentTestimonial.title && currentTestimonial.company && ', '}
+                  {currentTestimonial.position}
+                  {currentTestimonial.position && currentTestimonial.company && ', '}
                   {currentTestimonial.company}
                 </div>
               </div>

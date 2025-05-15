@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 import { Spinner } from '@/components/ui/spinner';
@@ -56,6 +55,7 @@ const TermsOfService = lazy(() => import(/* webpackChunkName: "terms-of-service"
 const AdminPage = lazy(() => import(/* webpackChunkName: "admin-home" */ '@/pages/AdminPage'));
 const ContentfulConfigurationPage = lazy(() => import(/* webpackChunkName: "admin-contentful" */ '@/pages/ContentfulConfigurationPage'));
 const EnvironmentVariablesPage = lazy(() => import(/* webpackChunkName: "admin-env" */ '@/pages/admin/EnvironmentVariablesPage'));
+const StrapiSetupPage = lazy(() => import(/* webpackChunkName: "admin-strapi" */ '@/pages/admin/StrapiSetupPage'));
 
 // Enhanced wrapper for lazy-loaded components with error boundary
 const LazyPageWithBoundary = ({ component: Component }) => (
@@ -179,6 +179,10 @@ const routes: RouteObject[] = [
       {
         path: 'environment-variables',
         element: <LazyPageWithBoundary component={EnvironmentVariablesPage} />
+      },
+      {
+        path: 'strapi-setup',
+        element: <LazyPageWithBoundary component={StrapiSetupPage} />
       },
       ...adminRoutes
     ]

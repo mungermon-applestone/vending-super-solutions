@@ -4,11 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import BlogPostContent from '@/components/blog/BlogPostContent';
-import ContentfulBlogPostContent from '@/components/blog/ContentfulBlogPostContent';
 import { useBlogPostBySlug, useAdjacentPosts } from '@/hooks/useBlogData';
 import { SimpleContactCTA } from '@/components/common';
-import { ContentfulBlogPost } from '@/hooks/useContentfulBlogPosts';
-import { convertContentfulBlogPostToBlogPost, convertAdjacentPostToContentful } from '@/utils/contentfulTypeGuards';
 
 const BlogPostDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -19,27 +16,12 @@ const BlogPostDetail = () => {
   
   const isLoading = isLoadingPost || isLoadingAdjacent;
   
-  // Convert Contentful blog post to compatible format if needed
-  const compatiblePost = post ? convertContentfulBlogPostToBlogPost(post) : null;
-  
   // Handle 404 for non-existent or non-published posts
   React.useEffect(() => {
-    if (!isLoading && (!post || (compatiblePost?.status !== 'published' && !window.location.pathname.includes('/admin')))) {
+    if (!isLoading && (!post || (post.status !== 'published' && !window.location.pathname.includes('/admin')))) {
       navigate('/not-found', { replace: true });
     }
-  }, [post, compatiblePost, isLoading, navigate]);
-
-  // Convert adjacent posts to Contentful format for ContentfulBlogPostContent
-  const contentfulPreviousPost = adjacentPosts?.previous 
-    ? convertAdjacentPostToContentful(adjacentPosts.previous)
-    : null;
-  
-  const contentfulNextPost = adjacentPosts?.next
-    ? convertAdjacentPostToContentful(adjacentPosts.next)
-    : null;
-
-  // Determine whether to use Contentful or standard rendering
-  const isContentfulPost = post && post.fields && post.sys;
+  }, [post, isLoading, navigate]);
 
   return (
     <Layout>
@@ -54,19 +36,11 @@ const BlogPostDetail = () => {
               <p className="text-red-500">Something went wrong. Please try again later.</p>
             </div>
           ) : post ? (
-            isContentfulPost ? (
-              <ContentfulBlogPostContent 
-                post={post as ContentfulBlogPost} 
-                previousPost={contentfulPreviousPost} 
-                nextPost={contentfulNextPost} 
-              />
-            ) : (
-              <BlogPostContent 
-                post={compatiblePost} 
-                previousPost={adjacentPosts?.previous || null} 
-                nextPost={adjacentPosts?.next || null} 
-              />
-            )
+            <BlogPostContent 
+              post={post} 
+              previousPost={adjacentPosts?.previous} 
+              nextPost={adjacentPosts?.next} 
+            />
           ) : null}
         </div>
         
@@ -75,9 +49,9 @@ const BlogPostDetail = () => {
           className="w-full mt-auto"
           title="Have Questions About This Article?"
           description="Our team is ready to help you implement these insights in your business."
-          formType={`Blog Post: ${compatiblePost?.title || post?.fields?.title || slug}`}
+          formType={`Blog Post: ${post?.title || slug}`}
           initialValues={{
-            subject: `Question about: ${compatiblePost?.title || post?.fields?.title || slug}`
+            subject: `Question about: ${post?.title || slug}`
           }}
         />
       </div>

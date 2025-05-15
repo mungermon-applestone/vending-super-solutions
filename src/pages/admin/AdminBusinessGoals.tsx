@@ -1,17 +1,17 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBusinessGoals } from '@/hooks/useCMSData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Edit, Eye, Trash2, Loader2, AlertTriangle } from 'lucide-react';
+import { Plus, Edit, Eye, Trash2, Loader2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { deleteBusinessGoal } from '@/services/businessGoal';
 import { useCloneBusinessGoal } from '@/hooks/cms/useCloneCMS';
 import { CMSBusinessGoal } from '@/types/cms';
 import CloneButton from '@/components/admin/common/CloneButton';
-import DeprecatedInterfaceWarning from '@/components/admin/DeprecatedInterfaceWarning';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -108,11 +108,6 @@ const AdminBusinessGoals = () => {
   return (
     <Layout>
       <div className="container py-10">
-        <DeprecatedInterfaceWarning 
-          contentType="Business Goals Administration"
-          message="This business goals administration interface is being phased out. Please use Contentful directly to manage business goals content."
-        />
-
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h1 className="text-3xl font-bold">Business Goals Admin</h1>
           <Button asChild>

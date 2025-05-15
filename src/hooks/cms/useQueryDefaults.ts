@@ -2,12 +2,24 @@
 import { UseQueryOptions } from '@tanstack/react-query';
 
 /**
- * Create standardized query options with sensible defaults
+ * Common options for all CMS data queries
  */
-export function createQueryOptions<T>(customOptions: Partial<UseQueryOptions<T>> = {}): Partial<UseQueryOptions<T>> {
+export const defaultQueryOptions = {
+  retry: 2,
+  refetchOnMount: true,
+  refetchOnWindowFocus: false,
+  staleTime: 1000 * 60 * 5, // 5 minutes
+  gcTime: 1000 * 60 * 10, // 10 minutes
+};
+
+/**
+ * Creates standardized query options by merging defaults with custom options
+ */
+export function createQueryOptions<T, E = Error>(
+  customOptions?: Partial<UseQueryOptions<T, E>>
+): Partial<UseQueryOptions<T, E>> {
   return {
-    retry: 1,
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    ...customOptions
+    ...defaultQueryOptions,
+    ...customOptions,
   };
 }

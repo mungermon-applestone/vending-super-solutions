@@ -56,6 +56,9 @@ import { businessGoalOperations } from './cms/contentTypes/businessGoals';
 import { technologyOperations } from './cms/contentTypes/technologies';
 import { caseStudyOperations } from './cms/contentTypes/caseStudies/operations';
 import { landingPageOperations } from './cms/contentTypes/landingPages/operations';
+import { cloneProductType } from './cms/contentTypes/productTypes/cloneProductType';
+import { cloneBusinessGoal } from './cms/contentTypes/businessGoals/cloneBusinessGoal';
+import { cloneTechnology } from './cms/contentTypes/technologies/cloneTechnology';
 import { cloneMachine } from './cms/contentTypes/machines/cloneMachine';
 
 // Export standardized content type operations
@@ -72,10 +75,12 @@ export {
   getProductTypeBySlug,
   getProductTypeByUUID,
   deleteProductType,
+  cloneProductType,
   
   // Business goals
   getBusinessGoals,
   getBusinessGoalBySlug,
+  cloneBusinessGoal,
   
   // Machines
   getMachines,
@@ -90,6 +95,7 @@ export {
   getTechnologies,
   getTechnologyBySlug,
   deleteTechnology,
+  cloneTechnology,
   
   // Testimonials
   getTestimonials,

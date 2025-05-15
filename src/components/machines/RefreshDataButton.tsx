@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { isPreviewEnvironment } from '@/config/cms';
 
 interface RefreshDataButtonProps {
   isLoading: boolean;
@@ -9,17 +10,17 @@ interface RefreshDataButtonProps {
 }
 
 const RefreshDataButton: React.FC<RefreshDataButtonProps> = ({ isLoading, onRefresh }) => {
+  // Only show in development or preview environments
+  const showDevTools = import.meta.env.DEV || isPreviewEnvironment();
+  
+  if (!showDevTools) {
+    return null;
+  }
+  
   return (
-    <div className="flex justify-end mb-6">
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={onRefresh}
-        disabled={isLoading}
-        className="flex items-center"
-      >
-        <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-        {isLoading ? 'Refreshing...' : 'Refresh Data'}
+    <div className="flex justify-end mb-8">
+      <Button onClick={onRefresh} variant="outline" className="flex items-center gap-2">
+        Refresh Contentful Data <Loader2 className={`h-4 w-4 ${isLoading ? 'animate-spin' : 'hidden'}`} />
       </Button>
     </div>
   );

@@ -1,36 +1,7 @@
-
-// Only adding the missing type
-export interface CMSMachine {
-  id: string;
-  title: string;
-  name?: string; // Added for backwards compatibility
-  slug: string;
-  type: string;  // Allow any string for backward compatibility
-  description?: string;
-  shortDescription?: string;
-  temperature?: string; // Allow any string
-  mainImage?: CMSImage; 
-  thumbnail?: CMSImage;
-  images?: CMSImage[];
-  features?: string[];
-  specs?: Record<string, string>;
-  visible?: boolean;
-  featured?: boolean;
-  displayOrder?: number;
-  // Support both naming conventions
-  created_at?: string;
-  updated_at?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  showOnHomepage?: boolean;
-  homepageOrder?: number | null;
-}
-
 export interface CMSImage {
-  id?: string;  // Make id optional to support both formats
+  id: string;
   url: string;
-  alt?: string;
-  filename?: string;
+  alt: string;
   width?: number;
   height?: number;
 }
@@ -39,60 +10,43 @@ export interface CMSProductType {
   id: string;
   title: string;
   slug: string;
-  description?: string;
+  description: string;
   image?: CMSImage;
-  displayOrder?: number;
-  visible?: boolean;
   created_at?: string;
   updated_at?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface CMSFeature {
-  title: string;
-  description: string;
-  icon?: string;
-  screenshot?: CMSImage;
-}
-
-export interface CMSBusinessGoal {
-  id: string;
-  title: string;
-  slug: string;
-  description?: string;
-  icon?: string;
-  image?: CMSImage;
   benefits?: string[];
   features?: CMSFeature[];
+  examples?: CMSExample[];
+  video?: {
+    title: string;
+    description: string;
+    thumbnailImage: CMSImage;
+    url?: string;
+  };
   visible?: boolean;
-  created_at?: string;
-  updated_at?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  displayOrder?: number;
+  showOnHomepage?: boolean;
+  homepageOrder?: number;
 }
 
-export interface CMSTechnology {
+export interface CMSMachine {
   id: string;
   title: string;
   slug: string;
-  description?: string;
-  image?: CMSImage;
-  sections?: any[];
-  visible?: boolean;
+  type: 'vending' | 'locker';
+  description: string;
+  features?: string[];
+  images?: CMSImage[];
+  product_types?: CMSProductType[];
   created_at?: string;
   updated_at?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface QueryOptions {
-  limit?: number;
-  skip?: number;
-  offset?: number; // Added for compatibility with some API calls
-  order?: string;
-  filters?: Record<string, any>;
-  status?: string; // For content with draft/published status
+  temperature?: string;
+  specs?: Record<string, string>;
+  deploymentExamples?: CMSDeploymentExample[];
+  visible?: boolean;
+  displayOrder?: number;
+  showOnHomepage?: boolean;
+  homepageOrder?: number;
 }
 
 export interface CMSTestimonial {
@@ -101,40 +55,189 @@ export interface CMSTestimonial {
   title: string;
   company: string;
   testimonial: string;
-  rating?: number;
   image_url?: string;
+  rating: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
-// Interface for a blog post
-export interface BlogPost {
+export interface CMSBusinessGoal {
   id: string;
   title: string;
   slug: string;
-  content: string;
-  excerpt?: string;
-  status: 'draft' | 'published' | 'archived';
-  published_at?: string;
-  created_at: string;
-  updated_at: string;
-  featuredImage?: {
-    url: string;
-    title: string;
-    width?: number;
-    height?: number;
-  };
-  author?: string;
-  tags?: string[];
-  sys?: {
+  description: string;
+  image?: CMSImage;
+  icon?: string;
+  benefits?: string[];
+  features?: CMSFeature[];
+  visible?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  video?: {
     id: string;
-    createdAt?: string;
-    updatedAt?: string;
+    url: string | null;
+    title?: string;
   };
-  fields?: any;
-  includes?: any; // Added for rich text resolution
+  recommendedMachines?: {
+    id: string;
+    slug: string;
+    title: string;
+    description: string;
+    image?: {
+      url: string;
+      alt?: string;
+    };
+  }[];
+  image_url?: string;
+  image_alt?: string;
+  caseStudies?: CMSExample[];
+  displayOrder?: number;
+  showOnHomepage?: boolean;
+  homepageOrder?: number;
 }
 
-// Type for adjacent blog posts (prev/next)
-export interface AdjacentPost {
-  slug: string; 
+export interface CMSTechnology {
+  id: string;
+  slug: string;
   title: string;
+  description: string;
+  image_url?: string;
+  image_alt?: string;
+  visible: boolean;
+  created_at?: string;
+  updated_at?: string;
+  sections?: CMSTechnologySection[];
+  features?: CMSTechnologyFeature[];
+  image?: CMSImage | string;
+}
+
+export interface CMSTechnologySection {
+  id: string;
+  technology_id: string;
+  title: string;
+  description?: string;
+  summary?: string;
+  section_type: string;
+  display_order: number;
+  features?: CMSTechnologyFeature[];
+  images?: CMSTechnologyImage[];
+  bulletPoints?: string[];
+  sectionImage?: {
+    url: string;
+    alt?: string;
+  };
+  image?: {
+    url: string;
+    alt?: string;
+  };
+}
+
+export interface CMSTechnologyFeature {
+  id: string;
+  section_id: string;
+  title: string;
+  description?: string;
+  icon?: string;
+  display_order: number;
+  items?: CMSTechnologyFeatureItem[];
+}
+
+export interface CMSTechnologyFeatureItem {
+  id: string;
+  feature_id: string;
+  text: string;
+  display_order: number;
+}
+
+export interface CMSTechnologyImage {
+  id: string;
+  technology_id: string;
+  section_id?: string;
+  url: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  display_order: number;
+}
+
+export interface CMSFeature {
+  id?: string;
+  title: string;
+  description: string;
+  icon?: string | React.ReactNode;
+  screenshot?: CMSImage;
+  screenshotUrl?: string;
+  screenshotAlt?: string;
+  display_order?: number;
+}
+
+export interface CMSExample {
+  id?: string;
+  title: string;
+  description: string;
+  image: CMSImage;
+  slug?: string;
+  results?: string[];
+  display_order?: number;
+}
+
+export interface CMSDeploymentExample {
+  id?: string;
+  title: string;
+  description: string;
+  image: CMSImage;
+  display_order?: number;
+}
+
+export interface CMSCaseStudy {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string;
+  content: string;
+  industry?: string;
+  image_url?: string;
+  image_alt?: string;
+  visible: boolean;
+  created_at?: string;
+  updated_at?: string;
+  results?: CMSCaseStudyResult[];
+  testimonial?: CMSCaseStudyTestimonial;
+}
+
+export interface CMSCaseStudyResult {
+  id: string;
+  case_study_id: string;
+  text: string;
+  display_order: number;
+}
+
+export interface CMSCaseStudyTestimonial {
+  id: string;
+  case_study_id: string;
+  quote: string;
+  author: string;
+  company?: string;
+  position?: string;
+}
+
+export interface MockImage {
+  id: string;
+  url: string;
+  alt: string;
+  width?: number;
+  height?: number;
+}
+
+/**
+ * Standard query options interface for CMS operations
+ */
+export interface QueryOptions {
+  filters?: Record<string, any>;
+  limit?: number;
+  offset?: number;
+  orderBy?: string;
+  orderDirection?: 'asc' | 'desc';
+  search?: string;
+  exactMatch?: boolean;
 }

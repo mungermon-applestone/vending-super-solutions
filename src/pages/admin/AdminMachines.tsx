@@ -1,130 +1,175 @@
 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useMachines } from '@/hooks/useMachinesData';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import Layout from '@/components/layout/Layout';
+import { Loader2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { ChevronRight } from 'lucide-react';
+import { useMachines, useDeleteMachine } from '@/hooks/useMachinesData';
+import { useToast } from '@/hooks/use-toast';
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
+} from "@/components/ui/table";
+import MachineHeader from '@/components/admin/machines/MachineHeader';
+import MachineTableRow from '@/components/admin/machines/MachineTableRow';
+import DeleteMachineDialog from '@/components/admin/machines/DeleteMachineDialog';
 import { CMSMachine } from '@/types/cms';
-import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
-import ViewInContentful from '@/components/admin/ViewInContentful';
+import { useCloneMachine } from '@/hooks/cms/useCloneCMS';
 
 const AdminMachines = () => {
-  const navigate = useNavigate();
-  const { data: machines = [], isLoading } = useMachines();
-  
-  // Log deprecation of this admin page
-  useEffect(() => {
-    logDeprecationWarning(
-      "AdminMachines",
-      "The Machines admin interface is deprecated and will be removed in a future version.",
-      "Please use Contentful to manage machine content."
-    );
-  }, []);
-  
-  return (
-    <DeprecatedAdminLayout
-      title="Machine Management"
-      description="View all machines in the system (read-only)"
-      contentType="Machine"
-      backPath="/admin/dashboard"
-    >
-      <div className="flex justify-between mb-6">
-        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-          Read-Only View
-        </Badge>
-        <ViewInContentful 
-          contentType="machine"
-          className="bg-blue-50 text-blue-700 border-blue-200"
-        />
-      </div>
+  const { toast } = useToast();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [machineToDelete, setMachineToDelete] = useState<{id: string, title: string} | null>(null);
 
-      <Card className="shadow-sm">
-        <CardContent className="pt-6">
-          {isLoading ? (
-            <div className="text-center py-10">Loading machines...</div>
-          ) : machines.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-muted-foreground mb-4">No machines found</p>
-              <ViewInContentful 
-                contentType="machine"
-                variant="default"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              />
+  // For cloning functionality
+  const cloneMachineMutation = useCloneMachine();
+  const [cloningMachineId, setCloningMachineId] = useState<string | null>(null);
+
+  const { data: machines = [], isLoading, refetch } = useMachines();
+  const typedMachines = machines as CMSMachine[];
+  const deleteMutation = useDeleteMachine();
+
+  const handleDeleteClick = (machine: CMSMachine) => {
+    console.log("[AdminMachines] Delete clicked for machine:", machine);
+    setMachineToDelete({
+      id: machine.id,
+      title: machine.title
+    });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!machineToDelete) return;
+    
+    try {
+      console.log("[AdminMachines] Confirming delete for machine:", machineToDelete);
+      await deleteMutation.mutateAsync(machineToDelete.id);
+      setDeleteDialogOpen(false);
+      setMachineToDelete(null);
+      toast({
+        title: "Machine deleted",
+        description: `${machineToDelete.title} has been deleted successfully.`
+      });
+    } catch (error) {
+      console.error('[AdminMachines] Error deleting machine:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete machine. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handleCloneMachine = async (machine: CMSMachine) => {
+    try {
+      setCloningMachineId(machine.id);
+      const clonedMachine = await cloneMachineMutation.mutateAsync(machine.id);
+      
+      if (clonedMachine) {
+        toast({
+          title: "Machine cloned",
+          description: `${machine.title} has been cloned successfully.`
+        });
+      }
+    } catch (error) {
+      console.error('[AdminMachines] Error cloning machine:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to clone machine. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCloningMachineId(null);
+    }
+  };
+
+  const handleRefresh = () => {
+    refetch();
+    toast({
+      title: "Refreshing...",
+      description: "Refreshing machines data from the database",
+    });
+  };
+
+  // Admin pages should have access to the refresh functionality
+  // regardless of environment as they're only accessible to authenticated users
+
+  return (
+    <Layout>
+      <div className="container mx-auto py-8">
+        <MachineHeader onRefresh={handleRefresh} />
+
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          </div>
+        ) : typedMachines && typedMachines.length > 0 ? (
+          <div className="bg-white rounded-md shadow overflow-x-auto">
+            <div className="p-4 border-b">
+              <p className="text-sm text-gray-500">
+                Showing {typedMachines.length} machine{typedMachines.length !== 1 && 's'}
+              </p>
             </div>
-          ) : (
             <Table>
-              <TableCaption>A list of all machines (read-only view).</TableCaption>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Title</TableHead>
+                  <TableHead className="w-[200px]">Title</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Temperature</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
+                  <TableHead>Slug</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {machines.map((machine: CMSMachine) => (
-                  <TableRow key={machine.id}>
-                    <TableCell className="font-medium">{machine.title}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="capitalize">
-                        {machine.type || 'N/A'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="capitalize">
-                        {machine.temperature || 'N/A'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <ViewInContentful 
-                          contentType="machine"
-                          contentId={machine.id}
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/machines/${machine.slug}`)}
-                          className="h-8 px-2 w-8"
-                          title="View machine page"
-                        >
-                          <ChevronRight size={16} />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                {typedMachines.map((machine) => (
+                  <MachineTableRow
+                    key={machine.id}
+                    machine={{
+                      id: machine.id,
+                      title: machine.title,
+                      type: machine.type || '',
+                      temperature: machine.temperature || '',
+                      slug: machine.slug || ''
+                    }}
+                    onDeleteClick={() => handleDeleteClick(machine)}
+                    onCloneClick={() => handleCloneMachine(machine)}
+                    isCloningId={cloningMachineId}
+                  />
                 ))}
               </TableBody>
             </Table>
-          )}
-        </CardContent>
-        <CardFooter className="border-t bg-gray-50 flex justify-between items-center">
-          <p className="text-sm text-muted-foreground">
-            This interface is read-only. All content management should be done in Contentful.
-          </p>
-          <ViewInContentful 
-            contentType="machine"
-            size="sm"
-          />
-        </CardFooter>
-      </Card>
-    </DeprecatedAdminLayout>
+          </div>
+        ) : (
+          <div className="bg-white rounded-md shadow p-8 text-center">
+            <p className="text-gray-500 mb-4">No machines found</p>
+            <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 justify-center">
+              <Button variant="outline" asChild>
+                <Link to="/admin/machines/migrate">
+                  <Plus className="h-4 w-4 mr-2" /> Import Sample Data
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link to="/admin/machines/new">
+                  <Plus className="h-4 w-4 mr-2" /> Add Your First Machine
+                </Link>
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <DeleteMachineDialog
+          isOpen={deleteDialogOpen}
+          setIsOpen={setDeleteDialogOpen}
+          machineToDelete={machineToDelete}
+          onConfirmDelete={confirmDelete}
+          isDeleting={deleteMutation.isPending}
+        />
+      </div>
+    </Layout>
   );
 };
 

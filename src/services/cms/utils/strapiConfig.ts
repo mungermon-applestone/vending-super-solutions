@@ -1,69 +1,59 @@
 
 /**
- * @deprecated COMPATIBILITY LAYER - All functionality in this file will be removed in v3.0
- * 
- * This module provides compatibility functions for legacy code that depended on Strapi.
- * All new development should use Contentful APIs and configuration directly.
+ * Utility functions for Strapi configuration
  */
-
-import { logDeprecation } from './deprecationUtils';
-
-// Log warning when this module is imported
-const warnOnImport = () => {
-  logDeprecation(
-    "strapiConfig.ts",
-    "Importing deprecated Strapi configuration utilities.",
-    "Use Contentful configuration utilities from src/services/cms/utils/contentfulConfig.ts"
-  );
-};
-
-// Execute warning
-warnOnImport();
 
 /**
- * @deprecated Use Contentful configuration instead
+ * Get the base URL for the Strapi API from environment variables
  */
-export function getStrapiBaseUrl(): string {
-  logDeprecation('getStrapiBaseUrl', 'Use contentful client instead');
-  return 'DEPRECATED';
+export function getStrapiBaseUrl(): string | undefined {
+  return import.meta.env.VITE_STRAPI_API_URL || undefined;
 }
 
 /**
- * @deprecated Use Contentful configuration instead
+ * Get the API key for authenticating with Strapi from environment variables
  */
-export function getStrapiApiKey(): string {
-  logDeprecation('getStrapiApiKey', 'Use contentful client instead');
-  return 'DEPRECATED';
+export function getStrapiApiKey(): string | undefined {
+  return import.meta.env.VITE_STRAPI_API_KEY || undefined;
 }
 
 /**
- * @deprecated Use Contentful configuration instead
+ * Build headers for Strapi API requests including authorization if API key is available
  */
-export function getStrapiHeaders(): Record<string, string> {
-  logDeprecation('getStrapiHeaders', 'Use contentful client instead');
-  return { 'Content-Type': 'application/json' };
+export function getStrapiHeaders(includeAuth: boolean = true): HeadersInit {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (includeAuth) {
+    const apiKey = getStrapiApiKey();
+    if (apiKey) {
+      headers['Authorization'] = `Bearer ${apiKey}`;
+    }
+  }
+  
+  return headers;
 }
 
 /**
- * @deprecated Use isContentfulConfigured instead
+ * Check if Strapi is properly configured
  */
 export function isStrapiConfigured(): boolean {
-  logDeprecation('isStrapiConfigured', 'Use isContentfulConfigured instead');
-  return false;
+  return !!getStrapiBaseUrl() && !!getStrapiApiKey();
 }
 
 /**
- * @deprecated Use contentful validation instead
+ * Validate Strapi configuration and throw an error if not properly configured
  */
 export function validateStrapiConfig(): void {
-  logDeprecation('validateStrapiConfig', 'Use contentful validation instead');
-  throw new Error("Strapi configuration no longer supported. Use Contentful instead.");
-}
-
-/**
- * @deprecated Use contentful query parameters instead
- */
-export function buildStrapiQueryParams(options: any): URLSearchParams {
-  logDeprecation('buildStrapiQueryParams', 'Use contentful query parameters instead');
-  return new URLSearchParams();
+  const baseUrl = getStrapiBaseUrl();
+  const apiKey = getStrapiApiKey();
+  
+  if (!baseUrl) {
+    throw new Error('Strapi API URL not configured. Set VITE_STRAPI_API_URL environment variable.');
+  }
+  
+  if (!apiKey) {
+    throw new Error('Strapi API key not configured. Set VITE_STRAPI_API_KEY environment variable.');
+  }
 }

@@ -10,7 +10,7 @@ import {
 } from './index';
 
 export const landingPageOperations: ContentTypeOperations<LandingPage> = {
-  fetchAll: async () => {
+  fetchAll: async (options) => {
     const pages = await fetchLandingPages();
     return pages;
   },

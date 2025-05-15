@@ -87,35 +87,6 @@ const ProductTypesSection = () => {
     featuredCount: featuredProductTypes.length,
     firstItem: featuredProductTypes[0]?.title
   });
-
-  // Helper function to safely get text content with fallbacks
-  const getTextContent = (primaryKey: string, fallbackKeys: string[], defaultValue: string): string => {
-    if (homeContent && primaryKey in homeContent && homeContent[primaryKey as keyof typeof homeContent]) {
-      return homeContent[primaryKey as keyof typeof homeContent] as string;
-    }
-    
-    // Try fallback keys
-    for (const key of fallbackKeys) {
-      if (homeContent && key in homeContent && homeContent[key as keyof typeof homeContent]) {
-        return homeContent[key as keyof typeof homeContent] as string;
-      }
-    }
-    
-    return defaultValue;
-  };
-
-  // Get section title and description with fallbacks
-  const sectionTitle = getTextContent(
-    'productCategoriesTitle', 
-    ['title'], 
-    "Featured Product Categories"
-  );
-                      
-  const sectionDescription = getTextContent(
-    'productCategoriesDescription', 
-    ['subtitle'], 
-    "Find the perfect vending solution for your product type."
-  );
   
   return (
     <section className="py-16 md:py-24">
@@ -123,10 +94,10 @@ const ProductTypesSection = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-              {sectionTitle}
+              {homeContent?.productCategoriesTitle || "Featured Product Categories"}
             </h2>
             <p className="subtitle max-w-2xl">
-              {sectionDescription}
+              {homeContent?.productCategoriesDescription || "Find the perfect vending solution for your product type."}
             </p>
           </div>
           <Button asChild className="mt-4 md:mt-0">

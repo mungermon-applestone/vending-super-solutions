@@ -3,185 +3,40 @@ import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Settings, Database, ExternalLink, AlertTriangle, ArrowRight, BarChart3 } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
+import { Settings, Database } from 'lucide-react';
 
 const AdminPage = () => {
   const navigate = useNavigate();
 
-  const handleOpenContentful = () => {
-    logDeprecationWarning(
-      "ContentfulRedirect",
-      "User clicked to open Contentful from the Admin page"
-    );
-    window.open("https://app.contentful.com/", "_blank");
-  };
-  
-  React.useEffect(() => {
-    logDeprecationWarning(
-      "AdminPage",
-      "The Admin page is being phased out as we migrate to Contentful",
-      "Please use Contentful for content management"
-    );
-  }, []);
-
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold mb-2">Content Management</h1>
-          <p className="text-muted-foreground mb-6">
-            Manage content and configuration settings
-          </p>
+        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Button 
+            variant="outline" 
+            className="p-6 h-auto flex flex-col items-center gap-2 border-dashed"
+            onClick={() => navigate('/admin/contentful-config')}
+          >
+            <Settings className="h-6 w-6" />
+            <span className="font-medium">Contentful Configuration</span>
+            <span className="text-xs text-muted-foreground text-center">
+              Set up environment variables for Contentful CMS
+            </span>
+          </Button>
           
-          <Card className="mb-8 border-blue-200 shadow-md">
-            <CardHeader className="bg-blue-50 border-b border-blue-200">
-              <CardTitle className="text-blue-800 flex items-center gap-2">
-                <Database className="h-5 w-5 text-blue-600" />
-                Contentful CMS
-              </CardTitle>
-              <CardDescription className="text-blue-700">
-                Primary content management system
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <p className="text-gray-700">
-                  All content management has been migrated to Contentful CMS. Please use Contentful for creating, editing, and managing:
-                </p>
-                
-                <ul className="list-disc pl-5 space-y-1 text-gray-700">
-                  <li>Products</li>
-                  <li>Machines</li>
-                  <li>Business Goals</li>
-                  <li>Technology Pages</li>
-                  <li>Blog Articles</li>
-                  <li>Case Studies</li>
-                  <li>Landing Pages</li>
-                </ul>
-                
-                <Button 
-                  onClick={handleOpenContentful}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2"
-                  size="lg"
-                >
-                  <ExternalLink className="mr-2 h-5 w-5" />
-                  Open Contentful CMS
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Alert variant="warning" className="mb-8">
-            <AlertTriangle className="h-5 w-5" />
-            <AlertTitle>Legacy Admin Interface</AlertTitle>
-            <AlertDescription>
-              The legacy admin interface is being phased out and will be removed in future updates.
-            </AlertDescription>
-          </Alert>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="shadow-sm hover:shadow transition-shadow duration-200 border-gray-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  <span>Contentful Config</span>
-                </CardTitle>
-                <CardDescription>
-                  API keys and environment setup
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600 mb-4">
-                  Configure API keys and environment 
-                  variables for Contentful CMS.
-                </p>
-              </CardContent>
-              <CardFooter className="bg-gray-50 border-t">
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => navigate('/admin/contentful-config')}
-                >
-                  Manage Configuration
-                </Button>
-              </CardFooter>
-            </Card>
-            
-            <Card className="shadow-sm hover:shadow transition-shadow duration-200 border-gray-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="h-5 w-5" />
-                  <span>Legacy Dashboard</span>
-                </CardTitle>
-                <CardDescription>
-                  Read-only legacy interfaces
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600 mb-4">
-                  View-only access to content previously 
-                  managed through the admin interface.
-                  All updates should be done in Contentful.
-                </p>
-              </CardContent>
-              <CardFooter className="bg-gray-50 border-t">
-                <Button 
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => navigate('/admin/dashboard')}
-                >
-                  View Dashboard
-                  <span className="ml-2 text-xs bg-gray-200 px-2 py-0.5 rounded-full">Read-only</span>
-                </Button>
-              </CardFooter>
-            </Card>
-            
-            <Card className="shadow-sm hover:shadow transition-shadow duration-200 border-gray-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  <span>Deprecation Stats</span>
-                </CardTitle>
-                <CardDescription>
-                  Monitor usage of deprecated features
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600 mb-4">
-                  View statistics on deprecated feature usage
-                  to help identify code that needs migration to
-                  newer implementations.
-                </p>
-              </CardContent>
-              <CardFooter className="bg-gray-50 border-t">
-                <Button 
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => navigate('/admin/deprecation-stats')}
-                >
-                  View Statistics
-                  <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">New</span>
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
-          
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-500 mb-2">
-              Need to manage content? Use Contentful CMS
-            </p>
-            <Button 
-              variant="default" 
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={handleOpenContentful}
-            >
-              Go to Contentful
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
+          <Button 
+            variant="outline" 
+            className="p-6 h-auto flex flex-col items-center gap-2 border-dashed"
+            onClick={() => navigate('/admin/strapi-setup')}
+          >
+            <Database className="h-6 w-6" />
+            <span className="font-medium">Strapi Configuration</span>
+            <span className="text-xs text-muted-foreground text-center">
+              Set up environment variables for Strapi CMS
+            </span>
+          </Button>
         </div>
       </div>
     </Layout>

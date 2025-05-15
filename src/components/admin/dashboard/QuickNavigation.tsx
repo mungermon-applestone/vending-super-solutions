@@ -1,43 +1,68 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
   title: string;
   description: string;
   href: string;
-  deprecated?: boolean;
 }
 
 interface QuickNavigationProps {
   items: NavItem[];
 }
 
+const ListItem = React.forwardRef<
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a">
+>(({ className, title, children, ...props }, ref) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <a
+          ref={ref}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </a>
+      </NavigationMenuLink>
+    </li>
+  );
+});
+ListItem.displayName = "ListItem";
+
 const QuickNavigation: React.FC<QuickNavigationProps> = ({ items }) => {
   return (
-    <div className="flex space-x-1 overflow-x-auto pb-1 mb-4">
-      {items.map((item) => (
-        <Link
-          key={item.title}
-          to={item.href}
-          className={cn(
-            "inline-flex items-center px-3 py-2 text-sm font-medium rounded-md whitespace-nowrap",
-            "bg-white border hover:bg-gray-50 transition-colors",
-            item.deprecated 
-              ? "text-amber-700 border-amber-300" 
-              : "text-gray-700 border-gray-200"
-          )}
-        >
-          {item.title}
-          {item.deprecated && (
-            <span className="ml-2 text-xs bg-amber-100 text-amber-800 rounded-full px-2 py-0.5">
-              Deprecated
-            </span>
-          )}
-        </Link>
-      ))}
-    </div>
+    <NavigationMenu>
+      <NavigationMenuList>
+        <NavigationMenuItem>
+          <NavigationMenuTrigger className="bg-transparent">Quick Navigation</NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+              {items.map((item) => (
+                <ListItem key={item.title} title={item.title} href={item.href}>
+                  {item.description}
+                </ListItem>
+              ))}
+              <ListItem
+                title="Database Overview"
+                href="#database-section"
+              >
+                View and manage all database-driven content
+              </ListItem>
+            </ul>
+          </NavigationMenuContent>
+        </NavigationMenuItem>
+      </NavigationMenuList>
+    </NavigationMenu>
   );
 };
 

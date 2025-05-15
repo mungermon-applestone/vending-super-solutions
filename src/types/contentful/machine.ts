@@ -4,15 +4,12 @@ import { CMSMachine, CMSImage } from '@/types/cms';
 export interface ContentfulEntry {
   sys?: {
     id: string;
-    createdAt?: string;
-    updatedAt?: string;
   };
   id?: string;
   title?: string;
   slug?: string;
   type?: string;
   description?: string;
-  shortDescription?: string;
   temperature?: string;
   features?: string[];
   fields?: {
@@ -20,7 +17,6 @@ export interface ContentfulEntry {
     slug?: string;
     type?: string;
     description?: string;
-    shortDescription?: string;
     temperature?: string;
     features?: string[];
     images?: Array<{
@@ -30,12 +26,6 @@ export interface ContentfulEntry {
       fields?: {
         file?: {
           url?: string;
-          details?: {
-            image?: {
-              width?: number;
-              height?: number;
-            };
-          };
         };
         title?: string;
       };
@@ -47,12 +37,6 @@ export interface ContentfulEntry {
       fields?: {
         file?: {
           url?: string;
-          details?: {
-            image?: {
-              width?: number;
-              height?: number;
-            };
-          };
         };
         title?: string;
       };
@@ -85,12 +69,6 @@ export interface ContentfulEntry {
     fields?: {
       file?: {
         url?: string;
-        details?: {
-          image?: {
-            width?: number;
-            height?: number;
-          };
-        };
       };
       title?: string;
     };
@@ -102,12 +80,6 @@ export interface ContentfulEntry {
     fields?: {
       file?: {
         url?: string;
-        details?: {
-          image?: {
-            width?: number;
-            height?: number;
-          };
-        };
       };
       title?: string;
     };
@@ -132,6 +104,5 @@ export interface ContentfulEntry {
     temperature?: string;
     [key: string]: string | undefined;
   };
-  visible?: boolean;
-  featured?: boolean;
 }
+

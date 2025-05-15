@@ -1,130 +1,100 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { HomePageContent } from '@/types/homePageContent';
+import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
+import { CONTENTFUL_CONFIG } from '@/config/cms';
 import { toast } from 'sonner';
-import { isContentfulAsset } from '@/services/cms/utils/contentfulHelpers';
 
-export interface HomePageContent {
-  id: string;
-  title: string;
-  heroHeadline: string;
-  heroSubheading: string;
-  heroCTAText: string;
-  heroCTALink: string;
-  heroImage: string;
-  featuredProductsTitle: string;
-  featuredProductsSubtitle: string;
-  featuredMachinesTitle: string;
-  featuredMachinesSubtitle: string;
-  testimonialsSectionTitle: string;
-  testimonialsSectionSubtitle: string;
-  businessGoalsTitle: string;
-  businessGoalsDescription: string;
-  ctaSectionTitle: string;
-  ctaSectionDescription: string;
-  ctaPrimaryButtonText: string;
-  ctaPrimaryButtonUrl: string;
-  ctaSecondaryButtonText: string;
-  ctaSecondaryButtonUrl: string;
-  availableMachines: string;
-  availableMachinesDescription: string;
-}
-
-// Helper function to safely convert values to strings
-function safeString(value: any): string {
-  if (value === null || value === undefined) return '';
-  return String(value);
-}
+// Define fallback content with VERY obvious text to easily identify when fallbacks are being used
+const fallbackHomeContent: HomePageContent = {
+  productCategoriesTitle: "[FALLBACK] Featured Product Categories",
+  productCategoriesDescription: "[FALLBACK] Find the perfect vending solution for your product type.",
+  businessGoalsTitle: "[FALLBACK] Business Goals We Help You Achieve",
+  businessGoalsDescription: "[FALLBACK] Tailored solutions to meet your specific business objectives.",
+  availableMachines: "[FALLBACK] Available Machines",
+  availableMachinesDescription: "[FALLBACK] Explore our range of cutting-edge vending machines compatible with our software solution.",
+  ctaSectionTitle: "[FALLBACK] Ready to Transform Your Vending Operations?",
+  ctaSectionDescription: "[FALLBACK] Get started with our platform today and see the difference in your operations.",
+  ctaPrimaryButtonText: "[FALLBACK] Request a Demo",
+  ctaPrimaryButtonUrl: "/contact",
+  ctaSecondaryButtonText: "[FALLBACK] Learn More",
+  ctaSecondaryButtonUrl: "/products"
+};
 
 export function useHomePageContent() {
+  console.log('[useHomePageContent] Initializing hook');
+  console.log('[useHomePageContent] Contentful config:', {
+    spaceId: CONTENTFUL_CONFIG.SPACE_ID || 'NOT SET',
+    hasDeliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
+    environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID
+  });
+  
   return useQuery({
-    queryKey: ['contentful', 'homePageContent'],
+    queryKey: ['homePageContent'],
     queryFn: async () => {
+      console.log('[useHomePageContent] Fetching data from Contentful');
       try {
-        const client = await getContentfulClient();
-        const entries = await client.getEntries({
-          content_type: 'homePage',
-          limit: 1
-        });
-
-        if (entries.items.length === 0) {
-          console.warn('[useHomePageContent] No home page content found');
-          // Return default values as fallback
-          return getDefaultHomePageContent();
+        // Check if Contentful is configured
+        if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
+          console.warn('[useHomePageContent] Contentful is not configured, using fallback content');
+          toast.error('Contentful is not configured properly. Check your environment variables.', {
+            id: 'contentful-error',
+            duration: 5000,
+          });
+          return fallbackHomeContent;
         }
-
-        const entry = entries.items[0];
-        const fields = entry.fields;
-
-        // Extract heroImage URL with proper type checking
-        let heroImageUrl = '';
-        if (fields.heroImage && isContentfulAsset(fields.heroImage)) {
-          heroImageUrl = `https:${fields.heroImage.fields.file.url}`;
-        }
-
-        // Convert Contentful data to our expected format with safe string conversions
-        const content: HomePageContent = {
-          id: entry.sys.id,
-          title: safeString(fields.title) || 'Home',
-          heroHeadline: safeString(fields.heroHeadline) || 'Smart Vending Solutions',
-          heroSubheading: safeString(fields.heroSubheading) || 'Discover our advanced vending technology',
-          heroCTAText: safeString(fields.heroCTAText) || 'Get Started',
-          heroCTALink: safeString(fields.heroCTALink) || '/contact',
-          heroImage: heroImageUrl,
-          featuredProductsTitle: safeString(fields.featuredProductsTitle) || 'Our Products',
-          featuredProductsSubtitle: safeString(fields.featuredProductsSubtitle) || 'Discover our product categories',
-          featuredMachinesTitle: safeString(fields.featuredMachinesTitle) || 'Our Machines',
-          featuredMachinesSubtitle: safeString(fields.featuredMachinesSubtitle) || 'Explore our vending machines',
-          testimonialsSectionTitle: safeString(fields.testimonialsSectionTitle) || 'What Our Customers Say',
-          testimonialsSectionSubtitle: safeString(fields.testimonialsSectionSubtitle) || 'Hear from our satisfied clients',
-          businessGoalsTitle: safeString(fields.businessGoalsTitle) || 'Business Goals',
-          businessGoalsDescription: safeString(fields.businessGoalsDescription) || 'How we can help you achieve your business goals',
-          ctaSectionTitle: safeString(fields.ctaSectionTitle) || 'Ready to Get Started?',
-          ctaSectionDescription: safeString(fields.ctaSectionDescription) || 'Contact us today to learn more about our solutions',
-          ctaPrimaryButtonText: safeString(fields.ctaPrimaryButtonText) || 'Contact Us',
-          ctaPrimaryButtonUrl: safeString(fields.ctaPrimaryButtonUrl) || '/contact',
-          ctaSecondaryButtonText: safeString(fields.ctaSecondaryButtonText) || 'Learn More',
-          ctaSecondaryButtonUrl: safeString(fields.ctaSecondaryButtonUrl) || '/about',
-          availableMachines: safeString(fields.availableMachines) || 'Available Machines',
-          availableMachinesDescription: safeString(fields.availableMachinesDescription) || 'Explore our range of vending machines'
-        };
-
-        return content;
-      } catch (error) {
-        console.error('[useHomePageContent] Error fetching home page content:', error);
-        toast.error('Failed to load home page content');
         
-        // Return default values as fallback
-        return getDefaultHomePageContent();
+        // Attempt to fetch from Contentful with more detailed logging
+        console.log('[useHomePageContent] Attempting to fetch from Contentful with content type:', 'homePageContent');
+        const entries = await fetchContentfulEntries<any>('homePageContent', {
+          limit: 1,
+          include: 2 // Include linked entries up to 2 levels deep
+        });
+        
+        console.log('[useHomePageContent] Raw Contentful response:', entries);
+        console.log('[useHomePageContent] Response length:', entries ? entries.length : 0);
+        
+        if (entries && entries.length > 0) {
+          console.log('[useHomePageContent] First entry fields:', entries[0].fields);
+          const content = entries[0].fields;
+          
+          const mappedContent = {
+            productCategoriesTitle: content.productCategoriesTitle || fallbackHomeContent.productCategoriesTitle,
+            productCategoriesDescription: content.productCategoriesDescription || fallbackHomeContent.productCategoriesDescription,
+            businessGoalsTitle: content.businessGoalsTitle || fallbackHomeContent.businessGoalsTitle,
+            businessGoalsDescription: content.businessGoalsDescription || fallbackHomeContent.businessGoalsDescription,
+            availableMachines: content.availableMachines || fallbackHomeContent.availableMachines,
+            availableMachinesDescription: content.availableMachinesDescription || fallbackHomeContent.availableMachinesDescription,
+            ctaSectionTitle: content.ctaSectionTitle || fallbackHomeContent.ctaSectionTitle,
+            ctaSectionDescription: content.ctaSectionDescription || fallbackHomeContent.ctaSectionDescription,
+            ctaPrimaryButtonText: content.ctaPrimaryButtonText || fallbackHomeContent.ctaPrimaryButtonText,
+            ctaPrimaryButtonUrl: content.ctaPrimaryButtonUrl || fallbackHomeContent.ctaPrimaryButtonUrl,
+            ctaSecondaryButtonText: content.ctaSecondaryButtonText || fallbackHomeContent.ctaSecondaryButtonText,
+            ctaSecondaryButtonUrl: content.ctaSecondaryButtonUrl || fallbackHomeContent.ctaSecondaryButtonUrl
+          };
+          
+          console.log('[useHomePageContent] Mapped content from Contentful:', mappedContent);
+          return mappedContent;
+        }
+        
+        console.warn('[useHomePageContent] No entries found, using fallbacks');
+        toast.warning('No content found in Contentful. Using fallback content.', {
+          id: 'contentful-no-content',
+          duration: 5000,
+        });
+        // Return fallback data if no entries found
+        return fallbackHomeContent;
+      } catch (error) {
+        console.error('[useHomePageContent] Error fetching data:', error);
+        toast.error(`Failed to fetch content: ${error instanceof Error ? error.message : 'Unknown error'}`, {
+          id: 'contentful-fetch-error',
+          duration: 5000,
+        });
+        // Return fallback data on error
+        return fallbackHomeContent;
       }
     },
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    refetchOnWindowFocus: false
   });
-}
-
-function getDefaultHomePageContent(): HomePageContent {
-  return {
-    id: 'default',
-    title: 'Home',
-    heroHeadline: 'Smart Vending Solutions',
-    heroSubheading: 'Discover our advanced vending technology',
-    heroCTAText: 'Get Started',
-    heroCTALink: '/contact',
-    heroImage: '',
-    featuredProductsTitle: 'Our Products',
-    featuredProductsSubtitle: 'Discover our product categories',
-    featuredMachinesTitle: 'Our Machines',
-    featuredMachinesSubtitle: 'Explore our vending machines',
-    testimonialsSectionTitle: 'What Our Customers Say',
-    testimonialsSectionSubtitle: 'Hear from our satisfied clients',
-    businessGoalsTitle: 'Business Goals',
-    businessGoalsDescription: 'How we can help you achieve your business goals',
-    ctaSectionTitle: 'Ready to Get Started?',
-    ctaSectionDescription: 'Contact us today to learn more about our solutions',
-    ctaPrimaryButtonText: 'Contact Us',
-    ctaPrimaryButtonUrl: '/contact',
-    ctaSecondaryButtonText: 'Learn More',
-    ctaSecondaryButtonUrl: '/about',
-    availableMachines: 'Available Machines',
-    availableMachinesDescription: 'Explore our range of vending machines'
-  };
 }

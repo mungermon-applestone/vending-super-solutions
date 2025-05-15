@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -12,11 +13,11 @@ import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import { SimpleContactCTA } from '@/components/common';
 
-const MachinesLanding: React.FC = () => {
+const MachinesLanding = () => {
   const location = useLocation();
   const { data: machines = [], isLoading } = useMachines();
   const typedMachines = machines as CMSMachine[];
-  const { data: testimonialSection } = useTestimonialSection();
+  const { data: testimonialSection } = useTestimonialSection('machines');
   
   // Filter machines by type
   const vendingMachines = typedMachines.filter(machine => machine.type === 'vending');

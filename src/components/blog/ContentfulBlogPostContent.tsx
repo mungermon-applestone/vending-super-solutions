@@ -1,6 +1,5 @@
-
 import React from "react";
-import { ContentfulBlogPost } from "@/hooks/useContentfulBlogPosts";
+import { ContentfulBlogPost } from "@/hooks/useContentfulBlogPostBySlug";
 import ContentfulBlogPostHeader from "./ContentfulBlogPostHeader";
 import ContentfulBlogPostBody from "./ContentfulBlogPostBody";
 import ContentfulBlogPostFooter from "./ContentfulBlogPostFooter";
@@ -22,25 +21,16 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
   previousPost,
   nextPost,
 }) => {
-  if (!post) {
-    console.error("[ContentfulBlogPostContent] Missing post data");
+  if (!post || !post.fields) {
+    console.error("[ContentfulBlogPostContent] Missing or invalid post data:", post);
     return (
       <ContentfulErrorBoundary contentType="blog post">
-        <div>Error: Blog post data is missing</div>
+        <div>Error: Blog post data is missing or invalid</div>
       </ContentfulErrorBoundary>
     );
   }
 
-  const title = post.title || post.fields?.title || "Untitled";
-  const content = post.content || post.fields?.content;
-  const excerpt = post.excerpt || post.fields?.excerpt;
-  const publishDate = post.publishDate || post.fields?.publishDate || post.published_at;
-  const featuredImage = post.featuredImage || (post.fields?.featuredImage ? {
-    url: `https:${post.fields.featuredImage.fields?.file?.url || ''}`,
-    title: post.fields.featuredImage.fields?.title || '',
-    width: post.fields.featuredImage.fields?.file?.details?.image?.width,
-    height: post.fields.featuredImage.fields?.file?.details?.image?.height
-  } : undefined);
+  const { title = "Untitled", content, excerpt, publishDate, featuredImage } = post.fields;
   
   // Extract included assets from the response if available
   const includedAssets = post.includes?.Asset || [];
@@ -50,11 +40,16 @@ const ContentfulBlogPostContent: React.FC<ContentfulBlogPostContentProps> = ({
     console.log("[ContentfulBlogPostContent] Rendering post:", {
       title,
       hasContent: !!content,
-      assetCount: includedAssets?.length || 0,
+      assetCount: includedAssets.length,
       publishDate,
-      featuredImage: !!featuredImage
     });
-  }, [post, includedAssets, title, content, publishDate, featuredImage]);
+    
+    if (includedAssets?.length) {
+      includedAssets.forEach(asset => {
+        console.log(`[ContentfulBlogPostContent] Asset ${asset.sys.id}:`, asset.fields);
+      });
+    }
+  }, [post, includedAssets, title, content, publishDate]);
 
   return (
     <ContentfulErrorBoundary contentType="blog post">

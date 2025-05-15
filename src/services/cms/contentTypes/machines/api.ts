@@ -1,46 +1,6 @@
 
-import { CMSMachine } from '@/types/cms';
+import { supabase } from '@/integrations/supabase/client';
 import { transformMachineData } from '../../utils/transformers';
-
-// Mock machine data
-const mockMachines: CMSMachine[] = [
-  {
-    id: 'machine-001',
-    title: 'Vending Machine Pro',
-    slug: 'vending-machine-pro',
-    type: 'vending',
-    temperature: 'ambient',
-    description: 'Our flagship vending machine with advanced features',
-    features: ['Touchscreen interface', 'Cashless payment', 'Remote monitoring'],
-    images: [
-      { id: 'img-001', url: 'https://example.com/machine1.jpg', alt: 'Vending Machine Pro front view' }
-    ],
-    specs: {
-      dimensions: '72" x 39" x 35"',
-      weight: '800 lbs',
-      capacity: '500 items',
-      powerRequirements: '110V'
-    }
-  },
-  {
-    id: 'machine-002',
-    title: 'Smart Locker System',
-    slug: 'smart-locker-system',
-    type: 'locker',
-    temperature: 'ambient',
-    description: 'Secure locker system for package delivery and pickup',
-    features: ['Barcode scanner', 'Notification system', 'Climate control'],
-    images: [
-      { id: 'img-002', url: 'https://example.com/locker1.jpg', alt: 'Smart Locker System' }
-    ],
-    specs: {
-      dimensions: '80" x 72" x 20"',
-      weight: '1200 lbs',
-      capacity: '24 compartments',
-      powerRequirements: '110V'
-    }
-  }
-];
 
 /**
  * Fetch machines from the CMS with sorting options
@@ -48,37 +8,145 @@ const mockMachines: CMSMachine[] = [
 export async function fetchMachines<T = any>(params: Record<string, any> = {}): Promise<T[]> {
   try {
     console.log('[fetchMachines] Starting fetch with params:', params);
+    let query = supabase
+      .from('machines')
+      .select(`
+        id,
+        slug,
+        title,
+        type,
+        temperature,
+        description,
+        display_order,
+        show_on_homepage,
+        homepage_order,
+        machine_images (
+          id,
+          url,
+          alt,
+          width,
+          height,
+          display_order
+        ),
+        machine_specs (
+          id,
+          key,
+          value
+        ),
+        machine_features (
+          id,
+          feature,
+          display_order
+        ),
+        deployment_examples (
+          id,
+          title,
+          description,
+          image_url,
+          image_alt,
+          display_order
+        )
+      `)
+      .eq('visible', true);
     
-    // Filter mock machines based on params
-    let filteredMachines = [...mockMachines];
+    // Apply filters if provided
+    query = applyFiltersToQuery(query, params);
     
-    if (params.type) {
-      filteredMachines = filteredMachines.filter(m => m.type === params.type);
-    }
-    
-    if (params.temperature) {
-      filteredMachines = filteredMachines.filter(m => m.temperature === params.temperature);
-    }
-    
-    if (params.slug) {
-      filteredMachines = filteredMachines.filter(m => m.slug === params.slug);
-    }
-    
-    if (params.id) {
-      filteredMachines = filteredMachines.filter(m => m.id === params.id);
-    }
-    
-    // Apply sorting if provided
+    // Apply sorting
     if (params.sort) {
-      // For mock data, no sorting implementation needed
-      console.log(`[fetchMachines] Would sort by ${params.sort} in a real implementation`);
+      query = query.order(params.sort);
+    } else if (params.showOnHomepage) {
+      // If showing homepage items, sort by homepage_order
+      query = query.order('homepage_order', { ascending: true });
+    } else {
+      // Default sort by display_order then title
+      query = query.order('display_order', { ascending: true })
+                  .order('title');
     }
     
-    console.log(`[fetchMachines] Returning ${filteredMachines.length} machines`);
-    return filteredMachines as T[];
+    // Print the final query for debugging
+    console.log('[fetchMachines] Running query with filters:', params);
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('[fetchMachines] Error fetching machines:', error);
+      throw error;
+    }
+
+    // Log data received
+    logMachinesData(data);
+
+    const transformed = transformMachineData(data);
+    console.log(`[fetchMachines] Transformed data: ${transformed.length} machines`);
+    
+    return transformed as T[];
   } catch (error) {
     console.error('[fetchMachines] Error fetching machines:', error);
     throw error;
+  }
+}
+
+/**
+ * Helper function to apply filters to the query
+ */
+function applyFiltersToQuery(query: any, params: Record<string, any>) {
+  if (params.type) {
+    query = query.eq('type', params.type);
+  }
+  
+  if (params.temperature) {
+    query = query.eq('temperature', params.temperature);
+  }
+  
+  if (params.slug) {
+    query = query.eq('slug', params.slug);
+  }
+  
+  if (params.id) {
+    query = query.eq('id', params.id);
+  }
+  
+  if (params.showOnHomepage !== undefined) {
+    query = query.eq('show_on_homepage', params.showOnHomepage);
+  }
+  
+  return query;
+}
+
+/**
+ * Helper function to log fetched machines data
+ */
+function logMachinesData(data: any[] | null) {
+  console.log(`[fetchMachines] Raw data received: ${data?.length || 0} machines`);
+  if (data?.length > 0) {
+    console.log('[fetchMachines] First machine sample:', {
+      id: data[0].id,
+      title: data[0].title,
+      slug: data[0].slug
+    });
+  } else {
+    console.warn('[fetchMachines] No machines found in database');
+    
+    // Check for possible RLS issues
+    console.warn('[fetchMachines] Empty result may indicate RLS policy issues - checking table access');
+    checkTableAccess();
+  }
+}
+
+/**
+ * Helper function to check database table access
+ */
+async function checkTableAccess() {
+  // Try a simple count query to verify basic table access
+  const { count, error: countError } = await supabase
+    .from('machines')
+    .select('*', { count: 'exact', head: true });
+  
+  if (countError) {
+    console.error('[fetchMachines] Error accessing machines table:', countError);
+  } else {
+    console.log(`[fetchMachines] Total count in machines table (may be filtered by RLS): ${count}`);
   }
 }
 
@@ -89,14 +157,60 @@ export async function fetchMachineById<T = any>(id: string): Promise<T | null> {
   try {
     console.log(`[fetchMachineById] Fetching machine with ID: ${id}`);
     
-    const machine = mockMachines.find(m => m.id === id);
+    const { data, error } = await supabase
+      .from('machines')
+      .select(`
+        id,
+        slug,
+        title,
+        type,
+        temperature,
+        description,
+        display_order,
+        show_on_homepage,
+        homepage_order,
+        machine_images (
+          id,
+          url,
+          alt,
+          width,
+          height,
+          display_order
+        ),
+        machine_specs (
+          id,
+          key,
+          value
+        ),
+        machine_features (
+          id,
+          feature,
+          display_order
+        ),
+        deployment_examples (
+          id,
+          title,
+          description,
+          image_url,
+          image_alt,
+          display_order
+        )
+      `)
+      .eq('id', id)
+      .maybeSingle();
     
-    if (!machine) {
+    if (error) {
+      console.error(`[fetchMachineById] Error fetching machine with ID ${id}:`, error);
+      throw error;
+    }
+    
+    if (!data) {
       console.warn(`[fetchMachineById] No machine found with ID: ${id}`);
       return null;
     }
     
-    return machine as T;
+    const transformed = transformMachineData([data]);
+    return transformed.length > 0 ? transformed[0] as T : null;
   } catch (error) {
     console.error(`[fetchMachineById] Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return null;

@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { testContentfulConnection, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
+import { refreshContentfulClient, testContentfulConnection } from '@/services/cms/utils/contentfulClient';
 import { forceContentfulProvider } from '@/services/cms/cmsInit';
 import { isContentfulConfigured, isPreviewEnvironment } from '@/config/cms';
 import { Loader2 } from 'lucide-react';
@@ -34,8 +34,20 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
       try {
         console.log('[ContentfulInitializer] Starting initialization');
         
+        // Check if Contentful is already configured
+        if (!isContentfulConfigured()) {
+          console.log('[ContentfulInitializer] Contentful not configured, checking hardcoded values');
+          // Try to use hardcoded values from env-config.js
+          if (typeof window !== 'undefined' && window.env && window.env.VITE_CONTENTFUL_SPACE_ID) {
+            console.log('[ContentfulInitializer] Found hardcoded values in window.env');
+          } else {
+            console.warn('[ContentfulInitializer] No Contentful credentials found in environment');
+            throw new Error('Contentful is not configured and no fallback credentials are available');
+          }
+        }
+        
         // Force provider initialization
-        await forceContentfulProvider();
+        forceContentfulProvider();
         
         // Test the connection
         const testResult = await testContentfulConnection();
@@ -49,7 +61,7 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
           
           // Try the test again
           const retryTest = await testContentfulConnection();
-          if (!retryTest.success && retryCount >= MAX_RETRIES - 1) {
+          if (!retryTest.success) {
             throw new Error(`Connection test failed: ${retryTest.message}`);
           }
         }
@@ -85,10 +97,6 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
             forceContentfulProvider();
             setIsInitialized(true); // Still initialized but will use fallbacks
             window._contentfulInitializedSource = 'fallback-after-error';
-            
-            if (isPreview) {
-              toast.warning('Using preview mode with demo content. Some features may be limited.');
-            }
           }
         }
       } finally {

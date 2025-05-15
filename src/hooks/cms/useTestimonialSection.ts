@@ -1,39 +1,17 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
-import { ContentfulTestimonialSection, convertTestimonialsToSection } from '@/types/contentful/testimonial';
+import { ContentfulTestimonialSection } from '@/types/contentful/testimonial';
 
-export function useTestimonialSection() {
+export function useTestimonialSection(pageKey: string) {
   return useQuery({
-    queryKey: ['contentful', 'testimonials'],
+    queryKey: ['testimonialSection', pageKey],
     queryFn: async () => {
-      try {
-        const entries = await fetchContentfulEntries('testimonial');
-        
-        if (!entries || entries.length === 0) {
-          return null;
-        }
-        
-        // Convert the testimonials to the expected format
-        const testimonials = entries.map((entry: any) => ({
-          id: entry.sys.id,
-          name: entry.fields.author || '',
-          title: entry.fields.position || '',
-          company: entry.fields.company || '',
-          testimonial: entry.fields.quote || '',
-          rating: entry.fields.rating || 5,
-          image_url: entry.fields.image?.fields?.file?.url 
-            ? `https:${entry.fields.image.fields.file.url}`
-            : undefined
-        }));
-        
-        // Create a section with these testimonials
-        return convertTestimonialsToSection(testimonials);
-      } catch (error) {
-        console.error('Error fetching testimonials:', error);
-        return null;
-      }
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+      const entries = await fetchContentfulEntries<ContentfulTestimonialSection>('testimonialSection', {
+        'fields.pageKey': pageKey,
+        include: 2
+      });
+      return entries[0] || null;
+    }
   });
 }

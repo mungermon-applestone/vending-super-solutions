@@ -1,4 +1,5 @@
 
+import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
 
 /**
@@ -32,40 +33,58 @@ export const processBenefits = (benefits: string[] | undefined): string[] => {
 
 /**
  * Update a product's benefits by first completely removing existing ones
- * and then adding the new ones - MOCK IMPLEMENTATION
+ * and then adding the new ones
  */
 export const updateProductBenefits = async (data: ProductFormData, productId: string): Promise<void> => {
-  console.log('[benefitHelpers] MOCK: Updating benefits for product ID:', productId);
-  console.log('[benefitHelpers] MOCK: Benefits data received:', data.benefits);
+  console.log('[benefitHelpers] Updating benefits for product ID:', productId);
+  console.log('[benefitHelpers] Benefits data received:', data.benefits);
   
   try {
-    // Mock implementation - no actual database queries here
-    console.log('[benefitHelpers] MOCK: Successfully deleted all existing benefits');
+    // CRITICAL: First delete ALL existing benefits for this product
+    // This ensures a clean slate and prevents duplicated benefits
+    const { error: deleteError } = await supabase
+      .from('product_type_benefits')
+      .delete()
+      .eq('product_type_id', productId);
+
+    if (deleteError) {
+      console.error('[benefitHelpers] Error deleting existing benefits:', deleteError);
+      throw new Error(deleteError.message);
+    }
     
-    // Clean benefits data
+    console.log('[benefitHelpers] Successfully deleted all existing benefits');
+    
+    // Clean benefits data again to ensure quality before insertion
+    // This is redundant with the processing in updateProduct, but serves as a safety net
     const validBenefits = Array.isArray(data.benefits) 
       ? processBenefits(data.benefits)
       : [];
     
-    console.log(`[benefitHelpers] MOCK: Processing ${validBenefits.length} valid benefits`);
+    console.log(`[benefitHelpers] Processing ${validBenefits.length} valid benefits for insertion`);
     
     // Skip the insertion step if there are no valid benefits to insert
     if (validBenefits.length === 0) {
-      console.log('[benefitHelpers] MOCK: No valid benefits to insert');
+      console.log('[benefitHelpers] No valid benefits to insert');
       return;
     }
     
-    // Mock the benefits as they would be inserted in a DB
+    // Insert each benefit with a specific display_order
     const benefitsToInsert = validBenefits.map((benefit, index) => ({
       product_type_id: productId,
       benefit: benefit,
       display_order: index
     }));
 
-    console.log(`[benefitHelpers] MOCK: ${validBenefits.length} benefits would be inserted`);
-    console.log('[benefitHelpers] MOCK: Benefits sample:', benefitsToInsert[0]);
+    const { error: insertError } = await supabase
+      .from('product_type_benefits')
+      .insert(benefitsToInsert);
 
-    console.log(`[benefitHelpers] MOCK: ${validBenefits.length} benefits inserted successfully`);
+    if (insertError) {
+      console.error('[benefitHelpers] Error inserting benefits:', insertError);
+      throw new Error(insertError.message);
+    }
+
+    console.log(`[benefitHelpers] ${validBenefits.length} benefits inserted successfully`);
   } catch (error) {
     console.error('[benefitHelpers] Error in updateProductBenefits:', error);
     throw error;

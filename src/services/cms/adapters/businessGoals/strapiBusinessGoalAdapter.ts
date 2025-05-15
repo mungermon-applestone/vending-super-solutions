@@ -1,15 +1,7 @@
 
-/**
- * @deprecated This adapter is deprecated as we are transitioning to Contentful.
- * This file now simply re-exports the contentful adapter to maintain compatibility.
- */
-
-// Import the contentful adapter instead
-import { contentfulBusinessGoalAdapter } from './contentfulBusinessGoalAdapter';
-
-console.warn('strapiBusinessGoalAdapter is deprecated and will be removed in a future release. Please use contentfulBusinessGoalAdapter instead.');
+import { strapiBusinessGoalAdapter as adapter } from './strapi';
 
 /**
- * Re-export the Contentful business goal adapter implementation to maintain compatibility
+ * Re-export the Strapi business goal adapter implementation
  */
-export const strapiBusinessGoalAdapter = contentfulBusinessGoalAdapter;
+export const strapiBusinessGoalAdapter = adapter;

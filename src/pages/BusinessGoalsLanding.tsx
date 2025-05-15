@@ -1,3 +1,4 @@
+
 import React, { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -16,10 +17,10 @@ import { validateContentfulClient, refreshContentfulClient } from '@/services/cm
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import { toast } from 'sonner';
 
-const BusinessGoalsLanding: React.FC = () => {
+const BusinessGoalsLanding = () => {
   const { data: featuredContent, isLoading, error, refetch } = useFeaturedBusinessGoalsContent();
   const { data: pageContent } = useBusinessGoalsPageContent();
-  const { data: testimonialSection } = useTestimonialSection();
+  const { data: testimonialSection } = useTestimonialSection('business-goals');
   const navigate = useNavigate();
   const isConfigured = isContentfulConfigured();
 

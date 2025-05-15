@@ -1,141 +1,154 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
-import { CMSMachine, CMSImage } from '@/types/cms';
+import { CMSMachine } from '@/types/cms';
 import { ContentfulEntry } from '@/types/contentful/machine';
-import { safeStringArray } from '@/services/cms/utils/safeTypeUtilities';
+import { transformContentfulEntry } from '@/utils/cms/transformers/machineTransformer';
+import { fallbackMachineData } from '@/data/fallbacks/machineFallbacks';
+import { toast } from 'sonner';
 
 /**
- * Transform Contentful machine data to our application's CMSMachine format
+ * Hook for fetching Contentful machines
+ * 
+ * !!!!! DO NOT REMOVE OR FUNDAMENTALLY ALTER !!!!
+ * Core requirements:
+ * - Fetch all machines
+ * - Provide fallback in preview/error scenarios
+ * - Consistent error logging
  */
-export function transformMachineFromContentful(entry: ContentfulEntry): CMSMachine {
-  // Extract fields from either format
-  const fields = entry.fields || entry;
-  
-  // Extract image data if available
-  let mainImage: CMSImage | undefined = undefined;
-  if (fields.thumbnail) {
-    const imageData = fields.thumbnail;
-    const imageUrl = imageData.fields?.file?.url;
-    if (imageUrl) {
-      mainImage = {
-        url: imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl,
-        alt: imageData.fields?.title || fields.title || '',
-        width: imageData.fields?.file?.details?.image?.width,
-        height: imageData.fields?.file?.details?.image?.height
-      };
-    }
-  }
-  
-  // Process images array if available
-  const images: CMSImage[] = [];
-  if (fields.images && Array.isArray(fields.images)) {
-    fields.images.forEach(image => {
-      const imageUrl = image.fields?.file?.url;
-      if (imageUrl) {
-        images.push({
-          url: imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl,
-          alt: image.fields?.title || fields.title || '',
-          width: image.fields?.file?.details?.image?.width,
-          height: image.fields?.file?.details?.image?.height
-        });
-      }
-    });
-  }
-  
-  // Build specs object from individual properties or specs object
-  const specs: Record<string, string> = fields.specs || {};
-  
-  // Add individual spec fields if they exist
-  const specFields = ['dimensions', 'weight', 'capacity', 'powerRequirements', 'paymentOptions', 'connectivity', 'manufacturer', 'warranty'];
-  specFields.forEach(field => {
-    if (fields[field] && typeof fields[field] === 'string') {
-      specs[field] = fields[field] as string;
-    }
-  });
-
-  // Add temperature to specs if not already present
-  if (fields.temperature && !specs.temperature) {
-    specs.temperature = fields.temperature as string;
-  }
-  
-  // Extract features array safely
-  const features = Array.isArray(fields.features) 
-    ? safeStringArray(fields.features) 
-    : [];
-  
-  // Build the standardized machine object
-  const machine: CMSMachine = {
-    id: entry.sys?.id || entry.id || '',
-    title: fields.title as string || 'Untitled Machine',
-    name: fields.title as string || 'Untitled Machine', // Add name property for backwards compatibility
-    slug: fields.slug as string || '',
-    type: fields.type as string || '',
-    description: fields.description as string || '',
-    shortDescription: fields.shortDescription as string || '',
-    temperature: fields.temperature as string || '',
-    mainImage,
-    images,
-    features,
-    specs,
-    visible: fields.visible !== false,
-    featured: fields.featured === true,
-    displayOrder: typeof fields.displayOrder === 'number' ? fields.displayOrder : 0,
-    createdAt: entry.sys?.createdAt || new Date().toISOString(),
-    updatedAt: entry.sys?.updatedAt || new Date().toISOString()
-  };
-  
-  return machine;
-}
-
-/**
- * Hook to fetch all machines
- */
-export function useContentfulMachines(options?: { limit?: number; skip?: number }) {
+export function useContentfulMachines() {
   return useQuery({
-    queryKey: ['contentful', 'machines', options],
+    queryKey: ['contentful', 'machines'],
     queryFn: async () => {
+      console.log('[useContentfulMachines] Fetching all machines');
       try {
-        const entries = await fetchContentfulEntries('machine', options);
-        return entries.map(transformMachineFromContentful);
+        const entries = await fetchContentfulEntries<ContentfulEntry>('machine');
+        console.log('[useContentfulMachines] Fetched entries:', entries);
+        
+        if (!entries || entries.length === 0) {
+          console.log('[useContentfulMachines] No machines found in Contentful');
+          
+          if (window.location.hostname.includes('lovable')) {
+            console.log('[useContentfulMachines] Using fallback data in preview');
+            toast.info('Using fallback machine data in preview environment');
+            return Object.values(fallbackMachineData);
+          }
+          
+          return [];
+        }
+        
+        const machines = entries.map(transformContentfulEntry);
+        console.log('[useContentfulMachines] Transformed machines:', machines);
+        return machines;
+        
       } catch (error) {
-        console.error('[useContentfulMachines] Error fetching machines:', error);
-        return [];
+        console.error('[CRITICAL] Machine fetch failed', {
+          error,
+          timestamp: new Date().toISOString()
+        });
+        
+        if (window.location.hostname.includes('lovable')) {
+          console.log('[useContentfulMachines] Using fallback data after error in preview');
+          toast.info('Using fallback machine data in preview environment');
+          return Object.values(fallbackMachineData);
+        }
+        throw error;
       }
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    }
   });
 }
 
 /**
- * Hook to fetch a single machine by ID or slug
+ * Hook for fetching a single Contentful machine
+ * 
+ * !!!!! DO NOT REMOVE OR FUNDAMENTALLY ALTER !!!!
+ * Core requirements:
+ * - Fetch machine by ID or slug
+ * - Handle special cases (e.g., divi-wp)
+ * - Provide fallback in preview/error scenarios
  */
 export function useContentfulMachine(idOrSlug: string | undefined) {
   return useQuery({
     queryKey: ['contentful', 'machine', idOrSlug],
     queryFn: async () => {
-      if (!idOrSlug) return null;
-      
-      try {
-        // Try to fetch by ID first
-        let entry = await fetchContentfulEntry('machine', idOrSlug);
-        
-        // If not found by ID, try by slug
-        if (!entry) {
-          const entries = await fetchContentfulEntries('machine', {
-            'fields.slug': idOrSlug,
-            limit: 1
-          });
-          entry = entries && entries.length > 0 ? entries[0] : null;
-        }
-        
-        return entry ? transformMachineFromContentful(entry) : null;
-      } catch (error) {
-        console.error(`[useContentfulMachine] Error fetching machine with ID/slug ${idOrSlug}:`, error);
+      if (!idOrSlug) {
+        console.log('[useContentfulMachine] No ID or slug provided');
         return null;
       }
+      
+      console.log('[useContentfulMachine] Fetching machine with idOrSlug:', idOrSlug);
+      
+      try {
+        // Special handling for divi-wp
+        if (idOrSlug === 'divi-wp') {
+          console.log('[useContentfulMachine] Special case: directly fetching divi-wp with ID: 1omUbnEhB6OeBFpwPFj1Ww');
+          
+          try {
+            const entry = await fetchContentfulEntry<ContentfulEntry>('1omUbnEhB6OeBFpwPFj1Ww');
+            if (entry) {
+              console.log('[useContentfulMachine] Successfully fetched divi-wp entry by ID:', entry);
+              return transformContentfulEntry(entry);
+            }
+          } catch (diviError) {
+            console.error('[useContentfulMachine] Error fetching divi-wp by ID:', diviError);
+          }
+          
+          if (window.location.hostname.includes('lovable')) {
+            console.log('[useContentfulMachine] Using fallback data for divi-wp in preview');
+            toast.info('Using fallback data for DIVI-WP in preview environment');
+            return fallbackMachineData['divi-wp'];
+          }
+        }
+        
+        // Try fetching by ID first if it looks like an ID
+        if (idOrSlug.length > 10) {
+          try {
+            console.log('[useContentfulMachine] Trying direct ID fetch:', idOrSlug);
+            const entry = await fetchContentfulEntry<ContentfulEntry>(idOrSlug);
+            if (entry) {
+              console.log('[useContentfulMachine] Successfully fetched by ID:', entry);
+              return transformContentfulEntry(entry);
+            }
+          } catch (idError) {
+            console.log('[useContentfulMachine] Could not fetch by ID:', idError);
+          }
+        }
+        
+        // Then try by slug
+        console.log('[useContentfulMachine] Fetching by slug field:', idOrSlug);
+        const entries = await fetchContentfulEntries<ContentfulEntry>('machine', {
+          'fields.slug': idOrSlug
+        });
+        
+        if (entries.length === 0) {
+          console.warn('[useContentfulMachine] No machine found with slug:', idOrSlug);
+          
+          if (window.location.hostname.includes('lovable') && fallbackMachineData[idOrSlug]) {
+            console.log('[useContentfulMachine] Using fallback data for:', idOrSlug);
+            return fallbackMachineData[idOrSlug];
+          }
+          
+          return null;
+        }
+        
+        console.log('[useContentfulMachine] Found machine by slug:', entries[0]);
+        return transformContentfulEntry(entries[0]);
+        
+      } catch (error) {
+        console.error(`[useContentfulMachine] Error:`, error);
+        
+        if (window.location.hostname.includes('lovable') && fallbackMachineData[idOrSlug]) {
+          console.log('[useContentfulMachine] Using fallback data for:', idOrSlug);
+          return fallbackMachineData[idOrSlug];
+        }
+        
+        toast.error(`Failed to load machine data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        throw error;
+      }
     },
-    enabled: !!idOrSlug,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: !!idOrSlug
   });
 }
+
+export default { useContentfulMachines, useContentfulMachine };
+

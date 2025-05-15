@@ -121,7 +121,7 @@ const BusinessGoalsPage: React.FC = () => {
   const { data: businessGoals, isLoading: goalsLoading, error: goalsError } = useContentfulBusinessGoals();
   const { data: pageContent, isLoading: contentLoading, error: contentError } = useBusinessGoalsPageContent(BUSINESS_GOALS_CONTENT_ID);
   const { data: heroContent, isLoading: heroLoading } = useHeroContent(HERO_CONTENT_ID);
-  const { data: testimonialSection } = useTestimonialSection();
+  const { data: testimonialSection } = useTestimonialSection('business-goals');
   
   const isLoading = goalsLoading || contentLoading || heroLoading;
   const error = goalsError || contentError;

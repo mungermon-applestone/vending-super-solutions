@@ -1,136 +1,219 @@
-
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { fetchCaseStudies } from '@/services/cms/contentTypes/caseStudies';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
 } from '@/components/ui/table';
-import { ChevronRight } from 'lucide-react';
-import DeprecatedAdminLayout from '@/components/admin/layout/DeprecatedAdminLayout';
-import ViewInContentful from '@/components/admin/ViewInContentful';
-import { logDeprecationWarning } from '@/services/cms/utils/deprecationLogger';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { 
+  MoreHorizontal, 
+  Search, 
+  Plus, 
+  Edit, 
+  Trash2,
+  Eye, 
+  EyeOff 
+} from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/context/AuthContext';
+import { useCaseStudies, useDeleteCaseStudy } from '@/hooks/useCaseStudies';
+import DeleteEntityDialog from '@/components/admin/common/DeleteEntityDialog';
 
 const AdminCaseStudies = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedCaseStudyId, setSelectedCaseStudyId] = useState<string | null>(null);
+  const [selectedCaseStudyTitle, setSelectedCaseStudyTitle] = useState<string>('');
+  
+  const { toast } = useToast();
   const navigate = useNavigate();
-  
-  // Log deprecation of this admin page
-  useEffect(() => {
-    logDeprecationWarning(
-      "AdminCaseStudies",
-      "The Case Studies admin interface is deprecated and will be removed in a future version.",
-      "Please use Contentful to manage case study content."
-    );
-  }, []);
-  
-  // Fetch case studies - updated to use TanStack Query v5 API pattern
-  const { data, isLoading } = useQuery({
-    queryKey: ['caseStudies'],
-    queryFn: async () => {
-      return await fetchCaseStudies();
+  const { isAdmin, isLoading } = useAuth();
+  const { data: caseStudies, isLoading: isLoadingCaseStudies } = useCaseStudies();
+  const deleteCaseStudy = useDeleteCaseStudy();
+
+  React.useEffect(() => {
+    if (!isLoading && !isAdmin) {
+      navigate('/admin/sign-in');
     }
-  });
-  
-  // Make sure data is always an array
-  const caseStudies = Array.isArray(data) ? data : [];
+  }, [isAdmin, isLoading, navigate]);
+
+  const filteredCaseStudies = React.useMemo(() => {
+    if (!caseStudies) return [];
+    
+    if (!searchTerm) return caseStudies;
+    
+    return caseStudies.filter(
+      (study) => 
+        study.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        study.industry?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        study.summary.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [caseStudies, searchTerm]);
+
+  const handleDeleteClick = (id: string, title: string) => {
+    setSelectedCaseStudyId(id);
+    setSelectedCaseStudyTitle(title);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedCaseStudyId) return;
+    
+    try {
+      await deleteCaseStudy.mutateAsync(selectedCaseStudyId);
+      setDeleteDialogOpen(false);
+    } catch (error) {
+      console.error('Error deleting case study:', error);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-10">
+          <div className="flex items-center justify-center h-64">
+            <p>Loading...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
-    <DeprecatedAdminLayout
-      title="Case Studies Management"
-      description="View all case studies (read-only)"
-      contentType="Case Study"
-      backPath="/admin/dashboard"
-    >
-      <div className="flex justify-between mb-6">
-        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-          Read-Only View
-        </Badge>
-        <ViewInContentful 
-          contentType="caseStudy"
-          className="bg-blue-50 text-blue-700 border-blue-200"
-        />
-      </div>
+    <Layout>
+      <div className="container mx-auto py-10">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">Case Studies</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage case studies for the website
+            </p>
+          </div>
+          <Button asChild>
+            <Link to="/admin/case-studies/new">
+              <Plus className="mr-2 h-4 w-4" /> Add New Case Study
+            </Link>
+          </Button>
+        </div>
 
-      <Card className="shadow-sm">
-        <CardContent className="pt-6">
-          {isLoading ? (
-            <div className="text-center py-10">Loading case studies...</div>
-          ) : caseStudies.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-muted-foreground mb-4">No case studies found</p>
-              <ViewInContentful 
-                contentType="caseStudy"
-                variant="default"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              />
-            </div>
-          ) : (
-            <Table>
-              <TableCaption>A list of all case studies (read-only view).</TableCaption>
-              <TableHeader>
+        <div className="flex items-center mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search case studies..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Industry</TableHead>
+                <TableHead className="hidden md:table-cell">Summary</TableHead>
+                <TableHead className="hidden md:table-cell">Status</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoadingCaseStudies ? (
                 <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Industry</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    Loading case studies...
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {caseStudies.map((study) => (
-                  <TableRow key={study.id}>
-                    <TableCell className="font-medium">{study.title}</TableCell>
-                    <TableCell>{study.industry || 'N/A'}</TableCell>
-                    <TableCell>
-                      <Badge variant={study.visible ? "default" : "outline"}>
-                        {study.visible ? 'Published' : 'Draft'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <ViewInContentful 
-                          contentType="caseStudy"
-                          contentId={study.id}
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/case-studies/${study.slug}`)}
-                          className="h-8 px-2 w-8"
-                          title="View case study"
-                        >
-                          <ChevronRight size={16} />
-                        </Button>
+              ) : filteredCaseStudies.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    {searchTerm
+                      ? "No case studies match your search"
+                      : "No case studies found. Create your first one!"}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredCaseStudies.map((caseStudy) => (
+                  <TableRow key={caseStudy.id}>
+                    <TableCell className="font-medium">{caseStudy.title}</TableCell>
+                    <TableCell>{caseStudy.industry || "—"}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="truncate max-w-md">
+                        {caseStudy.summary}
                       </div>
                     </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {caseStudy.visible ? (
+                        <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200">
+                          <Eye className="h-3 w-3 mr-1" /> Visible
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-gray-50 text-gray-700 hover:bg-gray-50 border-gray-200">
+                          <EyeOff className="h-3 w-3 mr-1" /> Hidden
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link to={`/case-studies/${caseStudy.slug}`}>
+                              <Eye className="h-4 w-4 mr-2" /> View
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to={`/admin/case-studies/edit/${caseStudy.slug}`}>
+                              <Edit className="h-4 w-4 mr-2" /> Edit
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteClick(caseStudy.id, caseStudy.title)}
+                            className="text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-        <CardFooter className="border-t bg-gray-50 flex justify-between items-center">
-          <p className="text-sm text-muted-foreground">
-            This interface is read-only. All content management should be done in Contentful.
-          </p>
-          <ViewInContentful 
-            contentType="caseStudy"
-            size="sm"
-          />
-        </CardFooter>
-      </Card>
-    </DeprecatedAdminLayout>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </Card>
+      </div>
+
+      <DeleteEntityDialog
+        isOpen={deleteDialogOpen}
+        setIsOpen={setDeleteDialogOpen}
+        entityToDelete={selectedCaseStudyId ? { id: selectedCaseStudyId, title: selectedCaseStudyTitle, slug: '' } : null}
+        onConfirmDelete={handleDeleteConfirm}
+        isDeleting={deleteCaseStudy.isPending}
+        entityType="case study"
+      />
+    </Layout>
   );
 };
 

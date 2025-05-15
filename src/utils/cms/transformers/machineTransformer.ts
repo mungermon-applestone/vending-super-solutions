@@ -1,119 +1,94 @@
 
-import { CMSImage, CMSMachine } from '@/types/cms';
+import { ContentfulEntry } from '@/types/contentful/machine';
+import { CMSMachine } from '@/types/cms';
+import { validateMachineData } from '../validation/machineValidation';
 
 /**
- * Transforms a Contentful machine entry into our application's CMSMachine format
+ * Transforms a Contentful entry into a consistent CMSMachine format
  * 
- * @param entry - Contentful entry for a machine
- * @returns CMSMachine - Transformed machine object
+ * @param entry - The raw Contentful entry to transform
+ * @returns A standardized CMSMachine object
  */
-export function transformMachineFromContentful(entry: any): CMSMachine {
-  if (!entry || !entry.fields) {
-    console.error('[machineTransformer] Invalid entry provided:', entry);
-    throw new Error('Invalid Contentful entry provided');
+export const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => {
+  console.log('Transforming entry:', entry);
+  
+  // Handle nested Contentful structure - fields may be at top level or in fields property
+  const fields = entry.fields || entry;
+  const title = fields.title || '';
+  const slug = fields.slug || '';
+  
+  // Ensure type is strictly "vending" or "locker"
+  const type = fields.type === 'locker' ? 'locker' : 'vending';
+  
+  const description = fields.description || '';
+  const temperature = fields.temperature || 'ambient';
+  const features = fields.features || [];
+  
+  // Handle images, which can be complex in Contentful
+  let images = [];
+  if (fields.images && Array.isArray(fields.images)) {
+    images = fields.images.map((image) => {
+      const imageFields = image.fields || {};
+      const url = imageFields.file?.url ? `https:${imageFields.file.url}` : '';
+      const alt = imageFields.title || title || '';
+      return {
+        id: image.sys?.id || '',
+        url: url,
+        alt: alt
+      };
+    });
   }
   
-  try {
-    const fields = entry.fields;
-    
-    // Transform main image (if exists)
-    const mainImage = fields.mainImage ? transformContentfulAsset(fields.mainImage) : undefined;
-    
-    // Transform thumbnail (if exists)
-    const thumbnail = fields.machineThumbnail ? transformContentfulAsset(fields.machineThumbnail) : undefined;
-    
-    // Transform gallery images
-    const images: CMSImage[] = [];
-    if (Array.isArray(fields.images)) {
-      fields.images.forEach((imageAsset: any) => {
-        if (imageAsset && imageAsset.fields) {
-          const image = transformContentfulAsset(imageAsset);
-          if (image) images.push(image);
-        }
-      });
-    }
-    
-    // Transform features
-    const features: string[] = Array.isArray(fields.features) 
-      ? fields.features.filter((f: any) => typeof f === 'string') 
-      : [];
-    
-    // Build specs object from individual specification fields
-    const specs: Record<string, string> = {};
-    if (fields.dimensions) specs.dimensions = String(fields.dimensions);
-    if (fields.weight) specs.weight = String(fields.weight);
-    if (fields.powerRequirements) specs.powerRequirements = String(fields.powerRequirements);
-    if (fields.capacity) specs.capacity = String(fields.capacity);
-    if (fields.paymentOptions) specs.paymentOptions = String(fields.paymentOptions);
-    if (fields.connectivity) specs.connectivity = String(fields.connectivity);
-    if (fields.manufacturer) specs.manufacturer = String(fields.manufacturer);
-    if (fields.warranty) specs.warranty = String(fields.warranty);
-    if (fields.temperature) specs.temperature = String(fields.temperature);
-    
-    // Handle nested specs object if it exists
-    if (fields.specs && typeof fields.specs === 'object') {
-      Object.entries(fields.specs).forEach(([key, value]) => {
-        if (typeof value === 'string' || typeof value === 'number') {
-          specs[key] = String(value);
-        }
-      });
-    }
-    
-    // Build the machine object
-    const machine: CMSMachine = {
-      id: entry.sys.id,
-      title: String(fields.title || ''),
-      name: String(fields.title || ''), // For backward compatibility
-      slug: String(fields.slug || ''),
-      type: String(fields.type || ''),
-      description: String(fields.description || ''),
-      shortDescription: String(fields.shortDescription || fields.description?.substring(0, 160) || ''),
-      images: images,
-      thumbnail: thumbnail,
-      mainImage: mainImage,
-      features: features,
-      specs: specs,
-      temperature: fields.temperature ? String(fields.temperature) : 'ambient',
-      visible: Boolean(fields.visible),
-      featured: Boolean(fields.featured),
-      displayOrder: typeof fields.displayOrder === 'number' ? fields.displayOrder : 999,
-      showOnHomepage: Boolean(fields.showOnHomepage),
-      homepageOrder: typeof fields.homepageOrder === 'number' ? fields.homepageOrder : null,
-      createdAt: entry.sys.createdAt,
-      updatedAt: entry.sys.updatedAt,
-      created_at: entry.sys.createdAt,
-      updated_at: entry.sys.updatedAt
+  // Extract thumbnail if available
+  let thumbnail = undefined;
+  if (fields.thumbnail) {
+    const thumbFields = fields.thumbnail.fields || {};
+    const thumbUrl = thumbFields.file?.url ? `https:${thumbFields.file.url}` : '';
+    const thumbAlt = thumbFields.title || title || '';
+    thumbnail = {
+      id: fields.thumbnail.sys?.id || '',
+      url: thumbUrl,
+      alt: thumbAlt
     };
-    
-    return machine;
-  } catch (error) {
-    console.error('[machineTransformer] Error transforming machine:', error);
-    throw new Error(`Failed to transform machine: ${error instanceof Error ? error.message : 'unknown error'}`);
   }
-}
-
-/**
- * Transform a Contentful asset to our CMSImage format
- */
-function transformContentfulAsset(asset: any): CMSImage | undefined {
-  if (!asset || !asset.fields || !asset.fields.file) {
-    return undefined;
-  }
-
+  
+  // Safe access to specs with proper fallbacks
+  const specs = {
+    dimensions: fields.dimensions || (fields.specs?.dimensions) || '',
+    weight: fields.weight || (fields.specs?.weight) || '',
+    capacity: fields.capacity || (fields.specs?.capacity) || '',
+    powerRequirements: fields.powerRequirements || (fields.specs?.powerRequirements) || '',
+    paymentOptions: fields.paymentOptions || (fields.specs?.paymentOptions) || '',
+    connectivity: fields.connectivity || (fields.specs?.connectivity) || '',
+    manufacturer: fields.manufacturer || (fields.specs?.manufacturer) || '',
+    warranty: fields.warranty || (fields.specs?.warranty) || '',
+    temperature: fields.temperature || (fields.specs?.temperature) || ''
+  };
+  
+  // Construct the final object
+  const machineData: CMSMachine = {
+    id: entry.sys?.id || entry.id || '',
+    title: title,
+    slug: slug,
+    type: type, 
+    description: description,
+    temperature: temperature,
+    features: features,
+    images: images,
+    thumbnail: thumbnail, // Add thumbnail to the returned machine object
+    specs: specs
+  };
+  
+  // Validate before returning
   try {
-    const file = asset.fields.file;
-    const url = file.url.startsWith('//') ? `https:${file.url}` : file.url;
-    
-    return {
-      id: asset.sys?.id,
-      url,
-      alt: asset.fields.title || '',
-      filename: file.fileName,
-      width: file.details?.image?.width,
-      height: file.details?.image?.height
-    };
-  } catch (error) {
-    console.error('[machineTransformer] Error transforming asset:', error);
-    return undefined;
+    const safeMachine = validateMachineData(machineData);
+    return safeMachine;
+  } catch (validationError) {
+    console.error('[CRITICAL] Machine data validation failed', {
+      error: validationError,
+      entry,
+      timestamp: new Date().toISOString()
+    });
+    throw validationError;
   }
-}
+};

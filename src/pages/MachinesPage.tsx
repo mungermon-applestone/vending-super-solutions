@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { toast } from 'sonner';
@@ -10,7 +9,6 @@ import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
 import { isContentfulConfigured } from '@/config/cms';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { CMSMachine } from '@/types/cms';
 
 // Import refactored components
 import MachinesLoadingState from '@/components/machines/MachinesLoadingState';
@@ -41,9 +39,9 @@ const MachinesPage: React.FC = () => {
     error: errorByKey
   } = useHeroContent(MACHINES_PAGE_KEY);
   
-  const { data: machines = [], isLoading, error, refetch } = useContentfulMachines();
+  const { data: machines, isLoading, error, refetch } = useContentfulMachines();
   const { data: pageContent } = useMachinesPageContent();
-  const { data: testimonialSection } = useTestimonialSection();
+  const { data: testimonialSection } = useTestimonialSection('machines');
   
   useEffect(() => {
     if (machines) {
@@ -64,14 +62,8 @@ const MachinesPage: React.FC = () => {
     heroByKey: !!heroByKey
   });
 
-  // Safe type checking to filter machines
-  const vendingMachines: CMSMachine[] = machines.filter(machine => 
-    machine && machine.type === 'vending'
-  );
-  
-  const lockers: CMSMachine[] = machines.filter(machine => 
-    machine && machine.type === 'locker'
-  );
+  const vendingMachines = machines?.filter(machine => machine.type === 'vending') || [];
+  const lockers = machines?.filter(machine => machine.type === 'locker') || [];
 
   // Use hero content from page key if available, otherwise use TechnologyPageHero with entry ID
   const heroContent = heroByKey;

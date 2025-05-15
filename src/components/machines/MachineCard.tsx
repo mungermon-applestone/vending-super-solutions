@@ -5,48 +5,60 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Server, HardDrive } from 'lucide-react';
 import Image from '@/components/common/Image';
-import { CMSMachine } from '@/types/cms';
 
 interface MachineCardProps {
-  machine: CMSMachine;
+  machine: {
+    id: string;
+    slug: string;
+    title: string;
+    description: string;
+    type: string;
+    temperature?: string;
+    images?: Array<{
+      url: string;
+      alt?: string;
+    }>;
+    thumbnail?: {
+      url: string;
+      alt?: string;
+    };
+  };
 }
 
 const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
-  // Use title as the display name
-  const displayTitle = machine.title || 'Unnamed Machine';
+  // Determine which image to use - thumbnail has priority
+  const hasImages = machine.images && machine.images.length > 0;
+  const hasThumbnail = !!machine.thumbnail;
   
-  // Determine which image to use - thumbnail has priority, then mainImage, then first image from array
-  const hasThumbnail = !!machine.thumbnail?.url;
-  const hasMainImage = machine.mainImage?.url || (machine.images && machine.images.length > 0 && machine.images[0].url);
-  const hasImages = Array.isArray(machine.images) && machine.images.length > 0;
-  
-  // Determine the image to display
-  let displayImage;
-  if (hasThumbnail) {
-    displayImage = machine.thumbnail;
-  } else if (machine.mainImage) {
-    displayImage = machine.mainImage;
-  } else if (hasImages) {
-    displayImage = machine.images[0];
-  }
-  
-  // Get machine type or default to 'vending'
-  const machineType = machine.type || 'vending';
+  // Log the image selection for debugging
+  console.log(`[MachineCard] Rendering ${machine.title}:`, {
+    hasThumbnail,
+    hasImages,
+    imageSource: hasThumbnail ? 'thumbnail' : (hasImages ? 'first image' : 'none')
+  });
   
   return (
     <Card key={machine.id} className="overflow-hidden flex flex-col h-full">
       <div className="relative h-48 bg-gray-50 flex items-center justify-center">
-        {displayImage?.url ? (
+        {hasThumbnail ? (
           <Image 
-            src={displayImage.url} 
-            alt={displayImage.alt || displayTitle} 
+            src={machine.thumbnail.url} 
+            alt={machine.thumbnail.alt || machine.title} 
             className="w-full h-full"
             objectFit="contain"
             isThumbnail={true}
           />
+        ) : hasImages ? (
+          <Image 
+            src={machine.images[0].url} 
+            alt={machine.images[0].alt || machine.title} 
+            className="w-full h-full"
+            objectFit="contain"
+            isThumbnail={false}
+          />
         ) : (
           <div className="flex items-center justify-center h-full">
-            {machineType === 'vending' ? (
+            {machine.type === 'vending' ? (
               <Server className="h-16 w-16 text-gray-300" />
             ) : (
               <HardDrive className="h-16 w-16 text-gray-300" />
@@ -60,7 +72,7 @@ const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
         )}
       </div>
       <CardHeader>
-        <CardTitle className="text-xl">{displayTitle}</CardTitle>
+        <CardTitle className="text-xl">{machine.title || 'Unnamed Machine'}</CardTitle>
       </CardHeader>
       <CardContent className="flex-grow">
         <p className="text-gray-600 line-clamp-3">

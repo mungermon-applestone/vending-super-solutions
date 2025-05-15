@@ -1,10 +1,10 @@
 
 import { CMSTechnology } from '@/types/cms';
-import { getTechnologyAdapter } from './adapters/technologies';
+import { getCMSProviderConfig } from './providerConfig';
+import { getTechnologyAdapter } from './adapters/technologies/technologyAdapterFactory';
 import { TechnologyCreateInput, TechnologyUpdateInput } from './adapters/technologies/types';
-import { logDeprecationWarning } from './utils/deprecationLogger';
-
-// Import the operations directly
+import { useToast } from '@/hooks/use-toast';
+// Import technologyOperations from the correct path
 import { technologyOperations } from './contentTypes/technologies';
 
 /**
@@ -13,8 +13,7 @@ import { technologyOperations } from './contentTypes/technologies';
 export async function getTechnologies(): Promise<CMSTechnology[]> {
   console.log("[technology.ts] Fetching all technologies");
   try {
-    // Use the Contentful adapter directly for clarity
-    const adapter = getTechnologyAdapter();
+    const adapter = getTechnologyAdapter(getCMSProviderConfig());
     return await adapter.getAll();
   } catch (error) {
     console.error("[technology.ts] Error fetching technologies:", error);
@@ -34,7 +33,7 @@ export async function getTechnologyBySlug(slug: string): Promise<CMSTechnology |
   }
   
   try {
-    const adapter = getTechnologyAdapter();
+    const adapter = getTechnologyAdapter(getCMSProviderConfig());
     return await adapter.getBySlug(slug);
   } catch (error) {
     console.error(`[technology.ts] Error fetching technology by slug "${slug}":`, error);
@@ -54,7 +53,7 @@ export async function getTechnologyById(id: string): Promise<CMSTechnology | nul
   }
   
   try {
-    const adapter = getTechnologyAdapter();
+    const adapter = getTechnologyAdapter(getCMSProviderConfig());
     return await adapter.getById(id);
   } catch (error) {
     console.error(`[technology.ts] Error fetching technology by ID "${id}":`, error);
@@ -68,7 +67,7 @@ export async function getTechnologyById(id: string): Promise<CMSTechnology | nul
 export async function createTechnology(data: TechnologyCreateInput): Promise<string> {
   console.log('[technology.ts] Creating new technology:', data);
   try {
-    const adapter = getTechnologyAdapter();
+    const adapter = getTechnologyAdapter(getCMSProviderConfig());
     const result = await adapter.create(data);
     return result.id;
   } catch (error) {
@@ -84,7 +83,7 @@ export async function updateTechnology(id: string, data: TechnologyUpdateInput):
   console.log('[technology.ts] Updating technology:', id, data);
   
   try {
-    const adapter = getTechnologyAdapter();
+    const adapter = getTechnologyAdapter(getCMSProviderConfig());
     const result = await adapter.update(id, data);
     return result.id;
   } catch (error) {
@@ -100,7 +99,7 @@ export async function deleteTechnology(slug: string): Promise<boolean> {
   console.log(`[technology.ts] Deleting technology with slug: ${slug}`);
   
   try {
-    const adapter = getTechnologyAdapter();
+    const adapter = getTechnologyAdapter(getCMSProviderConfig());
     
     // First get the technology ID from the slug
     const technology = await adapter.getBySlug(slug);
@@ -124,7 +123,7 @@ export async function cloneTechnology(id: string): Promise<CMSTechnology | null>
   console.log(`[technology.ts] Cloning technology with ID: ${id}`);
   
   try {
-    const adapter = getTechnologyAdapter();
+    const adapter = getTechnologyAdapter(getCMSProviderConfig());
     const result = await adapter.clone(id);
     return result;
   } catch (error) {
@@ -132,6 +131,3 @@ export async function cloneTechnology(id: string): Promise<CMSTechnology | null>
     throw error;
   }
 }
-
-// Re-export the technology operations for direct use
-export { technologyOperations };

@@ -1,107 +1,94 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
-import { ContentfulAsset } from '@/types/contentful';
-import { isContentfulEntry, isContentfulAsset } from '@/utils/contentfulTypeGuards';
-import { ContentfulBlogPost } from './useContentfulBlogPosts';
-import { safeString } from '@/services/cms/utils/safeTypeUtilities';
+import { useQuery } from "@tanstack/react-query";
+import { getContentfulClient, refreshContentfulClient } from "@/services/cms/utils/contentfulClient";
+import { Document } from "@contentful/rich-text-types";
+import { Asset, Entry } from "contentful";
+import { CMS_MODELS } from "@/config/cms";
+import { toast } from "sonner";
 
-export interface ContentfulBlogPostBySlugOptions {
-  preview?: boolean;
+export interface BlogPostFields {
+  title: string;
+  slug: string;
+  content?: Document;
+  excerpt?: string;
+  publishDate?: string;
+  featuredImage?: Asset;
+  author?: string;
+  tags?: string[];
 }
 
-// Re-export ContentfulBlogPost interface to ensure it's available
-export type { ContentfulBlogPost };
-
-export function useContentfulBlogPostBySlug(slug?: string, options?: ContentfulBlogPostBySlugOptions) {
-  return useQuery({
-    queryKey: ['contentful', 'blogPost', slug, options?.preview],
-    queryFn: async () => {
-      if (!slug) {
-        return null;
+export interface ContentfulBlogPost {
+  sys: {
+    id: string;
+    contentType: {
+      sys: {
+        id: string;
       }
+    }
+  };
+  fields: BlogPostFields;
+  includes?: {
+    Asset?: Asset[];
+    Entry?: Entry<any>[];
+  };
+}
+
+interface UseContentfulBlogPostBySlugOptions {
+  slug: string | undefined;
+}
+
+export function useContentfulBlogPostBySlug({ slug }: UseContentfulBlogPostBySlugOptions) {
+  return useQuery({
+    queryKey: ["contentful-blog-post", slug],
+    enabled: !!slug,
+    queryFn: async () => {
+      console.log('[useContentfulBlogPostBySlug] Fetching post with slug:', slug);
+      
+      if (!slug) throw new Error("No slug provided");
       
       try {
-        const query = {
-          'fields.slug': slug,
-          include: 2, // Include linked assets
+        // Try to get a fresh client first
+        await refreshContentfulClient();
+        const client = await getContentfulClient();
+        
+        console.log(`[useContentfulBlogPostBySlug] Querying for blog post with slug: "${slug}"`);
+        
+        const response = await client.getEntries({
+          content_type: CMS_MODELS.BLOG_POST,
+          "fields.slug": slug,
+          include: 3,
           limit: 1,
-          preview: options?.preview
+        });
+        
+        console.log('[useContentfulBlogPostBySlug] Raw response:', response);
+        console.log('[useContentfulBlogPostBySlug] Response items count:', response.items.length);
+        
+        if (!response.items.length) {
+          console.error(`[useContentfulBlogPostBySlug] No blog post found with slug: ${slug}`);
+          throw new Error(`Blog post not found for slug: ${slug}`);
+        }
+        
+        const post = response.items[0];
+        const enhancedPost = {
+          ...post,
+          includes: response.includes
         };
         
-        const entries = await fetchContentfulEntries('blogPost', query);
+        console.log('[useContentfulBlogPostBySlug] Enhanced post:', enhancedPost);
         
-        if (!entries || entries.length === 0) {
-          console.log(`[useContentfulBlogPostBySlug] No blog post found with slug: ${slug}`);
-          return null;
-        }
-        
-        // Process the first entry
-        const entry = entries[0];
-        
-        // Validate entry format
-        if (!isContentfulEntry(entry)) {
-          console.error('[useContentfulBlogPostBySlug] Invalid entry format:', entry);
-          return null;
-        }
-
-        // Featured image handling
-        let featuredImage = undefined;
-        
-        if (entry.fields.featuredImage && isContentfulAsset(entry.fields.featuredImage)) {
-          featuredImage = {
-            url: `https:${entry.fields.featuredImage.fields.file.url}`,
-            title: safeString(entry.fields.featuredImage.fields.title || entry.fields.title || ''),
-            width: entry.fields.featuredImage.fields.file.details?.image?.width,
-            height: entry.fields.featuredImage.fields.file.details?.image?.height
-          };
-        }
-        
-        const publishDate = entry.fields.publishDate ? safeString(entry.fields.publishDate) : '';
-        
-        // Return in ContentfulBlogPost format to match useContentfulBlogPosts
-        const blogPost: ContentfulBlogPost = {
-          id: entry.sys.id,
-          title: safeString(entry.fields.title || 'Untitled'),
-          slug: safeString(entry.fields.slug || ''),
-          content: entry.fields.content,
-          excerpt: entry.fields.excerpt ? safeString(entry.fields.excerpt) : undefined,
-          publishDate,
-          published_at: publishDate,
-          featuredImage,
-          author: entry.fields.author ? safeString(entry.fields.author) : undefined,
-          tags: Array.isArray(entry.fields.tags) ? entry.fields.tags.map(tag => safeString(tag)) : [],
-          sys: {
-            id: entry.sys.id,
-            createdAt: entry.sys.createdAt,
-            updatedAt: entry.sys.updatedAt
-          },
-          fields: {
-            title: safeString(entry.fields.title || 'Untitled'),
-            slug: safeString(entry.fields.slug || ''),
-            publishDate,
-            content: entry.fields.content,
-            excerpt: entry.fields.excerpt ? safeString(entry.fields.excerpt) : undefined,
-            featuredImage: entry.fields.featuredImage,
-            author: entry.fields.author ? safeString(entry.fields.author) : undefined,
-            tags: Array.isArray(entry.fields.tags) ? entry.fields.tags.map(tag => safeString(tag)) : []
-          },
-          status: 'published',
-          created_at: entry.sys.createdAt || '',
-          updated_at: entry.sys.updatedAt || ''
-        };
-        
-        // Add includes for rich text resolution if they exist in the original entry
-        if ((entry as any).includes) {
-          blogPost.includes = (entry as any).includes;
-        }
-        
-        return blogPost;
+        return enhancedPost as unknown as ContentfulBlogPost;
       } catch (error) {
-        console.error(`[useContentfulBlogPostBySlug] Error fetching blog post: ${slug}`, error);
-        return null;
+        console.error('[useContentfulBlogPostBySlug] Error fetching blog post:', error);
+        throw error;
       }
     },
-    enabled: !!slug
+    retry: 1,
+    retryDelay: 1000,
+    meta: {
+      onError: (error: Error) => {
+        toast.error(`Error loading blog post: ${error.message}`);
+        console.error('[useContentfulBlogPostBySlug] Error:', error);
+      }
+    }
   });
 }

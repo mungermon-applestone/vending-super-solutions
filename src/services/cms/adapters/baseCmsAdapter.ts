@@ -1,9 +1,8 @@
 
-import { ContentProviderConfig } from './types';
+import { ContentProviderConfig, ContentProviderType } from './types';
 import { supabase } from '@/integrations/supabase/client';
 import { handleCMSError } from '../utils/errorHandling';
 import { QueryOptions } from '@/types/cms';
-import { USE_SUPABASE_CMS } from '@/config/featureFlags';
 
 /**
  * Base CMS adapter that provides consistent implementations for common operations
@@ -22,18 +21,57 @@ export class BaseCmsAdapter<T, CreateInput, UpdateInput> {
    * Get all items with support for filtering, pagination, and ordering
    */
   async getAll(options?: QueryOptions): Promise<T[]> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:getAll] Supabase CMS is disabled, returning empty array`);
-      return [];
-    }
-
     try {
       console.log(`[${this.tableName}:getAll] Fetching all with options:`, options);
       
-      // This would normally use dynamic table access, but we'll prevent it from running
-      // when USE_SUPABASE_CMS is false, so TypeScript errors won't matter during execution
-      console.log(`[${this.tableName}:getAll] This function would normally access the "${this.tableName}" table`);
-      return [];
+      let query = supabase
+        .from(this.tableName)
+        .select('*');
+      
+      // Apply filters if provided
+      if (options?.filters) {
+        Object.entries(options.filters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            query = query.eq(key, value);
+          }
+        });
+      }
+      
+      // Apply pagination if provided
+      if (options?.limit) {
+        query = query.limit(options.limit);
+      }
+      
+      if (options?.offset) {
+        query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+      }
+      
+      // Apply ordering if provided
+      if (options?.orderBy) {
+        const direction = options.orderDirection || 'asc';
+        query = query.order(options.orderBy, { ascending: direction === 'asc' });
+      }
+      
+      // Apply search if provided
+      if (options?.search && options.search.trim() !== '') {
+        if (options.exactMatch) {
+          // Exact match search
+          query = query.eq('title', options.search);
+        } else {
+          // Fuzzy search (ILIKE)
+          query = query.ilike('title', `%${options.search}%`);
+        }
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error(`[${this.tableName}:getAll] Error:`, error);
+        throw error;
+      }
+      
+      console.log(`[${this.tableName}:getAll] Found ${data?.length || 0} items`);
+      return data as T[];
     } catch (error) {
       throw handleCMSError(error, 'fetch', this.tableName);
     }
@@ -43,17 +81,21 @@ export class BaseCmsAdapter<T, CreateInput, UpdateInput> {
    * Get an item by its slug
    */
   async getBySlug(slug: string): Promise<T | null> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:getBySlug] Supabase CMS is disabled, returning null`);
-      return null;
-    }
-
     try {
       console.log(`[${this.tableName}:getBySlug] Fetching item with slug: ${slug}`);
       
-      // This would normally use dynamic table access, but we'll prevent it
-      console.log(`[${this.tableName}:getBySlug] This function would normally access the "${this.tableName}" table`);
-      return null;
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .select('*')
+        .eq('slug', slug)
+        .maybeSingle();
+      
+      if (error) {
+        console.error(`[${this.tableName}:getBySlug] Error:`, error);
+        throw error;
+      }
+      
+      return data as T | null;
     } catch (error) {
       throw handleCMSError(error, 'fetchBySlug', this.tableName);
     }
@@ -63,17 +105,21 @@ export class BaseCmsAdapter<T, CreateInput, UpdateInput> {
    * Get an item by its ID
    */
   async getById(id: string): Promise<T | null> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:getById] Supabase CMS is disabled, returning null`);
-      return null;
-    }
-
     try {
       console.log(`[${this.tableName}:getById] Fetching item with id: ${id}`);
       
-      // This would normally use dynamic table access, but we'll prevent it
-      console.log(`[${this.tableName}:getById] This function would normally access the "${this.tableName}" table`);
-      return null;
+      const { data, error } = await supabase
+        .from(this.tableName)
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      
+      if (error) {
+        console.error(`[${this.tableName}:getById] Error:`, error);
+        throw error;
+      }
+      
+      return data as T | null;
     } catch (error) {
       throw handleCMSError(error, 'fetchById', this.tableName);
     }
@@ -83,19 +129,22 @@ export class BaseCmsAdapter<T, CreateInput, UpdateInput> {
    * Create a new item
    */
   async create(data: CreateInput): Promise<T> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:create] Supabase CMS is disabled, returning mock data`);
-      return {
-        id: 'mock-id-' + Date.now()
-      } as unknown as T;
-    }
-
     try {
       console.log(`[${this.tableName}:create] Creating new item:`, data);
       
-      // This would normally use dynamic table access, but we'll prevent it
-      console.log(`[${this.tableName}:create] This function would normally access the "${this.tableName}" table`);
-      return { id: 'mock-id-' + Date.now() } as unknown as T;
+      const { data: createdItem, error } = await supabase
+        .from(this.tableName)
+        .insert(data)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error(`[${this.tableName}:create] Error:`, error);
+        throw error;
+      }
+      
+      console.log(`[${this.tableName}:create] Created item:`, createdItem);
+      return createdItem as T;
     } catch (error) {
       throw handleCMSError(error, 'create', this.tableName);
     }
@@ -105,20 +154,23 @@ export class BaseCmsAdapter<T, CreateInput, UpdateInput> {
    * Update an existing item
    */
   async update(id: string, data: UpdateInput): Promise<T> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:update] Supabase CMS is disabled, returning mock data`);
-      return {
-        id: id,
-        ...data
-      } as unknown as T;
-    }
-
     try {
       console.log(`[${this.tableName}:update] Updating item ${id} with:`, data);
       
-      // This would normally use dynamic table access, but we'll prevent it
-      console.log(`[${this.tableName}:update] This function would normally access the "${this.tableName}" table`);
-      return { id: id, ...data } as unknown as T;
+      const { data: updatedItem, error } = await supabase
+        .from(this.tableName)
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error(`[${this.tableName}:update] Error:`, error);
+        throw error;
+      }
+      
+      console.log(`[${this.tableName}:update] Updated item:`, updatedItem);
+      return updatedItem as T;
     } catch (error) {
       throw handleCMSError(error, 'update', this.tableName);
     }
@@ -128,16 +180,20 @@ export class BaseCmsAdapter<T, CreateInput, UpdateInput> {
    * Delete an item
    */
   async delete(id: string): Promise<boolean> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:delete] Supabase CMS is disabled, returning true`);
-      return true;
-    }
-
     try {
       console.log(`[${this.tableName}:delete] Deleting item: ${id}`);
       
-      // This would normally use dynamic table access, but we'll prevent it
-      console.log(`[${this.tableName}:delete] This function would normally access the "${this.tableName}" table`);
+      const { error } = await supabase
+        .from(this.tableName)
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error(`[${this.tableName}:delete] Error:`, error);
+        throw error;
+      }
+      
+      console.log(`[${this.tableName}:delete] Successfully deleted item: ${id}`);
       return true;
     } catch (error) {
       throw handleCMSError(error, 'delete', this.tableName);
@@ -148,20 +204,31 @@ export class BaseCmsAdapter<T, CreateInput, UpdateInput> {
    * Clone an item
    */
   async clone(id: string): Promise<T | null> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:clone] Supabase CMS is disabled, returning mock data`);
-      return {
-        id: 'cloned-' + id,
-        title: 'Cloned Item'
-      } as unknown as T;
-    }
-
     try {
       console.log(`[${this.tableName}:clone] Cloning item: ${id}`);
       
-      // This would normally use dynamic table access, but we'll prevent it
-      console.log(`[${this.tableName}:clone] This function would normally access the "${this.tableName}" table`);
-      return { id: 'cloned-' + id, title: 'Cloned Item' } as unknown as T;
+      // First, get the original item
+      const original = await this.getById(id);
+      
+      if (!original) {
+        console.error(`[${this.tableName}:clone] Item not found: ${id}`);
+        return null;
+      }
+      
+      // Remove the ID from the original item to create a new one
+      const { id: _, created_at, updated_at, ...cloneData } = original as any;
+      
+      // Modify the title/slug to indicate it's a clone
+      if ('title' in cloneData && 'slug' in cloneData) {
+        cloneData.title = `${cloneData.title} (Copy)`;
+        cloneData.slug = `${cloneData.slug}-copy-${Date.now().toString().slice(-6)}`;
+      }
+      
+      // Create the clone
+      const clone = await this.create(cloneData as unknown as CreateInput);
+      console.log(`[${this.tableName}:clone] Successfully cloned item: ${id}`);
+      
+      return clone;
     } catch (error) {
       throw handleCMSError(error, 'clone', this.tableName);
     }

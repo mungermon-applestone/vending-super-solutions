@@ -39,14 +39,13 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({
     }
   }, [entryId, fallbackTitle, fallbackSubtitle, retryCount, hasManuallyRetried]);
   
-  // Use the hook without parameters
   const { 
     data: hero, 
     isLoading, 
     error, 
     refetch,
     isError
-  } = useHeroContent();
+  } = useHeroContent(entryId);
   
   // Enhanced error handling logging
   useEffect(() => {
@@ -141,30 +140,24 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({
     );
   }
 
-  // Helper function to safely convert any value to string
-  const safeString = (value: any): string => {
-    if (value === null || value === undefined) return '';
-    return String(value);
-  };
-
   return (
     <section className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
       <div className="container-wide py-16 md:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <HeroContent 
-            title={isUsingFallback ? fallbackTitle : safeString(hero?.title || hero?.headline)}
-            subtitle={isUsingFallback ? fallbackSubtitle : safeString(hero?.subtitle || hero?.subheading)}
-            primaryButtonText={!isUsingFallback ? safeString(hero?.primaryButtonText || hero?.ctaText || "Request Information") : "Request Information"}
-            primaryButtonUrl={!isUsingFallback ? safeString(hero?.primaryButtonUrl || hero?.ctaLink || "/contact") : "/contact"}
-            secondaryButtonText={!isUsingFallback ? safeString(hero?.secondaryButtonText || hero?.secondaryCTAText || "View Products") : "View Products"}
-            secondaryButtonUrl={!isUsingFallback ? safeString(hero?.secondaryButtonUrl || hero?.secondaryCTALink || "/products") : "/products"}
+            title={isUsingFallback ? fallbackTitle : hero.title}
+            subtitle={isUsingFallback ? fallbackSubtitle : hero.subtitle}
+            primaryButtonText={!isUsingFallback && hero.primaryButtonText ? hero.primaryButtonText : "Request Information"}
+            primaryButtonUrl={!isUsingFallback && hero.primaryButtonUrl ? hero.primaryButtonUrl : "/contact"}
+            secondaryButtonText={!isUsingFallback && hero.secondaryButtonText ? hero.secondaryButtonText : "View Products"}
+            secondaryButtonUrl={!isUsingFallback && hero.secondaryButtonUrl ? hero.secondaryButtonUrl : "/products"}
             error={error}
             isUsingFallback={isUsingFallback}
             entryId={entryId}
           />
           <HeroImage 
-            imageUrl={isUsingFallback ? fallbackImageUrl : safeString((hero?.image?.url || hero?.backgroundImage) || '')}
-            imageAlt={isUsingFallback ? "Vending Machines" : safeString((hero?.image?.alt || hero?.title || hero?.headline) || "Vending Technology")}
+            imageUrl={isUsingFallback ? fallbackImageUrl : (hero?.image?.url || '')}
+            imageAlt={isUsingFallback ? "Vending Machines" : (hero?.image?.alt || hero?.title || "Vending Technology")}
           />
         </div>
       </div>

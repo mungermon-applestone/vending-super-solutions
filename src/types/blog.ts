@@ -9,18 +9,6 @@ export interface BlogPost {
   published_at?: string | null;
   created_at: string;
   updated_at: string;
-  // Additional fields to match the shape of contentful posts
-  featuredImage?: {
-    url: string;
-    title: string;
-    width?: number;
-    height?: number;
-  };
-  author?: string;
-  tags?: string[];
-  // Fields to help with compatibility
-  sys?: any;
-  fields?: any;
 }
 
 export interface BlogPostFormData {

@@ -1,15 +1,12 @@
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import React, { ErrorInfo, Component, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
-  contentType?: string;
-  fallbackComponent?: ReactNode;
-  fallback?: ReactNode; // Added for compatibility
-  onReset?: () => void;
+  fallback?: ReactNode;
+  contentType: string;
 }
 
 interface State {
@@ -18,7 +15,8 @@ interface State {
 }
 
 /**
- * Error boundary component specifically for catching Contentful-related errors
+ * A component that catches errors in Contentful data rendering and displays
+ * a helpful fallback UI instead of crashing the app.
  */
 class ContentfulErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
@@ -37,47 +35,45 @@ class ContentfulErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error(`[ContentfulErrorBoundary] Error in ${this.props.contentType || 'component'}:`, {
-      error,
-      errorInfo,
-      component: this.props.contentType || 'unknown'
-    });
+    console.error(`[ContentfulErrorBoundary] Error rendering ${this.props.contentType}:`, error);
+    console.error(`[ContentfulErrorBoundary] Component stack:`, errorInfo.componentStack);
   }
-
-  handleReset = (): void => {
-    this.setState({ hasError: false, error: null });
-    if (this.props.onReset) {
-      this.props.onReset();
-    }
-  };
 
   render(): ReactNode {
     const { hasError, error } = this.state;
-    const { children, contentType, fallbackComponent, fallback } = this.props;
+    const { children, fallback, contentType } = this.props;
 
     if (hasError) {
-      // If a custom fallback component is provided, use it
-      if (fallbackComponent || fallback) {
-        return fallbackComponent || fallback;
+      // If there's a custom fallback, use it
+      if (fallback) {
+        return fallback;
       }
 
-      // Default error UI
+      // Default fallback UI
       return (
-        <Alert variant="destructive" className="my-4">
-          <AlertTitle>Error Loading {contentType || 'Content'}</AlertTitle>
-          <AlertDescription>
-            <p className="mb-2">{error?.message || 'An unexpected error occurred'}</p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={this.handleReset} 
-              className="flex items-center gap-1"
-            >
-              <RefreshCw className="h-4 w-4" />
-              <span>Retry</span>
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <div className="p-6 border border-amber-200 bg-amber-50 rounded-lg text-center">
+          <div className="flex justify-center mb-4">
+            <AlertTriangle size={32} className="text-amber-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-amber-800 mb-2">
+            Content Display Error
+          </h3>
+          <p className="text-amber-700 mb-4">
+            There was an error displaying {contentType} content.
+          </p>
+          {error && (
+            <p className="text-sm text-amber-600 bg-amber-100 p-3 rounded mb-4 max-w-md mx-auto overflow-auto">
+              {error.message}
+            </p>
+          )}
+          <Button
+            variant="outline"
+            onClick={() => window.location.reload()}
+            className="border-amber-400 text-amber-700 hover:bg-amber-100"
+          >
+            Try Again
+          </Button>
+        </div>
       );
     }
 

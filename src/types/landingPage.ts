@@ -5,21 +5,11 @@ export interface HeroContent {
   subtitle: string;
   image_url: string;
   image_alt: string;
-  image?: {
-    url: string;
-    alt: string;
-  };
   cta_primary_text?: string;
   cta_primary_url?: string;
   cta_secondary_text?: string;
   cta_secondary_url?: string;
-  primaryButtonText?: string;
-  primaryButtonUrl?: string;
-  secondaryButtonText?: string;
-  secondaryButtonUrl?: string;
   background_class?: string;
-  backgroundColor?: string;
-  backgroundClass?: string;
   created_at: string;
   updated_at: string;
 }
@@ -42,10 +32,10 @@ export interface LandingPageFormData {
     subtitle: string;
     image_url: string;
     image_alt: string;
-    cta_primary_text?: string;
-    cta_primary_url?: string;
-    cta_secondary_text?: string;
-    cta_secondary_url?: string;
+    cta_primary_text: string;
+    cta_primary_url: string;
+    cta_secondary_text: string;
+    cta_secondary_url: string;
     background_class?: string;
   };
 }

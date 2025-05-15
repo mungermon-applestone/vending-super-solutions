@@ -1,21 +1,21 @@
 
-import { ContentProviderConfig } from '../types';
+import { ContentProviderConfig, ContentProviderType } from '../types';
 import { TechnologyAdapter } from './types';
 import { contentfulTechnologyAdapter } from './contentfulTechnologyAdapter';
 import { handleCMSError } from '@/services/cms/utils/errorHandling';
 
-/**
- * Returns the Contentful technology adapter
- * This simplification always returns the Contentful implementation
- */
-export function getTechnologyAdapter(_config?: ContentProviderConfig): TechnologyAdapter {
+export function getTechnologyAdapter(config: ContentProviderConfig): TechnologyAdapter {
   try {
-    return contentfulTechnologyAdapter;
+    switch (config.type) {
+      case ContentProviderType.CONTENTFUL:
+      default:
+        console.log('[technologyAdapterFactory] Using Contentful technology adapter');
+        return contentfulTechnologyAdapter;
+    }
   } catch (error) {
-    console.error('[getTechnologyAdapter] Error creating technology adapter:', error);
+    console.error('[technologyAdapterFactory] Error creating technology adapter:', error);
     throw handleCMSError(error, 'initialize', 'TechnologyAdapter');
   }
 }
 
-// Export the adapter directly for convenience
 export { contentfulTechnologyAdapter };

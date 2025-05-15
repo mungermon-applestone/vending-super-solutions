@@ -1,132 +1,125 @@
 
 import React from 'react';
+import { useContentfulBlogPostBySlug } from '@/hooks/useContentfulBlogPostBySlug';
 import Layout from '@/components/layout/Layout';
-import { Button } from '@/components/ui/button';
-import { useMachine } from '@/hooks/useMachines';
-import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import ContentfulBlogPostContent from '@/components/blog/ContentfulBlogPostContent';
+import { Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
+import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
+import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
+import { SimpleContactCTA } from '@/components/common';
 
-const ZhilaiApplestoneAnnouncement = () => {
-  // This is just an example machine slug, you should replace it with the actual slug
-  const { machine, isLoading } = useMachine("cf-835");
+// Interface for adjacent post navigation
+interface AdjacentBlogPost {
+  slug: string;
+  title: string;
+}
+
+// Extract blog post info for navigation
+const extractBlogInfo = (entry: any): AdjacentBlogPost | null => {
+  if (!entry || !entry.fields || typeof entry.fields.slug !== 'string' || typeof entry.fields.title !== 'string') {
+    return null;
+  }
   
+  return {
+    slug: entry.fields.slug,
+    title: entry.fields.title
+  };
+};
+
+// Hook for getting adjacent posts
+function useAdjacentContentfulPosts(currentSlug: string | undefined) {
+  return useQuery({
+    queryKey: ["contentful-adjacent-posts", currentSlug],
+    enabled: !!currentSlug,
+    queryFn: async () => {
+      if (!currentSlug) return { previous: null, next: null };
+      const client = await getContentfulClient();
+      
+      // Fetch all published posts sorted by publishDate descending (newest first)
+      // This means "previous" is newer and "next" is older
+      const response = await client.getEntries({
+        content_type: "blogPost",
+        order: ["-fields.publishDate"],
+        select: ["fields.slug", "fields.title", "fields.publishDate"],
+      });
+      
+      const posts = response.items || [];
+      
+      const idx = posts.findIndex(p => p.fields && p.fields.slug === currentSlug);
+      if (idx === -1) return { previous: null, next: null };
+      
+      // Previous is a newer post (comes before in the sorted array)
+      const previous = idx > 0 ? extractBlogInfo(posts[idx - 1]) : null;
+      // Next is an older post (comes after in the sorted array)
+      const next = idx < posts.length - 1 ? extractBlogInfo(posts[idx + 1]) : null;
+      
+      return { previous, next };
+    }
+  });
+}
+
+const ZhilaiApplestoneAnnouncement: React.FC = () => {
   return (
     <Layout>
-      <Helmet>
-        <title>Zhilai and Applestone Partnership Announcement</title>
-        <meta name="description" content="Learn about the strategic partnership between Zhilai and Applestone to revolutionize retail meat vending solutions." />
-      </Helmet>
-      
-      <section className="bg-gradient-to-b from-vending-blue-light to-white py-16 md:py-24">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="flex items-center justify-center mb-8">
-              <img
-                src="/lovable-uploads/zhilai-logo.png" 
-                alt="Zhilai Logo"
-                className="h-12 mx-4"
-              />
-              <div className="text-3xl font-light text-gray-600 mx-2">×</div>
-              <img
-                src="/lovable-uploads/applestone-logo.png"
-                alt="Applestone Logo"
-                className="h-12 mx-4"
-              />
-            </div>
-            
-            <h1 className="text-4xl md:text-5xl font-bold text-vending-blue-dark mb-6">
-              Strategic Partnership Announcement
-            </h1>
-            <p className="text-xl text-gray-700 mb-8">
-              Zhilai and Applestone Meat Co. join forces to revolutionize refrigerated vending solutions
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg">
-                <a href="#details">Learn More</a>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/contact">Contact Sales</Link>
-              </Button>
-            </div>
+      <ContentfulInitializer
+        fallback={
+          <div className="container mx-auto p-4">
+            <ContentfulFallbackMessage
+              message="We're having trouble loading this announcement. Please configure Contentful in the Admin area."
+              contentType="blog post"
+              showRefresh={true}
+            />
           </div>
-        </div>
-      </section>
-      
-      <section id="details" className="py-16">
-        <div className="container">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-vending-blue-dark mb-6">
-              Transforming Food Retail Together
-            </h2>
-            
-            <div className="prose prose-lg max-w-none">
-              <p>
-                We are excited to announce a groundbreaking partnership between Zhilai Vending Solutions and Applestone Meat Co. This collaboration brings together Zhilai's expertise in advanced refrigerated vending technology with Applestone's innovative approach to fresh meat retailing.
-              </p>
-              
-              <p>
-                Together, we're creating a new standard for 24/7 accessible, fresh food vending solutions that maintain perfect temperature control and inventory management for perishable goods.
-              </p>
-              
-              <h3>Key Partnership Benefits</h3>
-              <ul>
-                <li>Advanced temperature maintenance systems for fresh meat products</li>
-                <li>Custom software solutions for inventory tracking and freshness monitoring</li>
-                <li>Seamless customer experience with multiple payment options</li>
-                <li>Remote monitoring capabilities for operational efficiency</li>
-                <li>Scalable solution for various location types and sizes</li>
-              </ul>
-              
-              <blockquote>
-                "This partnership represents the future of specialty food retail - combining cutting-edge technology with premium products to create convenient access for consumers while maintaining the highest quality standards."
-              </blockquote>
-              
-              <h3>Technology Showcase</h3>
-              <p>
-                The partnership will feature customized versions of our CR-800 refrigerated vending machines, specially modified to meet the unique requirements of premium meat products.
-              </p>
-            </div>
-            
-            {machine && !isLoading && (
-              <div className="mt-12">
-                <h3 className="text-2xl font-bold text-vending-blue-dark mb-4">
-                  Featured Technology: {machine.title}
-                </h3>
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <div className="aspect-w-16 aspect-h-9 mb-4">
-                    {machine.mainImage?.url && (
-                      <img 
-                        src={machine.mainImage.url} 
-                        alt={machine.title} 
-                        className="rounded-md object-cover"
-                      />
-                    )}
-                  </div>
-                  <p className="text-gray-700 mb-4">
-                    {machine.description}
-                  </p>
-                  <Button asChild>
-                    <Link to={`/machines/${machine.slug}`}>View Details</Link>
-                  </Button>
-                </div>
-              </div>
-            )}
-            
-            <div className="mt-12 text-center">
-              <h3 className="text-2xl font-bold text-vending-blue-dark mb-4">
-                Ready to learn more?
-              </h3>
-              <p className="text-gray-700 mb-6">
-                Contact our sales team to discuss how this partnership can benefit your business.
-              </p>
-              <Button asChild size="lg">
-                <Link to="/contact">Contact Us</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+        }
+      >
+        <AnnouncementContent />
+      </ContentfulInitializer>
     </Layout>
+  );
+};
+
+const AnnouncementContent: React.FC = () => {
+  const slug = 'zhilai-applestone-announcement';
+  const { data: post, isLoading, error } = useContentfulBlogPostBySlug({ slug });
+  const { data: adjacentPosts, isLoading: isLoadingAdjacent } = useAdjacentContentfulPosts(slug);
+
+  if (isLoading || isLoadingAdjacent) return (
+    <div className="container mx-auto py-16 flex justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+    </div>
+  );
+
+  if (error) return (
+    <div className="container mx-auto p-4">
+      <div className="bg-red-50 border border-red-200 p-4 rounded-md mb-8">
+        <h2 className="text-lg font-semibold text-red-700 mb-2">Error loading blog post</h2>
+        <p className="text-red-600">{error instanceof Error ? error.message : 'Unknown error'}</p>
+      </div>
+    </div>
+  );
+  
+  if (!post) return (
+    <div className="container mx-auto p-4">
+      <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
+        <h2 className="text-lg font-semibold mb-2">No post found</h2>
+        <p>No blog post found for slug "{slug}"</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <div className="container mx-auto py-8 flex-grow">        
+        <ContentfulBlogPostContent 
+          post={post} 
+          previousPost={adjacentPosts?.previous}
+          nextPost={adjacentPosts?.next}
+        />
+      </div>
+      <SimpleContactCTA className="w-full mt-auto" />
+    </div>
   );
 };
 
