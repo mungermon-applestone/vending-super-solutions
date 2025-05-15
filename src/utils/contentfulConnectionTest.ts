@@ -1,12 +1,11 @@
 
-import { createClient } from 'contentful';
-import { CONTENTFUL_CONFIG } from '@/config/cms';
+import { isContentfulConfigured, testContentfulConnection as testConnection } from '@/services/contentful/client';
 
 export const checkContentfulConfig = () => {
   // Check if the required configuration values are set
-  const spaceId = CONTENTFUL_CONFIG.SPACE_ID;
-  const deliveryToken = CONTENTFUL_CONFIG.DELIVERY_TOKEN;
-  const environmentId = CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master';
+  const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
+  const deliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
+  const environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || 'master';
   
   const missingValues: string[] = [];
   
@@ -38,27 +37,8 @@ export const testContentfulConnection = async () => {
       };
     }
     
-    console.log('[testContentfulConnection] Creating test Contentful client');
-    
-    // Create a new client directly using the values from config
-    const client = createClient({
-      space: configCheck.config.spaceId,
-      accessToken: configCheck.config.deliveryToken,
-      environment: configCheck.config.environmentId
-    });
-    
-    // Make a simple request to verify connection
-    console.log('[testContentfulConnection] Making test request to Contentful API');
-    const { total } = await client.getEntries({
-      limit: 1
-    });
-    
-    console.log(`[testContentfulConnection] Connection successful. Found ${total} total entries`);
-    
-    return {
-      success: true,
-      message: `Connection to Contentful successful! Found ${total} total entries.`
-    };
+    // Use our unified test connection function
+    return await testConnection();
   } catch (error) {
     console.error('[testContentfulConnection] Error testing connection:', error);
     

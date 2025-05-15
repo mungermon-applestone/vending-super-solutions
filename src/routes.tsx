@@ -11,9 +11,10 @@ import BlogPostDetail from "@/pages/BlogPostDetail";
 import Contact from "@/pages/Contact";
 import BusinessGoalDetailPage from "@/pages/BusinessGoalDetailPage";
 import BusinessGoalsPage from "@/pages/BusinessGoalsPage";
-import AdminPage from "@/pages/AdminPage";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
+import TechnologyLanding from "@/pages/TechnologyLanding";
+import ContentfulTechnologyPage from "@/pages/ContentfulTechnologyPage";
 
 // Import business goal routes
 import { businessGoalRoutes } from "./routes/businessGoalRoutes";
@@ -49,16 +50,20 @@ export const router = createBrowserRouter([
         element: <Contact />,
       },
       {
-        path: "/admin",
-        element: <AdminPage />,
-      },
-      {
         path: "/privacy-policy",
         element: <PrivacyPolicy />,
       },
       {
         path: "/terms-of-service",
         element: <TermsOfService />,
+      },
+      {
+        path: "/technology",
+        element: <TechnologyLanding />,
+      },
+      {
+        path: "/technology/:slug",
+        element: <ContentfulTechnologyPage />,
       },
       // Include business goal routes as separate routes
       ...businessGoalRoutes,

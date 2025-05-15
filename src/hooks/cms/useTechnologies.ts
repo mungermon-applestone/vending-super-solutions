@@ -1,6 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { contentfulClient } from '@/integrations/contentful/client';
+import { contentfulClient } from '@/services/contentful/client';
 import { CMSTechnology } from '@/types/cms';
 
 /**
@@ -30,14 +30,16 @@ export function useContentfulTechnologies() {
     queryKey: ['contentful', 'technologies'],
     queryFn: async (): Promise<CMSTechnology[]> => {
       try {
+        console.log('[useContentfulTechnologies] Fetching technologies');
         const response = await contentfulClient.getEntries({
           content_type: 'technology',
           order: ['fields.title'],
         });
         
+        console.log(`[useContentfulTechnologies] Found ${response.items.length} technologies`);
         return response.items.map(transformContentfulTechnology);
       } catch (error) {
-        console.error('Error fetching technologies from Contentful:', error);
+        console.error('[useContentfulTechnologies] Error fetching technologies:', error);
         return [];
       }
     },
@@ -54,6 +56,7 @@ export function useContentfulTechnologyBySlug(slug: string | undefined) {
       if (!slug) return null;
       
       try {
+        console.log(`[useContentfulTechnologyBySlug] Fetching technology with slug: ${slug}`);
         const response = await contentfulClient.getEntries({
           content_type: 'technology',
           'fields.slug': slug,
@@ -61,12 +64,14 @@ export function useContentfulTechnologyBySlug(slug: string | undefined) {
         });
         
         if (response.items.length === 0) {
+          console.warn(`[useContentfulTechnologyBySlug] No technology found with slug: ${slug}`);
           return null;
         }
         
+        console.log(`[useContentfulTechnologyBySlug] Found technology with slug: ${slug}`);
         return transformContentfulTechnology(response.items[0]);
       } catch (error) {
-        console.error(`Error fetching technology with slug "${slug}" from Contentful:`, error);
+        console.error(`[useContentfulTechnologyBySlug] Error fetching technology with slug "${slug}":`, error);
         return null;
       }
     },

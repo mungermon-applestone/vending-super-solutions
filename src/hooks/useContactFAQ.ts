@@ -1,6 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { contentfulClient } from '@/integrations/contentful/client';
+import { contentfulClient, fetchContentfulEntries } from '@/services/contentful/client';
 import { ContentfulFAQFields } from '@/types/contentful';
 import { Document } from '@contentful/rich-text-types';
 

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -184,10 +185,10 @@ const TechnologyLanding = () => {
                         <li>Verify the content model matches our expected structure</li>
                       </ol>
                       <div className="flex gap-2 mt-3">
-                        <Link to="/admin/technology">
+                        <Link to="/contact">
                           <Button variant="default" size="sm">
                             <Wrench className="mr-2 h-4 w-4" />
-                            Manage Technologies
+                            Contact Support
                           </Button>
                         </Link>
                         <Button 
@@ -195,7 +196,7 @@ const TechnologyLanding = () => {
                           size="sm"
                           onClick={handleRefresh}
                         >
-                          <RefreshCw className="mr-2 h-4 w-4" />
+                          <RefreshCcw className="mr-2 h-4 w-4" />
                           Refresh
                         </Button>
                       </div>
@@ -242,10 +243,10 @@ const TechnologyLanding = () => {
                           className="w-full"
                           asChild
                         >
-                          <Link to="/admin/settings">
+                          <a href="https://www.contentful.com/help/" target="_blank" rel="noopener noreferrer">
                             <BookOpen className="mr-2 h-4 w-4" />
                             View Full Documentation
-                          </Link>
+                          </a>
                         </Button>
                       </div>
                     </div>
@@ -258,7 +259,7 @@ const TechnologyLanding = () => {
                   size="sm"
                   onClick={handleRefresh}
                 >
-                  <RefreshCw className="mr-2 h-4 w-4" />
+                  <RefreshCcw className="mr-2 h-4 w-4" />
                   Refresh Content
                 </Button>
                 
@@ -273,10 +274,8 @@ const TechnologyLanding = () => {
               </CardFooter>
             </Card>
           </div>
-        )}
-        
-        {/* Technology List */}
-        {hasTechnologies && (
+        ) : (
+          // Technology List
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {technologies.map((tech) => (
               <Card key={tech.id} className="overflow-hidden h-full flex flex-col">

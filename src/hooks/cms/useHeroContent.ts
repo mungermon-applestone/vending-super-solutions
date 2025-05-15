@@ -1,6 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchContentfulEntries } from '@/services/contentful/utils';
+import { fetchContentfulEntries } from '@/services/contentful/client';
 import { Document } from '@contentful/rich-text-types';
 
 export interface HeroContent {
