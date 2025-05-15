@@ -21,7 +21,7 @@ export function useContentfulBusinessGoals() {
       try {
         const response = await contentfulClient.getEntries({
           content_type: "businessGoal",
-          order: "fields.displayOrder",
+          order: ["fields.displayOrder"]
         });
 
         // Transform Contentful entries to our internal format
@@ -32,7 +32,7 @@ export function useContentfulBusinessGoals() {
         console.error("Error fetching business goals from Contentful:", error);
         throw error;
       }
-    },
+    }
   });
 }
 

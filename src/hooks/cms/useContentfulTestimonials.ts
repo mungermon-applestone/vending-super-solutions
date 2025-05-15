@@ -21,7 +21,7 @@ export function useContentfulTestimonials() {
       try {
         const response = await contentfulClient.getEntries({
           content_type: "testimonial",
-          "fields.visible": true,
+          "fields.visible": true
         });
 
         // Transform Contentful entries to our internal format

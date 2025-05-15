@@ -1,155 +1,106 @@
 
 import React from 'react';
-import { BLOCKS, INLINES, MARKS } from '@contentful/rich-text-types';
+import { BLOCKS, INLINES, MARKS, Document } from '@contentful/rich-text-types';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import Image from '@/components/common/Image';
-import { ContentfulAsset } from '@/types/contentful';
 
-// Helper function to normalize Contentful URLs
-export const normalizeContentfulUrl = (url: string): string => {
-  if (!url) return '';
-  return url.startsWith('//') 
-    ? `https:${url}` 
-    : url.startsWith('http') ? url : `https:${url}`;
-};
-
-// Helper to find an asset using multiple strategies
-export const findContentfulAsset = (
-  assetId: string,
-  includedAssets: ContentfulAsset[],
-  contentIncludes?: { Asset?: ContentfulAsset[] },
-  nodeData?: any
-): ContentfulAsset | null => {
-  // Strategy 1: Direct lookup in includedAssets
-  let asset = includedAssets.find(a => a.sys.id === assetId);
-
-  // Strategy 2: Check node data for direct file references
-  if (!asset && nodeData?.target?.fields?.file) {
-    asset = {
-      sys: { id: assetId },
-      fields: nodeData.target.fields
-    };
-  }
-
-  // Strategy 3: Look through content includes
-  if (!asset && contentIncludes?.Asset) {
-    asset = contentIncludes.Asset.find(a => 
-      a.sys.id === assetId || 
-      a.fields.file?.url?.includes(assetId)
-    );
-  }
-
-  return asset || null;
-};
-
-interface RichTextRendererOptions {
-  includedAssets: ContentfulAsset[];
-  contentIncludes?: { Asset?: ContentfulAsset[] };
+interface RenderOptions {
+  includedAssets?: any[];
 }
 
-export const getRichTextRenderOptions = ({ includedAssets, contentIncludes }: RichTextRendererOptions) => ({
-  renderNode: {
-    [BLOCKS.PARAGRAPH]: (node: any, children: React.ReactNode) => (
-      <p className="mb-4">{children}</p>
-    ),
-    [BLOCKS.HEADING_1]: (node: any, children: React.ReactNode) => (
-      <h1 className="text-3xl font-bold mt-8 mb-4">{children}</h1>
-    ),
-    [BLOCKS.HEADING_2]: (node: any, children: React.ReactNode) => (
-      <h2 className="text-2xl font-bold mt-6 mb-3">{children}</h2>
-    ),
-    [BLOCKS.HEADING_3]: (node: any, children: React.ReactNode) => (
-      <h3 className="text-xl font-bold mt-5 mb-2">{children}</h3>
-    ),
-    [BLOCKS.HEADING_4]: (node: any, children: React.ReactNode) => (
-      <h4 className="text-lg font-bold mt-4 mb-2">{children}</h4>
-    ),
-    [BLOCKS.HEADING_5]: (node: any, children: React.ReactNode) => (
-      <h5 className="text-base font-bold mt-3 mb-1">{children}</h5>
-    ),
-    [BLOCKS.HEADING_6]: (node: any, children: React.ReactNode) => (
-      <h6 className="text-sm font-bold mt-3 mb-1">{children}</h6>
-    ),
-    [BLOCKS.UL_LIST]: (node: any, children: React.ReactNode) => (
-      <ul className="list-disc pl-6 mb-4">{children}</ul>
-    ),
-    [BLOCKS.OL_LIST]: (node: any, children: React.ReactNode) => (
-      <ol className="list-decimal pl-6 mb-4">{children}</ol>
-    ),
-    [BLOCKS.LIST_ITEM]: (node: any, children: React.ReactNode) => (
-      <li className="mb-1">{children}</li>
-    ),
-    [BLOCKS.QUOTE]: (node: any, children: React.ReactNode) => (
-      <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4">{children}</blockquote>
-    ),
-    [BLOCKS.HR]: () => <hr className="my-6 border-t border-gray-300" />,
-    [BLOCKS.EMBEDDED_ASSET]: (node: any) => {
-      try {
-        const assetId = node.data?.target?.sys?.id;
-        
-        if (!assetId) {
-          console.error('Missing asset ID in embedded asset node');
-          return <div className="text-red-500">Image reference error (no ID)</div>;
-        }
-
-        const asset = findContentfulAsset(assetId, includedAssets, contentIncludes, node.data);
+/**
+ * Render Contentful rich text to React components
+ * @param document Contentful Rich Text document
+ * @param options Rendering options
+ * @returns React components
+ */
+export function renderRichText(document: Document, options: RenderOptions = {}) {
+  // Extract assets from options
+  const { includedAssets = [] } = options;
+  
+  // Create a map of asset IDs to assets for easy lookup
+  const assetMap = includedAssets.reduce((map, asset) => {
+    map[asset.sys.id] = asset;
+    return map;
+  }, {});
+  
+  const renderOptions = {
+    renderMark: {
+      [MARKS.BOLD]: (text) => <strong>{text}</strong>,
+      [MARKS.ITALIC]: (text) => <em>{text}</em>,
+      [MARKS.UNDERLINE]: (text) => <u>{text}</u>,
+      [MARKS.CODE]: (text) => <code className="bg-gray-100 p-1 rounded">{text}</code>,
+    },
+    renderNode: {
+      [BLOCKS.PARAGRAPH]: (node, children) => <p className="mb-4">{children}</p>,
+      [BLOCKS.HEADING_1]: (node, children) => <h1 className="text-3xl font-bold mb-4">{children}</h1>,
+      [BLOCKS.HEADING_2]: (node, children) => <h2 className="text-2xl font-bold mb-3">{children}</h2>,
+      [BLOCKS.HEADING_3]: (node, children) => <h3 className="text-xl font-bold mb-2">{children}</h3>,
+      [BLOCKS.HEADING_4]: (node, children) => <h4 className="text-lg font-bold mb-2">{children}</h4>,
+      [BLOCKS.HEADING_5]: (node, children) => <h5 className="text-base font-bold mb-2">{children}</h5>,
+      [BLOCKS.HEADING_6]: (node, children) => <h6 className="text-sm font-bold mb-2">{children}</h6>,
+      [BLOCKS.UL_LIST]: (node, children) => <ul className="list-disc pl-5 mb-4">{children}</ul>,
+      [BLOCKS.OL_LIST]: (node, children) => <ol className="list-decimal pl-5 mb-4">{children}</ol>,
+      [BLOCKS.LIST_ITEM]: (node, children) => <li className="mb-1">{children}</li>,
+      [BLOCKS.QUOTE]: (node, children) => (
+        <blockquote className="border-l-4 border-gray-300 pl-4 italic my-4">{children}</blockquote>
+      ),
+      [BLOCKS.HR]: () => <hr className="my-6" />,
+      [BLOCKS.EMBEDDED_ASSET]: (node) => {
+        const assetId = node.data.target.sys.id;
+        const asset = assetMap[assetId];
         
         if (!asset) {
-          console.error(`Asset not found for ID: ${assetId}`);
-          return <div className="text-red-500">Image not found (ID: {assetId})</div>;
+          console.warn(`Asset with ID ${assetId} not found in included assets`);
+          return null;
         }
-
-        const { title, file } = asset.fields;
-
-        if (!file || !file.url) {
-          console.error('Asset file or URL missing:', asset);
-          return <div className="text-red-500">Image file data missing</div>;
+        
+        const { title, description, file } = asset.fields;
+        const { url, contentType } = file;
+        
+        // Handle different asset types
+        if (contentType.startsWith('image/')) {
+          return (
+            <img
+              src={url.startsWith('//') ? `https:${url}` : url}
+              alt={description || title || 'Image'}
+              className="max-w-full my-4 rounded"
+            />
+          );
+        } else if (contentType.startsWith('video/')) {
+          return (
+            <video
+              controls
+              className="max-w-full my-4 rounded"
+              title={title || 'Video'}
+            >
+              <source src={url.startsWith('//') ? `https:${url}` : url} type={contentType} />
+              Your browser does not support the video tag.
+            </video>
+          );
         }
-
-        const fullUrl = normalizeContentfulUrl(file.url);
-
+        
+        // Fallback for other asset types
+        return <a href={url} target="_blank" rel="noreferrer">{title || 'Download asset'}</a>;
+      },
+      [INLINES.HYPERLINK]: (node, children) => {
+        const { uri } = node.data;
         return (
-          <div className="my-8">
-            <AspectRatio ratio={16/9} className="overflow-hidden rounded-md border border-gray-200">
-              <Image 
-                src={fullUrl}
-                alt={title || 'Content image'}
-                className="w-full h-full object-cover"
-              />
-            </AspectRatio>
-            {title && <p className="text-sm text-gray-500 mt-2">{title}</p>}
-          </div>
+          <a 
+            href={uri} 
+            target={uri.startsWith('http') ? '_blank' : undefined}
+            rel={uri.startsWith('http') ? 'noreferrer' : undefined}
+            className="text-blue-600 hover:underline"
+          >
+            {children}
+          </a>
         );
-      } catch (err) {
-        console.error('Error rendering embedded asset:', err);
-        return <div className="text-red-500">Error rendering asset: {String(err)}</div>;
-      }
+      },
+      [INLINES.ENTRY_HYPERLINK]: (node, children) => {
+        // This could be expanded to handle different types of linked entries
+        return <span className="text-blue-600">{children}</span>;
+      },
     },
-    [INLINES.HYPERLINK]: (node: any, children: React.ReactNode) => (
-      <a 
-        href={node.data.uri} 
-        className="text-blue-600 hover:underline" 
-        target={node.data.uri.startsWith('http') ? '_blank' : '_self'} 
-        rel="noopener noreferrer"
-      >
-        {children}
-      </a>
-    ),
-  },
-  renderMark: {
-    [MARKS.BOLD]: (text: React.ReactNode) => <strong>{text}</strong>,
-    [MARKS.ITALIC]: (text: React.ReactNode) => <em>{text}</em>,
-    [MARKS.UNDERLINE]: (text: React.ReactNode) => <u>{text}</u>,
-    [MARKS.CODE]: (text: React.ReactNode) => (
-      <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono">{text}</code>
-    ),
-  },
-});
-
-export const renderRichText = (
-  content: any,
-  options: RichTextRendererOptions
-) => {
-  return documentToReactComponents(content, getRichTextRenderOptions(options));
-};
+  };
+  
+  return documentToReactComponents(document, renderOptions);
+}

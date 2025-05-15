@@ -1,124 +1,152 @@
-import { useQuery } from "@tanstack/react-query";
-import { createClient } from "contentful";
-import { BlogPost, AdjacentPost } from "@/types/cms";
-import { transformBlogPost, createAdjacentPost, ContentfulBlogPost } from "./cms/transformers/blogPostTransformer";
-import { logDeprecation } from "@/services/cms/utils/deprecation";
 
-// Create Contentful client using environment variables
+import { useQuery } from '@tanstack/react-query';
+import { createClient } from 'contentful';
+import { BlogPost, AdjacentPost } from '@/types/cms';
+import { transformBlogPost, createAdjacentPost } from './cms/transformers/blogPostTransformer';
+
+// Create Contentful client
 const contentfulClient = createClient({
-  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID || "",
-  accessToken: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || "",
-  environment: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || "master",
+  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
+  accessToken: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || '',
+  environment: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || 'master',
 });
 
 /**
- * Hook to fetch all blog posts from Contentful
- * @param limit Optional limit on number of posts to retrieve
+ * Hook to fetch a paginated list of blog posts
  */
-export function useBlogPosts(limit?: number) {
-  logDeprecation("useBlogPosts", "Will be replaced with useContentfulBlogPosts in the future");
-  
+export function useBlogPosts(page = 1, pageSize = 10) {
   return useQuery({
-    queryKey: ["blog", "posts", limit],
-    queryFn: async (): Promise<BlogPost[]> => {
+    queryKey: ['blogs', page, pageSize],
+    queryFn: async (): Promise<{ posts: BlogPost[]; total: number }> => {
       try {
         const response = await contentfulClient.getEntries({
-          content_type: "blogPost",
-          order: "-fields.publishedDate",
-          limit: limit || 100,
-          "fields.status": "published",
+          content_type: 'blogPost',
+          order: ['-fields.publishedDate'],
+          limit: pageSize,
+          skip: (page - 1) * pageSize,
+          'fields.status': 'published'
         });
 
-        return response.items.map((entry) => 
-          transformBlogPost(entry as unknown as ContentfulBlogPost)
-        );
+        const posts = response.items.map(entry => transformBlogPost(entry));
+
+        return {
+          posts,
+          total: response.total
+        };
       } catch (error) {
-        console.error("Error fetching blog posts:", error);
+        console.error('Error fetching blog posts:', error);
         throw error;
       }
-    },
+    }
   });
 }
 
 /**
  * Hook to fetch a single blog post by slug
- * @param slug The slug of the blog post to fetch
  */
 export function useBlogPostBySlug(slug: string | undefined) {
-  logDeprecation("useBlogPostBySlug", "Will be replaced with useContentfulBlogPostBySlug in the future");
-  
   return useQuery({
-    queryKey: ["blog", "post", slug],
-    queryFn: async (): Promise<BlogPost | null> => {
-      if (!slug) return null;
+    queryKey: ['blog', slug],
+    queryFn: async (): Promise<{ 
+      post: BlogPost | null; 
+      previousPost: AdjacentPost | null;
+      nextPost: AdjacentPost | null;
+    }> => {
+      if (!slug) {
+        return { post: null, previousPost: null, nextPost: null };
+      }
 
       try {
+        // Fetch the requested post
         const response = await contentfulClient.getEntries({
-          content_type: "blogPost",
-          "fields.slug": slug,
-          limit: 1,
+          content_type: 'blogPost',
+          'fields.slug': slug,
+          limit: 1
         });
 
         if (response.items.length === 0) {
-          return null;
+          return { post: null, previousPost: null, nextPost: null };
         }
 
-        return transformBlogPost(response.items[0] as unknown as ContentfulBlogPost);
+        const post = transformBlogPost(response.items[0]);
+
+        // Fetch adjacent posts (previous and next)
+        // This is a simplified approach - in a real app you might want to
+        // sort these by publish date or another criterion
+        const adjacentPostsResponse = await contentfulClient.getEntries({
+          content_type: 'blogPost',
+          order: ['-fields.publishedDate'],
+          'fields.status': 'published'
+        });
+
+        // Find the current post index in the sorted list
+        const allPosts = adjacentPostsResponse.items;
+        const currentIndex = allPosts.findIndex(p => p.fields.slug === slug);
+        
+        // Get adjacent posts
+        const previousPost = currentIndex > 0 ? createAdjacentPost(allPosts[currentIndex - 1]) : null;
+        const nextPost = currentIndex < allPosts.length - 1 ? createAdjacentPost(allPosts[currentIndex + 1]) : null;
+
+        return { 
+          post, 
+          previousPost, 
+          nextPost 
+        };
       } catch (error) {
         console.error(`Error fetching blog post with slug ${slug}:`, error);
         throw error;
       }
     },
-    enabled: !!slug,
+    enabled: !!slug
   });
 }
 
 /**
- * Get adjacent posts (previous and next) for a given post slug
- * @param slug Current post slug
+ * Hook to fetch recent blog posts (for widgets, sidebars, etc.)
  */
-export function useAdjacentPosts(slug: string | undefined) {
-  logDeprecation("useAdjacentPosts", "Will be replaced with useContentfulAdjacentPosts in the future");
-  
+export function useRecentBlogPosts(limit = 3) {
   return useQuery({
-    queryKey: ["blog", "adjacent", slug],
-    queryFn: async (): Promise<{ previous: AdjacentPost | null; next: AdjacentPost | null }> => {
-      if (!slug) {
-        return { previous: null, next: null };
-      }
-
+    queryKey: ['blogs', 'recent', limit],
+    queryFn: async (): Promise<BlogPost[]> => {
       try {
-        // Get all published posts sorted by date
         const response = await contentfulClient.getEntries({
-          content_type: "blogPost",
-          order: "fields.publishedDate",
-          "fields.status": "published",
+          content_type: 'blogPost',
+          order: ['-fields.publishedDate'],
+          limit,
+          'fields.status': 'published'
         });
 
-        const posts = response.items.map((entry) => entry as unknown as ContentfulBlogPost);
-        
-        // Find the current post index
-        const currentIndex = posts.findIndex((post) => post.fields.slug === slug);
-        
-        if (currentIndex === -1) {
-          return { previous: null, next: null };
-        }
-
-        // Get previous and next posts
-        const previousPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
-        const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
-
-        return {
-          previous: previousPost ? createAdjacentPost(previousPost) : null,
-          next: nextPost ? createAdjacentPost(nextPost) : null,
-        };
+        return response.items.map(entry => transformBlogPost(entry));
       } catch (error) {
-        console.error(`Error fetching adjacent posts for ${slug}:`, error);
+        console.error('Error fetching recent blog posts:', error);
         throw error;
       }
-    },
-    enabled: !!slug,
+    }
   });
 }
 
-// Other blog-related hooks will be added here as needed
+/**
+ * Hook to fetch blog posts by tag
+ */
+export function useBlogPostsByTag(tag: string, limit = 10) {
+  return useQuery({
+    queryKey: ['blogs', 'tag', tag, limit],
+    queryFn: async (): Promise<BlogPost[]> => {
+      try {
+        const response = await contentfulClient.getEntries({
+          content_type: 'blogPost',
+          'fields.tags': tag,
+          order: ['-fields.publishedDate'],
+          limit,
+          'fields.status': 'published'
+        });
+
+        return response.items.map(entry => transformBlogPost(entry));
+      } catch (error) {
+        console.error(`Error fetching blog posts with tag ${tag}:`, error);
+        throw error;
+      }
+    },
+    enabled: !!tag
+  });
+}

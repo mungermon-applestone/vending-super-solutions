@@ -1,5 +1,5 @@
 
-// Common CMS Types
+// Common CMS Types - Contentful-only implementation
 // These types represent the internal format used throughout the application
 
 // Base image type used across all CMS entities
@@ -21,10 +21,10 @@ export interface CMSBusinessGoal {
   benefits: string[];
   image?: CMSImage;
   visible: boolean;
-  featured: boolean;
+  features?: string[];
   displayOrder: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Machine type
@@ -49,8 +49,8 @@ export interface CMSMachine {
   visible: boolean;
   featured: boolean;
   displayOrder: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Technology type
@@ -65,8 +65,8 @@ export interface CMSTechnology {
   visible: boolean;
   featured: boolean;
   displayOrder: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Product type
@@ -80,22 +80,22 @@ export interface CMSProductType {
   visible: boolean;
   featured: boolean;
   displayOrder: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Testimonial type
 export interface CMSTestimonial {
   id: string;
-  author: string;
+  name: string;
   position?: string;
   company?: string;
   quote: string;
   rating?: number;
   image?: CMSImage;
   visible: boolean;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Blog Post types
@@ -104,15 +104,15 @@ export interface BlogPost {
   title: string;
   slug: string;
   summary?: string;
-  content: string;
+  content: any; // Rich text content
   author?: string;
   publishedDate?: string;
   category?: string;
   tags?: string[];
   image?: CMSImage;
   status: 'published' | 'draft';
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Adjacent post (simplified version of BlogPost for previous/next navigation)
@@ -121,4 +121,13 @@ export interface AdjacentPost {
   title: string;
   slug: string;
   image?: CMSImage;
+}
+
+// Query options type for consistent filtering
+export interface QueryOptions {
+  limit?: number;
+  offset?: number;
+  filters?: Record<string, any>;
+  orderBy?: string;
+  orderDirection?: 'asc' | 'desc';
 }

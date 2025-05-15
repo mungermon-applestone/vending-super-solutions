@@ -1,10 +1,7 @@
 
 /**
  * Simple deprecation utility for logging deprecated CMS functionality
- * This replaces the complex deprecation tracker system
  */
-
-import { toast } from "@/components/ui/use-toast";
 
 /**
  * Log a deprecation warning for a function or feature
@@ -13,17 +10,8 @@ import { toast } from "@/components/ui/use-toast";
  */
 export function logDeprecation(feature: string, message?: string) {
   console.warn(
-    `[DEPRECATED] ${feature} is deprecated and will be removed. ${message || "Please use Contentful instead."}`
+    `[DEPRECATED] ${feature} is deprecated and will be removed. ${message || "Please use Contentful directly."}`
   );
-  
-  // Optional toast for user-visible warnings
-  if (import.meta.env.DEV) {
-    toast({
-      title: "Deprecated Feature Used",
-      description: `${feature} is deprecated. ${message || "Please use Contentful instead."}`,
-      variant: "destructive",
-    });
-  }
 }
 
 /**

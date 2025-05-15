@@ -1,7 +1,7 @@
 
 import { Asset, Entry } from "contentful";
-import { BlogPost, AdjacentPost, CMSImage } from "@/types/cms";
 import { transformContentfulAsset } from "./testimonialTransformer";
+import { BlogPost, AdjacentPost } from "@/types/cms";
 
 // Interface for the structure of a Contentful Blog Post entry
 export interface ContentfulBlogPost {
@@ -9,7 +9,7 @@ export interface ContentfulBlogPost {
     title: string;
     slug: string;
     summary?: string;
-    content: string;
+    content: any;
     author?: string;
     publishedDate?: string;
     category?: string;
@@ -35,15 +35,15 @@ export function transformBlogPost(entry: ContentfulBlogPost): BlogPost {
     title: entry.fields.title || "",
     slug: entry.fields.slug || "",
     summary: entry.fields.summary,
-    content: entry.fields.content || "",
+    content: entry.fields.content,
     author: entry.fields.author,
     publishedDate: entry.fields.publishedDate,
     category: entry.fields.category,
     tags: entry.fields.tags || [],
     image: transformContentfulAsset(entry.fields.image),
     status: entry.fields.status || "draft",
-    created_at: entry.sys.createdAt || "",
-    updated_at: entry.sys.updatedAt || "",
+    createdAt: entry.sys.createdAt || "",
+    updatedAt: entry.sys.updatedAt || "",
   };
 }
 

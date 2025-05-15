@@ -1,14 +1,31 @@
-// Re-export all CMS hooks for ease of use
-// All hooks should use Contentful as the source of truth
 
-// Business Goals
-export {
+// Consolidated export of all CMS hooks - Contentful only
+
+// Export Contentful business goals hooks
+export { 
   useContentfulBusinessGoals,
-  useContentfulBusinessGoalBySlug,
-  // Legacy hooks (using Contentful internally)
-  useBusinessGoals,
-  useBusinessGoalBySlug
-} from './useBusinessGoals';
+  useContentfulBusinessGoalBySlug 
+} from './useContentfulBusinessGoals';
 
-// Export other hooks as they are implemented
-// Each content type should have its own file and transformer
+// Export Contentful testimonials hooks
+export { 
+  useContentfulTestimonials 
+} from './useContentfulTestimonials';
+
+// Re-export transformers for convenience
+export { 
+  transformBusinessGoal,
+  ContentfulBusinessGoal
+} from './transformers/businessGoalTransformer';
+
+export {
+  transformTestimonial,
+  ContentfulTestimonial,
+  transformContentfulAsset
+} from './transformers/testimonialTransformer';
+
+export {
+  transformBlogPost,
+  createAdjacentPost,
+  ContentfulBlogPost
+} from './transformers/blogPostTransformer';

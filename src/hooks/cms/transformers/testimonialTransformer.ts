@@ -1,11 +1,11 @@
 
-import { Asset, Entry } from "contentful";
+import { Asset } from "contentful";
 import { CMSTestimonial, CMSImage } from "@/types/cms";
 
 // Interface for the structure of a Contentful Testimonial entry
 export interface ContentfulTestimonial {
   fields: {
-    author: string;
+    name: string;
     position?: string;
     company?: string;
     quote: string;
@@ -30,7 +30,7 @@ export function transformContentfulAsset(asset?: Asset): CMSImage | undefined {
 
   return {
     id: asset.sys?.id || "",
-    url: `https:${asset.fields.file.url}`,
+    url: asset.fields.file.url.startsWith('//') ? `https:${asset.fields.file.url}` : asset.fields.file.url,
     alt: asset.fields.title || "",
     width: asset.fields.file.details?.image?.width || 0,
     height: asset.fields.file.details?.image?.height || 0,
@@ -45,14 +45,14 @@ export function transformContentfulAsset(asset?: Asset): CMSImage | undefined {
 export function transformTestimonial(entry: ContentfulTestimonial): CMSTestimonial {
   return {
     id: entry.sys.id,
-    author: entry.fields.author || "",
+    name: entry.fields.name || "",
     position: entry.fields.position,
     company: entry.fields.company,
     quote: entry.fields.quote || "",
     rating: entry.fields.rating,
     image: transformContentfulAsset(entry.fields.image),
     visible: entry.fields.visible !== false,
-    created_at: entry.sys.createdAt || "",
-    updated_at: entry.sys.updatedAt || "",
+    createdAt: entry.sys.createdAt || "",
+    updatedAt: entry.sys.updatedAt || "",
   };
 }
