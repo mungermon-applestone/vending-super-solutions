@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { refreshContentfulClient, testContentfulConnection } from '@/services/cms/utils/contentfulClient';
+import { testContentfulConnection, refreshContentfulClient } from '@/services/contentful/client';
 import { forceContentfulProvider } from '@/services/cms/cmsInit';
 import { isContentfulConfigured, isPreviewEnvironment } from '@/config/cms';
 import { Loader2 } from 'lucide-react';
@@ -47,7 +47,9 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
         }
         
         // Force provider initialization
-        forceContentfulProvider();
+        if (typeof forceContentfulProvider === 'function') {
+          forceContentfulProvider();
+        }
         
         // Test the connection
         const testResult = await testContentfulConnection();
@@ -69,8 +71,10 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
         // Mark as initialized regardless of test result to attempt showing content
         if (isMounted) {
           setIsInitialized(true);
-          window._contentfulInitialized = true;
-          window._contentfulInitializedSource = testResult.success ? 'successful-connection' : 'fallback-after-warning';
+          if (typeof window !== 'undefined') {
+            window._contentfulInitialized = true;
+            window._contentfulInitializedSource = testResult.success ? 'successful-connection' : 'fallback-after-warning';
+          }
           console.log('[ContentfulInitializer] Marked as initialized, will attempt to show content');
         }
       } catch (error) {
@@ -94,9 +98,13 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
           
           // In preview environments or after all retries, still force provider to use fallbacks
           if (isPreview || retryCount >= MAX_RETRIES) {
-            forceContentfulProvider();
+            if (typeof forceContentfulProvider === 'function') {
+              forceContentfulProvider();
+            }
             setIsInitialized(true); // Still initialized but will use fallbacks
-            window._contentfulInitializedSource = 'fallback-after-error';
+            if (typeof window !== 'undefined') {
+              window._contentfulInitializedSource = 'fallback-after-error';
+            }
           }
         }
       } finally {
@@ -142,5 +150,18 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
   // Render children when initialized or attempted initialization
   return shouldShowChildren ? <>{children}</> : null;
 };
+
+// Add this declaration to fix TypeScript errors
+declare global {
+  interface Window {
+    _contentfulInitialized?: boolean;
+    _contentfulInitializedSource?: string;
+    env?: {
+      VITE_CONTENTFUL_SPACE_ID?: string;
+      VITE_CONTENTFUL_DELIVERY_TOKEN?: string;
+      VITE_CONTENTFUL_ENVIRONMENT?: string;
+    };
+  }
+}
 
 export default ContentfulInitializer;

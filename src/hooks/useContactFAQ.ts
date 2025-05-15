@@ -1,7 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { contentfulClient, fetchContentfulEntries } from '@/services/contentful/client';
-import { ContentfulFAQFields } from '@/types/contentful';
+import { contentfulClient } from '@/services/contentful/client';
 import { Document } from '@contentful/rich-text-types';
 
 export interface FAQ {
@@ -29,6 +28,12 @@ export function useContactFAQ() {
         // Get the FAQs from the contact page entry
         const contactPage = response.items[0];
         const faqs = contactPage.fields.faqs || [];
+        
+        // Make sure faqs is an array before mapping
+        if (!Array.isArray(faqs)) {
+          console.warn('FAQs field is not an array:', faqs);
+          return [];
+        }
         
         // Map the FAQs to our internal format
         return faqs.map((faq: any) => ({

@@ -1,6 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import { initCMS, refreshCmsConnection } from '@/services/cms/cmsInit';
-import { testContentfulConnection } from '@/services/contentful/utils';
+import { testContentfulConnection } from '@/services/contentful/client';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -37,7 +38,9 @@ export const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
       console.log('[ContentfulInitializer] Starting Contentful initialization');
       
       // Force Contentful provider and initialize
-      await initCMS();
+      if (typeof initCMS === 'function') {
+        await initCMS();
+      }
       
       console.log('[ContentfulInitializer] Contentful initialized successfully');
       setIsInitialized(true);
@@ -55,7 +58,12 @@ export const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
   const retryConnection = async () => {
     setIsLoading(true);
     try {
-      await refreshCmsConnection();
+      if (typeof refreshCmsConnection === 'function') {
+        await refreshCmsConnection();
+      } else {
+        // Fallback to direct test
+        await testContentfulConnection();
+      }
       setIsInitialized(true);
       setError(null);
       toast.success('Contentful connection refreshed');

@@ -1,113 +1,126 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import Layout from '@/components/layout/Layout';
-import { fetchContentfulEntries } from '@/services/contentful/utils';
-import { Skeleton } from '@/components/ui/skeleton';
+import MachineDetailHero from '@/components/machineDetail/MachineDetailHero';
+import MachineDetailFeatures from '@/components/machineDetail/MachineDetailFeatures';
+import MachineDetailSpecifications from '@/components/machineDetail/MachineDetailSpecifications';
+import MachineDetailGallery from '@/components/machineDetail/MachineDetailGallery';
+import MachineDetailDeployments from '@/components/machineDetail/MachineDetailDeployments';
+import MachineDetailInquiry from '@/components/machineDetail/MachineDetailInquiry';
+import { useContentfulMachine, ContentfulMachine } from '@/hooks/useContentfulMachines';
+import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
 
 const MachineDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { data: machine, isLoading, error } = useContentfulMachine(slug);
   
-  const { data: machine, isLoading, error } = useQuery({
-    queryKey: ['machine', slug],
-    queryFn: async () => {
-      try {
-        const entries = await fetchContentfulEntries('machine', {
-          'fields.slug': slug,
-          include: 2
-        });
-        
-        if (entries.items.length === 0) {
-          throw new Error('Machine not found');
-        }
-        
-        const machine = entries.items[0];
-        return {
-          id: machine.sys.id,
-          ...machine.fields
-        };
-      } catch (error) {
-        console.error(`Error fetching machine with slug ${slug}:`, error);
-        throw error;
-      }
-    },
-    enabled: !!slug
-  });
-
+  React.useEffect(() => {
+    console.log("[MachineDetail] Rendering with:", { slug, machine, isLoading, error });
+  }, [slug, machine, isLoading, error]);
+  
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container py-16 flex flex-col items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
+          <p className="text-lg text-gray-600">Loading machine details...</p>
+        </div>
+      </Layout>
+    );
+  }
+  
   if (error) {
     return (
       <Layout>
-        <div className="container mx-auto py-10">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
+        <div className="container py-16">
+          <Alert variant="destructive" className="mb-8">
+            <AlertTitle>Error Loading Machine</AlertTitle>
             <AlertDescription>
-              {error instanceof Error ? error.message : 'An unknown error occurred'}
+              {error instanceof Error ? error.message : 'Failed to load machine details'}
             </AlertDescription>
           </Alert>
+          <div className="p-8 border border-gray-200 rounded-lg text-center">
+            <h2 className="text-2xl font-semibold mb-4">Unable to load machine details</h2>
+            <p className="text-gray-600 mb-4">We're having trouble retrieving information about this machine.</p>
+            <p className="text-gray-600">Please try again later or contact support if this problem persists.</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+  
+  if (!machine) {
+    return (
+      <Layout>
+        <div className="container py-16">
+          <Alert variant="warning" className="mb-8">
+            <AlertTitle>Machine Not Found</AlertTitle>
+            <AlertDescription>
+              We couldn't find a machine with the identifier: {slug}
+            </AlertDescription>
+          </Alert>
+          <div className="p-8 border border-gray-200 rounded-lg text-center">
+            <h2 className="text-2xl font-semibold mb-4">Machine Not Found</h2>
+            <p className="text-gray-600 mb-4">The machine you're looking for doesn't exist or may have been removed.</p>
+          </div>
         </div>
       </Layout>
     );
   }
 
+  const { title, description, type, temperature, features, images } = machine as ContentfulMachine;
+
   return (
     <Layout>
-      <div className="container mx-auto py-10">
-        {isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-10 w-1/3" />
-            <Skeleton className="h-4 w-2/3" />
-            <Skeleton className="h-64 w-full rounded-lg" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-5/6" />
-          </div>
-        ) : (
+      <MachineDetailHero 
+        title={title || 'Unnamed Machine'} 
+        description={description || 'No description available.'}
+        image={images && images.length > 0 ? `https:${images[0].fields.file.url}` : undefined}
+        imageAlt={images && images.length > 0 ? images[0].fields.title || title : title}
+      />
+      
+      <div className="container py-12 space-y-16">
+        {type && (
           <div>
-            <h1 className="text-3xl font-bold mb-4">{machine?.title}</h1>
-            <p className="text-lg text-muted-foreground mb-6">{machine?.description}</p>
+            <h2 className="text-2xl font-semibold mb-6">Machine Type</h2>
+            <p className="text-gray-700">{type.charAt(0).toUpperCase() + type.slice(1)}</p>
             
-            {/* Display machine details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                {machine?.images?.[0] && (
-                  <img
-                    src={`https:${machine.images[0].fields.file.url}`}
-                    alt={machine.title}
-                    className="rounded-lg shadow-md w-full"
-                  />
-                )}
-              </div>
-              
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Machine Details</h2>
-                {machine?.type && (
-                  <p className="mb-2">
-                    <span className="font-medium">Type:</span> {machine.type}
-                  </p>
-                )}
-                {machine?.temperature && (
-                  <p className="mb-2">
-                    <span className="font-medium">Temperature:</span> {machine.temperature}
-                  </p>
-                )}
-                
-                {machine?.features && machine.features.length > 0 && (
-                  <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-2">Features</h3>
-                    <ul className="list-disc list-inside space-y-1">
-                      {machine.features.map((feature: string, index: number) => (
-                        <li key={index}>{feature}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
+            {temperature && (
+              <p className="text-gray-700 mt-2">Temperature: {temperature.charAt(0).toUpperCase() + temperature.slice(1)}</p>
+            )}
           </div>
         )}
+        
+        {features && features.length > 0 && (
+          <MachineDetailFeatures 
+            features={features} 
+          />
+        )}
+        
+        <MachineDetailSpecifications 
+          specifications={machine.specs || {}} 
+        />
+        
+        {images && images.length > 1 && (
+          <MachineDetailGallery 
+            images={images.map(image => ({
+              url: `https:${image.fields.file.url}`,
+              alt: image.fields.title || title,
+            }))} 
+          />
+        )}
+        
+        <MachineDetailDeployments 
+          machineId={machine.id}
+          machineType={machine.type || 'vending'}
+        />
+        
+        <MachineDetailInquiry 
+          machineId={machine.id}
+          machineTitle={machine.title || 'Unnamed Machine'}
+        />
       </div>
     </Layout>
   );

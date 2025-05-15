@@ -15,6 +15,16 @@ export interface HeroContent {
     url: string;
     alt?: string;
   };
+  // Additional properties needed by components
+  primaryButtonText?: string;
+  primaryButtonUrl?: string;
+  secondaryButtonText?: string;
+  secondaryButtonUrl?: string;
+  image?: {
+    url: string;
+    alt?: string;
+  };
+  backgroundClass?: string;
 }
 
 /**
@@ -49,12 +59,24 @@ export function useHeroContent(pageKey: string) {
           ctaLink: fields.ctaLink || '',
           secondaryCtaText: fields.secondaryCtaText || '',
           secondaryCtaLink: fields.secondaryCtaLink || '',
+          primaryButtonText: fields.primaryButtonText || fields.ctaText || '',
+          primaryButtonUrl: fields.primaryButtonUrl || fields.ctaLink || '',
+          secondaryButtonText: fields.secondaryButtonText || fields.secondaryCtaText || '',
+          secondaryButtonUrl: fields.secondaryButtonUrl || fields.secondaryCtaLink || '',
+          backgroundClass: fields.backgroundClass || '',
         };
         
         if (fields.backgroundImage) {
           heroContent.backgroundImage = {
             url: `https:${fields.backgroundImage.fields.file.url}`,
             alt: fields.backgroundImage.fields.title || '',
+          };
+        }
+        
+        if (fields.image) {
+          heroContent.image = {
+            url: `https:${fields.image.fields.file.url}`,
+            alt: fields.image.fields.title || '',
           };
         }
         

@@ -1,156 +1,68 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
-import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
-import useContentful from '@/hooks/useContentful';
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Link } from 'react-router-dom';
-import { useBreadcrumbs } from '@/context/BreadcrumbContext';
-import { useEffect } from 'react';
+import { useContactFAQ, FAQ } from '@/hooks/useContactFAQ';
+import ContactFormNew from '@/components/contact/ContactFormNew';
+import FAQSection from '@/components/contact/FAQSection';
 import ContactCards from '@/components/contact/ContactCards';
-import ContactLoadingState from "@/components/contact/ContactLoadingState";
-import ContactErrorState from "@/components/contact/ContactErrorState";
-import ContactFallback from "@/components/contact/ContactFallback";
-import { useContactFAQ } from "@/hooks/useContactFAQ";
-import SEO from '@/components/seo/SEO';
-import { SimpleContactCTA } from '@/components/common';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { Document } from '@contentful/rich-text-types';
-import { ContentfulRichTextDocument } from '@/types/contentful';
+import ContactLoadingState from '@/components/contact/ContactLoadingState';
+import ContactErrorState from '@/components/contact/ContactErrorState';
+import { useContentfulInit } from '@/hooks/useContentfulInit';
 
 const ContactContentful = () => {
-  const { processedData, isLoading, error, rawData } = useContactFAQ();
-  const { setBreadcrumbs, getSchemaFormattedBreadcrumbs } = useBreadcrumbs();
+  const { isConnected, isLoading: isConnectionLoading } = useContentfulInit();
+  const { data: faqs, isLoading: isFAQsLoading, error: faqError } = useContactFAQ();
   
-  useEffect(() => {
-    setBreadcrumbs([
-      { name: "Home", url: "/", position: 1 },
-      { name: "Contact", url: "/contact", position: 2 }
-    ]);
-  }, [setBreadcrumbs]);
+  console.log('Contact page rendering with:', { 
+    isConnected, 
+    isConnectionLoading,
+    faqs, 
+    faqError,
+    isFAQsLoading
+  });
+  
+  const isLoading = isConnectionLoading || isFAQsLoading;
+  const error = faqError;
 
-  if (isLoading) return <ContactLoadingState />;
-  if (error) {
-    // For serious errors, show the error state
-    return <ContactFallback />;
+  if (isLoading) {
+    return <ContactLoadingState />;
   }
 
-  // Helper function to render rich text content
-  const renderRichText = (content: string | Document | ContentfulRichTextDocument) => {
-    if (typeof content === 'object' && content !== null && 'nodeType' in content) {
-      try {
-        return documentToReactComponents(content as Document);
-      } catch (error) {
-        console.error('Error rendering rich text:', error);
-        return <p className="text-red-500">Error rendering content</p>;
-      }
-    }
-    return <p className="text-gray-600 whitespace-pre-line">{content as string}</p>;
-  };
+  if (error) {
+    return <ContactErrorState error={error} />;
+  }
 
   return (
     <Layout>
-      <SEO 
-        title="Contact Us | Vending Solutions"
-        description="Get in touch with our team for vending machine solutions, support, and business inquiries."
-        canonicalUrl="https://yourdomain.com/contact"
-        schema={{
-          "@context": "https://schema.org",
-          "@type": "ContactPage",
-          "name": "Contact Vending Solutions",
-          "description": "Get in touch with our team",
-          "breadcrumb": {
-            "@type": "BreadcrumbList",
-            "itemListElement": getSchemaFormattedBreadcrumbs()
-          }
-        }}
-      />
-
-      <div className="bg-gradient-to-r from-slate-50 to-slate-100 py-16">
-        <div className="container max-w-7xl mx-auto">
-          <nav aria-label="Breadcrumb" className="mb-8">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink aria-current="page">Contact</BreadcrumbLink>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </nav>
-
-          <div className="flex flex-col md:flex-row gap-12">
-            {/* Info section */}
-            <div className="flex-1">
-              <h1 className="text-4xl md:text-5xl font-bold text-vending-blue-dark mb-6">
-                {processedData.introTitle || 'Get in Touch'}
-              </h1>
-              <p className="text-lg text-gray-700 mb-8 max-w-lg">
-                {processedData.introDescription ||
-                  'Have questions about our vending solutions? Ready to transform your retail operations? Contact our team today.'}
-              </p>
-              <ContactCards data={processedData} />
+      <div className="container py-12">
+        <h1 className="text-4xl font-bold mb-6">Contact Us</h1>
+        
+        <div className="mb-16">
+          <ContactCards />
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div>
+            <h2 className="text-2xl font-semibold mb-6">Send us a message</h2>
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <ContactFormNew />
             </div>
-            
-            {/* FAQ Accordion replacing the form */}
-            <div className="flex-1 bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-2xl font-semibold mb-4">{processedData.faqSectionTitle || 'Frequently Asked Questions'}</h2>
-              {processedData.faqItems && processedData.faqItems.length > 0 ? (
-                <Accordion type="single" collapsible className="w-full">
-                  {processedData.faqItems.map((faq, index) => (
-                    <AccordionItem key={faq.id || `faq-${index}`} value={faq.id || `faq-${index}`}>
-                      <AccordionTrigger className="text-left text-base">
-                        {faq.question}
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="text-sm">{renderRichText(faq.answer)}</div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
+          </div>
+          
+          <div>
+            <h2 className="text-2xl font-semibold mb-6">Frequently Asked Questions</h2>
+            <div className="bg-white rounded-lg shadow-md p-2">
+              {faqs && faqs.length > 0 ? (
+                <FAQSection faqs={faqs} />
               ) : (
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="faq-1">
-                    <AccordionTrigger className="text-left text-base">
-                      What types of businesses use your vending solutions?
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="text-sm">Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.</div>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="faq-2">
-                    <AccordionTrigger className="text-left text-base">
-                      How quickly can your solutions be deployed?
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="text-sm">Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.</div>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="faq-3">
-                    <AccordionTrigger className="text-left text-base">
-                      Do you offer installation and maintenance services?
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="text-sm">Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.</div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                <div className="p-6 text-center text-gray-500">
+                  <p>No FAQs available at this time.</p>
+                </div>
               )}
             </div>
           </div>
         </div>
       </div>
-      
-      {/* Simple Contact CTA at the bottom */}
-      <SimpleContactCTA 
-        title="Ready to Get in Touch?" 
-        description="Our team is ready to help you find the perfect vending solution for your business."
-        className="w-full"
-      />
     </Layout>
   );
 };

@@ -1,6 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchContentfulEntries, fetchContentfulEntry } from '../services/cms/utils/contentfulClient';
+import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/contentful/client';
 import { toast } from 'sonner';
 
 // Define types for machine content from Contentful
@@ -34,37 +34,45 @@ export interface ContentfulMachine {
 }
 
 // Map Contentful machine to our app's machine format
-export const mapContentfulMachine = (machine: ContentfulMachine) => {
+export const mapContentfulMachine = (machine: any): ContentfulMachine => {
+  const fields = machine.fields || {};
+  
   // Process images to match our expected format
-  const processedImages = machine.images?.map(image => ({
-    url: `https:${image.fields.file.url}`,
-    alt: image.fields.title || machine.title
+  const processedImages = fields.images?.map((image: any) => ({
+    fields: {
+      file: {
+        url: image.fields?.file?.url || ''
+      },
+      title: image.fields?.title || fields.title || 'Machine image',
+      description: image.fields?.description || ''
+    }
   })) || [];
 
   // Process specifications into a consolidated object
   const specs: Record<string, string> = {
-    ...(machine.dimensions ? { dimensions: machine.dimensions } : {}),
-    ...(machine.weight ? { weight: machine.weight } : {}),
-    ...(machine.powerRequirements ? { powerRequirements: machine.powerRequirements } : {}),
-    ...(machine.capacity ? { capacity: machine.capacity } : {}),
-    ...(machine.paymentOptions ? { paymentOptions: machine.paymentOptions } : {}),
-    ...(machine.connectivity ? { connectivity: machine.connectivity } : {}),
-    ...(machine.manufacturer ? { manufacturer: machine.manufacturer } : {}),
-    ...(machine.warranty ? { warranty: machine.warranty } : {}),
-    ...(machine.specs || {})
+    ...(fields.dimensions ? { dimensions: fields.dimensions } : {}),
+    ...(fields.weight ? { weight: fields.weight } : {}),
+    ...(fields.powerRequirements ? { powerRequirements: fields.powerRequirements } : {}),
+    ...(fields.capacity ? { capacity: fields.capacity } : {}),
+    ...(fields.paymentOptions ? { paymentOptions: fields.paymentOptions } : {}),
+    ...(fields.connectivity ? { connectivity: fields.connectivity } : {}),
+    ...(fields.manufacturer ? { manufacturer: fields.manufacturer } : {}),
+    ...(fields.warranty ? { warranty: fields.warranty } : {}),
+    ...(fields.specs || {})
   };
 
   return {
-    id: machine.id,
-    title: machine.title,
-    slug: machine.slug,
-    type: machine.type,
-    temperature: machine.temperature || 'ambient',
-    description: machine.description,
-    features: machine.features || [],
+    id: machine.sys?.id || 'unknown-id',
+    title: fields.title || 'Untitled Machine',
+    slug: fields.slug || 'untitled-machine',
+    type: fields.type || 'vending',
+    temperature: fields.temperature || 'ambient',
+    description: fields.description || '',
+    features: Array.isArray(fields.features) ? fields.features : [],
     images: processedImages,
     specs: specs,
-    visible: machine.visible !== false, // Default to true if not specified
+    visible: fields.visible !== false,
+    ...specs
   };
 };
 
@@ -74,9 +82,9 @@ export function useContentfulMachines() {
     queryKey: ['contentful', 'machines'],
     queryFn: async () => {
       try {
-        const machines = await fetchContentfulEntries<ContentfulMachine>('machine');
-        console.log('Fetched machines from Contentful:', machines);
-        return machines.map(mapContentfulMachine);
+        const response = await fetchContentfulEntries('machine', {});
+        console.log('Fetched machines from Contentful:', response);
+        return response.items.map(mapContentfulMachine);
       } catch (error) {
         console.error('Error fetching machines from Contentful:', error);
         toast.error('Failed to fetch machines');
@@ -100,10 +108,10 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         if (idOrSlug.length > 10) {
           try {
             console.log('Trying to fetch by direct ID:', idOrSlug);
-            const machine = await fetchContentfulEntry<ContentfulMachine>(idOrSlug);
-            if (machine) {
-              console.log('Found machine by ID:', machine);
-              return mapContentfulMachine(machine);
+            const response = await fetchContentfulEntry('machine', idOrSlug);
+            if (response) {
+              console.log('Found machine by ID:', response);
+              return mapContentfulMachine(response);
             }
           } catch (idError) {
             console.log('Could not fetch by direct ID, will try by slug next');
@@ -112,19 +120,19 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         
         // Then try by slug
         console.log('Trying to fetch by slug field:', idOrSlug);
-        const machines = await fetchContentfulEntries<ContentfulMachine>('machine', {
+        const response = await fetchContentfulEntries('machine', {
           'fields.slug': idOrSlug
         });
         
-        if (machines.length === 0) {
+        if (response.items.length === 0) {
           // Special case for divi-wp with known ID
           if (idOrSlug === 'divi-wp') {
             try {
               console.log('Special case: Trying to fetch divi-wp with known ID');
-              const diviWpMachine = await fetchContentfulEntry<ContentfulMachine>('1omUbnEhB6OeBFpwPFj1Ww');
-              if (diviWpMachine) {
-                console.log('Found divi-wp with known ID:', diviWpMachine);
-                return mapContentfulMachine(diviWpMachine);
+              const response = await fetchContentfulEntry('machine', '1omUbnEhB6OeBFpwPFj1Ww');
+              if (response) {
+                console.log('Found divi-wp with known ID:', response);
+                return mapContentfulMachine(response);
               }
             } catch (knownIdError) {
               console.error('Could not fetch divi-wp with known ID:', knownIdError);
@@ -135,8 +143,8 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
           return null;
         }
         
-        console.log('Found machine by slug:', machines[0]);
-        return mapContentfulMachine(machines[0]);
+        console.log('Found machine by slug:', response.items[0]);
+        return mapContentfulMachine(response.items[0]);
       } catch (error) {
         console.error(`Error fetching machine with slug or ID ${idOrSlug}:`, error);
         toast.error(`Failed to load machine data: ${error instanceof Error ? error.message : 'Unknown error'}`);
