@@ -1,73 +1,49 @@
 
 import { Entry, Asset } from 'contentful';
-import { CMSTestimonial } from '@/types/cms';
-
-interface AssetDetails {
-  url: string;
-  fileName?: string;
-  contentType?: string;
-  details?: {
-    size?: number;
-    image?: {
-      width?: number;
-      height?: number;
-    };
-  };
-}
-
-interface AssetFile {
-  url: string;
-  details?: {
-    size?: number;
-    image?: {
-      width?: number;
-      height?: number;
-    };
-  };
-  fileName?: string;
-  contentType?: string;
-}
+import { Testimonial } from '@/types/cms';
 
 /**
- * Transform Contentful asset to URL
+ * Safely access nested Contentful fields
  */
-export function transformContentfulAsset(asset: Asset | undefined): string {
-  if (!asset || !asset.fields || !asset.fields.file) {
-    return '';
+const getField = <T>(entry: any, fieldPath: string, defaultValue: T): T => {
+  try {
+    const paths = fieldPath.split('.');
+    let value = entry?.fields;
+    
+    for (const path of paths) {
+      if (value && typeof value === 'object' && path in value) {
+        value = value[path];
+      } else {
+        return defaultValue;
+      }
+    }
+    
+    return value !== undefined && value !== null ? value : defaultValue;
+  } catch (e) {
+    console.error(`Error accessing field ${fieldPath}:`, e);
+    return defaultValue;
   }
-  
-  const file = asset.fields.file;
-  let fileUrl = '';
-  
-  if (typeof file === 'string') {
-    fileUrl = file;
-  } else if (typeof file.url === 'string') {
-    fileUrl = file.url;
-  }
-  
-  // Make sure URLs are absolute
-  if (fileUrl && typeof fileUrl === 'string' && fileUrl.startsWith('//')) {
-    return `https:${fileUrl}`;
-  }
-  
-  return fileUrl;
-}
+};
 
 /**
- * Transform a Contentful testimonial entry to our application's CMSTestimonial type
+ * Transform a Contentful testimonial entry to our application's Testimonial type
  */
-export function transformContentfulTestimonial(entry: Entry<any>): CMSTestimonial {
-  const fields = entry.fields;
+export function transformContentfulTestimonial(entry: Entry<any>): Testimonial {
+  // Get image URL if present
+  let imageUrl: string | undefined = undefined;
+  const image = getField<any>(entry, 'image', null);
   
-  const testimonial: CMSTestimonial = {
+  if (image && image.fields && image.fields.file && image.fields.file.url) {
+    imageUrl = `https:${image.fields.file.url}`;
+  }
+  
+  return {
     id: entry.sys.id,
-    quote: fields.quote || '',
-    author: fields.author || 'Anonymous',
-    company: fields.company || undefined,
-    position: fields.position || undefined,
-    avatar_url: fields.avatar ? transformContentfulAsset(fields.avatar) : undefined,
-    logo_url: fields.companyLogo ? transformContentfulAsset(fields.companyLogo) : undefined,
+    quote: getField(entry, 'quote', ''),
+    author: getField(entry, 'author', ''),
+    company: getField(entry, 'company', ''),
+    position: getField(entry, 'position', ''),
+    image_url: imageUrl,
+    visible: getField(entry, 'visible', true),
   };
-  
-  return testimonial;
 }

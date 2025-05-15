@@ -1,36 +1,26 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { createClient } from "contentful";
-import { transformTestimonial, ContentfulTestimonial } from "./transformers/testimonialTransformer";
-import { CMSTestimonial } from "@/types/cms";
-
-// Create Contentful client using environment variables
-const contentfulClient = createClient({
-  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID || "",
-  accessToken: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || "",
-  environment: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || "master",
-});
+import { useQuery } from '@tanstack/react-query';
+import { contentfulClient } from '@/integrations/contentful/client';
+import { transformContentfulTestimonial } from './transformers/testimonialTransformer';
+import { Testimonial } from '@/types/cms';
 
 /**
- * Hook to fetch all testimonials from Contentful
+ * Hook to fetch testimonials from Contentful
  */
 export function useContentfulTestimonials() {
   return useQuery({
-    queryKey: ["contentful", "testimonials"],
-    queryFn: async (): Promise<CMSTestimonial[]> => {
+    queryKey: ['contentful', 'testimonials'],
+    queryFn: async (): Promise<Testimonial[]> => {
       try {
         const response = await contentfulClient.getEntries({
-          content_type: "testimonial",
-          "fields.visible": true
+          content_type: 'testimonial',
+          order: ['fields.author'],
         });
-
-        // Transform Contentful entries to our internal format
-        return response.items.map((entry) => 
-          transformTestimonial(entry as unknown as ContentfulTestimonial)
-        );
+        
+        return response.items.map(entry => transformContentfulTestimonial(entry));
       } catch (error) {
-        console.error("Error fetching testimonials from Contentful:", error);
-        throw error;
+        console.error('Error fetching testimonials from Contentful:', error);
+        return [];
       }
     },
   });

@@ -1,75 +1,74 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { createClient } from 'contentful';
+import { contentfulClient } from '@/integrations/contentful/client';
 import { CMSTechnology } from '@/types/cms';
 
-// Contentful client setup
-const client = createClient({
-  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
-  accessToken: import.meta.env.VITE_CONTENTFUL_DELIVERY_API_KEY || '',
-});
-
-// Transform Contentful technology entry to our CMSTechnology type
-const transformTechnology = (entry: any): CMSTechnology => {
+/**
+ * Transform a Contentful technology entry to our application's CMSTechnology type
+ */
+function transformContentfulTechnology(entry: any): CMSTechnology {
+  const imageUrl = entry.fields.image?.fields?.file?.url 
+    ? `https:${entry.fields.image.fields.file.url}` 
+    : undefined;
+  
   return {
     id: entry.sys.id,
     title: entry.fields.title || 'Untitled Technology',
     slug: entry.fields.slug || '',
     description: entry.fields.description || '',
-    image_url: entry.fields.image?.fields?.file?.url 
-      ? `https:${entry.fields.image.fields.file.url}` 
-      : undefined,
-    image_alt: entry.fields.imageAlt || '',
-    // You can add more fields as needed
+    image_url: imageUrl,
+    image_alt: entry.fields.imageAlt || entry.fields.title || '',
+    content: entry.fields.content || '',
+    visible: entry.fields.visible !== false, // Default to visible if not specified
   };
-};
+}
 
 /**
- * Hook to fetch all technologies
+ * Hook to fetch technologies from Contentful
  */
 export function useContentfulTechnologies() {
   return useQuery({
-    queryKey: ['technologies'],
-    queryFn: async () => {
+    queryKey: ['contentful', 'technologies'],
+    queryFn: async (): Promise<CMSTechnology[]> => {
       try {
-        const entries = await client.getEntries({
+        const response = await contentfulClient.getEntries({
           content_type: 'technology',
           order: ['fields.title'],
         });
         
-        return entries.items.map(transformTechnology);
+        return response.items.map(transformContentfulTechnology);
       } catch (error) {
-        console.error('Failed to fetch technologies:', error);
-        throw error;
+        console.error('Error fetching technologies from Contentful:', error);
+        return [];
       }
-    }
+    },
   });
 }
 
 /**
- * Hook to fetch a technology by slug
+ * Hook to fetch a single technology by slug from Contentful
  */
 export function useContentfulTechnologyBySlug(slug: string | undefined) {
   return useQuery({
-    queryKey: ['technology', slug],
-    queryFn: async () => {
+    queryKey: ['contentful', 'technology', slug],
+    queryFn: async (): Promise<CMSTechnology | null> => {
       if (!slug) return null;
       
       try {
-        const entries = await client.getEntries({
+        const response = await contentfulClient.getEntries({
           content_type: 'technology',
           'fields.slug': slug,
           limit: 1,
         });
         
-        if (!entries.items.length) {
+        if (response.items.length === 0) {
           return null;
         }
         
-        return transformTechnology(entries.items[0]);
+        return transformContentfulTechnology(response.items[0]);
       } catch (error) {
-        console.error(`Failed to fetch technology with slug ${slug}:`, error);
-        throw error;
+        console.error(`Error fetching technology with slug "${slug}" from Contentful:`, error);
+        return null;
       }
     },
     enabled: !!slug,

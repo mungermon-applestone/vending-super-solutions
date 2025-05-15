@@ -1,62 +1,79 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { createClient } from 'contentful';
+import { contentfulClient } from '@/integrations/contentful/client';
 import { BlogPost, AdjacentPost } from '@/types/cms';
 import { transformContentfulBlogPost, transformToAdjacentPost } from './cms/transformers/blogPostTransformer';
 
-// Contentful client setup
-const client = createClient({
-  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
-  accessToken: import.meta.env.VITE_CONTENTFUL_DELIVERY_API_KEY || '',
-});
+interface BlogPostsResponse {
+  posts: BlogPost[];
+  total: number;
+  skip: number;
+  limit: number;
+}
 
 /**
- * Hook to fetch all blog posts
+ * Hook to fetch blog posts from Contentful with pagination
  */
-export function useBlogPosts() {
-  return useQuery({
-    queryKey: ['blogPosts'],
+export function useContentfulBlogPosts(page = 1, limit = 10) {
+  return useQuery<BlogPostsResponse>({
+    queryKey: ['contentful', 'blog-posts', page, limit],
     queryFn: async () => {
       try {
-        const entries = await client.getEntries({
+        const skip = (page - 1) * limit;
+        
+        const response = await contentfulClient.getEntries({
           content_type: 'blogPost',
           'fields.status': 'published',
           order: ['-fields.publishedDate'],
+          skip,
+          limit,
         });
         
-        return entries.items.map(entry => transformContentfulBlogPost(entry));
+        const posts = response.items.map(entry => transformContentfulBlogPost(entry));
+        
+        return {
+          posts,
+          total: response.total,
+          skip: response.skip,
+          limit: response.limit
+        };
       } catch (error) {
-        console.error('Failed to fetch blog posts:', error);
-        throw error;
+        console.error('Error fetching blog posts from Contentful:', error);
+        return {
+          posts: [],
+          total: 0,
+          skip: 0,
+          limit
+        };
       }
-    }
+    },
   });
 }
 
 /**
- * Hook to fetch a blog post by slug
+ * Hook to fetch a single blog post by slug from Contentful
  */
-export function useBlogPostBySlug(slug: string | undefined) {
-  return useQuery({
-    queryKey: ['blogPost', slug],
+export function useContentfulBlogPostBySlug(slug: string | undefined) {
+  return useQuery<BlogPost | null>({
+    queryKey: ['contentful', 'blog-post', slug],
     queryFn: async () => {
       if (!slug) return null;
       
       try {
-        const entries = await client.getEntries({
+        const response = await contentfulClient.getEntries({
           content_type: 'blogPost',
           'fields.slug': slug,
           limit: 1,
         });
         
-        if (!entries.items.length) {
+        if (response.items.length === 0) {
           return null;
         }
         
-        return transformContentfulBlogPost(entries.items[0]);
+        return transformContentfulBlogPost(response.items[0]);
       } catch (error) {
-        console.error(`Failed to fetch blog post with slug ${slug}:`, error);
-        throw error;
+        console.error(`Error fetching blog post with slug "${slug}" from Contentful:`, error);
+        return null;
       }
     },
     enabled: !!slug,
@@ -64,109 +81,76 @@ export function useBlogPostBySlug(slug: string | undefined) {
 }
 
 /**
- * Hook to fetch featured blog posts
+ * Hook to fetch featured blog posts from Contentful
  */
-export function useFeaturedBlogPosts(limit = 3) {
-  return useQuery({
-    queryKey: ['featuredBlogPosts', limit],
+export function useContentfulFeaturedBlogPosts(limit = 3) {
+  return useQuery<BlogPost[]>({
+    queryKey: ['contentful', 'featured-blog-posts', limit],
     queryFn: async () => {
       try {
-        const entries = await client.getEntries({
+        const response = await contentfulClient.getEntries({
           content_type: 'blogPost',
           'fields.status': 'published',
+          'fields.featured': true,
           order: ['-fields.publishedDate'],
           limit,
         });
         
-        return entries.items.map(entry => transformContentfulBlogPost(entry));
+        return response.items.map(entry => transformContentfulBlogPost(entry));
       } catch (error) {
-        console.error('Failed to fetch featured blog posts:', error);
-        throw error;
+        console.error('Error fetching featured blog posts from Contentful:', error);
+        return [];
       }
-    }
+    },
   });
 }
 
 /**
- * Hook to fetch adjacent blog posts (previous and next)
+ * Hook to fetch adjacent (previous/next) blog posts from Contentful
  */
-export function useAdjacentBlogPosts(currentSlug: string | undefined) {
-  return useQuery({
-    queryKey: ['adjacentBlogPosts', currentSlug],
+export function useContentfulAdjacentBlogPosts(currentSlug: string | undefined) {
+  return useQuery<{ previous: AdjacentPost | null; next: AdjacentPost | null }>({
+    queryKey: ['contentful', 'adjacent-blog-posts', currentSlug],
     queryFn: async () => {
-      if (!currentSlug) return { prev: null, next: null };
+      if (!currentSlug) {
+        return { previous: null, next: null };
+      }
       
       try {
         // Get all published posts ordered by date
-        const entries = await client.getEntries({
+        const response = await contentfulClient.getEntries({
           content_type: 'blogPost',
           'fields.status': 'published',
           order: ['-fields.publishedDate'],
           select: 'sys.id,fields.title,fields.slug,fields.publishedDate',
         });
         
-        const posts = entries.items;
-        
-        // Find the index of the current post
-        const currentIndex = posts.findIndex(post => post.fields.slug === currentSlug);
-        
-        if (currentIndex === -1) {
-          return { prev: null, next: null };
+        if (response.items.length === 0) {
+          return { previous: null, next: null };
         }
         
-        // Get adjacent posts
-        const prevPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
-        const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+        // Find current post index
+        const currentIndex = response.items.findIndex(
+          (item) => item.fields.slug === currentSlug
+        );
+        
+        if (currentIndex === -1) {
+          return { previous: null, next: null };
+        }
+        
+        // Get previous and next posts
+        const previousPost = currentIndex > 0 ? response.items[currentIndex - 1] : null;
+        const nextPost = currentIndex < response.items.length - 1 ? response.items[currentIndex + 1] : null;
         
         return {
-          prev: prevPost ? transformToAdjacentPost(prevPost) : null,
+          previous: previousPost ? transformToAdjacentPost(previousPost) : null,
           next: nextPost ? transformToAdjacentPost(nextPost) : null,
         };
       } catch (error) {
-        console.error(`Failed to fetch adjacent posts for ${currentSlug}:`, error);
-        throw error;
+        console.error('Error fetching adjacent blog posts from Contentful:', error);
+        return { previous: null, next: null };
       }
     },
     enabled: !!currentSlug,
   });
-}
-
-/**
- * These functions below are stubs for preserving API compatibility
- * They will be removed in a future update
- */
-export function useCreateBlogPost() {
-  return {
-    mutateAsync: async () => {
-      throw new Error('Legacy CMS operations are no longer supported. Please use Contentful directly.');
-    },
-    isPending: false
-  };
-}
-
-export function useUpdateBlogPost() {
-  return {
-    mutateAsync: async () => {
-      throw new Error('Legacy CMS operations are no longer supported. Please use Contentful directly.');
-    },
-    isPending: false
-  };
-}
-
-export function useDeleteBlogPost() {
-  return {
-    mutateAsync: async () => {
-      throw new Error('Legacy CMS operations are no longer supported. Please use Contentful directly.');
-    },
-    isPending: false
-  };
-}
-
-export function useCloneBlogPost() {
-  return {
-    mutateAsync: async () => {
-      throw new Error('Legacy CMS operations are no longer supported. Please use Contentful directly.');
-    },
-    isPending: false
-  };
 }

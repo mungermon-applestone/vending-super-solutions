@@ -2,43 +2,27 @@
 /**
  * CMS Hooks
  * 
- * This file re-exports all CMS hooks for easy access
+ * This file exports all Contentful CMS hooks
  */
 
-// Business Goals
-import { 
-  useContentfulBusinessGoals, 
-  useContentfulBusinessGoalBySlug 
-} from './useContentfulBusinessGoals';
-
-// Testimonials
-import { useContentfulTestimonials } from './useContentfulTestimonials';
-
-// Blog
+// Blog Posts
 import { 
   useContentfulBlogPosts, 
   useContentfulBlogPostBySlug,
   useContentfulFeaturedBlogPosts,
   useContentfulAdjacentBlogPosts
-} from './useContentfulBlogPosts';
+} from '@/hooks/useBlogData';
 
-// Legacy hook re-exports for backward compatibility
-import { useBusinessGoals } from './useBusinessGoals';
-import { useTestimonials } from './useTestimonials';
+// Testimonials
+import { useContentfulTestimonials } from './useContentfulTestimonials';
 
 export {
-  // Business Goals
-  useContentfulBusinessGoals,
-  useContentfulBusinessGoalBySlug,
-  useBusinessGoals,
-  
-  // Testimonials
-  useContentfulTestimonials,
-  useTestimonials,
-  
-  // Blog
+  // Blog Posts
   useContentfulBlogPosts,
   useContentfulBlogPostBySlug,
   useContentfulFeaturedBlogPosts,
-  useContentfulAdjacentBlogPosts
+  useContentfulAdjacentBlogPosts,
+  
+  // Testimonials
+  useContentfulTestimonials,
 };

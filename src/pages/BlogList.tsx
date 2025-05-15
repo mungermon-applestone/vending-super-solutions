@@ -1,91 +1,63 @@
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
 import Layout from '@/components/layout/Layout';
-import { useBlogPosts } from '@/hooks/useBlogData';
-import { BlogPost } from '@/types/cms';
-import { format } from 'date-fns';
-import { Pagination } from '@/components/ui/pagination';
+import { Link } from 'react-router-dom';
+import BlogCard from '@/components/blog/BlogCard';
+import Pagination from '@/components/ui/Pagination';
+import { useContentfulBlogPosts } from '@/hooks/useBlogData';
+import { useSearchParams } from 'react-router-dom';
 
-const POSTS_PER_PAGE = 10;
-
-const BlogList = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const offset = (currentPage - 1) * POSTS_PER_PAGE;
+const BlogList: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
   
-  const { data, isLoading, error } = useBlogPosts({
-    status: 'published',
-    limit: POSTS_PER_PAGE,
-    offset
-  });
-  
-  const totalPages = data ? Math.ceil(data.total / POSTS_PER_PAGE) : 0;
-  const blogPosts = data?.posts || [];
+  const { data, isLoading, isError } = useContentfulBlogPosts(currentPage);
   
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo(0, 0);
+    setSearchParams({ page: page.toString() });
   };
   
+  const totalPages = data ? Math.ceil(data.total / data.limit) : 0;
+
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold mb-8">Blog</h1>
-        
-        {isLoading && (
-          <div className="flex justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div className="container mx-auto py-10 px-4">
+        <header className="mb-10">
+          <h1 className="text-3xl font-bold mb-2">Blog</h1>
+          <p className="text-gray-600">
+            Latest news, insights, and updates from our team
+          </p>
+        </header>
+
+        {isLoading ? (
+          <div className="flex justify-center py-10">
+            <p>Loading blog posts...</p>
           </div>
-        )}
-        
-        {error && (
-          <div className="bg-red-50 text-red-700 p-6 rounded-lg mb-8">
-            <h3 className="text-lg font-medium">Error loading blog posts</h3>
-            <p>Please try again later.</p>
+        ) : isError ? (
+          <div className="text-center py-10">
+            <h3 className="text-xl font-medium text-red-600 mb-2">Error loading blog posts</h3>
+            <p className="text-gray-600">Please try again later.</p>
           </div>
-        )}
-        
-        {!isLoading && !error && blogPosts.length > 0 ? (
-          <div className="grid gap-12">
-            {blogPosts.map((post: BlogPost) => (
-              <div key={post.id} className="border-b pb-10">
-                <div className="mb-4">
-                  <span className="text-sm text-gray-600">
-                    {post.publishedDate ? format(new Date(post.publishedDate), 'MMMM d, yyyy') : 'Draft'}
-                  </span>
-                  {post.category && (
-                    <span className="ml-3 bg-blue-50 text-blue-700 py-1 px-2 rounded text-xs font-medium">
-                      {post.category}
-                    </span>
-                  )}
-                </div>
-                
-                <h2 className="text-2xl font-bold mb-3">
-                  <Link to={`/blog/${post.slug}`} className="text-blue-600 hover:text-blue-800">
-                    {post.title}
-                  </Link>
-                </h2>
-                
-                {post.summary && <p className="text-gray-700 mb-4">{post.summary}</p>}
-                
-                <Link 
-                  to={`/blog/${post.slug}`} 
-                  className="text-blue-600 hover:underline font-medium"
-                >
-                  Read more →
-                </Link>
-              </div>
+        ) : data?.posts && data.posts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {data.posts.map((post) => (
+              <BlogCard key={post.id} post={post} />
             ))}
           </div>
-        ) : !isLoading && !error ? (
-          <div className="text-center py-16">
-            <h3 className="text-xl font-medium text-gray-600 mb-2">No posts yet</h3>
-            <p className="text-gray-500">Check back soon for new content!</p>
+        ) : (
+          <div className="text-center py-10">
+            <h3 className="text-xl font-medium mb-2">No blog posts found</h3>
+            <p className="text-gray-600 mb-6">
+              Check back later for new content.
+            </p>
+            <Link to="/" className="text-blue-600 hover:underline">
+              Return to homepage
+            </Link>
           </div>
-        ) : null}
-        
-        {totalPages > 1 && (
-          <div className="mt-12 flex justify-center">
+        )}
+
+        {data && totalPages > 1 && (
+          <div className="mt-10">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
