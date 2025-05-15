@@ -1,15 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { createClient } from "contentful";
-import { transformBusinessGoal, ContentfulBusinessGoal } from "./transformers/businessGoalTransformer";
+import { contentfulClient } from "@/integrations/contentful/client";
 import { CMSBusinessGoal } from "@/types/cms";
-
-// Create Contentful client using environment variables
-const contentfulClient = createClient({
-  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID || "",
-  accessToken: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || "",
-  environment: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || "master",
-});
 
 /**
  * Hook to fetch all business goals from Contentful
@@ -25,9 +17,30 @@ export function useContentfulBusinessGoals() {
         });
 
         // Transform Contentful entries to our internal format
-        return response.items.map((entry) => 
-          transformBusinessGoal(entry as unknown as ContentfulBusinessGoal)
-        );
+        return response.items.map((entry) => {
+          const fields = entry.fields;
+          
+          return {
+            id: entry.sys.id,
+            title: fields.title || '',
+            slug: fields.slug || '',
+            description: fields.description || '',
+            icon: fields.icon || '',
+            image: fields.image ? {
+              id: (fields.image as any).sys.id,
+              url: `https:${(fields.image as any).fields.file.url}`,
+              alt: (fields.image as any).fields.title || '',
+            } : undefined,
+            benefits: fields.benefits || [],
+            features: fields.features ? (fields.features as any[]).map(feature => ({
+              id: feature.sys.id,
+              title: feature.fields.title || '',
+              description: feature.fields.description || '',
+              icon: feature.fields.icon || ''
+            })) : [],
+            visible: fields.visible !== false,
+          };
+        });
       } catch (error) {
         console.error("Error fetching business goals from Contentful:", error);
         throw error;
@@ -38,7 +51,6 @@ export function useContentfulBusinessGoals() {
 
 /**
  * Hook to fetch a single business goal by slug from Contentful
- * @param slug The slug of the business goal to fetch
  */
 export function useContentfulBusinessGoalBySlug(slug: string | undefined) {
   return useQuery({
@@ -58,9 +70,29 @@ export function useContentfulBusinessGoalBySlug(slug: string | undefined) {
         }
 
         // Transform the entry to our internal format
-        return transformBusinessGoal(
-          response.items[0] as unknown as ContentfulBusinessGoal
-        );
+        const entry = response.items[0];
+        const fields = entry.fields;
+        
+        return {
+          id: entry.sys.id,
+          title: fields.title || '',
+          slug: fields.slug || '',
+          description: fields.description || '',
+          icon: fields.icon || '',
+          image: fields.image ? {
+            id: (fields.image as any).sys.id,
+            url: `https:${(fields.image as any).fields.file.url}`,
+            alt: (fields.image as any).fields.title || '',
+          } : undefined,
+          benefits: fields.benefits || [],
+          features: fields.features ? (fields.features as any[]).map(feature => ({
+            id: feature.sys.id,
+            title: feature.fields.title || '',
+            description: feature.fields.description || '',
+            icon: feature.fields.icon || ''
+          })) : [],
+          visible: fields.visible !== false,
+        };
       } catch (error) {
         console.error(`Error fetching business goal with slug ${slug}:`, error);
         throw error;

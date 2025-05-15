@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 import { Spinner } from '@/components/ui/spinner';
@@ -5,11 +6,7 @@ import { ErrorBoundary } from '@/components/common';
 
 // Eagerly load critical components
 import ErrorPage from '@/components/ErrorPage';
-import AdminLayout from '@/components/AdminLayout';
 import RootLayout from '@/components/RootLayout';
-
-// Lazy load admin routes to reduce initial bundle size
-import { adminRoutes } from '@/router/adminRoutes';
 
 // Loading fallback with transition delay to prevent flash
 const PageLoading = () => (
@@ -50,12 +47,7 @@ const Contact = lazy(() => import(/* webpackChunkName: "contact-page" */ '@/page
 const ZhilaiApplestoneAnnouncement = lazy(() => import(/* webpackChunkName: "announcement" */ '@/pages/ZhilaiApplestoneAnnouncement'));
 const PrivacyPolicy = lazy(() => import(/* webpackChunkName: "privacy-policy" */ '@/pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import(/* webpackChunkName: "terms-of-service" */ '@/pages/TermsOfService'));
-
-// Load admin pages separately
-const AdminPage = lazy(() => import(/* webpackChunkName: "admin-home" */ '@/pages/AdminPage'));
-const ContentfulConfigurationPage = lazy(() => import(/* webpackChunkName: "admin-contentful" */ '@/pages/ContentfulConfigurationPage'));
-const EnvironmentVariablesPage = lazy(() => import(/* webpackChunkName: "admin-env" */ '@/pages/admin/EnvironmentVariablesPage'));
-const StrapiSetupPage = lazy(() => import(/* webpackChunkName: "admin-strapi" */ '@/pages/admin/StrapiSetupPage'));
+const AdminPage = lazy(() => import(/* webpackChunkName: "admin-redirect" */ '@/pages/AdminPage'));
 
 // Enhanced wrapper for lazy-loaded components with error boundary
 const LazyPageWithBoundary = ({ component: Component }) => (
@@ -159,32 +151,13 @@ const routes: RouteObject[] = [
         element: <LazyPageWithBoundary component={TermsOfService} />
       },
       {
-        path: '*',
-        element: <LazyPageWithBoundary component={NotFound} />
-      }
-    ]
-  },
-  {
-    path: '/admin',
-    element: <AdminLayout />,
-    children: [
-      {
-        index: true,
+        path: 'admin/*',
         element: <LazyPageWithBoundary component={AdminPage} />
       },
       {
-        path: 'contentful-config',
-        element: <LazyPageWithBoundary component={ContentfulConfigurationPage} />
-      },
-      {
-        path: 'environment-variables',
-        element: <LazyPageWithBoundary component={EnvironmentVariablesPage} />
-      },
-      {
-        path: 'strapi-setup',
-        element: <LazyPageWithBoundary component={StrapiSetupPage} />
-      },
-      ...adminRoutes
+        path: '*',
+        element: <LazyPageWithBoundary component={NotFound} />
+      }
     ]
   }
 ];

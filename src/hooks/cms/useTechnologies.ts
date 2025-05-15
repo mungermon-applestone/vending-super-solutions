@@ -18,7 +18,6 @@ function transformContentfulTechnology(entry: any): CMSTechnology {
     description: entry.fields.description || '',
     image_url: imageUrl,
     image_alt: entry.fields.imageAlt || entry.fields.title || '',
-    content: entry.fields.content || '',
     visible: entry.fields.visible !== false, // Default to visible if not specified
   };
 }

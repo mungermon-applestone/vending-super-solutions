@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { contentfulClient } from '@/integrations/contentful/client';
 import { transformContentfulTestimonial } from './transformers/testimonialTransformer';
-import { Testimonial } from '@/types/cms';
+import { Testimonial } from '@/types/contentful';
 
 /**
  * Hook to fetch testimonials from Contentful

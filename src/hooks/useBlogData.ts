@@ -1,50 +1,26 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { contentfulClient } from '@/integrations/contentful/client';
-import { BlogPost, AdjacentPost } from '@/types/cms';
+import { BlogPost, AdjacentPost } from '@/types/contentful';
 import { transformContentfulBlogPost, transformToAdjacentPost } from './cms/transformers/blogPostTransformer';
 
-interface BlogPostsResponse {
-  posts: BlogPost[];
-  total: number;
-  skip: number;
-  limit: number;
-}
-
 /**
- * Hook to fetch blog posts from Contentful with pagination
+ * Hook to fetch all blog posts from Contentful
  */
-export function useContentfulBlogPosts(page = 1, limit = 10) {
-  return useQuery<BlogPostsResponse>({
-    queryKey: ['contentful', 'blog-posts', page, limit],
-    queryFn: async () => {
+export function useContentfulBlogPosts() {
+  return useQuery({
+    queryKey: ['contentful', 'blogPosts'],
+    queryFn: async (): Promise<BlogPost[]> => {
       try {
-        const skip = (page - 1) * limit;
-        
         const response = await contentfulClient.getEntries({
           content_type: 'blogPost',
-          'fields.status': 'published',
           order: ['-fields.publishedDate'],
-          skip,
-          limit,
         });
         
-        const posts = response.items.map(entry => transformContentfulBlogPost(entry));
-        
-        return {
-          posts,
-          total: response.total,
-          skip: response.skip,
-          limit: response.limit
-        };
+        return response.items.map(entry => transformContentfulBlogPost(entry));
       } catch (error) {
         console.error('Error fetching blog posts from Contentful:', error);
-        return {
-          posts: [],
-          total: 0,
-          skip: 0,
-          limit
-        };
+        return [];
       }
     },
   });
@@ -54,9 +30,9 @@ export function useContentfulBlogPosts(page = 1, limit = 10) {
  * Hook to fetch a single blog post by slug from Contentful
  */
 export function useContentfulBlogPostBySlug(slug: string | undefined) {
-  return useQuery<BlogPost | null>({
-    queryKey: ['contentful', 'blog-post', slug],
-    queryFn: async () => {
+  return useQuery({
+    queryKey: ['contentful', 'blogPost', slug],
+    queryFn: async (): Promise<BlogPost | null> => {
       if (!slug) return null;
       
       try {
@@ -81,16 +57,62 @@ export function useContentfulBlogPostBySlug(slug: string | undefined) {
 }
 
 /**
+ * Hook to fetch adjacent blog posts for navigation from Contentful
+ */
+export function useContentfulAdjacentBlogPosts(currentSlug: string | undefined) {
+  return useQuery({
+    queryKey: ['contentful', 'adjacentPosts', currentSlug],
+    queryFn: async (): Promise<{prev: AdjacentPost | null, next: AdjacentPost | null}> => {
+      if (!currentSlug) {
+        return { prev: null, next: null };
+      }
+      
+      try {
+        // Get all posts to find the current post's position
+        const response = await contentfulClient.getEntries({
+          content_type: 'blogPost',
+          order: ['-fields.publishedDate'],
+          select: 'sys.id,fields.title,fields.slug,fields.publishedDate',
+        });
+        
+        const posts = response.items;
+        const currentIndex = posts.findIndex(post => post.fields.slug === currentSlug);
+        
+        if (currentIndex === -1) {
+          return { prev: null, next: null };
+        }
+        
+        const prevPost = currentIndex < posts.length - 1 
+          ? transformToAdjacentPost(posts[currentIndex + 1]) 
+          : null;
+          
+        const nextPost = currentIndex > 0 
+          ? transformToAdjacentPost(posts[currentIndex - 1]) 
+          : null;
+        
+        return {
+          prev: prevPost,
+          next: nextPost
+        };
+      } catch (error) {
+        console.error('Error fetching adjacent posts from Contentful:', error);
+        return { prev: null, next: null };
+      }
+    },
+    enabled: !!currentSlug,
+  });
+}
+
+/**
  * Hook to fetch featured blog posts from Contentful
  */
 export function useContentfulFeaturedBlogPosts(limit = 3) {
-  return useQuery<BlogPost[]>({
-    queryKey: ['contentful', 'featured-blog-posts', limit],
-    queryFn: async () => {
+  return useQuery({
+    queryKey: ['contentful', 'featuredBlogPosts', limit],
+    queryFn: async (): Promise<BlogPost[]> => {
       try {
         const response = await contentfulClient.getEntries({
           content_type: 'blogPost',
-          'fields.status': 'published',
           'fields.featured': true,
           order: ['-fields.publishedDate'],
           limit,
@@ -102,55 +124,5 @@ export function useContentfulFeaturedBlogPosts(limit = 3) {
         return [];
       }
     },
-  });
-}
-
-/**
- * Hook to fetch adjacent (previous/next) blog posts from Contentful
- */
-export function useContentfulAdjacentBlogPosts(currentSlug: string | undefined) {
-  return useQuery<{ previous: AdjacentPost | null; next: AdjacentPost | null }>({
-    queryKey: ['contentful', 'adjacent-blog-posts', currentSlug],
-    queryFn: async () => {
-      if (!currentSlug) {
-        return { previous: null, next: null };
-      }
-      
-      try {
-        // Get all published posts ordered by date
-        const response = await contentfulClient.getEntries({
-          content_type: 'blogPost',
-          'fields.status': 'published',
-          order: ['-fields.publishedDate'],
-          select: 'sys.id,fields.title,fields.slug,fields.publishedDate',
-        });
-        
-        if (response.items.length === 0) {
-          return { previous: null, next: null };
-        }
-        
-        // Find current post index
-        const currentIndex = response.items.findIndex(
-          (item) => item.fields.slug === currentSlug
-        );
-        
-        if (currentIndex === -1) {
-          return { previous: null, next: null };
-        }
-        
-        // Get previous and next posts
-        const previousPost = currentIndex > 0 ? response.items[currentIndex - 1] : null;
-        const nextPost = currentIndex < response.items.length - 1 ? response.items[currentIndex + 1] : null;
-        
-        return {
-          previous: previousPost ? transformToAdjacentPost(previousPost) : null,
-          next: nextPost ? transformToAdjacentPost(nextPost) : null,
-        };
-      } catch (error) {
-        console.error('Error fetching adjacent blog posts from Contentful:', error);
-        return { previous: null, next: null };
-      }
-    },
-    enabled: !!currentSlug,
   });
 }

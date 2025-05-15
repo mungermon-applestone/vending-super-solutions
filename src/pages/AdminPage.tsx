@@ -1,13 +1,14 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Info } from 'lucide-react';
 
-// Get Contentful space URL from environment variable
-const CONTENTFUL_SPACE_URL = import.meta.env.VITE_CONTENTFUL_SPACE_URL || 'https://app.contentful.com/';
+// Get Contentful space URL from environment variable or use default
+const CONTENTFUL_SPACE_URL = import.meta.env.VITE_CONTENTFUL_SPACE_URL || 
+  `https://app.contentful.com/spaces/${import.meta.env.VITE_CONTENTFUL_SPACE_ID}`;
 
 const AdminPage: React.FC = () => {
   // Redirect to Contentful web app

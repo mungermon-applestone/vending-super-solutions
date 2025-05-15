@@ -1,6 +1,6 @@
 
 import { Entry, Asset } from 'contentful';
-import { BlogPost, AdjacentPost } from '@/types/cms';
+import { BlogPost, AdjacentPost } from '@/types/contentful';
 
 /**
  * Safely access nested Contentful fields
