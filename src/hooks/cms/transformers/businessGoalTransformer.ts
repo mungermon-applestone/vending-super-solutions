@@ -1,78 +1,71 @@
 
-import { isContentfulEntry, isContentfulAsset } from '@/services/cms/utils/contentfulHelpers';
-import { safeString, safeArrayField } from '@/services/cms/utils/safeTypeUtilities';
-import { CMSBusinessGoal, CMSImage, CMSFeature } from '@/types/cms';
-import { Entry, EntrySkeletonType } from 'contentful';
+import { ContentfulBusinessGoal } from '@/types/contentful';
+import { CMSBusinessGoal, CMSFeature, CMSImage } from '@/types/cms';
 
 /**
- * Transform a Contentful business goal entry to our app's format
+ * Transform a Contentful business goal to our app's format
  */
-export function transformBusinessGoal(entry: Entry<EntrySkeletonType, undefined, string>): CMSBusinessGoal | null {
-  if (!isContentfulEntry(entry)) {
-    console.error('[transformBusinessGoal] Invalid entry:', entry);
-    return null;
-  }
-  
-  const fields = entry.fields;
-  
-  // Extract image data if present
+export function transformBusinessGoalFromContentful(contentfulGoal: ContentfulBusinessGoal): CMSBusinessGoal {
+  // Extract image data safely
   let image: CMSImage | undefined = undefined;
-  if (fields.image && isContentfulAsset(fields.image)) {
+  if (contentfulGoal.fields.image) {
+    const imageData = contentfulGoal.fields.image;
     image = {
-      id: fields.image.sys?.id,
-      url: `https:${fields.image.fields?.file?.url || ''}`,
-      alt: safeString(fields.image.fields?.title || fields.title || ''),
-      width: fields.image.fields?.file?.details?.image?.width,
-      height: fields.image.fields?.file?.details?.image?.height
+      id: imageData.sys.id,
+      url: `https:${imageData.fields.file.url}`,
+      alt: imageData.fields.title || contentfulGoal.fields.title,
+      width: imageData.fields.file.details?.image?.width,
+      height: imageData.fields.file.details?.image?.height
     };
   }
   
-  // Extract benefits
-  const benefits = safeArrayField(fields, 'benefits')
-    .map((benefit: any) => safeString(benefit))
-    .filter(Boolean);
-  
-  // Extract and transform features (these could be links to other entries)
-  const features = safeArrayField(fields, 'features')
-    .map((feature: any) => {
-      if (isContentfulEntry(feature)) {
-        const featureFields = feature.fields;
+  // Transform features safely
+  const features: CMSFeature[] = [];
+  if (contentfulGoal.fields.features && Array.isArray(contentfulGoal.fields.features)) {
+    contentfulGoal.fields.features.forEach(feature => {
+      if (feature && feature.fields) {
+        const featureItem: CMSFeature = {
+          title: feature.fields.title || '',
+          description: feature.fields.description || '',
+          icon: feature.fields.icon
+        };
         
-        // Create a screenshot object if present
-        let screenshot = undefined;
-        if (featureFields.screenshot && isContentfulAsset(featureFields.screenshot)) {
-          screenshot = {
-            id: featureFields.screenshot.sys?.id,
-            url: `https:${featureFields.screenshot.fields?.file?.url || ''}`,
-            alt: safeString(featureFields.screenshot.fields?.title || featureFields.title || ''),
-            width: featureFields.screenshot.fields?.file?.details?.image?.width,
-            height: featureFields.screenshot.fields?.file?.details?.image?.height
+        // Add screenshot if available
+        if (feature.fields.screenshot) {
+          featureItem.screenshot = {
+            url: `https:${feature.fields.screenshot.fields.file.url}`,
+            alt: feature.fields.screenshot.fields.title || feature.fields.title || '',
+            width: feature.fields.screenshot.fields.file.details?.image?.width,
+            height: feature.fields.screenshot.fields.file.details?.image?.height
           };
         }
         
-        // Return a properly formatted feature
-        return {
-          title: safeString(featureFields.title),
-          description: safeString(featureFields.description),
-          icon: safeString(featureFields.icon),
-          screenshot
-        } as CMSFeature;
+        features.push(featureItem);
       }
-      return null;
-    })
-    .filter(Boolean) as CMSFeature[];
+    });
+  }
+  
+  // Handle benefits array safely
+  const benefits: string[] = [];
+  if (contentfulGoal.fields.benefits && Array.isArray(contentfulGoal.fields.benefits)) {
+    contentfulGoal.fields.benefits.forEach(benefit => {
+      if (typeof benefit === 'string') {
+        benefits.push(benefit);
+      }
+    });
+  }
   
   return {
-    id: entry.sys.id,
-    title: safeString(fields.title),
-    slug: safeString(fields.slug),
-    description: safeString(fields.description),
-    icon: safeString(fields.icon),
+    id: contentfulGoal.sys.id,
+    title: contentfulGoal.fields.title,
+    slug: contentfulGoal.fields.slug,
+    description: contentfulGoal.fields.description,
+    icon: contentfulGoal.fields.icon,
     image,
     benefits,
     features,
-    visible: fields.visible !== false, // Default to true
-    created_at: entry.sys.createdAt,
-    updated_at: entry.sys.updatedAt
+    visible: contentfulGoal.fields.visible !== false,
+    createdAt: contentfulGoal.sys.createdAt || new Date().toISOString(),
+    updatedAt: contentfulGoal.sys.updatedAt || new Date().toISOString()
   };
 }

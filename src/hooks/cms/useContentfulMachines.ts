@@ -1,170 +1,141 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
-import { isContentfulEntry, isContentfulAsset } from '@/utils/contentfulTypeGuards';
 import { CMSMachine, CMSImage } from '@/types/cms';
-import { safeString } from '@/services/cms/utils/safeTypeUtilities';
+import { ContentfulEntry } from '@/types/contentful/machine';
+import { safeStringArray } from '@/services/cms/utils/safeTypeUtilities';
 
 /**
- * Transform a Contentful machine entry to our CMSMachine format
+ * Transform Contentful machine data to our application's CMSMachine format
  */
-export function transformMachineFromContentful(entry: any): CMSMachine {
-  if (!isContentfulEntry(entry)) {
-    throw new Error('Invalid Contentful entry provided');
-  }
+export function transformMachineFromContentful(entry: ContentfulEntry): CMSMachine {
+  // Extract fields from either format
+  const fields = entry.fields || entry;
   
-  // Get main image URL if it exists
+  // Extract image data if available
   let mainImage: CMSImage | undefined = undefined;
-  
-  if (entry.fields.mainImage && isContentfulAsset(entry.fields.mainImage)) {
-    const imageUrl = entry.fields.mainImage.fields.file?.url || '';
-    // Handle both string formats
-    const fixedImageUrl = imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl;
-    
-    mainImage = {
-      id: entry.fields.mainImage.sys?.id,
-      url: fixedImageUrl,
-      alt: safeString(entry.fields.mainImage.fields.title || entry.fields.title || ''),
-      width: entry.fields.mainImage.fields.file?.details?.image?.width,
-      height: entry.fields.mainImage.fields.file?.details?.image?.height
-    };
-  }
-  
-  // Transform gallery images if they exist
-  const galleryImages: CMSImage[] = [];
-  if (Array.isArray(entry.fields.gallery)) {
-    for (const asset of entry.fields.gallery) {
-      if (isContentfulAsset(asset) && asset.fields && asset.fields.file) {
-        const imageUrl = asset.fields.file?.url || '';
-        // Handle both string formats
-        const fixedImageUrl = imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl;
-        
-        galleryImages.push({
-          id: asset.sys?.id,
-          url: fixedImageUrl,
-          alt: safeString(asset.fields.title || ''),
-          width: asset.fields.file?.details?.image?.width,
-          height: asset.fields.file?.details?.image?.height
-        });
-      }
+  if (fields.thumbnail) {
+    const imageData = fields.thumbnail;
+    const imageUrl = imageData.fields?.file?.url;
+    if (imageUrl) {
+      mainImage = {
+        url: imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl,
+        alt: imageData.fields?.title || fields.title || '',
+        width: imageData.fields?.file?.details?.image?.width,
+        height: imageData.fields?.file?.details?.image?.height
+      };
     }
   }
   
-  // Handle features
-  const features = Array.isArray(entry.fields.features)
-    ? entry.fields.features.map((feature: any) => safeString(feature))
-    : [];
-  
-  // Handle specifications
-  const specs: Record<string, string> = {};
-  if (entry.fields.specifications && Array.isArray(entry.fields.specifications)) {
-    entry.fields.specifications.forEach((spec: any) => {
-      if (spec.fields && spec.fields.name && spec.fields.value) {
-        specs[safeString(spec.fields.name)] = safeString(spec.fields.value);
+  // Process images array if available
+  const images: CMSImage[] = [];
+  if (fields.images && Array.isArray(fields.images)) {
+    fields.images.forEach(image => {
+      const imageUrl = image.fields?.file?.url;
+      if (imageUrl) {
+        images.push({
+          url: imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl,
+          alt: image.fields?.title || fields.title || '',
+          width: image.fields?.file?.details?.image?.width,
+          height: image.fields?.file?.details?.image?.height
+        });
       }
     });
   }
   
-  const title = safeString(entry.fields.title);
+  // Build specs object from individual properties or specs object
+  const specs: Record<string, string> = fields.specs || {};
   
-  // Create the machine object with proper type casting
-  const result: CMSMachine = {
-    id: entry.sys.id,
-    title: title,
-    name: title, // Explicitly set name to be the same as title for compatibility
-    slug: safeString(entry.fields.slug),
-    type: safeString(entry.fields.type || 'vending') as any, // Cast to satisfy TypeScript
-    description: safeString(entry.fields.description),
-    shortDescription: safeString(entry.fields.shortDescription || entry.fields.description),
-    temperature: safeString(entry.fields.temperature || 'ambient'),
+  // Add individual spec fields if they exist
+  const specFields = ['dimensions', 'weight', 'capacity', 'powerRequirements', 'paymentOptions', 'connectivity', 'manufacturer', 'warranty'];
+  specFields.forEach(field => {
+    if (fields[field] && typeof fields[field] === 'string') {
+      specs[field] = fields[field] as string;
+    }
+  });
+
+  // Add temperature to specs if not already present
+  if (fields.temperature && !specs.temperature) {
+    specs.temperature = fields.temperature as string;
+  }
+  
+  // Extract features array safely
+  const features = Array.isArray(fields.features) 
+    ? safeStringArray(fields.features) 
+    : [];
+  
+  // Build the standardized machine object
+  const machine: CMSMachine = {
+    id: entry.sys?.id || entry.id || '',
+    title: fields.title as string || 'Untitled Machine',
+    name: fields.title as string || 'Untitled Machine', // Add name property for backwards compatibility
+    slug: fields.slug as string || '',
+    type: fields.type as string || '',
+    description: fields.description as string || '',
+    shortDescription: fields.shortDescription as string || '',
+    temperature: fields.temperature as string || '',
     mainImage,
-    thumbnail: mainImage, // Use same image as thumbnail for simplicity
-    images: galleryImages.length > 0 ? galleryImages : undefined,
+    images,
     features,
     specs,
-    visible: entry.fields.visible !== false, // Default to true if not specified
-    featured: !!entry.fields.featured,
-    displayOrder: Number(entry.fields.displayOrder || 0),
-    createdAt: safeString(entry.sys.createdAt),
-    updatedAt: safeString(entry.sys.updatedAt),
-    // Include legacy naming convention
-    created_at: safeString(entry.sys.createdAt),
-    updated_at: safeString(entry.sys.updatedAt),
-    showOnHomepage: !!entry.fields.showOnHomepage,
-    homepageOrder: entry.fields.homepageOrder ? Number(entry.fields.homepageOrder) : null
+    visible: fields.visible !== false,
+    featured: fields.featured === true,
+    displayOrder: typeof fields.displayOrder === 'number' ? fields.displayOrder : 0,
+    createdAt: entry.sys?.createdAt || new Date().toISOString(),
+    updatedAt: entry.sys?.updatedAt || new Date().toISOString()
   };
   
-  return result;
+  return machine;
 }
 
 /**
- * Hook to fetch all machines from Contentful
+ * Hook to fetch all machines
  */
-export function useContentfulMachines() {
+export function useContentfulMachines(options?: { limit?: number; skip?: number }) {
   return useQuery({
-    queryKey: ['contentful', 'machines'],
+    queryKey: ['contentful', 'machines', options],
     queryFn: async () => {
       try {
-        const entries = await fetchContentfulEntries('machine');
-        
-        return entries
-          .filter(entry => entry && entry.sys && entry.fields)
-          .map((entry: any) => {
-            try {
-              return transformMachineFromContentful(entry);
-            } catch (error) {
-              console.error('[useContentfulMachines] Error transforming machine:', error);
-              return null;
-            }
-          }).filter(Boolean) as CMSMachine[];
+        const entries = await fetchContentfulEntries('machine', options);
+        return entries.map(transformMachineFromContentful);
       } catch (error) {
         console.error('[useContentfulMachines] Error fetching machines:', error);
-        throw error;
+        return [];
       }
-    }
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
 
 /**
- * Hook to fetch a specific machine by ID or slug from Contentful
+ * Hook to fetch a single machine by ID or slug
  */
 export function useContentfulMachine(idOrSlug: string | undefined) {
   return useQuery({
     queryKey: ['contentful', 'machine', idOrSlug],
     queryFn: async () => {
-      if (!idOrSlug) {
-        return null;
-      }
+      if (!idOrSlug) return null;
       
       try {
-        // Try first by matching the slug
-        const entriesBySlug = await fetchContentfulEntries('machine', {
-          'fields.slug': idOrSlug,
-          limit: 1
-        });
+        // Try to fetch by ID first
+        let entry = await fetchContentfulEntry('machine', idOrSlug);
         
-        if (entriesBySlug && entriesBySlug.length > 0) {
-          return transformMachineFromContentful(entriesBySlug[0]);
+        // If not found by ID, try by slug
+        if (!entry) {
+          const entries = await fetchContentfulEntries('machine', {
+            'fields.slug': idOrSlug,
+            limit: 1
+          });
+          entry = entries && entries.length > 0 ? entries[0] : null;
         }
         
-        // If no match by slug, try by ID
-        try {
-          const entryById = await fetchContentfulEntry(idOrSlug);
-          if (entryById && entryById.sys && entryById.sys.contentType && 
-              entryById.sys.contentType.sys.id === 'machine') {
-            return transformMachineFromContentful(entryById);
-          }
-        } catch (idError) {
-          console.log(`[useContentfulMachine] Machine with ID ${idOrSlug} not found`);
-        }
-        
-        console.warn(`[useContentfulMachine] No machine found with slug or ID: ${idOrSlug}`);
-        return null;
+        return entry ? transformMachineFromContentful(entry) : null;
       } catch (error) {
-        console.error(`[useContentfulMachine] Error fetching machine: ${idOrSlug}`, error);
-        throw error;
+        console.error(`[useContentfulMachine] Error fetching machine with ID/slug ${idOrSlug}:`, error);
+        return null;
       }
     },
-    enabled: !!idOrSlug
+    enabled: !!idOrSlug,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

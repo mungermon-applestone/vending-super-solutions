@@ -13,6 +13,19 @@ export function safeString(value: any): string {
 }
 
 /**
+ * Safely convert any array to string array, filtering out non-strings
+ */
+export function safeStringArray(values: any[]): string[] {
+  if (!Array.isArray(values)) {
+    return [];
+  }
+  
+  return values
+    .filter(value => value !== null && value !== undefined)
+    .map(value => String(value));
+}
+
+/**
  * Safely convert Contentful asset to CMSImage format
  */
 export function safeAssetToImage(asset: any): CMSImage | null {

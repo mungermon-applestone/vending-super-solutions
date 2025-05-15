@@ -1,26 +1,34 @@
-
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { ContentfulTestimonialSection } from '@/types/contentful/testimonial';
+import { ContentfulTestimonialSection, ContentfulTestimonial, transformContentfulTestimonial } from '@/types/contentful/testimonial';
+import { CMSTestimonial } from '@/types/cms';
 
 interface TestimonialsSectionProps {
   data: ContentfulTestimonialSection;
 }
 
-// Type guard functions to check testimonial format
-const isContentfulTestimonial = (testimonial: any): boolean => {
-  return testimonial && typeof testimonial === 'object' && testimonial.fields !== undefined;
-};
-
-const isCMSTestimonial = (testimonial: any): boolean => {
-  return testimonial && typeof testimonial === 'object' && testimonial.name !== undefined && testimonial.testimonial !== undefined;
-};
+/**
+ * Safely extract testimonials from either format of testimonial section
+ */
+function extractTestimonials(data: ContentfulTestimonialSection): CMSTestimonial[] {
+  // If we have contentful testimonials array, transform them to our standard format
+  if (data.fields?.testimonials && Array.isArray(data.fields.testimonials)) {
+    return data.fields.testimonials.map(item => transformContentfulTestimonial(item));
+  }
+  
+  // Otherwise use the already transformed testimonials
+  if (data.testimonials && Array.isArray(data.testimonials)) {
+    return data.testimonials;
+  }
+  
+  return [];
+}
 
 export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   
-  // Handle both new and legacy formats
-  const testimonials = data.fields?.testimonials || data.testimonials || [];
+  // Extract testimonials in a consistent format
+  const testimonials = extractTestimonials(data);
 
   if (!testimonials.length) {
     return null;
@@ -34,52 +42,13 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
     setActiveIndex((prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length);
   };
 
-  // We need to handle both Contentful and CMS formats
+  // We now have a guaranteed CMSTestimonial format
   const currentTestimonial = testimonials[activeIndex];
   if (!currentTestimonial) return null;
 
   // Get section title and subtitle from either format
   const title = data.fields?.title || data.title || "Trusted by Industry Leaders";
   const subtitle = data.fields?.subtitle || data.subtitle || "Hear what our clients have to say about our solutions";
-
-  // Helper function to extract testimonial data regardless of format
-  const getTestimonialData = () => {
-    if (isContentfulTestimonial(currentTestimonial)) {
-      return {
-        quote: currentTestimonial.fields.quote || '',
-        author: currentTestimonial.fields.author || '',
-        position: currentTestimonial.fields.position || '',
-        company: currentTestimonial.fields.company || '',
-        rating: currentTestimonial.fields.rating || 5,
-        imageUrl: currentTestimonial.fields.image?.fields?.file?.url ? 
-          `https:${currentTestimonial.fields.image.fields.file.url}` : undefined,
-        imageAlt: currentTestimonial.fields.image?.fields?.title || ''
-      };
-    } else if (isCMSTestimonial(currentTestimonial)) {
-      return {
-        quote: currentTestimonial.testimonial || '',
-        author: currentTestimonial.name || '',
-        position: currentTestimonial.title || '',
-        company: currentTestimonial.company || '',
-        rating: currentTestimonial.rating || 5,
-        imageUrl: currentTestimonial.image_url || undefined,
-        imageAlt: currentTestimonial.name || ''
-      };
-    }
-    
-    // Fallback for unknown format
-    return {
-      quote: '',
-      author: '',
-      position: '',
-      company: '',
-      rating: 5,
-      imageUrl: undefined,
-      imageAlt: ''
-    };
-  };
-
-  const testimonialData = getTestimonialData();
 
   return (
     <section className="py-16 md:py-24 bg-gray-50">
@@ -101,12 +70,12 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
 
             <div className="relative">
               {/* Stars */}
-              {testimonialData.rating && (
+              {currentTestimonial.rating && (
                 <div className="flex mb-6 justify-center">
-                  {[...Array(testimonialData.rating)].map((_, i) => (
+                  {[...Array(currentTestimonial.rating)].map((_, i) => (
                     <Star key={i} className="h-5 w-5 text-yellow-500 fill-yellow-500" />
                   ))}
-                  {[...Array(5 - (testimonialData.rating || 0))].map((_, i) => (
+                  {[...Array(5 - (currentTestimonial.rating || 0))].map((_, i) => (
                     <Star key={i} className="h-5 w-5 text-gray-300" />
                   ))}
                 </div>
@@ -114,23 +83,23 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
 
               {/* Quote */}
               <blockquote className="text-xl md:text-2xl text-center font-medium text-gray-700 mb-8">
-                "{testimonialData.quote}"
+                "{currentTestimonial.testimonial}"
               </blockquote>
 
               {/* Author info */}
               <div className="text-center">
-                {testimonialData.imageUrl && (
+                {currentTestimonial.image_url && (
                   <img 
-                    src={testimonialData.imageUrl}
-                    alt={testimonialData.imageAlt}
+                    src={currentTestimonial.image_url}
+                    alt={currentTestimonial.name}
                     className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
                   />
                 )}
-                <div className="font-semibold text-lg">{testimonialData.author}</div>
+                <div className="font-semibold text-lg">{currentTestimonial.name}</div>
                 <div className="text-vending-gray-dark">
-                  {testimonialData.position}
-                  {testimonialData.position && testimonialData.company && ', '}
-                  {testimonialData.company}
+                  {currentTestimonial.title}
+                  {currentTestimonial.title && currentTestimonial.company && ', '}
+                  {currentTestimonial.company}
                 </div>
               </div>
             </div>

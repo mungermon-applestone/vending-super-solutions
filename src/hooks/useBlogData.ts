@@ -1,6 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
+import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { BlogPost, AdjacentPost } from '@/types/cms';
 import { isContentfulEntry } from '@/utils/contentfulTypeGuards';
 import { safeString } from '@/services/cms/utils/safeTypeUtilities';
@@ -45,12 +45,19 @@ export function useBlogPosts(options = { limit: 10, skip: 0 }) {
               return null;
             }
             
-            const featuredImage = entry.fields.featuredImage ? {
-              url: `https:${entry.fields.featuredImage.fields?.file?.url || ''}`,
-              title: entry.fields.featuredImage.fields?.title || '',
-              width: entry.fields.featuredImage.fields?.file?.details?.image?.width,
-              height: entry.fields.featuredImage.fields?.file?.details?.image?.height
-            } : undefined;
+            // Process featured image safely
+            let featuredImage = undefined;
+            if (entry.fields.featuredImage && typeof entry.fields.featuredImage === 'object') {
+              const image = entry.fields.featuredImage;
+              if (image.fields && image.fields.file) {
+                featuredImage = {
+                  url: `https:${image.fields.file.url || ''}`,
+                  title: image.fields.title || '',
+                  width: image.fields.file.details?.image?.width,
+                  height: image.fields.file.details?.image?.height
+                };
+              }
+            }
             
             return {
               id: entry.sys.id,
@@ -64,10 +71,9 @@ export function useBlogPosts(options = { limit: 10, skip: 0 }) {
               updated_at: entry.sys.updatedAt || new Date().toISOString(),
               featuredImage,
               author: getEntryField(entry, 'author'),
-              tags: Array.isArray(entry.fields.tags) ? entry.fields.tags : [],
+              tags: Array.isArray(entry.fields.tags) ? entry.fields.tags.map(tag => typeof tag === 'string' ? tag : '') : [],
               sys: entry.sys,
-              fields: entry.fields,
-              includes: entry.includes
+              fields: entry.fields
             } as BlogPost;
           })
           .filter(Boolean) as BlogPost[];
@@ -107,12 +113,19 @@ export function useBlogPostBySlug(slug: string | undefined) {
           return null;
         }
         
-        const featuredImage = post.fields.featuredImage ? {
-          url: `https:${post.fields.featuredImage.fields?.file?.url || ''}`,
-          title: post.fields.featuredImage.fields?.title || '',
-          width: post.fields.featuredImage.fields?.file?.details?.image?.width,
-          height: post.fields.featuredImage.fields?.file?.details?.image?.height
-        } : undefined;
+        // Process featured image safely
+        let featuredImage = undefined;
+        if (post.fields.featuredImage && typeof post.fields.featuredImage === 'object') {
+          const image = post.fields.featuredImage;
+          if (image.fields && image.fields.file) {
+            featuredImage = {
+              url: `https:${image.fields.file.url || ''}`,
+              title: image.fields.title || '',
+              width: image.fields.file.details?.image?.width,
+              height: image.fields.file.details?.image?.height
+            };
+          }
+        }
         
         return {
           id: post.sys.id,
@@ -126,10 +139,10 @@ export function useBlogPostBySlug(slug: string | undefined) {
           updated_at: post.sys.updatedAt || new Date().toISOString(),
           featuredImage,
           author: getEntryField(post, 'author'),
-          tags: Array.isArray(post.fields.tags) ? post.fields.tags : [],
+          tags: Array.isArray(post.fields.tags) ? post.fields.tags.map(tag => typeof tag === 'string' ? tag : '') : [],
           sys: post.sys,
           fields: post.fields,
-          includes: post.includes
+          includes: (post as any).includes
         } as BlogPost;
       } catch (error) {
         console.error(`[useBlogPostBySlug] Error fetching blog post with slug: ${slug}`, error);

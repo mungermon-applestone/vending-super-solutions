@@ -37,6 +37,32 @@ export function isRichTextDocument(obj: any): boolean {
 }
 
 /**
+ * Type guard for ContentfulTestimonial
+ */
+export function isContentfulTestimonial(obj: any): boolean {
+  return (
+    obj && 
+    typeof obj === 'object' && 
+    obj.sys && 
+    obj.fields && 
+    typeof obj.fields.author === 'string' &&
+    typeof obj.fields.quote === 'string'
+  );
+}
+
+/**
+ * Type guard for CMSTestimonial
+ */
+export function isCMSTestimonial(obj: any): boolean {
+  return (
+    obj && 
+    typeof obj === 'object' && 
+    typeof obj.name === 'string' &&
+    typeof obj.testimonial === 'string'
+  );
+}
+
+/**
  * Convert ContentfulBlogPost to standard BlogPost format
  */
 export function convertContentfulBlogPostToBlogPost(contentfulPost: ContentfulBlogPost): BlogPost {

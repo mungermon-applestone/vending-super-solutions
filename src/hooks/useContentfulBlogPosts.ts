@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
 import { isContentfulEntry } from '@/utils/contentfulTypeGuards';
-import { safeString } from '@/services/cms/utils/safeTypeUtilities';
+import { safeString, safeStringArray } from '@/services/cms/utils/safeTypeUtilities';
 
 export interface ContentfulBlogPost {
   id?: string;
@@ -99,24 +99,37 @@ export function useContentfulBlogPosts(options = { limit: 10, skip: 0 }) {
             publishDate: getEntryStringField(entry, 'publishDate'),
             status: getEntryStringField(entry, 'status', 'published') as 'draft' | 'published' | 'archived',
             author: getEntryStringField(entry, 'author'),
-            tags: Array.isArray(entry.fields?.tags) ? entry.fields.tags : [],
-            fields: entry.fields,
+            tags: Array.isArray(entry.fields?.tags) ? safeStringArray(entry.fields.tags) : [],
+            fields: {
+              title: getEntryStringField(entry, 'title'),
+              slug: getEntryStringField(entry, 'slug'),
+              publishDate: getEntryStringField(entry, 'publishDate'),
+              content: entry.fields?.content,
+              excerpt: getEntryStringField(entry, 'excerpt'),
+              featuredImage: entry.fields?.featuredImage,
+              author: getEntryStringField(entry, 'author'),
+              tags: Array.isArray(entry.fields?.tags) ? safeStringArray(entry.fields.tags) : [],
+              visible: entry.fields?.visible !== false
+            }
           };
           
-          // Handle includes data
-          if (typeof entry.includes === 'object') {
+          // Handle includes data if available
+          if (entry.includes) {
             processedEntry.includes = entry.includes;
           }
           
           // Handle featured image if it exists
           if (entry.fields?.featuredImage) {
             try {
-              processedEntry.featuredImage = {
-                url: `https:${entry.fields.featuredImage.fields?.file?.url || ''}`,
-                title: entry.fields.featuredImage.fields?.title || '',
-                width: entry.fields.featuredImage.fields?.file?.details?.image?.width,
-                height: entry.fields.featuredImage.fields?.file?.details?.image?.height
-              };
+              const image = entry.fields.featuredImage;
+              if (image.fields?.file?.url) {
+                processedEntry.featuredImage = {
+                  url: `https:${image.fields.file.url}`,
+                  title: image.fields.title || '',
+                  width: image.fields.file.details?.image?.width,
+                  height: image.fields.file.details?.image?.height
+                };
+              }
             } catch (e) {
               console.error('Error processing featured image:', e);
             }
@@ -152,6 +165,24 @@ export function useContentfulBlogPost(slug: string | undefined) {
         
         const entry = entries[0];
         
+        // Process featured image safely
+        let featuredImage = undefined;
+        if (entry.fields?.featuredImage) {
+          try {
+            const image = entry.fields.featuredImage;
+            if (image.fields?.file?.url) {
+              featuredImage = {
+                url: `https:${image.fields.file.url}`,
+                title: image.fields.title || '',
+                width: image.fields.file.details?.image?.width,
+                height: image.fields.file.details?.image?.height
+              };
+            }
+          } catch (e) {
+            console.error('Error processing featured image:', e);
+          }
+        }
+        
         const result: ContentfulBlogPost = {
           sys: entry.sys,
           id: entry.sys.id,
@@ -162,23 +193,24 @@ export function useContentfulBlogPost(slug: string | undefined) {
           publishDate: getEntryStringField(entry, 'publishDate'),
           status: getEntryStringField(entry, 'status', 'published') as 'draft' | 'published' | 'archived',
           author: getEntryStringField(entry, 'author'),
-          tags: Array.isArray(entry.fields?.tags) ? entry.fields.tags : [],
-          fields: entry.fields,
+          tags: Array.isArray(entry.fields?.tags) ? safeStringArray(entry.fields.tags) : [],
+          fields: {
+            title: getEntryStringField(entry, 'title'),
+            slug: getEntryStringField(entry, 'slug'),
+            publishDate: getEntryStringField(entry, 'publishDate'),
+            content: entry.fields?.content,
+            excerpt: getEntryStringField(entry, 'excerpt'),
+            featuredImage: entry.fields?.featuredImage,
+            author: getEntryStringField(entry, 'author'),
+            tags: Array.isArray(entry.fields?.tags) ? safeStringArray(entry.fields.tags) : [],
+            visible: entry.fields?.visible !== false
+          },
+          featuredImage
         };
         
-        // Handle includes data
-        if (typeof entry.includes === 'object') {
+        // Add includes if available
+        if (entry.includes) {
           result.includes = entry.includes;
-        }
-        
-        // Handle featured image if it exists
-        if (entry.fields?.featuredImage) {
-          result.featuredImage = {
-            url: `https:${entry.fields.featuredImage.fields?.file?.url || ''}`,
-            title: entry.fields.featuredImage.fields?.title || '',
-            width: entry.fields.featuredImage.fields?.file?.details?.image?.width,
-            height: entry.fields.featuredImage.fields?.file?.details?.image?.height
-          };
         }
         
         return result;

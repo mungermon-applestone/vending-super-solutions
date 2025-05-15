@@ -10,12 +10,13 @@ export interface ContentfulTestimonial {
     id: string;
   };
   fields: {
-    name: string;
-    title?: string;
+    author: string;
+    position?: string;
     company?: string;
-    testimonial: string;
+    quote: string;
     rating?: number;
     image?: ContentfulAsset;
+    visible?: boolean;
   };
 }
 
@@ -41,29 +42,34 @@ export interface ContentfulTestimonialSection {
 }
 
 /**
+ * Transform ContentfulTestimonial to CMSTestimonial format
+ */
+export function transformContentfulTestimonial(contentfulTestimonial: ContentfulTestimonial): CMSTestimonial {
+  return {
+    id: contentfulTestimonial.sys.id,
+    name: contentfulTestimonial.fields.author,
+    title: contentfulTestimonial.fields.position || '',
+    company: contentfulTestimonial.fields.company || '',
+    testimonial: contentfulTestimonial.fields.quote,
+    rating: contentfulTestimonial.fields.rating || 5,
+    image_url: contentfulTestimonial.fields.image?.fields?.file?.url 
+      ? `https:${contentfulTestimonial.fields.image.fields.file.url}` 
+      : undefined
+  };
+}
+
+/**
  * Convert raw testimonials to a section format
  */
 export function convertTestimonialsToSection(
-  testimonials: any[],
+  testimonials: CMSTestimonial[],
   title: string = "What Our Clients Say",
   subtitle?: string
 ): ContentfulTestimonialSection {
   return {
     title,
     subtitle,
-    testimonials: testimonials.map(item => ({
-      id: item.id || item._id || `testimonial-${Math.random().toString(36).substring(7)}`,
-      name: item.name || item.author || "Customer",
-      title: item.title || item.position || "",
-      company: item.company || item.organization || "",
-      testimonial: item.testimonial || item.content || item.text || "",
-      rating: item.rating || 5,
-      image_url: item.image_url || item.imageUrl || (
-        item.image?.url || 
-        (item.image?.fields?.file?.url && `https:${item.image.fields.file.url}`) || 
-        ""
-      )
-    })),
+    testimonials,
     background: "bg-gray-50",
     displayStyle: "carousel"
   };
