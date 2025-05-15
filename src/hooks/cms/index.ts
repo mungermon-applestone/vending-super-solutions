@@ -1,31 +1,19 @@
 
-// Consolidated export of all CMS hooks - Contentful only
+// Export transformers
+export { transformContentfulAsset } from './transformers/testimonialTransformer';
+export { transformBusinessGoal } from './transformers/businessGoalTransformer';
+export { transformTestimonial } from './transformers/testimonialTransformer';
+export { transformBlogPost, createAdjacentPost } from './transformers/blogPostTransformer';
 
-// Export Contentful business goals hooks
-export { 
-  useContentfulBusinessGoals,
-  useContentfulBusinessGoalBySlug 
-} from './useContentfulBusinessGoals';
+// Export types from transformers
+export type { ContentfulBusinessGoal } from './transformers/businessGoalTransformer';
+export type { ContentfulTestimonial } from './transformers/testimonialTransformer';
+export type { ContentfulBlogPost } from './transformers/blogPostTransformer';
 
-// Export Contentful testimonials hooks
-export { 
-  useContentfulTestimonials 
-} from './useContentfulTestimonials';
+// Re-export hooks
+export { useContentfulBusinessGoals, useContentfulBusinessGoalBySlug } from './useContentfulBusinessGoals';
+export { useContentfulTestimonials } from './useContentfulTestimonials';
 
-// Re-export transformers for convenience
-export { 
-  transformBusinessGoal,
-  ContentfulBusinessGoal
-} from './transformers/businessGoalTransformer';
-
-export {
-  transformTestimonial,
-  ContentfulTestimonial,
-  transformContentfulAsset
-} from './transformers/testimonialTransformer';
-
-export {
-  transformBlogPost,
-  createAdjacentPost,
-  ContentfulBlogPost
-} from './transformers/blogPostTransformer';
+// Export types related to hooks
+export type { BusinessGoalsResponse } from './useContentfulBusinessGoals';
+export type { TestimonialsResponse } from './useContentfulTestimonials';

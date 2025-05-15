@@ -1,99 +1,88 @@
 
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { createClient } from 'contentful';
+import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
+import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 import Layout from '@/components/layout/Layout';
-import { Document } from '@contentful/rich-text-types';
-import { Skeleton } from '@/components/ui/skeleton';
-import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
-import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
-import useContentful from '@/hooks/useContentful';
-import { ContentfulResponse, AboutPageFields } from '@/types/contentful';
-import { renderRichText } from '@/utils/contentful/richTextRenderer';
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Link } from 'react-router-dom';
-import AboutSchemaData from '@/components/about/AboutSchemaData';
-import SEO from '@/components/seo/SEO';
-import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
+
+const contentfulClient = createClient({
+  space: import.meta.env.VITE_CONTENTFUL_SPACE_ID,
+  accessToken: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
+  environment: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || 'master',
+});
 
 const About = () => {
-  const { data, isLoading, error, isContentReady, refetch } = useContentful<ContentfulResponse<AboutPageFields>>({
-    queryKey: ['about', '3Dn6DWVQR0VzhcQL6gdU0H'],
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['about-page'],
     queryFn: async () => {
-      const client = await getContentfulClient();
-      const response = await client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H', {
-        include: 10,
-      });
-      return response as unknown as ContentfulResponse<AboutPageFields>;
+      const entry = await contentfulClient.getEntry('about-page');
+      return entry;
     }
   });
 
-  const includedAssets = React.useMemo(() => {
-    if (!data?.includes?.Asset) return [];
-    return data.includes.Asset;
-  }, [data?.includes?.Asset]);
+  const renderRichText = (content: any) => {
+    const options = {
+      renderNode: {
+        [BLOCKS.HEADING_1]: (_: any, children: React.ReactNode) => (
+          <h1 className="text-4xl font-bold mb-6">{children}</h1>
+        ),
+        [BLOCKS.HEADING_2]: (_: any, children: React.ReactNode) => (
+          <h2 className="text-3xl font-bold mb-4 mt-8">{children}</h2>
+        ),
+        [BLOCKS.HEADING_3]: (_: any, children: React.ReactNode) => (
+          <h3 className="text-2xl font-bold mb-3 mt-6">{children}</h3>
+        ),
+        [BLOCKS.PARAGRAPH]: (_: any, children: React.ReactNode) => (
+          <p className="mb-4">{children}</p>
+        ),
+        [BLOCKS.UL_LIST]: (_: any, children: React.ReactNode) => (
+          <ul className="list-disc pl-6 mb-4">{children}</ul>
+        ),
+        [BLOCKS.OL_LIST]: (_: any, children: React.ReactNode) => (
+          <ol className="list-decimal pl-6 mb-4">{children}</ol>
+        ),
+        [BLOCKS.LIST_ITEM]: (_: any, children: React.ReactNode) => (
+          <li className="mb-1">{children}</li>
+        ),
+        [INLINES.HYPERLINK]: (node: any, children: React.ReactNode) => (
+          <a 
+            href={node.data.uri} 
+            target="_blank" 
+            rel="noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+            {children}
+          </a>
+        ),
+      }
+    };
 
-  const breadcrumbItems = [
-    { name: "Home", url: "https://yourdomain.com", position: 1 },
-    { name: "About", url: "https://yourdomain.com/about", position: 2 }
-  ];
-
+    return documentToReactComponents(content, options);
+  };
+  
   return (
     <Layout>
-      <SEO 
-        title="About Us | Vending Solutions"
-        description="Learn more about Vending Solutions and our mission to revolutionize vending machine operations."
-        canonicalUrl="https://yourdomain.com/about"
-      />
-      <AboutSchemaData breadcrumbItems={breadcrumbItems} />
-      
-      <div className="container max-w-4xl mx-auto py-12 px-4">
-        <nav aria-label="Breadcrumb" className="mb-8">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink aria-current="page">About</BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </nav>
-
+      <div className="container mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold mb-8">About Us</h1>
-        {isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-1/2" />
+        
+        {isLoading && (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
           </div>
-        ) : error ? (
-          <ContentfulFallbackMessage
-            contentType="About page content"
-            message="Unable to load the about page content. Please try again later or contact support if the problem persists."
-            showRefresh={true}
-            onAction={() => refetch()}
-            title="Content Loading Error"
-          />
-        ) : (
-          <ContentfulErrorBoundary contentType="About page">
-            <div className="prose max-w-none">
-              {isContentReady && data?.fields && 'bodyContent' in data.fields && data.fields.bodyContent ? (
-                <>
-                  {renderRichText(data.fields.bodyContent as Document, {
-                    includedAssets,
-                    contentIncludes: data.includes
-                  })}
-                </>
-              ) : (
-                <p className="text-gray-500">
-                  No content available. Please check the Contentful entry for the About page.
-                </p>
-              )}
-            </div>
-          </ContentfulErrorBoundary>
+        )}
+        
+        {error && (
+          <div className="bg-red-50 text-red-700 p-6 rounded-lg mb-8">
+            <h3 className="text-lg font-medium">Error loading about page</h3>
+            <p>Please try again later.</p>
+          </div>
+        )}
+        
+        {!isLoading && !error && data && data.fields?.bodyContent && (
+          <div className="prose max-w-none">
+            {renderRichText(data.fields.bodyContent)}
+          </div>
         )}
       </div>
     </Layout>

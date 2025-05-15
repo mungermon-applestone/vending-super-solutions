@@ -23,104 +23,22 @@ export interface CMSBusinessGoal {
   visible: boolean;
   features?: string[];
   displayOrder: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Machine type
-export interface CMSMachine {
-  id: string;
-  title: string;
-  slug: string;
-  type: "vending" | "locker";
-  description?: string;
-  shortDescription?: string;
-  temperature?: string;
-  features: string[];
-  images: CMSImage[];
-  specs?: {
-    width?: number;
-    height?: number;
-    depth?: number;
-    weight?: number;
-    capacity?: number;
-    power?: string;
-  };
-  visible: boolean;
-  featured: boolean;
-  displayOrder: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Technology type
-export interface CMSTechnology {
-  id: string;
-  title: string;
-  slug: string;
-  description?: string;
-  shortDescription?: string;
-  image?: CMSImage;
-  logo?: CMSImage;
-  visible: boolean;
-  featured: boolean;
-  displayOrder: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Product type
-export interface CMSProductType {
-  id: string;
-  title: string;
-  slug: string;
-  description?: string;
-  shortDescription?: string;
-  image?: CMSImage;
-  visible: boolean;
-  featured: boolean;
-  displayOrder: number;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // Testimonial type
 export interface CMSTestimonial {
   id: string;
   name: string;
-  position?: string;
+  role?: string; 
   company?: string;
   quote: string;
   rating?: number;
   image?: CMSImage;
   visible: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Blog Post types
-export interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  summary?: string;
-  content: any; // Rich text content
-  author?: string;
-  publishedDate?: string;
-  category?: string;
-  tags?: string[];
-  image?: CMSImage;
-  status: 'published' | 'draft';
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Adjacent post (simplified version of BlogPost for previous/next navigation)
-export interface AdjacentPost {
-  id: string;
-  title: string;
-  slug: string;
-  image?: CMSImage;
+  created_at: string;
+  updated_at: string;
 }
 
 // Query options type for consistent filtering
@@ -130,4 +48,30 @@ export interface QueryOptions {
   filters?: Record<string, any>;
   orderBy?: string;
   orderDirection?: 'asc' | 'desc';
+}
+
+// Blog Post related types
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  summary?: string;
+  content: any; // Rich text content
+  author?: string;
+  publishedDate?: string;
+  published_at?: string;
+  category?: string;
+  tags?: string[];
+  image?: CMSImage;
+  status: 'published' | 'draft';
+  created_at: string;
+  updated_at: string;
+}
+
+// Adjacent post (simplified version of BlogPost for previous/next navigation)
+export interface AdjacentPost {
+  id: string;
+  title: string;
+  slug: string;
+  image?: CMSImage;
 }

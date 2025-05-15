@@ -1,97 +1,96 @@
 
-import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
-import Layout from '@/components/layout/Layout';
-import BlogPostCard from '@/components/blog/BlogPostCard';
-import { useBlogPosts } from '@/hooks/useBlogData';
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import BlogSchemaData from '@/components/blog/BlogSchemaData';
-import SEO from '@/components/seo/SEO';
-import { useBreadcrumbs } from '@/context/BreadcrumbContext';
+import Layout from '@/components/layout/Layout';
+import { useBlogPosts } from '@/hooks/useBlogData';
+import { BlogPost } from '@/types/cms';
+import { format } from 'date-fns';
+import { Pagination } from '@/components/ui/pagination';
 
-const POSTS_PER_PAGE = 9;
+const POSTS_PER_PAGE = 10;
 
 const BlogList = () => {
-  const [page, setPage] = useState(0);
-  const { setBreadcrumbs } = useBreadcrumbs();
+  const [currentPage, setCurrentPage] = useState(1);
+  const offset = (currentPage - 1) * POSTS_PER_PAGE;
   
-  // Get posts ordered by published_at in descending order (newest first)
-  const { data: blogPosts = [], isLoading, error } = useBlogPosts({ 
+  const { data, isLoading, error } = useBlogPosts({
     status: 'published',
     limit: POSTS_PER_PAGE,
-    offset: page * POSTS_PER_PAGE
+    offset
   });
-
-  useEffect(() => {
-    setBreadcrumbs([
-      { name: "Home", url: "/", position: 1 },
-      { name: "Blog", url: "/blog", position: 2 }
-    ]);
-  }, [setBreadcrumbs]);
-
-  const breadcrumbItems = [
-    { name: "Home", url: "https://yourdomain.com", position: 1 },
-    { name: "Blog", url: "https://yourdomain.com/blog", position: 2 }
-  ];
-
+  
+  const totalPages = data ? Math.ceil(data.total / POSTS_PER_PAGE) : 0;
+  const blogPosts = data?.posts || [];
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo(0, 0);
+  };
+  
   return (
     <Layout>
-      <SEO 
-        title="Blog - Latest Updates and Insights"
-        description="Explore our latest articles, insights, and updates about vending solutions and industry trends."
-        canonicalUrl="https://yourdomain.com/blog"
-      />
-      <BlogSchemaData 
-        breadcrumbItems={breadcrumbItems}
-        blogPosts={blogPosts.map(post => ({
-          title: post.title,
-          description: post.excerpt || '',
-          datePublished: post.published_at || '',
-          author: 'Vending Solutions Team',
-          url: `https://yourdomain.com/blog/${post.slug}`
-        }))}
-      />
-      
-      <div className="container mx-auto py-10">
-        <nav aria-label="Breadcrumb" className="mb-8">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink aria-current="page">Blog</BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </nav>
-
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold mb-4">Latest Updates</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Keep up with the latest news, insights, and updates from our team.
-          </p>
-        </div>
-
-        {isLoading ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      <div className="container mx-auto px-4 py-12">
+        <h1 className="text-4xl font-bold mb-8">Blog</h1>
+        
+        {isLoading && (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
           </div>
-        ) : error ? (
-          <div className="text-center py-16">
-            <p className="text-red-500">Something went wrong. Please try again later.</p>
+        )}
+        
+        {error && (
+          <div className="bg-red-50 text-red-700 p-6 rounded-lg mb-8">
+            <h3 className="text-lg font-medium">Error loading blog posts</h3>
+            <p>Please try again later.</p>
           </div>
-        ) : blogPosts.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {blogPosts.map((post) => (
-              <BlogPostCard key={post.id} post={post} />
+        )}
+        
+        {!isLoading && !error && blogPosts.length > 0 ? (
+          <div className="grid gap-12">
+            {blogPosts.map((post: BlogPost) => (
+              <div key={post.id} className="border-b pb-10">
+                <div className="mb-4">
+                  <span className="text-sm text-gray-600">
+                    {post.publishedDate ? format(new Date(post.publishedDate), 'MMMM d, yyyy') : 'Draft'}
+                  </span>
+                  {post.category && (
+                    <span className="ml-3 bg-blue-50 text-blue-700 py-1 px-2 rounded text-xs font-medium">
+                      {post.category}
+                    </span>
+                  )}
+                </div>
+                
+                <h2 className="text-2xl font-bold mb-3">
+                  <Link to={`/blog/${post.slug}`} className="text-blue-600 hover:text-blue-800">
+                    {post.title}
+                  </Link>
+                </h2>
+                
+                {post.summary && <p className="text-gray-700 mb-4">{post.summary}</p>}
+                
+                <Link 
+                  to={`/blog/${post.slug}`} 
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  Read more →
+                </Link>
+              </div>
             ))}
           </div>
-        ) : (
+        ) : !isLoading && !error ? (
           <div className="text-center py-16">
-            <p className="text-gray-500">No posts found. Check back soon for new updates!</p>
+            <h3 className="text-xl font-medium text-gray-600 mb-2">No posts yet</h3>
+            <p className="text-gray-500">Check back soon for new content!</p>
+          </div>
+        ) : null}
+        
+        {totalPages > 1 && (
+          <div className="mt-12 flex justify-center">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           </div>
         )}
       </div>

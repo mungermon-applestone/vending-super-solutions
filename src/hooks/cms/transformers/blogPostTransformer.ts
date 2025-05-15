@@ -42,8 +42,8 @@ export function transformBlogPost(entry: ContentfulBlogPost): BlogPost {
     tags: entry.fields.tags || [],
     image: transformContentfulAsset(entry.fields.image),
     status: entry.fields.status || "draft",
-    createdAt: entry.sys.createdAt || "",
-    updatedAt: entry.sys.updatedAt || "",
+    created_at: entry.sys.createdAt || "",
+    updated_at: entry.sys.updatedAt || "",
   };
 }
 

@@ -38,7 +38,8 @@ export function transformBusinessGoal(entry: ContentfulBusinessGoal): CMSBusines
     image: transformContentfulAsset(entry.fields.image),
     visible: entry.fields.visible !== false, // Default to true if not specified
     displayOrder: entry.fields.displayOrder || 0,
-    createdAt: entry.sys.createdAt || "",
-    updatedAt: entry.sys.updatedAt || "",
+    features: [],
+    created_at: entry.sys.createdAt || "",
+    updated_at: entry.sys.updatedAt || "",
   };
 }

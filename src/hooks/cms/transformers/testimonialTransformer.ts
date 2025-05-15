@@ -6,7 +6,7 @@ import { CMSTestimonial, CMSImage } from "@/types/cms";
 export interface ContentfulTestimonial {
   fields: {
     name: string;
-    position?: string;
+    role?: string;
     company?: string;
     quote: string;
     rating?: number;
@@ -27,10 +27,14 @@ export interface ContentfulTestimonial {
  */
 export function transformContentfulAsset(asset?: Asset): CMSImage | undefined {
   if (!asset?.fields?.file?.url) return undefined;
+  
+  const url = asset.fields.file.url;
+  // Handle protocol-relative URLs
+  const finalUrl = url.startsWith('//') ? `https:${url}` : url;
 
   return {
     id: asset.sys?.id || "",
-    url: asset.fields.file.url.startsWith('//') ? `https:${asset.fields.file.url}` : asset.fields.file.url,
+    url: finalUrl,
     alt: asset.fields.title || "",
     width: asset.fields.file.details?.image?.width || 0,
     height: asset.fields.file.details?.image?.height || 0,
@@ -46,13 +50,13 @@ export function transformTestimonial(entry: ContentfulTestimonial): CMSTestimoni
   return {
     id: entry.sys.id,
     name: entry.fields.name || "",
-    position: entry.fields.position,
+    role: entry.fields.role,
     company: entry.fields.company,
     quote: entry.fields.quote || "",
     rating: entry.fields.rating,
     image: transformContentfulAsset(entry.fields.image),
     visible: entry.fields.visible !== false,
-    createdAt: entry.sys.createdAt || "",
-    updatedAt: entry.sys.updatedAt || "",
+    created_at: entry.sys.createdAt || "",
+    updated_at: entry.sys.updatedAt || "",
   };
 }
