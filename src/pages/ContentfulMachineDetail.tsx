@@ -1,87 +1,51 @@
-
-import React, { useEffect, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
-import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/components/ui/use-toast';
+import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 import MachineDetailHero from '@/components/machineDetail/MachineDetailHero';
 import MachineDetailFeatures from '@/components/machineDetail/MachineDetailFeatures';
 import MachineDetailSpecifications from '@/components/machineDetail/MachineDetailSpecifications';
 import MachineDetailGallery from '@/components/machineDetail/MachineDetailGallery';
 import MachineDetailInquiry from '@/components/machineDetail/MachineDetailInquiry';
 import MachineDetailDeployments from '@/components/machineDetail/MachineDetailDeployments';
-import { CMSMachine } from '@/types/cms';
+import { CMSImage } from '@/types/cms';
 
 const ContentfulMachineDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { toast } = useToast();
-  
-  useEffect(() => {
-    console.log('[ContentfulMachineDetail] Rendering with slug:', slug);
-  }, [slug]);
-  
   const { data: machine, isLoading, error } = useContentfulMachine(slug);
-  
-  const machineData: CMSMachine | null = useMemo(() => {
-    if (!machine) return null;
-    return machine;
-  }, [machine]);
+
+  // Memoize the machine data to prevent unnecessary re-renders
+  const memoizedMachine = useMemo(() => machine, [machine]);
+
+  useEffect(() => {
+    if (error) {
+      console.error("Error fetching machine:", error);
+    }
+  }, [error]);
 
   if (isLoading) {
     return (
       <Layout>
-        <div className="container py-12">
-          <Skeleton className="h-12 w-3/4 mb-4" />
-          <Skeleton className="h-6 w-1/2 mb-12" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Skeleton className="h-96 rounded-lg" />
-            <div>
-              <Skeleton className="h-8 w-3/4 mb-4" />
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
+        <div className="flex justify-center items-center min-h-screen">
+          <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!memoizedMachine) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold text-gray-700 mb-4">Machine Not Found</h2>
+            <p className="text-gray-500">Sorry, we couldn't find a machine with that ID.</p>
+            <Button asChild variant="outline" size="lg" className="mt-4">
+              <Link to="/machines">Back to Machines</Link>
+            </Button>
           </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (error) {
-    toast({
-      title: "Error Loading Machine",
-      description: error instanceof Error ? error.message : "Unknown error occurred",
-      variant: "destructive"
-    });
-    
-    return (
-      <Layout>
-        <div className="container py-24 text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Error Loading Machine</h2>
-          <p className="text-gray-600 mb-8">
-            We couldn't load the machine details. Please try again later.
-          </p>
-          <Button asChild>
-            <a href="/machines">Return to Machines</a>
-          </Button>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (!machineData) {
-    return (
-      <Layout>
-        <div className="container py-24 text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Machine Not Found</h2>
-          <p className="text-gray-600 mb-8">
-            We couldn't find the machine you're looking for.
-          </p>
-          <Button asChild>
-            <a href="/machines">Return to Machines</a>
-          </Button>
         </div>
       </Layout>
     );
@@ -89,32 +53,22 @@ const ContentfulMachineDetail = () => {
 
   return (
     <Layout>
-      <MachineDetailHero
-        title={machineData.title}
-        subtitle={machineData.shortDescription || ''}
-        image={machineData.mainImage?.url || ''}
-        type={machineData.type}
-        temperature={machineData.temperature || 'ambient'}
-      />
-      
-      {machineData.features && machineData.features.length > 0 && (
-        <MachineDetailFeatures features={machineData.features} />
-      )}
-      
-      {machineData.specs && Object.keys(machineData.specs).length > 0 && (
-        <MachineDetailSpecifications specs={machineData.specs} />
-      )}
-      
-      {machineData.images && machineData.images.length > 0 && (
-        <MachineDetailGallery images={machineData.images} />
-      )}
-      
-      <MachineDetailDeployments />
-      
-      <MachineDetailInquiry 
-        machineId={machineData.id} 
-        machineName={machineData.title}
-      />
+      <div className="flex flex-col min-h-screen">
+        <MachineDetailHero
+          name={memoizedMachine.name || memoizedMachine.title}
+          description={memoizedMachine.description}
+          mainImage={memoizedMachine.mainImage as CMSImage}
+        />
+
+        <div className="container-wide py-12">
+          <MachineDetailFeatures features={memoizedMachine.features || []} />
+          <MachineDetailSpecifications specs={memoizedMachine.specs || {}} />
+          <MachineDetailGallery images={memoizedMachine.images || []} />
+          <MachineDetailDeployments machineType={memoizedMachine.type} />
+        </div>
+
+        <MachineDetailInquiry machineName={memoizedMachine.name || memoizedMachine.title} />
+      </div>
     </Layout>
   );
 };

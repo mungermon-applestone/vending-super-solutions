@@ -58,7 +58,9 @@ export function useHeroContent(pageKey?: string) {
             ctaText: "Request Demo",
             ctaLink: "/contact",
             secondaryCTAText: "Learn More",
-            secondaryCTALink: "/products"
+            secondaryCTALink: "/products",
+            backgroundImage: "https://images.unsplash.com/photo-1556742031-c6961e8560b0?ixlib=rb-4.0.3",
+            backgroundImageAlt: "Vending Technology"
           } as HeroContent;
         }
         

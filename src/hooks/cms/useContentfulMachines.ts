@@ -17,16 +17,16 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
   let mainImage: CMSImage | undefined = undefined;
   
   if (entry.fields.mainImage && isContentfulAsset(entry.fields.mainImage)) {
-    const imageUrl = entry.fields.mainImage.fields.file.url;
-    const fixedImageUrl = typeof imageUrl === 'string' ? 
-      (imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl) : '';
+    const imageUrl = entry.fields.mainImage.fields.file?.url || '';
+    // Handle both string formats
+    const fixedImageUrl = imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl;
     
     mainImage = {
       id: entry.fields.mainImage.sys?.id,
       url: fixedImageUrl,
       alt: safeString(entry.fields.mainImage.fields.title || entry.fields.title || ''),
-      width: entry.fields.mainImage.fields.file.details?.image?.width,
-      height: entry.fields.mainImage.fields.file.details?.image?.height
+      width: entry.fields.mainImage.fields.file?.details?.image?.width,
+      height: entry.fields.mainImage.fields.file?.details?.image?.height
     };
   }
   
@@ -35,16 +35,16 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
   if (Array.isArray(entry.fields.gallery)) {
     for (const asset of entry.fields.gallery) {
       if (isContentfulAsset(asset) && asset.fields && asset.fields.file) {
-        const imageUrl = asset.fields.file.url;
-        const fixedImageUrl = typeof imageUrl === 'string' ? 
-          (imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl) : '';
+        const imageUrl = asset.fields.file?.url || '';
+        // Handle both string formats
+        const fixedImageUrl = imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl;
         
         galleryImages.push({
           id: asset.sys?.id,
           url: fixedImageUrl,
           alt: safeString(asset.fields.title || ''),
-          width: asset.fields.file.details?.image?.width,
-          height: asset.fields.file.details?.image?.height
+          width: asset.fields.file?.details?.image?.width,
+          height: asset.fields.file?.details?.image?.height
         });
       }
     }
@@ -66,10 +66,9 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
   }
   
   // Create the machine object with proper type casting
-  return {
+  const result: CMSMachine = {
     id: entry.sys.id,
     title: safeString(entry.fields.title),
-    name: safeString(entry.fields.title), // For backwards compatibility
     slug: safeString(entry.fields.slug),
     type: safeString(entry.fields.type || 'vending') as any, // Cast to satisfy TypeScript
     description: safeString(entry.fields.description),
@@ -91,6 +90,11 @@ export function transformMachineFromContentful(entry: any): CMSMachine {
     showOnHomepage: !!entry.fields.showOnHomepage,
     homepageOrder: entry.fields.homepageOrder ? Number(entry.fields.homepageOrder) : null
   };
+  
+  // For backward compatibility
+  result.name = result.title;
+  
+  return result;
 }
 
 /**

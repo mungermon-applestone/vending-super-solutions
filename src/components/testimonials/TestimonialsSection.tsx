@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { ContentfulTestimonialSection, ContentfulTestimonial } from '@/types/contentful/testimonial';
+import { ContentfulTestimonialSection } from '@/types/contentful/testimonial';
 
 interface TestimonialsSectionProps {
   data: ContentfulTestimonialSection;
@@ -33,40 +33,37 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
   const title = data.fields?.title || data.title || "Trusted by Industry Leaders";
   const subtitle = data.fields?.subtitle || data.subtitle || "Hear what our clients have to say about our solutions";
 
-  // Helper function to determine if it's a ContentfulTestimonial
-  const isContentfulFormat = (test: any): boolean => {
-    return test && test.fields && (test.fields.author || test.fields.quote);
-  };
-
-  // Extract testimonial data based on format
-  let testimonialData;
-  
-  if (isContentfulFormat(currentTestimonial)) {
-    // It's in Contentful format with fields.author, fields.quote, etc.
-    testimonialData = {
-      quote: currentTestimonial.fields.quote || '',
-      author: currentTestimonial.fields.author || '',
-      position: currentTestimonial.fields.position || '',
-      company: currentTestimonial.fields.company || '',
-      rating: currentTestimonial.fields.rating || 5,
-      image: currentTestimonial.fields.image
-    };
-  } else {
+  // Helper function to extract testimonial data regardless of format
+  const getTestimonialData = () => {
+    // Check if it's in Contentful format with fields property
+    if (currentTestimonial.fields) {
+      return {
+        quote: currentTestimonial.fields.quote || '',
+        author: currentTestimonial.fields.author || '',
+        position: currentTestimonial.fields.position || '',
+        company: currentTestimonial.fields.company || '',
+        rating: currentTestimonial.fields.rating || 5,
+        image: currentTestimonial.fields.image
+      };
+    }
+    
     // It's in the CMS format with direct properties
-    testimonialData = {
-      quote: currentTestimonial.testimonial || '',
-      author: currentTestimonial.name || '',
-      position: currentTestimonial.title || '',
-      company: currentTestimonial.company || '',
-      rating: currentTestimonial.rating || 5,
-      image: currentTestimonial.image_url ? { 
+    return {
+      quote: (currentTestimonial as any).testimonial || '',
+      author: (currentTestimonial as any).name || '',
+      position: (currentTestimonial as any).title || '',
+      company: (currentTestimonial as any).company || '',
+      rating: (currentTestimonial as any).rating || 5,
+      image: (currentTestimonial as any).image_url ? { 
         fields: { 
-          file: { url: currentTestimonial.image_url },
-          title: currentTestimonial.name || '' 
+          file: { url: (currentTestimonial as any).image_url },
+          title: (currentTestimonial as any).name || '' 
         } 
       } : null
     };
-  }
+  };
+
+  const testimonialData = getTestimonialData();
 
   return (
     <section className="py-16 md:py-24 bg-gray-50">
