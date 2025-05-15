@@ -5,7 +5,7 @@ import { isContentfulConfigured, CONTENTFUL_CONFIG } from '@/config/cms';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, Bug, RefreshCcw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { testContentfulConnection } from '@/services/cms/utils/contentfulClient';
+import { testContentfulConnection } from '@/services/contentful/utils';
 
 const ContentfulDebug = () => {
   const [testResult, setTestResult] = React.useState<any>(null);

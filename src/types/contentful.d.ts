@@ -1,5 +1,5 @@
 
-import { Asset, Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
+import { Asset, Entry, EntrySkeletonType } from 'contentful';
 import { Document } from '@contentful/rich-text-types';
 
 // Basic types
@@ -60,6 +60,28 @@ export interface ContentfulRichTextDocument {
   nodeType: string;
   data: object;
   content: any[];
+}
+
+// Page content types
+export interface PrivacyPolicyFields {
+  title: string;
+  content: Document;
+}
+
+export interface TermsOfServiceFields {
+  title: string;
+  content: Document;
+}
+
+// Contact FAQ types
+export interface ContentfulContactPageFields {
+  title: string;
+  faqs: Entry<ContentfulFAQFields>[];
+}
+
+export interface ContentfulFAQFields {
+  question: string;
+  answer: Document;
 }
 
 // Export the Document type from @contentful/rich-text-types for convenience

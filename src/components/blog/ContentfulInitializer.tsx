@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
-import { forceContentfulProvider, initCMS, refreshCmsConnection } from '@/services/cms/cmsInit';
-import { testContentfulConnection } from '@/services/cms/utils/contentfulClient';
+import { initCMS, refreshCmsConnection } from '@/services/cms/cmsInit';
+import { testContentfulConnection } from '@/services/contentful/utils';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
