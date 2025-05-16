@@ -13,6 +13,16 @@ export interface TransformedTestimonial {
 }
 
 export function transformContentfulTestimonial(testimonial: ContentfulTestimonial): TransformedTestimonial {
+  if (!testimonial || !testimonial.sys || !testimonial.fields) {
+    console.warn('Invalid testimonial data received', testimonial);
+    return {
+      id: 'invalid-testimonial',
+      quote: 'Missing testimonial data',
+      author: 'Unknown',
+      rating: 0
+    };
+  }
+
   const fields = testimonial.fields || {};
   const image = fields.image?.fields?.file?.url;
   
@@ -42,5 +52,10 @@ export function transformToCMSTestimonial(testimonial: TransformedTestimonial): 
 
 // Helper function to transform an array of testimonials
 export function transformTestimonials(testimonials: TransformedTestimonial[]): CMSTestimonial[] {
+  if (!testimonials || !Array.isArray(testimonials)) {
+    console.warn('Invalid testimonials array', testimonials);
+    return [];
+  }
+  
   return testimonials.map(transformToCMSTestimonial);
 }

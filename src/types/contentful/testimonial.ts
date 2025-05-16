@@ -1,42 +1,22 @@
 
-export interface ContentfulTestimonialSection {
-  sys: {
-    id: string;
-  };
-  fields: {
-    title?: string;
-    subtitle?: string;
-    testimonials?: ContentfulTestimonial[];
-    pageKey?: string;
-  };
-  id?: string;
-  title?: string;
-  subtitle?: string;
-  testimonials?: ContentfulTestimonial[];
+import { Asset, Entry } from 'contentful';
+
+export interface ContentfulTestimonialFields {
+  author: string;
+  quote: string;
+  company?: string;
+  position?: string;
+  rating?: number;
+  image?: Asset;
 }
 
-export interface ContentfulTestimonial {
-  sys?: {
-    id: string;
-  };
-  fields?: {
-    quote?: string;
-    author?: string;
-    position?: string;
-    company?: string;
-    rating?: number;
-    image?: {
-      sys?: {
-        id: string;
-      };
-      fields?: {
-        file?: {
-          url?: string;
-        };
-        title?: string;
-      };
-    };
-    pageKey?: string;
-    visible?: boolean;
-  };
+export interface ContentfulTestimonial extends Entry<ContentfulTestimonialFields> {}
+
+export interface ContentfulTestimonialSectionFields {
+  title: string;
+  subtitle?: string;
+  testimonials: ContentfulTestimonial[];
+  pageKey?: string;
 }
+
+export interface ContentfulTestimonialSection extends Entry<ContentfulTestimonialSectionFields> {}

@@ -16,7 +16,7 @@ const MachineDetailGallery: React.FC<MachineDetailGalleryProps> = ({ images }) =
       <h2 className="text-2xl font-semibold mb-6 text-gray-800">Gallery</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {images.map((image) => (
-          <div key={image.id} className="rounded-lg overflow-hidden shadow-md">
+          <div key={image.id || `img-${Math.random()}`} className="rounded-lg overflow-hidden shadow-md">
             <img 
               src={image.url} 
               alt={image.alt || 'Machine image'} 

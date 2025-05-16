@@ -21,7 +21,13 @@ export function useTestimonialSection(sectionId: string) {
 
         const section = response.items[0];
         const sectionFields = section.fields || {};
-        const testimonials = sectionFields.testimonials?.map?.(
+        
+        // Safely check if testimonials exist and is an array before mapping
+        const testimonialsArray = Array.isArray(sectionFields.testimonials) 
+          ? sectionFields.testimonials 
+          : [];
+        
+        const testimonials = testimonialsArray.map(
           transformContentfulTestimonial
         ) || [];
 
@@ -31,8 +37,8 @@ export function useTestimonialSection(sectionId: string) {
           fields: {
             title: sectionFields.title || "What Our Clients Say",
             subtitle: sectionFields.subtitle || "",
-            testimonials: (sectionFields.testimonials || []) as ContentfulTestimonial[],
-            pageKey: sectionFields.pageKey
+            testimonials: testimonialsArray as ContentfulTestimonial[],
+            pageKey: sectionFields.pageKey || ""
           }
         } as ContentfulTestimonialSection;
       } catch (error) {

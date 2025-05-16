@@ -12,7 +12,7 @@ export interface FAQ {
 export function useContactFAQ() {
   return useQuery({
     queryKey: ['contentful', 'contact', 'faq'],
-    queryFn: async (): Promise<FAQ[]> => {
+    queryFn: async (): Promise<{ processedData: FAQ[] }> => {
       try {
         const response = await contentfulClient.getEntries({
           content_type: 'contactPage',
@@ -22,7 +22,7 @@ export function useContactFAQ() {
         
         if (response.items.length === 0) {
           console.warn('No contact page content found');
-          return [];
+          return { processedData: [] };
         }
         
         // Get the FAQs from the contact page entry
@@ -32,18 +32,20 @@ export function useContactFAQ() {
         // Make sure faqs is an array before mapping
         if (!Array.isArray(faqs)) {
           console.warn('FAQs field is not an array:', faqs);
-          return [];
+          return { processedData: [] };
         }
         
         // Map the FAQs to our internal format
-        return faqs.map((faq: any) => ({
+        const processedData = faqs.map((faq: any) => ({
           id: faq.sys.id,
           question: faq.fields.question,
           answer: faq.fields.answer,
         }));
+        
+        return { processedData };
       } catch (error) {
         console.error('Error fetching contact page FAQs:', error);
-        return [];
+        return { processedData: [] };
       }
     },
   });

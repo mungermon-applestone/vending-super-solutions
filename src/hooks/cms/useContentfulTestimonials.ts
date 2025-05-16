@@ -17,6 +17,11 @@ export function useContentfulTestimonials() {
           order: ['fields.author'],
         });
         
+        if (!response.items || !Array.isArray(response.items)) {
+          console.warn('[useContentfulTestimonials] No testimonials found or invalid response format');
+          return [];
+        }
+        
         const transformedTestimonials = response.items.map(entry => transformContentfulTestimonial(entry));
         return transformTestimonials(transformedTestimonials);
       } catch (error) {
