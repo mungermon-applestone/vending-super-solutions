@@ -1,178 +1,70 @@
 
-import { ContentProviderConfig } from './types';
-import { supabase } from '@/integrations/supabase/client';
-import { handleCMSError } from '../utils/errorHandling';
-import { QueryOptions } from '@/types/cms';
-import { USE_SUPABASE_CMS } from '@/config/featureFlags';
+import { Entry } from 'contentful';
 
 /**
- * Base CMS adapter that provides consistent implementations for common operations
- * This can be extended by specific content type adapters
+ * Base interface for CMS adapters
+ * This interface has been simplified to remove Supabase dependencies
+ * and will be further refactored in the next phase
  */
-export class BaseCmsAdapter<T, CreateInput, UpdateInput> {
-  protected tableName: string;
-  protected config: ContentProviderConfig;
-  
-  constructor(tableName: string, config: ContentProviderConfig) {
-    this.tableName = tableName;
-    this.config = config;
-  }
+export interface BaseCmsAdapter<T, CreatePayload, UpdatePayload = Partial<CreatePayload>> {
+  /**
+   * Fetches all entities of a given type
+   */
+  fetchAll: () => Promise<T[]>;
   
   /**
-   * Get all items with support for filtering, pagination, and ordering
+   * Fetches a single entity by slug
    */
-  async getAll(options?: QueryOptions): Promise<T[]> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:getAll] Supabase CMS is disabled, returning empty array`);
-      return [];
-    }
-
-    try {
-      console.log(`[${this.tableName}:getAll] Fetching all with options:`, options);
-      
-      // This would normally use dynamic table access, but we'll prevent it from running
-      // when USE_SUPABASE_CMS is false, so TypeScript errors won't matter during execution
-      console.log(`[${this.tableName}:getAll] This function would normally access the "${this.tableName}" table`);
-      return [];
-    } catch (error) {
-      throw handleCMSError(error, 'fetch', this.tableName);
-    }
-  }
+  fetchBySlug: (slug: string) => Promise<T | null>;
   
   /**
-   * Get an item by its slug
+   * Fetches a single entity by ID
    */
-  async getBySlug(slug: string): Promise<T | null> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:getBySlug] Supabase CMS is disabled, returning null`);
-      return null;
-    }
-
-    try {
-      console.log(`[${this.tableName}:getBySlug] Fetching item with slug: ${slug}`);
-      
-      // This would normally use dynamic table access, but we'll prevent it
-      console.log(`[${this.tableName}:getBySlug] This function would normally access the "${this.tableName}" table`);
-      return null;
-    } catch (error) {
-      throw handleCMSError(error, 'fetchBySlug', this.tableName);
-    }
-  }
-  
-  /**
-   * Get an item by its ID
-   */
-  async getById(id: string): Promise<T | null> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:getById] Supabase CMS is disabled, returning null`);
-      return null;
-    }
-
-    try {
-      console.log(`[${this.tableName}:getById] Fetching item with id: ${id}`);
-      
-      // This would normally use dynamic table access, but we'll prevent it
-      console.log(`[${this.tableName}:getById] This function would normally access the "${this.tableName}" table`);
-      return null;
-    } catch (error) {
-      throw handleCMSError(error, 'fetchById', this.tableName);
-    }
-  }
-  
-  /**
-   * Create a new item
-   */
-  async create(data: CreateInput): Promise<T> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:create] Supabase CMS is disabled, returning mock data`);
-      return {
-        id: 'mock-id-' + Date.now()
-      } as unknown as T;
-    }
-
-    try {
-      console.log(`[${this.tableName}:create] Creating new item:`, data);
-      
-      // This would normally use dynamic table access, but we'll prevent it
-      console.log(`[${this.tableName}:create] This function would normally access the "${this.tableName}" table`);
-      return { id: 'mock-id-' + Date.now() } as unknown as T;
-    } catch (error) {
-      throw handleCMSError(error, 'create', this.tableName);
-    }
-  }
-  
-  /**
-   * Update an existing item
-   */
-  async update(id: string, data: UpdateInput): Promise<T> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:update] Supabase CMS is disabled, returning mock data`);
-      return {
-        id: id,
-        ...data
-      } as unknown as T;
-    }
-
-    try {
-      console.log(`[${this.tableName}:update] Updating item ${id} with:`, data);
-      
-      // This would normally use dynamic table access, but we'll prevent it
-      console.log(`[${this.tableName}:update] This function would normally access the "${this.tableName}" table`);
-      return { id: id, ...data } as unknown as T;
-    } catch (error) {
-      throw handleCMSError(error, 'update', this.tableName);
-    }
-  }
-  
-  /**
-   * Delete an item
-   */
-  async delete(id: string): Promise<boolean> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:delete] Supabase CMS is disabled, returning true`);
-      return true;
-    }
-
-    try {
-      console.log(`[${this.tableName}:delete] Deleting item: ${id}`);
-      
-      // This would normally use dynamic table access, but we'll prevent it
-      console.log(`[${this.tableName}:delete] This function would normally access the "${this.tableName}" table`);
-      return true;
-    } catch (error) {
-      throw handleCMSError(error, 'delete', this.tableName);
-    }
-  }
-  
-  /**
-   * Clone an item
-   */
-  async clone(id: string): Promise<T | null> {
-    if (!USE_SUPABASE_CMS) {
-      console.log(`[${this.tableName}:clone] Supabase CMS is disabled, returning mock data`);
-      return {
-        id: 'cloned-' + id,
-        title: 'Cloned Item'
-      } as unknown as T;
-    }
-
-    try {
-      console.log(`[${this.tableName}:clone] Cloning item: ${id}`);
-      
-      // This would normally use dynamic table access, but we'll prevent it
-      console.log(`[${this.tableName}:clone] This function would normally access the "${this.tableName}" table`);
-      return { id: 'cloned-' + id, title: 'Cloned Item' } as unknown as T;
-    } catch (error) {
-      throw handleCMSError(error, 'clone', this.tableName);
-    }
-  }
+  fetchById: (id: string) => Promise<T | null>;
 }
 
 /**
- * Create a basic adapter factory that returns a BaseCmsAdapter instance
+ * Generic error handler for CMS operations
+ * @param error - The error that was caught
+ * @param operation - The operation that failed
+ * @returns A rejected promise with an error message
  */
-export function createBaseCmsAdapter<T, CreateInput, UpdateInput>(
-  tableName: string
-): (config: ContentProviderConfig) => BaseCmsAdapter<T, CreateInput, UpdateInput> {
-  return (config: ContentProviderConfig) => new BaseCmsAdapter<T, CreateInput, UpdateInput>(tableName, config);
-}
+export const handleCmsError = (error: unknown, operation: "fetch" | "create" | "update" | "delete" | "initialize"): Promise<never> => {
+  console.error(`CMS ${operation} operation failed:`, error);
+  return Promise.reject(new Error(`Failed to ${operation} content: ${error instanceof Error ? error.message : "Unknown error"}`));
+};
+
+/**
+ * This adapter has been kept as a stub to prevent build errors
+ * It will be removed in the next phase of the migration
+ * @deprecated - This adapter is being phased out in favor of direct Contentful usage
+ */
+export const createBaseCmsAdapter = <T, CreatePayload, UpdatePayload = Partial<CreatePayload>>(
+  contentType: string
+): BaseCmsAdapter<T, CreatePayload, UpdatePayload> => {
+  console.warn(`Using deprecated CMS adapter for ${contentType}`);
+  
+  return {
+    fetchAll: async () => {
+      console.warn(`fetchAll for ${contentType} using deprecated adapter`);
+      return [];
+    },
+    
+    fetchBySlug: async (slug: string) => {
+      console.warn(`fetchBySlug for ${contentType} using deprecated adapter`);
+      return null;
+    },
+    
+    fetchById: async (id: string) => {
+      console.warn(`fetchById for ${contentType} using deprecated adapter`);
+      return null;
+    }
+  };
+};
+
+/**
+ * Helper function to handle checking if a Contentful entry is valid
+ */
+export const isValidContentfulEntry = (entry: any): entry is Entry<any> => {
+  return entry && entry.sys && entry.fields;
+};

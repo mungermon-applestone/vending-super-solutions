@@ -1,119 +1,57 @@
 
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { ContentfulTestimonialSection, ContentfulTestimonial } from '@/types/contentful/testimonial';
+import React from 'react';
+import { Testimonial } from '@/types/testimonial';
 
 interface TestimonialsSectionProps {
-  data: ContentfulTestimonialSection;
+  title?: string;
+  subtitle?: string;
+  testimonials?: Testimonial[];
 }
 
-export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const testimonials = data.fields?.testimonials?.filter(t => t.fields?.visible !== false) || [];
-
-  if (!testimonials.length) {
+const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
+  title = "What Our Clients Say",
+  subtitle = "Read testimonials from businesses that have partnered with us",
+  testimonials = []
+}) => {
+  // If there are no testimonials, don't render the section
+  if (!testimonials || testimonials.length === 0) {
     return null;
   }
 
-  const nextTestimonial = () => {
-    setActiveIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
-  };
-
-  const prevTestimonial = () => {
-    setActiveIndex((prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length);
-  };
-
-  const currentTestimonial = testimonials[activeIndex]?.fields;
-  if (!currentTestimonial) return null;
-
   return (
-    <section className="py-16 md:py-24 bg-gray-50">
-      <div className="container-wide">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-            {data.fields?.title || "Trusted by Industry Leaders"}
-          </h2>
-          <p className="subtitle mx-auto text-gray-600">
-            {data.fields?.subtitle || "Hear what our clients have to say about our solutions"}
-          </p>
+    <section className="py-12 bg-gray-50">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold mb-2">{title}</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">{subtitle}</p>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="relative bg-white rounded-xl p-8 md:p-12 shadow-lg">
-            <div className="absolute top-6 left-6 text-6xl text-vending-blue-light leading-none font-serif opacity-40">
-              "
-            </div>
-
-            <div className="relative">
-              {/* Stars */}
-              {currentTestimonial.rating && (
-                <div className="flex mb-6 justify-center">
-                  {[...Array(currentTestimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                  ))}
-                  {[...Array(5 - (currentTestimonial.rating || 0))].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-gray-300" />
-                  ))}
-                </div>
-              )}
-
-              {/* Quote */}
-              <blockquote className="text-xl md:text-2xl text-center font-medium text-gray-700 mb-8">
-                "{currentTestimonial.quote}"
-              </blockquote>
-
-              {/* Author info */}
-              <div className="text-center">
-                {currentTestimonial.image?.fields?.file?.url && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {testimonials.map((testimonial, index) => (
+            <div 
+              key={testimonial.id || index}
+              className="bg-white p-6 rounded-lg shadow-md"
+            >
+              <div className="flex items-center mb-4">
+                {testimonial.avatar && (
                   <img 
-                    src={`https:${currentTestimonial.image.fields.file.url}`}
-                    alt={currentTestimonial.image.fields.title || currentTestimonial.author}
-                    className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
+                    src={testimonial.avatar} 
+                    alt={`${testimonial.name}'s avatar`}
+                    className="w-12 h-12 rounded-full object-cover mr-4" 
                   />
                 )}
-                <div className="font-semibold text-lg">{currentTestimonial.author}</div>
-                <div className="text-vending-gray-dark">
-                  {currentTestimonial.position}
-                  {currentTestimonial.position && currentTestimonial.company && ', '}
-                  {currentTestimonial.company}
+                <div>
+                  <h4 className="font-semibold">{testimonial.name}</h4>
+                  {testimonial.position && testimonial.company && (
+                    <p className="text-sm text-gray-500">
+                      {testimonial.position}, {testimonial.company}
+                    </p>
+                  )}
                 </div>
               </div>
+              <p className="text-gray-600">{testimonial.quote}</p>
             </div>
-
-            {/* Navigation arrows */}
-            {testimonials.length > 1 && (
-              <>
-                <button 
-                  onClick={prevTestimonial} 
-                  className="absolute top-1/2 left-4 -translate-y-1/2 bg-white rounded-full p-2 shadow-md hover:bg-gray-50"
-                  aria-label="Previous testimonial"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button 
-                  onClick={nextTestimonial} 
-                  className="absolute top-1/2 right-4 -translate-y-1/2 bg-white rounded-full p-2 shadow-md hover:bg-gray-50"
-                  aria-label="Next testimonial"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-
-                {/* Pagination dots */}
-                <div className="flex justify-center mt-6 space-x-2">
-                  {testimonials.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setActiveIndex(index)}
-                      className={`w-3 h-3 rounded-full transition-all ${
-                        index === activeIndex ? 'bg-vending-blue scale-110' : 'bg-gray-300'
-                      }`}
-                      aria-label={`Go to testimonial ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+          ))}
         </div>
       </div>
     </section>

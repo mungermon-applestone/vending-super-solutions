@@ -1,91 +1,63 @@
 
-import { BusinessGoalFormData } from '@/types/forms';
-import { USE_SUPABASE_CMS } from '@/config/featureFlags';
+// Import the BusinessGoalItem type from the shared types
+import { BusinessGoalItem } from '@/types/businessGoal';
+import { Entry } from 'contentful';
 
 /**
- * Process benefits array to remove empty items
+ * Helper function to transform Contentful business goal entries into BusinessGoalItem objects
+ * 
+ * @param entries - Array of Contentful business goal entries
+ * @returns Array of BusinessGoalItem objects
  */
-export const processBenefits = (benefits: string[]): string[] => {
-  return benefits.filter(benefit => benefit.trim() !== '');
+export const transformBusinessGoalEntries = (entries: Entry<any>[]): BusinessGoalItem[] => {
+  if (!entries || !Array.isArray(entries)) {
+    return [];
+  }
+  
+  return entries
+    .filter(entry => entry && entry.fields)
+    .map(entry => ({
+      id: entry.sys?.id || '',
+      title: entry.fields.title || '',
+      slug: entry.fields.slug || '',
+      description: entry.fields.description || '',
+      icon: entry.fields.icon || '',
+      benefits: Array.isArray(entry.fields.benefits) 
+        ? entry.fields.benefits 
+        : [],
+      image: entry.fields.image?.fields?.file?.url 
+        ? `https:${entry.fields.image.fields.file.url}`
+        : '',
+      imageAlt: entry.fields.image?.fields?.description || entry.fields.title || ''
+    }));
 };
 
 /**
- * Check if a business goal with the given slug already exists
+ * Helper function to transform a single Contentful business goal entry into a BusinessGoalItem
+ * 
+ * @param entry - A Contentful business goal entry
+ * @returns A BusinessGoalItem object or null if the entry is invalid
  */
-export const checkBusinessGoalSlugExists = async (slug: string): Promise<boolean> => {
-  // Always return false when Supabase CMS is disabled
-  console.log(`[businessGoalService] Would check if slug "${slug}" exists, but Supabase CMS is disabled`);
-  return false;
+export const transformBusinessGoalEntry = (entry: Entry<any> | undefined | null): BusinessGoalItem | null => {
+  if (!entry || !entry.fields) {
+    return null;
+  }
+  
+  return {
+    id: entry.sys?.id || '',
+    title: entry.fields.title || '',
+    slug: entry.fields.slug || '',
+    description: entry.fields.description || '',
+    icon: entry.fields.icon || '',
+    benefits: Array.isArray(entry.fields.benefits) 
+      ? entry.fields.benefits 
+      : [],
+    image: entry.fields.image?.fields?.file?.url 
+      ? `https:${entry.fields.image.fields.file.url}`
+      : '',
+    imageAlt: entry.fields.image?.fields?.description || entry.fields.title || ''
+  };
 };
 
-/**
- * Add business goal image
- */
-export const addBusinessGoalImage = async (
-  data: BusinessGoalFormData, 
-  businessGoalId: string
-): Promise<void> => {
-  // No-op when Supabase CMS is disabled
-  console.log('[businessGoalService] Would add business goal image, but Supabase CMS is disabled');
-  return;
-};
-
-/**
- * Add business goal benefits
- */
-export const addBusinessGoalBenefits = async (
-  data: BusinessGoalFormData, 
-  businessGoalId: string
-): Promise<void> => {
-  // No-op when Supabase CMS is disabled
-  console.log('[businessGoalService] Would add business goal benefits, but Supabase CMS is disabled');
-  return;
-};
-
-/**
- * Add business goal features
- */
-export const addBusinessGoalFeatures = async (
-  data: BusinessGoalFormData, 
-  businessGoalId: string
-): Promise<void> => {
-  // No-op when Supabase CMS is disabled
-  console.log('[businessGoalService] Would add business goal features, but Supabase CMS is disabled');
-  return;
-};
-
-/**
- * Update business goal image
- */
-export const updateBusinessGoalImage = async (
-  data: BusinessGoalFormData, 
-  businessGoalId: string
-): Promise<void> => {
-  // No-op when Supabase CMS is disabled
-  console.log('[businessGoalService] Would update business goal image, but Supabase CMS is disabled');
-  return;
-};
-
-/**
- * Update business goal benefits
- */
-export const updateBusinessGoalBenefits = async (
-  data: BusinessGoalFormData, 
-  businessGoalId: string
-): Promise<void> => {
-  // No-op when Supabase CMS is disabled
-  console.log('[businessGoalService] Would update business goal benefits, but Supabase CMS is disabled');
-  return;
-};
-
-/**
- * Update business goal features
- */
-export const updateBusinessGoalFeatures = async (
-  data: BusinessGoalFormData, 
-  businessGoalId: string
-): Promise<void> => {
-  // No-op when Supabase CMS is disabled
-  console.log('[businessGoalService] Would update business goal features, but Supabase CMS is disabled');
-  return;
-};
+// Re-export the type using export type syntax to avoid conflicts
+export type { BusinessGoalItem };
