@@ -1,71 +1,55 @@
 
 /**
- * Standard error handler for CMS operations
- * 
- * @param error The original error
- * @param operation The operation being performed (fetch, create, update, delete)
- * @param contentType The type of content being operated on
- * @param identifier Optional identifier for the specific content item
- * @returns A standardized error object
+ * Standardized error handling for CMS operations
+ * @param error The caught error
+ * @param operation Description of the operation that failed
+ * @param entityType Type of entity being operated on (e.g., 'technology')
+ * @param entityId Optional ID of the entity
+ * @returns Error with standardized message
  */
 export function handleCMSError(
   error: unknown, 
-  operation: 'fetch' | 'create' | 'update' | 'delete' | 'initialize',
-  contentType: string,
-  identifier?: string
+  operation: string,
+  entityType: string,
+  entityId?: string
 ): Error {
-  // Get message from the error
-  const originalMessage = error instanceof Error 
-    ? error.message 
-    : String(error);
+  console.error(`CMS Error: ${operation} ${entityType}${entityId ? ` (ID: ${entityId})` : ''}:`, error);
   
-  // Create a standard error message
-  let message = `Failed to ${operation} ${contentType}`;
-  if (identifier) {
-    message += ` (${identifier})`;
+  // Extract message from error
+  let message = 'Unknown error occurred';
+  if (error instanceof Error) {
+    message = error.message;
+  } else if (typeof error === 'string') {
+    message = error;
+  } else if (error && typeof error === 'object' && 'message' in error) {
+    message = String((error as any).message);
   }
-  message += `: ${originalMessage}`;
   
-  // Log the error for debugging
-  console.error(`[CMS Error] ${message}`, error);
-  
-  // Return a new error with the formatted message
-  return new Error(message);
+  // Standardize error message
+  return new Error(`Failed to ${operation} ${entityType}${entityId ? ` (ID: ${entityId})` : ''}: ${message}`);
 }
 
 /**
- * Helper function to create user-friendly error messages for CMS operations
+ * Check if an error is a not found error
+ * @param error The error to check
  */
-export function getUserFriendlyErrorMessage(
-  error: unknown,
-  defaultMessage = 'An unexpected error occurred'
-): string {
-  if (!error) return defaultMessage;
-  
+export function isNotFoundError(error: unknown): boolean {
   if (error instanceof Error) {
-    // Handle specific error types
-    if (error.message.includes('Network Error')) {
-      return 'Network error. Please check your internet connection and try again.';
-    }
-    
-    if (error.message.includes('401')) {
-      return 'Authentication error. Please check your CMS credentials.';
-    }
-    
-    if (error.message.includes('404')) {
-      return 'Content not found. It may have been deleted or moved.';
-    }
-    
-    if (error.message.includes('429')) {
-      return 'Rate limit exceeded. Please wait a moment and try again.';
-    }
-    
-    if (error.message.includes('500')) {
-      return 'Server error. Please try again later.';
-    }
-    
-    return error.message;
+    return error.message.includes('not found') || error.message.includes('404');
   }
-  
-  return defaultMessage;
+  return false;
+}
+
+/**
+ * Check if an error is an authorization error
+ * @param error The error to check
+ */
+export function isAuthError(error: unknown): boolean {
+  if (error instanceof Error) {
+    return error.message.includes('unauthorized') || 
+           error.message.includes('forbidden') || 
+           error.message.includes('401') ||
+           error.message.includes('403');
+  }
+  return false;
 }

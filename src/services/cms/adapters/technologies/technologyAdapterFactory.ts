@@ -7,16 +7,13 @@ import { handleCMSError } from '@/services/cms/utils/errorHandling';
 /**
  * Factory function to get the appropriate technology adapter based on the CMS provider
  * @param config CMS provider configuration
- * @returns The appropriate technology adapter implementation
+ * @returns The technology adapter implementation (always Contentful)
  */
 export function getTechnologyAdapter(config: ContentProviderConfig): TechnologyAdapter {
   try {
-    switch (config.type) {
-      case ContentProviderType.CONTENTFUL:
-      default:
-        console.log('[technologyAdapterFactory] Using Contentful technology adapter');
-        return contentfulTechnologyAdapter;
-    }
+    // Always return contentful adapter regardless of config
+    console.log('[technologyAdapterFactory] Using Contentful technology adapter');
+    return contentfulTechnologyAdapter;
   } catch (error) {
     console.error('[technologyAdapterFactory] Error creating technology adapter:', error);
     throw handleCMSError(error, 'initialize', 'TechnologyAdapter');

@@ -1,68 +1,78 @@
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo, Component, ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
-  contentType?: string;
   fallback?: ReactNode;
+  contentType: string;
 }
 
 interface State {
   hasError: boolean;
-  error?: Error;
+  error: Error | null;
 }
 
 /**
- * Error boundary specifically for handling Contentful rendering errors
+ * A component that catches errors in Contentful data rendering and displays
+ * a helpful fallback UI instead of crashing the app.
  */
 class ContentfulErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false
-  };
-
-  public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: null
+    };
   }
 
-  public componentDidMount() {
-    // Check for Contentful configuration
-    const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
-    const deliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
-
-    if (!spaceId || !deliveryToken) {
-      this.setState({ 
-        hasError: true, 
-        error: new Error("Contentful is not properly configured. Missing space ID or delivery token.") 
-      });
-    }
+  static getDerivedStateFromError(error: Error): State {
+    return {
+      hasError: true,
+      error
+    };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Contentful Error:", error);
-    console.error("Error Details:", errorInfo);
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    console.error(`[ContentfulErrorBoundary] Error rendering ${this.props.contentType}:`, error);
+    console.error(`[ContentfulErrorBoundary] Component stack:`, errorInfo.componentStack);
   }
 
-  public render() {
+  render(): ReactNode {
     const { hasError, error } = this.state;
-    const { children, contentType = "content", fallback } = this.props;
+    const { children, fallback, contentType } = this.props;
 
     if (hasError) {
-      return fallback || (
-        <div className="bg-white rounded-lg shadow-md p-6 my-4 border border-red-200">
-          <h3 className="text-lg font-semibold text-red-700 mb-2">
-            Error Loading {contentType}
+      // If there's a custom fallback, use it
+      if (fallback) {
+        return fallback;
+      }
+
+      // Default fallback UI
+      return (
+        <div className="p-6 border border-amber-200 bg-amber-50 rounded-lg text-center">
+          <div className="flex justify-center mb-4">
+            <AlertTriangle size={32} className="text-amber-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-amber-800 mb-2">
+            Content Display Error
           </h3>
-          <p className="text-gray-700 mb-4">
-            There was a problem loading the {contentType} from Contentful.
+          <p className="text-amber-700 mb-4">
+            There was an error displaying {contentType} content.
           </p>
           {error && (
-            <div className="bg-red-50 p-3 rounded text-sm font-mono text-red-800 overflow-auto">
+            <p className="text-sm text-amber-600 bg-amber-100 p-3 rounded mb-4 max-w-md mx-auto overflow-auto">
               {error.message}
-            </div>
+            </p>
           )}
-          <p className="text-sm mt-4 text-gray-600">
-            Please check your Contentful configuration and ensure the content exists.
-          </p>
+          <Button
+            variant="outline"
+            onClick={() => window.location.reload()}
+            className="border-amber-400 text-amber-700 hover:bg-amber-100"
+          >
+            Try Again
+          </Button>
         </div>
       );
     }

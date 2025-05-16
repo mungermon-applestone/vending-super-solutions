@@ -1,76 +1,82 @@
 
-import { createClient } from '@/services/contentful/managementClient';
-import {
-  updateBusinessGoalImage,
-  updateBusinessGoalBenefits,
-  updateBusinessGoalFeatures,
-  BusinessGoalItem
+import { supabase } from '@/integrations/supabase/client';
+import { BusinessGoalFormData } from '@/types/forms';
+import { UseToastReturn } from '@/hooks/use-toast';
+import { 
+  updateBusinessGoalImage, 
+  updateBusinessGoalBenefits, 
+  updateBusinessGoalFeatures 
 } from './businessGoalHelpers';
 
-export interface UpdateBusinessGoalParams {
-  id: string;
-  title?: string;
-  description?: string;
-  visible?: boolean;
-  icon?: string;
-  benefits?: BusinessGoalItem[];
-  features?: BusinessGoalItem[];
-  imageId?: string;
-}
-
-export async function updateBusinessGoal(params: UpdateBusinessGoalParams) {
+/**
+ * Update an existing business goal
+ */
+export const updateBusinessGoal = async (
+  data: BusinessGoalFormData, 
+  goalSlug: string, 
+  toast: UseToastReturn
+) => {
+  console.log(`[businessGoalService] Updating business goal "${goalSlug}" with data:`, data);
+  
   try {
-    const { id, title, description, visible, icon, benefits, features, imageId } = params;
-    
-    // Create Contentful client
-    const client = await createClient();
-    const space = await client.getSpace(process.env.CONTENTFUL_SPACE_ID || '');
-    const environment = await space.getEnvironment(process.env.CONTENTFUL_ENVIRONMENT_ID || 'master');
-    
-    // Get entry
-    const entry = await environment.getEntry(id);
-    
-    // Update fields if provided
-    if (title !== undefined) {
-      entry.fields.title = { 'en-US': title };
+    // First fetch the business goal to get its ID
+    const { data: existingGoal, error: fetchError } = await supabase
+      .from('business_goals')
+      .select('id')
+      .eq('slug', goalSlug)
+      .maybeSingle();
+      
+    if (fetchError) {
+      console.error('[businessGoalService] Error fetching business goal:', fetchError);
+      throw new Error(`Error fetching business goal: ${fetchError.message}`);
     }
     
-    if (description !== undefined) {
-      entry.fields.description = { 'en-US': description };
+    if (!existingGoal) {
+      console.error(`[businessGoalService] Business goal with slug "${goalSlug}" not found`);
+      throw new Error(`Business goal with slug "${goalSlug}" not found`);
     }
     
-    if (visible !== undefined) {
-      entry.fields.visible = { 'en-US': visible };
+    const goalId = existingGoal.id;
+    
+    // Update the basic business goal information
+    const { error: updateError } = await supabase
+      .from('business_goals')
+      .update({
+        title: data.title,
+        slug: data.slug,
+        description: data.description,
+        icon: data.icon || null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', goalId);
+      
+    if (updateError) {
+      console.error('[businessGoalService] Error updating business goal:', updateError);
+      throw new Error(`Error updating business goal: ${updateError.message}`);
     }
     
-    if (icon !== undefined) {
-      entry.fields.icon = { 'en-US': icon };
-    }
+    // Update business goal image
+    await updateBusinessGoalImage(data, goalId);
     
-    // Update entry
-    const updatedEntry = await entry.update();
+    // Update business goal benefits
+    await updateBusinessGoalBenefits(data, goalId);
     
-    // Publish entry
-    const publishedEntry = await updatedEntry.publish();
+    // Update business goal features
+    await updateBusinessGoalFeatures(data, goalId);
     
-    // Update image if provided
-    if (imageId) {
-      await updateBusinessGoalImage(publishedEntry.sys.id, imageId);
-    }
+    toast.toast({
+      title: "Business goal updated",
+      description: `${data.title} has been updated successfully.`
+    });
     
-    // Update benefits if provided
-    if (benefits) {
-      await updateBusinessGoalBenefits(publishedEntry.sys.id, benefits);
-    }
-    
-    // Update features if provided
-    if (features) {
-      await updateBusinessGoalFeatures(publishedEntry.sys.id, features);
-    }
-    
-    return publishedEntry;
+    return goalId;
   } catch (error) {
-    console.error('Error updating business goal:', error);
+    console.error('[businessGoalService] Error in updateBusinessGoal:', error);
+    toast.toast({
+      title: "Error",
+      description: `Failed to update business goal: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      variant: "destructive"
+    });
     throw error;
   }
-}
+};

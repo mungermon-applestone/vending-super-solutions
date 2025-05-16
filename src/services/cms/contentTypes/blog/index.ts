@@ -1,5 +1,32 @@
-import { supabase } from "@/integrations/supabase/client";
+
 import { BlogPost, BlogPostFormData } from "@/types/blog";
+import { logDeprecationWarning } from "@/services/cms/utils/deprecationLogger";
+
+// Mock blog posts data
+const mockBlogPosts: BlogPost[] = [
+  {
+    id: "1",
+    title: "Introduction to Vending Technology",
+    slug: "introduction-to-vending-technology",
+    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    excerpt: "A brief overview of modern vending technology.",
+    status: "published",
+    published_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  },
+  {
+    id: "2",
+    title: "The Future of Automated Retail",
+    slug: "future-of-automated-retail",
+    content: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    excerpt: "Exploring what's next in automated retail solutions.",
+    status: "published",
+    published_at: new Date(Date.now() - 86400000).toISOString(),
+    created_at: new Date(Date.now() - 86400000).toISOString(),
+    updated_at: new Date(Date.now() - 86400000).toISOString()
+  }
+];
 
 // Fetch all blog posts with optional filters
 export const fetchBlogPosts = async (filters: { 
@@ -8,197 +35,154 @@ export const fetchBlogPosts = async (filters: {
   limit?: number;
   offset?: number;
 } = {}): Promise<BlogPost[]> => {
-  console.log("[fetchBlogPosts] Fetching blog posts with filters:", filters);
+  logDeprecationWarning(
+    "fetchBlogPosts",
+    "Direct blog posts API is deprecated.",
+    "Please use Contentful API instead."
+  );
   
-  let query = supabase
-    .from('blog_posts')
-    .select('*');
-
-  // Apply filters
+  // Apply filters to mock data
+  let filteredPosts = [...mockBlogPosts];
+  
   if (filters.status) {
-    query = query.eq('status', filters.status);
+    filteredPosts = filteredPosts.filter(post => post.status === filters.status);
   }
   
   if (filters.slug) {
-    query = query.eq('slug', filters.slug);
+    filteredPosts = filteredPosts.filter(post => post.slug === filters.slug);
   }
   
   // Apply pagination
-  if (filters.limit) {
-    query = query.limit(filters.limit);
-  }
-  
-  if (filters.offset) {
-    query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1);
+  if (filters.offset !== undefined) {
+    const end = filters.limit ? filters.offset + filters.limit : undefined;
+    filteredPosts = filteredPosts.slice(filters.offset, end);
+  } else if (filters.limit) {
+    filteredPosts = filteredPosts.slice(0, filters.limit);
   }
   
   // Sort by published_at for published posts in descending order (newest first)
-  query = query.order('published_at', { ascending: false, nullsFirst: false })
-               .order('created_at', { ascending: false });
+  filteredPosts.sort((a, b) => {
+    if (a.published_at && b.published_at) {
+      return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
+    }
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
   
-  const { data, error } = await query;
-  
-  if (error) {
-    console.error("[fetchBlogPosts] Error fetching blog posts:", error);
-    throw error;
-  }
-  
-  return data as BlogPost[];
+  return filteredPosts;
 };
 
 // Fetch a single blog post by slug
 export const fetchBlogPostBySlug = async (slug: string): Promise<BlogPost | null> => {
-  console.log("[fetchBlogPostBySlug] Fetching blog post with slug:", slug);
+  logDeprecationWarning(
+    "fetchBlogPostBySlug",
+    "Direct blog post API is deprecated.",
+    "Please use Contentful API instead."
+  );
   
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .select('*')
-    .eq('slug', slug)
-    .maybeSingle();
-  
-  if (error) {
-    console.error("[fetchBlogPostBySlug] Error fetching blog post:", error);
-    throw error;
-  }
-  
-  return data as BlogPost | null;
+  const post = mockBlogPosts.find(post => post.slug === slug) || null;
+  return post;
 };
 
 // Create a new blog post
 export const createBlogPost = async (postData: BlogPostFormData): Promise<BlogPost> => {
-  console.log("[createBlogPost] Creating blog post:", postData);
+  logDeprecationWarning(
+    "createBlogPost",
+    "Direct blog post creation is deprecated.",
+    "Please use Contentful to manage blog content."
+  );
   
-  const newPost = {
+  const newPost: BlogPost = {
+    id: `mock-${Date.now()}`,
     ...postData,
-    published_at: postData.status === 'published' ? new Date().toISOString() : null
+    published_at: postData.status === 'published' ? new Date().toISOString() : null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   };
   
-  console.log("[createBlogPost] Sending to Supabase:", newPost);
-  
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .insert(newPost)
-    .select()
-    .single();
-  
-  if (error) {
-    console.error("[createBlogPost] Error creating blog post:", error);
-    throw error;
-  }
-  
-  return data as BlogPost;
+  mockBlogPosts.push(newPost);
+  return newPost;
 };
 
 // Update an existing blog post
 export const updateBlogPost = async (id: string, postData: BlogPostFormData): Promise<BlogPost> => {
-  console.log("[updateBlogPost] Updating blog post:", id, postData);
+  logDeprecationWarning(
+    "updateBlogPost",
+    "Direct blog post updating is deprecated.",
+    "Please use Contentful to manage blog content."
+  );
   
-  // First, get the existing post to check its status
-  const { data: existingPost } = await supabase
-    .from('blog_posts')
-    .select('status, published_at')
-    .eq('id', id)
-    .single();
+  const existingPostIndex = mockBlogPosts.findIndex(post => post.id === id);
   
-  const updatedPost: {
-    title: string;
-    slug: string;
-    content: string;
-    excerpt?: string;
-    status: 'draft' | 'published';
-    published_at?: string | null;
-    updated_at: string;
-  } = {
+  if (existingPostIndex === -1) {
+    throw new Error(`Blog post with ID ${id} not found`);
+  }
+  
+  const existingPost = mockBlogPosts[existingPostIndex];
+  
+  const updatedPost: BlogPost = {
+    ...existingPost,
     ...postData,
     updated_at: new Date().toISOString()
   };
   
   // If status changed to published and wasn't previously published, set published_at date
-  if (postData.status === 'published') {
-    if (existingPost && existingPost.status !== 'published') {
-      updatedPost.published_at = new Date().toISOString();
-    } else if (existingPost && existingPost.published_at) {
-      // Keep the original published date
-      updatedPost.published_at = existingPost.published_at;
-    }
-  } else {
-    // If changing to draft, set published_at to null
+  if (postData.status === 'published' && existingPost.status !== 'published') {
+    updatedPost.published_at = new Date().toISOString();
+  } else if (postData.status !== 'published') {
     updatedPost.published_at = null;
   }
   
-  console.log("[updateBlogPost] Sending to Supabase:", updatedPost);
-  
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .update(updatedPost)
-    .eq('id', id)
-    .select()
-    .single();
-  
-  if (error) {
-    console.error("[updateBlogPost] Error updating blog post:", error);
-    throw error;
-  }
-  
-  return data as BlogPost;
+  mockBlogPosts[existingPostIndex] = updatedPost;
+  return updatedPost;
 };
 
 // Delete a blog post
 export const deleteBlogPost = async (id: string): Promise<boolean> => {
-  console.log("[deleteBlogPost] Deleting blog post:", id);
+  logDeprecationWarning(
+    "deleteBlogPost",
+    "Direct blog post deletion is deprecated.",
+    "Please use Contentful to manage blog content."
+  );
   
-  const { error } = await supabase
-    .from('blog_posts')
-    .delete()
-    .eq('id', id);
+  const initialLength = mockBlogPosts.length;
+  const filteredPosts = mockBlogPosts.filter(post => post.id !== id);
   
-  if (error) {
-    console.error("[deleteBlogPost] Error deleting blog post:", error);
-    throw error;
-  }
+  // Update our mock data array
+  mockBlogPosts.length = 0;
+  mockBlogPosts.push(...filteredPosts);
   
-  return true;
+  return initialLength !== mockBlogPosts.length;
 };
 
 // Clone a blog post
 export const cloneBlogPost = async (id: string): Promise<BlogPost> => {
-  console.log("[cloneBlogPost] Cloning blog post:", id);
+  logDeprecationWarning(
+    "cloneBlogPost",
+    "Direct blog post cloning is deprecated.",
+    "Please use Contentful to manage blog content."
+  );
   
-  // Fetch the post to clone
-  const { data: postToClone, error: fetchError } = await supabase
-    .from('blog_posts')
-    .select('*')
-    .eq('id', id)
-    .single();
+  const postToClone = mockBlogPosts.find(post => post.id === id);
   
-  if (fetchError) {
-    console.error("[cloneBlogPost] Error fetching blog post to clone:", fetchError);
-    throw fetchError;
+  if (!postToClone) {
+    throw new Error(`Blog post with ID ${id} not found`);
   }
   
   // Generate a unique slug
   const timestamp = Date.now();
-  const clonedPost = {
+  const clonedPost: BlogPost = {
+    ...postToClone,
+    id: `clone-${timestamp}`,
     title: `${postToClone.title} (Copy)`,
     slug: `${postToClone.slug}-copy-${timestamp}`,
-    content: postToClone.content,
-    excerpt: postToClone.excerpt,
-    status: 'draft', // Always create clones as drafts
-    published_at: null
+    status: 'draft',
+    published_at: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   };
   
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .insert(clonedPost)
-    .select()
-    .single();
-  
-  if (error) {
-    console.error("[cloneBlogPost] Error creating cloned blog post:", error);
-    throw error;
-  }
-  
-  return data as BlogPost;
+  mockBlogPosts.push(clonedPost);
+  return clonedPost;
 };
 
 // Get adjacent posts (previous and next)
@@ -206,60 +190,26 @@ export const getAdjacentPosts = async (currentPostSlug: string): Promise<{
   previous: BlogPost | null;
   next: BlogPost | null;
 }> => {
-  console.log("[getAdjacentPosts] Finding adjacent posts for:", currentPostSlug);
+  logDeprecationWarning(
+    "getAdjacentPosts",
+    "Direct blog post navigation API is deprecated.",
+    "Please use Contentful API instead."
+  );
   
-  // Fetch the current post to get its published date
-  const currentPost = await fetchBlogPostBySlug(currentPostSlug);
+  const sortedPosts = [...mockBlogPosts].sort((a, b) => {
+    const dateA = a.published_at ? new Date(a.published_at) : new Date(a.created_at);
+    const dateB = b.published_at ? new Date(b.published_at) : new Date(b.created_at);
+    return dateB.getTime() - dateA.getTime();
+  });
   
-  if (!currentPost) {
-    throw new Error(`Blog post with slug ${currentPostSlug} not found`);
+  const currentIndex = sortedPosts.findIndex(post => post.slug === currentPostSlug);
+  
+  if (currentIndex === -1) {
+    return { previous: null, next: null };
   }
   
-  // For published posts, use published_at date for navigation
-  if (currentPost.status === 'published' && currentPost.published_at) {
-    // Get previous post (newer)
-    const { data: previousData } = await supabase
-      .from('blog_posts')
-      .select('*')
-      .eq('status', 'published')
-      .gt('published_at', currentPost.published_at)
-      .order('published_at', { ascending: true })
-      .limit(1);
-    
-    // Get next post (older)
-    const { data: nextData } = await supabase
-      .from('blog_posts')
-      .select('*')
-      .eq('status', 'published')
-      .lt('published_at', currentPost.published_at)
-      .order('published_at', { ascending: false })
-      .limit(1);
-    
-    return {
-      previous: previousData && previousData.length > 0 ? previousData[0] as BlogPost : null,
-      next: nextData && nextData.length > 0 ? nextData[0] as BlogPost : null
-    };
-  } else {
-    // For drafts, use created_at date for navigation
-    // Get previous post (newer)
-    const { data: previousData } = await supabase
-      .from('blog_posts')
-      .select('*')
-      .gt('created_at', currentPost.created_at)
-      .order('created_at', { ascending: true })
-      .limit(1);
-    
-    // Get next post (older)
-    const { data: nextData } = await supabase
-      .from('blog_posts')
-      .select('*')
-      .lt('created_at', currentPost.created_at)
-      .order('created_at', { ascending: false })
-      .limit(1);
-    
-    return {
-      previous: previousData && previousData.length > 0 ? previousData[0] as BlogPost : null,
-      next: nextData && nextData.length > 0 ? nextData[0] as BlogPost : null
-    };
-  }
+  return {
+    previous: currentIndex > 0 ? sortedPosts[currentIndex - 1] : null,
+    next: currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null
+  };
 };

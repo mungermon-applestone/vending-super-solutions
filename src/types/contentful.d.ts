@@ -1,40 +1,6 @@
+import { Asset, Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
+import { Document, BLOCKS } from '@contentful/rich-text-types';
 
-import { Asset, Entry, EntrySkeletonType } from 'contentful';
-import { Document } from '@contentful/rich-text-types';
-
-// Basic types
-export interface Testimonial {
-  id: string;
-  name: string;
-  title: string;
-  company: string;
-  testimonial: string;
-  image_url?: string;
-  rating: number;
-}
-
-export interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  summary?: string;
-  content: string;
-  author?: string;
-  published_date?: string;
-  featured_image?: string;
-  status?: string;
-  category?: string;
-  tags?: string[];
-  reading_time?: number;
-}
-
-export interface AdjacentPost {
-  id: string;
-  title: string;
-  slug: string;
-}
-
-// Contentful specific types
 export interface ContentfulAsset {
   sys: {
     id: string;
@@ -56,33 +22,143 @@ export interface ContentfulAsset {
   };
 }
 
+export interface ContentfulFeature {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title: string;
+    description: string;
+    icon?: string;
+    screenshot?: ContentfulAsset;
+  };
+}
+
+export interface ContentfulBusinessGoal {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title: string;
+    slug: string;
+    description: string;
+    icon?: string;
+    image?: ContentfulAsset;
+    benefits?: string[];
+    features?: ContentfulFeature[];
+    visible?: boolean;
+    video?: ContentfulVideo;
+    recommendedMachines?: any[];
+  };
+}
+
+export interface ContentfulTechnologyFeature {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title: string;
+    description: string;
+    icon?: string;
+    displayOrder?: number;
+    items?: string[];
+  };
+}
+
+export interface ContentfulTechnologySection {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title: string;
+    description?: string;
+    sectionType: string;
+    displayOrder?: number;
+    features?: ContentfulTechnologyFeature[];
+  };
+}
+
+export interface ContentfulTechnology {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title: string;
+    slug: string;
+    description: string;
+    visible?: boolean;
+    image?: ContentfulAsset;
+    sections?: ContentfulTechnologySection[];
+  };
+}
+
 export interface ContentfulRichTextDocument {
   nodeType: string;
   data: object;
   content: any[];
 }
 
-// Page content types
-export interface PrivacyPolicyFields {
-  title: string;
-  content: Document;
+export interface ContentfulResponse<T = any> extends Entry<T> {
+  includes?: {
+    Asset?: ContentfulAsset[];
+    Entry?: Array<Entry<any>>;
+  };
 }
 
-export interface TermsOfServiceFields {
-  title: string;
-  content: Document;
+export interface AboutPageFields {
+  bodyContent?: Document | ContentfulRichTextDocument;
 }
 
-// Contact FAQ types
+export interface ContentfulFAQItem {
+  sys: {
+    id: string;
+    contentType?: {
+      sys: {
+        id: string;
+      };
+    };
+  };
+  fields: {
+    question: string;
+    answer: string | ContentfulRichTextDocument;
+  };
+}
+
 export interface ContentfulContactPageFields {
-  title: string;
-  faqs: Entry<ContentfulFAQFields>[];
+  introTitle?: string;
+  introDescription?: string;
+  phoneCardTitle?: string;
+  phoneNumber?: string;
+  phoneAvailability?: string;
+  emailCardTitle?: string;
+  emailAddress?: string;
+  emailResponseTime?: string;
+  addressCardTitle?: string;
+  address?: string;
+  addressType?: string;
+  formSectionTitle?: string;
+  faqSectionTitle?: string;
+  faqItems?: ContentfulFAQItem[];
+  immediateAssistanceTitle?: string;
+  immediateAssistanceDescription?: string;
+  immediateAssistanceButtonText?: string;
 }
 
-export interface ContentfulFAQFields {
-  question: string;
-  answer: Document;
+export interface ContentfulVideo {
+  sys: {
+    id: string;
+    type: string;
+  };
+  fields: {
+    title?: string;
+    description?: string;
+    file: {
+      url: string;
+      contentType: string;
+      fileName: string;
+      details?: {
+        size: number;
+      };
+    };
+  };
 }
-
-// Export the Document type from @contentful/rich-text-types for convenience
-export { Document } from '@contentful/rich-text-types';

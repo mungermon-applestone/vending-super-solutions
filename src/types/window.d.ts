@@ -4,16 +4,21 @@ interface Window {
     VITE_CONTENTFUL_SPACE_ID?: string;
     VITE_CONTENTFUL_DELIVERY_TOKEN?: string;
     VITE_CONTENTFUL_ENVIRONMENT_ID?: string;
-    VITE_CONTENTFUL_ENVIRONMENT?: string;
+    // Email configuration variables
     SENDGRID_API_KEY?: string;
     EMAIL_TO?: string;
     EMAIL_FROM?: string;
+    // Legacy keys for backward compatibility
     spaceId?: string;
     deliveryToken?: string;
     environmentId?: string;
     [key: string]: string | undefined;
   };
-  _contentfulInitialized?: boolean;
+  _contentfulInitialized?: boolean | string;
   _contentfulInitializedSource?: string;
+  _swRegistration?: ServiceWorkerRegistration;
   _refreshContentfulAfterConfig?: () => Promise<void>;
+  _runtimeConfig?: Record<string, string>;
+  _runtimeConfigLoaded?: boolean;
 }
+

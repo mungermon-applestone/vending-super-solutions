@@ -1,60 +1,38 @@
 
-import { ContentTypeOperations } from '../types';
 import { CMSBusinessGoal } from '@/types/cms';
-import { fetchBusinessGoals } from './fetchBusinessGoals';
-import { fetchBusinessGoalBySlug } from './fetchBusinessGoalBySlug';
-import { createBusinessGoal } from './createBusinessGoal';
-import { updateBusinessGoal } from './updateBusinessGoal';
-import { deleteBusinessGoal } from './deleteBusinessGoal';
-import { cloneBusinessGoal } from './cloneBusinessGoal';
+import { contentfulBusinessGoalAdapter } from '@/services/cms/adapters/businessGoals/contentfulBusinessGoalAdapter';
+import { createReadOnlyContentTypeOperations } from '@/services/cms/utils/deprecation';
+import { ContentTypeOperations } from '@/services/cms/contentTypes/types';
 
-export const businessGoalOperations: ContentTypeOperations<CMSBusinessGoal> = {
-  fetchAll: async () => {
-    return await fetchBusinessGoals();
-  },
-  fetchBySlug: async (slug) => {
-    return await fetchBusinessGoalBySlug(slug);
-  },
-  fetchById: async (id) => {
-    // ID lookup by getting all goals and filtering by ID
-    const allGoals = await fetchBusinessGoals();
-    return allGoals.find(goal => goal.id === id) || null;
-  },
-  create: async (data) => {
-    const id = await createBusinessGoal(data);
-    // Return the newly created business goal by fetching it
-    const goals = await fetchBusinessGoals();
-    const newGoal = goals.find(goal => goal.id === id);
-    if (!newGoal) {
-      throw new Error('Failed to retrieve newly created business goal');
-    }
-    return newGoal;
-  },
-  update: async (id, data) => {
-    const success = await updateBusinessGoal(id, data);
-    if (!success) {
-      throw new Error('Failed to update business goal');
-    }
-    
-    // Return the updated business goal
-    const updatedGoal = await businessGoalOperations.fetchById(id);
-    if (!updatedGoal) {
-      throw new Error('Failed to retrieve updated business goal');
-    }
-    return updatedGoal;
-  },
-  delete: async (id) => {
-    return await deleteBusinessGoal(id);
-  },
-  clone: cloneBusinessGoal
+/**
+ * Read-only version of the business goals adapter
+ * This maintains read operations but prevents write operations as part of our migration to Contentful
+ */
+const baseAdapter = {
+  getAll: contentfulBusinessGoalAdapter.getAll,
+  getBySlug: contentfulBusinessGoalAdapter.getBySlug,
+  getById: contentfulBusinessGoalAdapter.getById,
 };
 
-// Export individual operations for direct imports
-export {
-  fetchBusinessGoals,
-  fetchBusinessGoalBySlug,
-  createBusinessGoal,
-  updateBusinessGoal,
-  deleteBusinessGoal,
-  cloneBusinessGoal
-};
+// Create a fully compatible ContentTypeOperations instance
+export const businessGoalOperations: ContentTypeOperations<CMSBusinessGoal> = createReadOnlyContentTypeOperations<CMSBusinessGoal>(
+  'businessGoal',
+  'business goal',
+  baseAdapter
+);
+
+// Export individual functions for backward compatibility
+export const fetchBusinessGoals = businessGoalOperations.fetchAll;
+export const fetchBusinessGoalBySlug = businessGoalOperations.fetchBySlug;
+export const fetchBusinessGoalById = businessGoalOperations.fetchById;
+
+// Mock implementations for write operations that will always fail with clear error messages
+export const createBusinessGoal = businessGoalOperations.create;
+export const updateBusinessGoal = businessGoalOperations.update;
+export const deleteBusinessGoal = businessGoalOperations.delete;
+
+/**
+ * Clone a business goal - no longer supported
+ * @deprecated This method is deprecated and will throw an error
+ */
+export const cloneBusinessGoal = businessGoalOperations.clone;

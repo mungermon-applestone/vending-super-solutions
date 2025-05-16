@@ -1,68 +1,147 @@
 
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { contentfulClient } from '@/services/contentful/client';
-import Layout from '@/components/layout/Layout';
-import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { PrivacyPolicyFields } from '@/types/contentful';
+import React, { useEffect } from 'react';
+import Layout from "@/components/layout/Layout";
+import { useContentful } from '@/hooks/useContentful';
+import { fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
+import { ContentfulErrorBoundary, ContentfulFallbackMessage } from '@/components/common';
+import { renderRichText } from '@/utils/contentful/richTextRenderer';
+import { Document } from '@contentful/rich-text-types';
+import { Spinner } from '@/components/ui/spinner';
+import { ContentfulResponse } from '@/types/contentful';
+
+interface PrivacyPolicyEntry {
+  sys: {
+    id: string;
+    contentType?: {
+      sys: {
+        id: string;
+      };
+    };
+  };
+  fields: {
+    privacyMainText?: Document;
+    title?: string;
+  };
+  includes?: {
+    Asset?: any[];
+  };
+}
 
 const PrivacyPolicy = () => {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['contentful', 'privacyPolicy'],
+  const entryId = '4SiOG2H5N7dLSnWbvZN5GW';
+  
+  const { data: privacyContent, isLoading, error, isContentReady } = useContentful<ContentfulResponse<PrivacyPolicyEntry>>({
+    queryKey: ['privacy-policy', entryId],
     queryFn: async () => {
       try {
-        console.log('[PrivacyPolicy] Fetching privacy policy content');
-        const response = await contentfulClient.getEntries({
-          content_type: 'privacyPolicy',
-          limit: 1,
-        });
-        
-        if (response.items.length === 0) {
-          console.warn('[PrivacyPolicy] Privacy policy not found');
-          throw new Error('Privacy policy not found');
-        }
-        
-        console.log('[PrivacyPolicy] Found privacy policy content');
-        return response.items[0];
+        // Fetch the specific privacy policy entry by ID
+        const entry = await fetchContentfulEntry<ContentfulResponse<PrivacyPolicyEntry>>(entryId);
+        console.log('Privacy policy content fetched:', JSON.stringify(entry, null, 2));
+        return entry;
       } catch (error) {
-        console.error('[PrivacyPolicy] Error fetching privacy policy:', error);
+        console.error('Error fetching privacy policy:', error);
         throw error;
       }
-    },
+    }
   });
-  
-  const fields = data?.fields as unknown as PrivacyPolicyFields;
-  
-  if (error) {
-    console.error('[PrivacyPolicy] Render error:', error);
-  }
-  
+
+  // Debug useEffect to see what's in the response
+  useEffect(() => {
+    if (privacyContent) {
+      console.log('Privacy content in component:', privacyContent);
+      console.log('Has fields?', !!privacyContent.fields);
+      console.log('All field names:', privacyContent.fields ? Object.keys(privacyContent.fields) : []);
+      
+      if (privacyContent.fields) {
+        // Check for all possible variations of the field name
+        const possibleFieldNames = ['Privacy-main-text', 'privacyMainText', 'privacy_main_text', 'privacyMainText', 'privacyText', 'content', 'body'];
+        possibleFieldNames.forEach(fieldName => {
+          console.log(`Has ${fieldName}?`, fieldName in privacyContent.fields);
+        });
+      }
+    }
+  }, [privacyContent]);
+
+  // Helper function to find the rich text content regardless of field name
+  const getRichTextContent = () => {
+    if (!privacyContent?.fields) return null;
+    
+    // Check for common field name variations
+    const fieldNames = Object.keys(privacyContent.fields);
+    console.log('Available fields:', fieldNames);
+    
+    // Try to find a rich text field (Document type)
+    for (const fieldName of fieldNames) {
+      const field = privacyContent.fields[fieldName];
+      if (field && typeof field === 'object' && 'content' in field && 'nodeType' in field) {
+        console.log(`Found rich text content in field: ${fieldName}`);
+        return field as Document;
+      }
+    }
+    
+    return null;
+  };
+
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-6">{isLoading ? 'Loading...' : fields?.title || 'Privacy Policy'}</h1>
+      <div className="container-wide py-12">
+        <h1 className="text-4xl font-bold text-vending-blue mb-8">Privacy Policy</h1>
         
-        {isLoading ? (
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded"></div>
-            <div className="h-4 bg-gray-200 rounded"></div>
-            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-          </div>
-        ) : error ? (
-          <div className="p-4 border border-red-300 bg-red-50 rounded-md">
-            <p className="text-red-700">
-              We're currently having trouble loading our privacy policy. Please try again later.
-            </p>
-          </div>
-        ) : (
-          <div className="prose max-w-none">
-            {fields?.content && documentToReactComponents(fields.content)}
-            {!fields?.content && (
-              <p>Our privacy policy content is currently being updated. Please check back soon.</p>
-            )}
-          </div>
-        )}
+        <ContentfulErrorBoundary 
+          contentType="Privacy Policy" 
+          fallback={
+            <ContentfulFallbackMessage 
+              message="There was an error displaying the privacy policy." 
+              contentType="Privacy Policy"
+              showRefresh={true}
+            />
+          }
+        >
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <Spinner size="lg" />
+            </div>
+          ) : error ? (
+            <ContentfulFallbackMessage 
+              message={`Error loading privacy policy: ${error.message}`} 
+              contentType="Privacy Policy"
+              showRefresh={true}
+            />
+          ) : isContentReady && privacyContent ? (
+            <div className="prose prose-lg max-w-none">
+              {(() => {
+                // Try to get rich text content from any field
+                const richTextContent = getRichTextContent();
+                
+                if (richTextContent) {
+                  return renderRichText(
+                    richTextContent,
+                    { includedAssets: privacyContent.includes?.Asset || [] }
+                  );
+                }
+                
+                return (
+                  <div>
+                    <p>No privacy policy content found with ID: {entryId}</p>
+                    <div className="mt-4 p-4 bg-gray-100 rounded-md text-sm">
+                      <p className="font-semibold">Debugging Info:</p>
+                      <pre className="whitespace-pre-wrap mt-2">
+                        {JSON.stringify({
+                          contentReceived: !!privacyContent,
+                          hasFields: privacyContent ? !!privacyContent.fields : false,
+                          availableFields: privacyContent?.fields ? Object.keys(privacyContent.fields) : [],
+                          entryType: privacyContent?.sys?.contentType?.sys?.id || 'unknown'
+                        }, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          ) : (
+            <p>No privacy policy content available.</p>
+          )}
+        </ContentfulErrorBoundary>
       </div>
     </Layout>
   );

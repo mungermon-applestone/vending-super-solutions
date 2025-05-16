@@ -1,55 +1,29 @@
 
-/**
- * CMS Hooks
- * 
- * This file exports all Contentful CMS hooks
- */
-
-// Blog Posts
+import { useProductTypes, useProductType } from './useProductTypes';
+import { useBusinessGoals } from './useBusinessGoals';
+import { useBusinessGoal } from './useBusinessGoal';
+import { useMachines, useMachine } from './useMachines';
+import { useTechnologies, useTechnology } from './useTechnologies';
+import { useTestimonials } from './useTestimonials';
 import { 
-  useContentfulBlogPosts, 
-  useContentfulBlogPostBySlug,
-  useContentfulFeaturedBlogPosts,
-  useContentfulAdjacentBlogPosts
-} from '@/hooks/useBlogData';
-
-// Testimonials
-import { useContentfulTestimonials } from './useContentfulTestimonials';
-
-// Technologies
-import {
-  useContentfulTechnologies,
-  useContentfulTechnologyBySlug
-} from './useTechnologies';
-
-// Business Goals
-import {
-  useContentfulBusinessGoals,
-  useContentfulBusinessGoalBySlug
-} from './useContentfulBusinessGoals';
+  useCloneProductType,
+  useCloneBusinessGoal,
+  useCloneTechnology,
+  useCloneMachine
+} from './useCloneCMS';
 
 export {
-  // Blog Posts
-  useContentfulBlogPosts,
-  useContentfulBlogPostBySlug,
-  useContentfulFeaturedBlogPosts,
-  useContentfulAdjacentBlogPosts,
-  
-  // Testimonials
-  useContentfulTestimonials,
-  
-  // Technologies
-  useContentfulTechnologies,
-  useContentfulTechnologyBySlug,
-  
-  // Business Goals
-  useContentfulBusinessGoals,
-  useContentfulBusinessGoalBySlug,
+  useProductTypes, 
+  useProductType,
+  useBusinessGoals,
+  useBusinessGoal,
+  useMachines,
+  useMachine,
+  useTechnologies,
+  useTechnology,
+  useTestimonials,
+  useCloneProductType,
+  useCloneBusinessGoal,
+  useCloneTechnology,
+  useCloneMachine
 };
-
-// For backward compatibility
-export const useBlogPosts = useContentfulBlogPosts;
-export const useBlogPostBySlug = useContentfulBlogPostBySlug;
-export const useAdjacentPosts = useContentfulAdjacentBlogPosts;
-export const useTechnologies = useContentfulTechnologies;
-export const useTechnologyBySlug = useContentfulTechnologyBySlug;

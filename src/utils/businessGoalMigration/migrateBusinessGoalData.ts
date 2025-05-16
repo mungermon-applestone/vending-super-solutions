@@ -87,7 +87,7 @@ export async function migrateBusinessGoalData(): Promise<boolean> {
       
       console.log(`[migrateBusinessGoalData] Created business goal: ${businessGoal.title} with ID: ${newGoal.id}`);
       
-      // Add features
+      // Add features - MOCK IMPLEMENTATION
       if (businessGoal.features && businessGoal.features.length > 0) {
         const featuresData = businessGoal.features.map((feature, index) => {
           // Extract icon name from feature's JSX icon element
@@ -108,16 +108,11 @@ export async function migrateBusinessGoalData(): Promise<boolean> {
           };
         });
         
-        const { error: featuresError } = await supabase
-          .from('business_goal_features')
-          .insert(featuresData);
-          
-        if (featuresError) {
-          console.error(`[migrateBusinessGoalData] Error creating features for ${businessGoal.title}:`, featuresError);
-          throw featuresError;
-        }
+        // Mock implementation for business_goal_features
+        console.log(`[migrateBusinessGoalData] MOCK: Would insert ${featuresData.length} features for business goal ${businessGoal.title}`);
+        console.log('[migrateBusinessGoalData] MOCK: Feature data sample:', featuresData[0]);
         
-        console.log(`[migrateBusinessGoalData] Added ${featuresData.length} features for ${businessGoal.title}`);
+        console.log(`[migrateBusinessGoalData] MOCK: Added ${featuresData.length} features for ${businessGoal.title}`);
       }
     }
     

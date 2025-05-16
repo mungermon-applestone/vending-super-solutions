@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -11,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription }
 import { ArrowRight, AlertCircle, ExternalLink, Wrench, FileQuestion, RefreshCcw, Database, BookOpen, Bug } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import SimpleConnectionTest from '@/components/admin/cms/SimpleConnectionTest';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -153,7 +153,6 @@ const TechnologyLanding = () => {
                     <TabsTrigger value="docs">Documentation</TabsTrigger>
                   </TabsList>
                   
-                  {/* Database Tab */}
                   <TabsContent value="database" className="space-y-4 pt-4">
                     <Alert className="bg-blue-50 border-blue-200">
                       <Database className="h-4 w-4 text-blue-600" />
@@ -185,10 +184,10 @@ const TechnologyLanding = () => {
                         <li>Verify the content model matches our expected structure</li>
                       </ol>
                       <div className="flex gap-2 mt-3">
-                        <Link to="/contact">
+                        <Link to="/admin/technology">
                           <Button variant="default" size="sm">
                             <Wrench className="mr-2 h-4 w-4" />
-                            Contact Support
+                            Manage Technologies
                           </Button>
                         </Link>
                         <Button 
@@ -203,15 +202,13 @@ const TechnologyLanding = () => {
                     </div>
                   </TabsContent>
                   
-                  {/* Test Tab */}
                   <TabsContent value="test" className="space-y-4 pt-4">
                     <div className="p-4 border rounded-md bg-gray-50">
-                      <p className="text-sm mb-4">You can test the Contentful connection by clicking the Refresh button above.</p>
-                      <Button onClick={handleRefresh}>Test Connection</Button>
+                      <p className="text-sm mb-4">Test the Contentful connection:</p>
+                      <SimpleConnectionTest />
                     </div>
                   </TabsContent>
                   
-                  {/* Docs Tab */}
                   <TabsContent value="docs" className="space-y-4 pt-4">
                     <div className="p-4 border rounded-md bg-gray-50">
                       <h4 className="font-medium mb-2">Contentful Documentation</h4>
@@ -243,10 +240,10 @@ const TechnologyLanding = () => {
                           className="w-full"
                           asChild
                         >
-                          <a href="https://www.contentful.com/help/" target="_blank" rel="noopener noreferrer">
+                          <Link to="/admin/settings">
                             <BookOpen className="mr-2 h-4 w-4" />
                             View Full Documentation
-                          </a>
+                          </Link>
                         </Button>
                       </div>
                     </div>
@@ -254,14 +251,12 @@ const TechnologyLanding = () => {
                 </Tabs>
               </CardContent>
               <CardFooter className="flex flex-wrap gap-3">
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  onClick={handleRefresh}
-                >
-                  <RefreshCcw className="mr-2 h-4 w-4" />
-                  Refresh Content
-                </Button>
+                <Link to="/admin/technology">
+                  <Button variant="default" size="sm">
+                    <Wrench className="mr-2 h-4 w-4" />
+                    Manage Technologies
+                  </Button>
+                </Link>
                 
                 <Button 
                   variant="outline"
@@ -275,7 +270,6 @@ const TechnologyLanding = () => {
             </Card>
           </div>
         ) : (
-          // Technology List
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {technologies.map((tech) => (
               <Card key={tech.id} className="overflow-hidden h-full flex flex-col">
@@ -304,6 +298,7 @@ const TechnologyLanding = () => {
         )}
       </div>
       
+      {/* Add SimpleContactCTA before CTASection */}
       <SimpleContactCTA />
       <CTASection />
     </Layout>

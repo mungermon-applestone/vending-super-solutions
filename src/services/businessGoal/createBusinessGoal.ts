@@ -1,71 +1,71 @@
 
-import { createClient } from '@/services/contentful/managementClient';
+import { supabase } from '@/integrations/supabase/client';
+import { BusinessGoalFormData } from '@/types/forms';
+import { UseToastReturn } from '@/hooks/use-toast';
 import { 
-  checkBusinessGoalSlugExists, 
-  addBusinessGoalImage,
-  addBusinessGoalBenefits,
-  addBusinessGoalFeatures,
-  BusinessGoalItem
+  checkBusinessGoalSlugExists,
+  addBusinessGoalImage, 
+  addBusinessGoalBenefits, 
+  addBusinessGoalFeatures 
 } from './businessGoalHelpers';
 
-export interface CreateBusinessGoalParams {
-  title: string;
-  slug: string;
-  description: string;
-  visible: boolean;
-  icon?: string;
-  benefits?: BusinessGoalItem[];
-  features?: BusinessGoalItem[];
-  imageId?: string;
-}
-
-export async function createBusinessGoal(params: CreateBusinessGoalParams) {
+/**
+ * Create a new business goal
+ */
+export const createBusinessGoal = async (data: BusinessGoalFormData, toast: UseToastReturn) => {
+  console.log('[businessGoalService] Creating business goal with data:', data);
+  
   try {
-    const { title, slug, description, visible, icon, benefits, features, imageId } = params;
+    // Check if a business goal with this slug already exists
+    const slugExists = await checkBusinessGoalSlugExists(data.slug);
     
-    // Check if slug exists
-    const slugExists = await checkBusinessGoalSlugExists(slug);
     if (slugExists) {
-      throw new Error(`A business goal with slug "${slug}" already exists`);
+      console.error(`[businessGoalService] Business goal with slug "${data.slug}" already exists`);
+      throw new Error(`A business goal with the slug "${data.slug}" already exists`);
     }
     
-    // Create Contentful client
-    const client = await createClient();
-    const space = await client.getSpace(process.env.CONTENTFUL_SPACE_ID || '');
-    const environment = await space.getEnvironment(process.env.CONTENTFUL_ENVIRONMENT_ID || 'master');
+    // Create the business goal
+    const { data: newBusinessGoal, error: createError } = await supabase
+      .from('business_goals')
+      .insert({
+        title: data.title,
+        slug: data.slug,
+        description: data.description,
+        icon: data.icon || null,
+        visible: true
+      })
+      .select('id')
+      .single();
+
+    if (createError || !newBusinessGoal) {
+      console.error('[businessGoalService] Error creating business goal:', createError);
+      throw new Error(createError?.message || 'Failed to create business goal');
+    }
+
+    console.log('[businessGoalService] Created business goal:', newBusinessGoal);
+
+    // Add business goal image
+    await addBusinessGoalImage(data, newBusinessGoal.id);
     
-    // Create entry
-    const entry = await environment.createEntry('businessGoal', {
-      fields: {
-        title: { 'en-US': title },
-        slug: { 'en-US': slug },
-        description: { 'en-US': description },
-        visible: { 'en-US': visible },
-        icon: icon ? { 'en-US': icon } : undefined
-      }
+    // Add business goal benefits
+    await addBusinessGoalBenefits(data, newBusinessGoal.id);
+    
+    // Add business goal features
+    await addBusinessGoalFeatures(data, newBusinessGoal.id);
+    
+    toast.toast({
+      title: "Business goal created",
+      description: `${data.title} has been created successfully.`
     });
     
-    // Publish entry
-    const publishedEntry = await entry.publish();
-    
-    // Add image if provided
-    if (imageId) {
-      await addBusinessGoalImage(publishedEntry.sys.id, imageId);
-    }
-    
-    // Add benefits if provided
-    if (benefits && benefits.length > 0) {
-      await addBusinessGoalBenefits(publishedEntry.sys.id, benefits);
-    }
-    
-    // Add features if provided
-    if (features && features.length > 0) {
-      await addBusinessGoalFeatures(publishedEntry.sys.id, features);
-    }
-    
-    return publishedEntry;
+    return newBusinessGoal.id;
   } catch (error) {
-    console.error('Error creating business goal:', error);
+    console.error('[businessGoalService] Error in createBusinessGoal:', error);
+    toast.toast({
+      title: "Error",
+      description: `Failed to create business goal: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      variant: "destructive"
+    });
     throw error;
   }
-}
+};

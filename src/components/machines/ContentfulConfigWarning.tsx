@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { AlertTriangle, RefreshCw, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useNavigate } from 'react-router-dom';
 import { isContentfulConfigured } from '@/config/cms';
-import { refreshContentfulClient, testContentfulConnection } from '@/services/contentful/utils';
+import { refreshContentfulClient, testContentfulConnection } from '@/services/cms/utils/contentfulClient';
 import { toast } from 'sonner';
 
 interface ContentfulConfigWarningProps {
@@ -48,9 +49,8 @@ const ContentfulConfigWarning: React.FC<ContentfulConfigWarningProps> = ({
     }
   };
 
-  const goToSettings = () => {
-    // Redirect to a simple settings page instead of the admin environment variables
-    navigate('/settings');
+  const goToEnvironmentSettings = () => {
+    navigate('/admin/environment-variables');
   };
 
   return (
@@ -92,7 +92,7 @@ const ContentfulConfigWarning: React.FC<ContentfulConfigWarningProps> = ({
               variant="outline" 
               size="sm"
               className="bg-white"
-              onClick={goToSettings}
+              onClick={goToEnvironmentSettings}
             >
               <Settings className="mr-2 h-4 w-4" />
               Configure Credentials

@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
-import { testContentfulConnection, refreshContentfulClient, isContentfulConfigured, waitForEnvironmentVariables } from '@/services/contentful/index';
+import { refreshContentfulClient, testContentfulConnection } from '@/services/cms/utils/contentfulClient';
 import { forceContentfulProvider } from '@/services/cms/cmsInit';
-import { isPreviewEnvironment } from '@/config/cms';
+import { isContentfulConfigured, isPreviewEnvironment } from '@/config/cms';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -34,9 +34,6 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
       try {
         console.log('[ContentfulInitializer] Starting initialization');
         
-        // First make sure environment variables are fully loaded
-        await waitForEnvironmentVariables();
-        
         // Check if Contentful is already configured
         if (!isContentfulConfigured()) {
           console.log('[ContentfulInitializer] Contentful not configured, checking hardcoded values');
@@ -50,9 +47,7 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
         }
         
         // Force provider initialization
-        if (typeof forceContentfulProvider === 'function') {
-          forceContentfulProvider();
-        }
+        forceContentfulProvider();
         
         // Test the connection
         const testResult = await testContentfulConnection();
@@ -74,10 +69,8 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
         // Mark as initialized regardless of test result to attempt showing content
         if (isMounted) {
           setIsInitialized(true);
-          if (typeof window !== 'undefined') {
-            window._contentfulInitialized = true;
-            window._contentfulInitializedSource = testResult.success ? 'successful-connection' : 'fallback-after-warning';
-          }
+          window._contentfulInitialized = true;
+          window._contentfulInitializedSource = testResult.success ? 'successful-connection' : 'fallback-after-warning';
           console.log('[ContentfulInitializer] Marked as initialized, will attempt to show content');
         }
       } catch (error) {
@@ -101,13 +94,9 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
           
           // In preview environments or after all retries, still force provider to use fallbacks
           if (isPreview || retryCount >= MAX_RETRIES) {
-            if (typeof forceContentfulProvider === 'function') {
-              forceContentfulProvider();
-            }
+            forceContentfulProvider();
             setIsInitialized(true); // Still initialized but will use fallbacks
-            if (typeof window !== 'undefined') {
-              window._contentfulInitializedSource = 'fallback-after-error';
-            }
+            window._contentfulInitializedSource = 'fallback-after-error';
           }
         }
       } finally {

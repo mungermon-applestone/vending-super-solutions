@@ -3,8 +3,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import MachineTypeIcon from '@/components/ui/icons/MachineTypeIcon';
+import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
 import { CMSBusinessGoal } from '@/types/cms';
+import { resolveSlug } from '@/services/cms/utils/slugMatching';
 
 interface BusinessGoalsCompactProps {
   goals: CMSBusinessGoal[];
@@ -39,14 +40,17 @@ const BusinessGoalsCompact: React.FC<BusinessGoalsCompactProps> = ({
     return goal.slug;
   };
   
-  // Function to handle goal navigation
+  // Function to handle goal navigation with proper slug resolution
   const handleGoalClick = (goal: CMSBusinessGoal) => {
     try {
       // Make sure the goal has a slug we can use
       const goalSlug = getGoalSlug(goal);
-      console.log(`[BusinessGoalsCompact] Navigating to goal: ${goal.title} with slug: ${goalSlug}`);
       
-      navigate(`/business-goals/${goalSlug}`);
+      // Make sure we're using the resolved canonical slug
+      const canonicalSlug = resolveSlug(goalSlug);
+      console.log(`[BusinessGoalsCompact] Navigating to goal: ${goal.title} with slug: ${canonicalSlug}`);
+      
+      navigate(`/business-goals/${canonicalSlug}`);
     } catch (error) {
       console.error('[BusinessGoalsCompact] Error navigating to goal:', error);
       // Fallback to home page or business goals page

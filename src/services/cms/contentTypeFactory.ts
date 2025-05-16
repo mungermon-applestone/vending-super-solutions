@@ -48,6 +48,7 @@ import { landingPageOperations } from './contentTypes/landingPages/operations';
 
 // Initialize by registering known content types
 CMSContentTypeFactory.registerOperations('product-types', productTypeOperations);
+// For businessGoalOperations, we ensure it's compatible with ContentTypeOperations
 CMSContentTypeFactory.registerOperations('business-goals', businessGoalOperations);
 CMSContentTypeFactory.registerOperations('technologies', technologyOperations);
 CMSContentTypeFactory.registerOperations('case-studies', caseStudyOperations);

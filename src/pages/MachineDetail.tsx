@@ -1,127 +1,74 @@
 
-import React from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
+import CTASection from '@/components/common/CTASection';
+import { getMachineBySlug } from '@/services/cms';
+import { CMSMachine } from '@/types/cms';
 import MachineDetailHero from '@/components/machineDetail/MachineDetailHero';
-import MachineDetailFeatures from '@/components/machineDetail/MachineDetailFeatures';
 import MachineDetailSpecifications from '@/components/machineDetail/MachineDetailSpecifications';
-import MachineDetailGallery from '@/components/machineDetail/MachineDetailGallery';
+import MachineDetailFeatures from '@/components/machineDetail/MachineDetailFeatures';
 import MachineDetailDeployments from '@/components/machineDetail/MachineDetailDeployments';
-import MachineDetailInquiry from '@/components/machineDetail/MachineDetailInquiry';
-import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
+import MachineDetailGallery from '@/components/machineDetail/MachineDetailGallery';
+import { useMachineBySlug } from '@/hooks/useMachinesData';
 import { Loader2 } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CMSImage, CMSMachine } from '@/types/cms';
+import { SimpleContactCTA } from '@/components/common';
 
 const MachineDetail = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const { data: machine, isLoading, error } = useContentfulMachine(slug);
+  const { machineId, machineType } = useParams<{ machineType: string, machineId: string }>();
   
-  React.useEffect(() => {
-    console.log("[MachineDetail] Rendering with:", { slug, machine, isLoading, error });
-  }, [slug, machine, isLoading, error]);
+  // Use our specialized hook that handles fetching by slug with just the machineId
+  const { data: machine, isLoading, error } = useMachineBySlug(machineId);
   
+  console.log("Fetching machine:", machineType, machineId);
+  console.log("Machine data:", machine);
+
   if (isLoading) {
     return (
       <Layout>
-        <div className="container py-16 flex flex-col items-center justify-center">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
-          <p className="text-lg text-gray-600">Loading machine details...</p>
+        <div className="py-24 text-center">
+          <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
+          <p>Loading machine information...</p>
         </div>
       </Layout>
     );
   }
-  
+
   if (error) {
     return (
       <Layout>
-        <div className="container py-16">
-          <Alert variant="destructive" className="mb-8">
-            <AlertTitle>Error Loading Machine</AlertTitle>
-            <AlertDescription>
-              {error instanceof Error ? error.message : 'Failed to load machine details'}
-            </AlertDescription>
-          </Alert>
-          <div className="p-8 border border-gray-200 rounded-lg text-center">
-            <h2 className="text-2xl font-semibold mb-4">Unable to load machine details</h2>
-            <p className="text-gray-600 mb-4">We're having trouble retrieving information about this machine.</p>
-            <p className="text-gray-600">Please try again later or contact support if this problem persists.</p>
-          </div>
+        <div className="py-24 text-center text-red-500">
+          <h2 className="text-2xl font-bold mb-4">Error Loading Machine Details</h2>
+          <p>Unable to load machine information. Please try again later.</p>
+          <p className="mt-4 text-sm">{error instanceof Error ? error.message : 'Unknown error'}</p>
         </div>
       </Layout>
     );
   }
-  
+
+  // If no machine is found, show error
   if (!machine) {
     return (
       <Layout>
-        <div className="container py-16">
-          <Alert variant="warning" className="mb-8">
-            <AlertTitle>Machine Not Found</AlertTitle>
-            <AlertDescription>
-              We couldn't find a machine with the identifier: {slug}
-            </AlertDescription>
-          </Alert>
-          <div className="p-8 border border-gray-200 rounded-lg text-center">
-            <h2 className="text-2xl font-semibold mb-4">Machine Not Found</h2>
-            <p className="text-gray-600 mb-4">The machine you're looking for doesn't exist or may have been removed.</p>
-          </div>
+        <div className="py-24 text-center">
+          <h2 className="text-2xl font-bold mb-4">Machine Not Found</h2>
+          <p>We couldn't find the machine you're looking for.</p>
+          <p className="mt-4 text-sm text-gray-600">
+            Machine ID: {machineId}, Type: {machineType}
+          </p>
         </div>
       </Layout>
     );
   }
 
-  // Transform the image data if needed
-  const machineImages: CMSImage[] = machine.images || [];
-  const { title, description, type, features, specs } = machine as CMSMachine;
-
   return (
     <Layout>
-      <MachineDetailHero 
-        title={title || 'Unnamed Machine'} 
-        description={description || 'No description available.'}
-        image={machineImages.length > 0 ? machineImages[0].url : undefined}
-        imageAlt={machineImages.length > 0 ? machineImages[0].alt : title}
-      />
-      
-      <div className="container py-12 space-y-16">
-        {type && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-6">Machine Type</h2>
-            <p className="text-gray-700">{type.charAt(0).toUpperCase() + type.slice(1)}</p>
-            
-            {specs?.temperature && (
-              <p className="text-gray-700 mt-2">Temperature: {specs.temperature.charAt(0).toUpperCase() + specs.temperature.slice(1)}</p>
-            )}
-          </div>
-        )}
-        
-        {features && features.length > 0 && (
-          <MachineDetailFeatures 
-            features={features} 
-          />
-        )}
-        
-        <MachineDetailSpecifications 
-          specifications={specs || {}} 
-        />
-        
-        {machineImages && machineImages.length > 1 && (
-          <MachineDetailGallery 
-            images={machineImages}
-          />
-        )}
-        
-        <MachineDetailDeployments 
-          machineId={machine.id}
-          machineType={machine.type || 'vending'}
-        />
-        
-        <MachineDetailInquiry 
-          machineId={machine.id}
-          machineTitle={machine.title || 'Unnamed Machine'}
-        />
-      </div>
+      <MachineDetailHero machine={machine} />
+      <MachineDetailSpecifications specs={machine.specs} />
+      <MachineDetailFeatures features={machine.features} />
+      <MachineDetailDeployments deploymentExamples={machine.deploymentExamples} />
+      <MachineDetailGallery title={machine.title} images={machine.images} />
+      <SimpleContactCTA />
+      <CTASection />
     </Layout>
   );
 };

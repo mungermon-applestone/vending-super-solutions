@@ -1,80 +1,68 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { contentfulClient } from '@/services/contentful/client';
+import * as cmsService from '@/services/cms';
 import { CMSTechnology } from '@/types/cms';
+import { normalizeSlug, getSlugVariations } from '@/services/cms/utils/slugMatching';
+import { createQueryOptions } from './useQueryDefaults';
 
 /**
- * Transform a Contentful technology entry to our application's CMSTechnology type
+ * Hook to fetch all technologies
  */
-function transformContentfulTechnology(entry: any): CMSTechnology {
-  const imageUrl = entry.fields.image?.fields?.file?.url 
-    ? `https:${entry.fields.image.fields.file.url}` 
-    : undefined;
-  
-  return {
-    id: entry.sys.id,
-    title: entry.fields.title || 'Untitled Technology',
-    slug: entry.fields.slug || '',
-    description: entry.fields.description || '',
-    image_url: imageUrl,
-    image_alt: entry.fields.imageAlt || entry.fields.title || '',
-    visible: entry.fields.visible !== false, // Default to visible if not specified
-  };
-}
-
-/**
- * Hook to fetch technologies from Contentful
- */
-export function useContentfulTechnologies() {
+export function useTechnologies() {
   return useQuery({
-    queryKey: ['contentful', 'technologies'],
-    queryFn: async (): Promise<CMSTechnology[]> => {
-      try {
-        console.log('[useContentfulTechnologies] Fetching technologies');
-        const response = await contentfulClient.getEntries({
-          content_type: 'technology',
-          order: ['fields.title'],
-        });
-        
-        console.log(`[useContentfulTechnologies] Found ${response.items.length} technologies`);
-        return response.items.map(transformContentfulTechnology);
-      } catch (error) {
-        console.error('[useContentfulTechnologies] Error fetching technologies:', error);
-        return [];
-      }
-    },
+    queryKey: ['technologies'],
+    queryFn: () => cmsService.getTechnologies(),
+    ...createQueryOptions<CMSTechnology[]>()
   });
 }
 
 /**
- * Hook to fetch a single technology by slug from Contentful
+ * Hook to fetch a specific technology by slug
  */
-export function useContentfulTechnologyBySlug(slug: string | undefined) {
+export function useTechnology(slug: string | undefined) {
   return useQuery({
-    queryKey: ['contentful', 'technology', slug],
-    queryFn: async (): Promise<CMSTechnology | null> => {
-      if (!slug) return null;
+    queryKey: ['technology', slug],
+    queryFn: async () => {
+      if (!slug) {
+        console.warn('[useTechnology] Called with empty slug');
+        return null;
+      }
+      
+      const normalizedSlug = normalizeSlug(slug);
+      console.log(`[useTechnology] Looking up technology with slug: "${normalizedSlug}"`);
       
       try {
-        console.log(`[useContentfulTechnologyBySlug] Fetching technology with slug: ${slug}`);
-        const response = await contentfulClient.getEntries({
-          content_type: 'technology',
-          'fields.slug': slug,
-          limit: 1,
-        });
+        // Try direct lookup first
+        const result = await cmsService.getTechnologyBySlug(normalizedSlug);
         
-        if (response.items.length === 0) {
-          console.warn(`[useContentfulTechnologyBySlug] No technology found with slug: ${slug}`);
-          return null;
+        if (result) {
+          return result;
         }
         
-        console.log(`[useContentfulTechnologyBySlug] Found technology with slug: ${slug}`);
-        return transformContentfulTechnology(response.items[0]);
+        // If direct lookup fails, try slug variations
+        console.log(`[useTechnology] Direct lookup failed, trying slug variations for: "${normalizedSlug}"`);
+        const variations = getSlugVariations(normalizedSlug);
+        
+        for (const variation of variations) {
+          if (variation === normalizedSlug) continue; // Skip the one we already tried
+          
+          console.log(`[useTechnology] Trying variation: "${variation}"`);
+          const resultFromVariation = await cmsService.getTechnologyBySlug(variation);
+          
+          if (resultFromVariation) {
+            console.log(`[useTechnology] Found technology with variation: "${variation}"`);
+            return resultFromVariation;
+          }
+        }
+        
+        console.warn(`[useTechnology] No technology found for slug "${normalizedSlug}" or variations`);
+        return null;
       } catch (error) {
-        console.error(`[useContentfulTechnologyBySlug] Error fetching technology with slug "${slug}":`, error);
+        console.error(`[useTechnology] Error fetching technology "${normalizedSlug}":`, error);
         return null;
       }
     },
-    enabled: !!slug,
+    enabled: !!slug && slug.trim() !== '',
+    ...createQueryOptions<CMSTechnology | null>()
   });
 }

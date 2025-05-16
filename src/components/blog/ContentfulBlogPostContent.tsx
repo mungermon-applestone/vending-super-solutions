@@ -1,33 +1,13 @@
-
 import React from "react";
+import { ContentfulBlogPost } from "@/hooks/useContentfulBlogPostBySlug";
 import ContentfulBlogPostHeader from "./ContentfulBlogPostHeader";
 import ContentfulBlogPostBody from "./ContentfulBlogPostBody";
 import ContentfulBlogPostFooter from "./ContentfulBlogPostFooter";
 import ContentfulErrorBoundary from "@/components/common/ContentfulErrorBoundary";
-import { Document } from "@contentful/rich-text-types";
-import { Asset } from "contentful";
 
 interface AdjacentBlogPost {
   slug: string;
   title: string;
-}
-
-interface BlogPostFields {
-  title?: string;
-  content?: Document;
-  excerpt?: string;
-  publishDate?: string; 
-  featuredImage?: Asset;
-}
-
-interface ContentfulBlogPost {
-  sys: {
-    id: string;
-  };
-  fields: BlogPostFields;
-  includes?: {
-    Asset?: Asset[];
-  };
 }
 
 interface ContentfulBlogPostContentProps {

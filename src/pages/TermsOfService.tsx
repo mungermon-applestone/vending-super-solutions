@@ -1,68 +1,99 @@
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { contentfulClient } from '@/services/contentful/client';
-import Layout from '@/components/layout/Layout';
-import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { TermsOfServiceFields } from '@/types/contentful';
+import Layout from "@/components/layout/Layout";
+import { useContentful } from '@/hooks/useContentful';
+import { fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
+import { ContentfulErrorBoundary, ContentfulFallbackMessage } from '@/components/common';
+import { renderRichText } from '@/utils/contentful/richTextRenderer';
+import { Document } from '@contentful/rich-text-types';
+import { Spinner } from '@/components/ui/spinner';
+import { ContentfulResponse } from '@/types/contentful';
+import SEO from '@/components/seo/SEO';
+
+interface PrivacyPolicyEntry {
+  sys: {
+    id: string;
+    contentType?: {
+      sys: {
+        id: string;
+      };
+    };
+  };
+  fields: {
+    termsOfUse?: Document;
+  };
+  includes?: {
+    Asset?: any[];
+  };
+}
 
 const TermsOfService = () => {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['contentful', 'termsOfService'],
+  // Corrected entry ID for the Privacy Policy content that contains terms of use
+  const entryId = '4SiOG2H5N7dLSnWbvZN5GW'; 
+  
+  const { data: privacyPolicy, isLoading, error, isContentReady } = useContentful<ContentfulResponse<PrivacyPolicyEntry>>({
+    queryKey: ['privacy-policy', entryId],
     queryFn: async () => {
       try {
-        console.log('[TermsOfService] Fetching terms of service content');
-        const response = await contentfulClient.getEntries({
-          content_type: 'termsOfService',
-          limit: 1,
-        });
-        
-        if (response.items.length === 0) {
-          console.warn('[TermsOfService] Terms of service not found');
-          throw new Error('Terms of service not found');
-        }
-        
-        console.log('[TermsOfService] Found terms of service content');
-        return response.items[0];
+        const entry = await fetchContentfulEntry<ContentfulResponse<PrivacyPolicyEntry>>(entryId);
+        console.log('Privacy policy content fetched for terms of use:', entry);
+        return entry;
       } catch (error) {
-        console.error('[TermsOfService] Error fetching terms of service:', error);
+        console.error('Error fetching privacy policy for terms of use:', error);
         throw error;
       }
-    },
+    }
   });
-  
-  const fields = data?.fields as unknown as TermsOfServiceFields;
-  
-  if (error) {
-    console.error('[TermsOfService] Render error:', error);
-  }
-  
+
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-6">{isLoading ? 'Loading...' : fields?.title || 'Terms of Service'}</h1>
+      <SEO 
+        title="Terms of Use"
+        description="Terms and conditions for using our services"
+        type="article"
+      />
+      <div className="container-wide py-12">
+        <h1 className="text-4xl font-bold text-vending-blue mb-8">Terms of Use</h1>
         
-        {isLoading ? (
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded"></div>
-            <div className="h-4 bg-gray-200 rounded"></div>
-            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-          </div>
-        ) : error ? (
-          <div className="p-4 border border-red-300 bg-red-50 rounded-md">
-            <p className="text-red-700">
-              We're currently having trouble loading our terms of service. Please try again later.
-            </p>
-          </div>
-        ) : (
-          <div className="prose max-w-none">
-            {fields?.content && documentToReactComponents(fields.content)}
-            {!fields?.content && (
-              <p>Our terms of service content is currently being updated. Please check back soon.</p>
-            )}
-          </div>
-        )}
+        <ContentfulErrorBoundary 
+          contentType="Terms of Use" 
+          fallback={
+            <ContentfulFallbackMessage 
+              message="There was an error displaying the terms of use." 
+              contentType="Terms of Use"
+              showRefresh={true}
+            />
+          }
+        >
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <Spinner size="lg" />
+            </div>
+          ) : error ? (
+            <ContentfulFallbackMessage 
+              message={`Error loading terms of use: ${error.message}`} 
+              contentType="Terms of Use"
+              showRefresh={true}
+            />
+          ) : isContentReady && privacyPolicy?.fields?.termsOfUse ? (
+            <div className="prose prose-lg max-w-none">
+              {renderRichText(
+                privacyPolicy.fields.termsOfUse,
+                { includedAssets: privacyPolicy.includes?.Asset || [] }
+              )}
+            </div>
+          ) : (
+            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
+              <h2 className="text-yellow-800 text-lg font-medium">Content Not Available</h2>
+              <p className="text-yellow-700 mt-1">
+                The Terms of Use content could not be loaded. Please check that the content has been published in Contentful.
+              </p>
+              <p className="text-sm text-yellow-600 mt-2">
+                Looking for field "termsOfUse" in Privacy Policy content (ID: {entryId})
+              </p>
+            </div>
+          )}
+        </ContentfulErrorBoundary>
       </div>
     </Layout>
   );

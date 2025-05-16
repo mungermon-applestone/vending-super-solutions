@@ -1,10 +1,13 @@
-
 import React, { lazy, Suspense } from 'react';
-import { RouterProvider } from 'react-router-dom';
-import { router } from './routes';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import routes from './routes';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
+import { LegacyMonitor } from './legacy/cms/legacyMonitor';
+
+// Create optimized router with performance monitoring
+const router = createBrowserRouter(routes);
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -31,12 +34,15 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <HelmetProvider>
-      <Suspense fallback={<LoadingFallback />}>
-        <RouterProvider router={router} />
-      </Suspense>
-      <Toaster position="top-right" />
-    </HelmetProvider>
+    <>
+      <HelmetProvider>
+        <Suspense fallback={<LoadingFallback />}>
+          <RouterProvider router={router} />
+        </Suspense>
+        <Toaster position="top-right" />
+      </HelmetProvider>
+      {process.env.NODE_ENV !== 'production' && <LegacyMonitor />}
+    </>
   );
 };
 

@@ -1,80 +1,42 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { forceContentfulProvider } from '@/services/cms/cmsInit';
+import { getContentfulClient, testContentfulConnection } from '@/services/cms/utils/contentfulClient';
 import { toast } from 'sonner';
-import { testContentfulConnection, isContentfulConfigured } from '@/services/contentful/index';
 
-/**
- * Hook to test and initialize Contentful connection
- */
 export function useContentfulInit() {
-  const [isConnected, setIsConnected] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    async function testConnection() {
-      setIsLoading(true);
-      
-      if (!isContentfulConfigured()) {
-        console.log('[useContentfulInit] Contentful not configured');
-        setIsConnected(false);
-        setIsLoading(false);
-        return;
-      }
-      
+    const initContentful = async () => {
       try {
-        const result = await testContentfulConnection();
+        console.log('[useContentfulInit] Starting Contentful initialization');
         
-        if (result.success) {
-          console.log('[useContentfulInit] Contentful connection successful');
-          setIsConnected(true);
-          setError(null);
-        } else {
-          console.error('[useContentfulInit] Contentful connection failed:', result.message);
-          setIsConnected(false);
-          setError(new Error(result.message));
+        // Force Contentful provider
+        forceContentfulProvider();
+        
+        // Test the connection
+        const client = await getContentfulClient();
+        const testResult = await testContentfulConnection();
+        
+        if (!testResult.success) {
+          throw new Error(testResult.message);
         }
+        
+        console.log('[useContentfulInit] Contentful initialized successfully');
+        setIsInitialized(true);
+        setError(null);
+        
       } catch (err) {
-        console.error('[useContentfulInit] Error testing Contentful connection:', err);
-        setIsConnected(false);
-        setError(err instanceof Error ? err : new Error('Unknown error testing Contentful connection'));
-      } finally {
-        setIsLoading(false);
+        console.error('[useContentfulInit] Initialization failed:', err);
+        setError(err instanceof Error ? err : new Error('Failed to initialize Contentful'));
+        toast.error('Failed to connect to CMS');
       }
-    }
-    
-    testConnection();
+    };
+
+    initContentful();
   }, []);
 
-  const refreshConnection = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const result = await testContentfulConnection();
-      
-      if (result.success) {
-        setIsConnected(true);
-        toast.success('Contentful connection refreshed');
-      } else {
-        setIsConnected(false);
-        setError(new Error(result.message));
-        toast.error('Failed to connect to Contentful');
-      }
-    } catch (err) {
-      setIsConnected(false);
-      setError(err instanceof Error ? err : new Error('Unknown error'));
-      toast.error('Error refreshing Contentful connection');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  return { 
-    isConnected, 
-    isLoading, 
-    error, 
-    refreshConnection,
-    isInitialized: isConnected // Alias for backward compatibility
-  };
+  return { isInitialized, error };
 }

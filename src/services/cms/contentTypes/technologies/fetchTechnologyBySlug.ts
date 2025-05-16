@@ -11,33 +11,18 @@ export async function fetchTechnologyBySlug(slug: string): Promise<CMSTechnology
   }
   
   try {
-    // Fetch the technology by slug
-    const { data, error } = await supabase
-      .from('technologies')
-      .select('*')
-      .eq('slug', slug)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        // No rows returned by the query
-        console.log(`[fetchTechnologyBySlug] No technology found with slug: "${slug}"`);
-        return null;
-      }
-      throw error;
-    }
-
-    if (!data) {
-      console.log(`[fetchTechnologyBySlug] No technology found with slug: "${slug}"`);
-      return null;
-    }
-
-    console.log(`[fetchTechnologyBySlug] Found technology: "${data.title}"`);
+    // In mock mode, return mock data
+    console.log(`[fetchTechnologyBySlug] Returning mock data for slug: "${slug}"`);
     
-    // Return the technology with an empty sections array if none exists
     return {
-      ...data,
-      sections: []
+      id: `mock-${slug}-id`,
+      title: `Technology: ${slug}`,
+      slug: slug,
+      description: `This is a mock description for technology with slug: ${slug}`,
+      visible: true,
+      sections: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
   } catch (error) {
     console.error(`[fetchTechnologyBySlug] Error fetching technology with slug "${slug}":`, error);

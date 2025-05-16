@@ -65,7 +65,7 @@ const ContentfulPersistenceProvider: React.FC<{ children: React.ReactNode }> = (
     // Check connection on route changes
     const checkConnection = async () => {
       try {
-        const result = await testContentfulConnection();
+        const result = await testContentfulConnection(true); // silent mode
         
         if (!result.success) {
           console.log('[ContentfulPersistenceProvider] Heartbeat detected connection issue, refreshing client');
@@ -93,7 +93,7 @@ const ContentfulPersistenceProvider: React.FC<{ children: React.ReactNode }> = (
     const handleRouteChange = async () => {
       try {
         console.log('[ContentfulPersistenceProvider] Checking connection after route change');
-        const result = await testContentfulConnection();
+        const result = await testContentfulConnection(true); // silent mode
         
         if (!result.success) {
           console.log('[ContentfulPersistenceProvider] Route change check found connection issue, refreshing');

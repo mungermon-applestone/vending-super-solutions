@@ -1,144 +1,91 @@
-import { Asset } from 'contentful-management';
-import { createClient } from '@/services/contentful/managementClient';
 
-// TypeScript interfaces for benefits and features
-export interface BusinessGoalItem {
-  id: string;
-  text: string;
-}
+import { BusinessGoalFormData } from '@/types/forms';
+import { USE_SUPABASE_CMS } from '@/config/featureFlags';
 
 /**
- * Check if a business goal slug already exists
+ * Process benefits array to remove empty items
  */
-export async function checkBusinessGoalSlugExists(slug: string): Promise<boolean> {
-  try {
-    const client = await createClient();
-    const space = await client.getSpace(process.env.CONTENTFUL_SPACE_ID || '');
-    const environment = await space.getEnvironment(process.env.CONTENTFUL_ENVIRONMENT_ID || 'master');
-    
-    const entries = await environment.getEntries({
-      content_type: 'businessGoal',
-      'fields.slug': slug,
-      limit: 1
-    });
-    
-    return entries.total > 0;
-  } catch (error) {
-    console.error('Error checking slug existence:', error);
-    throw error;
-  }
-}
+export const processBenefits = (benefits: string[]): string[] => {
+  return benefits.filter(benefit => benefit.trim() !== '');
+};
 
 /**
- * Add an image to a business goal
+ * Check if a business goal with the given slug already exists
  */
-export async function addBusinessGoalImage(entryId: string, imageId: string): Promise<void> {
-  try {
-    const client = await createClient();
-    const space = await client.getSpace(process.env.CONTENTFUL_SPACE_ID || '');
-    const environment = await space.getEnvironment(process.env.CONTENTFUL_ENVIRONMENT_ID || 'master');
-    
-    const entry = await environment.getEntry(entryId);
-    const asset = await environment.getAsset(imageId);
-    
-    entry.fields.image = {
-      'en-US': {
-        sys: {
-          type: 'Link',
-          linkType: 'Asset',
-          id: asset.sys.id
-        }
-      }
-    };
-    
-    await entry.update();
-    await entry.publish();
-  } catch (error) {
-    console.error('Error adding image to business goal:', error);
-    throw error;
-  }
-}
+export const checkBusinessGoalSlugExists = async (slug: string): Promise<boolean> => {
+  // Always return false when Supabase CMS is disabled
+  console.log(`[businessGoalService] Would check if slug "${slug}" exists, but Supabase CMS is disabled`);
+  return false;
+};
 
 /**
- * Add benefits to a business goal
+ * Add business goal image
  */
-export async function addBusinessGoalBenefits(entryId: string, benefits: BusinessGoalItem[]): Promise<void> {
-  try {
-    const client = await createClient();
-    const space = await client.getSpace(process.env.CONTENTFUL_SPACE_ID || '');
-    const environment = await space.getEnvironment(process.env.CONTENTFUL_ENVIRONMENT_ID || 'master');
-    
-    const entry = await environment.getEntry(entryId);
-    
-    entry.fields.benefits = {
-      'en-US': benefits.map(benefit => benefit.text)
-    };
-    
-    await entry.update();
-    await entry.publish();
-  } catch (error) {
-    console.error('Error adding benefits to business goal:', error);
-    throw error;
-  }
-}
+export const addBusinessGoalImage = async (
+  data: BusinessGoalFormData, 
+  businessGoalId: string
+): Promise<void> => {
+  // No-op when Supabase CMS is disabled
+  console.log('[businessGoalService] Would add business goal image, but Supabase CMS is disabled');
+  return;
+};
 
 /**
- * Add features to a business goal
+ * Add business goal benefits
  */
-export async function addBusinessGoalFeatures(entryId: string, features: BusinessGoalItem[]): Promise<void> {
-  try {
-    const client = await createClient();
-    const space = await client.getSpace(process.env.CONTENTFUL_SPACE_ID || '');
-    const environment = await space.getEnvironment(process.env.CONTENTFUL_ENVIRONMENT_ID || 'master');
-    
-    const entry = await environment.getEntry(entryId);
-    
-    entry.fields.features = {
-      'en-US': features.map(feature => feature.text)
-    };
-    
-    await entry.update();
-    await entry.publish();
-  } catch (error) {
-    console.error('Error adding features to business goal:', error);
-    throw error;
-  }
-}
+export const addBusinessGoalBenefits = async (
+  data: BusinessGoalFormData, 
+  businessGoalId: string
+): Promise<void> => {
+  // No-op when Supabase CMS is disabled
+  console.log('[businessGoalService] Would add business goal benefits, but Supabase CMS is disabled');
+  return;
+};
 
 /**
- * Update image on a business goal
+ * Add business goal features
  */
-export async function updateBusinessGoalImage(entryId: string, imageId: string): Promise<void> {
-  try {
-    return addBusinessGoalImage(entryId, imageId);
-  } catch (error) {
-    console.error('Error updating business goal image:', error);
-    throw error;
-  }
-}
+export const addBusinessGoalFeatures = async (
+  data: BusinessGoalFormData, 
+  businessGoalId: string
+): Promise<void> => {
+  // No-op when Supabase CMS is disabled
+  console.log('[businessGoalService] Would add business goal features, but Supabase CMS is disabled');
+  return;
+};
 
 /**
- * Update benefits on a business goal
+ * Update business goal image
  */
-export async function updateBusinessGoalBenefits(entryId: string, benefits: BusinessGoalItem[]): Promise<void> {
-  try {
-    return addBusinessGoalBenefits(entryId, benefits);
-  } catch (error) {
-    console.error('Error updating business goal benefits:', error);
-    throw error;
-  }
-}
+export const updateBusinessGoalImage = async (
+  data: BusinessGoalFormData, 
+  businessGoalId: string
+): Promise<void> => {
+  // No-op when Supabase CMS is disabled
+  console.log('[businessGoalService] Would update business goal image, but Supabase CMS is disabled');
+  return;
+};
 
 /**
- * Update features on a business goal
+ * Update business goal benefits
  */
-export async function updateBusinessGoalFeatures(entryId: string, features: BusinessGoalItem[]): Promise<void> {
-  try {
-    return addBusinessGoalFeatures(entryId, features);
-  } catch (error) {
-    console.error('Error updating business goal features:', error);
-    throw error;
-  }
-}
+export const updateBusinessGoalBenefits = async (
+  data: BusinessGoalFormData, 
+  businessGoalId: string
+): Promise<void> => {
+  // No-op when Supabase CMS is disabled
+  console.log('[businessGoalService] Would update business goal benefits, but Supabase CMS is disabled');
+  return;
+};
 
-export { BusinessGoalItem };
+/**
+ * Update business goal features
+ */
+export const updateBusinessGoalFeatures = async (
+  data: BusinessGoalFormData, 
+  businessGoalId: string
+): Promise<void> => {
+  // No-op when Supabase CMS is disabled
+  console.log('[businessGoalService] Would update business goal features, but Supabase CMS is disabled');
+  return;
+};

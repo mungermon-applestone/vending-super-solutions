@@ -1,47 +1,33 @@
 
 import React from "react";
 import { Document } from "@contentful/rich-text-types";
-import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
-import { Asset } from "contentful";
+import { renderRichText } from '@/utils/contentful/richTextRenderer';
 
 interface ContentfulBlogPostBodyProps {
   content?: Document;
-  includedAssets?: Asset[];
+  includedAssets?: any[];
 }
-
-/**
- * Renders Contentful rich text content
- */
-const renderRichText = (document: Document, options: { includedAssets?: Asset[] }) => {
-  if (!document) return null;
-  
-  try {
-    return documentToReactComponents(document, {
-      renderNode: {
-        // Add custom renderers here if needed
-      },
-    });
-  } catch (error) {
-    console.error('[ContentfulBlogPostBody] Error rendering rich text:', error);
-    return <p>Error rendering content. Please try again later.</p>;
-  }
-};
 
 const ContentfulBlogPostBody: React.FC<ContentfulBlogPostBodyProps> = ({ 
   content, 
   includedAssets = [] 
 }) => {
+  // For debugging
+  React.useEffect(() => {
+    if (content) {
+      console.log("Blog post rich text content structure:", JSON.stringify(content, null, 2));
+      console.log("Available included assets:", includedAssets);
+    }
+  }, [content, includedAssets]);
+
   return (
-    <ContentfulErrorBoundary contentType="blog post content">
-      <div className="prose max-w-none prose-slate mb-12">
-        {content ? (
-          renderRichText(content, { includedAssets })
-        ) : (
-          <p>No content available for this blog post.</p>
-        )}
-      </div>
-    </ContentfulErrorBoundary>
+    <div className="prose max-w-none prose-slate mb-12">
+      {content ? (
+        renderRichText(content, { includedAssets })
+      ) : (
+        <p>No content available for this blog post.</p>
+      )}
+    </div>
   );
 };
 

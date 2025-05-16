@@ -1,75 +1,97 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
+import BlogPostCard from '@/components/blog/BlogPostCard';
+import { useBlogPosts } from '@/hooks/useBlogData';
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Link } from 'react-router-dom';
-import BlogCard from '@/components/blog/BlogCard';
-import Pagination from '@/components/ui/pagination';
-import { useContentfulBlogPosts } from '@/hooks/cms';
-import { useSearchParams } from 'react-router-dom';
+import BlogSchemaData from '@/components/blog/BlogSchemaData';
+import SEO from '@/components/seo/SEO';
+import { useBreadcrumbs } from '@/context/BreadcrumbContext';
 
-const BlogList: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+const POSTS_PER_PAGE = 9;
+
+const BlogList = () => {
+  const [page, setPage] = useState(0);
+  const { setBreadcrumbs } = useBreadcrumbs();
   
-  const { data: blogPosts, isLoading, isError } = useContentfulBlogPosts();
-  
-  // Pagination logic
-  const postsPerPage = 9;
-  const totalPosts = blogPosts?.length || 0;
-  const totalPages = Math.ceil(totalPosts / postsPerPage);
-  
-  const startIndex = (currentPage - 1) * postsPerPage;
-  const endIndex = startIndex + postsPerPage;
-  const currentPosts = blogPosts?.slice(startIndex, endIndex) || [];
-  
-  const handlePageChange = (page: number) => {
-    setSearchParams({ page: page.toString() });
-  };
+  // Get posts ordered by published_at in descending order (newest first)
+  const { data: blogPosts = [], isLoading, error } = useBlogPosts({ 
+    status: 'published',
+    limit: POSTS_PER_PAGE,
+    offset: page * POSTS_PER_PAGE
+  });
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { name: "Home", url: "/", position: 1 },
+      { name: "Blog", url: "/blog", position: 2 }
+    ]);
+  }, [setBreadcrumbs]);
+
+  const breadcrumbItems = [
+    { name: "Home", url: "https://yourdomain.com", position: 1 },
+    { name: "Blog", url: "https://yourdomain.com/blog", position: 2 }
+  ];
 
   return (
     <Layout>
-      <div className="container mx-auto py-10 px-4">
-        <header className="mb-10">
-          <h1 className="text-3xl font-bold mb-2">Blog</h1>
-          <p className="text-gray-600">
-            Latest news, insights, and updates from our team
+      <SEO 
+        title="Blog - Latest Updates and Insights"
+        description="Explore our latest articles, insights, and updates about vending solutions and industry trends."
+        canonicalUrl="https://yourdomain.com/blog"
+      />
+      <BlogSchemaData 
+        breadcrumbItems={breadcrumbItems}
+        blogPosts={blogPosts.map(post => ({
+          title: post.title,
+          description: post.excerpt || '',
+          datePublished: post.published_at || '',
+          author: 'Vending Solutions Team',
+          url: `https://yourdomain.com/blog/${post.slug}`
+        }))}
+      />
+      
+      <div className="container mx-auto py-10">
+        <nav aria-label="Breadcrumb" className="mb-8">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink aria-current="page">Blog</BreadcrumbLink>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </nav>
+
+        <div className="text-center mb-10">
+          <h1 className="text-4xl font-bold mb-4">Latest Updates</h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Keep up with the latest news, insights, and updates from our team.
           </p>
-        </header>
+        </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-10">
-            <p>Loading blog posts...</p>
+          <div className="flex justify-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
           </div>
-        ) : isError ? (
-          <div className="text-center py-10">
-            <h3 className="text-xl font-medium text-red-600 mb-2">Error loading blog posts</h3>
-            <p className="text-gray-600">Please try again later.</p>
+        ) : error ? (
+          <div className="text-center py-16">
+            <p className="text-red-500">Something went wrong. Please try again later.</p>
           </div>
-        ) : currentPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentPosts.map((post) => (
-              <BlogCard key={post.id} post={post} />
+        ) : blogPosts.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {blogPosts.map((post) => (
+              <BlogPostCard key={post.id} post={post} />
             ))}
           </div>
         ) : (
-          <div className="text-center py-10">
-            <h3 className="text-xl font-medium mb-2">No blog posts found</h3>
-            <p className="text-gray-600 mb-6">
-              Check back later for new content.
-            </p>
-            <Link to="/" className="text-blue-600 hover:underline">
-              Return to homepage
-            </Link>
-          </div>
-        )}
-
-        {totalPages > 1 && (
-          <div className="mt-10">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
+          <div className="text-center py-16">
+            <p className="text-gray-500">No posts found. Check back soon for new updates!</p>
           </div>
         )}
       </div>
