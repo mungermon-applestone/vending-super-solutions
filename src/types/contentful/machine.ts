@@ -1,7 +1,7 @@
 
 import { CMSMachine, CMSImage } from '@/types/cms';
 
-export interface ContentfulEntry {
+export interface ContentfulMachine {
   sys?: {
     id: string;
   };
@@ -106,3 +106,4 @@ export interface ContentfulEntry {
   };
 }
 
+export type ContentfulEntry = ContentfulMachine;

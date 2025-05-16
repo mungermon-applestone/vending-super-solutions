@@ -12,6 +12,13 @@ export function transformContentfulTestimonial(entry: Entry<any>): any {
   }
 
   const { fields, sys } = entry;
+  
+  // Ensure image data is properly structured
+  let imageUrl = null;
+  if (fields.image && typeof fields.image === 'object' && fields.image.fields && 
+      fields.image.fields.file && fields.image.fields.file.url) {
+    imageUrl = `https:${fields.image.fields.file.url}`;
+  }
 
   return {
     id: sys.id,
@@ -20,7 +27,7 @@ export function transformContentfulTestimonial(entry: Entry<any>): any {
     position: fields.position || fields.title || '',
     company: fields.company || '',
     rating: fields.rating || 5,
-    image: fields.image?.fields?.file?.url ? `https:${fields.image.fields.file.url}` : null
+    image: imageUrl
   };
 }
 

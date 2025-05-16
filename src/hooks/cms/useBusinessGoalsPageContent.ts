@@ -1,76 +1,95 @@
-
 import { useQuery } from '@tanstack/react-query';
-import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
-import { Entry, EntryCollection } from 'contentful';
+import { getContentfulClient } from '@/services/contentful/client';
 
 interface BusinessGoalsPageContent {
-  introTitle: string;
-  introDescription: string;
-  customSolutionTitle?: string;
-  customSolutionDescription?: string;
-  customSolutionButtonText?: string;
-  customSolutionButtonUrl?: string;
+  introTitle?: string;
+  introDescription?: string;
   goalsSectionTitle?: string;
   goalsSectionDescription?: string;
   keyBenefitsTitle?: string;
   keyBenefitsDescription?: string;
   keyBenefits?: string[];
-  testimonialsSectionTitle?: string;
-  testimonialsSectionDescription?: string;
+  customSolutionTitle?: string;
+  customSolutionDescription?: string;
+  customSolutionButtonText?: string;
+  customSolutionButtonUrl?: string;
   inquiryBulletPoints?: string[];
 }
 
 export function useBusinessGoalsPageContent(contentId?: string) {
   return useQuery({
-    queryKey: ['contentful', 'businessGoalsPageContent', contentId],
-    queryFn: async () => {
+    queryKey: ['contentful', 'business-goals-page', contentId],
+    queryFn: async (): Promise<BusinessGoalsPageContent | null> => {
       try {
-        console.log('[useBusinessGoalsPageContent] Fetching content');
         const client = await getContentfulClient();
         
-        let entry;
-        if (contentId) {
-          entry = await client.getEntry(contentId);
-        } else {
-          const response = await client.getEntries({
-            content_type: 'businessGoalsPageContent',
-            limit: 1
-          });
-          entry = response.items[0];
-        }
+        let query: any = {
+          content_type: 'businessGoalsPage',
+          include: 1,
+          limit: 1
+        };
         
-        if (!entry) {
-          console.warn('[useBusinessGoalsPageContent] No content found');
+        if (contentId) {
+          // If contentId is provided, fetch by ID
+          try {
+            const entry = await client.getEntry(contentId, { include: 1 });
+            if (!entry || !entry.fields) {
+              return null;
+            }
+            
+            return transformBusinessGoalsPageContent(entry);
+          } catch (error) {
+            console.error(`Error fetching business goals page content by ID "${contentId}":`, error);
+            // Continue to search by content type
+          }
+        } 
+        
+        // Otherwise search by content type
+        const response = await client.getEntries(query);
+        
+        if (!response.items || response.items.length === 0) {
           return null;
         }
-
-        const fields = entry.fields;
         
-        console.log('[useBusinessGoalsPageContent] Content retrieved:', fields);
-        
-        return {
-          introTitle: fields.introTitle as string,
-          introDescription: fields.introDescription as string,
-          customSolutionTitle: fields.customSolutionTitle as string,
-          customSolutionDescription: fields.customSolutionDescription as string,
-          customSolutionButtonText: fields.customSolutionButtonText as string,
-          customSolutionButtonUrl: fields.customSolutionButtonUrl as string,
-          goalsSectionTitle: fields.goalsSectionTitle as string,
-          goalsSectionDescription: fields.goalsSectionDescription as string,
-          keyBenefitsTitle: fields.keyBenefitsTitle as string,
-          keyBenefitsDescription: fields.keyBenefitsDescription as string,
-          keyBenefits: fields.keyBenefits as string[],
-          testimonialsSectionTitle: fields.testimonialsSectionTitle as string,
-          testimonialsSectionDescription: fields.testimonialsSectionDescription as string,
-          inquiryBulletPoints: fields.inquiryBulletPoints as string[]
-        } as BusinessGoalsPageContent;
+        return transformBusinessGoalsPageContent(response.items[0]);
       } catch (error) {
-        console.error('[useBusinessGoalsPageContent] Error:', error);
+        console.error('Error fetching business goals page content:', error);
         return null;
       }
-    },
-    enabled: true
+    }
   });
+}
+
+function transformBusinessGoalsPageContent(entry: any): BusinessGoalsPageContent {
+  if (!entry || !entry.fields) {
+    return {};
+  }
+  
+  const { fields } = entry;
+  
+  // Transform any array fields
+  const keyBenefits = Array.isArray(fields.keyBenefits) ? 
+    fields.keyBenefits.filter(Boolean) : 
+    (fields.keyBenefits ? [fields.keyBenefits] : []);
+  
+  const inquiryBulletPoints = Array.isArray(fields.inquiryBulletPoints) ? 
+    fields.inquiryBulletPoints.filter(Boolean) : 
+    (fields.inquiryBulletPoints ? [fields.inquiryBulletPoints] : []);
+  
+  return {
+    introTitle: fields.introTitle || '',
+    introDescription: fields.introDescription || '',
+    goalsSectionTitle: fields.goalsSectionTitle || '',
+    goalsSectionDescription: fields.goalsSectionDescription || '',
+    keyBenefitsTitle: fields.keyBenefitsTitle || '',
+    keyBenefitsDescription: fields.keyBenefitsDescription || '',
+    keyBenefits,
+    customSolutionTitle: fields.customSolutionTitle || '',
+    customSolutionDescription: fields.customSolutionDescription || '',
+    customSolutionButtonText: fields.customSolutionButtonText || 'Contact Us',
+    customSolutionButtonUrl: fields.customSolutionButtonUrl || '/contact',
+    inquiryBulletPoints
+  };
 }
 
 export type { BusinessGoalsPageContent };

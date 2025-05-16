@@ -1,153 +1,119 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { contentfulClient } from "@/integrations/contentful/client";
-import { CMSBusinessGoal, CMSImage, CMSFeature } from "@/types/cms";
-import { transformContentfulAsset } from "./transformers/businessGoalTransformer";
+import { useQuery } from '@tanstack/react-query';
+import { getContentfulClient } from '@/services/contentful/client';
+
+interface BusinessGoal {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  visible: boolean;
+  icon?: string;
+  benefits?: string[];
+  features?: any[];
+  imageUrl?: string;
+}
 
 /**
- * Hook to fetch all business goals from Contentful
+ * Hook to fetch all business goals
  */
 export function useContentfulBusinessGoals() {
   return useQuery({
-    queryKey: ["contentful", "businessGoals"],
-    queryFn: async (): Promise<CMSBusinessGoal[]> => {
+    queryKey: ['contentful', 'business-goals'],
+    queryFn: async (): Promise<BusinessGoal[]> => {
       try {
-        const response = await contentfulClient.getEntries({
-          content_type: "businessGoal",
-          order: ["fields.displayOrder"]
+        const client = await getContentfulClient();
+        
+        const response = await client.getEntries({
+          content_type: 'businessGoal',
+          order: 'fields.title',
+          include: 1
         });
-
-        // Transform Contentful entries to our internal format
-        return response.items.map((entry) => {
-          const fields = entry.fields as any;
-          
-          // Helper function to safely convert field values to strings
-          const safeString = (value: any): string => {
-            return value !== undefined && value !== null ? String(value) : '';
-          };
-          
-          // Helper function to handle image transformation
-          const processImage = (imageField: any): CMSImage | undefined => {
-            if (!imageField || !imageField.fields || !imageField.fields.file || !imageField.fields.file.url) {
-              return undefined;
+        
+        if (!response.items) {
+          return [];
+        }
+        
+        return response.items
+          .filter(item => item && item.fields)
+          .map(item => {
+            // Get image URL if available
+            let imageUrl;
+            if (item.fields.image && item.fields.image.fields && item.fields.image.fields.file) {
+              imageUrl = `https:${item.fields.image.fields.file.url}`;
             }
             
+            // Transform entry to BusinessGoal interface
             return {
-              id: imageField.sys?.id || '',
-              url: `https:${imageField.fields.file.url}`,
-              alt: imageField.fields.title || '',
-              width: imageField.fields.file.details?.image?.width,
-              height: imageField.fields.file.details?.image?.height
+              id: item.sys.id,
+              slug: item.fields.slug || '',
+              title: item.fields.title || '',
+              description: item.fields.description || '',
+              visible: item.fields.visible === true,
+              icon: item.fields.icon || undefined,
+              benefits: Array.isArray(item.fields.benefits) ? item.fields.benefits : [],
+              features: Array.isArray(item.fields.features) ? item.fields.features : [],
+              imageUrl
             };
-          };
-          
-          // Process features if they exist
-          const processFeatures = (featuresField: any[] | undefined): CMSFeature[] => {
-            if (!featuresField || !Array.isArray(featuresField)) {
-              return [];
-            }
-            
-            return featuresField.map(feature => ({
-              id: feature.sys?.id || '',
-              title: safeString(feature.fields?.title || ''),
-              description: safeString(feature.fields?.description || ''),
-              icon: feature.fields?.icon || '',
-              display_order: feature.fields?.displayOrder || 0
-            }));
-          };
-          
-          return {
-            id: entry.sys.id,
-            title: safeString(fields.title),
-            slug: safeString(fields.slug),
-            description: safeString(fields.description),
-            icon: safeString(fields.icon || ''),
-            image: processImage(fields.image),
-            benefits: Array.isArray(fields.benefits) ? fields.benefits.map(safeString) : [],
-            features: processFeatures(fields.features),
-            visible: fields.visible !== false,
-            displayOrder: fields.displayOrder || 0,
-            created_at: entry.sys.createdAt || "",
-            updated_at: entry.sys.updatedAt || ""
-          };
-        });
+          })
+          // Only return visible goals
+          .filter(goal => goal.visible);
       } catch (error) {
-        console.error("Error fetching business goals from Contentful:", error);
-        throw error;
+        console.error('Error fetching business goals:', error);
+        return [];
       }
-    }
+    },
   });
 }
 
 /**
- * Hook to fetch a single business goal by slug from Contentful
+ * Hook to fetch a business goal by slug
  */
-export function useContentfulBusinessGoalBySlug(slug: string | undefined) {
+export function useContentfulBusinessGoalBySlug(slug?: string) {
   return useQuery({
-    queryKey: ["contentful", "businessGoal", slug],
-    queryFn: async (): Promise<CMSBusinessGoal | null> => {
+    queryKey: ['contentful', 'business-goal', slug],
+    enabled: !!slug,
+    queryFn: async (): Promise<BusinessGoal | null> => {
       if (!slug) return null;
-
+      
       try {
-        const response = await contentfulClient.getEntries({
-          content_type: "businessGoal",
-          "fields.slug": slug,
-          limit: 1,
+        const client = await getContentfulClient();
+        
+        const response = await client.getEntries({
+          content_type: 'businessGoal',
+          'fields.slug': slug,
+          include: 1,
+          limit: 1
         });
-
-        if (response.items.length === 0) {
+        
+        if (!response.items || response.items.length === 0) {
           return null;
         }
-
-        // Transform the entry to our internal format
-        const entry = response.items[0];
-        const fields = entry.fields as any;
         
-        // Helper function to safely convert field values to strings
-        const safeString = (value: any): string => {
-          return value !== undefined && value !== null ? String(value) : '';
-        };
+        const item = response.items[0];
         
-        // Process features if they exist
-        const processFeatures = (featuresField: any[] | undefined): CMSFeature[] => {
-          if (!featuresField || !Array.isArray(featuresField)) {
-            return [];
-          }
-          
-          return featuresField.map(feature => ({
-            id: feature.sys?.id || '',
-            title: safeString(feature.fields?.title || ''),
-            description: safeString(feature.fields?.description || ''),
-            icon: feature.fields?.icon || '',
-            display_order: feature.fields?.displayOrder || 0
-          }));
-        };
+        // Get image URL if available
+        let imageUrl;
+        if (item.fields.image && item.fields.image.fields && item.fields.image.fields.file) {
+          imageUrl = `https:${item.fields.image.fields.file.url}`;
+        }
         
+        // Transform entry to BusinessGoal interface
         return {
-          id: entry.sys.id,
-          title: safeString(fields.title),
-          slug: safeString(fields.slug),
-          description: safeString(fields.description),
-          icon: safeString(fields.icon || ''),
-          image: fields.image ? {
-            id: fields.image.sys?.id || '',
-            url: `https:${fields.image.fields?.file?.url}`,
-            alt: fields.image.fields?.title || '',
-            width: fields.image.fields?.file?.details?.image?.width,
-            height: fields.image.fields?.file?.details?.image?.height,
-          } : undefined,
-          benefits: Array.isArray(fields.benefits) ? fields.benefits.map(safeString) : [],
-          features: processFeatures(fields.features),
-          visible: fields.visible !== false,
-          displayOrder: fields.displayOrder || 0,
-          created_at: entry.sys.createdAt || "",
-          updated_at: entry.sys.updatedAt || ""
+          id: item.sys.id,
+          slug: item.fields.slug || '',
+          title: item.fields.title || '',
+          description: item.fields.description || '',
+          visible: item.fields.visible === true,
+          icon: item.fields.icon || undefined,
+          benefits: Array.isArray(item.fields.benefits) ? item.fields.benefits : [],
+          features: Array.isArray(item.fields.features) ? item.fields.features : [],
+          imageUrl
         };
       } catch (error) {
-        console.error(`Error fetching business goal with slug ${slug}:`, error);
-        throw error;
+        console.error(`Error fetching business goal with slug "${slug}":`, error);
+        return null;
       }
     },
-    enabled: !!slug,
   });
 }

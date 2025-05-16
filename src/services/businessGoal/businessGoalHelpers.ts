@@ -1,74 +1,145 @@
 
-// This file previously had Supabase references, but we'll remove those
-// and implement a simpler fallback implementation for now
+import { Asset } from 'contentful-management';
+import { createClient } from '@/services/contentful/managementClient';
 
-import { CMSBusinessGoal } from '@/types/cms';
+// TypeScript interfaces for benefits and features
+interface BusinessGoalItem {
+  id: string;
+  text: string;
+}
 
-// Fallback business goals data
-const FALLBACK_BUSINESS_GOALS: CMSBusinessGoal[] = [
-  {
-    id: 'bg-1',
-    title: 'Increase Revenue',
-    slug: 'increase-revenue',
-    description: 'Boost your business revenue with our smart vending solutions',
-    visible: true,
-    icon: 'trending-up',
-    benefits: [
-      { id: 'ben-1', text: 'Expand to new locations with minimal overhead' },
-      { id: 'ben-2', text: 'Increase sales with 24/7 availability' },
-      { id: 'ben-3', text: 'Optimize pricing dynamically' }
-    ],
-    features: [
-      { id: 'feat-1', title: 'Smart Pricing', description: 'Automatically adjust prices based on demand' }
-    ]
-  },
-  {
-    id: 'bg-2',
-    title: 'Reduce Operating Costs',
-    slug: 'reduce-operating-costs',
-    description: 'Lower your operational expenses with automated vending',
-    visible: true,
-    icon: 'trending-down',
-    benefits: [
-      { id: 'ben-4', text: 'Minimize staffing requirements' },
-      { id: 'ben-5', text: 'Reduce overhead with smaller footprint' },
-      { id: 'ben-6', text: 'Decrease inventory wastage' }
-    ],
-    features: [
-      { id: 'feat-2', title: 'Inventory Management', description: 'Real-time tracking to prevent stockouts' }
-    ]
+/**
+ * Check if a business goal slug already exists
+ */
+export async function checkBusinessGoalSlugExists(slug: string): Promise<boolean> {
+  try {
+    const client = await createClient();
+    const space = await client.getSpace(process.env.CONTENTFUL_SPACE_ID || '');
+    const environment = await space.getEnvironment(process.env.CONTENTFUL_ENVIRONMENT_ID || 'master');
+    
+    const entries = await environment.getEntries({
+      content_type: 'businessGoal',
+      'fields.slug': slug,
+      limit: 1
+    });
+    
+    return entries.total > 0;
+  } catch (error) {
+    console.error('Error checking slug existence:', error);
+    throw error;
   }
-];
-
-// Mock function to get all business goals
-export async function getBusinessGoals(): Promise<CMSBusinessGoal[]> {
-  console.log('[businessGoalHelpers] Getting business goals from fallback data');
-  return FALLBACK_BUSINESS_GOALS;
 }
 
-// Mock function to get a single business goal by slug
-export async function getBusinessGoalBySlug(slug: string): Promise<CMSBusinessGoal | null> {
-  console.log(`[businessGoalHelpers] Getting business goal by slug: ${slug}`);
-  return FALLBACK_BUSINESS_GOALS.find(goal => goal.slug === slug) || null;
+/**
+ * Add an image to a business goal
+ */
+export async function addBusinessGoalImage(entryId: string, imageId: string): Promise<void> {
+  try {
+    const client = await createClient();
+    const space = await client.getSpace(process.env.CONTENTFUL_SPACE_ID || '');
+    const environment = await space.getEnvironment(process.env.CONTENTFUL_ENVIRONMENT_ID || 'master');
+    
+    const entry = await environment.getEntry(entryId);
+    const asset = await environment.getAsset(imageId);
+    
+    entry.fields.image = {
+      'en-US': {
+        sys: {
+          type: 'Link',
+          linkType: 'Asset',
+          id: asset.sys.id
+        }
+      }
+    };
+    
+    await entry.update();
+    await entry.publish();
+  } catch (error) {
+    console.error('Error adding image to business goal:', error);
+    throw error;
+  }
 }
 
-// Mock function to get visible business goals
-export async function getVisibleBusinessGoals(): Promise<CMSBusinessGoal[]> {
-  console.log('[businessGoalHelpers] Getting visible business goals');
-  return FALLBACK_BUSINESS_GOALS.filter(goal => goal.visible === true);
+/**
+ * Add benefits to a business goal
+ */
+export async function addBusinessGoalBenefits(entryId: string, benefits: BusinessGoalItem[]): Promise<void> {
+  try {
+    const client = await createClient();
+    const space = await client.getSpace(process.env.CONTENTFUL_SPACE_ID || '');
+    const environment = await space.getEnvironment(process.env.CONTENTFUL_ENVIRONMENT_ID || 'master');
+    
+    const entry = await environment.getEntry(entryId);
+    
+    entry.fields.benefits = {
+      'en-US': benefits.map(benefit => benefit.text)
+    };
+    
+    await entry.update();
+    await entry.publish();
+  } catch (error) {
+    console.error('Error adding benefits to business goal:', error);
+    throw error;
+  }
 }
 
-// Mock function to create a business goal
-export async function createBusinessGoal(data: Partial<CMSBusinessGoal>): Promise<CMSBusinessGoal> {
-  console.log('[businessGoalHelpers] Creating business goal (mock):', data);
-  return {
-    id: `new-${Date.now()}`,
-    title: data.title || 'New Business Goal',
-    slug: data.slug || `new-goal-${Date.now()}`,
-    description: data.description || '',
-    visible: data.visible !== undefined ? data.visible : true,
-    benefits: data.benefits || [],
-    features: data.features || [],
-    icon: data.icon || 'default-icon'
-  };
+/**
+ * Add features to a business goal
+ */
+export async function addBusinessGoalFeatures(entryId: string, features: BusinessGoalItem[]): Promise<void> {
+  try {
+    const client = await createClient();
+    const space = await client.getSpace(process.env.CONTENTFUL_SPACE_ID || '');
+    const environment = await space.getEnvironment(process.env.CONTENTFUL_ENVIRONMENT_ID || 'master');
+    
+    const entry = await environment.getEntry(entryId);
+    
+    entry.fields.features = {
+      'en-US': features.map(feature => feature.text)
+    };
+    
+    await entry.update();
+    await entry.publish();
+  } catch (error) {
+    console.error('Error adding features to business goal:', error);
+    throw error;
+  }
 }
+
+/**
+ * Update image on a business goal
+ */
+export async function updateBusinessGoalImage(entryId: string, imageId: string): Promise<void> {
+  try {
+    return addBusinessGoalImage(entryId, imageId);
+  } catch (error) {
+    console.error('Error updating business goal image:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update benefits on a business goal
+ */
+export async function updateBusinessGoalBenefits(entryId: string, benefits: BusinessGoalItem[]): Promise<void> {
+  try {
+    return addBusinessGoalBenefits(entryId, benefits);
+  } catch (error) {
+    console.error('Error updating business goal benefits:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update features on a business goal
+ */
+export async function updateBusinessGoalFeatures(entryId: string, features: BusinessGoalItem[]): Promise<void> {
+  try {
+    return addBusinessGoalFeatures(entryId, features);
+  } catch (error) {
+    console.error('Error updating business goal features:', error);
+    throw error;
+  }
+}
+
+export { BusinessGoalItem };

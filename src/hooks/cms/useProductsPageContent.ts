@@ -1,7 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
-import { toast } from 'sonner';
+import { getContentfulClient } from '@/services/contentful/client';
 
 interface ProductsPageContent {
   purposeStatementTitle?: string;
@@ -11,53 +10,53 @@ interface ProductsPageContent {
   keyFeaturesTitle?: string;
   keyFeaturesDescription?: string;
   keyFeatures?: string[];
-  demoRequestTitle?: string;
-  demoRequestDescription?: string;
-  demoRequestBulletPoints?: string[];
 }
 
+/**
+ * Hook to fetch products page content from Contentful
+ */
 export function useProductsPageContent() {
   return useQuery({
-    queryKey: ['contentful', 'productsPageContent'],
-    queryFn: async () => {
-      console.log('[useProductsPageContent] Fetching products page content');
+    queryKey: ['contentful', 'products-page-content'],
+    queryFn: async (): Promise<ProductsPageContent | null> => {
       try {
         const client = await getContentfulClient();
         
-        const entries = await client.getEntries({
-          content_type: 'productsPageContent',
+        const response = await client.getEntries({
+          content_type: 'productsPage',
+          include: 1,
           limit: 1
         });
-
-        console.log('[useProductsPageContent] Raw response:', entries);
-
-        if (entries.items.length === 0) {
-          console.warn('[useProductsPageContent] No products page content found');
+        
+        if (!response.items || response.items.length === 0) {
           return null;
         }
-
-        const fields = entries.items[0].fields;
-        console.log('[useProductsPageContent] Content fields:', fields);
+        
+        const entry = response.items[0];
+        
+        // Transform key features field if it exists
+        let keyFeatures: string[] = [];
+        if (entry.fields.keyFeatures) {
+          if (Array.isArray(entry.fields.keyFeatures)) {
+            keyFeatures = entry.fields.keyFeatures;
+          } else if (typeof entry.fields.keyFeatures === 'string') {
+            keyFeatures = [entry.fields.keyFeatures];
+          }
+        }
         
         return {
-          purposeStatementTitle: fields.purposeStatementTitle as string,
-          purposeStatementDescription: fields.purposeStatementDescription as string,
-          categoriesSectionTitle: fields.categoriesSectionTitle as string,
-          categoriesSectionDescription: fields.categoriesSectionDescription as string,
-          keyFeaturesTitle: fields.keyFeaturesTitle as string,
-          keyFeaturesDescription: fields.keyFeaturesDescription as string,
-          keyFeatures: fields.keyFeatures as string[],
-          demoRequestTitle: fields.demoRequestTitle as string,
-          demoRequestDescription: fields.demoRequestDescription as string,
-          demoRequestBulletPoints: fields.demoRequestBulletPoints as string[],
-        } as ProductsPageContent;
+          purposeStatementTitle: entry.fields.purposeStatementTitle || 'Our Vending Solutions',
+          purposeStatementDescription: entry.fields.purposeStatementDescription || '',
+          categoriesSectionTitle: entry.fields.categoriesSectionTitle || '',
+          categoriesSectionDescription: entry.fields.categoriesSectionDescription || '',
+          keyFeaturesTitle: entry.fields.keyFeaturesTitle || '',
+          keyFeaturesDescription: entry.fields.keyFeaturesDescription || '',
+          keyFeatures
+        };
       } catch (error) {
-        console.error('[useProductsPageContent] Error fetching products page content:', error);
-        toast.error('Failed to load products page content');
-        throw error;
+        console.error('Error fetching products page content:', error);
+        return null;
       }
-    },
-    retry: 1,
-    refetchOnWindowFocus: false
+    }
   });
 }
