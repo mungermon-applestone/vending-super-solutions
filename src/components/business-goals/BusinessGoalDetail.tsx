@@ -38,11 +38,11 @@ const BusinessGoalDetail = ({ slug }: BusinessGoalDetailProps) => {
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-4">{businessGoal.title}</h1>
       
-      {businessGoal.image && (
+      {businessGoal.imageUrl && (
         <div className="mb-6">
           <img 
-            src={businessGoal.image.url} 
-            alt={businessGoal.image.alt || businessGoal.title} 
+            src={businessGoal.imageUrl} 
+            alt={businessGoal.title} 
             className="w-full rounded-lg shadow-md max-h-96 object-cover"
           />
         </div>

@@ -1,4 +1,3 @@
-
 export interface CMSImage {
   id: string;
   url: string;
@@ -69,12 +68,12 @@ export interface CMSMachine {
 
 export interface CMSTestimonial {
   id: string;
-  name: string;
-  title: string;
-  company: string;
-  testimonial: string;
+  quote: string;
+  author: string;
+  position?: string;
+  company?: string;
+  rating?: number;
   image_url?: string;
-  rating: number;
   created_at?: string;
   updated_at?: string;
 }

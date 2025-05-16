@@ -1,9 +1,8 @@
-
 import { Asset } from 'contentful-management';
 import { createClient } from '@/services/contentful/managementClient';
 
 // TypeScript interfaces for benefits and features
-interface BusinessGoalItem {
+export interface BusinessGoalItem {
   id: string;
   text: string;
 }

@@ -19,24 +19,23 @@ export function transformContentfulMachine(contentfulMachine: ContentfulMachine)
       if (image && image.fields && image.fields.file && image.fields.file.url) {
         const url = `https:${image.fields.file.url}`;
         images.push({ 
+          id: image.sys?.id || `img-${Math.random().toString(36).substr(2, 9)}`,
           url, 
-          alt: image.fields.title || 'Machine image',
-          contentType: image.fields.file.contentType || 'image/jpeg'
+          alt: image.fields.title || 'Machine image'
         });
       }
     });
   }
   
   // Handle thumbnail if it exists
+  let thumbnail: CMSImage | undefined = undefined;
   if (fields.thumbnail && fields.thumbnail.fields && fields.thumbnail.fields.file) {
     const url = `https:${fields.thumbnail.fields.file.url}`;
-    if (!images.some(img => img.url === url)) {
-      images.push({ 
-        url, 
-        alt: fields.thumbnail.fields.title || 'Machine thumbnail',
-        contentType: fields.thumbnail.fields.file.contentType || 'image/jpeg'
-      });
-    }
+    thumbnail = {
+      id: fields.thumbnail.sys?.id || `thumb-${Math.random().toString(36).substr(2, 9)}`,
+      url,
+      alt: fields.thumbnail.fields.title || 'Machine thumbnail'
+    };
   }
 
   // Handle specs
@@ -53,14 +52,14 @@ export function transformContentfulMachine(contentfulMachine: ContentfulMachine)
   if (fields.warranty) specs.warranty = fields.warranty;
   if (fields.temperature || fields.temperature === '') specs.temperature = fields.temperature;
 
-  // Transform to final format
+  // Transform to final format with proper typing
   return {
     id: sys.id,
     title: fields.title || 'Untitled Machine',
     slug: fields.slug || sys.id,
-    type: fields.type || 'Unknown',
+    type: (fields.type as 'vending' | 'locker') || 'vending',
     description: fields.description || '',
-    thumbnail: images.length > 0 ? images[0].url : '',
+    thumbnail: thumbnail,
     images: images,
     features: Array.isArray(fields.features) ? fields.features : [],
     specs: specs

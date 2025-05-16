@@ -5,7 +5,7 @@ import { CMSTestimonial } from '@/types/cms';
 /**
  * Transform a Contentful testimonial entry to our internal format
  */
-export function transformContentfulTestimonial(entry: Entry<any>): any {
+export function transformContentfulTestimonial(entry: Entry<any>): CMSTestimonial | null {
   if (!entry || !entry.fields) {
     console.warn('[transformContentfulTestimonial] Invalid testimonial entry:', entry);
     return null;
@@ -27,7 +27,7 @@ export function transformContentfulTestimonial(entry: Entry<any>): any {
     position: fields.position || fields.title || '',
     company: fields.company || '',
     rating: fields.rating || 5,
-    image: imageUrl
+    image_url: imageUrl
   };
 }
 
@@ -35,7 +35,7 @@ export function transformContentfulTestimonial(entry: Entry<any>): any {
  * Apply additional transformations to testimonials if needed
  * (e.g., sorting, filtering, etc.)
  */
-export function transformTestimonials(testimonials: any[]): any[] {
+export function transformTestimonials(testimonials: CMSTestimonial[]): CMSTestimonial[] {
   // Filter out any null entries
   const validTestimonials = testimonials.filter(t => t !== null);
   

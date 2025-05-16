@@ -8,10 +8,10 @@ import MachineDetailSpecifications from '@/components/machineDetail/MachineDetai
 import MachineDetailGallery from '@/components/machineDetail/MachineDetailGallery';
 import MachineDetailDeployments from '@/components/machineDetail/MachineDetailDeployments';
 import MachineDetailInquiry from '@/components/machineDetail/MachineDetailInquiry';
-import { useContentfulMachine, ContentfulMachine } from '@/hooks/useContentfulMachines';
+import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CMSImage } from '@/types/cms';
+import { CMSImage, CMSMachine } from '@/types/cms';
 
 const MachineDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -71,21 +71,17 @@ const MachineDetail = () => {
     );
   }
 
-  const { title, description, type, temperature, features, images } = machine as ContentfulMachine;
-  const machineImages: CMSImage[] = images && images.length > 0 ? 
-    images.map((img, index) => ({
-      id: `img-${index}`,
-      url: `https:${img.fields.file.url}`,
-      alt: img.fields.title || title
-    })) : [];
+  // Transform the image data if needed
+  const machineImages: CMSImage[] = machine.images || [];
+  const { title, description, type, features, specs } = machine as CMSMachine;
 
   return (
     <Layout>
       <MachineDetailHero 
         title={title || 'Unnamed Machine'} 
         description={description || 'No description available.'}
-        image={images && images.length > 0 ? `https:${images[0].fields.file.url}` : undefined}
-        imageAlt={images && images.length > 0 ? images[0].fields.title || title : title}
+        image={machineImages.length > 0 ? machineImages[0].url : undefined}
+        imageAlt={machineImages.length > 0 ? machineImages[0].alt : title}
       />
       
       <div className="container py-12 space-y-16">
@@ -94,8 +90,8 @@ const MachineDetail = () => {
             <h2 className="text-2xl font-semibold mb-6">Machine Type</h2>
             <p className="text-gray-700">{type.charAt(0).toUpperCase() + type.slice(1)}</p>
             
-            {temperature && (
-              <p className="text-gray-700 mt-2">Temperature: {temperature.charAt(0).toUpperCase() + temperature.slice(1)}</p>
+            {specs?.temperature && (
+              <p className="text-gray-700 mt-2">Temperature: {specs.temperature.charAt(0).toUpperCase() + specs.temperature.slice(1)}</p>
             )}
           </div>
         )}
@@ -107,7 +103,7 @@ const MachineDetail = () => {
         )}
         
         <MachineDetailSpecifications 
-          specifications={machine.specs || {}} 
+          specifications={specs || {}} 
         />
         
         {machineImages && machineImages.length > 1 && (
