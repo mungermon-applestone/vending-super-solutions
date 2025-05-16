@@ -1,61 +1,58 @@
 
-import { ContentfulTestimonial } from '@/types/contentful/testimonial';
-import { CMSTestimonial } from '@/types/cms';
+import { ContentfulEntry } from '@/types/cms';
 
-export interface TransformedTestimonial {
-  id: string;
-  quote: string;
-  author: string;
-  position?: string;
-  company?: string;
-  rating?: number;
-  imageUrl?: string;
+export interface ContentfulTestimonial {
+  sys: {
+    id: string;
+  };
+  fields: {
+    image?: any;
+    quote?: string;
+    author?: string;
+    position?: string;
+    company?: string;
+    rating?: number;
+  };
 }
 
-export function transformContentfulTestimonial(testimonial: ContentfulTestimonial): TransformedTestimonial {
-  if (!testimonial || !testimonial.sys || !testimonial.fields) {
-    console.warn('Invalid testimonial data received', testimonial);
-    return {
-      id: 'invalid-testimonial',
-      quote: 'Missing testimonial data',
-      author: 'Unknown',
-      rating: 0
-    };
-  }
+export interface ContentfulTestimonialSection {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title: string;
+    subtitle: string;
+    testimonials: ContentfulTestimonial[];
+    pageKey: string;
+  };
+}
 
-  const fields = testimonial.fields || {};
-  const image = fields.image?.fields?.file?.url;
+export function transformContentfulTestimonial(entry: ContentfulEntry) {
+  const fields = entry.fields || {};
   
   return {
-    id: testimonial.sys?.id || 'unknown-id',
-    quote: fields.quote || 'No quote provided',
-    author: fields.author || 'Anonymous',
-    position: fields.position,
-    company: fields.company,
-    rating: fields.rating || 5,
-    imageUrl: image ? `https:${image}` : undefined,
+    id: entry.sys?.id || 'unknown',
+    image: fields.image || null,
+    quote: fields.quote || '',
+    author: fields.author || '',
+    position: fields.position || '',
+    company: fields.company || '',
+    rating: fields.rating || 5
   };
 }
 
-// Convert TransformedTestimonial to CMSTestimonial format
-export function transformToCMSTestimonial(testimonial: TransformedTestimonial): CMSTestimonial {
-  return {
-    id: testimonial.id,
-    name: testimonial.author,
-    title: testimonial.position || '',
-    company: testimonial.company || '',
-    testimonial: testimonial.quote,
-    image_url: testimonial.imageUrl,
-    rating: testimonial.rating || 5
-  };
-}
-
-// Helper function to transform an array of testimonials
-export function transformTestimonials(testimonials: TransformedTestimonial[]): CMSTestimonial[] {
+export function transformTestimonials(testimonials: any[]) {
   if (!testimonials || !Array.isArray(testimonials)) {
-    console.warn('Invalid testimonials array', testimonials);
     return [];
   }
   
-  return testimonials.map(transformToCMSTestimonial);
+  return testimonials.map(testimonial => ({
+    id: testimonial.id || 'unknown',
+    quote: testimonial.quote || '',
+    author: testimonial.author || '',
+    position: testimonial.position || '',
+    company: testimonial.company || '',
+    rating: testimonial.rating || 5,
+    image: testimonial.image || null
+  }));
 }

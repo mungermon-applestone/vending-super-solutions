@@ -1,51 +1,47 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { fetchContentfulEntries } from "@/services/contentful/client";
-import { transformContentfulTestimonial, transformTestimonials } from "./transformers/testimonialTransformer";
-import { ContentfulTestimonial, ContentfulTestimonialSection } from "@/types/contentful/testimonial";
+import { useQuery } from '@tanstack/react-query';
+import { 
+  getContentfulClient
+} from '@/services/contentful/client';
+import { ContentfulTestimonialSection } from '@/types/contentful/testimonial';
 
-export function useTestimonialSection(sectionId: string) {
+/**
+ * Hook to fetch testimonials section content from Contentful
+ */
+export function useTestimonialSection(pageKey: string = 'homepage') {
   return useQuery({
-    queryKey: ["contentful", "testimonial-section", sectionId],
-    queryFn: async () => {
+    queryKey: ['contentful', 'testimonial-section', pageKey],
+    queryFn: async (): Promise<ContentfulTestimonialSection | null> => {
       try {
-        const response = await fetchContentfulEntries("testimonialSection", {
-          "sys.id": sectionId,
-          include: 2,
+        const client = await getContentfulClient();
+        
+        // Query for testimonialSection with the specified pageKey
+        const response = await client.getEntries({
+          content_type: 'testimonialSection',
+          'fields.pageKey': pageKey,
+          include: 2, // Include linked entries (testimonials)
         });
-
+        
         if (!response.items || response.items.length === 0) {
-          console.warn(`No testimonial section found with ID: ${sectionId}`);
+          console.warn(`[useTestimonialSection] No testimonial section found for pageKey: ${pageKey}`);
           return null;
         }
-
+        
         const section = response.items[0];
-        const sectionFields = section.fields || {};
         
-        // Safely check if testimonials exist and is an array before mapping
-        const testimonialsArray = Array.isArray(sectionFields.testimonials) 
-          ? sectionFields.testimonials 
-          : [];
-        
-        const testimonials = testimonialsArray.map(
-          transformContentfulTestimonial
-        ) || [];
-
-        // Return in ContentfulTestimonialSection format for compatibility
+        // Cast to ContentfulTestimonialSection
         return {
-          sys: { id: section.sys.id },
+          ...section,
           fields: {
-            title: sectionFields.title || "What Our Clients Say",
-            subtitle: sectionFields.subtitle || "",
-            testimonials: testimonialsArray as ContentfulTestimonial[],
-            pageKey: sectionFields.pageKey || ""
-          }
+            title: section.fields.title,
+            subtitle: section.fields.subtitle,
+            testimonials: section.fields.testimonials || [],
+            pageKey: section.fields.pageKey
+          },
+          metadata: section.metadata || { tags: [] }
         } as ContentfulTestimonialSection;
       } catch (error) {
-        console.error(
-          `Error fetching testimonial section with ID ${sectionId}:`,
-          error
-        );
+        console.error('[useTestimonialSection] Error fetching testimonial section:', error);
         return null;
       }
     },

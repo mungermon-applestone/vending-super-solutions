@@ -6,7 +6,9 @@ import {
   getContentfulClient, 
   contentfulClient as realContentfulClient,
   isContentfulConfigured as realIsContentfulConfigured,
-  testContentfulConnection as realTestContentfulConnection
+  testContentfulConnection as realTestContentfulConnection,
+  fetchContentfulEntries,
+  fetchContentfulEntry
 } from '@/services/contentful/client';
 
 // Re-export the lazy-loaded client to ensure consistency
@@ -19,3 +21,6 @@ export const isContentfulConfigured = realIsContentfulConfigured;
 export function testContentfulConnection() {
   return realTestContentfulConnection();
 }
+
+// Re-export helper functions
+export { fetchContentfulEntries, fetchContentfulEntry };

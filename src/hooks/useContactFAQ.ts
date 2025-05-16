@@ -10,7 +10,7 @@ export interface FAQ {
 }
 
 export function useContactFAQ() {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['contentful', 'contact', 'faq'],
     queryFn: async (): Promise<FAQ[]> => {
       try {
@@ -49,4 +49,10 @@ export function useContactFAQ() {
       }
     },
   });
+
+  // Add processedData property for backward compatibility
+  const result = query as any;
+  result.processedData = result.data || [];
+  
+  return result;
 }

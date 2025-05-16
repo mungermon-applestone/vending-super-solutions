@@ -6,7 +6,9 @@ import {
   refreshContentfulClient, 
   testContentfulConnection,
   isContentfulConfigured,
-  validateContentfulClient
+  validateContentfulClient,
+  fetchContentfulEntries,
+  fetchContentfulEntry
 } from '@/services/contentful/client';
 
 // Re-export all functions from the main Contentful client
@@ -15,7 +17,9 @@ export {
   refreshContentfulClient,
   testContentfulConnection,
   isContentfulConfigured,
-  validateContentfulClient
+  validateContentfulClient,
+  fetchContentfulEntries,
+  fetchContentfulEntry
 };
 
 /**

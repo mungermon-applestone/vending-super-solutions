@@ -142,6 +142,21 @@
     }
   }
   
+  // Setup refresh function
+  window._refreshContentfulAfterConfig = async function() {
+    try {
+      console.log('[env-config] Refreshing Contentful client after config update');
+      // This will be replaced by the actual code at runtime
+      // The refreshContentfulClient function will be imported and called
+      const event = new CustomEvent('refresh-contentful-client');
+      window.dispatchEvent(event);
+      return Promise.resolve();
+    } catch (e) {
+      console.error('[env-config] Error refreshing Contentful client:', e);
+      return Promise.reject(e);
+    }
+  };
+  
   // Apply credentials and trigger event
   if (applyCredentials()) {
     console.log('[env-config] Credentials applied successfully');

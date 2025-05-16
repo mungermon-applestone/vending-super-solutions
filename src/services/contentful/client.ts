@@ -1,15 +1,64 @@
-
 import { createClient, ContentfulClientApi } from "contentful";
 import { toast } from "sonner";
 
 // Store the client instance for reuse
 let contentfulClientInstance: ContentfulClientApi | null = null;
+let envLoadedPromise: Promise<void> | null = null;
+
+/**
+ * Waits for environment variables to be fully loaded before proceeding
+ * This ensures we don't try to create a client with missing credentials
+ */
+function waitForEnvironmentVariables(): Promise<void> {
+  // If we already have the promise cached, return it
+  if (envLoadedPromise) {
+    return envLoadedPromise;
+  }
+
+  // Create a new promise that resolves when environment variables are loaded
+  envLoadedPromise = new Promise((resolve) => {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
+      // In SSR/Node environment, resolve immediately
+      resolve();
+      return;
+    }
+
+    // Check if the event has already been fired (window.env exists and has values)
+    if (window.env && 
+        window.env.VITE_CONTENTFUL_SPACE_ID && 
+        window.env.VITE_CONTENTFUL_DELIVERY_TOKEN) {
+      console.log('[waitForEnvironmentVariables] Environment variables already loaded');
+      resolve();
+      return;
+    }
+
+    // Otherwise, wait for the env-config-loaded event
+    console.log('[waitForEnvironmentVariables] Waiting for env-config-loaded event');
+    window.addEventListener('env-config-loaded', () => {
+      console.log('[waitForEnvironmentVariables] env-config-loaded event received');
+      resolve();
+    }, { once: true });
+
+    // Set a timeout as a fallback in case the event never fires
+    setTimeout(() => {
+      console.log('[waitForEnvironmentVariables] Timeout reached, proceeding anyway');
+      resolve();
+    }, 2000); // 2 second timeout
+  });
+
+  return envLoadedPromise;
+}
 
 /**
  * Get or create a Contentful client instance using environment variables
  * This uses lazy initialization to only create the client when needed
+ * and now waits for environment variables to be loaded
  */
 export async function getContentfulClient(): Promise<ContentfulClientApi> {
+  // Wait for environment variables to be fully loaded
+  await waitForEnvironmentVariables();
+  
   if (contentfulClientInstance) {
     return contentfulClientInstance;
   }
@@ -25,7 +74,12 @@ export async function getContentfulClient(): Promise<ContentfulClientApi> {
   }
 
   try {
-    console.log('[getContentfulClient] Creating new Contentful client instance');
+    console.log('[getContentfulClient] Creating new Contentful client instance with:', { 
+      spaceId, 
+      hasAccessToken: !!accessToken, 
+      environment 
+    });
+    
     contentfulClientInstance = createClient({
       space: spaceId,
       accessToken,
@@ -193,6 +247,27 @@ export async function validateContentfulClient(): Promise<boolean> {
     console.error('[validateContentfulClient] Client validation failed:', error);
     return false;
   }
+}
+
+/**
+ * Helper function to fetch entries from Contentful
+ * This is added to support existing code that uses fetchContentfulEntries
+ */
+export async function fetchContentfulEntries(contentType: string, query?: any) {
+  const client = await getContentfulClient();
+  return client.getEntries({
+    content_type: contentType,
+    ...query
+  });
+}
+
+/**
+ * Helper function to fetch a single entry from Contentful
+ * This is added to support existing code that uses fetchContentfulEntry
+ */
+export async function fetchContentfulEntry(id: string) {
+  const client = await getContentfulClient();
+  return client.getEntry(id);
 }
 
 // Export contentfulClient for backward compatibility

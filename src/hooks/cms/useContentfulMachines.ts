@@ -1,155 +1,67 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchContentfulEntries, fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
-import { CMSMachine } from '@/types/cms';
-import { ContentfulEntry } from '@/types/contentful/machine';
-import { transformContentfulEntry } from '@/utils/cms/transformers/machineTransformer';
-import { fallbackMachineData } from '@/data/fallbacks/machineFallbacks';
-import { toast } from 'sonner';
+import { getContentfulClient } from '@/services/contentful/client';
 
 /**
- * Hook for fetching Contentful machines
- * 
- * !!!!! DO NOT REMOVE OR FUNDAMENTALLY ALTER !!!!
- * Core requirements:
- * - Fetch all machines
- * - Provide fallback in preview/error scenarios
- * - Consistent error logging
+ * Hook to fetch machines from Contentful
  */
 export function useContentfulMachines() {
   return useQuery({
     queryKey: ['contentful', 'machines'],
     queryFn: async () => {
-      console.log('[useContentfulMachines] Fetching all machines');
       try {
-        const entriesResponse = await fetchContentfulEntries('machine', {});
-        const entries = entriesResponse.items || [];
-        console.log('[useContentfulMachines] Fetched entries:', entries);
+        const client = await getContentfulClient();
         
-        if (!entries || entries.length === 0) {
-          console.log('[useContentfulMachines] No machines found in Contentful');
-          
-          if (window.location.hostname.includes('lovable')) {
-            console.log('[useContentfulMachines] Using fallback data in preview');
-            toast.info('Using fallback machine data in preview environment');
-            return Object.values(fallbackMachineData);
-          }
-          
+        const response = await client.getEntries({
+          content_type: 'machine',
+          order: ['fields.name'],
+          include: 2,
+        });
+        
+        if (!response.items) {
+          console.warn('[useContentfulMachines] No machines found');
           return [];
         }
         
-        const machines = entries.map(entry => transformContentfulEntry(entry as ContentfulEntry));
-        console.log('[useContentfulMachines] Transformed machines:', machines);
-        return machines;
-        
+        return response.items;
       } catch (error) {
-        console.error('[CRITICAL] Machine fetch failed', {
-          error,
-          timestamp: new Date().toISOString()
-        });
-        
-        if (window.location.hostname.includes('lovable')) {
-          console.log('[useContentfulMachines] Using fallback data after error in preview');
-          toast.info('Using fallback machine data in preview environment');
-          return Object.values(fallbackMachineData);
-        }
+        console.error('[useContentfulMachines] Error fetching machines:', error);
         throw error;
       }
-    }
+    },
   });
 }
 
 /**
- * Hook for fetching a single Contentful machine
- * 
- * !!!!! DO NOT REMOVE OR FUNDAMENTALLY ALTER !!!!
- * Core requirements:
- * - Fetch machine by ID or slug
- * - Handle special cases (e.g., divi-wp)
- * - Provide fallback in preview/error scenarios
+ * Hook to fetch a single machine by slug from Contentful
  */
-export function useContentfulMachine(idOrSlug: string | undefined) {
+export function useContentfulMachine(slug: string) {
   return useQuery({
-    queryKey: ['contentful', 'machine', idOrSlug],
+    queryKey: ['contentful', 'machine', slug],
     queryFn: async () => {
-      if (!idOrSlug) {
-        console.log('[useContentfulMachine] No ID or slug provided');
-        return null;
-      }
-      
-      console.log('[useContentfulMachine] Fetching machine with idOrSlug:', idOrSlug);
-      
       try {
-        // Special handling for divi-wp
-        if (idOrSlug === 'divi-wp') {
-          console.log('[useContentfulMachine] Special case: directly fetching divi-wp with ID: 1omUbnEhB6OeBFpwPFj1Ww');
-          
-          try {
-            const entryResponse = await fetchContentfulEntry('machine', '1omUbnEhB6OeBFpwPFj1Ww');
-            if (entryResponse) {
-              console.log('[useContentfulMachine] Successfully fetched divi-wp entry by ID:', entryResponse);
-              return transformContentfulEntry(entryResponse as unknown as ContentfulEntry);
-            }
-          } catch (diviError) {
-            console.error('[useContentfulMachine] Error fetching divi-wp by ID:', diviError);
-          }
-          
-          if (window.location.hostname.includes('lovable')) {
-            console.log('[useContentfulMachine] Using fallback data for divi-wp in preview');
-            toast.info('Using fallback data for DIVI-WP in preview environment');
-            return fallbackMachineData['divi-wp'];
-          }
+        if (!slug) {
+          throw new Error('Machine slug is required');
         }
         
-        // Try fetching by ID first if it looks like an ID
-        if (idOrSlug.length > 10) {
-          try {
-            console.log('[useContentfulMachine] Trying direct ID fetch:', idOrSlug);
-            const entryResponse = await fetchContentfulEntry('machine', idOrSlug);
-            if (entryResponse) {
-              console.log('[useContentfulMachine] Successfully fetched by ID:', entryResponse);
-              return transformContentfulEntry(entryResponse as unknown as ContentfulEntry);
-            }
-          } catch (idError) {
-            console.log('[useContentfulMachine] Could not fetch by ID:', idError);
-          }
-        }
+        const client = await getContentfulClient();
         
-        // Then try by slug
-        console.log('[useContentfulMachine] Fetching by slug field:', idOrSlug);
-        const entriesResponse = await fetchContentfulEntries('machine', {
-          'fields.slug': idOrSlug
+        const response = await client.getEntries({
+          content_type: 'machine',
+          'fields.slug': slug,
+          include: 3,
         });
         
-        const entries = entriesResponse.items || [];
-        if (entries.length === 0) {
-          console.warn('[useContentfulMachine] No machine found with slug:', idOrSlug);
-          
-          if (window.location.hostname.includes('lovable') && fallbackMachineData[idOrSlug]) {
-            console.log('[useContentfulMachine] Using fallback data for:', idOrSlug);
-            return fallbackMachineData[idOrSlug];
-          }
-          
-          return null;
+        if (!response.items || response.items.length === 0) {
+          throw new Error(`Machine with slug '${slug}' not found`);
         }
         
-        console.log('[useContentfulMachine] Found machine by slug:', entries[0]);
-        return transformContentfulEntry(entries[0] as unknown as ContentfulEntry);
-        
+        return response.items[0];
       } catch (error) {
-        console.error(`[useContentfulMachine] Error:`, error);
-        
-        if (window.location.hostname.includes('lovable') && fallbackMachineData[idOrSlug]) {
-          console.log('[useContentfulMachine] Using fallback data for:', idOrSlug);
-          return fallbackMachineData[idOrSlug];
-        }
-        
-        toast.error(`Failed to load machine data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        console.error(`[useContentfulMachine] Error fetching machine with slug '${slug}':`, error);
         throw error;
       }
     },
-    enabled: !!idOrSlug
+    enabled: !!slug,
   });
 }
-
-export default { useContentfulMachines, useContentfulMachine };
