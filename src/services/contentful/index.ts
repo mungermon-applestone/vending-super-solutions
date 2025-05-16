@@ -3,11 +3,14 @@
  * This file serves as a central export point for all Contentful functionality
  */
 
-// Export all client functions
+// Export client functions
 export * from './client';
 
-// Re-export utils for backward compatibility
-export * from './utils';
+// Export environment functions
+export * from './environment';
 
-// Export testing functions
-export * from '../utils/contentfulConnectionTest';
+// Export connection functions
+export * from './connection';
+
+// Export utility functions
+export * from './utils';

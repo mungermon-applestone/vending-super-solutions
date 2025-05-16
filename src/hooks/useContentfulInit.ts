@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { testContentfulConnection, isContentfulConfigured } from '@/services/contentful/client';
+import { testContentfulConnection, isContentfulConfigured } from '@/services/contentful/index';
 
 /**
  * Hook to test and initialize Contentful connection

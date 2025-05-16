@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { testContentfulConnection, refreshContentfulClient, isContentfulConfigured, waitForEnvironmentVariables } from '@/services/contentful/client';
+import { testContentfulConnection, refreshContentfulClient, isContentfulConfigured, waitForEnvironmentVariables } from '@/services/contentful/index';
 import { forceContentfulProvider } from '@/services/cms/cmsInit';
 import { isPreviewEnvironment } from '@/config/cms';
 import { Loader2 } from 'lucide-react';

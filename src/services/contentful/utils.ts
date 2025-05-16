@@ -1,25 +1,38 @@
 
-// This file provides utility functions for working with Contentful
+/**
+ * This file provides utility functions for working with Contentful
+ */
 
-import { 
-  waitForEnvironmentVariables,
-  getContentfulClient, 
-  refreshContentfulClient, 
-  testContentfulConnection,
-  isContentfulConfigured,
-  validateContentfulClient,
-  fetchContentfulEntries,
-  fetchContentfulEntry
-} from './client';
+import { getContentfulClient } from './client';
+import { waitForEnvironmentVariables, isContentfulConfigured } from './environment';
+import { testContentfulConnection, validateContentfulClient } from './connection';
+import { refreshContentfulClient } from './client';
 
-// Export utility functions
+/**
+ * Helper function to fetch entries from Contentful
+ */
+export async function fetchContentfulEntries(contentType: string, query?: any) {
+  const client = await getContentfulClient();
+  return client.getEntries({
+    content_type: contentType,
+    ...query
+  });
+}
+
+/**
+ * Helper function to fetch a single entry from Contentful
+ */
+export async function fetchContentfulEntry(id: string) {
+  const client = await getContentfulClient();
+  return client.getEntry(id);
+}
+
+// Export all necessary functions for external use
 export {
   waitForEnvironmentVariables,
   getContentfulClient,
   refreshContentfulClient,
   testContentfulConnection,
   isContentfulConfigured,
-  validateContentfulClient,
-  fetchContentfulEntries,
-  fetchContentfulEntry
+  validateContentfulClient
 };

@@ -20,7 +20,7 @@ export function transformContentfulTestimonial(entry: Entry<any>): any {
     position: fields.position || fields.title || '',
     company: fields.company || '',
     rating: fields.rating || 5,
-    image: fields.image ? `https:${fields.image.fields.file.url}` : null
+    image: fields.image?.fields?.file?.url ? `https:${fields.image.fields.file.url}` : null
   };
 }
 
