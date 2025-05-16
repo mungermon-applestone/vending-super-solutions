@@ -1,5 +1,6 @@
 
 import { ContentfulTestimonial } from '@/types/contentful/testimonial';
+import { CMSTestimonial } from '@/types/cms';
 
 export interface TransformedTestimonial {
   id: string;
@@ -24,4 +25,22 @@ export function transformContentfulTestimonial(testimonial: ContentfulTestimonia
     rating: fields.rating || 5,
     imageUrl: image ? `https:${image}` : undefined,
   };
+}
+
+// Convert TransformedTestimonial to CMSTestimonial format
+export function transformToCMSTestimonial(testimonial: TransformedTestimonial): CMSTestimonial {
+  return {
+    id: testimonial.id,
+    name: testimonial.author,
+    title: testimonial.position || '',
+    company: testimonial.company || '',
+    testimonial: testimonial.quote,
+    image_url: testimonial.imageUrl,
+    rating: testimonial.rating || 5
+  };
+}
+
+// Helper function to transform an array of testimonials
+export function transformTestimonials(testimonials: TransformedTestimonial[]): CMSTestimonial[] {
+  return testimonials.map(transformToCMSTestimonial);
 }

@@ -1,7 +1,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { fetchContentfulEntries } from "@/services/contentful/client";
-import { transformContentfulTestimonial } from "./transformers/testimonialTransformer";
+import { transformContentfulTestimonial, transformTestimonials } from "./transformers/testimonialTransformer";
+import { ContentfulTestimonial, ContentfulTestimonialSection } from "@/types/contentful/testimonial";
 
 export function useTestimonialSection(sectionId: string) {
   return useQuery({
@@ -13,22 +14,27 @@ export function useTestimonialSection(sectionId: string) {
           include: 2,
         });
 
-        if (response.items.length === 0) {
+        if (!response.items || response.items.length === 0) {
           console.warn(`No testimonial section found with ID: ${sectionId}`);
           return null;
         }
 
         const section = response.items[0];
-        const testimonials = section.fields?.testimonials?.map(
+        const sectionFields = section.fields || {};
+        const testimonials = sectionFields.testimonials?.map?.(
           transformContentfulTestimonial
         ) || [];
 
+        // Return in ContentfulTestimonialSection format for compatibility
         return {
-          id: section.sys.id,
-          title: section.fields?.title || "What Our Clients Say",
-          subtitle: section.fields?.subtitle || "",
-          testimonials,
-        };
+          sys: { id: section.sys.id },
+          fields: {
+            title: sectionFields.title || "What Our Clients Say",
+            subtitle: sectionFields.subtitle || "",
+            testimonials: (sectionFields.testimonials || []) as ContentfulTestimonial[],
+            pageKey: sectionFields.pageKey
+          }
+        } as ContentfulTestimonialSection;
       } catch (error) {
         console.error(
           `Error fetching testimonial section with ID ${sectionId}:`,

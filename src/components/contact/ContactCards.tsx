@@ -55,7 +55,7 @@ const ContactCards: React.FC<ContactCardsProps> = ({ data }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <EmailLink email={email} className="text-gray-600 hover:text-blue-600 transition-colors" />
+          <EmailLink emailAddress={email} className="text-gray-600 hover:text-blue-600 transition-colors" />
         </CardContent>
       </Card>
       

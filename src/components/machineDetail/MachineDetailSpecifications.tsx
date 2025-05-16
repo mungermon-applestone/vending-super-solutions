@@ -1,85 +1,37 @@
 
 import React from 'react';
-import { formatSpecLabel } from '@/components/machines/specs/SpecificationItem';
-import { 
-  Ruler, 
-  Scale, 
-  Zap, 
-  ShoppingBasket, 
-  CreditCard, 
-  Wifi, 
-  Building, 
-  ShieldCheck,
-  ThermometerSnowflake
-} from 'lucide-react';
 
-interface MachineDetailSpecificationsProps {
-  specs: Record<string, string>;
+export interface MachineDetailSpecificationsProps {
+  specifications: Record<string, string>;
 }
 
-const MachineDetailSpecifications: React.FC<MachineDetailSpecificationsProps> = ({ specs }) => {
-  const getIcon = (key: string) => {
-    const iconProps = { className: "h-5 w-5 mr-2 text-blue-600" };
-    switch (key.toLowerCase()) {
-      case 'dimensions':
-        return <Ruler {...iconProps} />;
-      case 'weight':
-        return <Scale {...iconProps} />;
-      case 'powerrequirements':
-        return <Zap {...iconProps} />;
-      case 'capacity':
-        return <ShoppingBasket {...iconProps} />;
-      case 'paymentoptions':
-        return <CreditCard {...iconProps} />;
-      case 'connectivity':
-        return <Wifi {...iconProps} />;
-      case 'manufacturer':
-        return <Building {...iconProps} />;
-      case 'warranty':
-        return <ShieldCheck {...iconProps} />;
-      case 'temperature':
-        return <ThermometerSnowflake {...iconProps} />;
-      default:
-        return null;
-    }
-  };
-
-  if (!specs || Object.keys(specs).length === 0) {
-    return null;
-  }
-
-  // Filter out empty specs
-  const filteredSpecs = Object.entries(specs).filter(([_, value]) => !!value);
-
-  if (filteredSpecs.length === 0) {
+const MachineDetailSpecifications: React.FC<MachineDetailSpecificationsProps> = ({ specifications }) => {
+  const specs = specifications || {};
+  const specEntries = Object.entries(specs);
+  
+  if (specEntries.length === 0) {
     return null;
   }
 
   return (
-    <section className="py-16 bg-white" id="specifications">
-      <div className="container mx-auto">
-        <h2 className="text-3xl font-bold mb-10 text-center text-gray-900">
-          Machine Specifications
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredSpecs.map(([key, value]) => {
-            if (!value) return null;
-            
-            const normalizedKey = key.replace(/[_\s]/g, '').toLowerCase();
-            
-            return (
-              <div key={key} className="bg-gray-50 p-6 rounded-lg border border-gray-100">
-                <h3 className="flex items-center text-lg font-medium mb-2 text-gray-900">
-                  {getIcon(normalizedKey)}
-                  {formatSpecLabel(key)}
-                </h3>
-                <p className="text-gray-700">{value}</p>
-              </div>
-            );
-          })}
-        </div>
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Specifications</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {specEntries.map(([key, value]) => (
+          <div key={key} className="flex items-start">
+            <div className="mr-3 text-blue-500">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div>
+              <span className="block text-sm font-medium text-gray-500">{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
+              <span className="text-gray-800">{value}</span>
+            </div>
+          </div>
+        ))}
       </div>
-    </section>
+    </div>
   );
 };
 

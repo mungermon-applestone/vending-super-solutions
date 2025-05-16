@@ -11,6 +11,7 @@ import MachineDetailInquiry from '@/components/machineDetail/MachineDetailInquir
 import { useContentfulMachine, ContentfulMachine } from '@/hooks/useContentfulMachines';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { CMSImage } from '@/types/cms';
 
 const MachineDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -71,6 +72,12 @@ const MachineDetail = () => {
   }
 
   const { title, description, type, temperature, features, images } = machine as ContentfulMachine;
+  const machineImages: CMSImage[] = images && images.length > 0 ? 
+    images.map((img, index) => ({
+      id: `img-${index}`,
+      url: `https:${img.fields.file.url}`,
+      alt: img.fields.title || title
+    })) : [];
 
   return (
     <Layout>
@@ -103,12 +110,9 @@ const MachineDetail = () => {
           specifications={machine.specs || {}} 
         />
         
-        {images && images.length > 1 && (
+        {machineImages && machineImages.length > 1 && (
           <MachineDetailGallery 
-            images={images.map(image => ({
-              url: `https:${image.fields.file.url}`,
-              alt: image.fields.title || title,
-            }))} 
+            images={machineImages}
           />
         )}
         

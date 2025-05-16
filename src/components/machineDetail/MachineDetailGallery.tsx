@@ -1,36 +1,31 @@
 
 import React from 'react';
-import { CMSMachine } from '@/types/cms';
+import { CMSImage } from '@/types/cms';
 
-interface MachineDetailGalleryProps {
-  title: string;
-  images: CMSMachine['images'];
-  maxImages?: number;
+export interface MachineDetailGalleryProps {
+  images: CMSImage[];
 }
 
-const MachineDetailGallery: React.FC<MachineDetailGalleryProps> = ({ 
-  title, 
-  images, 
-  maxImages = 3 
-}) => {
-  if (!images || images.length <= 1) return null;
-  
+const MachineDetailGallery: React.FC<MachineDetailGalleryProps> = ({ images }) => {
+  if (!images || images.length === 0) {
+    return null;
+  }
+
   return (
-    <section className="py-12 bg-vending-gray">
-      <div className="container-wide">
-        <h2 className="text-2xl font-bold mb-8 text-center text-vending-blue-dark">Additional Views</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {images.slice(0, maxImages).map((image, index) => (
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Gallery</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {images.map((image) => (
+          <div key={image.id} className="rounded-lg overflow-hidden shadow-md">
             <img 
-              key={index}
-              src={image.url}
-              alt={image.alt || `${title} - View ${index + 1}`}
-              className="w-full h-64 object-cover rounded-lg shadow-md"
+              src={image.url} 
+              alt={image.alt || 'Machine image'} 
+              className="w-full h-48 object-cover"
             />
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
-    </section>
+    </div>
   );
 };
 

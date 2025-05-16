@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { ContentfulTestimonialSection, ContentfulTestimonial } from '@/types/contentful/testimonial';
+import { ContentfulTestimonialSection } from '@/types/contentful/testimonial';
 
 interface TestimonialsSectionProps {
   data: ContentfulTestimonialSection;
@@ -9,21 +9,22 @@ interface TestimonialsSectionProps {
 
 export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const testimonials = data.fields?.testimonials?.filter(t => t.fields?.visible !== false) || [];
+  const fields = data?.fields || {};
+  const testimonialsData = fields?.testimonials?.filter(t => t.fields?.visible !== false) || [];
 
-  if (!testimonials.length) {
+  if (!testimonialsData.length) {
     return null;
   }
 
   const nextTestimonial = () => {
-    setActiveIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
+    setActiveIndex((prevIndex) => (prevIndex + 1) % testimonialsData.length);
   };
 
   const prevTestimonial = () => {
-    setActiveIndex((prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length);
+    setActiveIndex((prevIndex) => (prevIndex - 1 + testimonialsData.length) % testimonialsData.length);
   };
 
-  const currentTestimonial = testimonials[activeIndex]?.fields;
+  const currentTestimonial = testimonialsData[activeIndex]?.fields;
   if (!currentTestimonial) return null;
 
   return (
@@ -31,10 +32,10 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
       <div className="container-wide">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-            {data.fields?.title || "Trusted by Industry Leaders"}
+            {fields?.title || "Trusted by Industry Leaders"}
           </h2>
           <p className="subtitle mx-auto text-gray-600">
-            {data.fields?.subtitle || "Hear what our clients have to say about our solutions"}
+            {fields?.subtitle || "Hear what our clients have to say about our solutions"}
           </p>
         </div>
 
@@ -81,7 +82,7 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
             </div>
 
             {/* Navigation arrows */}
-            {testimonials.length > 1 && (
+            {testimonialsData.length > 1 && (
               <>
                 <button 
                   onClick={prevTestimonial} 
@@ -100,7 +101,7 @@ export const TestimonialsSection = ({ data }: TestimonialsSectionProps) => {
 
                 {/* Pagination dots */}
                 <div className="flex justify-center mt-6 space-x-2">
-                  {testimonials.map((_, index) => (
+                  {testimonialsData.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setActiveIndex(index)}

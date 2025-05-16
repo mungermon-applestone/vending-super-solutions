@@ -22,7 +22,8 @@ export function useContentfulMachines() {
     queryFn: async () => {
       console.log('[useContentfulMachines] Fetching all machines');
       try {
-        const entries = await fetchContentfulEntries<ContentfulEntry>('machine');
+        const entriesResponse = await fetchContentfulEntries('machine', {});
+        const entries = entriesResponse.items || [];
         console.log('[useContentfulMachines] Fetched entries:', entries);
         
         if (!entries || entries.length === 0) {
@@ -37,7 +38,7 @@ export function useContentfulMachines() {
           return [];
         }
         
-        const machines = entries.map(transformContentfulEntry);
+        const machines = entries.map(entry => transformContentfulEntry(entry as ContentfulEntry));
         console.log('[useContentfulMachines] Transformed machines:', machines);
         return machines;
         
@@ -84,10 +85,10 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
           console.log('[useContentfulMachine] Special case: directly fetching divi-wp with ID: 1omUbnEhB6OeBFpwPFj1Ww');
           
           try {
-            const entry = await fetchContentfulEntry<ContentfulEntry>('1omUbnEhB6OeBFpwPFj1Ww');
-            if (entry) {
-              console.log('[useContentfulMachine] Successfully fetched divi-wp entry by ID:', entry);
-              return transformContentfulEntry(entry);
+            const entryResponse = await fetchContentfulEntry('machine', '1omUbnEhB6OeBFpwPFj1Ww');
+            if (entryResponse) {
+              console.log('[useContentfulMachine] Successfully fetched divi-wp entry by ID:', entryResponse);
+              return transformContentfulEntry(entryResponse as unknown as ContentfulEntry);
             }
           } catch (diviError) {
             console.error('[useContentfulMachine] Error fetching divi-wp by ID:', diviError);
@@ -104,10 +105,10 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         if (idOrSlug.length > 10) {
           try {
             console.log('[useContentfulMachine] Trying direct ID fetch:', idOrSlug);
-            const entry = await fetchContentfulEntry<ContentfulEntry>(idOrSlug);
-            if (entry) {
-              console.log('[useContentfulMachine] Successfully fetched by ID:', entry);
-              return transformContentfulEntry(entry);
+            const entryResponse = await fetchContentfulEntry('machine', idOrSlug);
+            if (entryResponse) {
+              console.log('[useContentfulMachine] Successfully fetched by ID:', entryResponse);
+              return transformContentfulEntry(entryResponse as unknown as ContentfulEntry);
             }
           } catch (idError) {
             console.log('[useContentfulMachine] Could not fetch by ID:', idError);
@@ -116,10 +117,11 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         
         // Then try by slug
         console.log('[useContentfulMachine] Fetching by slug field:', idOrSlug);
-        const entries = await fetchContentfulEntries<ContentfulEntry>('machine', {
+        const entriesResponse = await fetchContentfulEntries('machine', {
           'fields.slug': idOrSlug
         });
         
+        const entries = entriesResponse.items || [];
         if (entries.length === 0) {
           console.warn('[useContentfulMachine] No machine found with slug:', idOrSlug);
           
@@ -132,7 +134,7 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
         }
         
         console.log('[useContentfulMachine] Found machine by slug:', entries[0]);
-        return transformContentfulEntry(entries[0]);
+        return transformContentfulEntry(entries[0] as unknown as ContentfulEntry);
         
       } catch (error) {
         console.error(`[useContentfulMachine] Error:`, error);
@@ -151,4 +153,3 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
 }
 
 export default { useContentfulMachines, useContentfulMachine };
-
