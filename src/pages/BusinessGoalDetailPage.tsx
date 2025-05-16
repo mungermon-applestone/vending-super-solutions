@@ -1,302 +1,96 @@
-
-import React, { useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Star, Check, Shield, Server, Settings, Bell, Battery, ClipboardCheck, RefreshCcw, TrendingUp, PieChart, Map, UserCheck } from 'lucide-react';
-import Layout from '@/components/layout/Layout';
-import { useContentfulBusinessGoal } from '@/hooks/cms/useContentfulBusinessGoals';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Check as CheckIcon } from 'lucide-react';
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { useBusinessGoal } from '@/hooks/cms/useBusinessGoal';
+import { PageHero, ContentfulFallbackMessage } from '@/components/common';
+import { Loader2, RefreshCcw } from 'lucide-react';
+import { TrendingUp, PieChart, Map } from '@/components/ui/icons';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
-import MachineTypeIcon from '@/components/admin/machines/MachineTypeIcon';
-import BusinessGoalVideoSection from '@/components/businessGoals/BusinessGoalVideoSection';
-import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
-import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
-import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
-import { redirectToCanonicalBusinessGoalIfNeeded } from '@/services/cms/utils/routeRedirector';
-import { normalizeSlug } from '@/services/cms/utils/slug/common';
-import { SimpleContactCTA } from '@/components/common';
+import BusinessGoalFeatures from '@/components/businessGoals/BusinessGoalFeatures';
+import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry';
+import MachineTypeIcon from '@/components/common/MachineTypeIcon';
+import BusinessGoalIntegrations from '@/components/businessGoals/BusinessGoalIntegrations';
 
-// Helper function to safely check for features array
-const hasValidFeatures = (businessGoal: any) => {
-  return businessGoal && 
-         businessGoal.features && 
-         Array.isArray(businessGoal.features) && 
-         businessGoal.features.length > 0 &&
-         businessGoal.features.some(f => f && f.title);
-};
-
-const getIconComponent = (iconName: string | undefined): React.ReactNode => {
-  if (!iconName) return <Star className="h-6 w-6" />;
-  
-  switch (iconName.toLowerCase()) {
-    case 'check':
-      return <Check className="h-6 w-6" />;
-    case 'shield':
-      return <Shield className="h-6 w-6" />;
-    case 'server':
-      return <Server className="h-6 w-6" />;
-    case 'settings':
-      return <Settings className="h-6 w-6" />;
-    case 'bell':
-      return <Bell className="h-6 w-6" />;
-    case 'battery':
-      return <Battery className="h-6 w-6" />;
-    case 'clipboard-check':
-      return <ClipboardCheck className="h-6 w-6" />;
-    case 'refresh-ccw':
-      return <RefreshCcw className="h-6 w-6" />;
-    case 'trending-up':
-      return <TrendingUp className="h-6 w-6" />;
-    case 'pie-chart':
-      return <PieChart className="h-6 w-6" />;
-    case 'map':
-      return <Map className="h-6 w-6" />;
-    case 'user-check':
-      return <UserCheck className="h-6 w-6" />;
-    default:
-      return <Star className="h-6 w-6" />;
-  }
-};
-
-const BusinessGoalDetailPage = () => {
+const BusinessGoalDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  
-  // Add debug logs to track the slug processing
-  console.log(`[BusinessGoalDetailPage] Received slug from URL params: "${slug}"`);
-  
-  if (slug) {
-    console.log(`[BusinessGoalDetailPage] Normalized slug: "${normalizeSlug(slug)}"`);
-  }
-  
-  // Add effect to redirect to canonical URL if needed
-  useEffect(() => {
-    if (slug) {
-      const wasRedirected = redirectToCanonicalBusinessGoalIfNeeded(slug);
-      console.log(`[BusinessGoalDetailPage] Was redirected: ${wasRedirected}`);
-    }
-  }, [slug]);
-  
-  console.log('[BusinessGoalDetailPage] Current route path:', window.location.pathname);
-  
-  return (
-    <Layout>
-      <ContentfulInitializer
-        fallback={
-          <div className="container mx-auto p-4">
-            <ContentfulFallbackMessage
-              title="Business Goal Not Available"
-              message="We're having trouble loading this business goal. Please check your Contentful configuration."
-              contentType="business goal"
-              showRefresh={true}
-              actionText="View All Business Goals"
-              actionHref="/business-goals"
-            />
-          </div>
-        }
-      >
-        <BusinessGoalContent slug={slug} />
-      </ContentfulInitializer>
-    </Layout>
-  );
-};
+  const { data: businessGoal, isLoading, error, retry } = useBusinessGoal(slug || '');
 
-const BusinessGoalContent = ({ slug }: { slug: string | undefined }) => {
-  // Add detailed debug logging
-  console.log(`[BusinessGoalContent] Attempting to load content with slug: "${slug}"`);
-  
-  const { data: businessGoal, isLoading, error } = useContentfulBusinessGoal(slug || '');
-  
-  console.log('[BusinessGoalContent] Content data for slug:', slug, {
-    isLoading,
-    hasError: !!error,
-    errorMessage: error ? error.message : null,
-    businessGoalData: businessGoal ? {
-      id: businessGoal.id,
-      title: businessGoal.title,
-      slug: businessGoal.slug,
-      hasFeatures: businessGoal.features?.length > 0,
-      hasBenefits: businessGoal.benefits?.length > 0,
-      hasVideo: !!businessGoal.video,
-      hasRecommendedMachines: businessGoal.recommendedMachines?.length > 0
-    } : null
-  });
-  
   if (isLoading) {
     return (
-      <div className="container mx-auto py-12">
-        <div className="max-w-4xl mx-auto">
-          <Skeleton className="h-12 w-3/4 mb-4" />
-          <Skeleton className="h-6 w-full mb-2" />
-          <Skeleton className="h-6 w-full mb-8" />
-          <Skeleton className="h-96 w-full rounded-lg mb-8" />
-          <Skeleton className="h-6 w-full mb-2" />
-          <Skeleton className="h-6 w-full mb-2" />
-          <Skeleton className="h-6 w-3/4" />
-        </div>
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
       </div>
     );
   }
-  
-  if (error) {
-    console.error('[BusinessGoalContent] Error loading business goal:', error);
+
+  if (error || !businessGoal) {
     return (
-      <div className="container mx-auto py-12">
-        <div className="max-w-4xl mx-auto">
-          <ContentfulFallbackMessage
-            title="Error Loading Business Goal"
-            message={error instanceof Error ? error.message : 'An unknown error occurred'}
-            contentType="business goal"
-            actionText="Return to Business Goals"
-            actionHref="/business-goals"
-            showAdmin={false}
-          />
-        </div>
-      </div>
+      <ContentfulFallbackMessage 
+        title="Failed to Load Business Goal"
+        message="There was an error loading the business goal from the content management system."
+        retry={retry}
+      />
     );
   }
-  
-  if (!businessGoal) {
-    console.warn('[BusinessGoalContent] No business goal data returned for slug:', slug);
-    return (
-      <div className="container mx-auto py-12">
-        <div className="max-w-4xl mx-auto">
-          <ContentfulFallbackMessage
-            title="Business Goal Not Found"
-            message={`The business goal with slug "${slug}" doesn't exist or has been removed.`}
-            contentType="business goal"
-            actionText="Return to Business Goals"
-            actionHref="/business-goals"
-            showAdmin={false}
-          />
-        </div>
-      </div>
-    );
-  }
-  
-  console.log('[BusinessGoalContent] Successfully loaded business goal:', businessGoal.title);
-  
-  const icon = businessGoal?.icon ? (
-    <MachineTypeIcon type={businessGoal.icon} className="text-white" />
-  ) : (
-    <Star className="text-white h-6 w-6" />
-  );
-  
-  const imageUrl = businessGoal?.image?.url || "https://via.placeholder.com/1200x800?text=Business+Goal+Image";
-  
-  const showDebugInfo = false; // Set to true to show debug info in production
-  
-  // Check for valid features to display
-  const validFeatures = hasValidFeatures(businessGoal);
-  if (validFeatures) {
-    console.log('[BusinessGoalContent] Valid features found:', 
-      businessGoal.features.map(f => ({ id: f.id, title: f.title }))
-    );
-  } else {
-    console.log('[BusinessGoalContent] No valid features found for this goal');
-  }
-  
-  // Check if video exists and has a URL - only then should we attempt to render the video section
-  const hasVideo = businessGoal.video && businessGoal.video.url;
-  
+
+  const features = [
+    {
+      title: "Real-Time Data Tracking",
+      description: "Monitor your vending operations with up-to-the-minute data on sales, inventory, and machine performance.",
+      icon: <TrendingUp className="h-6 w-6" />
+    },
+    {
+      title: "Automated Inventory Management",
+      description: "Reduce stockouts and optimize product selection with our intelligent inventory management system.",
+      icon: <RefreshCcw className="h-6 w-6" />
+    },
+    {
+      title: "Comprehensive Analytics",
+      description: "Gain insights into customer behavior and sales trends with detailed analytics and reporting tools.",
+      icon: <PieChart className="h-6 w-6" />
+    }
+  ];
+
+  const integrations = [
+    {
+      name: "Google Analytics",
+      description: "Track website traffic and user behavior to optimize your online presence.",
+      icon: <MachineTypeIcon type="google" className="h-6 w-6" />,
+      link: "https://analytics.google.com/"
+    },
+    {
+      name: "Salesforce",
+      description: "Manage customer relationships and sales processes with the leading CRM platform.",
+      icon: <MachineTypeIcon type="salesforce" className="h-6 w-6" />,
+      link: "https://www.salesforce.com/"
+    },
+    {
+      name: "QuickBooks",
+      description: "Streamline your accounting and financial management with QuickBooks integration.",
+      icon: <MachineTypeIcon type="quickbooks" className="h-6 w-6" />,
+      link: "https://quickbooks.intuit.com/"
+    },
+    {
+      name: "Microsoft Teams",
+      description: "Improve team collaboration and communication with Microsoft Teams integration.",
+      icon: <MachineTypeIcon type="teams" className="h-6 w-6" />,
+      link: "https://www.microsoft.com/en-us/microsoft-teams/group-chat-software"
+    }
+  ];
+
   return (
     <>
-      <BusinessGoalHero
-        title={businessGoal?.title || ''}
-        description={businessGoal?.description || ''}
-        icon={icon}
-        image={imageUrl}
+      <BusinessGoalHero 
+        title={businessGoal.title}
+        description={businessGoal.description}
+        icon={<MachineTypeIcon type={businessGoal.icon} className="h-6 w-6" />}
+        image={businessGoal.image}
       />
       
-      {showDebugInfo && (
-        <section className="py-4 bg-gray-50 border-t border-b border-gray-200">
-          <div className="container mx-auto">
-            <details className="max-w-4xl mx-auto bg-white p-4 rounded shadow">
-              <summary className="cursor-pointer font-medium text-blue-600 mb-2">
-                Debug Information (Click to expand)
-              </summary>
-              <div className="text-xs font-mono bg-gray-100 p-4 rounded overflow-auto max-h-96">
-                <h4 className="font-bold mb-2">Business Goal Data:</h4>
-                <pre>{JSON.stringify(businessGoal, null, 2)}</pre>
-                
-                <h4 className="font-bold mt-4 mb-2">Video Status:</h4>
-                <p>Has Video Object: {businessGoal.video ? 'Yes' : 'No'}</p>
-                {businessGoal.video && (
-                  <>
-                    <p>Video ID: {businessGoal.video.id || 'Not available'}</p>
-                    <p>Video URL: {businessGoal.video.url || 'Not available'}</p>
-                    <p>Video Title: {businessGoal.video.title || 'Not available'}</p>
-                  </>
-                )}
-              </div>
-            </details>
-          </div>
-        </section>
-      )}
+      <BusinessGoalFeatures features={features} />
       
-      {businessGoal?.benefits && businessGoal.benefits.length > 0 && (
-        <section className="py-16 bg-gray-50">
-          <div className="container mx-auto">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-12">Benefits</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {businessGoal.benefits.map((benefit, index) => (
-                  <div key={index} className="bg-white rounded-lg p-6 shadow-sm flex items-start">
-                    <div className="bg-vending-teal rounded-full p-2 mr-4 text-white flex-shrink-0">
-                      <CheckIcon className="h-4 w-4" />
-                    </div>
-                    <p className="text-gray-800">{String(benefit)}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-      
-      {/* Only render the features section if there are valid features */}
-      {validFeatures && (
-        <section className="py-16 bg-white">
-          <div className="container mx-auto">
-            <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-12">Key Features</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {businessGoal.features
-                  .filter(feature => feature && feature.title) // Filter out invalid features
-                  .map((feature) => (
-                    <div key={feature.id || Math.random().toString()} className="bg-gray-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-                      {feature.icon && (
-                        <div className="mb-4 text-vending-blue">
-                          {getIconComponent(typeof feature.icon === 'string' ? feature.icon : undefined)}
-                        </div>
-                      )}
-                      <h3 className="text-xl font-semibold mb-3">{feature.title || 'Unnamed Feature'}</h3>
-                      <p className="text-gray-600">{feature.description || ''}</p>
-                    </div>
-                  ))
-              }
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-      
-      {/* Only render the video section if there's a video with a URL */}
-      {hasVideo && (
-        <BusinessGoalVideoSection 
-          video={businessGoal.video}
-          title={`See how ${businessGoal.title} works`}
-          description="Watch our solution in action to understand how it can help your business"
-        />
-      )}
-      
-      {businessGoal?.recommendedMachines && businessGoal.recommendedMachines.length > 0 && 
-       businessGoal.recommendedMachines.some(m => m && m.title) && (
-        <RecommendedMachines machines={businessGoal.recommendedMachines.filter(m => m && m.title)} />
-      )}
-      
-      {/* Use standard CTA without dynamic title */}
-      <SimpleContactCTA />
+      <BusinessGoalIntegrations integrations={integrations} />
+
+      <BusinessGoalInquiry />
     </>
   );
 };
