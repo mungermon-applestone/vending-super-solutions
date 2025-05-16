@@ -1,8 +1,8 @@
 
-// This file re-exports from our central Contentful client implementation 
-// to maintain backward compatibility
+// This file provides utility functions for working with Contentful
 
 import { 
+  waitForEnvironmentVariables,
   getContentfulClient, 
   refreshContentfulClient, 
   testContentfulConnection,
@@ -10,10 +10,11 @@ import {
   validateContentfulClient,
   fetchContentfulEntries,
   fetchContentfulEntry
-} from '@/services/contentful/client';
+} from './client';
 
-// Re-export all functions from the main Contentful client
+// Export utility functions
 export {
+  waitForEnvironmentVariables,
   getContentfulClient,
   refreshContentfulClient,
   testContentfulConnection,

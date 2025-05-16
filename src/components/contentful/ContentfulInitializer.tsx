@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { testContentfulConnection, refreshContentfulClient, isContentfulConfigured } from '@/services/contentful/client';
+import { testContentfulConnection, refreshContentfulClient, isContentfulConfigured, waitForEnvironmentVariables } from '@/services/contentful/client';
 import { forceContentfulProvider } from '@/services/cms/cmsInit';
 import { isPreviewEnvironment } from '@/config/cms';
 import { Loader2 } from 'lucide-react';
@@ -33,6 +33,9 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
       setIsLoading(true);
       try {
         console.log('[ContentfulInitializer] Starting initialization');
+        
+        // First make sure environment variables are fully loaded
+        await waitForEnvironmentVariables();
         
         // Check if Contentful is already configured
         if (!isContentfulConfigured()) {

@@ -1,7 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient } from '@/services/contentful/client';
-import { CMSTestimonial } from '@/types/cms';
 import { transformContentfulTestimonial, transformTestimonials } from './transformers/testimonialTransformer';
 
 /**
@@ -10,7 +9,7 @@ import { transformContentfulTestimonial, transformTestimonials } from './transfo
 export function useContentfulTestimonials() {
   return useQuery({
     queryKey: ['contentful', 'testimonials'],
-    queryFn: async (): Promise<CMSTestimonial[]> => {
+    queryFn: async () => {
       try {
         const client = await getContentfulClient();
         
