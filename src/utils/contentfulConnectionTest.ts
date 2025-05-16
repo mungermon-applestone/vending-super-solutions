@@ -2,7 +2,7 @@
 import { isContentfulConfigured, testContentfulConnection as testConnection } from '@/services/contentful/client';
 
 export const checkContentfulConfig = () => {
-  // Check if the required configuration values are set
+  // Get values using the new helper functions
   const spaceId = import.meta.env.VITE_CONTENTFUL_SPACE_ID;
   const deliveryToken = import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
   const environmentId = import.meta.env.VITE_CONTENTFUL_ENVIRONMENT || 'master';

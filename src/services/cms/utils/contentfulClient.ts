@@ -1,12 +1,10 @@
 
-import { createClient, ContentfulClientApi } from 'contentful';
+import { ContentfulClientApi } from 'contentful';
 import { toast } from 'sonner';
 import { 
   getContentfulClient, 
   refreshContentfulClient, 
   testContentfulConnection,
-  fetchContentfulEntries, 
-  fetchContentfulEntry,
   isContentfulConfigured,
   validateContentfulClient
 } from '@/services/contentful/client';
@@ -16,8 +14,6 @@ export {
   getContentfulClient,
   refreshContentfulClient,
   testContentfulConnection,
-  fetchContentfulEntries,
-  fetchContentfulEntry,
   isContentfulConfigured,
   validateContentfulClient
 };
