@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -228,17 +229,17 @@ const ContentfulConfigurationPage = () => {
                       </div>
                     )}
                   </AlertDescription>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-          
-          <div>
-            <ContentfulDebug />
-          </div>
+                </Alert>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+        
+        <div>
+          <ContentfulDebug />
         </div>
       </div>
-    
+    </div>
   );
 };
 
