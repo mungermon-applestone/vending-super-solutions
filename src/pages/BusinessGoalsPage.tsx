@@ -1,7 +1,5 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useBusinessGoalsPageContent } from '@/hooks/cms/useBusinessGoalsPageContent';
@@ -14,9 +12,9 @@ import BusinessGoalsGrid from '@/components/businessGoals/BusinessGoalsGrid';
 import BusinessGoalKeyBenefits from '@/components/businessGoals/BusinessGoalKeyBenefits';
 import BusinessGoalsDebugSection from '@/components/businessGoals/BusinessGoalsDebugSection';
 import BusinessGoalsLoader from '@/components/businessGoals/BusinessGoalsLoader';
-import BusinessGoalsIntro from '@/components/businessGoals/BusinessGoalsIntro';
 import BusinessGoalsFallbackNotice from '@/components/businessGoals/BusinessGoalsFallbackNotice';
 import BusinessGoalsContactSection from '@/components/businessGoals/BusinessGoalsContactSection';
+import BusinessGoalsHero from '@/components/businessGoals/BusinessGoalsHero';
 import { CONTENTFUL_CONFIG, isContentfulConfigured, isPreviewEnvironment } from '@/config/cms';
 
 const BUSINESS_GOALS_CONTENT_ID = "3z7Q1mcHEnk6S4YVCyaklz";
@@ -151,20 +149,16 @@ const BusinessGoalsPage: React.FC = () => {
   const displayGoals = (isConfigured && businessGoals && businessGoals.length > 0) ? businessGoals : fallbackBusinessGoals;
   
   if (isLoading && !displayContent && !displayGoals) {
-    return (
-      <Layout>
-        <BusinessGoalsLoader />
-      </Layout>
-    );
+    return <BusinessGoalsLoader />;
   }
 
   return (
-    <Layout>
-      <BusinessGoalsIntro 
-        heroContentId={HERO_CONTENT_ID}
-        isConfigured={isConfigured}
-        isPreview={isPreview}
-      />
+    <>
+      {/* Using our new BusinessGoalsHero component instead of BusinessGoalsIntro */}
+      <BusinessGoalsHero />
+      
+      {/* Show warning if using preview mode or fallback content */}
+      <BusinessGoalsFallbackNotice isPreview={isPreview} isConfigured={isConfigured} />
 
       {displayContent && displayContent.introTitle && (
         <BusinessGoalsPurposeStatement 
@@ -172,9 +166,6 @@ const BusinessGoalsPage: React.FC = () => {
           description={displayContent.introDescription} 
         />
       )}
-
-      {/* Add an indicator that we're using fallback data in preview mode */}
-      <BusinessGoalsFallbackNotice isPreview={isPreview} isConfigured={isConfigured} />
 
       <BusinessGoalsGrid 
         goals={displayGoals}
@@ -193,7 +184,7 @@ const BusinessGoalsPage: React.FC = () => {
         />
       )}
 
-      {/* Replace TestimonialsSection with ContentfulTestimonialsCarousel */}
+      {/* Use ContentfulTestimonialsCarousel for testimonials */}
       {testimonialSection && (
         <ContentfulTestimonialsCarousel 
           data={testimonialSection}
@@ -212,7 +203,7 @@ const BusinessGoalsPage: React.FC = () => {
           error={contentError}
         />
       )}
-    </Layout>
+    </>
   );
 };
 
