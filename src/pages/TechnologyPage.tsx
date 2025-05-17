@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 import { SimpleContactCTA } from '@/components/common';
+import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
+import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 
 // Content ID for the technology hero section
 const TECHNOLOGY_HERO_ENTRY_ID = '66FG7FxpIy3YkSXj2mu846';
@@ -16,6 +18,7 @@ const TECHNOLOGY_HERO_ENTRY_ID = '66FG7FxpIy3YkSXj2mu846';
 const TechnologyPage = () => {
   const { data: pageContent, isLoading: isLoadingContent, error: contentError } = useContentfulTechnologyPageContent();
   const { data: sections = [], isLoading: isLoadingSections, error: sectionsError } = useContentfulTechnologySections();
+  const { data: testimonialSection, isLoading: isLoadingTestimonials, error: testimonialError } = useTestimonialSection('technology');
 
   if (isLoadingContent || isLoadingSections) {
     return (
@@ -78,6 +81,13 @@ const TechnologyPage = () => {
         )}
 
         <TechnologySections sections={sections} />
+        
+        {/* Add ContentfulTestimonialsCarousel */}
+        <ContentfulTestimonialsCarousel 
+          data={testimonialSection} 
+          isLoading={isLoadingTestimonials}
+          error={testimonialError}
+        />
         
         {/* Replace InquiryForm with SimpleContactCTA */}
         <SimpleContactCTA title="Ready to transform your vending operations?" />

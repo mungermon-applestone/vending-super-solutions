@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useMachines } from '@/hooks/useMachinesData';
 import { Loader2 } from 'lucide-react';
@@ -5,13 +6,12 @@ import { CMSMachine } from '@/types/cms';
 import { forceContentfulProvider } from '@/services/cms/cmsInit';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import CTASection from '@/components/common/CTASection';
 import PageHero from '@/components/common/PageHero';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
-import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import { Server, HardDrive, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { SimpleContactCTA } from '@/components/common';
+import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 
 const MachinesPage = () => {
   // Force Contentful provider
@@ -24,7 +24,7 @@ const MachinesPage = () => {
   }, []);
 
   const { data: machines = [], isLoading, error } = useMachines();
-  const { data: testimonialSection } = useTestimonialSection('machines');
+  const { data: testimonialSection, isLoading: isLoadingTestimonials, error: testimonialError } = useTestimonialSection('machines');
   
   const vendingMachines = machines.filter(machine => machine.type === 'vending');
   const smartLockers = machines.filter(machine => machine.type === 'locker');
@@ -169,7 +169,11 @@ const MachinesPage = () => {
       </section>
 
       {/* Testimonials Section */}
-      {testimonialSection && <TestimonialsSection data={testimonialSection} />}
+      <ContentfulTestimonialsCarousel 
+        data={testimonialSection} 
+        isLoading={isLoadingTestimonials}
+        error={testimonialError}
+      />
 
       {/* Replace CTASection with SimpleContactCTA */}
       <SimpleContactCTA />

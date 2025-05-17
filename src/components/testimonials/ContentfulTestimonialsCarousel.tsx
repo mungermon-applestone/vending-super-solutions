@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { ContentfulTestimonialSection } from '@/types/contentful/testimonial';
 import { transformTestimonials } from '@/hooks/cms/transformers/testimonialTransformer';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
+import { Testimonial } from '@/types/testimonial';
 
 interface ContentfulTestimonialsCarouselProps {
   data: ContentfulTestimonialSection | null;
@@ -63,15 +64,7 @@ const ContentfulTestimonialsCarousel: React.FC<ContentfulTestimonialsCarouselPro
 
 // Inner component that manages the carousel functionality
 interface TestimonialsCarouselProps {
-  testimonials: Array<{
-    id: string;
-    name: string;
-    quote: string;
-    company: string;
-    position: string;
-    avatar?: string;
-    rating?: number;
-  }>;
+  testimonials: Testimonial[];
   title: string;
   subtitle: string;
 }

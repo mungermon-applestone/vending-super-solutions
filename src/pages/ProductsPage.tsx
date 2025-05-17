@@ -18,6 +18,8 @@ import ProductGrid from '@/components/products/sections/ProductGrid';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
+import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
+import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 
 const ProductsPage = () => {
   const navigate = useNavigate();
@@ -35,6 +37,8 @@ const ProductsPage = () => {
     error: contentError,
     refetch: refetchContent
   } = useProductsPageContent();
+  
+  const { data: testimonialSection, isLoading: isLoadingTestimonials, error: testimonialError } = useTestimonialSection('products');
   
   const contentfulConfigured = isContentfulConfigured();
   
@@ -175,6 +179,13 @@ const ProductsPage = () => {
           features={pageContent.keyFeatures}
         />
       )}
+
+      {/* Replace TestimonialsSection with ContentfulTestimonialsCarousel */}
+      <ContentfulTestimonialsCarousel 
+        data={testimonialSection}
+        isLoading={isLoadingTestimonials}
+        error={testimonialError}
+      />
       
       {/* Debug section - only shown in development mode */}
       {import.meta.env.DEV && (

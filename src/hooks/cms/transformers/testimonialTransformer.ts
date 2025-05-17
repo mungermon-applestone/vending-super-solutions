@@ -1,6 +1,7 @@
 
 import { Entry } from 'contentful';
 import { Testimonial } from '@/types/testimonial';
+import { ContentfulTestimonial } from '@/types/contentful/testimonial';
 
 /**
  * Transforms a Contentful Testimonial entry into the application's Testimonial format
@@ -8,7 +9,7 @@ import { Testimonial } from '@/types/testimonial';
  * @param entry - The Contentful entry containing testimonial data
  * @returns A Testimonial object
  */
-export const transformTestimonial = (entry: Entry<any>): Testimonial => {
+export const transformTestimonial = (entry: Entry<any> | ContentfulTestimonial): Testimonial => {
   if (!entry || !entry.fields) {
     console.warn('Received invalid testimonial entry:', entry);
     return {
@@ -21,23 +22,25 @@ export const transformTestimonial = (entry: Entry<any>): Testimonial => {
     };
   }
 
+  const fields = entry.fields;
+
   // Convert all field values to strings to satisfy TypeScript
-  const name = String(entry.fields.author || 'Unknown');
-  const quote = String(entry.fields.quote || '');
-  const company = String(entry.fields.company || '');
-  const position = String(entry.fields.position || '');
-  const rating = typeof entry.fields.rating === 'number' ? entry.fields.rating : 5;
+  const name = String(fields.author || fields.name || 'Unknown');
+  const quote = String(fields.quote || '');
+  const company = String(fields.company || '');
+  const position = String(fields.position || '');
+  const rating = typeof fields.rating === 'number' ? fields.rating : 5;
   
   // Handle avatar more carefully
   let avatar = '';
-  if (entry.fields.image && 
-      typeof entry.fields.image === 'object' && 
-      entry.fields.image.fields && 
-      typeof entry.fields.image.fields === 'object' &&
-      entry.fields.image.fields.file && 
-      typeof entry.fields.image.fields.file === 'object' &&
-      typeof entry.fields.image.fields.file.url === 'string') {
-    avatar = `https:${entry.fields.image.fields.file.url}`;
+  if (fields.image && 
+      typeof fields.image === 'object' && 
+      fields.image.fields && 
+      typeof fields.image.fields === 'object' &&
+      fields.image.fields.file && 
+      typeof fields.image.fields.file === 'object' &&
+      typeof fields.image.fields.file.url === 'string') {
+    avatar = `https:${fields.image.fields.file.url}`;
   }
 
   return {
@@ -57,7 +60,7 @@ export const transformTestimonial = (entry: Entry<any>): Testimonial => {
  * @param entries - Array of Contentful entries
  * @returns Array of Testimonial objects
  */
-export const transformTestimonials = (entries: Entry<any>[]): Testimonial[] => {
+export const transformTestimonials = (entries: Array<Entry<any> | ContentfulTestimonial>): Testimonial[] => {
   if (!entries || !Array.isArray(entries)) {
     return [];
   }

@@ -4,11 +4,11 @@ import { toast } from 'sonner';
 import { useMachinesPageContent } from '@/hooks/cms/useMachinesPageContent';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
-import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
 import { isContentfulConfigured } from '@/config/cms';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 
 // Import refactored components
 import MachinesLoadingState from '@/components/machines/MachinesLoadingState';
@@ -41,7 +41,7 @@ const MachinesPage: React.FC = () => {
   
   const { data: machines, isLoading, error, refetch } = useContentfulMachines();
   const { data: pageContent } = useMachinesPageContent();
-  const { data: testimonialSection } = useTestimonialSection('machines');
+  const { data: testimonialSection, isLoading: isLoadingTestimonials, error: testimonialError } = useTestimonialSection('machines');
   
   useEffect(() => {
     if (machines) {
@@ -148,7 +148,12 @@ const MachinesPage: React.FC = () => {
         )}
       </div>
       
-      {testimonialSection && <TestimonialsSection data={testimonialSection} />}
+      {/* Replace TestimonialsSection with ContentfulTestimonialsCarousel */}
+      <ContentfulTestimonialsCarousel 
+        data={testimonialSection}
+        isLoading={isLoadingTestimonials}
+        error={testimonialError}
+      />
       
       {/* Replace InquiryForm with SimpleContactCTA */}
       <SimpleContactCTA />

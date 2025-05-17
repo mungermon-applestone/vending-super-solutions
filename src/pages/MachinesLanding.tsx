@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -9,14 +10,14 @@ import { Wifi } from '@/components/ui/Wifi';
 import { CMSMachine } from '@/types/cms';
 import PageHero from '@/components/common/PageHero';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
-import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
 import { SimpleContactCTA } from '@/components/common';
+import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 
 const MachinesLanding = () => {
   const location = useLocation();
   const { data: machines = [], isLoading } = useMachines();
   const typedMachines = machines as CMSMachine[];
-  const { data: testimonialSection } = useTestimonialSection('machines');
+  const { data: testimonialSection, isLoading: isLoadingTestimonials, error: testimonialError } = useTestimonialSection('machines');
   
   // Filter machines by type
   const vendingMachines = typedMachines.filter(machine => machine.type === 'vending');
@@ -159,7 +160,11 @@ const MachinesLanding = () => {
       </section>
 
       {/* Testimonials Section */}
-      {testimonialSection && <TestimonialsSection data={testimonialSection} />}
+      <ContentfulTestimonialsCarousel 
+        data={testimonialSection} 
+        isLoading={isLoadingTestimonials}
+        error={testimonialError}
+      />
 
       {/* Replace CTASection with SimpleContactCTA */}
       <SimpleContactCTA />
