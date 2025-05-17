@@ -1,7 +1,5 @@
-
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import Layout from '@/components/layout/Layout';
 import { useBusinessGoals } from '@/hooks/cms/useBusinessGoals';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +18,7 @@ const BusinessGoals = () => {
   console.log("Business goals data:", businessGoals);
   
   return (
-    <Layout>
+    <>
       {/* Hero Section from Database */}
       <PageHero 
         pageKey="business-goals" 
@@ -107,7 +105,7 @@ const BusinessGoals = () => {
           </Card>
         )}
       </div>
-    </Layout>
+    </>
   );
 };
 

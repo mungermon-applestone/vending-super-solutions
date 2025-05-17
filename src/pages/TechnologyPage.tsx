@@ -1,6 +1,5 @@
 
 import React from 'react';
-import Layout from '@/components/layout/Layout';
 import TechnologySections from '@/components/technology/TechnologySections';
 import { useContentfulTechnologyPageContent } from '@/hooks/cms/useContentfulTechnologyPageContent';
 import { useContentfulTechnologySections } from '@/hooks/cms/useContentfulTechnologySections';
@@ -20,7 +19,7 @@ const TechnologyPage = () => {
 
   if (isLoadingContent || isLoadingSections) {
     return (
-      <Layout>
+      <>
         <div className="container mx-auto px-4 py-8">
           <Skeleton className="h-12 w-2/3 mb-4" />
           <Skeleton className="h-24 w-full mb-8" />
@@ -30,14 +29,14 @@ const TechnologyPage = () => {
             </div>
           ))}
         </div>
-      </Layout>
+      </>
     );
   }
 
   if (contentError || sectionsError) {
     const error = contentError || sectionsError;
     return (
-      <Layout>
+      <>
         <div className="container mx-auto px-4 py-8">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -47,12 +46,12 @@ const TechnologyPage = () => {
             </AlertDescription>
           </Alert>
         </div>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       {/* Hero Section */}
       <TechnologyPageHero entryId={TECHNOLOGY_HERO_ENTRY_ID} />
       
@@ -83,7 +82,7 @@ const TechnologyPage = () => {
         {/* Replace InquiryForm with SimpleContactCTA */}
         <SimpleContactCTA title="Ready to transform your vending operations?" />
       </div>
-    </Layout>
+    </>
   );
 };
 

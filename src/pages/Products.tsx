@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import SEO from '@/components/seo/SEO';
@@ -85,7 +84,7 @@ const Products = () => {
   const showDevTools = import.meta.env.DEV || isPreviewEnvironment();
   
   return (
-    <Layout>
+    <>
       <SEO 
         title="Products | Vending Solutions"
         description={pageContent?.categoriesSectionDescription || "Explore our comprehensive range of vending solutions designed for modern businesses. Find the perfect product type for your needs."}
@@ -263,7 +262,7 @@ const Products = () => {
           <SimpleContactCTA />
         </section>
       </ContentfulErrorBoundary>
-    </Layout>
+    </>
   );
 };
 
