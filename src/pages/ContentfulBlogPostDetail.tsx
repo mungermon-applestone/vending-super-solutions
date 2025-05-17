@@ -1,37 +1,34 @@
 
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
-import { useContentfulBlogPostBySlug } from '@/hooks/useContentfulBlogPostBySlug';
 import ContentfulBlogPostContent from '@/components/blog/ContentfulBlogPostContent';
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 import { Loader2 } from 'lucide-react';
 import { SimpleContactCTA } from '@/components/common';
+import { useContentfulBlogPostBySlug } from '@/hooks/useContentfulBlogPostBySlug';
 
 const ContentfulBlogPostDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   
   return (
-    <Layout>
-      <ContentfulInitializer
-        fallback={
-          <div className="container mx-auto p-4">
-            <ContentfulFallbackMessage
-              title="Blog Post Not Available"
-              message="We're having trouble loading this blog post. Please check your Contentful configuration."
-              contentType="blog post"
-              showRefresh={true}
-              actionText="View All Blog Posts"
-              actionHref="/blog"
-            />
-          </div>
-        }
-      >
-        <BlogPostContent slug={slug} />
-      </ContentfulInitializer>
-    </Layout>
+    <ContentfulInitializer
+      fallback={
+        <div className="container mx-auto p-4">
+          <ContentfulFallbackMessage
+            title="Blog Post Not Available"
+            message="We're having trouble loading this blog post. Please check your Contentful configuration."
+            contentType="blog post"
+            showRefresh={true}
+            actionText="View All Blog Posts"
+            actionHref="/blog"
+          />
+        </div>
+      }
+    >
+      <BlogPostContent slug={slug} />
+    </ContentfulInitializer>
   );
 };
 

@@ -1,6 +1,4 @@
-
 import React, { useEffect } from 'react';
-import Layout from '@/components/layout/Layout';
 import { useMachines } from '@/hooks/useMachinesData';
 import { Loader2 } from 'lucide-react';
 import { CMSMachine } from '@/types/cms';
@@ -74,29 +72,25 @@ const MachinesPage = () => {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="py-24 text-center">
-          <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
-          <p>Loading machines information...</p>
-        </div>
-      </Layout>
+      <div className="py-24 text-center">
+        <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
+        <p>Loading machines information...</p>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Layout>
-        <div className="py-24 text-center text-red-500">
-          <h2 className="text-2xl font-bold mb-4">Error Loading Machines</h2>
-          <p>Unable to load machines. Please try again later.</p>
-          <p className="mt-4 text-sm">{error instanceof Error ? error.message : 'Unknown error'}</p>
-        </div>
-      </Layout>
+      <div className="py-24 text-center text-red-500">
+        <h2 className="text-2xl font-bold mb-4">Error Loading Machines</h2>
+        <p>Unable to load machines. Please try again later.</p>
+        <p className="mt-4 text-sm">{error instanceof Error ? error.message : 'Unknown error'}</p>
+      </div>
     );
   }
 
   return (
-    <Layout>
+    <>
       {/* Hero Section using PageHero component */}
       <PageHero 
         pageKey="machines"
@@ -179,7 +173,7 @@ const MachinesPage = () => {
 
       {/* Replace CTASection with SimpleContactCTA */}
       <SimpleContactCTA />
-    </Layout>
+    </>
   );
 };
 

@@ -1,6 +1,5 @@
 
 import React from 'react';
-import Layout from '@/components/layout/Layout';
 import HeroSection from '@/components/home/HeroSection';
 import FeaturesSection from '@/components/home/FeaturesSection';
 import ProductTypesSection from '@/components/home/ProductTypesSection';
@@ -13,7 +12,7 @@ const Index = () => {
   const { data: homeContent } = useHomePageContent();
 
   return (
-    <Layout>
+    <>
       <HeroSection />
       <FeaturesSection />
       <ProductTypesSection />
@@ -25,7 +24,7 @@ const Index = () => {
         className="w-full"
         formType="Home Page Inquiry"
       />
-    </Layout>
+    </>
   );
 };
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -75,7 +74,7 @@ const MachinesLanding = () => {
   };
 
   return (
-    <Layout>
+    <>
       {/* Hero Section using PageHero component */}
       <PageHero 
         pageKey="machines"
@@ -164,7 +163,7 @@ const MachinesLanding = () => {
 
       {/* Replace CTASection with SimpleContactCTA */}
       <SimpleContactCTA />
-    </Layout>
+    </>
   );
 };
 

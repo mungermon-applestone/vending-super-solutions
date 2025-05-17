@@ -1,6 +1,5 @@
 
 import React from 'react';
-import Layout from '@/components/layout/Layout';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
 import MachineDetail from '@/components/machineDetail/MachineDetail';
 import { useParams } from 'react-router-dom';
@@ -12,32 +11,24 @@ const Option4Refrigerated = () => {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div>Loading...</div>
-      </Layout>
+      <div>Loading...</div>
     );
   }
 
   if (error) {
     return (
-      <Layout>
-        <div>Error: {error.message}</div>
-      </Layout>
+      <div>Error: {error.message}</div>
     );
   }
 
   if (!machine) {
     return (
-      <Layout>
-        <div>Machine not found.</div>
-      </Layout>
+      <div>Machine not found.</div>
     );
   }
 
   return (
-    <Layout>
-      <MachineDetail machine={machine} />
-    </Layout>
+    <MachineDetail machine={machine} />
   );
 };
 

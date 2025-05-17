@@ -1,6 +1,4 @@
-
 import React, { useState, useEffect } from 'react';
-import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -110,128 +108,126 @@ const ContentfulConfigurationPage = () => {
   };
 
   return (
-    <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Contentful Configuration</h1>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Environment Variables</CardTitle>
-                <CardDescription>
-                  Set your Contentful environment variables for the editor
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Important</AlertTitle>
-                  <AlertDescription>
-                    These variables are stored in your browser's local storage and will be used by the editor
-                    to connect to your Contentful space.
-                  </AlertDescription>
-                </Alert>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="space-id">Space ID</Label>
-                    <Input
-                      id="space-id"
-                      placeholder="e.g., abc123def456"
-                      value={spaceId}
-                      onChange={(e) => setSpaceId(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Your Contentful space identifier
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="delivery-token">Delivery Token</Label>
-                    <Input
-                      id="delivery-token"
-                      type="password"
-                      placeholder="Contentful Content Delivery API token"
-                      value={deliveryToken}
-                      onChange={(e) => setDeliveryToken(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      API token used to fetch content from Contentful
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="environment-id">Environment ID</Label>
-                    <Input
-                      id="environment-id"
-                      placeholder="e.g., master"
-                      value={environmentId}
-                      onChange={(e) => setEnvironmentId(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Usually "master" unless you're using a custom environment
-                    </p>
-                  </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Contentful Configuration</h1>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Environment Variables</CardTitle>
+              <CardDescription>
+                Set your Contentful environment variables for the editor
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Important</AlertTitle>
+                <AlertDescription>
+                  These variables are stored in your browser's local storage and will be used by the editor
+                  to connect to your Contentful space.
+                </AlertDescription>
+              </Alert>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="space-id">Space ID</Label>
+                  <Input
+                    id="space-id"
+                    placeholder="e.g., abc123def456"
+                    value={spaceId}
+                    onChange={(e) => setSpaceId(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Your Contentful space identifier
+                  </p>
                 </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <div className="space-x-2">
-                  <Button 
-                    variant="outline" 
-                    onClick={testConnection}
-                    disabled={isRefreshing || isSaving || !spaceId || !deliveryToken}
-                  >
-                    {isRefreshing ? (
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                    )}
-                    Test Connection
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={refreshContentful} 
-                    disabled={isRefreshing || isSaving}
-                  >
-                    {isRefreshing ? (
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                    )}
-                    Refresh Client
-                  </Button>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="delivery-token">Delivery Token</Label>
+                  <Input
+                    id="delivery-token"
+                    type="password"
+                    placeholder="Contentful Content Delivery API token"
+                    value={deliveryToken}
+                    onChange={(e) => setDeliveryToken(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    API token used to fetch content from Contentful
+                  </p>
                 </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="environment-id">Environment ID</Label>
+                  <Input
+                    id="environment-id"
+                    placeholder="e.g., master"
+                    value={environmentId}
+                    onChange={(e) => setEnvironmentId(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Usually "master" unless you're using a custom environment
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <div className="space-x-2">
                 <Button 
-                  onClick={handleSave} 
-                  disabled={isSaving || !spaceId || !deliveryToken}
+                  variant="outline" 
+                  onClick={testConnection}
+                  disabled={isRefreshing || isSaving || !spaceId || !deliveryToken}
                 >
-                  {isSaving ? (
+                  {isRefreshing ? (
                     <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <Save className="mr-2 h-4 w-4" />
+                    <RefreshCw className="mr-2 h-4 w-4" />
                   )}
-                  Save Variables
+                  Test Connection
                 </Button>
-              </CardFooter>
-            </Card>
-            
-            {testResult && (
-              <Card className="mt-4">
-                <CardHeader>
-                  <CardTitle>Connection Test Result</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Alert variant={testResult.success ? "default" : "destructive"}>
-                    <AlertTitle>Status: {testResult.success ? "Success" : "Failed"}</AlertTitle>
-                    <AlertDescription>
-                      {testResult.message}
-                      
-                      {testResult.details && (
-                        <div className="mt-2 p-2 bg-black/5 rounded overflow-auto max-h-40">
-                          <pre className="text-xs">{JSON.stringify(testResult.details, null, 2)}</pre>
-                        </div>
-                      )}
-                    </AlertDescription>
-                  </Alert>
+                <Button 
+                  variant="outline" 
+                  onClick={refreshContentful} 
+                  disabled={isRefreshing || isSaving}
+                >
+                  {isRefreshing ? (
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                  )}
+                  Refresh Client
+                </Button>
+              </div>
+              <Button 
+                onClick={handleSave} 
+                disabled={isSaving || !spaceId || !deliveryToken}
+              >
+                {isSaving ? (
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                Save Variables
+              </Button>
+            </CardFooter>
+          </Card>
+          
+          {testResult && (
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>Connection Test Result</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Alert variant={testResult.success ? "default" : "destructive"}>
+                  <AlertTitle>Status: {testResult.success ? "Success" : "Failed"}</AlertTitle>
+                  <AlertDescription>
+                    {testResult.message}
+                    
+                    {testResult.details && (
+                      <div className="mt-2 p-2 bg-black/5 rounded overflow-auto max-h-40">
+                        <pre className="text-xs">{JSON.stringify(testResult.details, null, 2)}</pre>
+                      </div>
+                    )}
+                  </AlertDescription>
                 </CardContent>
               </Card>
             )}
@@ -242,7 +238,7 @@ const ContentfulConfigurationPage = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    
   );
 };
 

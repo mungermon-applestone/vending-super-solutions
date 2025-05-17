@@ -3,7 +3,6 @@ import React, { useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
-import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
@@ -59,69 +58,61 @@ const ContentfulMachineDetail: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="container py-12">
-          <Skeleton className="h-12 w-3/4 mb-4" />
-          <Skeleton className="h-6 w-1/2 mb-8" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            <Skeleton className="h-80 w-full" />
-            <div>
-              <Skeleton className="h-6 w-3/4 mb-4" />
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-4/5 mb-6" />
-              <Skeleton className="h-10 w-40" />
-            </div>
+      <div className="container py-12">
+        <Skeleton className="h-12 w-3/4 mb-4" />
+        <Skeleton className="h-6 w-1/2 mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          <Skeleton className="h-80 w-full" />
+          <div>
+            <Skeleton className="h-6 w-3/4 mb-4" />
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-4/5 mb-6" />
+            <Skeleton className="h-10 w-40" />
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Layout>
-        <div className="container py-12">
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            <p className="font-bold">Error loading machine details</p>
-            <p>{error instanceof Error ? error.message : 'Unknown error'}</p>
-            <Link to="/contentful/machines" className="mt-4 inline-block">
-              <Button variant="outline">Back to Machines</Button>
-            </Link>
-          </div>
+      <div className="container py-12">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <p className="font-bold">Error loading machine details</p>
+          <p>{error instanceof Error ? error.message : 'Unknown error'}</p>
+          <Link to="/contentful/machines" className="mt-4 inline-block">
+            <Button variant="outline">Back to Machines</Button>
+          </Link>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   if (!machine) {
     return (
-      <Layout>
-        <div className="container py-12">
-          <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
-            <p className="font-bold">Machine not found</p>
-            <p>The machine with slug "{slug}" could not be found.</p>
-            <Link to="/contentful/machines" className="mt-4 inline-block">
-              <Button variant="outline">Back to Machines</Button>
-            </Link>
-          </div>
+      <div className="container py-12">
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
+          <p className="font-bold">Machine not found</p>
+          <p>The machine with slug "{slug}" could not be found.</p>
+          <Link to="/contentful/machines" className="mt-4 inline-block">
+            <Button variant="outline">Back to Machines</Button>
+          </Link>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   if (!formattedMachine) {
     return (
-      <Layout>
-        <div className="container py-12">
-          <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
-            <p>Error formatting machine data. Please check the console for details.</p>
-            <Link to="/contentful/machines" className="mt-4 inline-block">
-              <Button variant="outline">Back to Machines</Button>
-            </Link>
-          </div>
+      <div className="container py-12">
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
+          <p>Error formatting machine data. Please check the console for details.</p>
+          <Link to="/contentful/machines" className="mt-4 inline-block">
+            <Button variant="outline">Back to Machines</Button>
+          </Link>
         </div>
-      </Layout>
+      </div>
     );
   }
 

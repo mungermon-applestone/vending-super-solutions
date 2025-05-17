@@ -1,6 +1,5 @@
 
 import React from 'react';
-import Layout from '@/components/layout/Layout';
 import HeroSection from '@/components/home/HeroSection';
 import FeaturesSection from '@/components/home/FeaturesSection';
 import ProductTypesSection from '@/components/home/ProductTypesSection';
@@ -21,7 +20,7 @@ const Home = () => {
   });
 
   return (
-    <Layout>
+    <>
       <HeroSection />
       <FeaturesSection />
       <ProductTypesSection />
@@ -36,7 +35,7 @@ const Home = () => {
         primaryButtonText="Get Started Today"
       />
       <ContentfulDebug />
-    </Layout>
+    </>
   );
 };
 

@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
 import ContactCards from '@/components/contact/ContactCards';
 import { useContactFAQ } from '@/hooks/useContactFAQ';
 import ContactLoadingState from '@/components/contact/ContactLoadingState';
@@ -18,13 +16,11 @@ const ContactPage = () => {
   const navigate = useNavigate();
   
   return (
-    <Layout>
-      <ContentfulInitializer
-        fallback={<ContactFallback />}
-      >
-        <ContactContent />
-      </ContentfulInitializer>
-    </Layout>
+    <ContentfulInitializer
+      fallback={<ContactFallback />}
+    >
+      <ContactContent />
+    </ContentfulInitializer>
   );
 };
 

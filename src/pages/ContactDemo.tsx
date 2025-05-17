@@ -1,6 +1,4 @@
-
 import React from 'react';
-import Layout from '@/components/layout/Layout';
 import ContactCards from '@/components/contact/ContactCards';
 import { useContactFAQ } from '@/hooks/useContactFAQ';
 import ContactLoadingState from '@/components/contact/ContactLoadingState';
@@ -31,13 +29,11 @@ const ContactDemo = () => {
   }, []);
   
   return (
-    <Layout>
-      <ContentfulInitializer
-        fallback={<ContactFallback />}
-      >
-        <ContactContent />
-      </ContentfulInitializer>
-    </Layout>
+    <ContentfulInitializer
+      fallback={<ContactFallback />}
+    >
+      <ContactContent />
+    </ContentfulInitializer>
   );
 };
 

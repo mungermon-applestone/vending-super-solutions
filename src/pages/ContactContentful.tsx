@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
@@ -50,7 +49,7 @@ const ContactContentful = () => {
   };
 
   return (
-    <Layout>
+    <>
       <SEO 
         title="Contact Us | Vending Solutions"
         description="Get in touch with our team for vending machine solutions, support, and business inquiries."
@@ -151,7 +150,7 @@ const ContactContentful = () => {
         description="Our team is ready to help you find the perfect vending solution for your business."
         className="w-full"
       />
-    </Layout>
+    </>
   );
 };
 

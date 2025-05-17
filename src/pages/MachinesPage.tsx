@@ -1,5 +1,5 @@
+
 import React, { useEffect } from 'react';
-import Layout from '@/components/layout/Layout';
 import { toast } from 'sonner';
 import { useMachinesPageContent } from '@/hooks/cms/useMachinesPageContent';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
@@ -70,7 +70,7 @@ const MachinesPage: React.FC = () => {
   const usePageKeyHero = !!heroByKey && !isLoadingByKey && !errorByKey;
 
   return (
-    <Layout>
+    <>
       {usePageKeyHero ? (
         // Render with page key-fetched content
         <section className={heroContent.backgroundClass || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"}>
@@ -152,7 +152,7 @@ const MachinesPage: React.FC = () => {
       
       {/* Replace InquiryForm with SimpleContactCTA */}
       <SimpleContactCTA />
-    </Layout>
+    </>
   );
 };
 
