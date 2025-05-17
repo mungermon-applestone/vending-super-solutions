@@ -1,73 +1,58 @@
 
-import React from "react";
-import { useParams } from "react-router-dom";
-import { useBusinessGoal } from "@/hooks/cms/useBusinessGoal";
-import { Button } from "@/components/ui/button";
-import ContentfulErrorBoundary from "@/components/common/ContentfulErrorBoundary";
-import ContentfulFallbackMessage from "@/components/common/ContentfulFallbackMessage";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { CMSBusinessGoal } from '@/types/cms';
+import { Link } from 'react-router-dom';
 
-const BusinessGoalDetail: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const { data: businessGoal, isLoading, error, refetch } = useBusinessGoal(slug || '');
+interface BusinessGoalDetailProps {
+  businessGoal: CMSBusinessGoal;
+}
 
-  if (isLoading) {
-    return <div>Loading business goal...</div>;
-  }
-
-  if (error) {
-    return (
-      <ContentfulFallbackMessage 
-        title="Error loading business goal"
-        message={`We encountered an error loading this business goal: ${error.message}`}
-        onRetry={refetch}
-        contentType="Business Goal"
-      />
-    );
-  }
-
+const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal }) => {
   if (!businessGoal) {
-    return (
-      <ContentfulFallbackMessage
-        title="Business goal not found"
-        message={`We couldn't find a business goal with the slug "${slug}".`}
-        onRetry={refetch}
-        contentType="Business Goal"
-      />
-    );
+    return <div>No business goal data available</div>;
   }
-
-  // Map Contentful structure to expected UI fields
-  const imageUrl = businessGoal.image?.url;
-  const imageAlt = businessGoal.image?.alt || businessGoal.title;
 
   return (
-    <ContentfulErrorBoundary contentType="Business Goal">
-      <div className="container mx-auto py-8">
-        <h1 className="text-3xl font-bold mb-4">{businessGoal.title}</h1>
-        <p className="text-gray-600 mb-6">{businessGoal.description}</p>
-        {imageUrl && (
-          <img
-            src={imageUrl}
-            alt={imageAlt}
-            className="w-full rounded-md mb-6"
-          />
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="mb-8">
+        <Link to="/business-goals" className="inline-flex items-center text-blue-600 hover:text-blue-800">
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Business Goals
+        </Link>
+      </div>
+
+      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div className="px-4 py-5 sm:px-6">
+          <h1 className="text-3xl font-bold text-gray-900">{businessGoal.title}</h1>
+          <p className="mt-2 text-lg text-gray-600">{businessGoal.description}</p>
+        </div>
+        
+        {businessGoal.image && (
+          <div className="border-t border-gray-200">
+            <img 
+              src={businessGoal.image} 
+              alt={businessGoal.imageAlt || businessGoal.title}
+              className="w-full h-auto object-cover max-h-96"
+            />
+          </div>
         )}
+
         {businessGoal.benefits && businessGoal.benefits.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">Key Benefits</h2>
-            <ul className="list-disc list-inside">
+          <div className="px-4 py-5 sm:px-6 border-t border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Benefits</h2>
+            <ul className="space-y-2 list-disc pl-5">
               {businessGoal.benefits.map((benefit, index) => (
-                <li key={index}>{benefit}</li>
+                <li key={index} className="text-gray-700">{benefit}</li>
               ))}
             </ul>
           </div>
         )}
-        <Button asChild>
-          <Link to="/business-goals">Back to Business Goals</Link>
-        </Button>
+
+        {/* Add more sections as needed based on the CMSBusinessGoal type */}
       </div>
-    </ContentfulErrorBoundary>
+    </div>
   );
 };
 

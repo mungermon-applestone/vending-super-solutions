@@ -26,22 +26,32 @@ export const transformTestimonial = (entry: Entry<any> | ContentfulTestimonial):
 
   // Use TypeScript type guards to ensure properties exist
   const name = typeof fields.author === 'string' ? fields.author : 'Unknown';
-  
   const quote = typeof fields.quote === 'string' ? fields.quote : '';
   const company = typeof fields.company === 'string' ? fields.company : '';
   const position = typeof fields.position === 'string' ? fields.position : '';
   const rating = typeof fields.rating === 'number' ? fields.rating : 5;
   
-  // Handle avatar more carefully with proper type guards
+  // Handle avatar more carefully
   let avatar = '';
-  if (fields.image && 
-      typeof fields.image === 'object' && 
-      fields.image.fields && 
-      typeof fields.image.fields === 'object' &&
-      fields.image.fields.file && 
-      typeof fields.image.fields.file === 'object' &&
-      typeof fields.image.fields.file.url === 'string') {
-    avatar = `https:${fields.image.fields.file.url}`;
+  
+  // Check if image exists and has the expected structure
+  if (fields.image && typeof fields.image === 'object') {
+    // Handle Asset with sys and fields structure
+    if ('fields' in fields.image && fields.image.fields) {
+      const imageFields = fields.image.fields;
+      
+      // Check if file exists and has url
+      if (imageFields.file && typeof imageFields.file === 'object' && 
+          'url' in imageFields.file && typeof imageFields.file.url === 'string') {
+        avatar = `https:${imageFields.file.url}`;
+      }
+    }
+    // Handle direct url field (simplified structure)
+    else if ('url' in fields.image && typeof fields.image.url === 'string') {
+      avatar = fields.image.url.startsWith('http') 
+        ? fields.image.url 
+        : `https:${fields.image.url}`;
+    }
   }
 
   return {

@@ -1,36 +1,19 @@
 
-import { ContentProviderConfig, ContentProviderType } from './adapters/types';
-import { logDeprecationWarning } from './utils/deprecationLogger';
+import { ContentProviderType } from './adapters/types';
 
 /**
- * Default content provider configuration - always use Contentful now
+ * Get the content provider configuration - always Contentful
  */
-const currentProviderConfig: ContentProviderConfig = {
-  type: ContentProviderType.CONTENTFUL
-};
-
-/**
- * Get the current content provider configuration
- * Always returns Contentful configuration regardless of previous settings
- */
-export const getCMSProviderConfig = (): ContentProviderConfig => {
+export const getCMSProviderConfig = () => {
   return { type: ContentProviderType.CONTENTFUL };
 };
 
 /**
  * Set the content provider configuration
- * @deprecated This function is deprecated as we now always use Contentful
- * @param config New configuration (will be ignored)
+ * This function is kept for backward compatibility but has no effect
  */
-export const setCMSProviderConfig = (config: ContentProviderConfig) => {
-  logDeprecationWarning(
-    "setCMSProviderConfig",
-    "Setting a non-Contentful provider is deprecated and will be ignored.",
-    "Contentful is now the only supported CMS provider."
-  );
-  
-  // Log but ignore the attempt to change provider
-  console.log('[providerConfig] Attempted to change CMS provider, but Contentful is now enforced');
+export const setCMSProviderConfig = () => {
+  console.log('[providerConfig] Contentful is now the only supported CMS provider');
 };
 
 /**

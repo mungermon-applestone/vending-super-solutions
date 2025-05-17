@@ -1,10 +1,10 @@
-
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import ContentfulFallbackMessage from './ContentfulFallbackMessage';
 
 interface Props {
   children: ReactNode;
   contentType: string;
+  fallback?: ReactNode;
 }
 
 interface State {
@@ -33,6 +33,12 @@ class ContentfulErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
+      // If a custom fallback is provided, render that instead
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+      
+      // Otherwise use the default fallback message
       return (
         <ContentfulFallbackMessage
           title={`Error Rendering ${this.props.contentType}`}

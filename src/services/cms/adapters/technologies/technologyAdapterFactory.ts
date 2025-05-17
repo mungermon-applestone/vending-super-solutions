@@ -1,17 +1,14 @@
 
-import { ContentProviderConfig, ContentProviderType } from '../types';
 import { TechnologyAdapter } from './types';
 import { contentfulTechnologyAdapter } from './contentfulTechnologyAdapter';
 import { handleCMSError } from '@/services/cms/utils/errorHandling';
 
 /**
- * Factory function to get the appropriate technology adapter based on the CMS provider
- * @param config CMS provider configuration
- * @returns The technology adapter implementation (always Contentful)
+ * Factory function to get the Contentful technology adapter
+ * @returns The technology adapter implementation
  */
-export function getTechnologyAdapter(config: ContentProviderConfig): TechnologyAdapter {
+export function getTechnologyAdapter(): TechnologyAdapter {
   try {
-    // Always return contentful adapter regardless of config
     console.log('[technologyAdapterFactory] Using Contentful technology adapter');
     return contentfulTechnologyAdapter;
   } catch (error) {
@@ -21,13 +18,12 @@ export function getTechnologyAdapter(config: ContentProviderConfig): TechnologyA
 }
 
 /**
- * Check if the configured CMS provider has a valid technology adapter
- * @param config The CMS provider configuration to check
+ * Check if the technology adapter is valid
  * @returns True if the adapter is available and valid
  */
-export async function validateTechnologyAdapter(config: ContentProviderConfig): Promise<boolean> {
+export async function validateTechnologyAdapter(): Promise<boolean> {
   try {
-    const adapter = getTechnologyAdapter(config);
+    const adapter = getTechnologyAdapter();
     
     // Try a simple operation to validate the adapter
     await adapter.getAll({ limit: 1 });

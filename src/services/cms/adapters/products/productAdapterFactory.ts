@@ -1,14 +1,12 @@
 
-import { ContentProviderConfig } from '../types';
 import { ProductAdapter } from './types';
 import { contentfulProductAdapter } from './contentfulProductAdapter';
 import { handleCMSError } from '@/services/cms/utils/errorHandling';
 
 /**
- * Factory function that always returns the Contentful product adapter
- * regardless of configuration
+ * Factory function that returns the Contentful product adapter
  */
-export const getProductAdapter = (config?: ContentProviderConfig): ProductAdapter => {
+export const getProductAdapter = (): ProductAdapter => {
   try {
     console.log('[productAdapterFactory] Using Contentful product adapter');
     return contentfulProductAdapter;
@@ -22,9 +20,9 @@ export const getProductAdapter = (config?: ContentProviderConfig): ProductAdapte
  * Check if the product adapter is valid
  * @returns True if the adapter is available and valid
  */
-export async function validateProductAdapter(config: ContentProviderConfig): Promise<boolean> {
+export async function validateProductAdapter(): Promise<boolean> {
   try {
-    const adapter = getProductAdapter(config);
+    const adapter = getProductAdapter();
     
     // Try a simple operation to validate the adapter
     await adapter.getAll({ limit: 1 });

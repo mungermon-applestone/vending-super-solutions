@@ -3,8 +3,7 @@ import { Entry } from 'contentful';
 
 /**
  * Base interface for CMS adapters
- * This interface has been simplified to remove Supabase dependencies
- * and will be further refactored in the next phase
+ * Simplified to focus on Contentful integration
  */
 export interface BaseCmsAdapter<T, CreatePayload, UpdatePayload = Partial<CreatePayload>> {
   /**
@@ -32,34 +31,6 @@ export interface BaseCmsAdapter<T, CreatePayload, UpdatePayload = Partial<Create
 export const handleCmsError = (error: unknown, operation: "fetch" | "create" | "update" | "delete" | "initialize"): Promise<never> => {
   console.error(`CMS ${operation} operation failed:`, error);
   return Promise.reject(new Error(`Failed to ${operation} content: ${error instanceof Error ? error.message : "Unknown error"}`));
-};
-
-/**
- * This adapter has been kept as a stub to prevent build errors
- * It will be removed in the next phase of the migration
- * @deprecated - This adapter is being phased out in favor of direct Contentful usage
- */
-export const createBaseCmsAdapter = <T, CreatePayload, UpdatePayload = Partial<CreatePayload>>(
-  contentType: string
-): BaseCmsAdapter<T, CreatePayload, UpdatePayload> => {
-  console.warn(`Using deprecated CMS adapter for ${contentType}`);
-  
-  return {
-    fetchAll: async () => {
-      console.warn(`fetchAll for ${contentType} using deprecated adapter`);
-      return [];
-    },
-    
-    fetchBySlug: async (slug: string) => {
-      console.warn(`fetchBySlug for ${contentType} using deprecated adapter`);
-      return null;
-    },
-    
-    fetchById: async (id: string) => {
-      console.warn(`fetchById for ${contentType} using deprecated adapter`);
-      return null;
-    }
-  };
 };
 
 /**
