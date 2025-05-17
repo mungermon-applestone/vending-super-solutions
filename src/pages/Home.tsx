@@ -5,10 +5,11 @@ import FeaturesSection from '@/components/home/FeaturesSection';
 import ProductTypesSection from '@/components/home/ProductTypesSection';
 import BusinessGoalsSection from '@/components/home/BusinessGoalsSection';
 import MachineTypesSection from '@/components/home/MachineTypesSection';
-import TestimonialsSection from '@/components/home/TestimonialsSection';
 import { SimpleContactCTA } from '@/components/common';
 import ContentfulDebug from '@/components/debug/ContentfulDebug';
 import { CONTENTFUL_CONFIG, isContentfulConfigured } from '@/config/cms';
+import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
+import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 
 const Home = () => {
   console.log('[Home] CMS Configuration status:', {
@@ -19,6 +20,9 @@ const Home = () => {
     environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID
   });
 
+  // Fetch testimonials from Contentful with the 'home' pageKey
+  const { data: testimonialSection, isLoading, error } = useTestimonialSection('home');
+
   return (
     <>
       <HeroSection />
@@ -26,7 +30,14 @@ const Home = () => {
       <ProductTypesSection />
       <MachineTypesSection />
       <BusinessGoalsSection />
-      <TestimonialsSection />
+      
+      {/* Use our new ContentfulTestimonialsCarousel component */}
+      <ContentfulTestimonialsCarousel 
+        data={testimonialSection} 
+        isLoading={isLoading}
+        error={error}
+      />
+      
       <SimpleContactCTA 
         title="Ready to Transform Your Vending Operations?" 
         description="Get in touch and we'll start you on your vending journey."

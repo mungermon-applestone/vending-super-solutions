@@ -22,21 +22,22 @@ export const transformTestimonial = (entry: Entry<any>): Testimonial => {
   }
 
   // Convert all field values to strings to satisfy TypeScript
-  const name = String(entry.fields.name || 'Unknown');
+  const name = String(entry.fields.author || 'Unknown');
   const quote = String(entry.fields.quote || '');
   const company = String(entry.fields.company || '');
   const position = String(entry.fields.position || '');
+  const rating = typeof entry.fields.rating === 'number' ? entry.fields.rating : 5;
   
   // Handle avatar more carefully
   let avatar = '';
-  if (entry.fields.avatar && 
-      typeof entry.fields.avatar === 'object' && 
-      entry.fields.avatar.fields && 
-      typeof entry.fields.avatar.fields === 'object' &&
-      entry.fields.avatar.fields.file && 
-      typeof entry.fields.avatar.fields.file === 'object' &&
-      typeof entry.fields.avatar.fields.file.url === 'string') {
-    avatar = `https:${entry.fields.avatar.fields.file.url}`;
+  if (entry.fields.image && 
+      typeof entry.fields.image === 'object' && 
+      entry.fields.image.fields && 
+      typeof entry.fields.image.fields === 'object' &&
+      entry.fields.image.fields.file && 
+      typeof entry.fields.image.fields.file === 'object' &&
+      typeof entry.fields.image.fields.file.url === 'string') {
+    avatar = `https:${entry.fields.image.fields.file.url}`;
   }
 
   return {
@@ -45,7 +46,8 @@ export const transformTestimonial = (entry: Entry<any>): Testimonial => {
     quote,
     company,
     position,
-    avatar
+    avatar,
+    rating
   };
 };
 
