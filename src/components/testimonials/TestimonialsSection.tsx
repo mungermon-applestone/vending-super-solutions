@@ -6,15 +6,22 @@ interface TestimonialsSectionProps {
   title?: string;
   subtitle?: string;
   testimonials?: Testimonial[];
+  data?: any; // For compatibility with existing components
 }
 
 const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
   title = "What Our Clients Say",
   subtitle = "Read testimonials from businesses that have partnered with us",
-  testimonials = []
+  testimonials = [],
+  data
 }) => {
+  // Handle both direct testimonials and data.testimonials pattern
+  const testimonialsToDisplay = testimonials.length > 0 
+    ? testimonials 
+    : (data?.testimonials || []);
+  
   // If there are no testimonials, don't render the section
-  if (!testimonials || testimonials.length === 0) {
+  if (!testimonialsToDisplay || testimonialsToDisplay.length === 0) {
     return null;
   }
 
@@ -27,7 +34,7 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {testimonials.map((testimonial, index) => (
+          {testimonialsToDisplay.map((testimonial, index) => (
             <div 
               key={testimonial.id || index}
               className="bg-white p-6 rounded-lg shadow-md"

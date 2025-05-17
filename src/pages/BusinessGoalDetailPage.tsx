@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useBusinessGoal } from '@/hooks/cms/useBusinessGoal';
@@ -12,7 +13,7 @@ import BusinessGoalIntegrations from '@/components/businessGoals/BusinessGoalInt
 
 const BusinessGoalDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: businessGoal, isLoading, error, retry } = useBusinessGoal(slug || '');
+  const { data: businessGoal, isLoading, error, refetch } = useBusinessGoal(slug || '');
 
   if (isLoading) {
     return (
@@ -27,7 +28,7 @@ const BusinessGoalDetailPage: React.FC = () => {
       <ContentfulFallbackMessage 
         title="Failed to Load Business Goal"
         message="There was an error loading the business goal from the content management system."
-        retry={retry}
+        onRetry={refetch}
       />
     );
   }
@@ -77,13 +78,18 @@ const BusinessGoalDetailPage: React.FC = () => {
     }
   ];
 
+  // Process image to handle both string and object formats
+  const imageUrl = typeof businessGoal.image === 'string' 
+    ? businessGoal.image 
+    : businessGoal.image?.url || '';
+
   return (
     <>
       <BusinessGoalHero 
         title={businessGoal.title}
         description={businessGoal.description}
         icon={<MachineTypeIcon type={businessGoal.icon} className="h-6 w-6" />}
-        image={businessGoal.image}
+        image={imageUrl}
       />
       
       <BusinessGoalFeatures features={features} />

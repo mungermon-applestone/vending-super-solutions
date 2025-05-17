@@ -1,15 +1,36 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
 import { useContentfulBusinessGoals } from '@/hooks/cms/useContentfulBusinessGoals';
 import MachineTypeIcon from '@/components/common/MachineTypeIcon';
 
 interface BusinessGoalsGridProps {
   className?: string;
+  businessGoals?: any[];
+  goals?: any[];
+  isLoading?: boolean;
+  error?: any;
+  compactView?: boolean;
+  columnCount?: number;
+  ultraCompact?: boolean;
 }
 
-const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({ className }) => {
-  const { data: businessGoals, isLoading } = useContentfulBusinessGoals();
+const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({ 
+  className, 
+  businessGoals, 
+  goals,
+  isLoading: isLoadingProp, 
+  error,
+  compactView = false,
+  columnCount = 3,
+  ultraCompact = false
+}) => {
+  const { data: fetchedGoals, isLoading: isLoadingHook } = useContentfulBusinessGoals();
+  
+  // Determine what data to use
+  const isLoading = isLoadingProp !== undefined ? isLoadingProp : isLoadingHook;
+  const itemsToDisplay = businessGoals || goals || fetchedGoals || [];
 
   return (
     <section className={`py-16 bg-white ${className || ''}`}>
@@ -19,8 +40,8 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({ className }) => {
             <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {businessGoals?.map((goal) => (
+          <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${columnCount} gap-6`}>
+            {itemsToDisplay?.map((goal) => (
               <Link 
                 key={goal.id} 
                 to={`/business-goals/${goal.slug}`}
@@ -46,5 +67,3 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({ className }) => {
 };
 
 export default BusinessGoalsGrid;
-
-import { ArrowRight } from 'lucide-react';

@@ -36,9 +36,6 @@ const Navigation = () => {
           <NavLink to="/business-goals" active={isActive('/business-goals')}>
             Business Goals
           </NavLink>
-          <NavLink to="/admin/products" active={isActive('/admin')}>
-            Admin
-          </NavLink>
           <Button asChild>
             <Link to="/contact" className="ml-2">
               Contact
