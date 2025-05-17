@@ -15,6 +15,7 @@ import Layout from "./components/layout/Layout";
 import About from "./pages/About";
 import BlogPage from "./pages/BlogPage";
 import ContentfulBlogPostDetail from "./pages/ContentfulBlogPostDetail";
+import { Navigate } from "react-router-dom";
 
 export const router = createBrowserRouter([
   {
@@ -73,6 +74,11 @@ export const router = createBrowserRouter([
       {
         path: "/blog/:slug",
         element: <ContentfulBlogPostDetail />,
+      },
+      // Redirect any admin routes to Contentful
+      {
+        path: "/admin/*",
+        element: <Navigate to="https://app.contentful.com" replace />,
       },
     ],
   },

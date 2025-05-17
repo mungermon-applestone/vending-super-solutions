@@ -24,15 +24,16 @@ export const transformTestimonial = (entry: Entry<any> | ContentfulTestimonial):
 
   const fields = entry.fields;
 
-  // Convert all field values to strings to satisfy TypeScript
-  // Use author field as name if present, otherwise use name field
-  const name = String(fields.author || fields.name || 'Unknown');
-  const quote = String(fields.quote || '');
-  const company = String(fields.company || '');
-  const position = String(fields.position || '');
+  // Use TypeScript type guards to ensure properties exist
+  const name = typeof fields.author === 'string' ? fields.author : 
+               (typeof fields.name === 'string' ? fields.name : 'Unknown');
+  
+  const quote = typeof fields.quote === 'string' ? fields.quote : '';
+  const company = typeof fields.company === 'string' ? fields.company : '';
+  const position = typeof fields.position === 'string' ? fields.position : '';
   const rating = typeof fields.rating === 'number' ? fields.rating : 5;
   
-  // Handle avatar more carefully
+  // Handle avatar more carefully with proper type guards
   let avatar = '';
   if (fields.image && 
       typeof fields.image === 'object' && 

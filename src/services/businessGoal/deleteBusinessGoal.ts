@@ -1,43 +1,15 @@
 
-import { supabase } from '@/integrations/supabase/client';
-
 /**
- * Delete a business goal from the database
- * @param slug The slug of the business goal to delete
- * @returns True if successful, throws error otherwise
+ * @deprecated This operation is deprecated as we have migrated to Contentful CMS
+ * 
+ * Use Contentful's web interface to manage business goals:
+ * https://app.contentful.com
  */
 export const deleteBusinessGoal = async (slug: string): Promise<boolean> => {
-  console.log(`[deleteBusinessGoal] Deleting business goal with slug: ${slug}`);
+  console.warn(`[deleteBusinessGoal] DEPRECATED: Business goal deletion via API is no longer supported.
+    Please use the Contentful web interface to manage business goals.
+    Attempted to delete business goal with slug: ${slug}`);
   
-  try {
-    // First, fetch the business goal to get its ID
-    const { data: businessGoal, error: fetchError } = await supabase
-      .from('business_goals')
-      .select('id')
-      .eq('slug', slug)
-      .single();
-      
-    if (fetchError) {
-      console.error('[deleteBusinessGoal] Error fetching business goal:', fetchError);
-      throw new Error(`Business goal with slug '${slug}' not found`);
-    }
-    
-    const businessGoalId = businessGoal.id;
-    
-    // Delete the business goal
-    const { error: deleteError } = await supabase
-      .from('business_goals')
-      .delete()
-      .eq('id', businessGoalId);
-      
-    if (deleteError) {
-      console.error('[deleteBusinessGoal] Error deleting business goal:', deleteError);
-      throw new Error(`Failed to delete business goal: ${deleteError.message}`);
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('[deleteBusinessGoal] Error:', error);
-    throw error;
-  }
+  throw new Error(`Business goal deletion via API is deprecated. 
+    Please use the Contentful web interface to manage content.`);
 };

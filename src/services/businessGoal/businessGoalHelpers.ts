@@ -24,64 +24,27 @@ export const transformBusinessGoalEntries = (entries: Entry<any>[]): BusinessGoa
     return [];
   }
   
-  return entries
-    .filter(entry => entry && entry.fields)
-    .map(entry => ({
-      id: entry.sys?.id || '',
-      title: entry.fields.title || '',
-      slug: entry.fields.slug || '',
-      description: entry.fields.description || '',
-      icon: entry.fields.icon || '',
-      benefits: Array.isArray(entry.fields.benefits) 
-        ? entry.fields.benefits 
-        : [],
-      image: entry.fields.image && typeof entry.fields.image === 'object' && 
-        entry.fields.image.fields && typeof entry.fields.image.fields === 'object' && 
-        entry.fields.image.fields.file && typeof entry.fields.image.fields.file === 'object' && 
-        entry.fields.image.fields.file.url
-          ? `https:${entry.fields.image.fields.file.url}`
-          : '',
-      imageAlt: entry.fields.image && typeof entry.fields.image === 'object' && 
-        entry.fields.image.fields && typeof entry.fields.image.fields === 'object' &&
-        entry.fields.image.fields.description 
-          ? entry.fields.image.fields.description 
-          : entry.fields.title || ''
-    }));
+  return entries.map(entry => {
+    if (!entry || !entry.fields) {
+      console.warn('Invalid entry in transformBusinessGoalEntries:', entry);
+      return null;
+    }
+    
+    const fields = entry.fields;
+    
+    return {
+      id: entry.sys?.id || 'unknown-id',
+      title: typeof fields.title === 'string' ? fields.title : 'Untitled',
+      slug: typeof fields.slug === 'string' ? fields.slug : 'unknown-slug',
+      description: typeof fields.description === 'string' ? fields.description : '',
+      icon: typeof fields.icon === 'string' ? fields.icon : undefined,
+      benefits: Array.isArray(fields.benefits) ? 
+        fields.benefits.filter(benefit => typeof benefit === 'string') : 
+        undefined,
+      image: fields.image?.fields?.file?.url ? 
+        `https:${fields.image.fields.file.url}` : 
+        undefined,
+      imageAlt: fields.image?.fields?.title || undefined
+    };
+  }).filter(Boolean) as BusinessGoalItem[];
 };
-
-/**
- * Helper function to transform a single Contentful business goal entry into a BusinessGoalItem
- * 
- * @param entry - A Contentful business goal entry
- * @returns A BusinessGoalItem object or null if the entry is invalid
- */
-export const transformBusinessGoalEntry = (entry: Entry<any> | undefined | null): BusinessGoalItem | null => {
-  if (!entry || !entry.fields) {
-    return null;
-  }
-  
-  return {
-    id: entry.sys?.id || '',
-    title: entry.fields.title || '',
-    slug: entry.fields.slug || '',
-    description: entry.fields.description || '',
-    icon: entry.fields.icon || '',
-    benefits: Array.isArray(entry.fields.benefits) 
-      ? entry.fields.benefits 
-      : [],
-    image: entry.fields.image && typeof entry.fields.image === 'object' && 
-      entry.fields.image.fields && typeof entry.fields.image.fields === 'object' && 
-      entry.fields.image.fields.file && typeof entry.fields.image.fields.file === 'object' &&
-      entry.fields.image.fields.file.url
-        ? `https:${entry.fields.image.fields.file.url}`
-        : '',
-    imageAlt: entry.fields.image && typeof entry.fields.image === 'object' && 
-      entry.fields.image.fields && typeof entry.fields.image.fields === 'object' &&
-      entry.fields.image.fields.description 
-        ? entry.fields.image.fields.description 
-        : entry.fields.title || ''
-  };
-};
-
-// Re-export the type using export type syntax to avoid conflicts
-export type { BusinessGoalItem };
