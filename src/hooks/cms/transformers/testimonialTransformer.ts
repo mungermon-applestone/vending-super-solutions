@@ -26,7 +26,7 @@ export const transformTestimonial = (entry: Entry<any> | ContentfulTestimonial):
 
   // Convert all field values to strings to satisfy TypeScript
   // Use author field as name if present, otherwise use name field
-  const name = String(fields.author || fields.name || 'Unknown');
+  const name = String(fields.author || 'Unknown');
   const quote = String(fields.quote || '');
   const company = String(fields.company || '');
   const position = String(fields.position || '');

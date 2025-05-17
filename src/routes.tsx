@@ -3,7 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Products from "./pages/Products";
-import BusinessGoals from "./pages/BusinessGoals";
+import BusinessGoalsPage from "./pages/BusinessGoalsPage";
 import BusinessGoalDetail from "./pages/BusinessGoalDetail";
 import MachinesPage from "./pages/MachinesPage";
 import TechnologyPage from "./pages/TechnologyPage";
@@ -36,7 +36,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "/business-goals",
-        element: <BusinessGoals />,
+        element: <BusinessGoalsPage />,
       },
       {
         path: "/business-goals/:slug",
