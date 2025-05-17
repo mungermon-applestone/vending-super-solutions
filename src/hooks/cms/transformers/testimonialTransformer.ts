@@ -2,6 +2,12 @@
 import { Entry } from 'contentful';
 import { Testimonial } from '@/types/testimonial';
 import { ContentfulTestimonial } from '@/types/contentful/testimonial';
+import { 
+  getStringField, 
+  getNumberField,
+  getEntryId,
+  getAssetUrl
+} from '@/utils/contentful/dataExtractors';
 
 /**
  * Transforms a Contentful Testimonial entry into the application's Testimonial format
@@ -10,7 +16,7 @@ import { ContentfulTestimonial } from '@/types/contentful/testimonial';
  * @returns A Testimonial object
  */
 export const transformTestimonial = (entry: Entry<any> | ContentfulTestimonial): Testimonial => {
-  if (!entry || !entry.fields) {
+  if (!entry) {
     console.warn('Received invalid testimonial entry:', entry);
     return {
       id: 'invalid-entry',
@@ -22,45 +28,22 @@ export const transformTestimonial = (entry: Entry<any> | ContentfulTestimonial):
     };
   }
 
-  const fields = entry.fields;
-
-  // Use TypeScript type guards to ensure properties exist
-  const name = typeof fields.author === 'string' ? fields.author : 'Unknown';
-  const quote = typeof fields.quote === 'string' ? fields.quote : '';
-  const company = typeof fields.company === 'string' ? fields.company : '';
-  const position = typeof fields.position === 'string' ? fields.position : '';
-  const rating = typeof fields.rating === 'number' ? fields.rating : 5;
+  // Use our helper functions to safely extract values
+  const name = getStringField(entry, 'author', 'Unknown');
+  const quote = getStringField(entry, 'quote', '');
+  const company = getStringField(entry, 'company', '');
+  const position = getStringField(entry, 'position', '');
+  const rating = getNumberField(entry, 'rating', 5);
   
-  // Handle avatar more carefully with explicit type checking
+  // Handle avatar with our asset helper
   let avatar = '';
-  
-  if (fields.image) {
-    // Handle Asset with sys and fields structure
-    if (typeof fields.image === 'object' && fields.image !== null) {
-      if ('fields' in fields.image && fields.image.fields) {
-        const imageFields = fields.image.fields;
-        
-        // Check if file exists and has url with proper type guards
-        if (imageFields && 
-            typeof imageFields === 'object' &&
-            imageFields.file && 
-            typeof imageFields.file === 'object' && 
-            'url' in imageFields.file && 
-            typeof imageFields.file.url === 'string') {
-          avatar = `https:${imageFields.file.url}`;
-        }
-      }
-      // Handle direct url field (simplified structure)
-      else if ('url' in fields.image && typeof fields.image.url === 'string') {
-        avatar = fields.image.url.startsWith('http') 
-          ? fields.image.url 
-          : `https:${fields.image.url}`;
-      }
-    }
+  const image = entry.fields?.image;
+  if (image) {
+    avatar = getAssetUrl(image, '');
   }
 
   return {
-    id: entry.sys?.id || 'unknown-id',
+    id: getEntryId(entry, 'unknown-id'),
     name,
     quote,
     company,

@@ -1,6 +1,14 @@
 
 import { Entry } from 'contentful';
 import { CMSBusinessGoal } from '@/types/cms';
+import { 
+  getStringField,
+  getArrayField,
+  getEntryId,
+  getAssetUrl,
+  getAssetAlt
+} from '@/utils/contentful/dataExtractors';
+import { isObject } from '@/utils/contentful/typeGuards';
 
 export interface BusinessGoalItem {
   id: string;
@@ -31,47 +39,23 @@ export const transformBusinessGoalEntries = (entries: Entry<any>[]): BusinessGoa
         return null;
       }
       
-      // Safely access fields with proper type checking
-      const fields = entry.fields;
-      
-      // Extract image URL if available with proper type guards
-      let imageUrl: string | undefined;
-      let imageAlt: string | undefined;
-      
-      if (fields.image) {
-        if (typeof fields.image === 'object' && 'fields' in fields.image && fields.image.fields) {
-          const imageFields = fields.image.fields;
-          
-          if (imageFields.file && 
-              typeof imageFields.file === 'object' && 
-              'url' in imageFields.file && 
-              typeof imageFields.file.url === 'string') {
-            imageUrl = `https:${imageFields.file.url}`;
-          }
-          
-          if ('title' in imageFields && typeof imageFields.title === 'string') {
-            imageAlt = imageFields.title;
-          }
-        }
-      }
+      // Extract image information using our helper functions
+      const image = entry.fields.image;
+      const imageUrl = image ? getAssetUrl(image) : undefined;
+      const imageAlt = image ? getAssetAlt(image) : undefined;
       
       // Extract benefits array if available
-      let benefits: string[] | undefined;
-      if (Array.isArray(fields.benefits)) {
-        benefits = fields.benefits
-          .filter(benefit => typeof benefit === 'string')
-          .map(benefit => benefit as string);
-      }
+      const benefits = getArrayField<string>(entry, 'benefits').filter(isString);
       
       return {
-        id: entry.sys?.id || 'unknown-id',
-        title: typeof fields.title === 'string' ? fields.title : 'Untitled',
-        slug: typeof fields.slug === 'string' ? fields.slug : 'unknown-slug',
-        description: typeof fields.description === 'string' ? fields.description : '',
-        icon: typeof fields.icon === 'string' ? fields.icon : undefined,
-        benefits: benefits,
+        id: getEntryId(entry, 'unknown-id'),
+        title: getStringField(entry, 'title', 'Untitled'),
+        slug: getStringField(entry, 'slug', 'unknown-slug'),
+        description: getStringField(entry, 'description', ''),
+        icon: getStringField(entry, 'icon'),
+        benefits,
         image: imageUrl,
-        imageAlt: imageAlt
+        imageAlt
       };
     })
     .filter(Boolean) as BusinessGoalItem[];
