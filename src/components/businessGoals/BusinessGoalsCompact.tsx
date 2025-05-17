@@ -9,8 +9,8 @@ interface BusinessGoalItem {
   title: string;
   slug: string;
   description: string;
-  icon: string;
-  benefits: string[];
+  icon?: string;  // Changed from required to optional to match CMSBusinessGoal
+  benefits?: string[];
   image?: string;
   imageAlt?: string;
 }
@@ -44,6 +44,7 @@ const BusinessGoalsCompact: React.FC<BusinessGoalsCompactProps> = ({
                 <img className="w-full h-48 object-cover" src={goal.image} alt={goal.imageAlt || goal.title} />
               )}
               <div className="p-4">
+                {goal.icon && <MachineTypeIcon icon={goal.icon} className="mb-2 text-blue-500" />}
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">{goal.title}</h3>
                 <p className="text-gray-600 text-sm">{goal.description}</p>
                 <Link to={`/business-goals/${goal.slug}`} className="text-blue-500 hover:underline mt-3 block">

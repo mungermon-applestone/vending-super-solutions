@@ -21,13 +21,29 @@ export const transformTestimonial = (entry: Entry<any>): Testimonial => {
     };
   }
 
+  // Convert all field values to strings to satisfy TypeScript
+  const name = String(entry.fields.name || 'Unknown');
+  const quote = String(entry.fields.quote || '');
+  const company = String(entry.fields.company || '');
+  const position = String(entry.fields.position || '');
+  
+  // Handle avatar more carefully
+  let avatar = '';
+  if (entry.fields.avatar && 
+      typeof entry.fields.avatar === 'object' && 
+      entry.fields.avatar.fields && 
+      entry.fields.avatar.fields.file && 
+      entry.fields.avatar.fields.file.url) {
+    avatar = `https:${entry.fields.avatar.fields.file.url}`;
+  }
+
   return {
     id: entry.sys?.id || 'unknown-id',
-    name: entry.fields.name || 'Unknown',
-    quote: entry.fields.quote || '',
-    company: entry.fields.company || '',
-    position: entry.fields.position || '',
-    avatar: entry.fields.avatar?.fields?.file?.url ? `https:${entry.fields.avatar.fields.file.url}` : '',
+    name,
+    quote,
+    company,
+    position,
+    avatar
   };
 };
 

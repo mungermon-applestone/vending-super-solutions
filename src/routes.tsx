@@ -1,63 +1,63 @@
 
 import { createBrowserRouter } from "react-router-dom";
-import HomePage from "./pages/HomePage";
-import ProductPage from "./pages/ProductPage";
-import ProductsPage from "./pages/ProductsPage";
-import BusinessGoalsPage from "./pages/BusinessGoalsPage";
-import BusinessGoalPage from "./pages/BusinessGoalPage";
-import MachinesPage from "./pages/MachinesPage";
+import Home from "./pages/Home";
+import ProductDetail from "./pages/ProductDetail";
+import Products from "./pages/Products";
+import BusinessGoals from "./pages/BusinessGoals";
+import BusinessGoalDetail from "./pages/BusinessGoalDetail";
+import Machines from "./pages/Machines";
 import TechnologyPage from "./pages/TechnologyPage";
-import TechnologiesPage from "./pages/TechnologiesPage";
-import MachinePage from "./pages/MachinePage";
-import ContactPage from "./pages/ContactPage";
-import ErrorPage from "./pages/ErrorPage";
-import RootLayout from "./components/layout/RootLayout";
+import TechnologyDetail from "./pages/TechnologyDetail";
+import MachineDetail from "./pages/MachineDetail";
+import Contact from "./pages/Contact";
+import ErrorPage from "./components/ErrorPage";
+import Layout from "./components/layout/Layout";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <RootLayout />,
+    element: <Layout />,
     errorElement: <ErrorPage />,
     children: [
       {
         path: "/",
-        element: <HomePage />,
+        element: <Home />,
       },
       {
         path: "/products",
-        element: <ProductsPage />,
+        element: <Products />,
       },
       {
         path: "/products/:slug",
-        element: <ProductPage />,
+        element: <ProductDetail />,
       },
       {
         path: "/business-goals",
-        element: <BusinessGoalsPage />,
+        element: <BusinessGoals />,
       },
       {
         path: "/business-goals/:slug",
-        element: <BusinessGoalPage />,
+        element: <BusinessGoalDetail />,
       },
       {
         path: "/machines",
-        element: <MachinesPage />,
+        element: <Machines />,
       },
       {
         path: "/machines/:type/:slug",
-        element: <MachinePage />,
+        element: <MachineDetail />,
       },
       {
         path: "/technology",
-        element: <TechnologiesPage />,
-      },
-      {
-        path: "/technology/:slug",
         element: <TechnologyPage />,
       },
       {
+        path: "/technology/:slug",
+        element: <TechnologyDetail />,
+      },
+      {
         path: "/contact",
-        element: <ContactPage />,
+        element: <Contact />,
       },
     ],
   },
