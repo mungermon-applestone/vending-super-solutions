@@ -3,15 +3,15 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useContentfulProducts } from '@/hooks/cms/useContentfulProducts';
-import { ProductGrid } from '@/components/products/sections/ProductGrid';
+import ProductGrid from '@/components/products/sections/ProductGrid';
 import { CMSProductType } from '@/types/cms';
-import { ProductsHero } from '@/components/products/sections/ProductsHero';
-import { ProductsError } from '@/components/products/sections/ProductsError';
-import { ProductsLoadingState } from '@/components/products/sections/ProductsLoadingState';
-import { EmptyProductsList } from '@/components/products/sections/EmptyProductsList';
-import { PurposeStatement } from '@/components/products/sections/PurposeStatement';
+import ProductsHero from '@/components/products/sections/ProductsHero';
+import ProductsError from '@/components/products/sections/ProductsError';
+import ProductsLoadingState from '@/components/products/sections/ProductsLoadingState';
+import EmptyProductsList from '@/components/products/sections/EmptyProductsList';
+import PurposeStatement from '@/components/products/sections/PurposeStatement';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
-import { ConfigurationError } from '@/components/products/sections/ConfigurationError';
+import ConfigurationError from '@/components/products/sections/ConfigurationError';
 import { validateContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 
 // This is the main Products page component
@@ -43,7 +43,7 @@ const Products = () => {
     checkConfiguration();
   }, []);
 
-  // Handler for retry button
+  // Handler for retry button that returns a Promise
   const handleRefreshContentful = async (): Promise<void> => {
     setCanRefresh(false);
     try {
@@ -84,6 +84,11 @@ const Products = () => {
         onRetry={refetch} 
         onShowDebug={handleToggleDebug}
         showDebug={showDebug}
+        debugInfo={{
+          spaceId: process.env.VITE_CONTENTFUL_SPACE_ID || '',
+          environmentId: process.env.VITE_CONTENTFUL_ENVIRONMENT || '',
+          hasToken: !!process.env.VITE_CONTENTFUL_DELIVERY_TOKEN
+        }}
       />
     );
   }

@@ -31,26 +31,31 @@ export const transformTestimonial = (entry: Entry<any> | ContentfulTestimonial):
   const position = typeof fields.position === 'string' ? fields.position : '';
   const rating = typeof fields.rating === 'number' ? fields.rating : 5;
   
-  // Handle avatar more carefully
+  // Handle avatar more carefully with explicit type checking
   let avatar = '';
   
-  // Check if image exists and has the expected structure
-  if (fields.image && typeof fields.image === 'object') {
+  if (fields.image) {
     // Handle Asset with sys and fields structure
-    if ('fields' in fields.image && fields.image.fields) {
-      const imageFields = fields.image.fields;
-      
-      // Check if file exists and has url
-      if (imageFields.file && typeof imageFields.file === 'object' && 
-          'url' in imageFields.file && typeof imageFields.file.url === 'string') {
-        avatar = `https:${imageFields.file.url}`;
+    if (typeof fields.image === 'object' && fields.image !== null) {
+      if ('fields' in fields.image && fields.image.fields) {
+        const imageFields = fields.image.fields;
+        
+        // Check if file exists and has url with proper type guards
+        if (imageFields && 
+            typeof imageFields === 'object' &&
+            imageFields.file && 
+            typeof imageFields.file === 'object' && 
+            'url' in imageFields.file && 
+            typeof imageFields.file.url === 'string') {
+          avatar = `https:${imageFields.file.url}`;
+        }
       }
-    }
-    // Handle direct url field (simplified structure)
-    else if ('url' in fields.image && typeof fields.image.url === 'string') {
-      avatar = fields.image.url.startsWith('http') 
-        ? fields.image.url 
-        : `https:${fields.image.url}`;
+      // Handle direct url field (simplified structure)
+      else if ('url' in fields.image && typeof fields.image.url === 'string') {
+        avatar = fields.image.url.startsWith('http') 
+          ? fields.image.url 
+          : `https:${fields.image.url}`;
+      }
     }
   }
 

@@ -5,7 +5,7 @@ import { RefetchOptions, QueryObserverResult } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 
 export interface ContentfulFallbackMessageProps {
-  title?: string; // Make title optional
+  title?: string; // Title is now optional
   message: string;
   onRetry?: (options?: RefetchOptions) => Promise<any>;
   contentType: string;

@@ -34,16 +34,25 @@ export const transformBusinessGoalEntries = (entries: Entry<any>[]): BusinessGoa
       // Safely access fields with proper type checking
       const fields = entry.fields;
       
-      // Extract image URL if available
+      // Extract image URL if available with proper type guards
       let imageUrl: string | undefined;
       let imageAlt: string | undefined;
       
-      if (fields.image && typeof fields.image === 'object' && 'fields' in fields.image && fields.image.fields) {
-        const imageFields = fields.image.fields;
-        if (imageFields.file && typeof imageFields.file === 'object' && 'url' in imageFields.file && typeof imageFields.file.url === 'string') {
-          imageUrl = `https:${imageFields.file.url}`;
+      if (fields.image) {
+        if (typeof fields.image === 'object' && 'fields' in fields.image && fields.image.fields) {
+          const imageFields = fields.image.fields;
+          
+          if (imageFields.file && 
+              typeof imageFields.file === 'object' && 
+              'url' in imageFields.file && 
+              typeof imageFields.file.url === 'string') {
+            imageUrl = `https:${imageFields.file.url}`;
+          }
+          
+          if ('title' in imageFields && typeof imageFields.title === 'string') {
+            imageAlt = imageFields.title;
+          }
         }
-        imageAlt = typeof imageFields.title === 'string' ? imageFields.title : undefined;
       }
       
       // Extract benefits array if available

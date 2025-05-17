@@ -1,6 +1,5 @@
 
 import { Route } from "react-router-dom";
-import BusinessGoalDetail from "../pages/BusinessGoalDetail";
 import BusinessGoalDetailPage from "../pages/BusinessGoalDetailPage";
 
 export const businessGoalRoutes = (
