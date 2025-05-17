@@ -5,7 +5,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Products from "./pages/Products";
 import BusinessGoals from "./pages/BusinessGoals";
 import BusinessGoalDetail from "./pages/BusinessGoalDetail";
-import Machines from "./pages/Machines";
+import MachinesPage from "./pages/MachinesPage";
 import TechnologyPage from "./pages/TechnologyPage";
 import TechnologyDetail from "./pages/TechnologyDetail";
 import MachineDetail from "./pages/MachineDetail";
@@ -44,7 +44,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "/machines",
-        element: <Machines />,
+        element: <MachinesPage />,
       },
       {
         path: "/machines/:type/:slug",
