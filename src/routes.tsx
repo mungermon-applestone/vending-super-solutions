@@ -12,6 +12,9 @@ import MachineDetail from "./pages/MachineDetail";
 import Contact from "./pages/Contact";
 import ErrorPage from "./components/ErrorPage";
 import Layout from "./components/layout/Layout";
+import About from "./pages/About";
+import BlogPage from "./pages/BlogPage";
+import ContentfulBlogPostDetail from "./pages/ContentfulBlogPostDetail";
 
 export const router = createBrowserRouter([
   {
@@ -58,6 +61,18 @@ export const router = createBrowserRouter([
       {
         path: "/contact",
         element: <Contact />,
+      },
+      {
+        path: "/about",
+        element: <About />,
+      },
+      {
+        path: "/blog",
+        element: <BlogPage />,
+      },
+      {
+        path: "/blog/:slug",
+        element: <ContentfulBlogPostDetail />,
       },
     ],
   },

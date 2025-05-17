@@ -1,6 +1,5 @@
 
 import React from 'react';
-import Layout from '@/components/layout/Layout';
 import { Document } from '@contentful/rich-text-types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
@@ -37,7 +36,7 @@ const About = () => {
   ];
 
   return (
-    <Layout>
+    <>
       <SEO 
         title="About Us | Vending Solutions"
         description="Learn more about Vending Solutions and our mission to revolutionize vending machine operations."
@@ -96,7 +95,7 @@ const About = () => {
           </ContentfulErrorBoundary>
         )}
       </div>
-    </Layout>
+    </>
   );
 };
 
