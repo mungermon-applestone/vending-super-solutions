@@ -20,17 +20,18 @@ export function transformTechnologyEntry(entry: Entry<any>): any {
   let imageAlt = '';
   
   if (fields.image && typeof fields.image === 'object' && 'fields' in fields.image) {
-    if (fields.image.fields.file && fields.image.fields.file.url) {
-      imageUrl = `https:${fields.image.fields.file.url}`;
+    const imageFields = fields.image.fields;
+    if (imageFields && imageFields.file && typeof imageFields.file === 'object' && imageFields.file.url) {
+      imageUrl = `https:${imageFields.file.url}`;
     }
-    imageAlt = fields.image.fields.title || '';
+    imageAlt = imageFields && typeof imageFields.title === 'string' ? imageFields.title : '';
   }
 
   // Transform sections if present
   const sections = [];
   if (fields.sections && Array.isArray(fields.sections)) {
     for (const section of fields.sections) {
-      if (section && 'fields' in section) {
+      if (section && typeof section === 'object' && 'fields' in section && section.fields) {
         const sectionData = {
           id: section.sys?.id || `section-${Math.random().toString(36).substring(2, 11)}`,
           title: section.fields.title || '',
@@ -44,7 +45,7 @@ export function transformTechnologyEntry(entry: Entry<any>): any {
         // Transform features if present
         if (section.fields.features && Array.isArray(section.fields.features)) {
           sectionData.features = section.fields.features
-            .filter(feature => feature && 'fields' in feature)
+            .filter(feature => feature && typeof feature === 'object' && 'fields' in feature)
             .map(feature => ({
               id: feature.sys?.id || `feature-${Math.random().toString(36).substring(2, 11)}`,
               title: feature.fields.title || '',

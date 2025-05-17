@@ -6,6 +6,7 @@ import { useContentfulPageByKey } from "@/hooks/cms/useContentfulPageByKey";
 import ContentfulErrorBoundary from "@/components/common/ContentfulErrorBoundary";
 import ContentfulHero from "@/components/contentful/ContentfulHero";
 import ContentfulFallbackMessage from "@/components/common/ContentfulFallbackMessage";
+import { CMSTechnology } from "@/types/cms";
 
 /**
  * Technology landing page component
@@ -13,7 +14,7 @@ import ContentfulFallbackMessage from "@/components/common/ContentfulFallbackMes
  */
 const TechnologyLanding: React.FC = () => {
   const { 
-    data: technologies, 
+    data: technologies = [], 
     isLoading: isLoadingTech, 
     error: techError 
   } = useContentfulTechnologies();
@@ -26,6 +27,9 @@ const TechnologyLanding: React.FC = () => {
 
   const isLoading = isLoadingTech || isLoadingContent;
   const error = techError || contentError;
+
+  // Ensure we have a valid array for technologies
+  const technologiesArray: CMSTechnology[] = Array.isArray(technologies) ? technologies : [];
 
   return (
     <ContentfulErrorBoundary contentType="technology page">
@@ -56,7 +60,7 @@ const TechnologyLanding: React.FC = () => {
               </div>
               
               <TechnologyGrid 
-                technologies={technologies || []} 
+                technologies={technologiesArray} 
                 isLoading={isLoading} 
                 error={error}
               />

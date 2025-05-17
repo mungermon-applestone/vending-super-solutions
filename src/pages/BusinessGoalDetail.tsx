@@ -32,8 +32,8 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
         {businessGoal.image && (
           <div className="border-t border-gray-200">
             <img 
-              src={businessGoal.image} 
-              alt={businessGoal.imageAlt || businessGoal.title}
+              src={typeof businessGoal.image === 'string' ? businessGoal.image : businessGoal.image.url} 
+              alt={businessGoal.image_alt || businessGoal.title}
               className="w-full h-auto object-cover max-h-96"
             />
           </div>

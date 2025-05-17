@@ -5,7 +5,7 @@ import { RefetchOptions, QueryObserverResult } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 
 export interface ContentfulFallbackMessageProps {
-  title: string;
+  title?: string; // Make title optional
   message: string;
   onRetry?: (options?: RefetchOptions) => Promise<any>;
   contentType: string;
@@ -32,6 +32,9 @@ const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
   showAdmin = false,
   onAction
 }) => {
+  // Default title if one isn't provided
+  const displayTitle = title || `Error Loading ${contentType}`;
+
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center">
       <div className="mb-6">
@@ -52,7 +55,7 @@ const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
           <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
       </div>
-      <h2 className="text-2xl font-bold mb-2">{title}</h2>
+      <h2 className="text-2xl font-bold mb-2">{displayTitle}</h2>
       <p className="text-gray-600 mb-6">{message}</p>
       
       <div className="space-y-3">
