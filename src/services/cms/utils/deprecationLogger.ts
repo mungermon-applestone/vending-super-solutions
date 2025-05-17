@@ -1,38 +1,36 @@
 
 /**
- * @deprecated This file is being consolidated into deprecation.ts
- * and will be removed in a future version.
+ * Logs deprecation warnings for consistency
  * 
- * Re-exports from the consolidated deprecation module for backward compatibility.
+ * @param feature - The deprecated feature/function name
+ * @param message - Custom message explaining what to use instead
+ * @param suggestion - Optional suggestion for alternatives
  */
+export function logDeprecationWarning(
+  feature: string,
+  message: string = `${feature} is deprecated`,
+  suggestion: string = 'Use Contentful directly'
+): void {
+  console.warn(
+    `[DEPRECATED] ${message}. ${suggestion}. ` +
+    `This feature will be removed in a future release.`
+  );
+}
 
-import {
-  trackDeprecatedUsage,
-  getDeprecatedUsage,
-  resetDeprecationTracker,
-  logDeprecationWarning,
-  trackDeprecatedFeatureUsage,
-  getDeprecationStats,
-  type DeprecationStat
-} from './deprecation';
-
-// Re-export all functions to maintain backward compatibility
-export {
-  trackDeprecatedUsage,
-  getDeprecatedUsage,
-  resetDeprecationTracker,
-  logDeprecationWarning,
-  trackDeprecatedFeatureUsage,
-  getDeprecationStats,
-  type DeprecationStat
-};
-
-// Alias for backward compatibility
-export const getDeprecationUsageStats = getDeprecationStats;
-export const resetUsageStats = resetDeprecationTracker;
-
-// Log deprecation warning when this file is imported
-console.warn(
-  "⚠️ DEPRECATION WARNING: deprecationLogger.ts is deprecated and will be removed in a future update. " +
-  "Import directly from the consolidated 'deprecation.ts' module instead."
-);
+/**
+ * Tracks usage of deprecated features
+ * 
+ * @param feature Name of the feature being used
+ * @param details Additional information
+ */
+export function trackDeprecatedFeatureUsage(
+  feature: string, 
+  details?: string
+): void {
+  console.warn(
+    `[DEPRECATED FEATURE USED] "${feature}"` + 
+    (details ? `: ${details}` : '')
+  );
+  
+  // In future we could implement telemetry here to track usage
+}

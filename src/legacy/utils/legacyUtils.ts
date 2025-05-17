@@ -87,4 +87,3 @@ export const STRAPI_ENDPOINTS = {
   BUSINESS_GOALS: '/business-goals',
   MACHINES: '/machines'
 };
-

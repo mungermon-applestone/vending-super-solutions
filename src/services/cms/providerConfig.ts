@@ -11,6 +11,7 @@ export const getCMSProviderConfig = () => {
 /**
  * Set the content provider configuration
  * This function is kept for backward compatibility but has no effect
+ * @deprecated Use Contentful configuration directly
  */
 export const setCMSProviderConfig = () => {
   console.log('[providerConfig] Contentful is now the only supported CMS provider');
@@ -20,6 +21,7 @@ export const setCMSProviderConfig = () => {
  * Check if we're using a specific provider
  * @param type Provider type to check
  * @returns true if the provider type is Contentful, false otherwise
+ * @deprecated We now exclusively use Contentful
  */
 export const isUsingProvider = (type: ContentProviderType): boolean => {
   return type === ContentProviderType.CONTENTFUL;

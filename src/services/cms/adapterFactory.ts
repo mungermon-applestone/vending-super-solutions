@@ -3,7 +3,7 @@
  * CMS Adapter Factory
  * 
  * This module provides a centralized way to get adapters for different content types.
- * Only Contentful adapters are supported now.
+ * Only Contentful adapters are supported.
  */
 
 // Import Contentful adapters

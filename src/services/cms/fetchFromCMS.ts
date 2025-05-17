@@ -4,7 +4,7 @@ import { CMSContentTypeFactory } from './contentTypeFactory';
 import { useMockData, getMockData } from './mockDataHandler';
 
 /**
- * Generic function for fetching data from the CMS (either mock or Supabase)
+ * Generic function for fetching data from the CMS (Contentful or mock data)
  * @param contentType The type of content to fetch
  * @param params Query parameters to filter results
  * @returns Promise resolving to the requested data

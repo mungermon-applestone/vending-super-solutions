@@ -29,22 +29,22 @@ export const useContentfulPageByKey = (key: string, options?: {
         }
 
         const pageEntry = response.items[0];
-        const fields = pageEntry.fields;
+        const fields = pageEntry.fields as Record<string, any>;
 
         // Transform the page entry to a simpler structure
         return {
           id: pageEntry.sys.id,
-          key: fields.key,
-          title: fields.title,
-          introTitle: fields.introTitle || fields.title,
-          introDescription: fields.introDescription,
-          metaTitle: fields.metaTitle || fields.title,
-          metaDescription: fields.metaDescription,
+          key: fields.key as string || '',
+          title: fields.title as string || '',
+          introTitle: fields.introTitle as string || fields.title as string || '',
+          introDescription: fields.introDescription as string || '',
+          metaTitle: fields.metaTitle as string || fields.title as string || '',
+          metaDescription: fields.metaDescription as string || '',
           heroImage: fields.heroImage ? {
-            url: `https:${fields.heroImage.fields.file.url}`,
-            alt: fields.heroImage.fields.title || fields.title
+            url: `https:${(fields.heroImage as any).fields.file.url}`,
+            alt: (fields.heroImage as any).fields.title || fields.title || ''
           } : undefined,
-          content: fields.content
+          content: fields.content || null
         };
       } catch (error) {
         console.error(`[useContentfulPageByKey] Error fetching page with key "${key}":`, error);
