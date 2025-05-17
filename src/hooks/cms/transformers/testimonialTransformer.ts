@@ -25,6 +25,7 @@ export const transformTestimonial = (entry: Entry<any> | ContentfulTestimonial):
   const fields = entry.fields;
 
   // Convert all field values to strings to satisfy TypeScript
+  // Use author field as name if present, otherwise use name field
   const name = String(fields.author || fields.name || 'Unknown');
   const quote = String(fields.quote || '');
   const company = String(fields.company || '');
@@ -62,6 +63,7 @@ export const transformTestimonial = (entry: Entry<any> | ContentfulTestimonial):
  */
 export const transformTestimonials = (entries: Array<Entry<any> | ContentfulTestimonial>): Testimonial[] => {
   if (!entries || !Array.isArray(entries)) {
+    console.warn('Received invalid testimonials entries:', entries);
     return [];
   }
   

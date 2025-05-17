@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -7,7 +8,7 @@ import { useBusinessGoalsPageContent } from '@/hooks/cms/useBusinessGoalsPageCon
 import { useContentfulBusinessGoals } from '@/hooks/cms/useContentfulBusinessGoals';
 import { useHeroContent } from '@/hooks/cms/useHeroContent';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
-import TestimonialsSection from '@/components/testimonials/TestimonialsSection';
+import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 import BusinessGoalsPurposeStatement from '@/components/businessGoals/BusinessGoalsPurposeStatement';
 import BusinessGoalsGrid from '@/components/businessGoals/BusinessGoalsGrid';
 import BusinessGoalKeyBenefits from '@/components/businessGoals/BusinessGoalKeyBenefits';
@@ -121,7 +122,7 @@ const BusinessGoalsPage: React.FC = () => {
   const { data: businessGoals, isLoading: goalsLoading, error: goalsError } = useContentfulBusinessGoals();
   const { data: pageContent, isLoading: contentLoading, error: contentError } = useBusinessGoalsPageContent(BUSINESS_GOALS_CONTENT_ID);
   const { data: heroContent, isLoading: heroLoading } = useHeroContent(HERO_CONTENT_ID);
-  const { data: testimonialSection } = useTestimonialSection('business-goals');
+  const { data: testimonialSection, isLoading: isLoadingTestimonials, error: testimonialError } = useTestimonialSection('business-goals');
   
   const isLoading = goalsLoading || contentLoading || heroLoading;
   const error = goalsError || contentError;
@@ -192,8 +193,13 @@ const BusinessGoalsPage: React.FC = () => {
         />
       )}
 
+      {/* Replace TestimonialsSection with ContentfulTestimonialsCarousel */}
       {testimonialSection && (
-        <TestimonialsSection data={testimonialSection} />
+        <ContentfulTestimonialsCarousel 
+          data={testimonialSection}
+          isLoading={isLoadingTestimonials}
+          error={testimonialError}
+        />
       )}
 
       {/* Standard contact form section */}
