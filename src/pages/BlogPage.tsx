@@ -1,5 +1,5 @@
+
 import React from "react";
-import Layout from "@/components/layout/Layout";
 import { useContentfulBlogPosts } from "@/hooks/useContentfulBlogPosts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,21 +14,19 @@ import { SimpleContactCTA } from "@/components/common";
 
 const BlogPage: React.FC = () => {
   return (
-    <Layout>
-      <ContentfulInitializer
-        fallback={
-          <div className="container mx-auto p-4">
-            <ContentfulFallbackMessage
-              message="We're having trouble loading the blog content. Please configure Contentful in the Admin area."
-              contentType="blog"
-              showRefresh={true}
-            />
-          </div>
-        }
-      >
-        <BlogPageContent />
-      </ContentfulInitializer>
-    </Layout>
+    <ContentfulInitializer
+      fallback={
+        <div className="container mx-auto p-4">
+          <ContentfulFallbackMessage
+            message="We're having trouble loading the blog content. Please configure Contentful in the Admin area."
+            contentType="blog"
+            showRefresh={true}
+          />
+        </div>
+      }
+    >
+      <BlogPageContent />
+    </ContentfulInitializer>
   );
 };
 

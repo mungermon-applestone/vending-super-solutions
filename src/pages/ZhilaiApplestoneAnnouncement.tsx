@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { useContentfulBlogPostBySlug } from '@/hooks/useContentfulBlogPostBySlug';
-import Layout from '@/components/layout/Layout';
 import ContentfulBlogPostContent from '@/components/blog/ContentfulBlogPostContent';
 import { Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -62,21 +61,19 @@ function useAdjacentContentfulPosts(currentSlug: string | undefined) {
 
 const ZhilaiApplestoneAnnouncement: React.FC = () => {
   return (
-    <Layout>
-      <ContentfulInitializer
-        fallback={
-          <div className="container mx-auto p-4">
-            <ContentfulFallbackMessage
-              message="We're having trouble loading this announcement. Please configure Contentful in the Admin area."
-              contentType="blog post"
-              showRefresh={true}
-            />
-          </div>
-        }
-      >
-        <AnnouncementContent />
-      </ContentfulInitializer>
-    </Layout>
+    <ContentfulInitializer
+      fallback={
+        <div className="container mx-auto p-4">
+          <ContentfulFallbackMessage
+            message="We're having trouble loading this announcement. Please configure Contentful in the Admin area."
+            contentType="blog post"
+            showRefresh={true}
+          />
+        </div>
+      }
+    >
+      <AnnouncementContent />
+    </ContentfulInitializer>
   );
 };
 
