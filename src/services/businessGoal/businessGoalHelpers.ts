@@ -1,7 +1,17 @@
 
-// Import the BusinessGoalItem type from the shared types
-import { BusinessGoalItem } from '@/types/businessGoal';
 import { Entry } from 'contentful';
+import { CMSBusinessGoal } from '@/types/cms';
+
+export interface BusinessGoalItem {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  icon?: string;
+  benefits?: string[];
+  image?: string;
+  imageAlt?: string;
+}
 
 /**
  * Helper function to transform Contentful business goal entries into BusinessGoalItem objects
@@ -25,10 +35,17 @@ export const transformBusinessGoalEntries = (entries: Entry<any>[]): BusinessGoa
       benefits: Array.isArray(entry.fields.benefits) 
         ? entry.fields.benefits 
         : [],
-      image: entry.fields.image?.fields?.file?.url 
-        ? `https:${entry.fields.image.fields.file.url}`
-        : '',
-      imageAlt: entry.fields.image?.fields?.description || entry.fields.title || ''
+      image: entry.fields.image && typeof entry.fields.image === 'object' && 
+        entry.fields.image.fields && typeof entry.fields.image.fields === 'object' && 
+        entry.fields.image.fields.file && typeof entry.fields.image.fields.file === 'object' && 
+        entry.fields.image.fields.file.url
+          ? `https:${entry.fields.image.fields.file.url}`
+          : '',
+      imageAlt: entry.fields.image && typeof entry.fields.image === 'object' && 
+        entry.fields.image.fields && typeof entry.fields.image.fields === 'object' &&
+        entry.fields.image.fields.description 
+          ? entry.fields.image.fields.description 
+          : entry.fields.title || ''
     }));
 };
 
@@ -52,10 +69,17 @@ export const transformBusinessGoalEntry = (entry: Entry<any> | undefined | null)
     benefits: Array.isArray(entry.fields.benefits) 
       ? entry.fields.benefits 
       : [],
-    image: entry.fields.image?.fields?.file?.url 
-      ? `https:${entry.fields.image.fields.file.url}`
-      : '',
-    imageAlt: entry.fields.image?.fields?.description || entry.fields.title || ''
+    image: entry.fields.image && typeof entry.fields.image === 'object' && 
+      entry.fields.image.fields && typeof entry.fields.image.fields === 'object' && 
+      entry.fields.image.fields.file && typeof entry.fields.image.fields.file === 'object' &&
+      entry.fields.image.fields.file.url
+        ? `https:${entry.fields.image.fields.file.url}`
+        : '',
+    imageAlt: entry.fields.image && typeof entry.fields.image === 'object' && 
+      entry.fields.image.fields && typeof entry.fields.image.fields === 'object' &&
+      entry.fields.image.fields.description 
+        ? entry.fields.image.fields.description 
+        : entry.fields.title || ''
   };
 };
 

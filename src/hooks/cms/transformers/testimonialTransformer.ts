@@ -32,8 +32,10 @@ export const transformTestimonial = (entry: Entry<any>): Testimonial => {
   if (entry.fields.avatar && 
       typeof entry.fields.avatar === 'object' && 
       entry.fields.avatar.fields && 
+      typeof entry.fields.avatar.fields === 'object' &&
       entry.fields.avatar.fields.file && 
-      entry.fields.avatar.fields.file.url) {
+      typeof entry.fields.avatar.fields.file === 'object' &&
+      typeof entry.fields.avatar.fields.file.url === 'string') {
     avatar = `https:${entry.fields.avatar.fields.file.url}`;
   }
 

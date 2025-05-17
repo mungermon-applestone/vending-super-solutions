@@ -47,7 +47,7 @@ const FeaturedBusinessGoals = ({ entryId }: { entryId: string }) => {
         <ContentfulConfigWarning onRetry={handleRetry} showDetails={false} />
         {/* Show mock data as fallback */}
         {!goals || goals.length === 0 ? null : (
-          <BusinessGoalsCompact goals={goals} columnCount={3} />
+          <BusinessGoalsCompact goals={goals as any[]} columnCount={3} />
         )}
       </>
     );
@@ -66,7 +66,7 @@ const FeaturedBusinessGoals = ({ entryId }: { entryId: string }) => {
   }
 
   return (
-    <BusinessGoalsCompact goals={goals} columnCount={3} />
+    <BusinessGoalsCompact goals={goals as any[]} columnCount={3} />
   );
 };
 

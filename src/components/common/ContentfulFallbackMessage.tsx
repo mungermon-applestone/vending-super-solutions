@@ -5,16 +5,18 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query';
 
 interface ContentfulFallbackMessageProps {
-  title?: string;              // Added title prop
+  title?: string;
   message: string;
   contentType: string;
   showRefresh?: boolean;
   showAdmin?: boolean;
-  actionText?: string;         // Added actionText prop
-  actionHref?: string;         // Added actionHref prop
-  onAction?: () => void;       // Added onAction prop
+  actionText?: string;
+  actionHref?: string;
+  onAction?: () => void;
+  onRetry?: (options?: RefetchOptions) => Promise<any>; // Added onRetry prop
 }
 
 const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
@@ -26,9 +28,12 @@ const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
   actionText,
   actionHref,
   onAction,
+  onRetry,
 }) => {
   const handleRefresh = () => {
-    if (onAction) {
+    if (onRetry) {
+      onRetry();
+    } else if (onAction) {
       onAction();
     } else {
       window.location.reload();
