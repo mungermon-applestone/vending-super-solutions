@@ -25,8 +25,7 @@ export const transformTestimonial = (entry: Entry<any> | ContentfulTestimonial):
   const fields = entry.fields;
 
   // Use TypeScript type guards to ensure properties exist
-  const name = typeof fields.author === 'string' ? fields.author : 
-               (typeof fields.name === 'string' ? fields.name : 'Unknown');
+  const name = typeof fields.author === 'string' ? fields.author : 'Unknown';
   
   const quote = typeof fields.quote === 'string' ? fields.quote : '';
   const company = typeof fields.company === 'string' ? fields.company : '';

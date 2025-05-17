@@ -1,79 +1,54 @@
 
 import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
-import { AlertTriangle } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query';
+import { RefetchOptions, QueryObserverResult } from '@tanstack/react-query';
 
-interface ContentfulFallbackMessageProps {
-  title?: string;
+export interface ContentfulFallbackMessageProps {
+  title: string;
   message: string;
+  onRetry?: (options?: RefetchOptions) => Promise<any>;
   contentType: string;
-  showRefresh?: boolean;
-  showAdmin?: boolean;
-  actionText?: string;
-  actionHref?: string;
-  onAction?: () => void;
-  onRetry?: (options?: RefetchOptions) => Promise<any>; // Added onRetry prop
 }
 
+/**
+ * Component to display when there's an error loading content from Contentful
+ */
 const ContentfulFallbackMessage: React.FC<ContentfulFallbackMessageProps> = ({
   title,
   message,
-  contentType,
-  showRefresh = false,
-  showAdmin = true,
-  actionText,
-  actionHref,
-  onAction,
   onRetry,
+  contentType
 }) => {
-  const handleRefresh = () => {
-    if (onRetry) {
-      onRetry();
-    } else if (onAction) {
-      onAction();
-    } else {
-      window.location.reload();
-    }
-  };
-
   return (
-    <div className="max-w-3xl mx-auto py-8">
-      <Alert variant="warning" className="mb-6">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>{title || `Unable to load ${contentType}`}</AlertTitle>
-        <AlertDescription className="mt-2">
-          <p>{message}</p>
-        </AlertDescription>
-      </Alert>
-
-      <div className="flex flex-wrap gap-4 justify-center mt-6">
-        {showRefresh && (
-          <Button onClick={handleRefresh} variant="outline">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            {actionText || "Refresh Page"}
-          </Button>
-        )}
-        
-        {actionHref && actionText && !showRefresh && (
-          <Button onClick={onAction || (() => {})} asChild>
-            <Link to={actionHref}>
-              {actionText}
-            </Link>
-          </Button>
-        )}
-        
-        {showAdmin && !actionHref && (
-          <Button asChild>
-            <Link to="/admin/contentful-config">
-              Configure Contentful
-            </Link>
-          </Button>
-        )}
+    <div className="flex flex-col items-center justify-center p-8 text-center">
+      <div className="mb-6">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-gray-400 mb-4"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
       </div>
+      <h2 className="text-2xl font-bold mb-2">{title}</h2>
+      <p className="text-gray-600 mb-6">{message}</p>
+      {onRetry && (
+        <Button onClick={() => onRetry()} className="mb-4">
+          Try Again
+        </Button>
+      )}
+      <p className="text-sm text-gray-500">
+        If this problem persists, please check your Contentful content model for {contentType}.
+      </p>
     </div>
   );
 };

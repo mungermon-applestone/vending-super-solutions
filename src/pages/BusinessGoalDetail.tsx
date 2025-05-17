@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useParams } from "react-router-dom";
 import { useBusinessGoal } from "@/hooks/cms/useBusinessGoal";
@@ -36,15 +37,19 @@ const BusinessGoalDetail: React.FC = () => {
     );
   }
 
+  // Map Contentful structure to expected UI fields
+  const imageUrl = businessGoal.image?.url;
+  const imageAlt = businessGoal.image?.alt || businessGoal.title;
+
   return (
     <ContentfulErrorBoundary contentType="Business Goal">
       <div className="container mx-auto py-8">
         <h1 className="text-3xl font-bold mb-4">{businessGoal.title}</h1>
         <p className="text-gray-600 mb-6">{businessGoal.description}</p>
-        {businessGoal.image && (
+        {imageUrl && (
           <img
-            src={businessGoal.image}
-            alt={businessGoal.imageAlt || businessGoal.title}
+            src={imageUrl}
+            alt={imageAlt}
             className="w-full rounded-md mb-6"
           />
         )}

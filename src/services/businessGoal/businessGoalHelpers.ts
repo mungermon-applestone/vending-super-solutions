@@ -32,19 +32,35 @@ export const transformBusinessGoalEntries = (entries: Entry<any>[]): BusinessGoa
     
     const fields = entry.fields;
     
+    // Extract image URL if available
+    let imageUrl: string | undefined;
+    let imageAlt: string | undefined;
+    
+    if (fields.image && typeof fields.image === 'object' && fields.image.fields) {
+      const imageFields = fields.image.fields;
+      if (imageFields.file && typeof imageFields.file === 'object' && typeof imageFields.file.url === 'string') {
+        imageUrl = `https:${imageFields.file.url}`;
+      }
+      imageAlt = typeof imageFields.title === 'string' ? imageFields.title : undefined;
+    }
+    
+    // Extract benefits array if available
+    let benefits: string[] | undefined;
+    if (Array.isArray(fields.benefits)) {
+      benefits = fields.benefits
+        .filter(benefit => typeof benefit === 'string')
+        .map(benefit => benefit as string);
+    }
+    
     return {
       id: entry.sys?.id || 'unknown-id',
       title: typeof fields.title === 'string' ? fields.title : 'Untitled',
       slug: typeof fields.slug === 'string' ? fields.slug : 'unknown-slug',
       description: typeof fields.description === 'string' ? fields.description : '',
       icon: typeof fields.icon === 'string' ? fields.icon : undefined,
-      benefits: Array.isArray(fields.benefits) ? 
-        fields.benefits.filter(benefit => typeof benefit === 'string') : 
-        undefined,
-      image: fields.image?.fields?.file?.url ? 
-        `https:${fields.image.fields.file.url}` : 
-        undefined,
-      imageAlt: fields.image?.fields?.title || undefined
+      benefits: benefits,
+      image: imageUrl,
+      imageAlt: imageAlt
     };
   }).filter(Boolean) as BusinessGoalItem[];
 };
