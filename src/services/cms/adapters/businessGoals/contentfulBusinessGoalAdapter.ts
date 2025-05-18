@@ -48,13 +48,34 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
                                 machine.fields.thumbnail ||
                                 machine.fields.machineThumbnail;
                                 
+            // Enhanced logging for machine image discovery
+            console.log(`[contentfulBusinessGoalAdapter] Machine "${machine.fields.title}" image processing:`, {
+              hasImage: !!machine.fields.image,
+              hasThumbnail: !!machine.fields.thumbnail,
+              hasMachineThumbnail: !!machine.fields.machineThumbnail,
+              selectedSource: machineImage === machine.fields.machineThumbnail ? 'machineThumbnail' : 
+                             (machineImage === machine.fields.thumbnail ? 'thumbnail' : 'image')
+            });
+                                
+            const imageUrl = machineImage?.fields?.file?.url ? `https:${machineImage.fields.file.url}` : null;
+            
+            // Return the machine with image data mapped to both specific and generic properties
             return {
               id: machine.sys.id,
               title: machine.fields.title,
               slug: machine.fields.slug || machine.sys.id,
               description: machine.fields.description || '',
-              image: machineImage ? {
-                url: machineImage.fields?.file?.url ? `https:${machineImage.fields.file.url}` : null,
+              // Map to both specific properties AND generic image property
+              machineThumbnail: imageUrl ? {
+                url: imageUrl,
+                alt: machineImage.fields?.title || machine.fields.title
+              } : undefined,
+              thumbnail: imageUrl ? {
+                url: imageUrl,
+                alt: machineImage.fields?.title || machine.fields.title
+              } : undefined,
+              image: imageUrl ? {
+                url: imageUrl,
                 alt: machineImage.fields?.title || machine.fields.title
               } : undefined
             };
@@ -133,13 +154,34 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
                               machine.fields.thumbnail ||
                               machine.fields.machineThumbnail;
                               
+          // Enhanced logging for image discovery
+          console.log(`[contentfulBusinessGoalAdapter] Machine "${machine.fields.title}" image processing:`, {
+            hasImage: !!machine.fields.image,
+            hasThumbnail: !!machine.fields.thumbnail,
+            hasMachineThumbnail: !!machine.fields.machineThumbnail,
+            selectedSource: machineImage === machine.fields.machineThumbnail ? 'machineThumbnail' : 
+                          (machineImage === machine.fields.thumbnail ? 'thumbnail' : 'image')
+          });
+                              
+          const imageUrl = machineImage?.fields?.file?.url ? `https:${machineImage.fields.file.url}` : null;
+          
+          // Return the machine with image data mapped to both specific and generic properties
           return {
             id: machine.sys.id,
             title: machine.fields.title,
             slug: machine.fields.slug || machine.sys.id,
             description: machine.fields.description || '',
-            image: machineImage ? {
-              url: machineImage.fields?.file?.url ? `https:${machineImage.fields.file.url}` : null,
+            // Map to both specific properties AND generic image property
+            machineThumbnail: imageUrl ? {
+              url: imageUrl,
+              alt: machineImage.fields?.title || machine.fields.title
+            } : undefined,
+            thumbnail: imageUrl ? {
+              url: imageUrl,
+              alt: machineImage.fields?.title || machine.fields.title
+            } : undefined,
+            image: imageUrl ? {
+              url: imageUrl,
               alt: machineImage.fields?.title || machine.fields.title
             } : undefined
           };
@@ -198,13 +240,24 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
                               machine.fields.thumbnail ||
                               machine.fields.machineThumbnail;
                               
+          const imageUrl = machineImage?.fields?.file?.url ? `https:${machineImage.fields.file.url}` : null;
+          
           return {
             id: machine.sys.id,
             title: machine.fields.title,
             slug: machine.fields.slug || machine.sys.id,
             description: machine.fields.description || '',
-            image: machineImage ? {
-              url: machineImage.fields?.file?.url ? `https:${machineImage.fields.file.url}` : null,
+            // Map to both specific properties AND generic image property
+            machineThumbnail: imageUrl ? {
+              url: imageUrl,
+              alt: machineImage.fields?.title || machine.fields.title
+            } : undefined,
+            thumbnail: imageUrl ? {
+              url: imageUrl,
+              alt: machineImage.fields?.title || machine.fields.title
+            } : undefined,
+            image: imageUrl ? {
+              url: imageUrl,
               alt: machineImage.fields?.title || machine.fields.title
             } : undefined
           };

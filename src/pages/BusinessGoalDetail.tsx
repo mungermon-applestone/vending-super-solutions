@@ -41,6 +41,21 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
   // Process video data
   const videoData = businessGoal.video;
   
+  // Enhanced logging for debugging image issues
+  if (businessGoal.recommendedMachines && businessGoal.recommendedMachines.length > 0) {
+    console.log('[BusinessGoalDetail] Recommended machines with image data:', 
+      businessGoal.recommendedMachines.map(machine => ({
+        title: machine.title,
+        hasImage: !!machine.image,
+        imageUrl: machine.image?.url,
+        hasThumbnail: !!machine.thumbnail,
+        thumbnailUrl: machine.thumbnail?.url,
+        hasMachineThumbnail: !!machine.machineThumbnail,
+        machineThumbnailUrl: machine.machineThumbnail?.url
+      }))
+    );
+  }
+  
   // Log details about video and machines for debugging
   console.log('[BusinessGoalDetail] Video data:', videoData);
   console.log('[BusinessGoalDetail] Recommended machines:', businessGoal.recommendedMachines);
