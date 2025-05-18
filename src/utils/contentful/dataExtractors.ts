@@ -27,7 +27,9 @@ export function getAssetUrl(asset: any, defaultValue: string = ''): string {
   // Check for direct asset object
   if (isContentfulAsset(asset)) {
     if (asset.fields.file && asset.fields.file.url) {
-      return ensureHttps(asset.fields.file.url);
+      // Ensure we're passing a string type to ensureHttps
+      const urlString = asset.fields.file.url as string;
+      return ensureHttps(urlString);
     }
     return defaultValue;
   }
