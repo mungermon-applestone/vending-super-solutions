@@ -1,24 +1,24 @@
 
 import { useParams } from 'react-router-dom';
-import CTASection from '@/components/common/CTASection';
-import { getMachineBySlug } from '@/services/cms';
-import { CMSMachine } from '@/types/cms';
-import MachineDetailHero from '@/components/machineDetail/MachineDetailHero';
-import MachineDetailSpecifications from '@/components/machineDetail/MachineDetailSpecifications';
-import MachineDetailFeatures from '@/components/machineDetail/MachineDetailFeatures';
-import MachineDetailDeployments from '@/components/machineDetail/MachineDetailDeployments';
-import MachineDetailGallery from '@/components/machineDetail/MachineDetailGallery';
-import { useMachineBySlug } from '@/hooks/useMachinesData';
-import { Loader2 } from 'lucide-react';
-import { SimpleContactCTA } from '@/components/common';
+import { Loader2, AlertTriangle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import MachineDetailComponent from '@/components/machineDetail/MachineDetail';
+import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
+import { useEffect } from 'react';
 
 const MachineDetail = () => {
-  const { machineId, machineType } = useParams<{ machineType: string, machineId: string }>();
+  const { machineId } = useParams<{ machineId: string }>();
   
-  // Use our specialized hook that handles fetching by slug with just the machineId
-  const { data: machine, isLoading, error } = useMachineBySlug(machineId);
+  // Use the recommended useContentfulMachine hook
+  const { data: machine, isLoading, error } = useContentfulMachine(machineId);
   
-  console.log("Fetching machine:", machineType, machineId);
+  // Scroll to the top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  console.log("Fetching machine:", machineId);
   console.log("Machine data:", machine);
 
   if (isLoading) {
@@ -32,38 +32,45 @@ const MachineDetail = () => {
 
   if (error) {
     return (
-      <div className="py-24 text-center text-red-500">
-        <h2 className="text-2xl font-bold mb-4">Error Loading Machine Details</h2>
-        <p>Unable to load machine information. Please try again later.</p>
-        <p className="mt-4 text-sm">{error instanceof Error ? error.message : 'Unknown error'}</p>
+      <div className="container mx-auto py-20">
+        <div className="max-w-lg mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
+            <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-red-800 mb-3">Error Loading Machine</h3>
+            <p className="text-red-600 mb-6">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
+            <Button asChild variant="outline">
+              <Link to="/machines">View All Machines</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
-  // If no machine is found, show error
   if (!machine) {
     return (
-      <div className="py-24 text-center">
-        <h2 className="text-2xl font-bold mb-4">Machine Not Found</h2>
-        <p>We couldn't find the machine you're looking for.</p>
-        <p className="mt-4 text-sm text-gray-600">
-          Machine ID: {machineId}, Type: {machineType}
-        </p>
+      <div className="container mx-auto py-20">
+        <div className="max-w-lg mx-auto">
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-8 text-center">
+            <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-amber-800 mb-3">Machine Not Found</h3>
+            <p className="text-amber-600 mb-6">
+              {machineId ? (
+                `The machine "${machineId}" couldn't be found.`
+              ) : (
+                "No machine identifier was provided."
+              )}
+            </p>
+            <Button asChild variant="outline">
+              <Link to="/machines">View All Machines</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
-  return (
-    <>
-      <MachineDetailHero machine={machine} />
-      <MachineDetailSpecifications specs={machine.specs} />
-      <MachineDetailFeatures features={machine.features} />
-      <MachineDetailDeployments deploymentExamples={machine.deploymentExamples} />
-      <MachineDetailGallery title={machine.title} images={machine.images} />
-      <SimpleContactCTA />
-      <CTASection />
-    </>
-  );
+  return <MachineDetailComponent machine={machine} />;
 };
 
 export default MachineDetail;

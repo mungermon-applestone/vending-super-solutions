@@ -48,7 +48,7 @@ export const router = createBrowserRouter([
         element: <MachinesPage />,
       },
       {
-        path: "/machines/:type/:slug",
+        path: "/machines/:machineId",
         element: <MachineDetail />,
       },
       {

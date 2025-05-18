@@ -1,23 +1,28 @@
 
 import React from 'react';
-import { useMachineBySlug } from '@/hooks/useMachinesData';
-import MachineDetail from '@/components/machineDetail/MachineDetail';
 import { useParams } from 'react-router-dom';
+import { useContentfulMachine } from '@/hooks/cms/useContentfulMachines';
+import MachineDetail from '@/components/machineDetail/MachineDetail';
+import { Loader2 } from 'lucide-react';
 
 const Option4Refrigerated = () => {
-  const { machineType, machineId } = useParams<{ machineType: string, machineId: string }>();
-  // Update to use the hook with just machineId
-  const { data: machine, isLoading, error } = useMachineBySlug(machineId);
+  const { machineId } = useParams<{ machineId: string }>();
+  
+  // Update to use the direct contentful hook
+  const { data: machine, isLoading, error } = useContentfulMachine(machineId);
 
   if (isLoading) {
     return (
-      <div>Loading...</div>
+      <div className="py-24 text-center">
+        <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
+        <p>Loading machine information...</p>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <div>Error: {error.message}</div>
+      <div>Error: {error instanceof Error ? error.message : 'An unknown error occurred'}</div>
     );
   }
 
