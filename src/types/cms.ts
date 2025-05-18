@@ -1,4 +1,3 @@
-
 export interface CMSImage {
   id: string;
   url: string;
@@ -102,6 +101,14 @@ export interface CMSBusinessGoal {
     title: string;
     description: string;
     image?: {
+      url: string;
+      alt?: string;
+    };
+    thumbnail?: {
+      url: string;
+      alt?: string;
+    };
+    machineThumbnail?: {
       url: string;
       alt?: string;
     };

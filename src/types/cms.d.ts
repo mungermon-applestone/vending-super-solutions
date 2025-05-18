@@ -37,6 +37,7 @@ export interface CMSMachine {
   description: string;
   features?: string[];
   images?: CMSImage[];
+  thumbnail?: CMSImage;  // Added thumbnail property to CMSMachine
   product_types?: CMSProductType[];
   created_at?: string;
   updated_at?: string;
@@ -84,6 +85,14 @@ export interface CMSBusinessGoal {
     title: string;
     description: string;
     image?: {
+      url: string;
+      alt?: string;
+    };
+    thumbnail?: {
+      url: string;
+      alt?: string;
+    };
+    machineThumbnail?: {
       url: string;
       alt?: string;
     };
