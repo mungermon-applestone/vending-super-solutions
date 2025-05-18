@@ -20,7 +20,7 @@ export function isContentfulAsset(value: any): value is Asset {
 /**
  * Type guard to check if an object is a Contentful Entry
  */
-export function isContentfulEntry<T = any>(value: any): value is Entry<T> {
+export function isContentfulEntry<T extends EntrySkeletonType = any>(value: any): value is Entry<T> {
   return (
     value &&
     typeof value === 'object' &&

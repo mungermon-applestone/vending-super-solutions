@@ -1,30 +1,45 @@
 
 import { ContentProviderType } from './adapters/types';
 
+// Define the provider config type
+export interface CMSProviderConfig {
+  type: ContentProviderType;
+  initialized?: boolean;
+  error?: string | null;
+}
+
+// Default configuration
+const defaultConfig: CMSProviderConfig = {
+  type: ContentProviderType.CONTENTFUL,
+  initialized: false,
+  error: null
+};
+
+// Current configuration
+let currentConfig: CMSProviderConfig = { ...defaultConfig };
+
 /**
- * Get the content provider configuration - always Contentful
+ * Get the content provider configuration
  */
-export const getCMSProviderConfig = () => {
-  return { type: ContentProviderType.CONTENTFUL };
+export const getCMSProviderConfig = (): CMSProviderConfig => {
+  return currentConfig;
 };
 
 /**
  * Set the content provider configuration
- * This function is kept for backward compatibility but has no effect
- * @deprecated Use Contentful configuration directly
+ * @param config The new configuration
  */
-export const setCMSProviderConfig = () => {
-  console.log('[providerConfig] Contentful is now the only supported CMS provider');
+export const setCMSProviderConfig = (config: CMSProviderConfig): void => {
+  currentConfig = { ...config };
 };
 
 /**
  * Check if we're using a specific provider
  * @param type Provider type to check
- * @returns true if the provider type is Contentful, false otherwise
- * @deprecated We now exclusively use Contentful
+ * @returns true if the provider is of the specified type
  */
 export const isUsingProvider = (type: ContentProviderType): boolean => {
-  return type === ContentProviderType.CONTENTFUL;
+  return currentConfig.type === type;
 };
 
 // Re-export ContentProviderType for convenience

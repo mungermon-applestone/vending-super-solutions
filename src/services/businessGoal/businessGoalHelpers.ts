@@ -8,7 +8,7 @@ import {
   getAssetUrl,
   getAssetAlt
 } from '@/utils/contentful/dataExtractors';
-import { isObject } from '@/utils/contentful/typeGuards';
+import { isObject, isString } from '@/utils/contentful/typeGuards';
 
 export interface BusinessGoalItem {
   id: string;

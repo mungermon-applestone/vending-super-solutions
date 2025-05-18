@@ -274,3 +274,12 @@ async function synchronizeBusinessGoals(options: SyncOptions): Promise<{ success
     throw e;
   }
 }
+
+/**
+ * Determine if the source and target providers are compatible for synchronization
+ */
+export function areProvidersCompatible(source: string, target: string): boolean {
+  // In the updated system, we only support Contentful
+  // This function is kept for backward compatibility
+  return source === ContentProviderType.CONTENTFUL && target === ContentProviderType.CONTENTFUL;
+}

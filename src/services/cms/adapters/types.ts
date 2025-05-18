@@ -1,11 +1,23 @@
 
+/**
+ * Available CMS provider types
+ */
 export enum ContentProviderType {
-  CONTENTFUL = 'contentful'
+  CONTENTFUL = 'contentful',
 }
 
-export interface ContentProviderConfig {
+/**
+ * Base interface for CMS provider configuration
+ */
+export interface ProviderConfig {
   type: ContentProviderType;
-  options?: Record<string, unknown>;
-  initialized?: boolean;
-  error?: string | null;
+}
+
+/**
+ * Base interface for all CMS adapters
+ */
+export interface CmsAdapter<T> {
+  getById(id: string): Promise<T | null>;
+  getAll(): Promise<T[]>;
+  getBySlug?(slug: string): Promise<T | null>;
 }

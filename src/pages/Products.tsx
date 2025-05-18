@@ -70,8 +70,11 @@ const Products = () => {
   if (!isConfigured) {
     return (
       <ConfigurationError 
-        onRetry={handleRefreshContentful}
-        canRefresh={canRefresh}
+        debugInfo={{
+          spaceId: process.env.VITE_CONTENTFUL_SPACE_ID || '',
+          environmentId: process.env.VITE_CONTENTFUL_ENVIRONMENT || '',
+          hasToken: !!process.env.VITE_CONTENTFUL_DELIVERY_TOKEN
+        }}
       />
     );
   }
@@ -82,8 +85,6 @@ const Products = () => {
       <ProductsError 
         error={error} 
         onRetry={refetch} 
-        onShowDebug={handleToggleDebug}
-        showDebug={showDebug}
         debugInfo={{
           spaceId: process.env.VITE_CONTENTFUL_SPACE_ID || '',
           environmentId: process.env.VITE_CONTENTFUL_ENVIRONMENT || '',
@@ -100,7 +101,14 @@ const Products = () => {
 
   // If no products, show empty state
   if (!products || products.length === 0) {
-    return <EmptyProductsList />;
+    return (
+      <EmptyProductsList 
+        debugInfo={{
+          spaceId: process.env.VITE_CONTENTFUL_SPACE_ID || ''
+        }}
+        onRefresh={refetch}
+      />
+    );
   }
 
   // Sort products by displayOrder if available
@@ -119,7 +127,7 @@ const Products = () => {
         <ProductsHero />
         
         <div className="container mx-auto px-4 py-12 flex-grow">
-          <PurposeStatement />
+          <PurposeStatement title="Our Products" />
           
           <div className="mt-16">
             <div className="flex justify-between items-center mb-8">

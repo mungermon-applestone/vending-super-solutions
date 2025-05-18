@@ -24,7 +24,7 @@ describe('initCMS', () => {
     });
   });
   
-  it('should default to Supabase when no environment variables are set', () => {
+  it('should use Contentful when no environment variables are set', () => {
     // Set empty environment
     Object.defineProperty(import.meta, 'env', {
       value: {},
@@ -36,17 +36,16 @@ describe('initCMS', () => {
     
     // Check result
     const config = getCMSProviderConfig();
-    expect(config.type).toBe(ContentProviderType.SUPABASE);
-    expect(consoleLogMock).toHaveBeenCalledWith(expect.stringContaining('Using default Supabase CMS provider'));
+    expect(config.type).toBe(ContentProviderType.CONTENTFUL);
+    expect(consoleLogMock).toHaveBeenCalledWith(expect.stringContaining('Initializing CMS configuration'));
   });
   
-  it('should configure Strapi when environment variables are set', () => {
-    // Set Strapi environment
+  it('should configure Contentful when environment variables are set', () => {
+    // Set Contentful environment
     Object.defineProperty(import.meta, 'env', {
       value: {
-        VITE_CMS_PROVIDER: 'strapi',
-        VITE_STRAPI_API_URL: 'http://test-strapi.example.com',
-        VITE_STRAPI_API_KEY: 'test-api-key'
+        VITE_CONTENTFUL_SPACE_ID: 'test-space-id',
+        VITE_CONTENTFUL_DELIVERY_TOKEN: 'test-delivery-token' 
       },
       writable: true
     });
@@ -56,26 +55,22 @@ describe('initCMS', () => {
     
     // Check result
     const config = getCMSProviderConfig();
-    expect(config.type).toBe(ContentProviderType.STRAPI);
-    expect(config.apiUrl).toBe('http://test-strapi.example.com');
-    expect(config.apiKey).toBe('test-api-key');
-    expect(consoleLogMock).toHaveBeenCalledWith(expect.stringContaining('Using Strapi CMS provider'));
+    expect(config.type).toBe(ContentProviderType.CONTENTFUL);
+    expect(consoleLogMock).toHaveBeenCalledWith(expect.stringContaining('Initializing CMS configuration'));
   });
   
-  it('should ignore invalid CMS provider types', () => {
+  it('should handle missing environment variables', () => {
     // Set invalid provider
     Object.defineProperty(import.meta, 'env', {
-      value: {
-        VITE_CMS_PROVIDER: 'invalid-provider'
-      },
+      value: {},
       writable: true
     });
     
     // Run initialization
     initCMS();
     
-    // Should default to Supabase
+    // Should default to Contentful
     const config = getCMSProviderConfig();
-    expect(config.type).toBe(ContentProviderType.SUPABASE);
+    expect(config.type).toBe(ContentProviderType.CONTENTFUL);
   });
 });
