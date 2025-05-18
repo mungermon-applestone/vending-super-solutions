@@ -1,4 +1,3 @@
-
 import { Asset, Entry } from 'contentful';
 import { isContentfulAsset, isContentfulEntry, isString, isNumber, isArray, isObject } from './typeGuards';
 
@@ -45,6 +44,11 @@ export function getAssetUrl(asset: any, defaultValue: string = ''): string {
   // Check for simplified format { url: 'http://...' }
   if (isObject(asset) && 'url' in asset && isString(asset.url)) {
     return ensureHttps(asset.url);
+  }
+  
+  // Check for direct URL string
+  if (isString(asset)) {
+    return ensureHttps(asset);
   }
   
   return defaultValue;
