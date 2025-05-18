@@ -3,8 +3,9 @@ import React from 'react';
 
 interface ProductTableRowProps {
   product: any;
-  onEdit: (id: string) => void;
-  onDelete: (id: string, name: string) => void;
+  onDeleteClick: (product: any) => void;
+  onCloneClick: (product: any) => void;
+  isCloningId?: string;
 }
 
 /**
@@ -12,16 +13,28 @@ interface ProductTableRowProps {
  */
 const ProductTableRow: React.FC<ProductTableRowProps> = ({
   product,
-  onEdit,
-  onDelete
+  onDeleteClick,
+  onCloneClick,
+  isCloningId
 }) => {
   return (
     <tr className="product-table-row">
-      {/* Implementation will be added when needed */}
       <td>{product.title}</td>
+      <td>{product.slug}</td>
       <td>
-        <button onClick={() => onEdit(product.id)}>Edit</button>
-        <button onClick={() => onDelete(product.id, product.title)}>Delete</button>
+        <button 
+          onClick={() => onCloneClick(product)}
+          disabled={isCloningId === product.id}
+          title="Clone product"
+        >
+          {isCloningId === product.id ? 'Cloning...' : 'Clone'}
+        </button>
+        <button 
+          onClick={() => onDeleteClick(product)}
+          title="Delete product"
+        >
+          Delete
+        </button>
       </td>
     </tr>
   );

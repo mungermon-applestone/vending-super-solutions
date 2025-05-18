@@ -4,16 +4,35 @@ import { CMSProductType } from '@/types/cms';
 
 // This is a stub component for testing purposes
 const ProductEditorForm: React.FC<{
-  productType?: CMSProductType;
+  productSlug?: string;
+  isEditMode?: boolean;
   onSubmit: (data: any) => void;
-  isSubmitting: boolean;
-}> = ({ productType, onSubmit, isSubmitting }) => {
+  isSubmitting?: boolean;
+}> = ({ productSlug, isEditMode, onSubmit, isSubmitting = false }) => {
+  const isLoading = false;
+  const productType = {
+    title: 'Test Product',
+    slug: 'test-product',
+    description: 'Test description'
+  };
+
+  if (isLoading) {
+    return <div>Loading Product Data</div>;
+  }
+
   return (
     <div>
-      <h1>{productType ? 'Edit' : 'Create'} Product</h1>
+      <h1>{isEditMode ? `Edit Product: ${productType.title}` : 'Create New Product'}</h1>
+      
+      {isEditMode && (
+        <button type="button">
+          Clone Product
+        </button>
+      )}
+      
       <form onSubmit={(e) => {
         e.preventDefault();
-        onSubmit({ title: 'Test Product', slug: 'test-product' });
+        onSubmit({ title: productType.title, slug: productType.slug });
       }}>
         <div>
           <label htmlFor="title">Title</label>
@@ -29,6 +48,14 @@ const ProductEditorForm: React.FC<{
             id="slug"
             name="slug" 
             defaultValue={productType?.slug || ''} 
+          />
+        </div>
+        <div>
+          <label htmlFor="description">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            defaultValue={productType?.description || ''}
           />
         </div>
         <button type="submit" disabled={isSubmitting}>

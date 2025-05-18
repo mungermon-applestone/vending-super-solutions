@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { getCMSProviderConfig, ContentProviderType } from '../providerConfig';
 import { getTechnologyBySlug, getTechnologies } from '../technologies';
@@ -165,10 +166,6 @@ async function synchronizeTechnologies(options: SyncOptions): Promise<{ success:
   
   try {
     const config = getCMSProviderConfig();
-    const currentProvider = config.type;
-    const targetProvider = currentProvider === ContentProviderType.STRAPI 
-      ? ContentProviderType.SUPABASE 
-      : ContentProviderType.STRAPI;
     
     // Fetch all technologies from current provider
     const technologies = await getTechnologies();

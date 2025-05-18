@@ -4,8 +4,9 @@ import { FC } from 'react';
 
 interface ProductTableRowProps {
   product: any;
-  onEdit: (id: string) => void;
-  onDelete: (id: string, name: string) => void;
+  onDeleteClick: (product: any) => void;
+  onCloneClick: (product: any) => void;
+  isCloningId?: string;
 }
 
 /**

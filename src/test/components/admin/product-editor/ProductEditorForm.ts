@@ -3,7 +3,8 @@
 import { FC } from 'react';
 
 interface ProductEditorFormProps {
-  defaultValues?: any;
+  productSlug?: string;
+  isEditMode?: boolean;
   onSubmit: (data: any) => void;
   isSubmitting?: boolean;
 }

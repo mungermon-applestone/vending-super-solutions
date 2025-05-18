@@ -4,9 +4,10 @@ import { FC } from 'react';
 
 interface DeleteProductDialogProps {
   isOpen: boolean;
-  onClose: () => void;
-  onDelete: () => void;
-  productName: string;
+  setIsOpen: (isOpen: boolean) => void;
+  productToDelete: any;
+  onConfirmDelete: () => void;
+  isDeleting: boolean;
 }
 
 /**
