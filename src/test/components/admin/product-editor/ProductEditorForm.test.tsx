@@ -31,6 +31,8 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 describe('ProductEditorForm', () => {
+  const mockOnSubmit = vi.fn();
+  
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -49,7 +51,7 @@ describe('ProductEditorForm', () => {
       fetchStatus: 'idle',
     } as any);
 
-    render(<ProductEditorForm />);
+    render(<ProductEditorForm onSubmit={mockOnSubmit} />);
 
     expect(screen.getByText('Create New Product')).toBeInTheDocument();
     expect(screen.queryByText(/Loading Product Data/i)).not.toBeInTheDocument();
@@ -69,7 +71,7 @@ describe('ProductEditorForm', () => {
       fetchStatus: 'fetching',
     } as any);
 
-    render(<ProductEditorForm productSlug="test-product" isEditMode={true} />);
+    render(<ProductEditorForm productSlug="test-product" isEditMode={true} onSubmit={mockOnSubmit} />);
 
     expect(screen.getByText(/Loading Product Data/i)).toBeInTheDocument();
   });
@@ -113,7 +115,7 @@ describe('ProductEditorForm', () => {
       fetchStatus: 'idle',
     } as any);
 
-    render(<ProductEditorForm productSlug="test-product" isEditMode={true} />);
+    render(<ProductEditorForm productSlug="test-product" isEditMode={true} onSubmit={mockOnSubmit} />);
     
     await waitFor(() => {
       expect(screen.getByText(/Edit Product:/i)).toBeInTheDocument();
@@ -147,11 +149,11 @@ describe('ProductEditorForm', () => {
     } as any);
 
     // Render in edit mode
-    const { rerender } = render(<ProductEditorForm productSlug="test-product" isEditMode={true} />);
+    const { rerender } = render(<ProductEditorForm productSlug="test-product" isEditMode={true} onSubmit={mockOnSubmit} />);
     expect(screen.getByText(/Clone Product/i)).toBeInTheDocument();
 
     // Re-render in create mode
-    rerender(<ProductEditorForm isEditMode={false} />);
+    rerender(<ProductEditorForm isEditMode={false} onSubmit={mockOnSubmit} />);
     expect(screen.queryByText(/Clone Product/i)).not.toBeInTheDocument();
   });
 });

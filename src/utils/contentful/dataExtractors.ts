@@ -75,13 +75,13 @@ function ensureHttps(url: string): string {
 export function getAssetAlt(asset: any, defaultValue: string = ''): string {
   // Check for direct asset object
   if (isContentfulAsset(asset) && asset.fields.title) {
-    return asset.fields.title;
+    return String(asset.fields.title);
   }
   
   // Check for fields.title
   if (isObject(asset) && 'fields' in asset && isObject(asset.fields)) {
     if ('title' in asset.fields && isString(asset.fields.title)) {
-      return asset.fields.title as string;
+      return asset.fields.title;
     }
   }
   

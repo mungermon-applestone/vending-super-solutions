@@ -277,6 +277,5 @@ async function synchronizeBusinessGoals(options: SyncOptions): Promise<{ success
  */
 export function areProvidersCompatible(source: string, target: string): boolean {
   // In the updated system, we only support Contentful
-  // This function is kept for backward compatibility
   return source === ContentProviderType.CONTENTFUL && target === ContentProviderType.CONTENTFUL;
 }
