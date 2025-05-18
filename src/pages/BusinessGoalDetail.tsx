@@ -8,6 +8,7 @@ import BusinessGoalVideoSection from '@/components/businessGoals/BusinessGoalVid
 import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry';
 import { ArrowLeft } from 'lucide-react';
 import { getAssetUrl, getAssetAlt } from '@/utils/contentful/dataExtractors';
+import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
 
 interface BusinessGoalDetailProps {
   businessGoal: CMSBusinessGoal;
@@ -17,6 +18,8 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
   if (!businessGoal) {
     return <div>No business goal data available</div>;
   }
+
+  console.log('[BusinessGoalDetail] Rendering business goal:', businessGoal);
 
   // Extract image URL and alt text
   const imageUrl = businessGoal.image?.url || businessGoal.image_url || '';
@@ -36,11 +39,11 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
   );
 
   // Process video data
-  const videoData = businessGoal.video ? {
-    url: businessGoal.video.url,
-    title: businessGoal.video.title || businessGoal.title,
-    id: businessGoal.video.id
-  } : null;
+  const videoData = businessGoal.video;
+  
+  // Log details about video and machines for debugging
+  console.log('[BusinessGoalDetail] Video data:', videoData);
+  console.log('[BusinessGoalDetail] Recommended machines:', businessGoal.recommendedMachines);
 
   return (
     <div>
@@ -70,7 +73,7 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
       )}
 
       {/* Video Section - only show if there's a video URL */}
-      {businessGoal.video && businessGoal.video.url && (
+      {videoData && videoData.url && (
         <BusinessGoalVideoSection
           video={videoData}
           title="See it in action"
@@ -80,32 +83,7 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
       
       {/* Recommended Machines Section */}
       {businessGoal.recommendedMachines && businessGoal.recommendedMachines.length > 0 && (
-        <section className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Recommended Machines</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {businessGoal.recommendedMachines.map((machine) => (
-                <Link 
-                  key={machine.id} 
-                  to={`/machines/${machine.slug}`}
-                  className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-                >
-                  {machine.image && (
-                    <img 
-                      src={machine.image.url} 
-                      alt={machine.image.alt || machine.title} 
-                      className="w-full h-48 object-cover"
-                    />
-                  )}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold mb-2">{machine.title}</h3>
-                    <p className="text-gray-600">{machine.description}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
+        <RecommendedMachines machines={businessGoal.recommendedMachines} />
       )}
 
       {/* Call to Action */}

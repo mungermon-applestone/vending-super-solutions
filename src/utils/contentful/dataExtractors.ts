@@ -1,3 +1,4 @@
+
 import { Asset, Entry } from 'contentful';
 import { isContentfulAsset, isContentfulEntry, isString, isNumber, isArray, isObject } from './typeGuards';
 
