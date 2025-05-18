@@ -9,6 +9,9 @@ interface DeleteProductDialogProps {
   productName: string;
 }
 
+/**
+ * @deprecated - Use the actual component from src/components/admin/product-editor/DeleteProductDialog.tsx instead
+ */
 const DeleteProductDialog: FC<DeleteProductDialogProps> = () => {
   return null; // This is a stub for tests
 };

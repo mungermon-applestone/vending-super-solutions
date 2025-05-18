@@ -8,6 +8,9 @@ interface ProductEditorFormProps {
   isSubmitting?: boolean;
 }
 
+/**
+ * @deprecated - Use the actual component from src/components/admin/product-editor/ProductEditorForm.tsx instead
+ */
 const ProductEditorForm: FC<ProductEditorFormProps> = () => {
   return null; // This is a stub for tests
 };

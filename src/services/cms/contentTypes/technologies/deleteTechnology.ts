@@ -11,7 +11,7 @@ export async function deleteTechnology(id: string): Promise<boolean> {
   try {
     console.log(`[CMS:Technology] deleteTechnology: Deleting technology with ID: ${id}`);
     
-    const adapter = getTechnologyAdapter(getCMSProviderConfig());
+    const adapter = getTechnologyAdapter();
     const result = await adapter.delete(id);
     
     if (result) {

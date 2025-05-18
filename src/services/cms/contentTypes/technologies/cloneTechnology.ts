@@ -17,7 +17,7 @@ export async function cloneTechnology(
   try {
     console.log(`[CMS:Technology] cloneTechnology: Cloning technology with ID: ${id}`);
     
-    const adapter = getTechnologyAdapter(getCMSProviderConfig());
+    const adapter = getTechnologyAdapter();
     
     if (!adapter.clone) {
       console.error(`[CMS:Technology] cloneTechnology: Clone operation not supported by adapter`);

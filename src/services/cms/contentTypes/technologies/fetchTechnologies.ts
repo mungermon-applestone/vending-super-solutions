@@ -11,8 +11,7 @@ import { handleCMSError } from '../../utils/errorHandling';
  */
 export async function fetchTechnologies(options?: QueryOptions): Promise<CMSTechnology[]> {
   try {
-    const config = getCMSProviderConfig();
-    const adapter = getTechnologyAdapter(config);
+    const adapter = getTechnologyAdapter();
     
     return await adapter.getAll(options);
   } catch (error) {

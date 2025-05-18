@@ -1,7 +1,5 @@
-
 import { CMSProductType } from '@/types/cms';
 import { ProductFormData } from '@/types/forms';
-import { getCMSProviderConfig } from './providerConfig';
 import { getProductAdapter } from './adapters/products/productAdapterFactory';
 import { UseToastReturn } from '@/hooks/use-toast';
 
@@ -11,7 +9,7 @@ import { UseToastReturn } from '@/hooks/use-toast';
 export async function getProductTypes(): Promise<CMSProductType[]> {
   console.log("[products.ts] Fetching all product types");
   try {
-    const adapter = getProductAdapter(getCMSProviderConfig());
+    const adapter = getProductAdapter();
     return await adapter.getAll();
   } catch (error) {
     console.error("[products.ts] Error fetching product types:", error);
@@ -31,7 +29,7 @@ export async function getProductTypeBySlug(slug: string): Promise<CMSProductType
   }
   
   try {
-    const adapter = getProductAdapter(getCMSProviderConfig());
+    const adapter = getProductAdapter();
     return await adapter.getBySlug(slug);
   } catch (error) {
     console.error(`[products.ts] Error fetching product type by slug "${slug}":`, error);
@@ -51,7 +49,7 @@ export async function getProductTypeByUUID(uuid: string): Promise<CMSProductType
   }
   
   try {
-    const adapter = getProductAdapter(getCMSProviderConfig());
+    const adapter = getProductAdapter();
     return await adapter.getById(uuid);
   } catch (error) {
     console.error(`[products.ts] Error fetching product type by UUID "${uuid}":`, error);
@@ -74,7 +72,7 @@ export async function createProduct(data: ProductFormData, toast?: UseToastRetur
     
     console.log('[products.ts] Cleaned benefits for create:', cleanedData.benefits);
     
-    const adapter = getProductAdapter(getCMSProviderConfig());
+    const adapter = getProductAdapter();
     const result = await adapter.create(cleanedData);
     
     if (toast) {
@@ -134,7 +132,7 @@ export async function updateProduct(
       benefits: uniqueBenefits,
     };
     
-    const adapter = getProductAdapter(getCMSProviderConfig());
+    const adapter = getProductAdapter();
     
     // First get the product ID from the original slug
     const product = await adapter.getBySlug(originalSlug);
@@ -178,7 +176,7 @@ export async function deleteProduct(slug: string): Promise<boolean> {
   console.log(`[products.ts] Deleting product with slug: ${slug}`);
   
   try {
-    const adapter = getProductAdapter(getCMSProviderConfig());
+    const adapter = getProductAdapter();
     
     // First get the product ID from the slug
     const product = await adapter.getBySlug(slug);
@@ -201,7 +199,7 @@ export async function cloneProduct(id: string): Promise<CMSProductType> {
   console.log(`[products.ts] Cloning product with ID: ${id}`);
   
   try {
-    const adapter = getProductAdapter(getCMSProviderConfig());
+    const adapter = getProductAdapter();
     return await adapter.clone(id);
   } catch (error) {
     console.error(`[products.ts] Error cloning product "${id}":`, error);

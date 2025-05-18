@@ -1,5 +1,5 @@
 
-import { ContentProviderConfig } from '../types';
+import { ProviderConfig } from '../types';
 import { TechnologyAdapter } from './types';
 import { contentfulTechnologyAdapter } from './contentfulTechnologyAdapter';
 import { handleCMSError } from '@/services/cms/utils/errorHandling';
@@ -8,7 +8,7 @@ import { handleCMSError } from '@/services/cms/utils/errorHandling';
  * Returns the Contentful technology adapter
  * This simplification always returns the Contentful implementation
  */
-export function getTechnologyAdapter(_config?: ContentProviderConfig): TechnologyAdapter {
+export function getTechnologyAdapter(_config?: ProviderConfig): TechnologyAdapter {
   try {
     return contentfulTechnologyAdapter;
   } catch (error) {

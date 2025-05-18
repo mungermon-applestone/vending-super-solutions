@@ -35,7 +35,8 @@ export function getAssetUrl(asset: any, defaultValue: string = ''): string {
   // Check for inline asset format (fields.image.fields.file.url)
   if (isObject(asset) && 'fields' in asset && isObject(asset.fields)) {
     if ('file' in asset.fields && isObject(asset.fields.file) && 'url' in asset.fields.file) {
-      return ensureHttps(asset.fields.file.url as string);
+      const url = asset.fields.file.url;
+      return isString(url) ? ensureHttps(url) : defaultValue;
     }
   }
   

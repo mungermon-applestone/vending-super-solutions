@@ -4,13 +4,13 @@
  * Kept for backwards compatibility.
  */
 
-import { ContentProviderConfig, ContentProviderType } from './types';
+import { ProviderConfig, ContentProviderType } from './types';
 
 /**
  * @deprecated - This is maintained for backwards compatibility only.
  * We now exclusively use Contentful.
  */
-export function supabaseConfig(): ContentProviderConfig {
+export function supabaseConfig(): ProviderConfig {
   console.warn('[contentConfig] Using supabaseConfig() is deprecated. We now exclusively support Contentful.');
   return {
     type: ContentProviderType.CONTENTFUL
