@@ -85,6 +85,16 @@ const fallbackBusinessGoals = [
 
 // Fallback page content
 const fallbackPageContent = {
+  // Hero section fields
+  heroTitle: "Business Goals",
+  heroDescription: "Transform your business operations with innovative vending solutions designed to meet your specific objectives.",
+  heroImage: undefined,
+  heroPrimaryButtonText: "Request a Demo",
+  heroPrimaryButtonUrl: "/contact",
+  heroSecondaryButtonText: "Explore Goals",
+  heroSecondaryButtonUrl: "#goals-section",
+  
+  // Original content fields
   introTitle: "Business Goals",
   introDescription: "Transform your business operations with innovative vending solutions designed to meet your specific objectives. Our technology enables you to expand your footprint, improve customer experiences, and drive revenue growth.",
   goalsSectionTitle: "Business Goals We Help You Achieve",
