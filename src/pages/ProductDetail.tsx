@@ -1,16 +1,14 @@
 
-import { useParams, Link } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
+import { useParams, Link, useEffect } from 'react-router-dom';
 import { useProductType } from '@/hooks/cms/useProductTypes';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
 import ProductFeaturesList from '@/components/products/ProductFeaturesList';
 import ProductExamples from '@/components/products/ProductExamples';
-import CTASection from '@/components/common/CTASection';
-import { SimpleContactCTA } from '@/components/common';
-import { useEffect } from 'react';
+import SimpleContactCTA from '@/components/common/SimpleContactCTA';
 import ProductVideoSection from '@/components/products/ProductVideoSection';
+import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
 
 /**
  * Product detail page that displays detailed information about a specific product
@@ -18,6 +16,11 @@ import ProductVideoSection from '@/components/products/ProductVideoSection';
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: product, isLoading, error } = useProductType(slug || '');
+  
+  // Scroll to top when the component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   // Log product data for debugging
   useEffect(() => {
@@ -31,52 +34,46 @@ const ProductDetail = () => {
   // Loading state
   if (isLoading) {
     return (
-      <Layout>
-        <div className="container py-16 text-center">
-          <Loader2 className="h-10 w-10 animate-spin mx-auto" />
-          <p className="mt-4">Loading product information...</p>
-        </div>
-      </Layout>
+      <div className="container py-16 text-center">
+        <Loader2 className="h-10 w-10 animate-spin mx-auto" />
+        <p className="mt-4">Loading product information...</p>
+      </div>
     );
   }
 
   // Error state
   if (error) {
     return (
-      <Layout>
-        <div className="container py-16">
-          <div className="max-w-2xl mx-auto text-center">
-            <h1 className="text-xl font-semibold text-red-500 mb-4">Error Loading Product</h1>
-            <p className="mb-6">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
-            <Button asChild>
-              <Link to="/products">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Products
-              </Link>
-            </Button>
-          </div>
+      <div className="container py-16">
+        <div className="max-w-2xl mx-auto text-center">
+          <h1 className="text-xl font-semibold text-red-500 mb-4">Error Loading Product</h1>
+          <p className="mb-6">{error instanceof Error ? error.message : 'An unknown error occurred'}</p>
+          <Button asChild>
+            <Link to="/products">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Products
+            </Link>
+          </Button>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   // Not found state
   if (!product) {
     return (
-      <Layout>
-        <div className="container py-16">
-          <div className="max-w-2xl mx-auto text-center">
-            <h1 className="text-xl font-semibold mb-4">Product Not Found</h1>
-            <p className="mb-6">We couldn't find the product "{slug}" in the database.</p>
-            <Button asChild>
-              <Link to="/products">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Products
-              </Link>
-            </Button>
-          </div>
+      <div className="container py-16">
+        <div className="max-w-2xl mx-auto text-center">
+          <h1 className="text-xl font-semibold mb-4">Product Not Found</h1>
+          <p className="mb-6">We couldn't find the product "{slug}" in the database.</p>
+          <Button asChild>
+            <Link to="/products">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Products
+            </Link>
+          </Button>
         </div>
-      </Layout>
+      </div>
     );
   }
 
@@ -87,15 +84,17 @@ const ProductDetail = () => {
   const benefits = Array.isArray(product.benefits) ? product.benefits : [];
 
   return (
-    <Layout>
+    <>
       {/* Back Navigation */}
-      <div className="container pt-6">
-        <Button asChild variant="outline" size="sm">
-          <Link to="/products">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Products
-          </Link>
-        </Button>
+      <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
+        <div className="container pt-6 pb-4">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/products">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Products
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Hero Section */}
@@ -114,6 +113,7 @@ const ProductDetail = () => {
           videoId={product.video.youtubeId}
           videoUrl={product.video.url}
           thumbnailImage={product.video.thumbnailImage?.url || heroImage}
+          orientation={product.video.orientation}
         />
       )}
 
@@ -137,10 +137,22 @@ const ProductDetail = () => {
         </section>
       )}
 
-      {/* Replace Call to Action with SimpleContactCTA */}
-      <SimpleContactCTA />
-      <CTASection />
-    </Layout>
+      {/* Recommended Machines Section */}
+      {product.recommendedMachines && product.recommendedMachines.length > 0 && (
+        <RecommendedMachines machines={product.recommendedMachines} />
+      )}
+
+      {/* Single CTA Section */}
+      <div className="py-16 bg-gray-50">
+        <SimpleContactCTA
+          title="Ready to Get Started?"
+          description="Get in touch and we'll start you on your vending journey."
+          primaryButtonText="Schedule a Demo"
+          secondaryButtonText="Check out Machines"
+          secondaryButtonUrl="/machines"
+        />
+      </div>
+    </>
   );
 };
 

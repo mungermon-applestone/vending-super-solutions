@@ -1,3 +1,4 @@
+
 import { CMSProductType } from "@/types/cms";
 import { ProductAdapter, ProductCreateInput, ProductUpdateInput } from "./types";
 import { getContentfulClient } from "@/services/cms/utils/contentfulClient";
@@ -48,6 +49,44 @@ export const contentfulProductAdapter: ProductAdapter = {
           videoOrientation = fields.videoOrientation as 'vertical' | 'horizontal';
         }
         
+        // Process recommended machines with enhanced error handling
+        const recommendedMachines = fields.recommendedMachines ? 
+          (fields.recommendedMachines as any[])
+            .filter(machine => {
+              if (!machine || !machine.fields) {
+                console.warn(`[contentfulProductAdapter] Invalid machine in recommendedMachines for product ${fields.title || 'unknown'}:`, machine);
+                return false;
+              }
+              return true;
+            })
+            .map(machine => {
+              // Log machine data to help with debugging
+              console.log(`[contentfulProductAdapter] Processing machine ${machine.fields?.title || 'unknown'}:`, {
+                hasImage: !!machine.fields?.image,
+                hasMachineThumbnail: !!machine.fields?.machineThumbnail
+              });
+            
+              return {
+                id: machine.sys.id,
+                slug: machine.fields.slug,
+                title: machine.fields.title,
+                description: machine.fields.description,
+                image: machine.fields.image ? {
+                  url: `https:${machine.fields.image.fields.file.url}`,
+                  alt: machine.fields.image.fields.title || machine.fields.title
+                } : undefined,
+                // Use machineThumbnail instead of thumbnail
+                thumbnail: machine.fields.machineThumbnail ? {
+                  url: `https:${machine.fields.machineThumbnail.fields.file.url}`,
+                  alt: machine.fields.machineThumbnail.fields.title || machine.fields.title
+                } : undefined,
+                machineThumbnail: machine.fields.machineThumbnail ? {
+                  url: `https:${machine.fields.machineThumbnail.fields.file.url}`,
+                  alt: machine.fields.machineThumbnail.fields.title || machine.fields.title
+                } : undefined
+              };
+            }) : [];
+        
         return {
           id: entry.sys.id,
           title: fields.title as string,
@@ -65,33 +104,7 @@ export const contentfulProductAdapter: ProductAdapter = {
             description: feature.fields.description,
             icon: feature.fields.icon || undefined
           })) : [],
-          recommendedMachines: fields.recommendedMachines ? (fields.recommendedMachines as any[]).map(machine => {
-            // Log machine data to help with debugging
-            console.log(`[contentfulProductAdapter] Processing machine ${machine.fields?.title || 'unknown'}:`, {
-              hasImage: !!machine.fields?.image,
-              hasMachineThumbnail: !!machine.fields?.machineThumbnail
-            });
-            
-            return {
-              id: machine.sys.id,
-              title: machine.fields.title,
-              slug: machine.fields.slug,
-              description: machine.fields.description,
-              image: machine.fields.image ? {
-                url: `https:${machine.fields.image.fields.file.url}`,
-                alt: machine.fields.image.fields.title || machine.fields.title
-              } : undefined,
-              // Use machineThumbnail instead of thumbnail
-              thumbnail: machine.fields.machineThumbnail ? {
-                url: `https:${machine.fields.machineThumbnail.fields.file.url}`,
-                alt: machine.fields.machineThumbnail.fields.title || machine.fields.title
-              } : undefined,
-              machineThumbnail: machine.fields.machineThumbnail ? {
-                url: `https:${machine.fields.machineThumbnail.fields.file.url}`,
-                alt: machine.fields.machineThumbnail.fields.title || machine.fields.title
-              } : undefined
-            };
-          }) : [],
+          recommendedMachines,
           // Add video support with orientation information
           video: fields.video ? {
             title: fields.videoTitle as string || 'Product Demo',
@@ -118,7 +131,7 @@ export const contentfulProductAdapter: ProductAdapter = {
   },
   
   getBySlug: async (slug: string): Promise<CMSProductType | null> => {
-    console.log(`[contentfulProductAdapter] Fetching product by slug: ${slug}`);
+    console.log(`[contentfulProductAdapter] Fetching product by slug: "${slug}"`);
     
     if (!slug) {
       console.warn("[contentfulProductAdapter] Empty slug passed to getBySlug");
