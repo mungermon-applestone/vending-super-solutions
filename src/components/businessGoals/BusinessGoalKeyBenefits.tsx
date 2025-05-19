@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Check } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
 
 interface BusinessGoalKeyBenefitsProps {
   title?: string;
@@ -17,13 +18,10 @@ const BusinessGoalKeyBenefits: React.FC<BusinessGoalKeyBenefitsProps> = ({
     return null;
   }
 
-  // Calculate the midpoint to split the benefits into two columns
-  const midPoint = Math.ceil(benefits.length / 2);
-  const firstColumn = benefits.slice(0, midPoint);
-  const secondColumn = benefits.slice(midPoint);
+  console.log('[BusinessGoalKeyBenefits] Rendering benefits:', benefits);
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-16 bg-white">
       <div className="container mx-auto">
         <div className="max-w-4xl mx-auto text-center mb-12">
           <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">{title}</h2>
@@ -33,38 +31,21 @@ const BusinessGoalKeyBenefits: React.FC<BusinessGoalKeyBenefitsProps> = ({
         </div>
 
         <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* First Column */}
-            <div>
-              <ul className="space-y-4">
-                {firstColumn.map((benefit, index) => (
-                  <li key={`first-${index}`} className="flex items-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {benefits.map((benefit, index) => (
+              <Card key={index} className="shadow-sm hover:shadow transition-shadow duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-start">
                     <div className="flex-shrink-0 mt-1">
-                      <div className="bg-vending-blue rounded-full p-1">
+                      <div className="bg-teal-500 rounded-full p-1">
                         <Check className="h-4 w-4 text-white" />
                       </div>
                     </div>
-                    <p className="ml-3 text-lg text-gray-700">{benefit}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            {/* Second Column */}
-            <div>
-              <ul className="space-y-4">
-                {secondColumn.map((benefit, index) => (
-                  <li key={`second-${index}`} className="flex items-start">
-                    <div className="flex-shrink-0 mt-1">
-                      <div className="bg-vending-blue rounded-full p-1">
-                        <Check className="h-4 w-4 text-white" />
-                      </div>
-                    </div>
-                    <p className="ml-3 text-lg text-gray-700">{benefit}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                    <p className="ml-3 text-base text-gray-700">{benefit}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </div>

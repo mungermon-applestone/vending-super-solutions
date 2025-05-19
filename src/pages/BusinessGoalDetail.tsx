@@ -20,6 +20,7 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
   }
 
   console.log('[BusinessGoalDetail] Rendering business goal:', businessGoal);
+  console.log('[BusinessGoalDetail] Benefits data:', businessGoal.benefits);
 
   // Extract image URL and alt text
   const imageUrl = businessGoal.image?.url || businessGoal.image_url || '';
