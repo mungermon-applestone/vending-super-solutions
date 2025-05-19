@@ -17,6 +17,15 @@ const ContentfulTestimonialsCarousel: React.FC<ContentfulTestimonialsCarouselPro
   isLoading,
   error
 }) => {
+  // Enhanced logging to help debug
+  console.log('[ContentfulTestimonialsCarousel] Props received:', {
+    hasData: !!data,
+    isLoading,
+    hasError: !!error,
+    dataFields: data?.fields,
+    testimonials: data?.fields?.testimonials?.length
+  });
+
   // Handle loading state
   if (isLoading) {
     return (
@@ -43,8 +52,14 @@ const ContentfulTestimonialsCarousel: React.FC<ContentfulTestimonialsCarouselPro
     ? transformTestimonials(data.fields.testimonials)
     : [];
 
+  console.log('[ContentfulTestimonialsCarousel] Transformed testimonials:', {
+    count: testimonials.length,
+    testimonials
+  });
+
   // If no testimonials, don't render the section
   if (testimonials.length === 0) {
+    console.log('[ContentfulTestimonialsCarousel] No testimonials to display, returning null');
     return null;
   }
 

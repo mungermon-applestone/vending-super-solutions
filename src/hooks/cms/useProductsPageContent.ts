@@ -14,7 +14,7 @@ interface ProductsPageContent {
   demoRequestTitle?: string;
   demoRequestDescription?: string;
   demoRequestBulletPoints?: string[];
-  // New hero-related fields
+  // Hero-related fields
   heroTitle?: string;
   heroDescription?: string;
   heroImage?: {
@@ -55,7 +55,7 @@ export function useProductsPageContent() {
         const fields = entries.items[0].fields;
         console.log('[useProductsPageContent] Content fields:', fields);
         
-        return {
+        const transformedContent = {
           purposeStatementTitle: fields.purposeStatementTitle as string,
           purposeStatementDescription: fields.purposeStatementDescription as string,
           categoriesSectionTitle: fields.categoriesSectionTitle as string,
@@ -75,6 +75,19 @@ export function useProductsPageContent() {
           heroSecondaryButtonText: fields.heroSecondaryButtonText as string,
           heroSecondaryButtonUrl: fields.heroSecondaryButtonUrl as string,
         } as ProductsPageContent;
+
+        // Log specific hero fields to debug
+        console.log('[useProductsPageContent] Hero fields:', {
+          heroTitle: transformedContent.heroTitle,
+          heroDescription: transformedContent.heroDescription,
+          hasHeroImage: !!transformedContent.heroImage,
+          heroPrimaryButtonText: transformedContent.heroPrimaryButtonText,
+          heroPrimaryButtonUrl: transformedContent.heroPrimaryButtonUrl,
+          heroSecondaryButtonText: transformedContent.heroSecondaryButtonText,
+          heroSecondaryButtonUrl: transformedContent.heroSecondaryButtonUrl
+        });
+        
+        return transformedContent;
       } catch (error) {
         console.error('[useProductsPageContent] Error fetching products page content:', error);
         toast.error('Failed to load products page content');
