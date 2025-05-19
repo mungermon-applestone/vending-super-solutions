@@ -22,8 +22,13 @@ export default function ProductsHero({ pageContent, isLoading, error }: Products
     );
   }
 
-  if (error || !pageContent) {
-    console.error("[ProductsHero] Error loading hero content:", error);
+  if (error || !pageContent || !pageContent.heroTitle) {
+    console.error("[ProductsHero] Using fallback hero content:", { 
+      error, 
+      hasPageContent: !!pageContent, 
+      hasHeroTitle: pageContent?.heroTitle ? true : false 
+    });
+    
     // Fallback content
     return (
       <section className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
@@ -63,6 +68,14 @@ export default function ProductsHero({ pageContent, isLoading, error }: Products
       </section>
     );
   }
+
+  console.log('[ProductsHero] Rendering with Contentful hero content:', {
+    title: pageContent.heroTitle,
+    hasDescription: !!pageContent.heroDescription,
+    hasImage: !!pageContent.heroImage,
+    primaryButton: pageContent.heroPrimaryButtonText,
+    secondaryButton: pageContent.heroSecondaryButtonText
+  });
 
   // Use the reusable ContentfulHero component with direct page content
   return (
