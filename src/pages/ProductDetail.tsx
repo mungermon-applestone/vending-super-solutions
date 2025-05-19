@@ -16,17 +16,17 @@ import ProductVideoSection from '@/components/products/ProductVideoSection';
  * Product detail page that displays detailed information about a specific product
  */
 const ProductDetail = () => {
-  const { productSlug } = useParams<{ productSlug: string }>();
-  const { data: product, isLoading, error } = useProductType(productSlug || '');
+  const { slug } = useParams<{ slug: string }>();
+  const { data: product, isLoading, error } = useProductType(slug || '');
   
   // Log product data for debugging
   useEffect(() => {
     if (product) {
       console.log('[ProductDetail] Loaded product data:', product);
     } else if (!isLoading) {
-      console.log('[ProductDetail] No product data found for slug:', productSlug);
+      console.log('[ProductDetail] No product data found for slug:', slug);
     }
-  }, [product, isLoading, productSlug]);
+  }, [product, isLoading, slug]);
 
   // Loading state
   if (isLoading) {
@@ -67,7 +67,7 @@ const ProductDetail = () => {
         <div className="container py-16">
           <div className="max-w-2xl mx-auto text-center">
             <h1 className="text-xl font-semibold mb-4">Product Not Found</h1>
-            <p className="mb-6">We couldn't find the product "{productSlug}" in the database.</p>
+            <p className="mb-6">We couldn't find the product "{slug}" in the database.</p>
             <Button asChild>
               <Link to="/products">
                 <ArrowLeft className="mr-2 h-4 w-4" />

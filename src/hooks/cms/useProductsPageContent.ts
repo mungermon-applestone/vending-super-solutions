@@ -46,7 +46,9 @@ export function useProductsPageContent() {
         });
 
         console.log('[useProductsPageContent] Raw response:', entries);
-
+        console.log('[useProductsPageContent] Total items:', entries.items.length);
+        console.log('[useProductsPageContent] Response structure:', JSON.stringify(entries).substring(0, 200) + "...");
+        
         if (entries.items.length === 0) {
           console.warn('[useProductsPageContent] No products page content found');
           return null;
@@ -54,6 +56,18 @@ export function useProductsPageContent() {
 
         const fields = entries.items[0].fields;
         console.log('[useProductsPageContent] Content fields:', fields);
+        console.log('[useProductsPageContent] Field keys:', Object.keys(fields));
+        
+        // Log hero-specific fields for debugging
+        console.log('[useProductsPageContent] Hero fields from Contentful:', {
+          heroTitle: fields.heroTitle,
+          heroDescription: fields.heroDescription,
+          heroImage: fields.heroImage ? 'Present' : 'Not present',
+          heroPrimaryButtonText: fields.heroPrimaryButtonText,
+          heroPrimaryButtonUrl: fields.heroPrimaryButtonUrl,
+          heroSecondaryButtonText: fields.heroSecondaryButtonText, 
+          heroSecondaryButtonUrl: fields.heroSecondaryButtonUrl
+        });
         
         const transformedContent = {
           purposeStatementTitle: fields.purposeStatementTitle as string,
@@ -77,7 +91,7 @@ export function useProductsPageContent() {
         } as ProductsPageContent;
 
         // Log specific hero fields to debug
-        console.log('[useProductsPageContent] Hero fields:', {
+        console.log('[useProductsPageContent] Hero fields after transform:', {
           heroTitle: transformedContent.heroTitle,
           heroDescription: transformedContent.heroDescription,
           hasHeroImage: !!transformedContent.heroImage,
