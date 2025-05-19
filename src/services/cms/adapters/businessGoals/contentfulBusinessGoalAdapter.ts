@@ -43,40 +43,86 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
               return null;
             }
             
-            // Extract image data with fallbacks
-            const machineImage = machine.fields.image || 
-                                machine.fields.thumbnail ||
-                                machine.fields.machineThumbnail;
-                                
+            // Extract all possible image sources with detailed logging
+            console.log(`[contentfulBusinessGoalAdapter] Processing machine "${machine.fields.title}" images:`, {
+              hasImage: !!machine.fields.image,
+              imageType: machine.fields.image ? typeof machine.fields.image : 'undefined',
+              hasThumbnail: !!machine.fields.thumbnail,
+              thumbnailType: machine.fields.thumbnail ? typeof machine.fields.thumbnail : 'undefined',
+              hasMachineThumbnail: !!machine.fields.machineThumbnail,
+              machineThumbnailType: machine.fields.machineThumbnail ? typeof machine.fields.machineThumbnail : 'undefined',
+            });
+            
+            // Try to get image from machineThumbnail, thumbnail, or regular image in that priority order
+            let imageSource = null;
+            let imageSourceName = '';
+            
+            if (machine.fields.machineThumbnail) {
+              imageSource = machine.fields.machineThumbnail;
+              imageSourceName = 'machineThumbnail';
+            } else if (machine.fields.thumbnail) {
+              imageSource = machine.fields.thumbnail;
+              imageSourceName = 'thumbnail';
+            } else if (machine.fields.image) {
+              imageSource = machine.fields.image;
+              imageSourceName = 'image';
+            }
+            
+            // Handle the case where imageSource is a Contentful asset reference
+            let imageUrl = null;
+            let imageAlt = '';
+            
+            if (imageSource) {
+              // Different ways the image URL might be structured in Contentful
+              if (imageSource.fields && imageSource.fields.file && imageSource.fields.file.url) {
+                // Standard Contentful asset
+                imageUrl = imageSource.fields.file.url;
+                imageAlt = imageSource.fields.title || machine.fields.title;
+              } else if (imageSource.url) {
+                // Direct URL in the object
+                imageUrl = imageSource.url;
+                imageAlt = imageSource.alt || machine.fields.title;
+              }
+              
+              // Ensure the URL has proper https prefix
+              if (imageUrl) {
+                if (imageUrl.startsWith('//')) {
+                  imageUrl = `https:${imageUrl}`;
+                } else if (!imageUrl.startsWith('http')) {
+                  imageUrl = `https://${imageUrl}`;
+                }
+              }
+            }
+            
             // Enhanced logging for machine image discovery
             console.log(`[contentfulBusinessGoalAdapter] Machine "${machine.fields.title}" image processing:`, {
               hasImage: !!machine.fields.image,
               hasThumbnail: !!machine.fields.thumbnail,
               hasMachineThumbnail: !!machine.fields.machineThumbnail,
-              selectedSource: machineImage === machine.fields.machineThumbnail ? 'machineThumbnail' : 
-                             (machineImage === machine.fields.thumbnail ? 'thumbnail' : 'image')
+              selectedSource: imageSourceName,
+              finalImageUrl: imageUrl,
+              finalImageAlt: imageAlt
             });
-                                
-            const imageUrl = machineImage?.fields?.file?.url ? `https:${machineImage.fields.file.url}` : null;
             
-            // Return the machine with image data mapped to both specific and generic properties
+            // Return the machine with image data mapped to all possible image properties
+            // to ensure maximum compatibility with components
             return {
               id: machine.sys.id,
-              title: machine.fields.title,
+              title: machine.fields.title || 'Unnamed Machine',
               slug: machine.fields.slug || machine.sys.id,
               description: machine.fields.description || '',
-              // Map to both specific properties AND generic image property
+              // Map to all image properties for maximum compatibility
               machineThumbnail: imageUrl ? {
                 url: imageUrl,
-                alt: machineImage.fields?.title || machine.fields.title
+                alt: imageAlt
               } : undefined,
               thumbnail: imageUrl ? {
                 url: imageUrl,
-                alt: machineImage.fields?.title || machine.fields.title
+                alt: imageAlt
               } : undefined,
               image: imageUrl ? {
                 url: imageUrl,
-                alt: machineImage.fields?.title || machine.fields.title
+                alt: imageAlt
               } : undefined
             };
           }).filter(Boolean); // Remove any null values
@@ -149,40 +195,86 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
             return null;
           }
           
-          // Extract image data with fallbacks
-          const machineImage = machine.fields.image || 
-                              machine.fields.thumbnail ||
-                              machine.fields.machineThumbnail;
-                              
-          // Enhanced logging for image discovery
+          // Extract all possible image sources with detailed logging
+          console.log(`[contentfulBusinessGoalAdapter] Processing machine "${machine.fields.title}" images:`, {
+            hasImage: !!machine.fields.image,
+            imageType: machine.fields.image ? typeof machine.fields.image : 'undefined',
+            hasThumbnail: !!machine.fields.thumbnail,
+            thumbnailType: machine.fields.thumbnail ? typeof machine.fields.thumbnail : 'undefined',
+            hasMachineThumbnail: !!machine.fields.machineThumbnail,
+            machineThumbnailType: machine.fields.machineThumbnail ? typeof machine.fields.machineThumbnail : 'undefined',
+          });
+          
+          // Try to get image from machineThumbnail, thumbnail, or regular image in that priority order
+          let imageSource = null;
+          let imageSourceName = '';
+          
+          if (machine.fields.machineThumbnail) {
+            imageSource = machine.fields.machineThumbnail;
+            imageSourceName = 'machineThumbnail';
+          } else if (machine.fields.thumbnail) {
+            imageSource = machine.fields.thumbnail;
+            imageSourceName = 'thumbnail';
+          } else if (machine.fields.image) {
+            imageSource = machine.fields.image;
+            imageSourceName = 'image';
+          }
+          
+          // Handle the case where imageSource is a Contentful asset reference
+          let imageUrl = null;
+          let imageAlt = '';
+          
+          if (imageSource) {
+            // Different ways the image URL might be structured in Contentful
+            if (imageSource.fields && imageSource.fields.file && imageSource.fields.file.url) {
+              // Standard Contentful asset
+              imageUrl = imageSource.fields.file.url;
+              imageAlt = imageSource.fields.title || machine.fields.title;
+            } else if (imageSource.url) {
+              // Direct URL in the object
+              imageUrl = imageSource.url;
+              imageAlt = imageSource.alt || machine.fields.title;
+            }
+            
+            // Ensure the URL has proper https prefix
+            if (imageUrl) {
+              if (imageUrl.startsWith('//')) {
+                imageUrl = `https:${imageUrl}`;
+              } else if (!imageUrl.startsWith('http')) {
+                imageUrl = `https://${imageUrl}`;
+              }
+            }
+          }
+          
+          // Enhanced logging for machine image discovery
           console.log(`[contentfulBusinessGoalAdapter] Machine "${machine.fields.title}" image processing:`, {
             hasImage: !!machine.fields.image,
             hasThumbnail: !!machine.fields.thumbnail,
             hasMachineThumbnail: !!machine.fields.machineThumbnail,
-            selectedSource: machineImage === machine.fields.machineThumbnail ? 'machineThumbnail' : 
-                          (machineImage === machine.fields.thumbnail ? 'thumbnail' : 'image')
+            selectedSource: imageSourceName,
+            finalImageUrl: imageUrl,
+            finalImageAlt: imageAlt
           });
-                              
-          const imageUrl = machineImage?.fields?.file?.url ? `https:${machineImage.fields.file.url}` : null;
           
-          // Return the machine with image data mapped to both specific and generic properties
+          // Return the machine with image data mapped to all possible image properties
+          // to ensure maximum compatibility with components
           return {
             id: machine.sys.id,
-            title: machine.fields.title,
+            title: machine.fields.title || 'Unnamed Machine',
             slug: machine.fields.slug || machine.sys.id,
             description: machine.fields.description || '',
-            // Map to both specific properties AND generic image property
+            // Map to all image properties for maximum compatibility
             machineThumbnail: imageUrl ? {
               url: imageUrl,
-              alt: machineImage.fields?.title || machine.fields.title
+              alt: imageAlt
             } : undefined,
             thumbnail: imageUrl ? {
               url: imageUrl,
-              alt: machineImage.fields?.title || machine.fields.title
+              alt: imageAlt
             } : undefined,
             image: imageUrl ? {
               url: imageUrl,
-              alt: machineImage.fields?.title || machine.fields.title
+              alt: imageAlt
             } : undefined
           };
         }).filter(Boolean); // Remove any null values
@@ -235,33 +327,75 @@ export const contentfulBusinessGoalAdapter: BusinessGoalAdapter = {
         console.log(`[contentfulBusinessGoalAdapter] Business goal has ${recommendedMachinesField.length} recommended machines: ${entry.fields.title}`);
         
         recommendedMachines = recommendedMachinesField.map(machine => {
-          // Extract image data with fallbacks
-          const machineImage = machine.fields.image || 
-                              machine.fields.thumbnail ||
-                              machine.fields.machineThumbnail;
-                              
-          const imageUrl = machineImage?.fields?.file?.url ? `https:${machineImage.fields.file.url}` : null;
+          // Check if machine has proper structure
+          if (!machine.fields) {
+            console.error('[contentfulBusinessGoalAdapter] Machine entry is missing fields:', machine);
+            return null;
+          }
+          
+          // Extract all possible image sources
+          let imageSource = null;
+          let imageSourceName = '';
+          
+          if (machine.fields.machineThumbnail) {
+            imageSource = machine.fields.machineThumbnail;
+            imageSourceName = 'machineThumbnail';
+          } else if (machine.fields.thumbnail) {
+            imageSource = machine.fields.thumbnail;
+            imageSourceName = 'thumbnail';
+          } else if (machine.fields.image) {
+            imageSource = machine.fields.image;
+            imageSourceName = 'image';
+          }
+          
+          // Handle the case where imageSource is a Contentful asset reference
+          let imageUrl = null;
+          let imageAlt = '';
+          
+          if (imageSource) {
+            // Different ways the image URL might be structured in Contentful
+            if (imageSource.fields && imageSource.fields.file && imageSource.fields.file.url) {
+              // Standard Contentful asset
+              imageUrl = imageSource.fields.file.url;
+              imageAlt = imageSource.fields.title || machine.fields.title;
+            } else if (imageSource.url) {
+              // Direct URL in the object
+              imageUrl = imageSource.url;
+              imageAlt = imageSource.alt || machine.fields.title;
+            }
+            
+            // Ensure the URL has proper https prefix
+            if (imageUrl) {
+              if (imageUrl.startsWith('//')) {
+                imageUrl = `https:${imageUrl}`;
+              } else if (!imageUrl.startsWith('http')) {
+                imageUrl = `https://${imageUrl}`;
+              }
+            }
+          }
+          
+          console.log(`[contentfulBusinessGoalAdapter] Processed machine "${machine.fields.title}" with image from ${imageSourceName}:`, imageUrl);
           
           return {
             id: machine.sys.id,
-            title: machine.fields.title,
+            title: machine.fields.title || 'Unnamed Machine',
             slug: machine.fields.slug || machine.sys.id,
             description: machine.fields.description || '',
-            // Map to both specific properties AND generic image property
+            // Map to all image properties for maximum compatibility
             machineThumbnail: imageUrl ? {
               url: imageUrl,
-              alt: machineImage.fields?.title || machine.fields.title
+              alt: imageAlt
             } : undefined,
             thumbnail: imageUrl ? {
               url: imageUrl,
-              alt: machineImage.fields?.title || machine.fields.title
+              alt: imageAlt
             } : undefined,
             image: imageUrl ? {
               url: imageUrl,
-              alt: machineImage.fields?.title || machine.fields.title
+              alt: imageAlt
             } : undefined
           };
-        });
+        }).filter(Boolean); // Remove any null values
       }
 
       return {
