@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -37,7 +37,29 @@ interface RecommendedMachinesProps {
  * The image selection logic prioritizes machineThumbnail > thumbnail > image.
  */
 const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
-  if (!machines?.length) return null;
+  // Log machine data on initial render for debugging
+  useEffect(() => {
+    console.log('[RecommendedMachines] Component mounted with machines:', machines?.length || 0);
+    if (machines?.length) {
+      machines.forEach((machine, idx) => {
+        console.log(`[RecommendedMachines] Machine ${idx + 1} details:`, {
+          id: machine.id,
+          slug: machine.slug,
+          title: machine.title,
+          hasMachineThumbnail: !!machine.machineThumbnail,
+          hasThumbnail: !!machine.thumbnail,
+          hasImage: !!machine.image
+        });
+      });
+    } else {
+      console.warn('[RecommendedMachines] No machines data provided to component');
+    }
+  }, [machines]);
+
+  if (!machines?.length) {
+    console.warn('[RecommendedMachines] No machines to display, returning null');
+    return null;
+  }
 
   return (
     <section className="py-16 bg-gray-50">
@@ -59,8 +81,8 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
               hasImage: !!machine.image,
               imageUrl: machine.image?.url,
               selectedImageSource: machine.machineThumbnail ? 'machineThumbnail' : 
-                                  (machine.thumbnail ? 'thumbnail' : 
-                                  (machine.image ? 'image' : 'none'))
+                                (machine.thumbnail ? 'thumbnail' : 
+                                (machine.image ? 'image' : 'none'))
             });
             
             return (
@@ -79,7 +101,7 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
                             url: imageToUse.url,
                             error: e,
                             imageSource: machine.machineThumbnail ? 'machineThumbnail' : 
-                                         (machine.thumbnail ? 'thumbnail' : 'regular image')
+                                        (machine.thumbnail ? 'thumbnail' : 'regular image')
                           });
                           // Fallback to placeholder
                           (e.target as HTMLImageElement).src = '/placeholder.svg';

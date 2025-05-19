@@ -49,9 +49,13 @@ export const contentfulProductAdapter: ProductAdapter = {
           videoOrientation = fields.videoOrientation as 'vertical' | 'horizontal';
         }
         
-        // Process recommended machines with enhanced error handling
-        const recommendedMachines = fields.recommendedMachines ? 
-          (fields.recommendedMachines as any[])
+        // Process recommended machines with enhanced error handling and debugging
+        let recommendedMachines: any[] = [];
+        
+        if (fields.recommendedMachines && Array.isArray(fields.recommendedMachines)) {
+          console.log(`[contentfulProductAdapter] Processing ${fields.recommendedMachines.length} recommended machines for product ${fields.title}`);
+          
+          recommendedMachines = fields.recommendedMachines
             .filter(machine => {
               if (!machine || !machine.fields) {
                 console.warn(`[contentfulProductAdapter] Invalid machine in recommendedMachines for product ${fields.title || 'unknown'}:`, machine);
@@ -65,8 +69,8 @@ export const contentfulProductAdapter: ProductAdapter = {
                 hasImage: !!machine.fields?.image,
                 hasMachineThumbnail: !!machine.fields?.machineThumbnail
               });
-            
-              return {
+              
+              const machineData = {
                 id: machine.sys.id,
                 slug: machine.fields.slug,
                 title: machine.fields.title,
@@ -85,7 +89,22 @@ export const contentfulProductAdapter: ProductAdapter = {
                   alt: machine.fields.machineThumbnail.fields.title || machine.fields.title
                 } : undefined
               };
-            }) : [];
+              
+              console.log(`[contentfulProductAdapter] Processed machine data:`, {
+                id: machineData.id,
+                title: machineData.title,
+                hasImage: !!machineData.image,
+                hasThumbnail: !!machineData.thumbnail,
+                hasMachineThumbnail: !!machineData.machineThumbnail
+              });
+              
+              return machineData;
+            });
+          
+          console.log(`[contentfulProductAdapter] Successfully processed ${recommendedMachines.length} recommended machines`);
+        } else {
+          console.log(`[contentfulProductAdapter] No recommended machines for product ${fields.title}`);
+        }
         
         return {
           id: entry.sys.id,

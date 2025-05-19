@@ -24,6 +24,7 @@ export interface CMSProductType {
     thumbnailImage: CMSImage;
     url?: string;
     youtubeId?: string;
+    orientation?: 'horizontal' | 'vertical';
   };
   visible?: boolean;
   displayOrder?: number;
@@ -39,6 +40,10 @@ export interface CMSProductType {
       alt?: string;
     };
     thumbnail?: {
+      url: string;
+      alt?: string;
+    };
+    machineThumbnail?: {
       url: string;
       alt?: string;
     };

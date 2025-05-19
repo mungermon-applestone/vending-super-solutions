@@ -1,5 +1,6 @@
 
-import { useParams, Link, useEffect } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import { useProductType } from '@/hooks/cms/useProductTypes';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft } from 'lucide-react';
@@ -83,6 +84,22 @@ const ProductDetail = () => {
   // Prepare benefits list (ensure it's an array)
   const benefits = Array.isArray(product.benefits) ? product.benefits : [];
 
+  // Log information about recommended machines
+  if (product.recommendedMachines) {
+    console.log('[ProductDetail] Number of recommended machines:', product.recommendedMachines.length);
+    product.recommendedMachines.forEach((machine, index) => {
+      console.log(`[ProductDetail] Machine ${index + 1}:`, {
+        id: machine.id,
+        title: machine.title,
+        hasImage: !!machine.image,
+        hasThumbnail: !!machine.thumbnail,
+        hasMachineThumbnail: !!machine.machineThumbnail
+      });
+    });
+  } else {
+    console.log('[ProductDetail] No recommended machines for this product');
+  }
+
   return (
     <>
       {/* Back Navigation */}
@@ -105,7 +122,7 @@ const ProductDetail = () => {
         benefits={benefits}
       />
 
-      {/* Video Section - Modified to handle both YouTube and direct video URLs */}
+      {/* Video Section - With orientation property check */}
       {product.video && (
         <ProductVideoSection
           title={product.video.title || "See Our Solution in Action"}
@@ -113,7 +130,7 @@ const ProductDetail = () => {
           videoId={product.video.youtubeId}
           videoUrl={product.video.url}
           thumbnailImage={product.video.thumbnailImage?.url || heroImage}
-          orientation={product.video.orientation}
+          orientation={product.video.orientation || 'horizontal'}
         />
       )}
 
