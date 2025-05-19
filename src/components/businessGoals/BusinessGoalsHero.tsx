@@ -1,20 +1,35 @@
 
 import React from 'react';
-import { useHeroContent } from '@/hooks/cms/useHeroContent';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
+interface HeroContentProps {
+  title?: string;
+  subtitle?: string;
+  image?: {
+    url: string;
+    alt: string;
+  };
+  primaryButtonText?: string;
+  primaryButtonUrl?: string;
+  secondaryButtonText?: string;
+  secondaryButtonUrl?: string;
+  backgroundClass?: string;
+}
+
+interface BusinessGoalsHeroProps {
+  heroContent: HeroContentProps | null;
+}
+
 /**
  * BusinessGoalsHero component - Displays hero content for the business goals page
- * Uses the useHeroContent hook with the 'business-goals' pageKey
+ * Now accepts heroContent directly as a prop from BusinessGoalsPage
  */
-const BusinessGoalsHero: React.FC = () => {
-  const { data: heroContent, isLoading, error } = useHeroContent('business-goals');
-
-  // Show loading state while content is being fetched
-  if (isLoading) {
+const BusinessGoalsHero: React.FC<BusinessGoalsHeroProps> = ({ heroContent }) => {
+  // Show loading state if heroContent is null but we expect it to be loaded
+  if (!heroContent) {
     return (
       <section className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
         <div className="container py-16 md:py-24">
@@ -36,9 +51,9 @@ const BusinessGoalsHero: React.FC = () => {
     );
   }
 
-  // Show fallback content if there's an error or no content
-  if (error || !heroContent) {
-    console.error('[BusinessGoalsHero] Error loading hero content:', error);
+  // Show fallback content if hero content is incomplete
+  if (!heroContent.title || !heroContent.subtitle) {
+    console.warn('[BusinessGoalsHero] Incomplete hero content:', heroContent);
     
     return (
       <section className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
@@ -79,7 +94,7 @@ const BusinessGoalsHero: React.FC = () => {
     );
   }
 
-  // Render hero content from Contentful
+  // Render hero content from props
   return (
     <section className={heroContent.backgroundClass || "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"}>
       <div className="container py-16 md:py-24">

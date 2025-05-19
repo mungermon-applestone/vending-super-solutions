@@ -1,10 +1,10 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useBusinessGoalsPageContent } from '@/hooks/cms/useBusinessGoalsPageContent';
 import { useContentfulBusinessGoals } from '@/hooks/cms/useContentfulBusinessGoals';
-import { useHeroContent } from '@/hooks/cms/useHeroContent';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 import BusinessGoalsPurposeStatement from '@/components/businessGoals/BusinessGoalsPurposeStatement';
@@ -18,7 +18,6 @@ import BusinessGoalsHero from '@/components/businessGoals/BusinessGoalsHero';
 import { CONTENTFUL_CONFIG, isContentfulConfigured, isPreviewEnvironment } from '@/config/cms';
 
 const BUSINESS_GOALS_CONTENT_ID = "3z7Q1mcHEnk6S4YVCyaklz";
-const HERO_CONTENT_ID = "4b40Npa9Hgp8jO0jDX98F6";
 
 // Fallback data for when Contentful is not configured
 const fallbackBusinessGoals = [
@@ -119,10 +118,9 @@ const BusinessGoalsPage: React.FC = () => {
   
   const { data: businessGoals, isLoading: goalsLoading, error: goalsError } = useContentfulBusinessGoals();
   const { data: pageContent, isLoading: contentLoading, error: contentError } = useBusinessGoalsPageContent(BUSINESS_GOALS_CONTENT_ID);
-  const { data: heroContent, isLoading: heroLoading } = useHeroContent(HERO_CONTENT_ID);
   const { data: testimonialSection, isLoading: isLoadingTestimonials, error: testimonialError } = useTestimonialSection('business-goals');
   
-  const isLoading = goalsLoading || contentLoading || heroLoading;
+  const isLoading = goalsLoading || contentLoading;
   const error = goalsError || contentError;
 
   // Check if contentful is configured
@@ -140,7 +138,16 @@ const BusinessGoalsPage: React.FC = () => {
       fallbackBusinessGoals,
       displayGoals: isConfigured ? businessGoals : fallbackBusinessGoals
     });
-  }, [isConfigured, isPreview, businessGoals]);
+
+    // Log the hero content from the pageContent
+    if (pageContent) {
+      console.log('[BusinessGoalsPage] Hero content from pageContent:', {
+        heroTitle: pageContent.heroTitle,
+        heroDescription: pageContent.heroDescription,
+        hasHeroImage: !!pageContent.heroImage,
+      });
+    }
+  }, [isConfigured, isPreview, businessGoals, pageContent]);
   
   // Use fallback content if Contentful is not configured
   const displayContent = isConfigured ? pageContent : fallbackPageContent;
@@ -152,10 +159,24 @@ const BusinessGoalsPage: React.FC = () => {
     return <BusinessGoalsLoader />;
   }
 
+  // Extract hero content from pageContent
+  const heroContent = displayContent ? {
+    title: displayContent.heroTitle,
+    subtitle: displayContent.heroDescription,
+    image: displayContent.heroImage ? {
+      url: displayContent.heroImage.fields?.file?.url,
+      alt: displayContent.heroImage.fields?.title || "Business Goals"
+    } : undefined,
+    primaryButtonText: displayContent.heroPrimaryButtonText,
+    primaryButtonUrl: displayContent.heroPrimaryButtonUrl,
+    secondaryButtonText: displayContent.heroSecondaryButtonText,
+    secondaryButtonUrl: displayContent.heroSecondaryButtonUrl
+  } : null;
+
   return (
     <>
-      {/* Using our new BusinessGoalsHero component instead of BusinessGoalsIntro */}
-      <BusinessGoalsHero />
+      {/* Pass hero content to BusinessGoalsHero */}
+      <BusinessGoalsHero heroContent={heroContent} />
       
       {/* Show warning if using preview mode or fallback content */}
       <BusinessGoalsFallbackNotice isPreview={isPreview} isConfigured={isConfigured} />

@@ -18,6 +18,22 @@ interface BusinessGoalsPageContent {
   testimonialsSectionTitle?: string;
   testimonialsSectionDescription?: string;
   inquiryBulletPoints?: string[];
+  // New hero-related fields
+  heroTitle?: string;
+  heroDescription?: string;
+  heroImage?: {
+    fields: {
+      file: {
+        url: string;
+      };
+      title?: string;
+      description?: string;
+    };
+  };
+  heroPrimaryButtonText?: string;
+  heroPrimaryButtonUrl?: string;
+  heroSecondaryButtonText?: string;
+  heroSecondaryButtonUrl?: string;
 }
 
 export function useBusinessGoalsPageContent(contentId?: string) {
@@ -62,7 +78,15 @@ export function useBusinessGoalsPageContent(contentId?: string) {
           keyBenefits: fields.keyBenefits as string[],
           testimonialsSectionTitle: fields.testimonialsSectionTitle as string,
           testimonialsSectionDescription: fields.testimonialsSectionDescription as string,
-          inquiryBulletPoints: fields.inquiryBulletPoints as string[]
+          inquiryBulletPoints: fields.inquiryBulletPoints as string[],
+          // Extract hero-related fields
+          heroTitle: fields.heroTitle as string,
+          heroDescription: fields.heroDescription as string,
+          heroImage: fields.heroImage,
+          heroPrimaryButtonText: fields.heroPrimaryButtonText as string,
+          heroPrimaryButtonUrl: fields.heroPrimaryButtonUrl as string,
+          heroSecondaryButtonText: fields.heroSecondaryButtonText as string,
+          heroSecondaryButtonUrl: fields.heroSecondaryButtonUrl as string
         } as BusinessGoalsPageContent;
       } catch (error) {
         console.error('[useBusinessGoalsPageContent] Error:', error);
