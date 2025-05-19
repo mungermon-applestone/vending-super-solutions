@@ -21,7 +21,7 @@ const BusinessGoalKeyBenefits: React.FC<BusinessGoalKeyBenefitsProps> = ({
   console.log('[BusinessGoalKeyBenefits] Rendering benefits:', benefits);
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-gray-50">
       <div className="container mx-auto">
         <div className="max-w-4xl mx-auto text-center mb-12">
           <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">{title}</h2>

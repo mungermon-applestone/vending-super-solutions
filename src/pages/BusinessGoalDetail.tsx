@@ -84,7 +84,6 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
         <BusinessGoalKeyBenefits 
           benefits={businessGoal.benefits}
           title="Key Benefits"
-          description="How this business goal can transform your operations"
         />
       )}
 
