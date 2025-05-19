@@ -14,6 +14,22 @@ interface ProductsPageContent {
   demoRequestTitle?: string;
   demoRequestDescription?: string;
   demoRequestBulletPoints?: string[];
+  // New hero-related fields
+  heroTitle?: string;
+  heroDescription?: string;
+  heroImage?: {
+    fields: {
+      file: {
+        url: string;
+      };
+      title?: string;
+      description?: string;
+    };
+  };
+  heroPrimaryButtonText?: string;
+  heroPrimaryButtonUrl?: string;
+  heroSecondaryButtonText?: string;
+  heroSecondaryButtonUrl?: string;
 }
 
 export function useProductsPageContent() {
@@ -50,6 +66,14 @@ export function useProductsPageContent() {
           demoRequestTitle: fields.demoRequestTitle as string,
           demoRequestDescription: fields.demoRequestDescription as string,
           demoRequestBulletPoints: fields.demoRequestBulletPoints as string[],
+          // Extract hero-related fields
+          heroTitle: fields.heroTitle as string,
+          heroDescription: fields.heroDescription as string,
+          heroImage: fields.heroImage,
+          heroPrimaryButtonText: fields.heroPrimaryButtonText as string,
+          heroPrimaryButtonUrl: fields.heroPrimaryButtonUrl as string,
+          heroSecondaryButtonText: fields.heroSecondaryButtonText as string,
+          heroSecondaryButtonUrl: fields.heroSecondaryButtonUrl as string,
         } as ProductsPageContent;
       } catch (error) {
         console.error('[useProductsPageContent] Error fetching products page content:', error);
@@ -61,3 +85,5 @@ export function useProductsPageContent() {
     refetchOnWindowFocus: false
   });
 }
+
+export type { ProductsPageContent };

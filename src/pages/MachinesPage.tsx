@@ -21,14 +21,39 @@ import MachinesHero from '@/components/machines/MachinesHero';
 // Define the machines page key for consistency
 const MACHINES_PAGE_KEY = 'machines';
 
+// Fallback content for when Contentful is not configured
+const fallbackPageContent = {
+  // Hero fields
+  heroTitle: "Our Machines",
+  heroDescription: "Explore our comprehensive range of vending machines and smart lockers designed to meet diverse business needs.",
+  heroImage: undefined,
+  heroPrimaryButtonText: "Vending Machines",
+  heroPrimaryButtonUrl: "#vending-machines",
+  heroSecondaryButtonText: "Smart Lockers",
+  heroSecondaryButtonUrl: "#smart-lockers",
+  
+  // Original content fields
+  introTitle: "Vending Machines and Smart Lockers",
+  introDescription: "Discover our full range of vending machines and smart lockers designed to meet the needs of various business environments.",
+  machineTypesTitle: "Machine Types",
+  machineTypesDescription: "Browse our selection of vending machines and smart lockers.",
+  customMachineCtaTitle: "Need a Custom Solution?",
+  customMachineCtaDescription: "We can customize our machines to meet your specific requirements.",
+  customMachineButtonText: "Contact Us",
+  customMachineButtonUrl: "/contact"
+};
+
 const MachinesPage: React.FC = () => {
   const renderTime = new Date().toISOString();
   console.log(`[MachinesPage] Rendering at ${renderTime}`);
   console.log(`[MachinesPage] Using page key: ${MACHINES_PAGE_KEY}`);
   
   const { data: machines, isLoading, error, refetch } = useContentfulMachines();
-  const { data: pageContent } = useMachinesPageContent();
+  const { data: pageContent, isLoading: isLoadingContent, error: contentError } = useMachinesPageContent();
   const { data: testimonialSection, isLoading: isLoadingTestimonials, error: testimonialError } = useTestimonialSection('machines');
+  
+  // Use fallback content if Contentful is not configured or content isn't loaded yet
+  const displayContent = isContentfulConfigured() && pageContent ? pageContent : fallbackPageContent;
   
   useEffect(() => {
     if (machines) {
@@ -52,13 +77,17 @@ const MachinesPage: React.FC = () => {
 
   return (
     <>
-      {/* Use the new MachinesHero component */}
-      <MachinesHero />
+      {/* Use the new MachinesHero component with pageContent */}
+      <MachinesHero 
+        pageContent={displayContent}
+        isLoading={isLoadingContent}
+        error={contentError}
+      />
 
-      {pageContent && (
+      {displayContent && (
         <MachinesIntroSection 
-          introTitle={pageContent.introTitle} 
-          introDescription={pageContent.introDescription} 
+          introTitle={displayContent.introTitle} 
+          introDescription={displayContent.introDescription} 
         />
       )}
 

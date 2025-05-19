@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -20,6 +19,41 @@ import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
+import ProductsHero from '@/components/products/sections/ProductsHero';
+
+// Fallback page content with hero fields
+const fallbackPageContent = {
+  // Hero fields
+  heroTitle: "Vending Product Solutions",
+  heroDescription: "Discover our range of software solutions designed for various types of vending operations.",
+  heroImage: undefined,
+  heroPrimaryButtonText: "Request Demo",
+  heroPrimaryButtonUrl: "/contact",
+  heroSecondaryButtonText: "Explore Technology",
+  heroSecondaryButtonUrl: "/technology",
+  
+  // Original content fields
+  purposeStatementTitle: "Our Products",
+  purposeStatementDescription: "We offer a comprehensive range of vending software solutions designed to meet the needs of various industry segments.",
+  categoriesSectionTitle: "Product Categories",
+  categoriesSectionDescription: "Choose the right vending solution for your business",
+  keyFeaturesTitle: "Key Features",
+  keyFeaturesDescription: "Our products come with robust features that help you maximize efficiency and profitability",
+  keyFeatures: [
+    "Real-time inventory management",
+    "Remote machine monitoring",
+    "Cashless payment integration",
+    "Customer loyalty programs",
+    "Data analytics and reporting"
+  ],
+  demoRequestTitle: "Ready to see our products in action?",
+  demoRequestDescription: "Schedule a personalized demo to see how our products can help your business.",
+  demoRequestBulletPoints: [
+    "See the full feature set",
+    "Ask questions specific to your business",
+    "Get pricing information"
+  ]
+};
 
 const ProductsPage = () => {
   const navigate = useNavigate();
@@ -105,6 +139,9 @@ const ProductsPage = () => {
     }
   };
 
+  // Use fallback content if Contentful is not configured or content isn't loaded yet
+  const displayContent = contentfulConfigured && pageContent ? pageContent : fallbackPageContent;
+
   if (!contentfulConfigured) {
     return (
       <Layout>
@@ -131,24 +168,31 @@ const ProductsPage = () => {
       {/* ContentfulConfigVerifier only shown in development environment */}
       {import.meta.env.DEV && <ContentfulConfigVerifier />}
       
+      {/* Pass the display content to the hero component */}
+      <ProductsHero 
+        pageContent={displayContent} 
+        isLoading={isLoadingContent} 
+        error={contentError} 
+      />
+
       {/* Hero/Purpose Statement Section */}
-      {pageContent && (
+      {displayContent && (
         <PurposeStatement 
-          title={pageContent.purposeStatementTitle || "Our Vending Products"}
-          description={pageContent.purposeStatementDescription}
+          title={displayContent.purposeStatementTitle || "Our Vending Products"}
+          description={displayContent.purposeStatementDescription}
         />
       )}
 
       {/* Categories Section */}
       <div className="container mx-auto py-12">
-        {pageContent?.categoriesSectionTitle && (
+        {displayContent?.categoriesSectionTitle && (
           <div className="max-w-2xl mx-auto text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {pageContent.categoriesSectionTitle}
+              {displayContent.categoriesSectionTitle}
             </h2>
-            {pageContent.categoriesSectionDescription && (
+            {displayContent.categoriesSectionDescription && (
               <p className="text-lg text-gray-600">
-                {pageContent.categoriesSectionDescription}
+                {displayContent.categoriesSectionDescription}
               </p>
             )}
           </div>
@@ -172,11 +216,11 @@ const ProductsPage = () => {
       </div>
 
       {/* Key Features Section */}
-      {pageContent && (
+      {displayContent && (
         <KeyFeaturesSection 
-          title={pageContent.keyFeaturesTitle}
-          description={pageContent.keyFeaturesDescription}
-          features={pageContent.keyFeatures}
+          title={displayContent.keyFeaturesTitle}
+          description={displayContent.keyFeaturesDescription}
+          features={displayContent.keyFeatures}
         />
       )}
 

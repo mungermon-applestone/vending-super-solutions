@@ -12,13 +12,29 @@ import { SimpleContactCTA } from '@/components/common';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 
-// Content ID for the technology hero section
-const TECHNOLOGY_HERO_ENTRY_ID = '66FG7FxpIy3YkSXj2mu846';
+// Fallback content for when Contentful is not configured
+const fallbackPageContent = {
+  // Hero fields
+  heroTitle: "Our Technology Platform",
+  heroDescription: "Powerful, reliable, and secure technology solutions designed specifically for the vending industry",
+  heroImage: undefined,
+  heroPrimaryButtonText: "Request a Demo", 
+  heroPrimaryButtonUrl: "/contact",
+  heroSecondaryButtonText: "Explore Features",
+  heroSecondaryButtonUrl: "#features",
+  
+  // Original content fields
+  introTitle: "Vending Technology Platform",
+  introDescription: "Our comprehensive technology platform enables vending operators to manage their operations efficiently and effectively."
+};
 
 const TechnologyPage = () => {
   const { data: pageContent, isLoading: isLoadingContent, error: contentError } = useContentfulTechnologyPageContent();
   const { data: sections = [], isLoading: isLoadingSections, error: sectionsError } = useContentfulTechnologySections();
   const { data: testimonialSection, isLoading: isLoadingTestimonials, error: testimonialError } = useTestimonialSection('technology');
+
+  // Use either the fetched content or fallback content
+  const displayContent = pageContent || fallbackPageContent;
 
   if (isLoadingContent || isLoadingSections) {
     return (
@@ -56,14 +72,14 @@ const TechnologyPage = () => {
   return (
     <>
       {/* Hero Section */}
-      <TechnologyPageHero entryId={TECHNOLOGY_HERO_ENTRY_ID} />
+      <TechnologyPageHero />
       
       <div className="container mx-auto px-4 py-8">
-        {pageContent && (
+        {displayContent && (
           <div className="max-w-4xl mx-auto text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">{pageContent.introTitle}</h1>
-            {pageContent.introDescription && (
-              <p className="text-lg text-muted-foreground">{pageContent.introDescription}</p>
+            <h1 className="text-4xl font-bold mb-4">{displayContent.introTitle}</h1>
+            {displayContent.introDescription && (
+              <p className="text-lg text-muted-foreground">{displayContent.introDescription}</p>
             )}
           </div>
         )}

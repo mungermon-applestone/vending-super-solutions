@@ -6,6 +6,22 @@ import { useToast } from '@/hooks/use-toast';
 export interface TechnologyPageContent {
   introTitle: string;
   introDescription?: string;
+  // New hero-related fields
+  heroTitle?: string;
+  heroDescription?: string;
+  heroImage?: {
+    fields: {
+      file: {
+        url: string;
+      };
+      title?: string;
+      description?: string;
+    };
+  };
+  heroPrimaryButtonText?: string;
+  heroPrimaryButtonUrl?: string;
+  heroSecondaryButtonText?: string;
+  heroSecondaryButtonUrl?: string;
 }
 
 export function useContentfulTechnologyPageContent() {
@@ -34,6 +50,14 @@ export function useContentfulTechnologyPageContent() {
         return {
           introTitle: fields.introTitle || '',
           introDescription: fields.introDescription || '',
+          // Extract hero-related fields
+          heroTitle: fields.heroTitle || '',
+          heroDescription: fields.heroDescription || '',
+          heroImage: fields.heroImage,
+          heroPrimaryButtonText: fields.heroPrimaryButtonText || '',
+          heroPrimaryButtonUrl: fields.heroPrimaryButtonUrl || '',
+          heroSecondaryButtonText: fields.heroSecondaryButtonText || '',
+          heroSecondaryButtonUrl: fields.heroSecondaryButtonUrl || '',
         };
       } catch (error) {
         console.error('[useContentfulTechnologyPageContent] Error:', error);
