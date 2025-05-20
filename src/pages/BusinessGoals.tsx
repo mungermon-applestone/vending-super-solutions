@@ -14,8 +14,8 @@ const BusinessGoals: React.FC = () => {
   const { data: pageContent } = useBusinessGoalsPageContent();
 
   // SEO values with fallbacks
-  const pageTitle = pageContent?.fields?.heroTitle || 'Business Goals | Applestone Solutions';
-  const pageDescription = pageContent?.fields?.heroDescription || 
+  const pageTitle = pageContent?.heroTitle || 'Business Goals | Applestone Solutions';
+  const pageDescription = pageContent?.heroDescription || 
     'Discover how our vending solutions can help you achieve your business goals.';
 
   if (isLoading) {
@@ -39,9 +39,9 @@ const BusinessGoals: React.FC = () => {
 
   // Prepare hero content for BusinessGoalsHero with safe property access
   const heroContent = {
-    title: pageContent?.fields?.heroTitle || 'Achieve Your Business Goals',
-    subtitle: pageContent?.fields?.heroDescription || 'Our vending solutions are designed to help you meet specific business objectives.',
-    imageUrl: pageContent?.fields?.heroImage ? `https:${pageContent.fields.heroImage.fields.file.url}` : undefined,
+    title: pageContent?.heroTitle || 'Achieve Your Business Goals',
+    subtitle: pageContent?.heroDescription || 'Our vending solutions are designed to help you meet specific business objectives.',
+    imageUrl: pageContent?.heroImage ? `https:${pageContent.heroImage.fields?.file?.url}` : undefined,
     imageAlt: 'Business Goals'
   };
 
@@ -59,16 +59,18 @@ const BusinessGoals: React.FC = () => {
       
       {/* Purpose Statement */}
       <BusinessGoalsPurposeStatement 
-        heading={pageContent?.fields?.introTitle || 'How We Help You Succeed'}
-        content={pageContent?.fields?.introDescription || 'We understand the unique challenges of the vending industry and have tailored our solutions to address your specific business goals.'}
+        heading={pageContent?.introTitle || 'How We Help You Succeed'}
+        content={pageContent?.introDescription || 'We understand the unique challenges of the vending industry and have tailored our solutions to address your specific business goals.'}
       />
 
       {/* Business Goals Grid */}
       <div className="container mx-auto py-12 px-4">
         <BusinessGoalsGrid 
           goals={businessGoals || []} 
-          title={pageContent?.fields?.goalsSectionTitle || 'Select Your Business Goal'}
-          description={pageContent?.fields?.goalsSectionDescription || 'Click on any business goal to learn more about how we can help you achieve it.'}
+          title={pageContent?.goalsSectionTitle || 'Select Your Business Goal'}
+          description={pageContent?.goalsSectionDescription || 'Click on any business goal to learn more about how we can help you achieve it.'}
+          compactView={true}
+          columnCount={3}
         />
       </div>
 

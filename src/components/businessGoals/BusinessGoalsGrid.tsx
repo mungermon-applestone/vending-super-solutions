@@ -61,6 +61,28 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
     );
   }
 
+  // Define column classes based on columnCount prop
+  const columnClasses = {
+    2: "md:grid-cols-2",
+    3: "md:grid-cols-2 lg:grid-cols-3",
+    4: "md:grid-cols-2 lg:grid-cols-4",
+  }[columnCount] || "md:grid-cols-2 lg:grid-cols-3";
+
+  // Define card height and content classes based on compactView and ultraCompact
+  let cardClass = "h-full";
+  let imageClass = "h-40";
+  let contentClass = "p-5";
+  
+  if (ultraCompact) {
+    imageClass = "h-24";
+    contentClass = "p-3";
+    cardClass = "h-full flex flex-col";
+  } else if (compactView) {
+    imageClass = "h-32";
+    contentClass = "p-4";
+    cardClass = "h-full flex flex-col";
+  }
+
   return (
     <div className="py-8">
       <div className="text-center mb-10">
@@ -68,12 +90,12 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
         <p className="text-gray-600 max-w-2xl mx-auto">{description}</p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className={`grid grid-cols-1 ${columnClasses} gap-6`}>
         {goals.map((goal) => (
           <Link key={goal.id} to={`/business-goals/${goal.slug}`}>
-            <Card className="h-full overflow-hidden transition-shadow duration-300 hover:shadow-lg">
+            <Card className={`${cardClass} overflow-hidden transition-shadow duration-300 hover:shadow-lg`}>
               {goal.image && (
-                <div className="h-40 overflow-hidden">
+                <div className={`${imageClass} overflow-hidden`}>
                   <img
                     src={goal.image.url}
                     alt={goal.title}
@@ -81,9 +103,11 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
                   />
                 </div>
               )}
-              <div className="p-5">
+              <div className={contentClass}>
                 <h3 className="text-xl font-semibold mb-2">{goal.title}</h3>
-                <p className="text-gray-600 line-clamp-3">{goal.description}</p>
+                {!ultraCompact && (
+                  <p className="text-gray-600 line-clamp-2">{goal.description}</p>
+                )}
               </div>
             </Card>
           </Link>

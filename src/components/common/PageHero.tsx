@@ -8,6 +8,15 @@ interface PageHeroProps {
   subheading?: string;  // Alternative to subtitle
   className?: string;
   children?: React.ReactNode;
+  pageKey?: string; // Added for components using pageKey
+  fallbackTitle?: string;
+  fallbackSubtitle?: string;
+  fallbackImage?: string;
+  fallbackImageAlt?: string;
+  fallbackPrimaryButtonText?: string;
+  fallbackPrimaryButtonUrl?: string;
+  fallbackSecondaryButtonText?: string;
+  fallbackSecondaryButtonUrl?: string;
 }
 
 const PageHero: React.FC<PageHeroProps> = ({ 
@@ -16,12 +25,22 @@ const PageHero: React.FC<PageHeroProps> = ({
   subtitle, 
   subheading,
   className = '', 
-  children 
+  children,
+  // Optional props below, not used directly
+  pageKey,
+  fallbackTitle,
+  fallbackSubtitle,
+  fallbackImage,
+  fallbackImageAlt,
+  fallbackPrimaryButtonText,
+  fallbackPrimaryButtonUrl,
+  fallbackSecondaryButtonText,
+  fallbackSecondaryButtonUrl
 }) => {
   // Use title or heading, with title taking precedence if both are provided
-  const displayTitle = title || heading || '';
+  const displayTitle = title || heading || fallbackTitle || '';
   // Use subtitle or subheading, with subtitle taking precedence if both are provided
-  const displaySubtitle = subtitle || subheading || '';
+  const displaySubtitle = subtitle || subheading || fallbackSubtitle || '';
   
   return (
     <div className={`py-16 md:py-24 ${className}`}>
