@@ -15,7 +15,7 @@ import ContentfulConfigWarning from '@/components/machines/ContentfulConfigWarni
 import MachinesIntroSection from '@/components/machines/MachinesIntroSection';
 import RefreshDataButton from '@/components/machines/RefreshDataButton';
 import MachineGrid from '@/components/machines/MachineGrid';
-import { SimpleContactCTA } from '@/components/common';
+import { ContactSection } from '@/components/common';
 import MachinesHero from '@/components/machines/MachinesHero';
 
 // Define the machines page key for consistency
@@ -116,7 +116,13 @@ const MachinesPage: React.FC = () => {
         error={testimonialError}
       />
       
-      <SimpleContactCTA />
+      {/* Replace SimpleContactCTA with ContactSection */}
+      <ContactSection
+        title="Need a customized vending machine solution?"
+        description="Contact our team to discuss your specific requirements and discover how our machines can benefit your business."
+        formType="Machines Page Inquiry"
+        formVariant="compact"
+      />
     </>
   );
 };
