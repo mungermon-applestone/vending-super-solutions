@@ -2,6 +2,7 @@
 import React from 'react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
+import { adaptMachineData } from './MachineAdapter';
 
 const Combi3000 = () => {
   // Default fallback data
@@ -63,7 +64,10 @@ const Combi3000 = () => {
   const { data: dbMachineData, isLoading, error } = useMachineBySlug('vending', 'combi-3000');
 
   // Use database data if available, otherwise fall back to static data
-  const machineData = dbMachineData || fallbackMachineData;
+  const rawMachineData = dbMachineData || fallbackMachineData;
+  
+  // Convert the machine data to the proper CMSMachine format
+  const machineData = adaptMachineData(rawMachineData);
 
   return <MachinePageTemplate machine={machineData} />;
 };

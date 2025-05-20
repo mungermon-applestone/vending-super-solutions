@@ -5,7 +5,6 @@ import { router } from './routes';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
-import { LegacyMonitor } from './legacy/cms/legacyMonitor';
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -39,7 +38,6 @@ const App: React.FC = () => {
         </Suspense>
         <Toaster position="top-right" />
       </HelmetProvider>
-      {process.env.NODE_ENV !== 'production' && <LegacyMonitor />}
     </>
   );
 };

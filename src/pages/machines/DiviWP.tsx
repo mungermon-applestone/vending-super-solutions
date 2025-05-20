@@ -2,6 +2,7 @@
 import React from 'react';
 import MachinePageTemplate from '@/components/machines/MachinePageTemplate';
 import { useMachineBySlug } from '@/hooks/useMachinesData';
+import { adaptMachineData } from './MachineAdapter';
 
 const DiviWP = () => {
   // Default fallback data
@@ -61,7 +62,10 @@ const DiviWP = () => {
   const { data: dbMachineData, isLoading, error } = useMachineBySlug('vending', 'divi-wp');
 
   // Use database data if available, otherwise fall back to static data
-  const machineData = dbMachineData || fallbackMachineData;
+  const rawMachineData = dbMachineData || fallbackMachineData;
+  
+  // Convert the machine data to the proper CMSMachine format
+  const machineData = adaptMachineData(rawMachineData);
 
   return <MachinePageTemplate machine={machineData} />;
 };
