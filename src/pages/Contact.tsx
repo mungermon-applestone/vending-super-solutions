@@ -10,9 +10,18 @@ import ContactPageSEO from '@/components/seo/ContactPageSEO';
 const Contact: React.FC = () => {
   const { processedData, isLoading } = useContactFAQ();
   
-  // Safely extract FAQs and contact methods with proper fallbacks
-  const faqs = processedData?.faqItems || [];
-  const contactMethods = processedData?.contactMethods || [];
+  // Convert FAQItems to ContentfulFAQItem format expected by FAQSection
+  const contentfulFaqs = React.useMemo(() => {
+    if (!processedData?.faqItems || !Array.isArray(processedData.faqItems)) return [];
+    
+    return processedData.faqItems.map(faq => ({
+      sys: { id: faq.id },
+      fields: {
+        question: faq.question,
+        answer: faq.answer
+      }
+    }));
+  }, [processedData?.faqItems]);
 
   return (
     <>
@@ -36,7 +45,8 @@ const Contact: React.FC = () => {
             {/* Contact Cards */}
             <div className="flex-1 space-y-6">
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">Other Ways to Reach Us</h2>
-              <ContactCards data={contactMethods} />
+              {/* Pass processedData directly to ContactCards */}
+              <ContactCards data={processedData || {}} />
             </div>
           </div>
         </div>
@@ -45,7 +55,7 @@ const Contact: React.FC = () => {
       {/* FAQ Section */}
       <FAQSection 
         title="Frequently Asked Questions" 
-        faqs={faqs} 
+        faqs={contentfulFaqs} 
         isLoading={isLoading} 
       />
     </>
