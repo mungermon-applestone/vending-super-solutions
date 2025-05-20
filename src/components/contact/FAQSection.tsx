@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Accordion,
@@ -7,6 +8,9 @@ import {
 } from '@/components/ui/accordion';
 import { Spinner } from '@/components/ui/spinner';
 import { ContentfulFAQItem } from '@/types/contentful';
+import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
+import { Document } from '@contentful/rich-text-types';
+import { renderRichText } from '@/utils/contentful/richTextRenderer';
 
 interface FAQSectionProps {
   title: string;
@@ -36,6 +40,25 @@ const FAQSection: React.FC<FAQSectionProps> = ({
     return null;
   }
 
+  // Helper function to render content based on its type
+  const renderFAQContent = (content: any) => {
+    if (typeof content === 'string') {
+      return <p>{content}</p>;
+    } else if (typeof content === 'object' && content !== null && 'nodeType' in content) {
+      try {
+        return documentToReactComponents(content as Document);
+      } catch (error) {
+        console.error('Error rendering rich text content:', error);
+        return <p className="text-red-500">Error rendering content</p>;
+      }
+    } else if (Array.isArray(content?.content)) {
+      // Handle nested content structure
+      return <div>{renderRichText(content, { includedAssets: [] })}</div>;
+    }
+    
+    return <p className="text-gray-500">Content not available</p>;
+  };
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -52,17 +75,9 @@ const FAQSection: React.FC<FAQSectionProps> = ({
                   {faq.fields.question}
                 </AccordionTrigger>
                 <AccordionContent className="px-6 py-4 text-gray-600">
-                  {typeof faq.fields.answer === 'string' ? (
-                    <p>{faq.fields.answer}</p>
-                  ) : (
-                    <div>
-                      {/* If the answer is a rich text document, render it simply for now */}
-                      <p>
-                        {typeof faq.fields.answer === 'object' && faq.fields.answer?.content ? 
-                          'See expanded answer' : 'Answer content not available'}
-                      </p>
-                    </div>
-                  )}
+                  <div className="rich-text-content">
+                    {renderFAQContent(faq.fields.answer)}
+                  </div>
                 </AccordionContent>
               </AccordionItem>
             ))}
