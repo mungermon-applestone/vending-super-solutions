@@ -58,25 +58,33 @@ const ContactSection: React.FC<ContactSectionProps> = ({
   }, [formType]);
 
   return (
-    <section className={`bg-vending-blue-light py-16 ${className}`}>
+    <section className={`bg-blue-50 py-16 ${className}`}>
       <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">{title}</h2>
-            <p className="text-lg text-gray-600 mb-6">{description}</p>
+        <div className="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto">
+          {/* Left side content */}
+          <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
+              {title}
+            </h2>
+            <p className="text-lg text-gray-600">
+              {description}
+            </p>
           </div>
           
-          <div className="bg-white rounded-lg shadow-lg">
-            <EmbeddedContactForm 
-              title="" 
-              variant={formVariant}
-              formType={formType}
-              className="w-full"
-              initialValues={initialValues}
-              onSuccess={() => {
-                if (onCtaClick) onCtaClick();
-              }}
-            />
+          {/* Right side form */}
+          <div className="md:w-1/2 w-full">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <EmbeddedContactForm 
+                title="Send Us a Message" 
+                variant={formVariant}
+                formType={formType}
+                className="w-full"
+                initialValues={initialValues}
+                onSuccess={() => {
+                  if (onCtaClick) onCtaClick();
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
