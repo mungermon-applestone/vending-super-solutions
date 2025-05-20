@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ContactCards from '@/components/contact/ContactCards';
@@ -5,7 +6,6 @@ import { useContactFAQ } from '@/hooks/useContactFAQ';
 import ContactLoadingState from '@/components/contact/ContactLoadingState';
 import ContactFallback from '@/components/contact/ContactFallback';
 import ContentfulInitializer from '@/components/blog/ContentfulInitializer';
-import { SimpleContactCTA } from '@/components/common';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { Document } from '@contentful/rich-text-types';
@@ -137,13 +137,6 @@ const ContactContent = () => {
           )}
         </div>
       </div>
-      
-      {/* Simple Contact CTA at the bottom */}
-      <SimpleContactCTA 
-        title="Ready to Get Started?" 
-        description="Our team is ready to help you find the perfect vending solution for your business."
-        className="w-full"
-      />
     </div>
   );
 };
