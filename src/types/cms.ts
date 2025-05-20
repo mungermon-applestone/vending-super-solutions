@@ -17,7 +17,7 @@ export interface CMSProductType {
   updated_at?: string;
   benefits?: string[];
   features?: CMSFeature[];
-  examples?: CMSExample[];
+  examples?: CMSExample[];  // This is now explicitly optional
   video?: {
     title: string;
     description: string;

@@ -85,6 +85,11 @@ const ProductDetail = () => {
   // Prepare benefits list (ensure it's an array)
   const benefits = Array.isArray(product.benefits) ? product.benefits : [];
 
+  // Check if product has examples - with proper typing
+  // @ts-ignore - Handling potential missing examples property
+  const productExamples = product.examples || [];
+  const hasExamples = productExamples && Array.isArray(productExamples) && productExamples.length > 0;
+
   // Log information about recommended machines
   if (product.recommendedMachines) {
     console.log('[ProductDetail] Number of recommended machines:', product.recommendedMachines.length);
@@ -148,12 +153,13 @@ const ProductDetail = () => {
         </section>
       )}
 
-      {/* Examples Section - with null/undefined check */}
-      {product.examples && product.examples.length > 0 && (
+      {/* Examples Section - with proper null check */}
+      {hasExamples && (
         <section className="py-12 bg-gray-50">
           <div className="container">
             <h2 className="text-3xl font-bold mb-8 text-center">Applications</h2>
-            <ProductExamples examples={product.examples} />
+            {/* @ts-ignore - Handling potential missing examples property */}
+            <ProductExamples examples={productExamples} />
           </div>
         </section>
       )}

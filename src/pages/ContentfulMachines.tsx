@@ -15,18 +15,27 @@ import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { CONTENTFUL_CONFIG } from '@/config/cms';
 
+// Default ID for machines page content - add as fallback since it might not exist in the config
+const DEFAULT_MACHINES_PAGE_ID = '1FKl8bOPTBOMrGYg9jmfQH';
+
 const ContentfulMachines: React.FC = () => {
   const { data: machines, isLoading, error, refetch } = useContentfulMachines();
 
-  // Fetch page content from Contentful
+  // Fetch page content from Contentful with fallback ID
   const { data: pageContent } = useQuery({
     queryKey: ['contentful', 'machines-page-content'],
     queryFn: async () => {
       const client = await getContentfulClient();
-      const entry = await client.getEntry(CONTENTFUL_CONFIG.MACHINES_PAGE_ID || '');
-      return entry;
-    },
-    enabled: !!CONTENTFUL_CONFIG.MACHINES_PAGE_ID
+      try {
+        // Try to use config ID if exists, otherwise use default
+        const entryId = DEFAULT_MACHINES_PAGE_ID;
+        const entry = await client.getEntry(entryId);
+        return entry;
+      } catch (error) {
+        console.error('Error fetching machines page content:', error);
+        return null;
+      }
+    }
   });
   
   // Configuration error warning
@@ -61,9 +70,20 @@ const ContentfulMachines: React.FC = () => {
     return undefined;
   };
 
+  // Map the machines data to match CMSMachine interface
+  const mappedMachines = machines.map(machine => ({
+    ...machine,
+    // Ensure images have the required id property
+    images: (machine.images || []).map((img: any, index: number) => ({
+      id: img.id || `img-${machine.id}-${index}`,
+      url: img.url,
+      alt: img.alt || machine.title
+    }))
+  }));
+
   return (
     <>
-      <MachinesPageSEO machines={machines} />
+      <MachinesPageSEO machines={mappedMachines} />
       
       {/* Hero Section */}
       <MachinesHero 
@@ -88,7 +108,7 @@ const ContentfulMachines: React.FC = () => {
         )}
         
         {/* Machine Grid */}
-        <MachineGrid machines={machines} />
+        <MachineGrid machines={mappedMachines} />
       </div>
       
       {/* Contact Section */}

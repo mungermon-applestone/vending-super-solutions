@@ -8,11 +8,11 @@ import PageHero from '@/components/common/PageHero';
 import ContactPageSEO from '@/components/seo/ContactPageSEO';
 
 const Contact: React.FC = () => {
-  const { data: faqData, isLoading } = useContactFAQ();
+  const { processedData, isLoading } = useContactFAQ();
   
   // Safely extract FAQs and contact methods with proper fallbacks
-  const faqs = faqData?.faqItems || [];
-  const contactMethods = faqData?.contactMethods || [];
+  const faqs = processedData?.faqItems || [];
+  const contactMethods = processedData?.contactMethods || [];
 
   return (
     <>
