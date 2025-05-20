@@ -44,10 +44,10 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
               <Link 
                 key={goal.id} 
                 to={`/business-goals/${goal.slug}`}
-                className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow flex items-center justify-between h-16"
+                className="bg-white border border-gray-200 rounded-lg px-6 py-7 hover:shadow-lg transition-shadow flex items-center justify-between h-20"
               >
-                <h3 className="text-xl font-semibold text-vending-blue-dark">{goal.title}</h3>
-                <ArrowRight className="h-5 w-5 text-vending-blue" />
+                <h3 className="text-xl font-semibold text-vending-blue-dark pr-4">{goal.title}</h3>
+                <ArrowRight className="h-5 w-5 flex-shrink-0 text-vending-blue" />
               </Link>
             ))}
           </div>
