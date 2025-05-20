@@ -1,7 +1,6 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
 import { Loader2 } from 'lucide-react';
 
 /**
@@ -21,12 +20,10 @@ const ProductsLanding: React.FC = () => {
   }, [navigate]);
   
   return (
-    <Layout>
-      <div className="container mx-auto py-16 flex flex-col items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500 mb-3" />
-        <span className="text-gray-600">Redirecting to products...</span>
-      </div>
-    </Layout>
+    <div className="container mx-auto py-16 flex flex-col items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-gray-500 mb-3" />
+      <span className="text-gray-600">Redirecting to products...</span>
+    </div>
   );
 };
 

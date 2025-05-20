@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
 import { useContentfulProducts } from '@/hooks/cms/useContentfulProducts';
 import { useProductsPageContent } from '@/hooks/cms/useProductsPageContent';
 import { isContentfulConfigured, logContentfulConfig, CONTENTFUL_CONFIG } from '@/config/cms';
@@ -145,27 +144,25 @@ const ProductsPage = () => {
 
   if (!contentfulConfigured) {
     return (
-      <Layout>
-        <div className="container py-12">
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Contentful Not Configured</AlertTitle>
-            <AlertDescription className="space-y-4">
-              <p>Your Contentful account needs to be configured to display content on this page.</p>
-              <div className="flex gap-4">
-                <Button onClick={() => navigate('/admin/environment-variables')}>
-                  Configure Contentful
-                </Button>
-              </div>
-            </AlertDescription>
-          </Alert>
-        </div>
-      </Layout>
+      <div className="container py-12">
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Contentful Not Configured</AlertTitle>
+          <AlertDescription className="space-y-4">
+            <p>Your Contentful account needs to be configured to display content on this page.</p>
+            <div className="flex gap-4">
+              <Button onClick={() => navigate('/admin/environment-variables')}>
+                Configure Contentful
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
   return (
-    <Layout>
+    <>
       {/* ContentfulConfigVerifier only shown in development environment */}
       {import.meta.env.DEV && <ContentfulConfigVerifier />}
       
@@ -282,7 +279,7 @@ const ProductsPage = () => {
           </details>
         </div>
       )}
-    </Layout>
+    </>
   );
 };
 
