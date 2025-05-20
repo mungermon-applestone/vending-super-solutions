@@ -71,11 +71,11 @@ const FAQSection: React.FC<FAQSectionProps> = ({
                 value={faq.sys.id || `faq-${index}`}
                 className="bg-white mb-4 rounded-lg shadow-sm overflow-hidden"
               >
-                <AccordionTrigger className="px-6 py-4 text-left font-medium">
+                <AccordionTrigger className="px-6 py-4 text-left font-medium text-2xl">
                   {faq.fields.question}
                 </AccordionTrigger>
                 <AccordionContent className="px-6 py-4 text-gray-600">
-                  <div className="rich-text-content">
+                  <div className="rich-text-content text-lg">
                     {renderFAQContent(faq.fields.answer)}
                   </div>
                 </AccordionContent>
