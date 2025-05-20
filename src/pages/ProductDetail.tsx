@@ -148,7 +148,7 @@ const ProductDetail = () => {
         </section>
       )}
 
-      {/* Examples Section */}
+      {/* Examples Section - with null/undefined check */}
       {product.examples && product.examples.length > 0 && (
         <section className="py-12 bg-gray-50">
           <div className="container">

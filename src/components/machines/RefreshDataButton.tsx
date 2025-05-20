@@ -5,11 +5,11 @@ import { Loader2 } from 'lucide-react';
 import { isPreviewEnvironment } from '@/config/cms';
 
 interface RefreshDataButtonProps {
-  isLoading: boolean;
+  isLoading?: boolean;
   onRefresh: () => void;
 }
 
-const RefreshDataButton: React.FC<RefreshDataButtonProps> = ({ isLoading, onRefresh }) => {
+const RefreshDataButton: React.FC<RefreshDataButtonProps> = ({ isLoading = false, onRefresh }) => {
   // Only show in development or preview environments
   const showDevTools = import.meta.env.DEV || isPreviewEnvironment();
   

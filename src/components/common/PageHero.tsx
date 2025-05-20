@@ -2,28 +2,37 @@
 import React from 'react';
 
 interface PageHeroProps {
-  title: string;
+  title?: string;
+  heading?: string;  // Alternative to title
   subtitle?: string;
+  subheading?: string;  // Alternative to subtitle
   className?: string;
   children?: React.ReactNode;
 }
 
 const PageHero: React.FC<PageHeroProps> = ({ 
   title, 
+  heading,
   subtitle, 
+  subheading,
   className = '', 
   children 
 }) => {
+  // Use title or heading, with title taking precedence if both are provided
+  const displayTitle = title || heading || '';
+  // Use subtitle or subheading, with subtitle taking precedence if both are provided
+  const displaySubtitle = subtitle || subheading || '';
+  
   return (
     <div className={`py-16 md:py-24 ${className}`}>
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            {title}
+            {displayTitle}
           </h1>
-          {subtitle && (
+          {displaySubtitle && (
             <p className="text-xl text-gray-700">
-              {subtitle}
+              {displaySubtitle}
             </p>
           )}
           {children}

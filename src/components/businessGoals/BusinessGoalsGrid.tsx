@@ -9,13 +9,45 @@ interface BusinessGoalsGridProps {
   goals: CMSBusinessGoal[];
   title?: string;
   description?: string;
+  isLoading?: boolean;
+  error?: Error | null;
+  compactView?: boolean;
+  columnCount?: number;
+  ultraCompact?: boolean;
 }
 
 const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({ 
   goals, 
   title = "Select Your Business Goal",
-  description = "Click on any business goal to learn more about how we can help you achieve it."
+  description = "Click on any business goal to learn more about how we can help you achieve it.",
+  isLoading = false,
+  error = null,
+  compactView = false,
+  columnCount = 3,
+  ultraCompact = false
 }) => {
+  if (isLoading) {
+    return (
+      <div className="text-center p-8">
+        <h2 className="text-xl font-medium mb-4">{title}</h2>
+        <p className="text-gray-500 mb-6">{description}</p>
+        <div className="flex justify-center">
+          <Spinner size="lg" />
+        </div>
+        <p className="mt-4 text-gray-500">Loading business goals...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-8">
+        <h2 className="text-xl font-medium mb-4">{title}</h2>
+        <p className="text-red-500 mb-6">Error loading business goals: {error.message}</p>
+      </div>
+    );
+  }
+
   if (!goals || goals.length === 0) {
     return (
       <div className="text-center p-8">

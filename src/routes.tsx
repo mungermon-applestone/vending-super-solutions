@@ -7,7 +7,7 @@ import BusinessGoalsPage from "./pages/BusinessGoalsPage";
 import BusinessGoalDetailPage from "./pages/BusinessGoalDetailPage";
 import MachinesPage from "./pages/MachinesPage";
 import TechnologyPage from "./pages/TechnologyPage";
-import TechnologyDetail from "./pages/TechnologyDetail";
+import TechnologyDetailPage from "./pages/TechnologyDetailPage";
 import MachineDetail from "./pages/MachineDetail";
 import Contact from "./pages/Contact";
 import ErrorPage from "./components/ErrorPage";
@@ -57,7 +57,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "/technology/:slug",
-        element: <TechnologyDetail />,
+        element: <TechnologyDetailPage />,
       },
       {
         path: "/contact",

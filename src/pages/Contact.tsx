@@ -11,8 +11,8 @@ const Contact: React.FC = () => {
   const { data: faqData, isLoading } = useContactFAQ();
   
   // Safely extract FAQs and contact methods with proper fallbacks
-  const faqs = faqData?.fields?.faqItems || [];
-  const contactMethods = faqData?.fields?.contactMethods || [];
+  const faqs = faqData?.faqItems || [];
+  const contactMethods = faqData?.contactMethods || [];
 
   return (
     <>
