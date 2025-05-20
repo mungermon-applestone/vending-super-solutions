@@ -5,10 +5,9 @@ import { useContentfulTechnologyPageContent } from '@/hooks/cms/useContentfulTec
 import { useContentfulTechnologySections } from '@/hooks/cms/useContentfulTechnologySections';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, Bug } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
-import { SimpleContactCTA } from '@/components/common';
+import { ContactSection } from '@/components/common';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 
@@ -105,8 +104,13 @@ const TechnologyPage = () => {
           error={testimonialError}
         />
         
-        {/* Replace InquiryForm with SimpleContactCTA */}
-        <SimpleContactCTA title="Ready to transform your vending operations?" />
+        {/* Replace SimpleContactCTA with ContactSection */}
+        <ContactSection
+          title="Ready to transform your vending operations with our technology?"
+          description="Get in touch to learn how our vending technology platform can help your business thrive."
+          formType="Technology Page Inquiry"
+          formVariant="compact"
+        />
       </div>
     </>
   );
