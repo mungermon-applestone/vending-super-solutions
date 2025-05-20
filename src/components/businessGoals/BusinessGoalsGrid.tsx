@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { CMSBusinessGoal } from '@/types/cms';
 import { Spinner } from '@/components/ui/spinner';
+import Image from '@/components/common/Image';
 
 interface BusinessGoalsGridProps {
   goals: CMSBusinessGoal[];
@@ -63,24 +64,22 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
 
   // Define column classes based on columnCount prop
   const columnClasses = {
-    2: "md:grid-cols-2",
-    3: "md:grid-cols-2 lg:grid-cols-3",
-    4: "md:grid-cols-2 lg:grid-cols-4",
-  }[columnCount] || "md:grid-cols-2 lg:grid-cols-3";
+    2: "grid-cols-1 sm:grid-cols-2",
+    3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+    4: "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+  }[columnCount] || "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
 
-  // Define card height and content classes based on compactView and ultraCompact
-  let cardClass = "h-full";
-  let imageClass = "h-40";
-  let contentClass = "p-5";
+  // Image height classes based on compact view
+  let imageHeightClass = "h-48";
+  let cardClass = "flex flex-col h-full";
+  let contentClass = "p-5 flex-grow";
   
   if (ultraCompact) {
-    imageClass = "h-24";
+    imageHeightClass = "h-32";
     contentClass = "p-3";
-    cardClass = "h-full flex flex-col";
   } else if (compactView) {
-    imageClass = "h-32";
+    imageHeightClass = "h-40";
     contentClass = "p-4";
-    cardClass = "h-full flex flex-col";
   }
 
   return (
@@ -90,19 +89,30 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
         <p className="text-gray-600 max-w-2xl mx-auto">{description}</p>
       </div>
       
-      <div className={`grid grid-cols-1 ${columnClasses} gap-6`}>
+      <div className={`grid ${columnClasses} gap-6`}>
         {goals.map((goal) => (
-          <Link key={goal.id} to={`/business-goals/${goal.slug}`}>
-            <Card className={`${cardClass} overflow-hidden transition-shadow duration-300 hover:shadow-lg`}>
-              {goal.image && (
-                <div className={`${imageClass} overflow-hidden`}>
-                  <img
+          <Link 
+            key={goal.id} 
+            to={`/business-goals/${goal.slug}`}
+            className="block w-full"
+          >
+            <Card className={`${cardClass} overflow-hidden transition-shadow duration-300 hover:shadow-lg max-w-sm mx-auto w-full`}>
+              {/* Image container with fixed height */}
+              <div className={`${imageHeightClass} w-full overflow-hidden bg-gray-50`}>
+                {goal.image ? (
+                  <Image
                     src={goal.image.url}
                     alt={goal.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full"
+                    objectFit="contain"
+                    priority={false}
                   />
-                </div>
-              )}
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <span className="text-gray-400">{goal.title}</span>
+                  </div>
+                )}
+              </div>
               <div className={contentClass}>
                 <h3 className="text-xl font-semibold mb-2">{goal.title}</h3>
                 {!ultraCompact && (
