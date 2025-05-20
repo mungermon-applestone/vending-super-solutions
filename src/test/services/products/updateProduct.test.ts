@@ -44,7 +44,9 @@ describe('Product Service - updateProduct', () => {
     };
     
     const mockToast = {
-      toast: vi.fn()
+      toast: vi.fn(),
+      toasts: [],
+      dismiss: vi.fn()
     };
     
     const mockUpdatedProduct = {

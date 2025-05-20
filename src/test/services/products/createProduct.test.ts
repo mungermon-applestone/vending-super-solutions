@@ -39,7 +39,9 @@ describe('Product Service - createProduct', () => {
     };
     
     const mockToast = {
-      toast: vi.fn()
+      toast: vi.fn(),
+      toasts: [],
+      dismiss: vi.fn()
     };
     
     const mockCreatedProduct = {

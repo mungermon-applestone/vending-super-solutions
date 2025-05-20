@@ -38,14 +38,21 @@ export async function getMachineById(id: string): Promise<CMSMachine | null> {
  * Create a new machine
  */
 export async function createNewMachine(machineData: any): Promise<string> {
-  return await createMachine(machineData);
+  const result = await createMachine(machineData);
+  // Extract the ID from the result or return a placeholder ID for deprecated functionality
+  return result?.id || 'deprecated-operation';
 }
 
 /**
  * Update an existing machine
  */
 export async function updateExistingMachine(id: string, machineData: any): Promise<boolean> {
-  return await updateMachine(id, machineData);
+  try {
+    await updateMachine(id, machineData);
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
 /**
