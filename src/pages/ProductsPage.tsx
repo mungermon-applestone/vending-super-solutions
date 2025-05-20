@@ -19,7 +19,7 @@ import { AlertCircle } from 'lucide-react';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 import ProductsHero from '@/components/products/sections/ProductsHero';
-import SimpleContactCTA from '@/components/common/SimpleContactCTA';
+import { ContactSection } from '@/components/common';
 
 // Fallback page content with hero fields
 const fallbackPageContent = {
@@ -229,13 +229,12 @@ const ProductsPage = () => {
         error={testimonialError}
       />
       
-      {/* Add SimpleContactCTA component */}
-      <SimpleContactCTA 
+      {/* Replace SimpleContactCTA with ContactSection */}
+      <ContactSection 
         title={displayContent?.demoRequestTitle || "Ready to see our products in action?"}
         description={displayContent?.demoRequestDescription || "Schedule a personalized demo to see how our products can help your business."}
-        primaryButtonText="Request Demo"
-        secondaryButtonText="Learn More"
-        secondaryButtonUrl="/technology"
+        formType="Products Page Inquiry"
+        className="w-full"
       />
       
       {/* Debug section - only shown in development mode */}
