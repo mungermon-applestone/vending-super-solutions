@@ -1,7 +1,7 @@
 
 import { useParams, Link } from 'react-router-dom';
 import { useEffect } from 'react';
-import { useProductType } from '@/hooks/cms/useProductTypes';
+import { useContentfulProductType } from '@/hooks/cms/useContentfulProductType';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import ProductHeroSection from '@/components/products/ProductHeroSection';
@@ -17,7 +17,7 @@ import ProductDetailSEO from '@/components/seo/ProductDetailSEO';
  */
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: product, isLoading, error } = useProductType(slug || '');
+  const { data: product, isLoading, error } = useContentfulProductType(slug || '');
   
   // Scroll to top when the component mounts
   useEffect(() => {

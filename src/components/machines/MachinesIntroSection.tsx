@@ -1,24 +1,26 @@
 
 import React from 'react';
 
-interface MachinesIntroSectionProps {
-  introTitle?: string;
-  introDescription?: string;
+export interface MachinesIntroSectionProps {
+  title: string;
+  description: string;
+  id?: string;
 }
 
-const MachinesIntroSection: React.FC<MachinesIntroSectionProps> = ({ 
-  introTitle = "Innovative Machine Solutions", 
-  introDescription = "Our machines combine cutting-edge technology with reliable performance to deliver exceptional value." 
+const MachinesIntroSection: React.FC<MachinesIntroSectionProps> = ({
+  title,
+  description,
+  id
 }) => {
   return (
-    <section className="bg-white py-12 md:py-16">
+    <section id={id} className="py-12 bg-white">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            {introTitle}
+          <h2 className="text-3xl font-bold mb-6 text-vending-blue-dark">
+            {title}
           </h2>
-          <p className="text-lg text-gray-600">
-            {introDescription}
+          <p className="text-lg text-gray-700">
+            {description}
           </p>
         </div>
       </div>

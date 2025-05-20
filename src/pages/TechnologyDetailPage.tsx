@@ -28,7 +28,7 @@ const TechnologyDetailPage: React.FC = () => {
     <>
       {/* Add SEO component */}
       <TechnologySEO technology={technology} />
-      {/* Pass technology prop to TechnologyDetail component */}
+      {/* Render TechnologyDetail component */}
       <TechnologyDetail technology={technology} />
     </>
   );

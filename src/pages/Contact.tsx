@@ -9,8 +9,10 @@ import ContactPageSEO from '@/components/seo/ContactPageSEO';
 
 const Contact: React.FC = () => {
   const { data: faqData, isLoading } = useContactFAQ();
-  const faqs = faqData?.faqs || [];
-  const contactMethods = faqData?.contactMethods || [];
+  
+  // Safely extract FAQs and contact methods with proper fallbacks
+  const faqs = faqData?.fields?.faqItems || [];
+  const contactMethods = faqData?.fields?.contactMethods || [];
 
   return (
     <>
@@ -19,8 +21,8 @@ const Contact: React.FC = () => {
       
       {/* Hero Section */}
       <PageHero
-        heading="Contact Us"
-        subheading="Get in touch with our team to learn more about our vending solutions."
+        title="Contact Us"
+        subtitle="Get in touch with our team to learn more about our vending solutions."
         className="bg-blue-50"
       />
 
@@ -41,7 +43,11 @@ const Contact: React.FC = () => {
       </section>
 
       {/* FAQ Section */}
-      <FAQSection heading="Frequently Asked Questions" faqs={faqs} isLoading={isLoading} />
+      <FAQSection 
+        title="Frequently Asked Questions" 
+        faqs={faqs} 
+        isLoading={isLoading} 
+      />
     </>
   );
 };
