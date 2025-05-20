@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { refreshContentfulClient, testContentfulConnection } from '@/services/cms/utils/contentfulClient';
-import { forceContentfulProvider } from '@/services/cms/cmsInit';
 import { isContentfulConfigured, isPreviewEnvironment } from '@/config/cms';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -45,9 +44,6 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
             throw new Error('Contentful is not configured and no fallback credentials are available');
           }
         }
-        
-        // Force provider initialization
-        forceContentfulProvider();
         
         // Test the connection
         const testResult = await testContentfulConnection();
@@ -94,7 +90,6 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
           
           // In preview environments or after all retries, still force provider to use fallbacks
           if (isPreview || retryCount >= MAX_RETRIES) {
-            forceContentfulProvider();
             setIsInitialized(true); // Still initialized but will use fallbacks
             window._contentfulInitializedSource = 'fallback-after-error';
           }
@@ -120,7 +115,6 @@ const ContentfulInitializer: React.FC<ContentfulInitializerProps> = ({
     };
   }, [isPreview, retryCount]);
   
-  // Enhanced display strategy:
   // Always attempt to show content unless we're in a loading state
   const shouldShowChildren = isInitialized || initAttempted;
   

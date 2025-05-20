@@ -6,7 +6,6 @@ import ProductTypesSection from '@/components/home/ProductTypesSection';
 import BusinessGoalsSection from '@/components/home/BusinessGoalsSection';
 import AvailableMachinesSection from '@/components/home/AvailableMachinesSection';
 import { SimpleContactCTA } from '@/components/common';
-import ContentfulDebug from '@/components/debug/ContentfulDebug';
 import { CONTENTFUL_CONFIG, isContentfulConfigured } from '@/config/cms';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
@@ -45,7 +44,6 @@ const Home = () => {
         formType="Home Page Inquiry"
         primaryButtonText="Get Started Today"
       />
-      <ContentfulDebug />
     </>
   );
 };

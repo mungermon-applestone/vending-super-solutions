@@ -75,7 +75,11 @@ export const router = createBrowserRouter([
         path: "/blog/:slug",
         element: <ContentfulBlogPostDetail />,
       },
-      // Redirect any admin routes to Contentful
+      // Redirect all admin routes to Contentful
+      {
+        path: "/admin",
+        element: <Navigate to="https://app.contentful.com" replace />,
+      },
       {
         path: "/admin/*",
         element: <Navigate to="https://app.contentful.com" replace />,
