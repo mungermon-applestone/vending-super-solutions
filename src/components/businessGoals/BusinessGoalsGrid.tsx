@@ -45,13 +45,17 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
               <Link 
                 key={goal.id} 
                 to={`/business-goals/${goal.slug}`}
-                className="bg-vending-gray rounded-lg p-6 hover:shadow-lg transition-shadow flex flex-col h-full"
+                className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow flex flex-col h-full"
               >
                 <div className="flex items-center mb-4">
-                  <MachineTypeIcon icon={goal.icon} className="mr-4" />
+                  <MachineTypeIcon icon={goal.icon} className="mr-4 text-vending-blue" />
                   <h3 className="text-xl font-semibold text-vending-blue-dark">{goal.title}</h3>
                 </div>
-                <p className="text-gray-600 flex-grow">{goal.description}</p>
+                
+                {!ultraCompact && !compactView && (
+                  <p className="text-gray-600 flex-grow">{goal.description}</p>
+                )}
+                
                 <div className="mt-4">
                   <span className="text-vending-blue hover:underline flex items-center">
                     Learn More <ArrowRight className="ml-2 h-4 w-4" />
