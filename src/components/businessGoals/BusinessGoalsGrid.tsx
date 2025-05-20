@@ -15,7 +15,6 @@ interface BusinessGoalsGridProps {
   compactView?: boolean;
   columnCount?: number;
   ultraCompact?: boolean;
-  showHeader?: boolean;
 }
 
 const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({ 
@@ -26,8 +25,7 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
   error = null,
   compactView = false,
   columnCount = 3,
-  ultraCompact = false,
-  showHeader = true
+  ultraCompact = false
 }) => {
   if (isLoading) {
     return (
@@ -86,13 +84,6 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
 
   return (
     <div className="py-8 max-w-7xl mx-auto px-4">
-      {showHeader && (
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold mb-4">{title}</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">{description}</p>
-        </div>
-      )}
-      
       <div className={`grid ${columnClasses} gap-6`}>
         {goals.map((goal) => (
           <Link 

@@ -63,14 +63,13 @@ const BusinessGoals: React.FC = () => {
         content={pageContent?.introDescription || 'We understand the unique challenges of the vending industry and have tailored our solutions to address your specific business goals.'}
       />
 
-      {/* Business Goals Grid - with showHeader set to false to hide the hardcoded text */}
+      {/* Business Goals Grid - no header displayed */}
       <BusinessGoalsGrid 
         goals={businessGoals || []} 
         title={pageContent?.goalsSectionTitle || 'Select Your Business Goal'}
         description={pageContent?.goalsSectionDescription || 'Click on any business goal to learn more about how we can help you achieve it.'}
         compactView={true}
         columnCount={3}
-        showHeader={false}
       />
 
       {/* Contact Section */}
