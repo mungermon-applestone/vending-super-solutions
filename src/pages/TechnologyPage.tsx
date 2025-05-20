@@ -1,4 +1,3 @@
-
 import React from 'react';
 import TechnologySections from '@/components/technology/TechnologySections';
 import { useContentfulTechnologyPageContent } from '@/hooks/cms/useContentfulTechnologyPageContent';
@@ -10,6 +9,7 @@ import TechnologyPageHero from '@/components/technology/TechnologyPageHero';
 import { ContactSection } from '@/components/common';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
+import SEO from '@/components/seo/SEO';
 
 // Fallback content for when Contentful is not configured
 const fallbackPageContent = {
@@ -34,6 +34,13 @@ const TechnologyPage = () => {
 
   // Use either the fetched content or fallback content
   const displayContent = pageContent || fallbackPageContent;
+
+  // Generate page title and description for SEO
+  const pageTitle = displayContent?.introTitle 
+    ? `${displayContent.introTitle} | Applestone Solutions` 
+    : 'Vending Technology Platform | Applestone Solutions';
+  const pageDescription = displayContent?.introDescription || 
+    'Our comprehensive technology platform enables vending operators to manage their operations efficiently and effectively.';
 
   if (isLoadingContent || isLoadingSections) {
     return (
@@ -70,6 +77,20 @@ const TechnologyPage = () => {
 
   return (
     <>
+      {/* Add SEO component */}
+      <SEO 
+        title={pageTitle}
+        description={pageDescription}
+        canonicalUrl="https://applestonesolutions.com/technology"
+        type="website"
+        openGraph={{
+          title: pageTitle,
+          description: pageDescription,
+          url: 'https://applestonesolutions.com/technology',
+          type: 'website'
+        }}
+      />
+      
       {/* Hero Section */}
       <TechnologyPageHero />
       

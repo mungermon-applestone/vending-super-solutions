@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useContentfulProducts } from '@/hooks/cms/useContentfulProducts';
@@ -21,6 +20,7 @@ import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 import ProductsHero from '@/components/products/sections/ProductsHero';
 import { ContactSection } from '@/components/common';
+import ProductsPageSEO from '@/components/seo/ProductsPageSEO';
 
 // Fallback page content with hero fields
 const fallbackPageContent = {
@@ -164,6 +164,13 @@ const ProductsPage = () => {
 
   return (
     <>
+      {/* Add SEO component */}
+      <ProductsPageSEO 
+        title={displayContent?.purposeStatementTitle ? `${displayContent.purposeStatementTitle} | Applestone Solutions` : undefined}
+        description={displayContent?.purposeStatementDescription}
+        products={productTypes}
+      />
+    
       {/* ContentfulConfigVerifier only shown in development environment */}
       {import.meta.env.DEV && <ContentfulConfigVerifier />}
       

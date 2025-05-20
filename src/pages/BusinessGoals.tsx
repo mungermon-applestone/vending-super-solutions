@@ -1,110 +1,79 @@
-import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { useBusinessGoals } from '@/hooks/cms/useBusinessGoals';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import PageHero from '@/components/common/PageHero';
 
-const BusinessGoals = () => {
-  const { data: businessGoals, isLoading, error, refetch } = useBusinessGoals();
-  const queryClient = useQueryClient();
-  
-  const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['businessGoals'] });
-  };
-  
-  console.log("Business goals data:", businessGoals);
-  
+import React from 'react';
+import { useBusinessGoals } from '@/hooks/cms/useBusinessGoals';
+import { useBusinessGoalsPageContent } from '@/hooks/cms/useBusinessGoalsPageContent';
+import BusinessGoalsGrid from '@/components/businessGoals/BusinessGoalsGrid';
+import { Spinner } from '@/components/ui/spinner';
+import BusinessGoalsHero from '@/components/businessGoals/BusinessGoalsHero';
+import BusinessGoalsPurposeStatement from '@/components/businessGoals/BusinessGoalsPurposeStatement';
+import { ContactSection } from '@/components/common';
+import BusinessGoalsPageSEO from '@/components/seo/BusinessGoalsPageSEO';
+
+const BusinessGoals: React.FC = () => {
+  const { data: businessGoals, isLoading, error } = useBusinessGoals();
+  const { data: pageContent } = useBusinessGoalsPageContent();
+
+  // SEO values
+  const pageTitle = pageContent?.pageTitle || 'Business Goals | Applestone Solutions';
+  const pageDescription = pageContent?.heroSubtitle || 
+    'Discover how our vending solutions can help you achieve your business goals.';
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-96 py-12">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-12 px-4">
+        <div className="bg-red-50 border border-red-200 p-4 rounded-md">
+          <h2 className="text-red-800 font-medium text-lg">Error Loading Business Goals</h2>
+          <p className="text-red-700 mt-2">{error.message}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-      {/* Hero Section from Database */}
-      <PageHero 
-        pageKey="business-goals" 
-        fallbackTitle="" 
-        fallbackSubtitle="" 
-        fallbackImage="" 
-        fallbackImageAlt="" 
+      {/* Add SEO component */}
+      <BusinessGoalsPageSEO 
+        businessGoals={businessGoals}
+        title={pageTitle}
+        description={pageDescription}
+      />
+      
+      {/* Hero Section */}
+      <BusinessGoalsHero 
+        title={pageContent?.heroTitle || 'Achieve Your Business Goals'}
+        subtitle={pageContent?.heroSubtitle || 'Our vending solutions are designed to help you meet specific business objectives.'}
+        image={pageContent?.heroImage}
+      />
+      
+      {/* Purpose Statement */}
+      <BusinessGoalsPurposeStatement 
+        title={pageContent?.purposeStatementTitle || 'How We Help You Succeed'}
+        description={pageContent?.purposeStatementDescription || 'We understand the unique challenges of the vending industry and have tailored our solutions to address your specific business goals.'}
       />
 
-      <div className="container py-10">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Business Goals</h1>
-            <p className="text-muted-foreground mt-1">
-              Explore business goals that our products can help you achieve
-            </p>
-          </div>
-          <Button onClick={handleRefresh} variant="outline" className="mt-4 md:mt-0">
-            Refresh Data
-          </Button>
-        </div>
-
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-          </div>
-        ) : error ? (
-          <Card>
-            <CardContent className="py-10">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-red-500 mb-2">Error Loading Business Goals</h3>
-                <p className="text-gray-600">
-                  {error instanceof Error ? error.message : 'An unknown error occurred'}
-                </p>
-                <Button onClick={() => refetch()} className="mt-4" variant="outline">
-                  Try Again
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : businessGoals && businessGoals.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {businessGoals.map((goal) => (
-              <Card key={goal.id} className="overflow-hidden">
-                <div className="relative h-40 overflow-hidden">
-                  {goal.image?.url || goal.image_url ? (
-                    <img 
-                      src={goal.image?.url || goal.image_url} 
-                      alt={goal.image?.alt || goal.image_alt || goal.title} 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-500">No image available</span>
-                    </div>
-                  )}
-                </div>
-                <CardHeader>
-                  <CardTitle>{goal.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 line-clamp-3">{goal.description}</p>
-                </CardContent>
-                <CardFooter>
-                  <Button asChild variant="outline" size="sm">
-                    <Link to={`/business-goals/${goal.slug}`}>
-                      Learn More <ExternalLink className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <Card>
-            <CardContent className="py-10">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-2">No Business Goals Found</h3>
-                <p className="text-gray-600">
-                  There are no business goals in the database.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {/* Business Goals Grid */}
+      <div className="container mx-auto py-12 px-4">
+        <BusinessGoalsGrid 
+          goals={businessGoals || []} 
+          title={pageContent?.gridTitle || 'Select Your Business Goal'}
+          subtitle={pageContent?.gridSubtitle || 'Click on any business goal to learn more about how we can help you achieve it.'}
+        />
       </div>
+
+      {/* Contact Section */}
+      <ContactSection 
+        title="Ready to Get Started?"
+        description="Get in touch and we'll start you on your vending journey."
+        formType="Business Goals Page Inquiry"
+      />
     </>
   );
 };

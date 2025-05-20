@@ -1,101 +1,102 @@
 
-import React from 'react';
-import { useContentfulMachines } from '@/hooks/useContentfulMachines';
-import { Link } from 'react-router-dom';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useEffect, useState } from 'react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+import MachineGrid from '@/components/machines/MachineGrid';
+import MachinesHero from '@/components/machines/MachinesHero';
+import MachinesIntroSection from '@/components/machines/MachinesIntroSection';
+import { useContentfulMachines } from '@/hooks/cms/useContentfulMachines';
+import { useMachinesPageContent } from '@/hooks/cms/useMachinesPageContent';
+import { isContentfulConfigured } from '@/config/cms';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useNavigate } from 'react-router-dom';
+import MachinesLoadingState from '@/components/machines/MachinesLoadingState';
+import MachinesErrorState from '@/components/machines/MachinesErrorState';
+import MachinesEmptyState from '@/components/machines/MachinesEmptyState';
+import { ContactSection } from '@/components/common';
+import MachinesPageSEO from '@/components/seo/MachinesPageSEO';
 
 const ContentfulMachines: React.FC = () => {
-  const { data: machines, isLoading, error } = useContentfulMachines();
+  const navigate = useNavigate();
+  const contentfulConfigured = isContentfulConfigured();
+  const [refreshKey, setRefreshKey] = useState(0);
+  
+  const { data: pageContent } = useMachinesPageContent();
+  const { data: machines, isLoading, error, refetch } = useContentfulMachines();
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!contentfulConfigured) {
+      console.warn('Contentful is not configured. Machine data may not be available.');
+    }
+  }, [contentfulConfigured]);
+
+  const handleRefresh = () => {
+    refetch();
+    setRefreshKey(prev => prev + 1);
+  };
+
+  if (!contentfulConfigured) {
     return (
       <div className="container py-12">
-        <h1 className="text-3xl font-bold mb-8">Our Machines</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="overflow-hidden">
-              <Skeleton className="h-48 w-full" />
-              <CardHeader>
-                <Skeleton className="h-8 w-3/4" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-5/6 mb-2" />
-                <Skeleton className="h-4 w-4/6" />
-              </CardContent>
-              <CardFooter>
-                <Skeleton className="h-10 w-full" />
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container py-12">
-        <h1 className="text-3xl font-bold mb-8">Our Machines</h1>
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          <p>Error loading machines: {error instanceof Error ? error.message : 'Unknown error'}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!machines || machines.length === 0) {
-    return (
-      <div className="container py-12">
-        <h1 className="text-3xl font-bold mb-8">Our Machines</h1>
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
-          <p>No machines found. Start by creating machines in your Contentful space!</p>
-          <Link to="/admin/contentful-management" className="underline mt-2 inline-block">
-            Go to Contentful Management
-          </Link>
-        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Contentful Not Configured</AlertTitle>
+          <AlertDescription className="space-y-4">
+            <p>Your Contentful account needs to be configured to display machines.</p>
+            <div className="flex gap-4">
+              <Button onClick={() => navigate('/admin/environment-variables')}>
+                Configure Contentful
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
 
   return (
-    <div className="container py-12">
-      <h1 className="text-3xl font-bold mb-8">Our Machines</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {machines.map((machine) => (
-          <Card key={machine.id} className="overflow-hidden">
-            {machine.images && machine.images.length > 0 ? (
-              <img 
-                src={machine.images[0].url} 
-                alt={machine.images[0].alt} 
-                className="h-48 w-full object-cover"
-              />
-            ) : (
-              <div className="h-48 w-full bg-gray-100 flex items-center justify-center">
-                <span className="text-gray-400">No image</span>
-              </div>
-            )}
-            <CardHeader>
-              <CardTitle>{machine.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-500">
-                {machine.description.length > 150 
-                  ? `${machine.description.substring(0, 150)}...` 
-                  : machine.description}
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Link to={`/contentful/machines/${machine.slug}`} className="w-full">
-                <Button className="w-full">View Details</Button>
-              </Link>
-            </CardFooter>
-          </Card>
-        ))}
+    <>
+      {/* Add SEO component */}
+      <MachinesPageSEO machines={machines} />
+      
+      {/* Hero Section */}
+      <MachinesHero 
+        title={pageContent?.heroTitle || "Vending Machines"}
+        description={pageContent?.heroDescription || "Explore our range of innovative vending machines designed for various use cases and industries."}
+        image={pageContent?.heroImage}
+      />
+
+      {/* Intro Section */}
+      <MachinesIntroSection 
+        title={pageContent?.introTitle || "Our Machine Portfolio"}
+        description={pageContent?.introDescription || "We offer a diverse range of vending machines that can be customized to meet your specific business needs."}
+        key={`intro-${refreshKey}`}
+      />
+
+      {/* Machines Grid Section */}
+      <div className="container mx-auto py-12 px-4">
+        <h2 className="text-3xl font-bold mb-8 text-center">Available Machines</h2>
+        
+        {isLoading && <MachinesLoadingState />}
+        
+        {error && <MachinesErrorState error={error} onRetry={handleRefresh} />}
+        
+        {!isLoading && !error && machines && machines.length === 0 && (
+          <MachinesEmptyState onRefresh={handleRefresh} />
+        )}
+        
+        {!isLoading && !error && machines && machines.length > 0 && (
+          <MachineGrid machines={machines} />
+        )}
       </div>
-    </div>
+      
+      {/* Contact Section */}
+      <ContactSection
+        title="Ready to Get Started?"
+        description="Get in touch and we'll start you on your vending journey."
+        formType="Machines Page Inquiry"
+      />
+    </>
   );
 };
 

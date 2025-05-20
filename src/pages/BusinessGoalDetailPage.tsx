@@ -5,6 +5,7 @@ import { useBusinessGoal } from "@/hooks/cms/useBusinessGoal";
 import ContentfulErrorBoundary from "@/components/common/ContentfulErrorBoundary";
 import ContentfulFallbackMessage from "@/components/common/ContentfulFallbackMessage";
 import BusinessGoalDetail from "./BusinessGoalDetail";
+import BusinessGoalSEO from "@/components/seo/BusinessGoalSEO";
 
 const BusinessGoalDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -38,6 +39,8 @@ const BusinessGoalDetailPage: React.FC = () => {
 
   return (
     <ContentfulErrorBoundary contentType="Business Goal">
+      {/* Add SEO component */}
+      <BusinessGoalSEO businessGoal={businessGoal} />
       <BusinessGoalDetail businessGoal={businessGoal} />
     </ContentfulErrorBoundary>
   );

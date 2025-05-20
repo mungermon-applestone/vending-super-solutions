@@ -31,14 +31,12 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <>
-      <HelmetProvider>
-        <Suspense fallback={<LoadingFallback />}>
-          <RouterProvider router={router} />
-        </Suspense>
-        <Toaster position="top-right" />
-      </HelmetProvider>
-    </>
+    <HelmetProvider>
+      <Suspense fallback={<LoadingFallback />}>
+        <RouterProvider router={router} />
+      </Suspense>
+      <Toaster position="top-right" />
+    </HelmetProvider>
   );
 };
 

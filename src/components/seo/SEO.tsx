@@ -43,20 +43,24 @@ const SEO: React.FC<SEOProps> = ({
   language = 'en',
   alternateLanguages = []
 }) => {
-  const siteName = 'Vending Solutions';
+  const siteName = 'Applestone Solutions';
   const defaultDescription = 'Advanced vending solutions for modern businesses. Automate your retail operations with smart vending machines and IoT technology.';
-  const defaultImage = '/og-image.jpg';
-  const fullTitle = title ? `${title} | ${siteName}` : siteName;
+  const defaultImage = 'https://applestonesolutions.com/og-image.jpg';
+  const fullTitle = title ? `${title}` : siteName;
   
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  // Ensure all canonical URLs use the applestonesolutions.com domain
   const canonical = canonicalUrl || currentUrl;
+  const domainPattern = /^(https?:\/\/[^\/]+)\//;
+  const baseUrl = 'https://applestonesolutions.com';
+  const formattedCanonical = canonical.replace(domainPattern, `${baseUrl}/`);
 
   return (
     <Helmet htmlAttributes={{ lang: language }}>
       {/* Basic Meta Tags */}
       <title>{fullTitle}</title>
       <meta name="description" content={description || defaultDescription} />
-      <link rel="canonical" href={canonical} />
+      <link rel="canonical" href={formattedCanonical} />
       {noindex && <meta name="robots" content="noindex,nofollow" />}
       
       {/* Open Graph Meta Tags */}
@@ -65,7 +69,7 @@ const SEO: React.FC<SEOProps> = ({
       <meta property="og:description" content={openGraph?.description || description || defaultDescription} />
       <meta property="og:type" content={openGraph?.type || type} />
       <meta property="og:image" content={openGraph?.image || image || defaultImage} />
-      <meta property="og:url" content={openGraph?.url || canonical} />
+      <meta property="og:url" content={openGraph?.url || formattedCanonical} />
       <meta property="og:locale" content={openGraph?.locale || 'en_US'} />
       
       {/* Twitter Card Meta Tags */}
@@ -83,7 +87,7 @@ const SEO: React.FC<SEOProps> = ({
 
       {/* Additional Meta Tags */}
       <meta name="format-detection" content="telephone=no" />
-      <meta name="theme-color" content="#ffffff" />
+      <meta name="theme-color" content="#2563eb" />
       {additionalMetaTags.map((tag, index) => (
         <meta key={index} name={tag.name} content={tag.content} />
       ))}

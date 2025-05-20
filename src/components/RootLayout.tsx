@@ -114,8 +114,8 @@ const RootLayout = () => {
       }
     >
       <ContentfulPersistenceProvider>
-        {/* Site-wide metadata and structured data */}
-        <SiteMetadata />
+        {/* Global site metadata with structured data */}
+        <SiteMetadata siteUrl="https://applestonesolutions.com" />
         
         <div className="flex min-h-screen flex-col">
           <Header />

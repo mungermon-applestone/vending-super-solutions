@@ -2,39 +2,64 @@
 import React from 'react';
 import { CMSMachine } from '@/types/cms';
 import MachineDetailHero from './MachineDetailHero';
-import MachineDetailSpecifications from './MachineDetailSpecifications';
 import MachineDetailFeatures from './MachineDetailFeatures';
-import MachineDetailDeployments from './MachineDetailDeployments';
+import MachineDetailSpecifications from './MachineDetailSpecifications';
 import MachineDetailGallery from './MachineDetailGallery';
-import CTASection from '@/components/common/CTASection';
+import MachineDetailDeployments from './MachineDetailDeployments';
+import MachineDetailInquiry from './MachineDetailInquiry';
+import MachineDetailSEO from '@/components/seo/MachineDetailSEO';
 
 interface MachineDetailProps {
   machine: CMSMachine;
 }
 
 const MachineDetail: React.FC<MachineDetailProps> = ({ machine }) => {
-  // Log machine data to help with debugging
-  console.log('[MachineDetail] Rendering machine detail:', {
-    id: machine.id,
-    title: machine.title,
-    hasThumbnail: !!machine.thumbnail,
-    thumbnailUrl: machine.thumbnail?.url || 'none',
-    hasImages: machine.images?.length > 0
-  });
-
   return (
-    <div>
-      <MachineDetailHero machine={machine} />
+    <>
+      {/* Add SEO optimization */}
+      <MachineDetailSEO machine={machine} />
       
-      <div className="container mx-auto px-4 py-12">
-        <MachineDetailSpecifications specs={machine.specs} />
-        <MachineDetailFeatures features={machine.features} />
-        <MachineDetailDeployments deploymentExamples={machine.deploymentExamples} />
-        <MachineDetailGallery title={machine.title} images={machine.images} />
-      </div>
-      
-      <CTASection />
-    </div>
+      {/* Hero Section */}
+      <MachineDetailHero 
+        title={machine.title}
+        description={machine.description}
+        image={machine.image}
+        machineType={machine.machineType}
+      />
+
+      {/* Gallery Section */}
+      <MachineDetailGallery
+        mainImage={machine.image}
+        additionalImages={machine.additionalImages}
+        title={machine.title}
+      />
+
+      {/* Features Section */}
+      <MachineDetailFeatures
+        features={machine.features}
+      />
+
+      {/* Specifications Section */}
+      <MachineDetailSpecifications
+        specifications={machine.specifications}
+        machineType={machine.machineType}
+      />
+
+      {/* Deployments Examples */}
+      {machine.deploymentExamples && machine.deploymentExamples.length > 0 && (
+        <MachineDetailDeployments
+          deployments={machine.deploymentExamples}
+          title="Deployment Examples"
+          description="See how this machine is being used in real-world scenarios."
+        />
+      )}
+
+      {/* Inquiry Section */}
+      <MachineDetailInquiry 
+        machineName={machine.title}
+        machineType={machine.machineType}
+      />
+    </>
   );
 };
 
