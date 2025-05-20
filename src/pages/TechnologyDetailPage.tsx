@@ -6,10 +6,6 @@ import TechnologyDetail from "./TechnologyDetail";
 import ContentfulFallbackMessage from "@/components/common/ContentfulFallbackMessage";
 import TechnologySEO from "@/components/seo/TechnologySEO";
 
-interface TechnologyDetailProps {
-  technology: any;
-}
-
 const TechnologyDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { technology, isLoading, isError, error } = useTechnologyData(slug || '');
@@ -32,6 +28,7 @@ const TechnologyDetailPage: React.FC = () => {
     <>
       {/* Add SEO component */}
       <TechnologySEO technology={technology} />
+      {/* Pass technology prop to TechnologyDetail component */}
       <TechnologyDetail technology={technology} />
     </>
   );

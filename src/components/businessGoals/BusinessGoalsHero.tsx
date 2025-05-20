@@ -27,7 +27,9 @@ interface BusinessGoalsHeroProps {
  * BusinessGoalsHero component - Displays hero content for the business goals page
  * Now accepts heroContent directly as a prop from BusinessGoalsPage
  */
-const BusinessGoalsHero: React.FC<BusinessGoalsHeroProps> = ({ heroContent }) => {
+const BusinessGoalsHero: React.FC<BusinessGoalsHeroProps> = ({ 
+  heroContent
+}: BusinessGoalsHeroProps) => {
   // Show loading state if heroContent is null but we expect it to be loaded
   if (!heroContent) {
     return (
@@ -110,7 +112,7 @@ const BusinessGoalsHero: React.FC<BusinessGoalsHeroProps> = ({ heroContent }) =>
               {heroContent.primaryButtonUrl && (
                 <Button asChild size="lg">
                   <Link to={heroContent.primaryButtonUrl}>
-                    {heroContent.primaryButtonText}
+                    {heroContent.primaryButtonText || "Request Information"}
                     {heroContent.primaryButtonText?.includes('Demo') && (
                       <ExternalLink className="ml-2 h-5 w-5" />
                     )}
@@ -120,7 +122,7 @@ const BusinessGoalsHero: React.FC<BusinessGoalsHeroProps> = ({ heroContent }) =>
               {heroContent.secondaryButtonUrl && (
                 <Button asChild variant="outline" size="lg">
                   <Link to={heroContent.secondaryButtonUrl}>
-                    {heroContent.secondaryButtonText}
+                    {heroContent.secondaryButtonText || "Explore Goals"}
                   </Link>
                 </Button>
               )}

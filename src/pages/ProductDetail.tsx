@@ -10,6 +10,7 @@ import ProductExamples from '@/components/products/ProductExamples';
 import SimpleContactCTA from '@/components/common/SimpleContactCTA';
 import ProductVideoSection from '@/components/products/ProductVideoSection';
 import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
+import ProductDetailSEO from '@/components/seo/ProductDetailSEO';
 
 /**
  * Product detail page that displays detailed information about a specific product
@@ -102,6 +103,9 @@ const ProductDetail = () => {
 
   return (
     <>
+      {/* Add SEO component */}
+      <ProductDetailSEO product={product} />
+
       {/* Back Navigation */}
       <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
         <div className="container pt-6 pb-4">

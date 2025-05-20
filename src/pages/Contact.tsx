@@ -10,6 +10,7 @@ import ContactPageSEO from '@/components/seo/ContactPageSEO';
 const Contact: React.FC = () => {
   const { data: faqData, isLoading } = useContactFAQ();
   const faqs = faqData?.faqs || [];
+  const contactMethods = faqData?.contactMethods || [];
 
   return (
     <>
@@ -33,7 +34,7 @@ const Contact: React.FC = () => {
             {/* Contact Cards */}
             <div className="flex-1 space-y-6">
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">Other Ways to Reach Us</h2>
-              <ContactCards data={faqData?.contactMethods || []} />
+              <ContactCards data={contactMethods} />
             </div>
           </div>
         </div>

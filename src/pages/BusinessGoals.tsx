@@ -14,8 +14,8 @@ const BusinessGoals: React.FC = () => {
   const { data: pageContent } = useBusinessGoalsPageContent();
 
   // SEO values
-  const pageTitle = pageContent?.title || 'Business Goals | Applestone Solutions';
-  const pageDescription = pageContent?.description || 
+  const pageTitle = pageContent?.heroTitle || 'Business Goals | Applestone Solutions';
+  const pageDescription = pageContent?.heroDescription || 
     'Discover how our vending solutions can help you achieve your business goals.';
 
   if (isLoading) {
@@ -37,6 +37,16 @@ const BusinessGoals: React.FC = () => {
     );
   }
 
+  // Prepare hero content for BusinessGoalsHero
+  const heroContent = {
+    title: pageContent?.heroTitle || 'Achieve Your Business Goals',
+    subtitle: pageContent?.heroDescription || 'Our vending solutions are designed to help you meet specific business objectives.',
+    image: pageContent?.heroImage?.url ? {
+      url: pageContent.heroImage.url,
+      alt: 'Business Goals'
+    } : undefined
+  };
+
   return (
     <>
       {/* Add SEO component */}
@@ -47,11 +57,7 @@ const BusinessGoals: React.FC = () => {
       />
       
       {/* Hero Section */}
-      <BusinessGoalsHero 
-        heading={pageContent?.heroTitle || 'Achieve Your Business Goals'}
-        subheading={pageContent?.heroDescription || 'Our vending solutions are designed to help you meet specific business objectives.'}
-        imageUrl={pageContent?.heroImage?.url}
-      />
+      <BusinessGoalsHero heroContent={heroContent} />
       
       {/* Purpose Statement */}
       <BusinessGoalsPurposeStatement 
