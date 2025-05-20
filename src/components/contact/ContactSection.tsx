@@ -37,7 +37,7 @@ interface ContactSectionProps {
  * while maintaining API compatibility
  */
 const ContactSection: React.FC<ContactSectionProps> = ({ 
-  title = "Ready to Transform Your Vending Operations?", 
+  title = "Ready to Get Started?", 
   description = "Get in touch and we'll start you on your vending journey.",
   className = "",
   formType = "Home Page Form",

@@ -116,10 +116,10 @@ const MachinesPage: React.FC = () => {
         error={testimonialError}
       />
       
-      {/* Replace SimpleContactCTA with ContactSection */}
+      {/* Update ContactSection with standardized title and description */}
       <ContactSection
-        title="Need a customized vending machine solution?"
-        description="Contact our team to discuss your specific requirements and discover how our machines can benefit your business."
+        title="Ready to Get Started?"
+        description="Get in touch and we'll start you on your vending journey."
         formType="Machines Page Inquiry"
         formVariant="compact"
       />

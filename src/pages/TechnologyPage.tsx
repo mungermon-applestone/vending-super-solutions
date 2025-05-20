@@ -104,10 +104,10 @@ const TechnologyPage = () => {
           error={testimonialError}
         />
         
-        {/* Replace SimpleContactCTA with ContactSection */}
+        {/* Update ContactSection with standardized title and description */}
         <ContactSection
-          title="Ready to transform your vending operations with our technology?"
-          description="Get in touch to learn how our vending technology platform can help your business thrive."
+          title="Ready to Get Started?"
+          description="Get in touch and we'll start you on your vending journey."
           formType="Technology Page Inquiry"
           formVariant="compact"
         />
