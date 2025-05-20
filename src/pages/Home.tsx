@@ -4,7 +4,7 @@ import HeroSection from '@/components/home/HeroSection';
 import FeaturesSection from '@/components/home/FeaturesSection';
 import ProductTypesSection from '@/components/home/ProductTypesSection';
 import BusinessGoalsSection from '@/components/home/BusinessGoalsSection';
-import MachineTypesSection from '@/components/home/MachineTypesSection';
+import AvailableMachinesSection from '@/components/home/AvailableMachinesSection';
 import { SimpleContactCTA } from '@/components/common';
 import ContentfulDebug from '@/components/debug/ContentfulDebug';
 import { CONTENTFUL_CONFIG, isContentfulConfigured } from '@/config/cms';
@@ -28,8 +28,8 @@ const Home = () => {
       <HeroSection />
       <FeaturesSection />
       <ProductTypesSection />
-      <MachineTypesSection />
       <BusinessGoalsSection />
+      <AvailableMachinesSection />
       
       {/* Use our new ContentfulTestimonialsCarousel component */}
       <ContentfulTestimonialsCarousel 
