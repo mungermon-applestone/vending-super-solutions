@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useContentfulProducts } from '@/hooks/cms/useContentfulProducts';
@@ -229,10 +230,10 @@ const ProductsPage = () => {
         error={testimonialError}
       />
       
-      {/* Replace SimpleContactCTA with ContactSection */}
+      {/* Update ContactSection with standardized title and description */}
       <ContactSection 
-        title={displayContent?.demoRequestTitle || "Ready to see our products in action?"}
-        description={displayContent?.demoRequestDescription || "Schedule a personalized demo to see how our products can help your business."}
+        title="Ready to Get Started?"
+        description="Get in touch and we'll start you on your vending journey."
         formType="Products Page Inquiry"
         className="w-full"
       />
