@@ -63,16 +63,14 @@ const BusinessGoals: React.FC = () => {
         content={pageContent?.introDescription || 'We understand the unique challenges of the vending industry and have tailored our solutions to address your specific business goals.'}
       />
 
-      {/* Business Goals Grid */}
-      <div className="container mx-auto py-12 px-4">
-        <BusinessGoalsGrid 
-          goals={businessGoals || []} 
-          title={pageContent?.goalsSectionTitle || 'Select Your Business Goal'}
-          description={pageContent?.goalsSectionDescription || 'Click on any business goal to learn more about how we can help you achieve it.'}
-          compactView={true}
-          columnCount={3}
-        />
-      </div>
+      {/* Business Goals Grid - removed the container div since it's now in the component */}
+      <BusinessGoalsGrid 
+        goals={businessGoals || []} 
+        title={pageContent?.goalsSectionTitle || 'Select Your Business Goal'}
+        description={pageContent?.goalsSectionDescription || 'Click on any business goal to learn more about how we can help you achieve it.'}
+        compactView={true}
+        columnCount={3}
+      />
 
       {/* Contact Section */}
       <ContactSection 
