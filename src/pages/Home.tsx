@@ -5,7 +5,7 @@ import FeaturesSection from '@/components/home/FeaturesSection';
 import ProductTypesSection from '@/components/home/ProductTypesSection';
 import BusinessGoalsSection from '@/components/home/BusinessGoalsSection';
 import AvailableMachinesSection from '@/components/home/AvailableMachinesSection';
-import { SimpleContactCTA } from '@/components/common';
+import { ContactSection } from '@/components/common';
 import { CONTENTFUL_CONFIG, isContentfulConfigured } from '@/config/cms';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
@@ -37,12 +37,13 @@ const Home = () => {
         error={error}
       />
       
-      <SimpleContactCTA 
+      {/* Replace SimpleContactCTA with our new ContactSection */}
+      <ContactSection 
         title="Ready to Transform Your Vending Operations?" 
         description="Get in touch and we'll start you on your vending journey."
         className="w-full"
         formType="Home Page Inquiry"
-        primaryButtonText="Get Started Today"
+        formVariant="compact"
       />
     </>
   );

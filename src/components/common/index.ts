@@ -12,3 +12,4 @@ export { default as OfflineFallback } from './OfflineFallback';
 export { default as PageHero } from './PageHero';
 export { default as SimpleContactCTA } from './SimpleContactCTA';
 export { default as CookieBanner } from './CookieBanner';
+export { default as ContactSection } from '../contact/ContactSection';
