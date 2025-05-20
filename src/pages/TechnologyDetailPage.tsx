@@ -1,9 +1,14 @@
+
 import React from "react";
 import { useParams } from "react-router-dom";
 import { useTechnologyData } from "@/hooks/useTechnologyData";
 import TechnologyDetail from "./TechnologyDetail";
 import ContentfulFallbackMessage from "@/components/common/ContentfulFallbackMessage";
 import TechnologySEO from "@/components/seo/TechnologySEO";
+
+interface TechnologyDetailProps {
+  technology: any;
+}
 
 const TechnologyDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();

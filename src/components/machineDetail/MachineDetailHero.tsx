@@ -10,6 +10,10 @@ interface MachineDetailHeroProps {
 }
 
 const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
+  // Determine machine type for icon display
+  const type = machine.type || 'vending';
+  const temperature = machine.temperature || 'ambient';
+  
   return (
     <section className="py-12 md:py-16 bg-gradient-to-br from-blue-500 to-blue-600">
       <div className="container mx-auto">
@@ -17,14 +21,14 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
           <div>
             <div className="flex items-center mb-4">
               <div className="bg-white/10 p-2 rounded-full mr-3">
-                {machine.type === 'vending' ? (
+                {type === 'vending' ? (
                   <Server className="h-5 w-5 text-white" />
                 ) : (
                   <HardDrive className="h-5 w-5 text-white" />
                 )}
               </div>
               <span className="text-white font-medium">
-                {machine.type.charAt(0).toUpperCase()}{machine.type.slice(1)} | {machine.temperature}
+                {type.charAt(0).toUpperCase()}{type.slice(1)} | {temperature}
               </span>
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-5 text-white">
@@ -59,7 +63,7 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
                 </div>
               ) : (
                 <div className="aspect-square bg-gray-100 flex items-center justify-center">
-                  {machine.type === 'vending' ? (
+                  {type === 'vending' ? (
                     <Server className="h-20 w-20 text-gray-400" />
                   ) : (
                     <HardDrive className="h-20 w-20 text-gray-400" />

@@ -20,44 +20,34 @@ const MachineDetail: React.FC<MachineDetailProps> = ({ machine }) => {
       <MachineDetailSEO machine={machine} />
       
       {/* Hero Section */}
-      <MachineDetailHero 
-        title={machine.title}
-        description={machine.description}
-        image={machine.image}
-        machineType={machine.machineType}
-      />
+      <MachineDetailHero machine={machine} />
 
       {/* Gallery Section */}
-      <MachineDetailGallery
-        mainImage={machine.image}
-        additionalImages={machine.additionalImages}
+      <MachineDetailGallery 
         title={machine.title}
+        images={machine.images || []}
       />
 
       {/* Features Section */}
       <MachineDetailFeatures
-        features={machine.features}
+        features={machine.features || []}
       />
 
       {/* Specifications Section */}
       <MachineDetailSpecifications
-        specifications={machine.specifications}
-        machineType={machine.machineType}
+        specs={machine.specs || {}}
       />
 
       {/* Deployments Examples */}
       {machine.deploymentExamples && machine.deploymentExamples.length > 0 && (
         <MachineDetailDeployments
-          deployments={machine.deploymentExamples}
-          title="Deployment Examples"
-          description="See how this machine is being used in real-world scenarios."
+          deploymentExamples={machine.deploymentExamples}
         />
       )}
 
       {/* Inquiry Section */}
       <MachineDetailInquiry 
-        machineName={machine.title}
-        machineType={machine.machineType}
+        machineTitle={machine.title}
       />
     </>
   );

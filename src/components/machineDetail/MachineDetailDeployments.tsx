@@ -4,12 +4,14 @@ import { CMSMachine } from '@/types/cms';
 
 interface MachineDetailDeploymentsProps {
   deploymentExamples: CMSMachine['deploymentExamples'];
-  sectionTitle?: string;
+  title?: string;
+  description?: string;
 }
 
 const MachineDetailDeployments: React.FC<MachineDetailDeploymentsProps> = ({ 
   deploymentExamples,
-  sectionTitle = "Deployment Examples"
+  title = "Deployment Examples",
+  description = "See how this machine is being used in real-world scenarios."
 }) => {
   if (!deploymentExamples || deploymentExamples.length === 0) return null;
   
@@ -17,7 +19,7 @@ const MachineDetailDeployments: React.FC<MachineDetailDeploymentsProps> = ({
     <section className="py-12 bg-white" id="deployment-examples">
       <div className="container-wide">
         <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center text-vending-blue-dark">
-          {sectionTitle}
+          {title}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {deploymentExamples.map((example, index) => (

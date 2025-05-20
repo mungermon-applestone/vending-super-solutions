@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { CMSMachine } from '@/types/cms';
+import { CMSImage } from '@/types/cms';
 
 interface MachineDetailGalleryProps {
   title: string;
-  images: CMSMachine['images'];
+  images: CMSImage[];
   maxImages?: number;
 }
 

@@ -17,6 +17,11 @@ const MachineDetailSEO: React.FC<MachineDetailSEOProps> = ({ machine, canonicalU
     ? canonicalUrl || window.location.href
     : `https://applestonesolutions.com/machines/${machine.slug}`;
   
+  // Get the main image URL if available
+  const mainImageUrl = machine.images && machine.images.length > 0 
+    ? machine.images[0].url 
+    : undefined;
+  
   // Generate structured data for the machine
   const structuredData = {
     '@context': 'https://schema.org',
@@ -24,14 +29,14 @@ const MachineDetailSEO: React.FC<MachineDetailSEOProps> = ({ machine, canonicalU
     'name': machine.title,
     'description': machine.description,
     'url': pageUrl,
-    ...(machine.image && {
-      image: machine.image.url
+    ...(mainImageUrl && {
+      image: mainImageUrl
     }),
-    ...(machine.specifications && machine.specifications.length > 0 && {
-      'additionalProperty': machine.specifications.map(spec => ({
+    ...(machine.specs && Object.keys(machine.specs).length > 0 && {
+      'additionalProperty': Object.entries(machine.specs).map(([name, value]) => ({
         '@type': 'PropertyValue',
-        'name': spec.name,
-        'value': spec.value
+        'name': name,
+        'value': value
       }))
     })
   };
@@ -41,18 +46,18 @@ const MachineDetailSEO: React.FC<MachineDetailSEOProps> = ({ machine, canonicalU
       title={machine.title}
       description={machine.description}
       canonicalUrl={pageUrl}
-      image={machine.image?.url}
+      image={mainImageUrl}
       type="product"
       openGraph={{
         title: machine.title,
         description: machine.description,
         url: pageUrl,
         type: 'product',
-        image: machine.image?.url
+        image: mainImageUrl
       }}
       twitter={{
         card: 'summary_large_image',
-        image: machine.image?.url
+        image: mainImageUrl
       }}
       schema={structuredData}
     />

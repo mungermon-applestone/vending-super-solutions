@@ -14,8 +14,8 @@ const BusinessGoals: React.FC = () => {
   const { data: pageContent } = useBusinessGoalsPageContent();
 
   // SEO values
-  const pageTitle = pageContent?.pageTitle || 'Business Goals | Applestone Solutions';
-  const pageDescription = pageContent?.heroSubtitle || 
+  const pageTitle = pageContent?.title || 'Business Goals | Applestone Solutions';
+  const pageDescription = pageContent?.description || 
     'Discover how our vending solutions can help you achieve your business goals.';
 
   if (isLoading) {
@@ -48,23 +48,23 @@ const BusinessGoals: React.FC = () => {
       
       {/* Hero Section */}
       <BusinessGoalsHero 
-        title={pageContent?.heroTitle || 'Achieve Your Business Goals'}
-        subtitle={pageContent?.heroSubtitle || 'Our vending solutions are designed to help you meet specific business objectives.'}
-        image={pageContent?.heroImage}
+        heading={pageContent?.heroTitle || 'Achieve Your Business Goals'}
+        subheading={pageContent?.heroDescription || 'Our vending solutions are designed to help you meet specific business objectives.'}
+        imageUrl={pageContent?.heroImage?.url}
       />
       
       {/* Purpose Statement */}
       <BusinessGoalsPurposeStatement 
-        title={pageContent?.purposeStatementTitle || 'How We Help You Succeed'}
-        description={pageContent?.purposeStatementDescription || 'We understand the unique challenges of the vending industry and have tailored our solutions to address your specific business goals.'}
+        heading={pageContent?.introTitle || 'How We Help You Succeed'}
+        content={pageContent?.introDescription || 'We understand the unique challenges of the vending industry and have tailored our solutions to address your specific business goals.'}
       />
 
       {/* Business Goals Grid */}
       <div className="container mx-auto py-12 px-4">
         <BusinessGoalsGrid 
           goals={businessGoals || []} 
-          title={pageContent?.gridTitle || 'Select Your Business Goal'}
-          subtitle={pageContent?.gridSubtitle || 'Click on any business goal to learn more about how we can help you achieve it.'}
+          heading={pageContent?.sectionTitle || 'Select Your Business Goal'}
+          description={pageContent?.sectionDescription || 'Click on any business goal to learn more about how we can help you achieve it.'}
         />
       </div>
 

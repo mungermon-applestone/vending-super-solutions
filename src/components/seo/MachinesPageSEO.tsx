@@ -31,7 +31,9 @@ const MachinesPageSEO: React.FC<MachinesPageSEOProps> = ({
         'name': machine.title,
         'description': machine.description,
         'url': `https://applestonesolutions.com/machines/${machine.slug}`,
-        ...(machine.image && { image: machine.image.url })
+        ...(machine.images && machine.images.length > 0 && { 
+          image: machine.images[0].url 
+        })
       }
     })) : []
   };

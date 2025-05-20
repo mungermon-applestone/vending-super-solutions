@@ -17,6 +17,16 @@ const TechnologySEO: React.FC<TechnologySEOProps> = ({ technology, canonicalUrl 
     ? canonicalUrl || window.location.href
     : `https://applestonesolutions.com/technology/${technology.slug}`;
   
+  // Handle various image formats - could be a string or an object
+  const getImageUrl = (image: any): string | undefined => {
+    if (!image) return undefined;
+    if (typeof image === 'string') return image;
+    if (typeof image === 'object' && image.url) return image.url;
+    return undefined;
+  };
+  
+  const imageUrl = getImageUrl(technology.image);
+  
   // Generate structured data for the technology
   const structuredData = {
     '@context': 'https://schema.org',
@@ -25,8 +35,8 @@ const TechnologySEO: React.FC<TechnologySEOProps> = ({ technology, canonicalUrl 
     'description': technology.description,
     'url': pageUrl,
     'applicationCategory': 'BusinessApplication',
-    ...(technology.image && {
-      image: technology.image.url
+    ...(imageUrl && {
+      image: imageUrl
     }),
     'offers': {
       '@type': 'Offer',
@@ -40,18 +50,18 @@ const TechnologySEO: React.FC<TechnologySEOProps> = ({ technology, canonicalUrl 
       title={technology.title}
       description={technology.description}
       canonicalUrl={pageUrl}
-      image={technology.image?.url}
+      image={imageUrl}
       type="website"
       openGraph={{
         title: technology.title,
         description: technology.description,
         url: pageUrl,
         type: 'website',
-        image: technology.image?.url
+        image: imageUrl
       }}
       twitter={{
         card: 'summary_large_image',
-        image: technology.image?.url
+        image: imageUrl
       }}
       schema={structuredData}
     />

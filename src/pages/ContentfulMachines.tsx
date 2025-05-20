@@ -61,14 +61,14 @@ const ContentfulMachines: React.FC = () => {
       
       {/* Hero Section */}
       <MachinesHero 
-        title={pageContent?.heroTitle || "Vending Machines"}
-        description={pageContent?.heroDescription || "Explore our range of innovative vending machines designed for various use cases and industries."}
-        image={pageContent?.heroImage}
+        heading={pageContent?.heroTitle || "Vending Machines"}
+        subheading={pageContent?.heroDescription || "Explore our range of innovative vending machines designed for various use cases and industries."}
+        imageUrl={pageContent?.heroImage?.url}
       />
 
       {/* Intro Section */}
       <MachinesIntroSection 
-        title={pageContent?.introTitle || "Our Machine Portfolio"}
+        heading={pageContent?.introTitle || "Our Machine Portfolio"}
         description={pageContent?.introDescription || "We offer a diverse range of vending machines that can be customized to meet your specific business needs."}
         key={`intro-${refreshKey}`}
       />
@@ -82,11 +82,14 @@ const ContentfulMachines: React.FC = () => {
         {error && <MachinesErrorState error={error} onRetry={handleRefresh} />}
         
         {!isLoading && !error && machines && machines.length === 0 && (
-          <MachinesEmptyState onRefresh={handleRefresh} />
+          <MachinesEmptyState />
         )}
         
         {!isLoading && !error && machines && machines.length > 0 && (
-          <MachineGrid machines={machines} />
+          <MachineGrid 
+            machines={machines}
+            title="Our Available Machines"
+          />
         )}
       </div>
       

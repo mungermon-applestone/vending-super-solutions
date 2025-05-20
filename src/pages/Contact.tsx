@@ -8,7 +8,8 @@ import PageHero from '@/components/common/PageHero';
 import ContactPageSEO from '@/components/seo/ContactPageSEO';
 
 const Contact: React.FC = () => {
-  const { faqs, isLoading } = useContactFAQ();
+  const { data: faqData, isLoading } = useContactFAQ();
+  const faqs = faqData?.faqs || [];
 
   return (
     <>
@@ -17,8 +18,8 @@ const Contact: React.FC = () => {
       
       {/* Hero Section */}
       <PageHero
-        title="Contact Us"
-        subtitle="Get in touch with our team to learn more about our vending solutions."
+        heading="Contact Us"
+        subheading="Get in touch with our team to learn more about our vending solutions."
         className="bg-blue-50"
       />
 
@@ -32,14 +33,14 @@ const Contact: React.FC = () => {
             {/* Contact Cards */}
             <div className="flex-1 space-y-6">
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">Other Ways to Reach Us</h2>
-              <ContactCards />
+              <ContactCards data={faqData?.contactMethods || []} />
             </div>
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <FAQSection title="Frequently Asked Questions" faqs={faqs} isLoading={isLoading} />
+      <FAQSection heading="Frequently Asked Questions" faqs={faqs} isLoading={isLoading} />
     </>
   );
 };
