@@ -24,7 +24,8 @@ export function useBusinessGoal(slug: string | undefined) {
       
       try {
         // Dynamically import to avoid circular dependencies
-        const { fetchBusinessGoalBySlug } = await import('@/services/cms/contentTypes/businessGoals/fetchBusinessGoalBySlug');
+        // Changed the import path to match the pattern in useBusinessGoals.ts
+        const { fetchBusinessGoalBySlug } = await import('@/services/cms/contentTypes/businessGoals');
         
         // Try to fetch using resolved slug
         let businessGoal = await fetchBusinessGoalBySlug(resolvedSlug);
