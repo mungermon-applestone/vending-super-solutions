@@ -1,7 +1,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { deleteProduct } from '@/services/cms/products';
 import { supabase } from '@/integrations/supabase/client';
+import { deleteProduct as deleteProductService } from '@/services/product/index';
 
 // Mock the Supabase client
 vi.mock('@/integrations/supabase/client', () => ({
@@ -41,7 +41,7 @@ describe('Product Service - deleteProduct', () => {
       })
     } as any);
     
-    const result = await deleteProduct(productSlug);
+    const result = await deleteProductService(productSlug);
     
     expect(result).toBe(true);
   });

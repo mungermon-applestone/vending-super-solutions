@@ -1,3 +1,4 @@
+
 // This file is maintained for backward compatibility
 // New code should import from the specific modules directly
 
@@ -57,8 +58,13 @@ import { caseStudyOperations } from './contentTypes/caseStudies/operations';
 import { landingPageOperations } from './contentTypes/landingPages/operations';
 import { cloneProductType } from './contentTypes/productTypes/cloneProductType';
 import { cloneBusinessGoal } from './contentTypes/businessGoals/cloneBusinessGoal';
-import { cloneTechnology } from './contentTypes/technologies/cloneTechnology';
 import { cloneMachine } from './contentTypes/machines/cloneMachine';
+
+// Create stub for cloneTechnology
+const cloneTechnology = async (id: string) => {
+  console.warn('[cloneTechnology] This function is deprecated and will be removed. Use Contentful directly.');
+  return null;
+};
 
 // Export standardized content type operations
 export const productTypes = productTypeOperations;

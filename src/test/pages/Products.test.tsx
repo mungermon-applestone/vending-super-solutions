@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import ProductsPage from '@/pages/ProductsPage'; // Updated import path
+import { describe, it, expect, vi } from 'vitest';
 
 // Mock test that does nothing - kept for backwards compatibility
 describe('ProductsPage', () => {

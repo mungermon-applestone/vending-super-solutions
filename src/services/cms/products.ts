@@ -1,6 +1,5 @@
 
 // This file has been updated as part of the migration to Contentful
-import { ContentfulProduct } from '@/types/contentful';
 import { toast } from 'sonner';
 import { showDeprecationToast, throwDeprecatedOperationError } from './utils/deprecationToastUtils';
 
@@ -63,6 +62,22 @@ export const createProduct = async (data: any, toast: any) => {
  */
 export const updateProduct = async (data: any, slug: string, toast: any) => {
   throwDeprecatedOperationError("updateProduct");
+  return null;
+};
+
+/**
+ * Delete an existing product
+ */
+export const deleteProduct = async (slug: string) => {
+  throwDeprecatedOperationError("deleteProduct");
+  return { success: false, message: "Operation not supported" };
+};
+
+/**
+ * Clone an existing product
+ */
+export const cloneProduct = async (id: string) => {
+  throwDeprecatedOperationError("cloneProduct");
   return null;
 };
 

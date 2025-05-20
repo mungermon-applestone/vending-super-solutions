@@ -1,3 +1,4 @@
+
 import { Asset, Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 import { Document, BLOCKS } from '@contentful/rich-text-types';
 
@@ -89,6 +90,23 @@ export interface ContentfulTechnology {
     visible?: boolean;
     image?: ContentfulAsset;
     sections?: ContentfulTechnologySection[];
+  };
+}
+
+export interface ContentfulProduct {
+  sys: {
+    id: string;
+  };
+  fields: {
+    title: string;
+    slug: string;
+    description: string;
+    visible?: boolean;
+    image?: ContentfulAsset;
+    benefits?: string[];
+    features?: ContentfulFeature[];
+    displayOrder?: number;
+    showOnHomepage?: boolean;
   };
 }
 

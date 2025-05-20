@@ -1,7 +1,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { cloneProduct } from '@/services/cms/products';
 import { supabase } from '@/integrations/supabase/client';
+import { cloneProduct as cloneProductService } from '@/services/product/index';
 
 // Mock the Supabase client
 vi.mock('@/integrations/supabase/client', () => ({
@@ -41,7 +41,7 @@ describe('Product Service - cloneProduct', () => {
       single: vi.fn().mockResolvedValue({ data: mockClonedProduct, error: null })
     } as any);
     
-    const result = await cloneProduct(productId);
+    const result = await cloneProductService(productId);
     
     expect(result).toEqual(mockClonedProduct);
     expect(supabase.from).toHaveBeenCalledWith('product_types');

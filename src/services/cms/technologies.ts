@@ -1,7 +1,6 @@
 
 // This file has been updated as part of the migration to Contentful
-import { ContentfulTechnology } from '@/types/contentful';
-import { showDeprecationToast, throwDeprecatedOperationError } from './utils/deprecationToastUtils';
+import { throwDeprecatedOperationError, showDeprecationToast } from './utils/deprecationToastUtils';
 
 /**
  * @deprecated This module is deprecated and will be removed in future versions.

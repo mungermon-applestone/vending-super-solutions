@@ -1,8 +1,8 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createProduct } from '@/services/cms/products';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
+import { createProduct } from '@/services/product/createProduct';
 
 // Mock the Supabase client
 vi.mock('@/integrations/supabase/client', () => ({
@@ -38,6 +38,10 @@ describe('Product Service - createProduct', () => {
       ]
     };
     
+    const mockToast = {
+      toast: vi.fn()
+    };
+    
     const mockCreatedProduct = {
       id: 'new-product-id',
       ...mockProductFormData
@@ -52,7 +56,7 @@ describe('Product Service - createProduct', () => {
       insert: vi.fn().mockResolvedValue(mockResponse)
     } as any);
     
-    const result = await createProduct(mockProductFormData);
+    const result = await createProduct(mockProductFormData, mockToast);
     
     expect(result).toBe(mockCreatedProduct.id);
   });
