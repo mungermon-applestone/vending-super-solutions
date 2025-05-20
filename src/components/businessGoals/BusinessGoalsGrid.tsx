@@ -3,7 +3,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2, ArrowRight } from 'lucide-react';
 import { useContentfulBusinessGoals } from '@/hooks/cms/useContentfulBusinessGoals';
-import MachineTypeIcon from '@/components/common/MachineTypeIcon';
 
 interface BusinessGoalsGridProps {
   className?: string;
@@ -45,18 +44,10 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
               <Link 
                 key={goal.id} 
                 to={`/business-goals/${goal.slug}`}
-                className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow flex flex-col justify-between h-full"
+                className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow flex items-center justify-between h-16"
               >
-                <div className="flex items-center">
-                  <MachineTypeIcon icon={goal.icon} className="mr-4 text-vending-blue" />
-                  <h3 className="text-xl font-semibold text-vending-blue-dark">{goal.title}</h3>
-                </div>
-                
-                <div className="mt-6">
-                  <span className="text-vending-blue hover:underline flex items-center">
-                    Learn More <ArrowRight className="ml-2 h-4 w-4" />
-                  </span>
-                </div>
+                <h3 className="text-xl font-semibold text-vending-blue-dark">{goal.title}</h3>
+                <ArrowRight className="h-5 w-5 text-vending-blue" />
               </Link>
             ))}
           </div>
