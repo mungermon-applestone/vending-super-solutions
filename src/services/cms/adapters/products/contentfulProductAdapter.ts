@@ -50,11 +50,11 @@ export const contentfulProductAdapter: ProductAdapter = {
           videoOrientation = fields.videoOrientation as 'vertical' | 'horizontal';
         }
         
-        // Process recommended machines with enhanced error handling, transformers and debugging
+        // Process recommended machines using the machine transformer and proper fallback logic
         let recommendedMachines: any[] = [];
         
         if (fields.recommendedMachines && Array.isArray(fields.recommendedMachines)) {
-          console.log(`[contentfulProductAdapter] Processing ${fields.recommendedMachines.length} recommended machines for product ${fields.title}`);
+          console.log(`[contentfulProductAdapter] Processing ${fields.recommendedMachines.length} recommended machines for product ${fields.title || 'unknown'}`);
           
           recommendedMachines = fields.recommendedMachines
             .filter(machine => {
@@ -65,73 +65,109 @@ export const contentfulProductAdapter: ProductAdapter = {
               return true;
             })
             .map(machine => {
-              // Use the dedicated machine transformer to ensure consistent handling
-              // and apply the same fallback logic used in BusinessGoals pages
               try {
-                // First create a basic machine object that will be enhanced by the transformer
-                const basicMachineData = {
-                  id: machine.sys.id,
-                  slug: machine.fields.slug,
-                  title: machine.fields.title,
-                  description: machine.fields.description || '',
-                  sys: machine.sys,
-                  fields: machine.fields
-                };
+                console.log(`[contentfulProductAdapter] Processing machine ${machine.fields?.title || 'unknown'} using transformer`);
                 
-                // Log machine data to help with debugging
-                console.log(`[contentfulProductAdapter] Processing machine ${machine.fields?.title || 'unknown'}:`, {
-                  id: machine.sys.id,
-                  hasImage: !!machine.fields?.image,
-                  hasMachineThumbnail: !!machine.fields?.machineThumbnail
+                // Use the dedicated machine transformer to ensure consistent handling
+                const transformedMachine = transformContentfulEntry(machine);
+                
+                // Enhanced logging for the transformed machine
+                console.log(`[contentfulProductAdapter] Machine after transformation:`, {
+                  id: transformedMachine.id,
+                  title: transformedMachine.title,
+                  slug: transformedMachine.slug,
+                  hasThumbnail: !!transformedMachine.thumbnail,
+                  thumbnailUrl: transformedMachine.thumbnail?.url
                 });
                 
-                // First try to create a more complete machine object with our standard fields
-                const machineData = {
-                  id: machine.sys.id,
-                  slug: machine.fields.slug,
-                  title: machine.fields.title,
-                  description: machine.fields.description || '',
-                  // Process image with fallbacks to ensure we have something to display
-                  image: machine.fields.image ? {
-                    url: `https:${machine.fields.image.fields.file.url}`,
-                    alt: machine.fields.image.fields.title || machine.fields.title
+                // Ensure we have all three required image properties for RecommendedMachines component
+                // This matches the format expected by the RecommendedMachines component
+                return {
+                  id: transformedMachine.id,
+                  slug: transformedMachine.slug,
+                  title: transformedMachine.title,
+                  description: transformedMachine.description || '',
+                  // Standard image (highest quality, used as fallback)
+                  image: transformedMachine.images && transformedMachine.images.length > 0 ? {
+                    url: transformedMachine.images[0].url,
+                    alt: transformedMachine.images[0].alt || transformedMachine.title
                   } : undefined,
-                  // Process thumbnails with proper priority handling
-                  thumbnail: machine.fields.thumbnail ? {
-                    url: `https:${machine.fields.thumbnail.fields.file.url}`,
-                    alt: machine.fields.thumbnail.fields.title || machine.fields.title
+                  // Regular thumbnail (if available)
+                  thumbnail: transformedMachine.thumbnail ? {
+                    url: transformedMachine.thumbnail.url,
+                    alt: transformedMachine.thumbnail.alt || transformedMachine.title
                   } : undefined,
+                  // Machine-specific thumbnail (highest priority)
                   machineThumbnail: machine.fields.machineThumbnail ? {
-                    url: `https:${machine.fields.machineThumbnail.fields.file.url}`,
-                    alt: machine.fields.machineThumbnail.fields.title || machine.fields.title
+                    url: `https:${machine.fields.machineThumbnail.fields?.file?.url || ''}`,
+                    alt: machine.fields.machineThumbnail.fields?.title || transformedMachine.title
                   } : undefined
                 };
-                
-                console.log(`[contentfulProductAdapter] Processed machine data:`, {
-                  id: machineData.id,
-                  title: machineData.title,
-                  hasImage: !!machineData.image,
-                  hasThumbnail: !!machineData.thumbnail,
-                  hasMachineThumbnail: !!machineData.machineThumbnail,
-                  imageUrl: machineData.image?.url,
-                  thumbnailUrl: machineData.thumbnail?.url,
-                  machineThumbnailUrl: machineData.machineThumbnail?.url
-                });
-                
-                return machineData;
               } catch (err) {
                 console.error(`[contentfulProductAdapter] Error processing recommended machine ${machine.fields?.title || 'unknown'}:`, err);
-                // Return a minimal valid machine object to avoid breaking the UI
-                return {
+                
+                // Fallback to direct access with enhanced error handling for images
+                const machineData = {
                   id: machine.sys?.id || `fallback-${Date.now()}`,
                   slug: machine.fields?.slug || 'machine',
                   title: machine.fields?.title || 'Machine',
                   description: machine.fields?.description || 'No description available'
                 };
+                
+                // Try to extract image data directly with multiple fallback paths
+                try {
+                  // Regular image from images array
+                  const image = machine.fields?.images && Array.isArray(machine.fields.images) && machine.fields.images.length > 0
+                    ? {
+                        url: `https:${machine.fields.images[0].fields?.file?.url || ''}`,
+                        alt: machine.fields.images[0].fields?.title || machineData.title
+                      }
+                    : undefined;
+                    
+                  // Thumbnail
+                  const thumbnail = machine.fields?.thumbnail
+                    ? {
+                        url: `https:${machine.fields.thumbnail.fields?.file?.url || ''}`,
+                        alt: machine.fields.thumbnail.fields?.title || machineData.title
+                      }
+                    : undefined;
+                  
+                  // Machine thumbnail
+                  const machineThumbnail = machine.fields?.machineThumbnail
+                    ? {
+                        url: `https:${machine.fields.machineThumbnail.fields?.file?.url || ''}`,
+                        alt: machine.fields.machineThumbnail.fields?.title || machineData.title
+                      }
+                    : undefined;
+                  
+                  return {
+                    ...machineData,
+                    image,
+                    thumbnail,
+                    machineThumbnail
+                  };
+                } catch (imgErr) {
+                  console.error(`[contentfulProductAdapter] Error extracting image data for machine ${machineData.title}:`, imgErr);
+                  return machineData;
+                }
               }
             });
           
           console.log(`[contentfulProductAdapter] Successfully processed ${recommendedMachines.length} recommended machines`);
+          
+          // Log final machine data to verify images are available
+          recommendedMachines.forEach((machine, idx) => {
+            console.log(`[contentfulProductAdapter] Final machine ${idx + 1} data:`, {
+              id: machine.id,
+              title: machine.title,
+              hasMachineThumbnail: !!machine.machineThumbnail,
+              machineThumbnailUrl: machine.machineThumbnail?.url,
+              hasThumbnail: !!machine.thumbnail,
+              thumbnailUrl: machine.thumbnail?.url,
+              hasImage: !!machine.image,
+              imageUrl: machine.image?.url
+            });
+          });
         } else {
           console.log(`[contentfulProductAdapter] No recommended machines for product ${fields.title}`);
         }
@@ -228,8 +264,9 @@ export const contentfulProductAdapter: ProductAdapter = {
         videoOrientation = fields.videoOrientation as 'vertical' | 'horizontal';
       }
       
-      // Process recommended machines with enhanced error handling and debugging
+      // Process recommended machines using the machine transformer and proper fallback logic
       let recommendedMachines: any[] = [];
+      
       if (fields.recommendedMachines && Array.isArray(fields.recommendedMachines)) {
         console.log(`[contentfulProductAdapter] Processing ${fields.recommendedMachines.length} recommended machines in getById`);
         
@@ -243,46 +280,107 @@ export const contentfulProductAdapter: ProductAdapter = {
           })
           .map(machine => {
             try {
-              // Log machine data for debugging
-              console.log(`[contentfulProductAdapter] Processing machine ${machine.fields?.title || 'unknown'} in getById:`, {
-                hasImage: !!machine.fields?.image,
-                hasMachineThumbnail: !!machine.fields?.machineThumbnail
+              console.log(`[contentfulProductAdapter] Processing machine ${machine.fields?.title || 'unknown'} using transformer in getById`);
+              
+              // Use the dedicated machine transformer for consistent handling
+              const transformedMachine = transformContentfulEntry(machine);
+              
+              // Enhanced logging for the transformed machine
+              console.log(`[contentfulProductAdapter] Machine after transformation in getById:`, {
+                id: transformedMachine.id,
+                title: transformedMachine.title,
+                slug: transformedMachine.slug,
+                hasThumbnail: !!transformedMachine.thumbnail,
+                thumbnailUrl: transformedMachine.thumbnail?.url
               });
               
-              // Create machine data with proper image handling
+              // Ensure we have all three required image properties
               return {
-                id: machine.sys.id,
-                title: machine.fields.title,
-                slug: machine.fields.slug,
-                description: machine.fields.description || '',
-                // Process image with fallbacks
-                image: machine.fields.image ? {
-                  url: `https:${machine.fields.image.fields.file.url}`,
-                  alt: machine.fields.image.fields.title || machine.fields.title
+                id: transformedMachine.id,
+                slug: transformedMachine.slug,
+                title: transformedMachine.title,
+                description: transformedMachine.description || '',
+                // Standard image (highest quality)
+                image: transformedMachine.images && transformedMachine.images.length > 0 ? {
+                  url: transformedMachine.images[0].url,
+                  alt: transformedMachine.images[0].alt || transformedMachine.title
                 } : undefined,
-                // Process thumbnails with proper priority handling
-                thumbnail: machine.fields.thumbnail ? {
-                  url: `https:${machine.fields.thumbnail.fields.file.url}`,
-                  alt: machine.fields.thumbnail.fields.title || machine.fields.title
+                // Regular thumbnail
+                thumbnail: transformedMachine.thumbnail ? {
+                  url: transformedMachine.thumbnail.url,
+                  alt: transformedMachine.thumbnail.alt || transformedMachine.title
                 } : undefined,
+                // Machine-specific thumbnail (highest priority)
                 machineThumbnail: machine.fields.machineThumbnail ? {
-                  url: `https:${machine.fields.machineThumbnail.fields.file.url}`,
-                  alt: machine.fields.machineThumbnail.fields.title || machine.fields.title
+                  url: `https:${machine.fields.machineThumbnail.fields?.file?.url || ''}`,
+                  alt: machine.fields.machineThumbnail.fields?.title || transformedMachine.title
                 } : undefined
               };
             } catch (err) {
               console.error(`[contentfulProductAdapter] Error processing machine in getById:`, err);
-              // Return minimal valid data on error
-              return {
+              
+              // Fallback to direct access with enhanced error handling for images
+              const machineData = {
                 id: machine.sys?.id || `fallback-${Date.now()}`,
                 slug: machine.fields?.slug || 'machine',
                 title: machine.fields?.title || 'Machine',
                 description: machine.fields?.description || 'No description available'
               };
+              
+              // Try to extract image data directly with multiple fallback paths
+              try {
+                // Regular image from images array
+                const image = machine.fields?.images && Array.isArray(machine.fields.images) && machine.fields.images.length > 0
+                  ? {
+                      url: `https:${machine.fields.images[0].fields?.file?.url || ''}`,
+                      alt: machine.fields.images[0].fields?.title || machineData.title
+                    }
+                  : undefined;
+                  
+                // Thumbnail
+                const thumbnail = machine.fields?.thumbnail
+                  ? {
+                      url: `https:${machine.fields.thumbnail.fields?.file?.url || ''}`,
+                      alt: machine.fields.thumbnail.fields?.title || machineData.title
+                    }
+                  : undefined;
+                
+                // Machine thumbnail
+                const machineThumbnail = machine.fields?.machineThumbnail
+                  ? {
+                      url: `https:${machine.fields.machineThumbnail.fields?.file?.url || ''}`,
+                      alt: machine.fields.machineThumbnail.fields?.title || machineData.title
+                    }
+                  : undefined;
+                
+                return {
+                  ...machineData,
+                  image,
+                  thumbnail,
+                  machineThumbnail
+                };
+              } catch (imgErr) {
+                console.error(`[contentfulProductAdapter] Error extracting image data for machine ${machineData.title} in getById:`, imgErr);
+                return machineData;
+              }
             }
           });
         
         console.log(`[contentfulProductAdapter] Successfully processed ${recommendedMachines.length} machines in getById`);
+        
+        // Log final machine data to verify images are available
+        recommendedMachines.forEach((machine, idx) => {
+          console.log(`[contentfulProductAdapter] Final machine ${idx + 1} data in getById:`, {
+            id: machine.id,
+            title: machine.title,
+            hasMachineThumbnail: !!machine.machineThumbnail,
+            machineThumbnailUrl: machine.machineThumbnail?.url,
+            hasThumbnail: !!machine.thumbnail,
+            thumbnailUrl: machine.thumbnail?.url,
+            hasImage: !!machine.image,
+            imageUrl: machine.image?.url
+          });
+        });
       }
       
       return {
