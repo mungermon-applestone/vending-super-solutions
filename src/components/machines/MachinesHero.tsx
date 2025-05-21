@@ -35,7 +35,7 @@ const MachinesHero: React.FC<MachinesHeroProps> = ({
   const displayImageUrl = imageUrl || (pageContent?.heroImage?.fields?.file?.url ? `https:${pageContent.heroImage.fields.file.url}` : undefined);
   
   return (
-    <section className="relative bg-gradient-to-br from-vending-blue-light to-vending-teal-light py-16 md:py-20 overflow-hidden">
+    <section className="relative bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light py-16 md:py-20 overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
@@ -43,18 +43,20 @@ const MachinesHero: React.FC<MachinesHeroProps> = ({
               {displayTitle}
             </h1>
             {displaySubtitle && (
-              <p className="text-xl text-vending-blue">
+              <p className="text-xl text-gray-700">
                 {displaySubtitle}
               </p>
             )}
           </div>
           {displayImageUrl && (
             <div className="md:w-1/2 flex justify-center">
-              <img 
-                src={displayImageUrl} 
-                alt={displayTitle}
-                className="rounded-lg shadow-xl max-h-80 object-contain"
-              />
+              <div className="bg-white rounded-lg shadow-xl overflow-hidden w-full">
+                <img 
+                  src={displayImageUrl} 
+                  alt={displayTitle}
+                  className="w-full object-contain"
+                />
+              </div>
             </div>
           )}
         </div>
