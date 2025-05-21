@@ -7,7 +7,7 @@ export interface MachinesHeroProps {
   imageUrl?: string;
   pageContent?: {
     heroTitle?: string;
-    heroSubtitle?: string;
+    heroDescription?: string;
     heroImage?: {
       fields?: {
         file?: {
@@ -30,7 +30,8 @@ const MachinesHero: React.FC<MachinesHeroProps> = ({
 }) => {
   // Use direct props first, then fall back to pageContent
   const displayTitle = title || pageContent?.heroTitle || '';
-  const displaySubtitle = subtitle || pageContent?.heroSubtitle || '';
+  // Changed from heroSubtitle to heroDescription to match the content type
+  const displaySubtitle = subtitle || pageContent?.heroDescription || '';
   const displayImageUrl = imageUrl || (pageContent?.heroImage?.fields?.file?.url ? `https:${pageContent.heroImage.fields.file.url}` : undefined);
   
   return (

@@ -27,6 +27,28 @@ export const machinesPageContentTemplate: ContentTypeTemplate = {
         localized: false,
       },
       {
+        id: 'heroTitle',
+        name: 'Hero Title',
+        type: 'Symbol',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'heroDescription',
+        name: 'Hero Description',
+        type: 'Text',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'heroImage',
+        name: 'Hero Image',
+        type: 'Link',
+        linkType: 'Asset',
+        required: false,
+        localized: false,
+      },
+      {
         id: 'machineTypesTitle',
         name: 'Machine Types Title',
         type: 'Symbol',
