@@ -6,6 +6,7 @@ import { useMachines, useMachine } from './useMachines';
 import { useTechnologies, useTechnology } from './useTechnologies';
 import { useTestimonials } from './useTestimonials';
 import { useTestimonialSection } from './useTestimonialSection';
+import { useHeroSlides } from './useHeroSlides';
 
 export {
   useProductTypes, 
@@ -17,5 +18,6 @@ export {
   useTechnologies,
   useTechnology,
   useTestimonials,
-  useTestimonialSection
+  useTestimonialSection,
+  useHeroSlides
 };

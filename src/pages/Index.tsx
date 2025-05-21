@@ -1,6 +1,6 @@
 
 import React from 'react';
-import HeroSection from '@/components/home/HeroSection';
+import HeroSlider from '@/components/home/HeroSlider';
 import FeaturesSection from '@/components/home/FeaturesSection';
 import ProductTypesSection from '@/components/home/ProductTypesSection';
 import BusinessGoalsSection from '@/components/home/BusinessGoalsSection';
@@ -13,7 +13,7 @@ const Index = () => {
 
   return (
     <>
-      <HeroSection />
+      <HeroSlider />
       <FeaturesSection />
       <ProductTypesSection />
       <BusinessGoalsSection />
