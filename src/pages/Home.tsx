@@ -1,6 +1,6 @@
 
 import React from 'react';
-import HeroSection from '@/components/home/HeroSection';
+import HeroSlider from '@/components/home/HeroSlider';
 import FeaturesSection from '@/components/home/FeaturesSection';
 import ProductTypesSection from '@/components/home/ProductTypesSection';
 import BusinessGoalsSection from '@/components/home/BusinessGoalsSection';
@@ -24,7 +24,7 @@ const Home = () => {
 
   return (
     <>
-      <HeroSection />
+      <HeroSlider sliderId="home-slider" />
       <FeaturesSection />
       <ProductTypesSection />
       <BusinessGoalsSection />

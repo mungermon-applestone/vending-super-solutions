@@ -13,7 +13,7 @@ const Index = () => {
 
   return (
     <>
-      <HeroSlider />
+      <HeroSlider sliderId="home-slider" />
       <FeaturesSection />
       <ProductTypesSection />
       <BusinessGoalsSection />

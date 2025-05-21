@@ -46,7 +46,7 @@ export function useHeroSlides(sliderId: string = 'home-slider') {
         
         const entries = await client.getEntries({
           content_type: 'heroContent',
-          'fields.pageKey': sliderId,
+          'fields.sliderId': sliderId,
           include: 2,
           order: 'fields.slideOrder'
         });
@@ -81,7 +81,7 @@ export function useHeroSlides(sliderId: string = 'home-slider') {
             secondaryButtonText: entry.fields.secondaryButtonText as string,
             secondaryButtonUrl: entry.fields.secondaryButtonUrl as string,
             backgroundClass: entry.fields.backgroundClass as string,
-            slideTransitionEffect: entry.fields.slideTransitionEffect as string,
+            slideTransitionEffect: entry.fields.transitionEffect as string,
             slideDuration: entry.fields.slideDuration as number || 5
           } as HeroSlide;
         });
