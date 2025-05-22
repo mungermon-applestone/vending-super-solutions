@@ -8,11 +8,9 @@ import {
   CarouselPrevious,
   type CarouselApi
 } from '@/components/ui/carousel';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useHeroSlides } from '@/hooks/cms/useHeroSlides';
 import HeroSlide from './HeroSlide';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface HeroSliderProps {
   sliderId?: string;
@@ -155,7 +153,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({
 
   return (
     <div 
-      className="hero-slider-container" 
+      className="hero-slider-container relative" 
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -183,9 +181,9 @@ const HeroSlider: React.FC<HeroSliderProps> = ({
         )}
       </Carousel>
       
-      {/* Slide indicators */}
+      {/* Slide indicators - Repositioned to be directly under the carousel */}
       {showIndicators && slides.length > 1 && (
-        <div className="flex justify-center mt-4 space-x-2 absolute bottom-4 left-0 right-0">
+        <div className="flex justify-center mt-4 mb-6 space-x-2">
           {slides.map((_, index) => (
             <button
               key={index}
