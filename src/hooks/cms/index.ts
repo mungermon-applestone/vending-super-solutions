@@ -7,6 +7,7 @@ import { useTechnologies, useTechnology } from './useTechnologies';
 import { useTestimonials } from './useTestimonials';
 import { useTestimonialSection } from './useTestimonialSection';
 import { useHeroSlides } from './useHeroSlides';
+import { useHomePageContent } from '@/hooks/useHomePageContent'; // Import the hook
 
 export {
   useProductTypes, 
@@ -19,5 +20,6 @@ export {
   useTechnology,
   useTestimonials,
   useTestimonialSection,
-  useHeroSlides
+  useHeroSlides,
+  useHomePageContent // Export the hook
 };
