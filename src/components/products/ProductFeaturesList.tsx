@@ -57,7 +57,7 @@ const ProductFeaturesList = ({ features }: ProductFeaturesListProps) => {
             </CardHeader>
             
             <CardContent>
-              <CardDescription className="text-gray-600 text-sm">
+              <CardDescription className="text-gray-600">
                 {feature.description}
               </CardDescription>
             </CardContent>
