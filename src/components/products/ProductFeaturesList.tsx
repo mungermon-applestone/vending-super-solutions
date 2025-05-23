@@ -1,84 +1,68 @@
 
 import React from 'react';
-import { Check, ShoppingBag, ShieldCheck, Utensils, Tags, Truck, Clock } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { CMSFeature } from '@/types/cms';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import MachineTypeIcon from '@/components/common/MachineTypeIcon';
 
 interface ProductFeaturesListProps {
   features: CMSFeature[];
 }
 
 const ProductFeaturesList = ({ features }: ProductFeaturesListProps) => {
-  // Function to render the appropriate icon based on string name or use default
-  const renderIcon = (iconName?: string | React.ReactNode) => {
-    if (React.isValidElement(iconName)) {
-      return iconName;
-    }
-    
-    // If it's a string, map to the corresponding icon component
-    if (typeof iconName === 'string') {
-      switch (iconName.toLowerCase()) {
-        case 'shoppingbag':
-          return <ShoppingBag className="h-6 w-6 text-vending-teal" />;
-        case 'shieldcheck':
-          return <ShieldCheck className="h-6 w-6 text-vending-teal" />;
-        case 'utensils':
-          return <Utensils className="h-6 w-6 text-vending-teal" />;
-        case 'tags':
-          return <Tags className="h-6 w-6 text-vending-teal" />;
-        case 'truck':
-          return <Truck className="h-6 w-6 text-vending-teal" />;
-        case 'clock':
-          return <Clock className="h-6 w-6 text-vending-teal" />;
-        default:
-          return <Check className="h-6 w-6 text-vending-teal" />;
-      }
-    }
-    
-    // Default icon
-    return <Check className="h-6 w-6 text-vending-teal" />;
-  };
+  // If no features are provided, don't render anything
+  if (!features || features.length === 0) return null;
 
   return (
-    <section className="py-16 bg-white">
-      <div className="container-wide">
-        <h2 className="text-3xl font-bold text-center mb-16 text-vending-blue-dark">
-          Specialized Features
-        </h2>
-        
-        <div className="space-y-16">
-          {features.map((feature, index) => (
-            <div 
-              key={index}
-              className={`grid grid-cols-1 ${feature.screenshot ? 'lg:grid-cols-2' : ''} gap-8 items-center ${
-                index % 2 === 1 && feature.screenshot ? 'lg:flex-row-reverse' : ''
-              }`}
-            >
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  {renderIcon(feature.icon)}
-                  <h3 className="text-2xl font-semibold">{feature.title}</h3>
-                </div>
-                <p className="text-gray-700 mb-6">{feature.description}</p>
-                
-                {/* Additional content could go here */}
+    <div className="container mx-auto py-8">
+      <h2 className="text-3xl font-bold text-center mb-10 text-vending-blue-dark">
+        Key Features
+      </h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {features.map((feature, index) => (
+          <Card 
+            key={feature.id || index} 
+            className="h-full transition-all duration-300 hover:shadow-lg"
+          >
+            {/* If there's a screenshot, show it at the top of the card */}
+            {feature.screenshot && (
+              <div className="w-full h-48 overflow-hidden">
+                <img 
+                  src={feature.screenshot.url} 
+                  alt={feature.screenshot.alt || feature.title}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              
-              {feature.screenshot && (
-                <div className="relative">
-                  <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                    <img 
-                      src={feature.screenshot.url} 
-                      alt={feature.screenshot.alt || feature.title}
-                      className="w-full h-auto object-cover"
+            )}
+            
+            <CardHeader className={feature.screenshot ? 'pt-4' : 'pt-6'}>
+              <div className="flex items-center gap-2">
+                {feature.icon ? (
+                  <div className="bg-blue-50 p-2 rounded-full">
+                    <MachineTypeIcon 
+                      icon={feature.icon}
+                      className="h-5 w-5 text-vending-blue"
                     />
                   </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+                ) : (
+                  <div className="bg-blue-50 p-2 rounded-full">
+                    <Check className="h-5 w-5 text-vending-blue" />
+                  </div>
+                )}
+                <CardTitle className="text-lg font-semibold">{feature.title}</CardTitle>
+              </div>
+            </CardHeader>
+            
+            <CardContent>
+              <CardDescription className="text-gray-700 text-sm">
+                {feature.description}
+              </CardDescription>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-    </section>
+    </div>
   );
 };
 

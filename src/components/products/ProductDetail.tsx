@@ -143,19 +143,16 @@ const ProductDetail = () => {
         />
       )}
 
-      {/* Features Section */}
+      {/* Features Section - Updated to use our new component without extra heading */}
       {product.features && product.features.length > 0 && (
-        <section className="py-12 bg-white">
-          <div className="container">
-            <h2 className="text-3xl font-bold mb-8 text-center">Features</h2>
-            <ProductFeaturesList features={product.features} />
-          </div>
+        <section className="py-12 bg-gray-50">
+          <ProductFeaturesList features={product.features} />
         </section>
       )}
 
       {/* Examples Section - with proper null check */}
       {hasExamples && (
-        <section className="py-12 bg-gray-50">
+        <section className="py-12 bg-white">
           <div className="container">
             <h2 className="text-3xl font-bold mb-8 text-center">Applications</h2>
             {/* @ts-ignore - Handling potential missing examples property */}
