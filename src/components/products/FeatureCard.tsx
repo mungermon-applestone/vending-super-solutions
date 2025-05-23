@@ -18,6 +18,9 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ feature }) => {
     ? feature.screenshot.alt 
     : `${feature.title || 'Feature'} image`;
   
+  // Safely handle the icon prop to ensure it's a string when passed to MachineTypeIcon
+  const isIconString = typeof feature.icon === 'string';
+  
   return (
     <Card className="h-full transition-all duration-300 hover:shadow-lg overflow-hidden">
       {hasScreenshot ? (
@@ -33,10 +36,17 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ feature }) => {
       ) : (
         <div className="w-full h-32 bg-blue-50 flex items-center justify-center">
           {feature.icon ? (
-            <MachineTypeIcon 
-              icon={feature.icon}
-              className="h-12 w-12 text-vending-blue-dark opacity-40"
-            />
+            isIconString ? (
+              <MachineTypeIcon 
+                icon={feature.icon}
+                className="h-12 w-12 text-vending-blue-dark opacity-40"
+              />
+            ) : (
+              // Handle case where icon is not a string but a ReactNode
+              <div className="h-12 w-12 text-vending-blue-dark opacity-40">
+                {feature.icon}
+              </div>
+            )
           ) : (
             <Check className="h-12 w-12 text-vending-blue-dark opacity-40" />
           )}
