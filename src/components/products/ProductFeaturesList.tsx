@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 import { CMSFeature } from '@/types/cms';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import MachineTypeIcon from '@/components/common/MachineTypeIcon';
+import Image from '@/components/common/Image';
 
 interface ProductFeaturesListProps {
   features: CMSFeature[];
@@ -23,35 +24,34 @@ const ProductFeaturesList = ({ features }: ProductFeaturesListProps) => {
         {features.map((feature, index) => (
           <Card 
             key={feature.id || index} 
-            className="h-full transition-all duration-300 hover:shadow-lg"
+            className="h-full transition-all duration-300 hover:shadow-lg overflow-hidden"
           >
-            {/* If there's a screenshot, show it at the top of the card */}
-            {feature.screenshot && (
+            {/* Prioritize screenshot if available */}
+            {feature.screenshot && feature.screenshot.url ? (
               <div className="w-full h-48 overflow-hidden">
-                <img 
-                  src={feature.screenshot.url} 
-                  alt={feature.screenshot.alt || feature.title}
-                  className="w-full h-full object-cover"
+                <Image 
+                  src={feature.screenshot.url}
+                  alt={feature.screenshot.alt || feature.title || "Feature image"}
+                  className="w-full h-full"
+                  objectFit="cover"
+                  aspectRatio="16/9"
                 />
+              </div>
+            ) : (
+              <div className="w-full h-32 bg-blue-50 flex items-center justify-center">
+                {feature.icon ? (
+                  <MachineTypeIcon 
+                    icon={feature.icon}
+                    className="h-12 w-12 text-vending-blue-dark opacity-40"
+                  />
+                ) : (
+                  <Check className="h-12 w-12 text-vending-blue-dark opacity-40" />
+                )}
               </div>
             )}
             
-            <CardHeader className={feature.screenshot ? 'pt-4' : 'pt-6'}>
-              <div className="flex items-center gap-2">
-                {feature.icon ? (
-                  <div className="bg-blue-50 p-2 rounded-full">
-                    <MachineTypeIcon 
-                      icon={feature.icon}
-                      className="h-5 w-5 text-vending-blue"
-                    />
-                  </div>
-                ) : (
-                  <div className="bg-blue-50 p-2 rounded-full">
-                    <Check className="h-5 w-5 text-vending-blue" />
-                  </div>
-                )}
-                <CardTitle className="text-lg font-semibold">{feature.title}</CardTitle>
-              </div>
+            <CardHeader className="pt-4">
+              <CardTitle className="text-lg font-semibold">{feature.title}</CardTitle>
             </CardHeader>
             
             <CardContent>
