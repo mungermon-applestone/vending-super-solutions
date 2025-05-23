@@ -20,7 +20,7 @@ const ProductFeaturesList = ({ features }: ProductFeaturesListProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {features.map((feature, index) => (
           <FeatureCard 
-            key={feature.id || index}
+            key={feature.id || `feature-${index}`}
             feature={feature}
           />
         ))}

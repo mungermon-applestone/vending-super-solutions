@@ -1,65 +1,28 @@
 
-import { ProductFormData } from '@/types/forms';
-import { v4 as uuidv4 } from 'uuid';
+import { CMSFeature } from '@/types/cms';
 
 /**
- * Update a product's features - MOCK IMPLEMENTATION
+ * Check if the feature icon is a string
  */
-export const updateProductFeatures = async (data: ProductFormData, productId: string): Promise<void> => {
-  console.log('[featureHelpers] MOCK: Updating features for product ID:', productId);
-  
-  try {
-    // Mock getting existing features
-    console.log('[featureHelpers] MOCK: Fetching existing features for product');
-    const mockExistingFeatures = [
-      { id: uuidv4() },
-      { id: uuidv4() }
-    ];
-    console.log('[featureHelpers] MOCK: Found existing features:', mockExistingFeatures);
-
-    // Mock deletion
-    console.log('[featureHelpers] MOCK: Deleting existing features');
-    
-    // Mock insert of each feature
-    for (let i = 0; i < data.features.length; i++) {
-      const feature = data.features[i];
-      
-      // Skip features with empty title or description
-      if (!feature.title.trim() || !feature.description.trim()) {
-        console.log('[featureHelpers] MOCK: Skipping empty feature at index:', i);
-        continue;
-      }
-      
-      // Mock insert the feature
-      const mockFeatureId = uuidv4();
-      console.log(`[featureHelpers] MOCK: Inserted feature with ID: ${mockFeatureId}`);
-      console.log('[featureHelpers] MOCK: Feature data:', {
-        product_type_id: productId,
-        title: feature.title,
-        description: feature.description,
-        icon: feature.icon || 'check',
-        display_order: i
-      });
-
-      // If screenshot data is provided, mock insert it
-      if (feature.screenshotUrl || feature.screenshotAlt) {
-        console.log('[featureHelpers] MOCK: Inserting feature screenshot');
-        console.log('[featureHelpers] MOCK: Screenshot data:', {
-          feature_id: mockFeatureId,
-          url: feature.screenshotUrl || '',
-          alt: feature.screenshotAlt || ''
-        });
-      }
-    }
-
-    console.log(`[featureHelpers] MOCK: ${data.features.length} features processed successfully`);
-  } catch (error) {
-    console.error('[featureHelpers] Error in updateProductFeatures:', error);
-    throw error;
-  }
+export const isFeatureIconString = (icon: any): icon is string => {
+  return typeof icon === 'string';
 };
 
 /**
- * Add product features (alias for updateProductFeatures for consistency)
+ * Parse feature data from any source and ensure it matches the CMSFeature interface
+ * @param featureData Raw feature data
+ * @returns Cleaned feature object conforming to CMSFeature interface
  */
-export const addProductFeatures = updateProductFeatures;
+export const parseFeatureData = (featureData: any): CMSFeature => {
+  return {
+    id: featureData.id || `feature-${Math.random().toString(36).substring(2, 9)}`,
+    title: featureData.title || '',
+    description: featureData.description || '',
+    icon: featureData.icon || undefined,
+    screenshot: featureData.screenshot ? {
+      id: featureData.screenshot.id || 'screenshot',
+      url: featureData.screenshot.url || '',
+      alt: String(featureData.screenshot.alt || featureData.title || 'Feature image')
+    } : undefined
+  };
+};
