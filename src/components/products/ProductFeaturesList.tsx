@@ -51,11 +51,13 @@ const ProductFeaturesList = ({ features }: ProductFeaturesListProps) => {
             )}
             
             <CardHeader className="pt-4">
-              <CardTitle className="text-lg font-semibold">{feature.title}</CardTitle>
+              <CardTitle className="text-xl font-bold">
+                {feature.title}
+              </CardTitle>
             </CardHeader>
             
             <CardContent>
-              <CardDescription className="text-gray-700 text-sm">
+              <CardDescription className="text-gray-600 text-sm">
                 {feature.description}
               </CardDescription>
             </CardContent>
