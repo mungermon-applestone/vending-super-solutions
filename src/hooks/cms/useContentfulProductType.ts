@@ -268,14 +268,14 @@ export function useContentfulProductType(slug: string) {
           image: fields.image ? {
             id: fields.image.sys?.id || 'unknown',
             url: fields.image.fields?.file?.url ? `https:${fields.image.fields.file.url}` : '',
-            alt: fields.image.fields?.title || fields.title || '',
+            alt: String(fields.image.fields?.title || fields.title || ''),
           } : null,
           thumbnail: fields.thumbnail ? {
             id: fields.thumbnail.sys?.id || 'unknown',
             url: fields.thumbnail.fields?.file?.url ? `https:${fields.thumbnail.fields.file.url}` : '',
-            alt: fields.thumbnail.fields?.title || fields.title || '',
+            alt: String(fields.thumbnail.fields?.title || fields.title || ''),
           } : null,
-          // Updated feature mapping to properly include screenshot
+          // Updated feature mapping to properly handle the alt attribute as a string
           features: Array.isArray(fields.features) ? fields.features.map(feature => ({
             id: feature.sys?.id || `feature-${Math.random().toString(36).substring(2, 11)}`,
             title: feature.fields?.title || '',
@@ -284,7 +284,7 @@ export function useContentfulProductType(slug: string) {
             screenshot: feature.fields?.screenshot ? {
               id: feature.fields.screenshot.sys?.id || 'screenshot-id',
               url: feature.fields.screenshot.fields?.file?.url ? `https:${feature.fields.screenshot.fields.file.url}` : '',
-              alt: feature.fields.screenshot.fields?.title || feature.fields?.title || 'Feature image'
+              alt: String(feature.fields.screenshot.fields?.title || feature.fields?.title || 'Feature image')
             } : undefined
           })) : [],
           recommendedMachines: Array.isArray(fields.recommendedMachines) ? 
@@ -295,22 +295,22 @@ export function useContentfulProductType(slug: string) {
               description: machine.fields?.description || '',
               image: machine.fields?.images && machine.fields.images[0] ? {
                 url: `https:${machine.fields.images[0].fields?.file?.url || ''}`,
-                alt: machine.fields.images[0].fields?.title || machine.fields?.title || ''
+                alt: String(machine.fields.images[0].fields?.title || machine.fields?.title || '')
               } : undefined
             })).filter(machine => machine.slug && machine.title) : [],
-          // Enhanced video support with better handling
+          // Enhanced video support with better handling and string conversion for text fields
           video: (fields.video || fields.youtubeVideoId) ? {
             title: fields.videoTitle ? String(fields.videoTitle) : 'Product Demo',
             description: plainVideoDescription || 'See our solution in action',
-            // Improved thumbnail handling
+            // Improved thumbnail handling with string conversion for alt
             thumbnailImage: fields.videoPreviewImage ? {
               id: fields.videoPreviewImage.sys?.id || 'thumbnail-id',
               url: fields.videoPreviewImage.fields?.file?.url ? `https:${fields.videoPreviewImage.fields.file.url}` : '',
-              alt: fields.videoPreviewImage.fields?.title || 'Video thumbnail'
+              alt: String(fields.videoPreviewImage.fields?.title || 'Video thumbnail')
             } : fields.image ? {
               id: fields.image.sys?.id || 'image-as-thumbnail',
               url: fields.image.fields?.file?.url ? `https:${fields.image.fields.file.url}` : '',
-              alt: fields.image.fields?.title || fields.title || 'Video thumbnail'
+              alt: String(fields.image.fields?.title || fields.title || 'Video thumbnail')
             } : null,
             url: fields.video?.fields?.file?.url ? `https:${fields.video.fields.file.url}` : undefined,
             youtubeId: fields.youtubeVideoId ? String(fields.youtubeVideoId) : undefined,
