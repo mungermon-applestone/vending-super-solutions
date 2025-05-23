@@ -1,5 +1,4 @@
 
-import { supabase } from '@/integrations/supabase/client';
 import { ProductFormData } from '@/types/forms';
 import { CMSFeature } from '@/types/cms';
 
@@ -30,28 +29,20 @@ export const parseFeatureData = (featureData: any): CMSFeature => {
 };
 
 /**
- * Update product features for a product
+ * [MOCK] Update product features for a product
  * @param data Product form data
  * @param productId Product ID
  */
 export const updateProductFeatures = async (data: ProductFormData, productId: string) => {
-  console.log('[productService] Updating features for product', productId);
+  console.log('[MOCK productService] Updating features for product', productId);
   
   try {
-    // First delete all existing features for this product
-    const { error: deleteError } = await supabase
-      .from('product_features')
-      .delete()
-      .eq('product_id', productId);
-    
-    if (deleteError) {
-      console.error('[productService] Error deleting existing features:', deleteError);
-      throw new Error(`Failed to delete existing features: ${deleteError.message}`);
-    }
+    // Mock deletion of existing features
+    console.log('[MOCK productService] Simulating deletion of existing features for product', productId);
     
     // If there are no features, we're done
     if (!data.features || data.features.length === 0) {
-      console.log('[productService] No features to add for product', productId);
+      console.log('[MOCK productService] No features to add for product', productId);
       return;
     }
     
@@ -74,36 +65,26 @@ export const updateProductFeatures = async (data: ProductFormData, productId: st
       return parseFeatureData(processedFeature);
     });
     
-    console.log(`[productService] Adding ${features.length} features for product ${productId}`);
+    console.log(`[MOCK productService] Would add ${features.length} features for product ${productId}:`, 
+      features.map(f => ({ title: f.title, hasScreenshot: !!f.screenshot }))
+    );
     
-    // Insert features one by one to handle errors better
-    for (const feature of features) {
-      const { error: insertError } = await supabase
-        .from('product_features')
-        .insert({
-          product_id: productId,
-          title: feature.title,
-          description: feature.description,
-          icon: feature.icon,
-          screenshot_url: feature.screenshot?.url,
-          screenshot_alt: feature.screenshot?.alt
-        });
-      
-      if (insertError) {
-        console.error('[productService] Error inserting feature:', insertError);
-        throw new Error(`Failed to add feature "${feature.title}": ${insertError.message}`);
-      }
-    }
+    // Mock success response
+    console.log(`[MOCK productService] Successfully mocked adding ${features.length} features to product ${productId}`);
     
-    console.log(`[productService] Successfully added ${features.length} features to product ${productId}`);
+    return {
+      success: true,
+      count: features.length,
+      features: features
+    };
   } catch (error) {
-    console.error('[productService] Error in updateProductFeatures:', error);
+    console.error('[MOCK productService] Error in updateProductFeatures:', error);
     throw error;
   }
 };
 
 /**
- * Add product features for a new product (alias to updateProductFeatures for consistency)
+ * [MOCK] Add product features for a new product (alias to updateProductFeatures for consistency)
  * @param data Product form data
  * @param productId Product ID
  */
