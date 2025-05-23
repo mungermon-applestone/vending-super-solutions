@@ -1,10 +1,7 @@
 
 import React from 'react';
-import { Check } from 'lucide-react';
 import { CMSFeature } from '@/types/cms';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import MachineTypeIcon from '@/components/common/MachineTypeIcon';
-import Image from '@/components/common/Image';
+import FeatureCard from './FeatureCard';
 
 interface ProductFeaturesListProps {
   features: CMSFeature[];
@@ -22,46 +19,10 @@ const ProductFeaturesList = ({ features }: ProductFeaturesListProps) => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {features.map((feature, index) => (
-          <Card 
-            key={feature.id || index} 
-            className="h-full transition-all duration-300 hover:shadow-lg overflow-hidden"
-          >
-            {/* Prioritize screenshot if available */}
-            {feature.screenshot && feature.screenshot.url ? (
-              <div className="w-full h-48 overflow-hidden">
-                <Image 
-                  src={feature.screenshot.url}
-                  alt={feature.screenshot.alt || "Feature image"}
-                  className="w-full h-full"
-                  objectFit="contain"
-                  aspectRatio="16/9"
-                />
-              </div>
-            ) : (
-              <div className="w-full h-32 bg-blue-50 flex items-center justify-center">
-                {feature.icon ? (
-                  <MachineTypeIcon 
-                    icon={feature.icon}
-                    className="h-12 w-12 text-vending-blue-dark opacity-40"
-                  />
-                ) : (
-                  <Check className="h-12 w-12 text-vending-blue-dark opacity-40" />
-                )}
-              </div>
-            )}
-            
-            <CardHeader className="pt-4">
-              <CardTitle className="text-xl font-bold">
-                {feature.title}
-              </CardTitle>
-            </CardHeader>
-            
-            <CardContent>
-              <CardDescription className="text-gray-600">
-                {feature.description}
-              </CardDescription>
-            </CardContent>
-          </Card>
+          <FeatureCard 
+            key={feature.id || index}
+            feature={feature}
+          />
         ))}
       </div>
     </div>
