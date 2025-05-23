@@ -187,6 +187,28 @@ export function useContentfulProductType(slug: string) {
           videoOrientation: fields.videoOrientation
         });
 
+        // Log feature-related fields for debugging
+        if (fields.features && Array.isArray(fields.features)) {
+          console.log(`[useContentfulProductType] Found ${fields.features.length} features`);
+          
+          // Log the first feature for debugging
+          if (fields.features.length > 0) {
+            const firstFeature = fields.features[0];
+            console.log('[useContentfulProductType] First feature:', {
+              id: firstFeature.sys?.id,
+              title: firstFeature.fields?.title,
+              hasDescription: !!firstFeature.fields?.description,
+              hasIcon: !!firstFeature.fields?.icon,
+              hasScreenshot: !!firstFeature.fields?.screenshot,
+              screenshotDetails: firstFeature.fields?.screenshot ? {
+                id: firstFeature.fields.screenshot.sys?.id,
+                url: firstFeature.fields.screenshot.fields?.file?.url ? `https:${firstFeature.fields.screenshot.fields.file.url}` : 'No URL',
+                title: firstFeature.fields.screenshot.fields?.title || 'No title'
+              } : 'No screenshot'
+            });
+          }
+        }
+
         if (fields.videoPreviewImage) {
           console.log('[useContentfulProductType] Video preview image details:', {
             id: fields.videoPreviewImage.sys?.id,
@@ -253,11 +275,17 @@ export function useContentfulProductType(slug: string) {
             url: fields.thumbnail.fields?.file?.url ? `https:${fields.thumbnail.fields.file.url}` : '',
             alt: fields.thumbnail.fields?.title || fields.title || '',
           } : null,
+          // Updated feature mapping to properly include screenshot
           features: Array.isArray(fields.features) ? fields.features.map(feature => ({
             id: feature.sys?.id || `feature-${Math.random().toString(36).substring(2, 11)}`,
             title: feature.fields?.title || '',
             description: feature.fields?.description || '',
-            icon: feature.fields?.icon || undefined
+            icon: feature.fields?.icon || undefined,
+            screenshot: feature.fields?.screenshot ? {
+              id: feature.fields.screenshot.sys?.id || 'screenshot-id',
+              url: feature.fields.screenshot.fields?.file?.url ? `https:${feature.fields.screenshot.fields.file.url}` : '',
+              alt: feature.fields.screenshot.fields?.title || feature.fields?.title || 'Feature image'
+            } : undefined
           })) : [],
           recommendedMachines: Array.isArray(fields.recommendedMachines) ? 
             fields.recommendedMachines.map(machine => ({
