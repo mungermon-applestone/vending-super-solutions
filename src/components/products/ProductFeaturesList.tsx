@@ -31,7 +31,7 @@ const ProductFeaturesList = ({ features }: ProductFeaturesListProps) => {
               <div className="w-full h-48 overflow-hidden">
                 <Image 
                   src={feature.screenshot.url}
-                  alt={feature.screenshot.alt || feature.title || "Feature image"}
+                  alt={String(feature.screenshot.alt || feature.title || "Feature image")}
                   className="w-full h-full"
                   objectFit="cover"
                   aspectRatio="16/9"
