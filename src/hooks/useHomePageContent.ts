@@ -22,31 +22,37 @@ const fallbackHomeContent: HomePageContent = {
   feature1Title: "[FALLBACK] Multiple Product Types",
   feature1Description: "[FALLBACK] From grocery and fresh food to vape products and collectibles, you can sell a diverse array of products.",
   feature1icon: "ShoppingCart",
+  feature1url: "/products",
   
   // Feature 2 fallback
   feature2Title: "[FALLBACK] Business Goal Focused",
   feature2Description: "[FALLBACK] Meet revenue-producing, creative objectives with custom solutions for BOPIS, loss prevention, marketing, and more.",
   feature2Icon: "Award",
+  feature2url: "/business-goals",
   
   // Feature 3 fallback
   feature3Title: "[FALLBACK] Hardware Flexibility",
   feature3Description: "[FALLBACK] Compatible with various vending machines and lockers from leading global manufacturers.",
   feature3Icon: "Globe",
+  feature3url: "/machines",
   
   // Feature 4 fallback
   feature4Title: "[FALLBACK] Advanced Analytics",
   feature4Description: "[FALLBACK] Tune up your operations with up-to-the-second reporting and analytics.",
   feature4Icon: "BarChart3",
+  feature4url: "/technology",
   
   // Feature 5 fallback
   feature5Title: "[FALLBACK] Enterprise Security",
   feature5Description: "[FALLBACK] We don't collect any retail customer PII and observe rigorous security protocols.",
   feature5Icon: "Shield",
+  feature5url: "/technology",
   
   // Feature 6 fallback
   feature6Title: "[FALLBACK] Seamless Integration",
   feature6Description: "[FALLBACK] Open standards allow our solution to connect to your existing systems.",
-  feature6Icon: "Zap"
+  feature6Icon: "Zap",
+  feature6url: "/contact"
 };
 
 export function useHomePageContent() {
@@ -102,27 +108,33 @@ export function useHomePageContent() {
             // Map feature cards fields - matching exact field names from Contentful
             feature1Title: content.feature1Title || fallbackHomeContent.feature1Title,
             feature1Description: content.feature1Description || fallbackHomeContent.feature1Description,
-            feature1icon: content.feature1icon || fallbackHomeContent.feature1icon,
+            feature1icon: content.feature1Icon || fallbackHomeContent.feature1icon,
+            feature1url: content.feature1url || fallbackHomeContent.feature1url,
             
             feature2Title: content.feature2Title || fallbackHomeContent.feature2Title,
             feature2Description: content.feature2Description || fallbackHomeContent.feature2Description,
             feature2Icon: content.feature2Icon || fallbackHomeContent.feature2Icon,
+            feature2url: content.feature2url || fallbackHomeContent.feature2url,
             
             feature3Title: content.feature3Title || fallbackHomeContent.feature3Title,
             feature3Description: content.feature3Description || fallbackHomeContent.feature3Description,
             feature3Icon: content.feature3Icon || fallbackHomeContent.feature3Icon,
+            feature3url: content.feature3url || fallbackHomeContent.feature3url,
             
             feature4Title: content.feature4Title || fallbackHomeContent.feature4Title,
             feature4Description: content.feature4Description || fallbackHomeContent.feature4Description,
             feature4Icon: content.feature4Icon || fallbackHomeContent.feature4Icon,
+            feature4url: content.feature4url || fallbackHomeContent.feature4url,
             
             feature5Title: content.feature5Title || fallbackHomeContent.feature5Title,
             feature5Description: content.feature5Description || fallbackHomeContent.feature5Description,
             feature5Icon: content.feature5Icon || fallbackHomeContent.feature5Icon,
+            feature5url: content.feature5url || fallbackHomeContent.feature5url,
             
             feature6Title: content.feature6Title || fallbackHomeContent.feature6Title,
             feature6Description: content.feature6Description || fallbackHomeContent.feature6Description,
-            feature6Icon: content.feature6Icon || fallbackHomeContent.feature6Icon
+            feature6Icon: content.feature6Icon || fallbackHomeContent.feature6Icon,
+            feature6url: content.feature6url || fallbackHomeContent.feature6url
           };
           
           console.log('[useHomePageContent] Mapped content from Contentful:', mappedContent);

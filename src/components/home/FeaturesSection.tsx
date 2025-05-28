@@ -14,11 +14,12 @@ interface FeatureCardProps {
   icon: React.ReactNode;
   title: string;
   description: string;
+  url?: string;
 }
 
-const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) => {
-  return (
-    <div className="bg-white rounded-lg p-8 text-center shadow-sm border border-gray-100">
+const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, url }) => {
+  const content = (
+    <div className="bg-white rounded-lg p-8 text-center shadow-sm border border-gray-100 h-full">
       <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
         {icon}
       </div>
@@ -28,6 +29,19 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) =
       </p>
     </div>
   );
+
+  if (url) {
+    return (
+      <a 
+        href={url} 
+        className="block transition-transform duration-300 hover:scale-105 hover:shadow-lg"
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return content;
 };
 
 /**
@@ -79,32 +93,38 @@ const FeaturesSection = () => {
     {
       title: homeContent?.feature1Title || '',
       description: homeContent?.feature1Description || '',
-      icon: getIconComponent(homeContent?.feature1icon)
+      icon: getIconComponent(homeContent?.feature1icon),
+      url: homeContent?.feature1url
     },
     {
       title: homeContent?.feature2Title || '',
       description: homeContent?.feature2Description || '',
-      icon: getIconComponent(homeContent?.feature2Icon)
+      icon: getIconComponent(homeContent?.feature2Icon),
+      url: homeContent?.feature2url
     },
     {
       title: homeContent?.feature3Title || '',
       description: homeContent?.feature3Description || '',
-      icon: getIconComponent(homeContent?.feature3Icon)
+      icon: getIconComponent(homeContent?.feature3Icon),
+      url: homeContent?.feature3url
     },
     {
       title: homeContent?.feature4Title || '',
       description: homeContent?.feature4Description || '',
-      icon: getIconComponent(homeContent?.feature4Icon)
+      icon: getIconComponent(homeContent?.feature4Icon),
+      url: homeContent?.feature4url
     },
     {
       title: homeContent?.feature5Title || '',
       description: homeContent?.feature5Description || '',
-      icon: getIconComponent(homeContent?.feature5Icon)
+      icon: getIconComponent(homeContent?.feature5Icon),
+      url: homeContent?.feature5url
     },
     {
       title: homeContent?.feature6Title || '',
       description: homeContent?.feature6Description || '',
-      icon: getIconComponent(homeContent?.feature6Icon)
+      icon: getIconComponent(homeContent?.feature6Icon),
+      url: homeContent?.feature6url
     }
   ];
 
@@ -128,6 +148,7 @@ const FeaturesSection = () => {
               icon={feature.icon}
               title={feature.title}
               description={feature.description}
+              url={feature.url}
             />
           ))}
         </div>
