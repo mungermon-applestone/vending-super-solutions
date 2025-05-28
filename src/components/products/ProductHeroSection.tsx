@@ -96,7 +96,7 @@ const ProductHeroSection: React.FC<ProductHeroSectionProps> = ({
                 alt={`${productType} illustration`}
                 className="w-full h-auto rounded-lg shadow-lg"
                 aspectRatio="4/3"
-                objectFit="cover"
+                objectFit="contain"
               />
             </div>
           </div>
