@@ -23,7 +23,7 @@ const ProductsDropdown: React.FC<ProductsDropdownProps> = ({ isActive }) => {
             : "bg-gray-50 text-gray-900 hover:bg-gray-100 border border-transparent"
         )}
       >
-        <Link to="/products">Products</Link>
+        <Link to="/products">Sell Any Product</Link>
       </NavigationMenuLink>
     </NavigationMenuItem>
   );

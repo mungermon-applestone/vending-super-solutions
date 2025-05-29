@@ -30,7 +30,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         variant="ghost"
         className={getButtonStyles(isMachinesActive)}
       >
-        <Link to="/machines">Machines</Link>
+        <Link to="/machines">Machines and Lockers</Link>
       </Button>
       <Button 
         asChild 

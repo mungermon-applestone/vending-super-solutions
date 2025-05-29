@@ -3,11 +3,11 @@ describe('Site Navigation', () => {
   it('can navigate to main sections from homepage', () => {
     cy.visit('/');
     
-    // Check main navigation links
-    cy.contains('a', 'Products').click();
+    // Check main navigation links with updated text
+    cy.contains('a', 'Sell Any Product').click();
     cy.url().should('include', '/products');
     
-    cy.contains('a', 'Machines').click();
+    cy.contains('a', 'Machines and Lockers').click();
     cy.url().should('include', '/machines');
     
     cy.contains('a', 'Business Goals').click();
