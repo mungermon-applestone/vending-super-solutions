@@ -2,12 +2,11 @@
 import React from 'react';
 import Layout from "@/components/layout/Layout";
 import { useContentful } from '@/hooks/useContentful';
-import { fetchContentfulEntry } from '@/services/cms/utils/contentfulClient';
+import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { ContentfulErrorBoundary, ContentfulFallbackMessage } from '@/components/common';
 import { renderRichText } from '@/utils/contentful/richTextRenderer';
 import { Document } from '@contentful/rich-text-types';
 import { Spinner } from '@/components/ui/spinner';
-import { ContentfulResponse } from '@/types/contentful';
 import SEO from '@/components/seo/SEO';
 
 interface PrivacyPolicyEntry {
@@ -21,6 +20,7 @@ interface PrivacyPolicyEntry {
   };
   fields: {
     termsOfUse?: Document;
+    title?: string;
   };
   includes?: {
     Asset?: any[];
@@ -28,39 +28,40 @@ interface PrivacyPolicyEntry {
 }
 
 const TermsOfService = () => {
-  // Corrected entry ID for the Privacy Policy content that contains terms of use
-  const entryId = '4SiOG2H5N7dLSnWbvZN5GW'; 
-  
-  const { data: privacyPolicy, isLoading, error, isContentReady } = useContentful<ContentfulResponse<PrivacyPolicyEntry>>({
-    queryKey: ['privacy-policy', entryId],
+  const { data: privacyEntries, isLoading, error, isContentReady } = useContentful<PrivacyPolicyEntry[]>({
+    queryKey: ['terms-of-service-content'],
     queryFn: async () => {
       try {
-        const entry = await fetchContentfulEntry<ContentfulResponse<PrivacyPolicyEntry>>(entryId);
-        console.log('Privacy policy content fetched for terms of use:', entry);
-        return entry;
+        console.log('[TermsOfService] Fetching privacy policy content for terms of use');
+        const entries = await fetchContentfulEntries<PrivacyPolicyEntry>('privacyPolicy');
+        console.log('[TermsOfService] Fetched entries:', entries);
+        return entries;
       } catch (error) {
-        console.error('Error fetching privacy policy for terms of use:', error);
+        console.error('[TermsOfService] Error fetching terms of use:', error);
         throw error;
       }
     }
   });
 
+  // Get the first privacy policy entry (which contains the terms of use field)
+  const privacyContent = privacyEntries && privacyEntries.length > 0 ? privacyEntries[0] : null;
+
   return (
     <Layout>
       <SEO 
-        title="Terms of Use"
+        title="Terms of Service"
         description="Terms and conditions for using our services"
         type="article"
       />
       <div className="container-wide py-12">
-        <h1 className="text-4xl font-bold text-vending-blue mb-8">Terms of Use</h1>
+        <h1 className="text-4xl font-bold text-vending-blue mb-8">Terms of Service</h1>
         
         <ContentfulErrorBoundary 
-          contentType="Terms of Use" 
+          contentType="Terms of Service" 
           fallback={
             <ContentfulFallbackMessage 
-              message="There was an error displaying the terms of use." 
-              contentType="Terms of Use"
+              message="There was an error displaying the terms of service." 
+              contentType="Terms of Service"
               showRefresh={true}
             />
           }
@@ -71,26 +72,28 @@ const TermsOfService = () => {
             </div>
           ) : error ? (
             <ContentfulFallbackMessage 
-              message={`Error loading terms of use: ${error.message}`} 
-              contentType="Terms of Use"
+              message={`Error loading terms of service: ${error.message}`} 
+              contentType="Terms of Service"
               showRefresh={true}
             />
-          ) : isContentReady && privacyPolicy?.fields?.termsOfUse ? (
+          ) : isContentReady && privacyContent?.fields?.termsOfUse ? (
             <div className="prose prose-lg max-w-none">
               {renderRichText(
-                privacyPolicy.fields.termsOfUse,
-                { includedAssets: privacyPolicy.includes?.Asset || [] }
+                privacyContent.fields.termsOfUse,
+                { includedAssets: privacyContent.includes?.Asset || [] }
               )}
             </div>
           ) : (
             <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-md">
               <h2 className="text-yellow-800 text-lg font-medium">Content Not Available</h2>
               <p className="text-yellow-700 mt-1">
-                The Terms of Use content could not be loaded. Please check that the content has been published in Contentful.
+                The Terms of Service content could not be loaded. Please ensure that:
               </p>
-              <p className="text-sm text-yellow-600 mt-2">
-                Looking for field "termsOfUse" in Privacy Policy content (ID: {entryId})
-              </p>
+              <ul className="text-yellow-700 mt-2 list-disc list-inside">
+                <li>A Privacy Policy entry has been created in Contentful</li>
+                <li>The content has been published</li>
+                <li>The "termsOfUse" field contains content</li>
+              </ul>
             </div>
           )}
         </ContentfulErrorBoundary>

@@ -15,6 +15,8 @@ import Layout from "./components/layout/Layout";
 import About from "./pages/About";
 import BlogPage from "./pages/BlogPage";
 import ContentfulBlogPostDetail from "./pages/ContentfulBlogPostDetail";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import { Navigate } from "react-router-dom";
 
 export const router = createBrowserRouter([
@@ -74,6 +76,14 @@ export const router = createBrowserRouter([
       {
         path: "/blog/:slug",
         element: <ContentfulBlogPostDetail />,
+      },
+      {
+        path: "/privacy",
+        element: <PrivacyPolicy />,
+      },
+      {
+        path: "/terms",
+        element: <TermsOfService />,
       },
       // Redirect all admin routes to Contentful
       {
