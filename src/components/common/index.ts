@@ -15,4 +15,4 @@ export { default as ProgressiveHydration } from './ProgressiveHydration';
 export { default as SimpleContactCTA } from './SimpleContactCTA';
 export { default as VideoPlayer } from './VideoPlayer';
 export { default as ScrollToTop } from './ScrollToTop';
-export { ContactSection } from './ContactSection';
+export { ContactSection } from '../contact/ContactSection';
