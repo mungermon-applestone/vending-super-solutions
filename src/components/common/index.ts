@@ -1,4 +1,5 @@
 
+
 export { default as ContentfulErrorBoundary } from './ContentfulErrorBoundary';
 export { default as ContentfulFallbackMessage } from './ContentfulFallbackMessage';
 export { default as CookieBanner } from './CookieBanner';
@@ -15,4 +16,5 @@ export { default as ProgressiveHydration } from './ProgressiveHydration';
 export { default as SimpleContactCTA } from './SimpleContactCTA';
 export { default as VideoPlayer } from './VideoPlayer';
 export { default as ScrollToTop } from './ScrollToTop';
-export { ContactSection } from '../contact/ContactSection';
+export { default as ContactSection } from '../contact/ContactSection';
+
