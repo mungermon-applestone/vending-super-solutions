@@ -1,6 +1,15 @@
 
+/**
+ * Terms of Service Page Component
+ * 
+ * CRITICAL REGRESSION PREVENTION:
+ * - This component should NEVER wrap its content with <Layout />
+ * - Layout is already provided by the router configuration in src/routes.tsx
+ * - Adding <Layout /> here will cause double navigation and footer
+ * - See the router configuration where Layout is the parent route wrapper
+ */
+
 import React from 'react';
-import Layout from "@/components/layout/Layout";
 import { useContentful } from '@/hooks/useContentful';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
 import { ContentfulErrorBoundary, ContentfulFallbackMessage } from '@/components/common';
@@ -47,7 +56,7 @@ const TermsOfService = () => {
   const privacyContent = privacyEntries && privacyEntries.length > 0 ? privacyEntries[0] : null;
 
   return (
-    <Layout>
+    <>
       <SEO 
         title="Terms of Service"
         description="Terms and conditions for using our services"
@@ -98,7 +107,7 @@ const TermsOfService = () => {
           )}
         </ContentfulErrorBoundary>
       </div>
-    </Layout>
+    </>
   );
 };
 

@@ -19,6 +19,22 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import { Navigate } from "react-router-dom";
 
+/**
+ * Router Configuration
+ * 
+ * CRITICAL LAYOUT ARCHITECTURE NOTES:
+ * - The Layout component is configured at the root level as the parent route
+ * - ALL child route components inherit this layout automatically
+ * - Child components should NEVER wrap themselves with <Layout />
+ * - This prevents double navigation/footer rendering
+ * 
+ * REGRESSION PREVENTION:
+ * - If you see double navigation or footers, check if page components
+ *   are incorrectly wrapping content with <Layout />
+ * - Page components should return their content directly
+ * - Layout is provided by this router configuration
+ */
+
 export const router = createBrowserRouter([
   {
     path: "/",
