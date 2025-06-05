@@ -6,12 +6,15 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
+import { useNavigationContent } from '@/hooks/cms/useNavigationContent';
 
 interface TechnologyDropdownProps {
   isActive: boolean;
 }
 
 const TechnologyDropdown: React.FC<TechnologyDropdownProps> = ({ isActive }) => {
+  const navigationContent = useNavigationContent();
+  
   return (
     <NavigationMenuItem>
       <NavigationMenuLink 
@@ -23,7 +26,9 @@ const TechnologyDropdown: React.FC<TechnologyDropdownProps> = ({ isActive }) => 
             : "bg-gray-50 text-gray-900 hover:bg-gray-100 border border-transparent"
         )}
       >
-        <Link to="/technology">Technology</Link>
+        <Link to="/technology">
+          {navigationContent.isLoading ? "Technology" : navigationContent.technology}
+        </Link>
       </NavigationMenuLink>
     </NavigationMenuItem>
   );
