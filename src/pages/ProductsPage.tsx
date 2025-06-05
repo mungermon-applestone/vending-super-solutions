@@ -22,8 +22,11 @@ import ProductsHero from '@/components/products/sections/ProductsHero';
 import { ContactSection } from '@/components/common';
 import ProductsPageSEO from '@/components/seo/ProductsPageSEO';
 
-// Fallback page content with hero fields
+// Fallback page content with hero fields and navigation link text
 const fallbackPageContent = {
+  // Navigation field
+  navigationLinkText: "Sell Any Product",
+  
   // Hero fields
   heroTitle: "Vending Product Solutions",
   heroDescription: "Discover our range of software solutions designed for various types of vending operations.",
