@@ -18,6 +18,7 @@ interface BusinessGoalsPageContent {
   testimonialsSectionTitle?: string;
   testimonialsSectionDescription?: string;
   inquiryBulletPoints?: string[];
+  navigationLinkText: string;
   // New hero-related fields
   heroTitle?: string;
   heroDescription?: string;
@@ -79,6 +80,7 @@ export function useBusinessGoalsPageContent(contentId?: string) {
           testimonialsSectionTitle: fields.testimonialsSectionTitle as string,
           testimonialsSectionDescription: fields.testimonialsSectionDescription as string,
           inquiryBulletPoints: fields.inquiryBulletPoints as string[],
+          navigationLinkText: fields.navigationLinkText as string,
           // Extract hero-related fields
           heroTitle: fields.heroTitle as string,
           heroDescription: fields.heroDescription as string,

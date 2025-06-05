@@ -12,6 +12,7 @@ export interface BlogPageContent {
   newsletterDescription?: string;
   newsletterButtonText?: string;
   newsletterPlaceholder?: string;
+  navigationLinkText?: string;
 }
 
 export function useContentfulBlogPageContent() {
@@ -35,7 +36,18 @@ export function useContentfulBlogPageContent() {
           throw new Error("Blog page content not found");
         }
         
-        return response.items[0].fields as BlogPageContent;
+        const fields = response.items[0].fields as any;
+        return {
+          introTitle: fields.introTitle,
+          introDescription: fields.introDescription,
+          featuredPostsTitle: fields.featuredPostsTitle,
+          latestArticlesTitle: fields.latestArticlesTitle,
+          newsletterTitle: fields.newsletterTitle,
+          newsletterDescription: fields.newsletterDescription,
+          newsletterButtonText: fields.newsletterButtonText,
+          newsletterPlaceholder: fields.newsletterPlaceholder,
+          navigationLinkText: fields.navigationLinkText,
+        } as BlogPageContent;
       } catch (error) {
         console.error("[useContentfulBlogPageContent] Error fetching blog page content:", error);
         throw error;

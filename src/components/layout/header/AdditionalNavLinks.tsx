@@ -3,6 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useNavigationContent } from '@/hooks/cms/useNavigationContent';
 
 interface AdditionalNavLinksProps {
   isAboutActive?: boolean;
@@ -10,6 +11,8 @@ interface AdditionalNavLinksProps {
 
 const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
   const location = useLocation();
+  const navigationContent = useNavigationContent();
+  
   const isBlogActive = location.pathname.startsWith('/blog');
   const isBusinessActive = location.pathname.startsWith('/business') || location.pathname.startsWith('/business-goals');
   const isMachinesActive = location.pathname.startsWith('/machines');
@@ -23,6 +26,20 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
       : "bg-gray-50 text-gray-900 hover:bg-gray-100 border-transparent"
   );
   
+  // Show loading state or fallback text
+  if (navigationContent.isLoading) {
+    return (
+      <div className="flex items-center space-x-2">
+        {/* Show skeleton buttons while loading */}
+        <div className="h-10 w-32 bg-gray-200 rounded-md animate-pulse" />
+        <div className="h-10 w-28 bg-gray-200 rounded-md animate-pulse" />
+        <div className="h-10 w-20 bg-gray-200 rounded-md animate-pulse" />
+        <div className="h-10 w-24 bg-gray-200 rounded-md animate-pulse" />
+        <div className="h-10 w-24 bg-gray-200 rounded-md animate-pulse" />
+      </div>
+    );
+  }
+  
   return (
     <div className="flex items-center space-x-2">
       <Button 
@@ -30,35 +47,35 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         variant="ghost"
         className={getButtonStyles(isMachinesActive)}
       >
-        <Link to="/machines">Machines and Lockers</Link>
+        <Link to="/machines">{navigationContent.machines}</Link>
       </Button>
       <Button 
         asChild 
         className={getButtonStyles(isBusinessActive)}
         variant="ghost"
       >
-        <Link to="/business-goals">Business Goals</Link>
+        <Link to="/business-goals">{navigationContent.businessGoals}</Link>
       </Button>
       <Button 
         asChild 
         className={getButtonStyles(isAboutActive || false)}
         variant="ghost"
       >
-        <Link to="/about">About</Link>
+        <Link to="/about">{navigationContent.about}</Link>
       </Button>
       <Button 
         asChild
         className={getButtonStyles(isBlogActive)}
         variant="ghost"
       >
-        <Link to="/blog">Updates</Link>
+        <Link to="/blog">{navigationContent.blog}</Link>
       </Button>
       <Button 
         asChild
         className={getButtonStyles(isContactActive)}
         variant="ghost"
       >
-        <Link to="/contact">Contact</Link>
+        <Link to="/contact">{navigationContent.contact}</Link>
       </Button>
     </div>
   );

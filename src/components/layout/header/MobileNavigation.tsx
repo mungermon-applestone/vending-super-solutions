@@ -2,6 +2,7 @@
 import React from 'react';
 import MobileNavItem from './MobileNavItem';
 import { X } from 'lucide-react';
+import { useNavigationContent } from '@/hooks/cms/useNavigationContent';
 
 interface MobileNavigationProps {
   isOpen: boolean;
@@ -9,6 +10,8 @@ interface MobileNavigationProps {
 }
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) => {
+  const navigationContent = useNavigationContent();
+  
   if (!isOpen) return null;
   
   return (
@@ -28,13 +31,41 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
         
         <nav className="flex flex-col space-y-2">
           <MobileNavItem title="Home" path="/" onClick={onClose} />
-          <MobileNavItem title="Sell Any Product" path="/products" onClick={onClose} />
-          <MobileNavItem title="Machines and Lockers" path="/machines" onClick={onClose} />
-          <MobileNavItem title="Business Goals" path="/business-goals" onClick={onClose} />
-          <MobileNavItem title="Technology" path="/technology" onClick={onClose} />
-          <MobileNavItem title="Blog" path="/blog" onClick={onClose} />
-          <MobileNavItem title="About" path="/about" onClick={onClose} />
-          <MobileNavItem title="Contact Us" path="/contact" onClick={onClose} />
+          <MobileNavItem 
+            title={navigationContent.isLoading ? "Loading..." : navigationContent.products} 
+            path="/products" 
+            onClick={onClose} 
+          />
+          <MobileNavItem 
+            title={navigationContent.isLoading ? "Loading..." : navigationContent.machines} 
+            path="/machines" 
+            onClick={onClose} 
+          />
+          <MobileNavItem 
+            title={navigationContent.isLoading ? "Loading..." : navigationContent.businessGoals} 
+            path="/business-goals" 
+            onClick={onClose} 
+          />
+          <MobileNavItem 
+            title={navigationContent.isLoading ? "Loading..." : navigationContent.technology} 
+            path="/technology" 
+            onClick={onClose} 
+          />
+          <MobileNavItem 
+            title={navigationContent.isLoading ? "Loading..." : navigationContent.blog} 
+            path="/blog" 
+            onClick={onClose} 
+          />
+          <MobileNavItem 
+            title={navigationContent.isLoading ? "Loading..." : navigationContent.about} 
+            path="/about" 
+            onClick={onClose} 
+          />
+          <MobileNavItem 
+            title={navigationContent.isLoading ? "Loading..." : navigationContent.contact} 
+            path="/contact" 
+            onClick={onClose} 
+          />
         </nav>
       </div>
     </div>

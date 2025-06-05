@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 export interface TechnologyPageContent {
   introTitle: string;
   introDescription?: string;
+  navigationLinkText: string;
   // New hero-related fields
   heroTitle?: string;
   heroDescription?: string;
@@ -50,6 +51,7 @@ export function useContentfulTechnologyPageContent() {
         return {
           introTitle: fields.introTitle || '',
           introDescription: fields.introDescription || '',
+          navigationLinkText: fields.navigationLinkText || '',
           // Extract hero-related fields
           heroTitle: fields.heroTitle || '',
           heroDescription: fields.heroDescription || '',

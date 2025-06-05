@@ -14,6 +14,7 @@ interface ProductsPageContent {
   demoRequestTitle?: string;
   demoRequestDescription?: string;
   demoRequestBulletPoints?: string[];
+  navigationLinkText: string;
   // Hero-related fields
   heroTitle?: string;
   heroDescription?: string;
@@ -80,6 +81,7 @@ export function useProductsPageContent() {
           demoRequestTitle: fields.demoRequestTitle as string,
           demoRequestDescription: fields.demoRequestDescription as string,
           demoRequestBulletPoints: fields.demoRequestBulletPoints as string[],
+          navigationLinkText: fields.navigationLinkText as string,
           // Extract hero-related fields
           heroTitle: fields.heroTitle as string,
           heroDescription: fields.heroDescription as string,

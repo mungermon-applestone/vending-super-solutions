@@ -11,6 +11,7 @@ interface MachinesPageContent {
   customMachineCtaDescription?: string;
   customMachineButtonText?: string;
   customMachineButtonUrl?: string;
+  navigationLinkText: string;
   // New hero-related fields
   heroTitle?: string;
   heroDescription?: string;
@@ -57,6 +58,7 @@ export function useMachinesPageContent() {
           customMachineCtaDescription: fields.customMachineCtaDescription as string,
           customMachineButtonText: fields.customMachineButtonText as string,
           customMachineButtonUrl: fields.customMachineButtonUrl as string,
+          navigationLinkText: fields.navigationLinkText as string,
           // Extract hero-related fields
           heroTitle: fields.heroTitle as string,
           heroDescription: fields.heroDescription as string,
