@@ -1,14 +1,9 @@
 
 import { ReactNode } from 'react';
-
-interface Feature {
-  title: string;
-  description: string;
-  icon: ReactNode;
-}
+import { CMSFeature } from '@/types/cms';
 
 interface BusinessGoalFeaturesProps {
-  features: Feature[];
+  features: CMSFeature[];
   sectionTitle?: string;
   sectionDescription?: string; 
 }
@@ -33,11 +28,22 @@ const BusinessGoalFeatures = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <div 
-              key={index} 
+              key={feature.id || `feature-${index}`} 
               className="bg-vending-gray rounded-lg p-6 hover:shadow-lg transition-shadow border border-transparent hover:border-vending-blue-light"
             >
               <div className="bg-white p-3 rounded-full w-14 h-14 flex items-center justify-center text-vending-blue mb-4">
-                {feature.icon}
+                {feature.icon ? (
+                  typeof feature.icon === 'string' ? (
+                    <div dangerouslySetInnerHTML={{ __html: feature.icon }} />
+                  ) : (
+                    feature.icon
+                  )
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  </svg>
+                )}
               </div>
               <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
               <p className="text-gray-600">{feature.description}</p>
