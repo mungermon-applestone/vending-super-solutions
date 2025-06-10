@@ -4,6 +4,7 @@ import { CMSBusinessGoal } from '@/types/cms';
 import { Link } from 'react-router-dom';
 import BusinessGoalHero from '@/components/businessGoals/BusinessGoalHero';
 import BusinessGoalKeyBenefits from '@/components/businessGoals/BusinessGoalKeyBenefits';
+import BusinessGoalFeatures from '@/components/businessGoals/BusinessGoalFeatures';
 import BusinessGoalVideoSection from '@/components/businessGoals/BusinessGoalVideoSection';
 import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry';
 import { ArrowLeft } from 'lucide-react';
@@ -21,6 +22,7 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
 
   console.log('[BusinessGoalDetail] Rendering business goal:', businessGoal);
   console.log('[BusinessGoalDetail] Benefits data:', businessGoal.benefits);
+  console.log('[BusinessGoalDetail] Features data:', businessGoal.features);
 
   // Extract image URL and alt text
   const imageUrl = businessGoal.image?.url || businessGoal.image_url || '';
@@ -84,6 +86,15 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
         <BusinessGoalKeyBenefits 
           benefits={businessGoal.benefits}
           title="Key Benefits"
+        />
+      )}
+
+      {/* Features Section */}
+      {businessGoal.features && businessGoal.features.length > 0 && (
+        <BusinessGoalFeatures 
+          features={businessGoal.features}
+          sectionTitle="Key Features"
+          sectionDescription="Our platform provides specialized features to help you achieve this business goal effectively."
         />
       )}
 
