@@ -34,9 +34,11 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
       const entries = await client.getEntries({
         content_type: 'businessGoal',
         'fields.slug': slug,
-        include: 2, // Include linked entries like features
+        include: 3, // Increase include level to ensure we get linked features
         limit: 1
       });
+
+      console.log('[contentfulBusinessGoalAdapter] Raw response for slug lookup:', JSON.stringify(entries, null, 2));
 
       if (entries.items.length === 0) {
         console.log('[contentfulBusinessGoalAdapter] No business goal found with slug:', slug);
@@ -45,7 +47,8 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
 
       const businessGoal = this.transformEntry(entries.items[0]);
       console.log('[contentfulBusinessGoalAdapter] Found business goal:', businessGoal.title);
-      console.log('[contentfulBusinessGoalAdapter] Features data:', businessGoal.features);
+      console.log('[contentfulBusinessGoalAdapter] Raw features field:', entries.items[0].fields.features);
+      console.log('[contentfulBusinessGoalAdapter] Transformed features data:', businessGoal.features);
       
       return businessGoal;
     } catch (error) {
@@ -57,7 +60,7 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
   async getById(id: string): Promise<CMSBusinessGoal | null> {
     try {
       const client = await getContentfulClient();
-      const entry = await client.getEntry(id, { include: 2 });
+      const entry = await client.getEntry(id, { include: 3 });
       return this.transformEntry(entry);
     } catch (error) {
       console.error('[contentfulBusinessGoalAdapter] Error fetching business goal by ID:', error);
@@ -80,26 +83,45 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
   private transformEntry(entry: any): CMSBusinessGoal {
     const fields = entry.fields || {};
     
+    console.log(`[contentfulBusinessGoalAdapter] Transforming entry for: ${fields.title}`);
+    console.log(`[contentfulBusinessGoalAdapter] Raw features field:`, fields.features);
+    console.log(`[contentfulBusinessGoalAdapter] Features is array:`, Array.isArray(fields.features));
+    
     // Transform features if they exist
-    const features = fields.features ? fields.features.map((featureEntry: any) => {
-      const featureFields = featureEntry.fields || {};
+    let features = undefined;
+    if (fields.features && Array.isArray(fields.features)) {
+      console.log(`[contentfulBusinessGoalAdapter] Processing ${fields.features.length} feature entries`);
       
-      return {
-        id: featureEntry.sys?.id || Math.random().toString(36).substring(2, 9),
-        title: featureFields.title || '',
-        description: featureFields.description || '',
-        icon: featureFields.icon,
-        screenshot: featureFields.screenshot ? {
-          id: featureFields.screenshot.sys?.id || 'screenshot',
-          url: featureFields.screenshot.fields?.file?.url || '',
-          alt: featureFields.screenshot.fields?.description || featureFields.title || 'Feature screenshot'
-        } : undefined
-      };
-    }) : undefined;
-
-    console.log(`[contentfulBusinessGoalAdapter] Transforming business goal: ${fields.title}`);
-    console.log(`[contentfulBusinessGoalAdapter] Raw features data:`, fields.features);
-    console.log(`[contentfulBusinessGoalAdapter] Transformed features:`, features);
+      features = fields.features.map((featureEntry: any, index: number) => {
+        console.log(`[contentfulBusinessGoalAdapter] Processing feature ${index}:`, featureEntry);
+        
+        if (!featureEntry || !featureEntry.fields) {
+          console.warn(`[contentfulBusinessGoalAdapter] Feature ${index} has no fields`);
+          return null;
+        }
+        
+        const featureFields = featureEntry.fields;
+        
+        const transformedFeature = {
+          id: featureEntry.sys?.id || Math.random().toString(36).substring(2, 9),
+          title: featureFields.title || '',
+          description: featureFields.description || '',
+          icon: featureFields.icon,
+          screenshot: featureFields.screenshot ? {
+            id: featureFields.screenshot.sys?.id || 'screenshot',
+            url: featureFields.screenshot.fields?.file?.url || '',
+            alt: featureFields.screenshot.fields?.description || featureFields.title || 'Feature screenshot'
+          } : undefined
+        };
+        
+        console.log(`[contentfulBusinessGoalAdapter] Transformed feature ${index}:`, transformedFeature);
+        return transformedFeature;
+      }).filter(Boolean); // Remove any null entries
+      
+      console.log(`[contentfulBusinessGoalAdapter] Final features array:`, features);
+    } else {
+      console.log(`[contentfulBusinessGoalAdapter] No features found or features is not an array`);
+    }
 
     return {
       id: entry.sys.id,

@@ -1,17 +1,20 @@
 
 import { CMSBusinessGoal } from '@/types/cms';
-import { contentfulBusinessGoalAdapter } from '@/services/cms/adapters/businessGoals/contentfulBusinessGoalAdapter';
+import { ContentfulBusinessGoalAdapter } from '@/services/cms/adapters/businessGoals/contentfulBusinessGoalAdapter';
 import { createReadOnlyContentTypeOperations } from '@/services/cms/utils/deprecation';
 import { ContentTypeOperations } from '@/services/cms/contentTypes/types';
+
+// Create an instance of the adapter
+const contentfulBusinessGoalAdapter = new ContentfulBusinessGoalAdapter();
 
 /**
  * Read-only version of the business goals adapter
  * This maintains read operations but prevents write operations as part of our migration to Contentful
  */
 const baseAdapter = {
-  getAll: contentfulBusinessGoalAdapter.getAll,
-  getBySlug: contentfulBusinessGoalAdapter.getBySlug,
-  getById: contentfulBusinessGoalAdapter.getById,
+  getAll: contentfulBusinessGoalAdapter.getAll.bind(contentfulBusinessGoalAdapter),
+  getBySlug: contentfulBusinessGoalAdapter.getBySlug.bind(contentfulBusinessGoalAdapter),
+  getById: contentfulBusinessGoalAdapter.getById.bind(contentfulBusinessGoalAdapter),
 };
 
 // Create a fully compatible ContentTypeOperations instance
