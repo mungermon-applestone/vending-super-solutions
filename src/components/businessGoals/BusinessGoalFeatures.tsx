@@ -1,6 +1,8 @@
-
 import { ReactNode } from 'react';
 import { CMSFeature } from '@/types/cms';
+import { Check } from 'lucide-react';
+import MachineTypeIcon from '@/components/common/MachineTypeIcon';
+import Image from '@/components/common/Image';
 
 interface BusinessGoalFeaturesProps {
   features: CMSFeature[];
@@ -14,6 +16,30 @@ const BusinessGoalFeatures = ({
   sectionDescription = "Our platform provides specialized features to help you achieve this business goal effectively."
 }: BusinessGoalFeaturesProps) => {
   if (!features || features.length === 0) return null;
+
+  // Render the icon based on its type
+  const renderIcon = (feature: CMSFeature) => {
+    if (!feature.icon) {
+      return <Check className="h-6 w-6 text-vending-blue" />;
+    }
+    
+    // If icon is a string, use MachineTypeIcon
+    if (typeof feature.icon === 'string') {
+      return (
+        <MachineTypeIcon 
+          icon={feature.icon}
+          className="h-6 w-6 text-vending-blue"
+        />
+      );
+    }
+    
+    // Otherwise render the ReactNode directly
+    return (
+      <div className="h-6 w-6 text-vending-blue">
+        {feature.icon}
+      </div>
+    );
+  };
   
   return (
     <section className="py-16 bg-white">
@@ -26,29 +52,44 @@ const BusinessGoalFeatures = ({
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <div 
-              key={feature.id || `feature-${index}`} 
-              className="bg-vending-gray rounded-lg p-6 hover:shadow-lg transition-shadow border border-transparent hover:border-vending-blue-light"
-            >
-              <div className="bg-white p-3 rounded-full w-14 h-14 flex items-center justify-center text-vending-blue mb-4">
-                {feature.icon ? (
-                  typeof feature.icon === 'string' ? (
-                    <div dangerouslySetInnerHTML={{ __html: feature.icon }} />
-                  ) : (
-                    feature.icon
-                  )
+          {features.map((feature, index) => {
+            // Process screenshot data to ensure type safety
+            const hasScreenshot = feature.screenshot && feature.screenshot.url;
+            const screenshotUrl = hasScreenshot ? feature.screenshot.url : '';
+            const screenshotAlt = hasScreenshot && typeof feature.screenshot.alt === 'string' 
+              ? feature.screenshot.alt 
+              : `${feature.title || 'Feature'} image`;
+
+            return (
+              <div 
+                key={feature.id || `feature-${index}`} 
+                className="bg-vending-gray rounded-lg overflow-hidden hover:shadow-lg transition-shadow border border-transparent hover:border-vending-blue-light"
+              >
+                {hasScreenshot ? (
+                  <div className="w-full h-48 overflow-hidden">
+                    <Image 
+                      src={screenshotUrl}
+                      alt={screenshotAlt}
+                      className="w-full h-full"
+                      objectFit="contain"
+                      aspectRatio="16/9"
+                    />
+                  </div>
                 ) : (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                  </svg>
+                  <div className="w-full h-32 bg-blue-50 flex items-center justify-center">
+                    <div className="bg-white p-3 rounded-full w-14 h-14 flex items-center justify-center">
+                      {renderIcon(feature)}
+                    </div>
+                  </div>
                 )}
+                
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+                  <p className="text-gray-600">{feature.description}</p>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
