@@ -1,4 +1,3 @@
-
 import { useParams, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useContentfulProductType } from '@/hooks/cms/useContentfulProductType';
@@ -128,6 +127,7 @@ const ProductDetail = () => {
         productType={product.title}
         description={product.description}
         image={heroImage}
+        imageCaption={product.mainImageCaption}
         benefits={benefits}
       />
 

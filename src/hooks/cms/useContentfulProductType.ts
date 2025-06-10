@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { toast } from 'sonner';
@@ -270,6 +269,8 @@ export function useContentfulProductType(slug: string) {
             url: fields.image.fields?.file?.url ? `https:${fields.image.fields.file.url}` : '',
             alt: String(fields.image.fields?.title || fields.title || ''),
           } : null,
+          // Add the new mainImageCaption field
+          mainImageCaption: fields.mainImageCaption ? String(fields.mainImageCaption) : undefined,
           thumbnail: fields.thumbnail ? {
             id: fields.thumbnail.sys?.id || 'unknown',
             url: fields.thumbnail.fields?.file?.url ? `https:${fields.thumbnail.fields.file.url}` : '',

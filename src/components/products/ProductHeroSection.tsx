@@ -9,6 +9,7 @@ interface ProductHeroSectionProps {
   productType: string;
   description?: string;
   image?: string;
+  imageCaption?: string;
   benefits?: string[];
 }
 
@@ -16,6 +17,7 @@ const ProductHeroSection: React.FC<ProductHeroSectionProps> = ({
   productType,
   description,
   image,
+  imageCaption,
   benefits = []
 }) => {
   // Split benefits into two columns for larger screens
@@ -98,6 +100,14 @@ const ProductHeroSection: React.FC<ProductHeroSectionProps> = ({
                 aspectRatio="4/3"
                 objectFit="contain"
               />
+              {/* Caption below the image */}
+              {imageCaption && (
+                <div className="text-right mt-2">
+                  <p className="text-xs text-gray-500 italic">
+                    {imageCaption}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
