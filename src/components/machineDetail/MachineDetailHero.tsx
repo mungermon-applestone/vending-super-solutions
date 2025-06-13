@@ -37,12 +37,9 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
             <p className="text-xl text-white/90 mb-8">
               {machine.description}
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div>
               <Button className="bg-white text-blue-600 hover:bg-blue-50">
                 Request Information
-              </Button>
-              <Button variant="outline" className="text-white border-white hover:bg-white/10">
-                Download Spec Sheet
               </Button>
             </div>
           </div>
