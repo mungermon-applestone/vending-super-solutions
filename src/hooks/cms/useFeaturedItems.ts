@@ -4,6 +4,7 @@ import { businessGoalOperations } from '@/services/cms/contentTypes/businessGoal
 import { fetchMachines } from '@/services/cms/contentTypes/machines/api';
 import { CMSBusinessGoal, CMSMachine } from '@/types/cms';
 import { useContentfulProducts } from './useContentfulProducts';
+import { fetchProductTypes } from '@/services/cms/contentTypes/productTypes/fetchProductTypes';
 
 /**
  * Hook to fetch items for homepage display
@@ -71,15 +72,24 @@ export function useHomepageItems() {
  * 
  * @remarks
  * CRITICAL PATH: This hook is used by the homepage to display product cards.
- * The implementation must return properly formatted product data with valid links.
- * 
- * Previously returned an empty array, which broke product cards on homepage.
- * Now uses useContentfulProducts() to ensure consistent data.
+ * Now filters by showOnHomepage field from Contentful.
  */
 export function useFeaturedProducts() {
-  // Use the Contentful products hook instead of returning an empty array
-  // This will fetch real data from Contentful and ensure proper links
-  return useContentfulProducts();
+  return useQuery({
+    queryKey: ['homepage', 'products', 'showOnHomepage'],
+    queryFn: async () => {
+      console.log('[useFeaturedProducts] Fetching products with showOnHomepage=true');
+      
+      // Fetch product types that are marked to show on homepage
+      const products = await fetchProductTypes({
+        showOnHomepage: true,
+        sort: 'fields.homepageOrder,fields.displayOrder,fields.title'
+      });
+      
+      console.log(`[useFeaturedProducts] Found ${products.length} products for homepage`);
+      return products;
+    }
+  });
 }
 
 /**

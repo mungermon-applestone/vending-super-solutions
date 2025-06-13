@@ -6,6 +6,13 @@ import { useHomePageContent } from '@/hooks/useHomePageContent';
 import ProductCard from '@/components/products/ProductCard';
 import { useFeaturedProducts } from '@/hooks/cms/useFeaturedItems';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
 
 const ProductTypesSection = () => {
   const { data: homeContent } = useHomePageContent();
@@ -80,12 +87,14 @@ const ProductTypesSection = () => {
         }
       } as CMSProductType));
   
-  const featuredProductTypes = displayProductTypes.slice(0, 4);
+  // Determine if we should use carousel or grid
+  const useCarousel = displayProductTypes.length >= 4;
   
   console.log('[ProductTypesSection] Display types:', {
     isUsingRealData: shouldUseRealData,
-    featuredCount: featuredProductTypes.length,
-    firstItem: featuredProductTypes[0]?.title
+    totalCount: displayProductTypes.length,
+    useCarousel,
+    firstItem: displayProductTypes[0]?.title
   });
   
   return (
@@ -121,14 +130,35 @@ const ProductTypesSection = () => {
             <p className="text-red-500 mb-4">Error loading product types</p>
             <p className="text-sm text-gray-500">Using fallback product data</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-              {featuredProductTypes.map((product) => (
+              {displayProductTypes.slice(0, 4).map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
           </div>
+        ) : useCarousel ? (
+          <Carousel
+            opts={{
+              align: "start",
+              slidesToScroll: "auto", // This will be overridden by our responsive config
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {displayProductTypes.map((product) => (
+                <CarouselItem 
+                  key={product.id} 
+                  className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
+                >
+                  <ProductCard product={product} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-4" />
+            <CarouselNext className="right-4" />
+          </Carousel>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProductTypes.map((product) => (
+            {displayProductTypes.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
