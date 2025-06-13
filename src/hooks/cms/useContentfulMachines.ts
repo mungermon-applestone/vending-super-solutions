@@ -60,6 +60,16 @@ export function useContentfulMachines() {
 }
 
 /**
+ * Helper function to check if a string looks like a Contentful entry ID
+ * @param idOrSlug The string to check
+ * @returns true if it looks like an ID, false if it's likely a slug
+ */
+function looksLikeContentfulId(idOrSlug: string): boolean {
+  // Contentful IDs are typically 22 characters long and contain alphanumeric + underscores
+  return idOrSlug.length > 15 && /^[a-zA-Z0-9_-]+$/.test(idOrSlug) && !/^[a-z-]+$/.test(idOrSlug);
+}
+
+/**
  * Hook for fetching a single Contentful machine
  * 
  * @remarks
@@ -86,7 +96,7 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
           console.log('[useContentfulMachine] Special case: directly fetching divi-wp with ID: 1omUbnEhB6OeBFpwPFj1Ww');
           
           try {
-            const entry = await fetchContentfulEntry<ContentfulEntry>('1omUbnEhB6OeBFpwPFj1Ww');
+            const entry = await fetchContentfulEntry<ContentfulEntry>('1omUbnEhB6OeBFpwPFj1Ww', {}, false);
             if (entry) {
               console.log('[useContentfulMachine] Successfully fetched divi-wp entry by ID:', entry);
               return transformContentfulEntry(entry);
@@ -102,17 +112,17 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
           }
         }
         
-        // Try fetching by ID first if it looks like an ID
-        if (idOrSlug.length > 10) {
+        // Try fetching by ID first if it looks like an ID (improved detection)
+        if (looksLikeContentfulId(idOrSlug)) {
           try {
             console.log('[useContentfulMachine] Trying direct ID fetch:', idOrSlug);
-            const entry = await fetchContentfulEntry<ContentfulEntry>(idOrSlug);
+            const entry = await fetchContentfulEntry<ContentfulEntry>(idOrSlug, {}, false); // Don't show toast for ID attempts
             if (entry) {
               console.log('[useContentfulMachine] Successfully fetched by ID:', entry);
               return transformContentfulEntry(entry);
             }
           } catch (idError) {
-            console.log('[useContentfulMachine] Could not fetch by ID:', idError);
+            console.log('[useContentfulMachine] Could not fetch by ID (this is normal for slugs):', idError.message);
           }
         }
         
@@ -130,6 +140,8 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
             return fallbackMachineData[idOrSlug];
           }
           
+          // Only show error toast when all attempts have failed
+          toast.error(`Machine not found: ${idOrSlug}`);
           return null;
         }
         
@@ -144,7 +156,10 @@ export function useContentfulMachine(idOrSlug: string | undefined) {
           return fallbackMachineData[idOrSlug];
         }
         
-        toast.error(`Failed to load machine data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        // Only show error toast for unexpected errors, not for "not found" cases
+        if (!error.message?.includes('not found')) {
+          toast.error(`Failed to load machine data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
         throw error;
       }
     },

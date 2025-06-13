@@ -252,9 +252,10 @@ export const fetchContentfulEntries = async <T>(contentType: string, query: Reco
  * Fetch a single Contentful entry by ID
  * @param entryId The Contentful entry ID
  * @param query Additional query parameters (optional)
+ * @param showErrorToast Whether to show error toast (default: true)
  * @returns The requested entry or null if not found
  */
-export const fetchContentfulEntry = async <T>(entryId: string, query: Record<string, any> = {}): Promise<T> => {
+export const fetchContentfulEntry = async <T>(entryId: string, query: Record<string, any> = {}, showErrorToast = true): Promise<T> => {
   try {
     console.log(`[fetchContentfulEntry] Fetching entry with ID: ${entryId}`);
     
@@ -268,7 +269,8 @@ export const fetchContentfulEntry = async <T>(entryId: string, query: Record<str
   } catch (error) {
     console.error(`[fetchContentfulEntry] Error fetching entry ID ${entryId}:`, error);
     
-    if (process.env.NODE_ENV !== 'development') {
+    // Only show toast if explicitly requested and not in development
+    if (showErrorToast && process.env.NODE_ENV !== 'development') {
       toast.error(`Failed to fetch content: ${error instanceof Error ? error.message : 'Unknown error'}`, {
         id: `contentful-entry-error-${entryId}`
       });
