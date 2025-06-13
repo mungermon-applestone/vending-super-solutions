@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Server, HardDrive } from 'lucide-react';
 import { CMSMachine } from '@/types/cms';
 import Image from '@/components/common/Image';
+import { Link } from 'react-router-dom';
 
 interface MachineDetailHeroProps {
   machine: CMSMachine;
@@ -38,8 +39,10 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
               {machine.description}
             </p>
             <div>
-              <Button className="bg-white text-blue-600 hover:bg-blue-50">
-                Request Information
+              <Button asChild className="bg-white text-blue-600 hover:bg-blue-50">
+                <Link to="/contact">
+                  Request Information
+                </Link>
               </Button>
             </div>
           </div>
