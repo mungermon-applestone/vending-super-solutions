@@ -31,12 +31,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({
             <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Draft</span>
           )}
         </div>
-        
-        {post.excerpt && (
-          <p className="text-lg text-gray-600 italic">
-            {post.excerpt}
-          </p>
-        )}
       </header>
       
       <div className="prose max-w-none prose-slate">
