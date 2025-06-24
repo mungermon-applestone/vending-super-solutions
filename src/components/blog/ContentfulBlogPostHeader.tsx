@@ -31,7 +31,7 @@ const ContentfulBlogPostHeader: React.FC<ContentfulBlogPostHeaderProps> = ({
       <Image
         src={getImageUrl(featuredImage)}
         alt={getImageTitle(featuredImage, title)}
-        className="mb-6 w-full max-h-[320px] rounded-xl object-cover"
+        className="mb-8 w-full max-h-[320px] rounded-xl object-cover"
       />
     )}
     <h1 className="text-3xl sm:text-4xl font-bold mb-4">{title}</h1>
