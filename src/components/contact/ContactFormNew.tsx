@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +40,7 @@ export interface ContactFormNewProps {
 /**
  * ContactFormNew Component
  * 
- * A contact form that uses a Supabase Edge Function to send emails via SendGrid,
+ * A contact form that uses AWS SES via Supabase Edge Function to send emails,
  * with fallback to mailto links if the API call fails.
  */
 const ContactFormNew: React.FC<ContactFormNewProps> = ({
@@ -108,8 +109,8 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
         location: window.location.href
       };
       
-      // Call the Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+      // Call the new SES Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('send-contact-email-ses', {
         body: formData
       });
       
