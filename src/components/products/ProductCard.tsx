@@ -1,8 +1,6 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Image from '@/components/common/Image';
 import { CMSProductType } from '@/types/cms';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,19 +19,19 @@ interface ProductCardProps {
  * - Contains structured data markup (Schema.org) for SEO which must be preserved
  * - Image handling includes loading states, error states, and lazy loading
  * - Consistent hover effects and shadow styling must be maintained
+ * - Entire card is now clickable (not just the "Learn more" button)
  * 
  * Layout specifications:
  * - Card uses consistent rounded corners (rounded-lg) 
  * - Shadow styling that enhances on hover (shadow-md hover:shadow-lg)
  * - Image area maintains fixed height (h-48) with object-contain styling
  * - Content area has consistent padding (p-6) and spacing
- * - "Learn more" CTA with consistent styling and arrow icon
+ * - Entire card acts as navigation link with proper hover states
  * 
  * @param props Component properties
  * @returns React component with Schema.org structured data
  */
 const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
-  const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [imageError, setImageError] = React.useState(false);
   
@@ -59,97 +57,153 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
   // Determine which image to use - thumbnail has priority over main image
   const imageToUse = product.thumbnail || product.image;
 
-  // Handle the navigation to product detail page
-  const handleProductNavigation = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (productSlug) {
-      // Navigate to the product page and ensure we start at the top
-      navigate(`/products/${productSlug}`);
-      window.scrollTo(0, 0);
-    } else {
-      console.error(`[ProductCard] Cannot navigate: product slug is empty for ${product.title}`);
-    }
-  };
+  // If no slug, render non-clickable card
+  if (!productSlug) {
+    console.error(`[ProductCard] Cannot navigate: product slug is empty for ${product.title}`);
+    return (
+      <article 
+        className="rounded-lg overflow-hidden shadow-md bg-white h-full flex flex-col"
+        itemScope 
+        itemType="https://schema.org/Product"
+        aria-labelledby={`product-title-${product.id}`}
+      >
+        {/* Image area - fixed height and consistent styling */}
+        <div className="w-full h-48 overflow-hidden bg-gray-100 relative flex items-center justify-center">
+          {imageToUse ? (
+            <>
+              {!imageLoaded && !imageError && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Skeleton className="w-full h-full absolute" />
+                </div>
+              )}
+              <div className="w-full h-full flex items-center justify-center">
+                <Image 
+                  src={imageToUse.url} 
+                  alt={imageToUse.alt || product.title}
+                  className="w-full h-full"
+                  objectFit="contain"
+                  isThumbnail={!!product.thumbnail}
+                  itemProp="image"
+                  onLoad={() => setImageLoaded(true)}
+                  onError={() => {
+                    console.error(`[ProductCard] Failed to load image for: ${product.title}`);
+                    setImageError(true);
+                  }}
+                  loading="lazy"
+                  fetchPriority={isVisible ? "high" : "low"}
+                />
+              </div>
+              {imageError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                  <span className="text-gray-400">Image not available</span>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-50">
+              <span className="text-gray-400">No image</span>
+            </div>
+          )}
+        </div>
+        
+        {/* Content area - consistent padding and spacing */}
+        <div className="p-6 flex flex-col flex-grow">
+          <h3 
+            id={`product-title-${product.id}`}
+            className="text-xl font-semibold mb-3" 
+            itemProp="name"
+          >
+            {product.title}
+          </h3>
+          <p 
+            className="text-gray-600 mb-4 line-clamp-3 flex-grow" 
+            itemProp="description"
+          >
+            {product.description}
+          </p>
+          
+          {/* SEO structured data that must be preserved */}
+          <meta itemProp="brand" content="Vending Solutions" />
+          <meta itemProp="category" content="Vending Machine Products" />
+        </div>
+      </article>
+    );
+  }
   
   return (
-    <article 
-      className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-shadow h-full flex flex-col"
-      itemScope 
-      itemType="https://schema.org/Product"
-      aria-labelledby={`product-title-${product.id}`}
+    <Link 
+      to={`/products/${productSlug}`}
+      className="block h-full"
+      onClick={() => window.scrollTo(0, 0)}
+      aria-label={`Learn more about ${product.title}`}
     >
-      {/* Image area - fixed height and consistent styling */}
-      <div className="w-full h-48 overflow-hidden bg-gray-100 relative flex items-center justify-center">
-        {imageToUse ? (
-          <>
-            {!imageLoaded && !imageError && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Skeleton className="w-full h-full absolute" />
+      <article 
+        className="rounded-lg overflow-hidden shadow-md bg-white hover:shadow-lg transition-all duration-300 h-full flex flex-col cursor-pointer hover:scale-[1.02]"
+        itemScope 
+        itemType="https://schema.org/Product"
+        aria-labelledby={`product-title-${product.id}`}
+      >
+        {/* Image area - fixed height and consistent styling */}
+        <div className="w-full h-48 overflow-hidden bg-gray-100 relative flex items-center justify-center">
+          {imageToUse ? (
+            <>
+              {!imageLoaded && !imageError && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Skeleton className="w-full h-full absolute" />
+                </div>
+              )}
+              <div className="w-full h-full flex items-center justify-center">
+                <Image 
+                  src={imageToUse.url} 
+                  alt={imageToUse.alt || product.title}
+                  className="w-full h-full"
+                  objectFit="contain"
+                  isThumbnail={!!product.thumbnail}
+                  itemProp="image"
+                  onLoad={() => setImageLoaded(true)}
+                  onError={() => {
+                    console.error(`[ProductCard] Failed to load image for: ${product.title}`);
+                    setImageError(true);
+                  }}
+                  loading="lazy"
+                  fetchPriority={isVisible ? "high" : "low"}
+                />
               </div>
-            )}
-            <div className="w-full h-full flex items-center justify-center">
-              <Image 
-                src={imageToUse.url} 
-                alt={imageToUse.alt || product.title}
-                className="w-full h-full"
-                objectFit="contain"
-                isThumbnail={!!product.thumbnail}
-                itemProp="image"
-                onLoad={() => setImageLoaded(true)}
-                onError={() => {
-                  console.error(`[ProductCard] Failed to load image for: ${product.title}`);
-                  setImageError(true);
-                }}
-                loading="lazy"
-                fetchPriority={isVisible ? "high" : "low"}
-              />
+              {imageError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                  <span className="text-gray-400">Image not available</span>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-50">
+              <span className="text-gray-400">No image</span>
             </div>
-            {imageError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-                <span className="text-gray-400">Image not available</span>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-50">
-            <span className="text-gray-400">No image</span>
-          </div>
-        )}
-      </div>
-      
-      {/* Content area - consistent padding and spacing */}
-      <div className="p-6 flex flex-col flex-grow">
-        <h3 
-          id={`product-title-${product.id}`}
-          className="text-xl font-semibold mb-3" 
-          itemProp="name"
-        >
-          {product.title}
-        </h3>
-        <p 
-          className="text-gray-600 mb-4 line-clamp-3 flex-grow" 
-          itemProp="description"
-        >
-          {product.description}
-        </p>
+          )}
+        </div>
         
-        {/* SEO structured data that must be preserved */}
-        <meta itemProp="brand" content="Vending Solutions" />
-        <meta itemProp="category" content="Vending Machine Products" />
-        
-        {/* CTA button with consistent styling */}
-        <Button 
-          variant="ghost" 
-          className="text-vending-blue hover:text-vending-blue-dark font-medium flex items-center p-0"
-          onClick={handleProductNavigation}
-          aria-label={`Learn more about ${product.title}`}
-          disabled={!productSlug}
-        >
-          Learn more
-          <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-        </Button>
-      </div>
-    </article>
+        {/* Content area - consistent padding and spacing */}
+        <div className="p-6 flex flex-col flex-grow">
+          <h3 
+            id={`product-title-${product.id}`}
+            className="text-xl font-semibold mb-3" 
+            itemProp="name"
+          >
+            {product.title}
+          </h3>
+          <p 
+            className="text-gray-600 mb-4 line-clamp-3 flex-grow" 
+            itemProp="description"
+          >
+            {product.description}
+          </p>
+          
+          {/* SEO structured data that must be preserved */}
+          <meta itemProp="brand" content="Vending Solutions" />
+          <meta itemProp="category" content="Vending Machine Products" />
+        </div>
+      </article>
+    </Link>
   );
 };
 
