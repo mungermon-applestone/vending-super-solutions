@@ -31,24 +31,75 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
     
     try {
       const client = await getContentfulClient();
+      
+      // Phase 1: Fetch business goal with reduced include level to avoid depth limits
       const entries = await client.getEntries({
         content_type: 'businessGoal',
         'fields.slug': slug,
-        include: 3, // Increase include level to ensure we get linked features
+        include: 2, // Reduced from 3 to avoid depth limits
         limit: 1
       });
 
-      console.log('[contentfulBusinessGoalAdapter] Raw response for slug lookup:', JSON.stringify(entries, null, 2));
+      console.log('[contentfulBusinessGoalAdapter] Phase 1 - Business goal response:', JSON.stringify(entries, null, 2));
 
       if (entries.items.length === 0) {
         console.log('[contentfulBusinessGoalAdapter] No business goal found with slug:', slug);
         return null;
       }
 
-      const businessGoal = this.transformEntry(entries.items[0]);
+      const businessGoalEntry = entries.items[0];
+      
+      // Phase 2: If there are recommended machines, fetch them separately with full image data
+      let enrichedRecommendedMachines = [];
+      if (businessGoalEntry.fields.recommendedMachines && Array.isArray(businessGoalEntry.fields.recommendedMachines)) {
+        console.log('[contentfulBusinessGoalAdapter] Phase 2 - Fetching recommended machines separately');
+        
+        // Extract machine IDs from the business goal
+        const machineIds = businessGoalEntry.fields.recommendedMachines
+          .map((machine: any) => machine.sys?.id)
+          .filter(Boolean);
+        
+        console.log('[contentfulBusinessGoalAdapter] Machine IDs to fetch:', machineIds);
+        
+        if (machineIds.length > 0) {
+          // Fetch machines separately with proper include level for images
+          const machinesResponse = await client.getEntries({
+            content_type: 'machine',
+            'sys.id[in]': machineIds.join(','),
+            include: 2 // This should be enough for machine -> image data
+          });
+          
+          console.log('[contentfulBusinessGoalAdapter] Phase 2 - Machines response:', JSON.stringify(machinesResponse, null, 2));
+          
+          // Transform the machines with full image data
+          enrichedRecommendedMachines = machinesResponse.items.map((machine: any) => ({
+            id: machine.sys?.id || '',
+            slug: machine.fields?.slug || '',
+            title: machine.fields?.title || '',
+            description: machine.fields?.description || '',
+            image: machine.fields?.image ? {
+              url: `https:${machine.fields.image.fields?.file?.url || ''}`,
+              alt: machine.fields.image.fields?.description || machine.fields?.title || 'Machine image'
+            } : undefined,
+            thumbnail: machine.fields?.thumbnail ? {
+              url: `https:${machine.fields.thumbnail.fields?.file?.url || ''}`,
+              alt: machine.fields.thumbnail.fields?.description || machine.fields?.title || 'Machine thumbnail'
+            } : undefined,
+            machineThumbnail: machine.fields?.machineThumbnail ? {
+              url: `https:${machine.fields.machineThumbnail.fields?.file?.url || ''}`,
+              alt: machine.fields.machineThumbnail.fields?.description || machine.fields?.title || 'Machine thumbnail'
+            } : undefined
+          }));
+          
+          console.log('[contentfulBusinessGoalAdapter] Phase 2 - Enriched machines:', enrichedRecommendedMachines);
+        }
+      }
+
+      // Transform the business goal entry and attach the enriched machines
+      const businessGoal = this.transformEntry(businessGoalEntry, enrichedRecommendedMachines);
+      
       console.log('[contentfulBusinessGoalAdapter] Found business goal:', businessGoal.title);
-      console.log('[contentfulBusinessGoalAdapter] Raw features field:', entries.items[0].fields.features);
-      console.log('[contentfulBusinessGoalAdapter] Transformed features data:', businessGoal.features);
+      console.log('[contentfulBusinessGoalAdapter] Final recommended machines:', businessGoal.recommendedMachines);
       
       return businessGoal;
     } catch (error) {
@@ -60,7 +111,7 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
   async getById(id: string): Promise<CMSBusinessGoal | null> {
     try {
       const client = await getContentfulClient();
-      const entry = await client.getEntry(id, { include: 3 });
+      const entry = await client.getEntry(id, { include: 2 });
       return this.transformEntry(entry);
     } catch (error) {
       console.error('[contentfulBusinessGoalAdapter] Error fetching business goal by ID:', error);
@@ -80,7 +131,7 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
     throw new Error('Delete operation not implemented for read-only Contentful adapter');
   }
 
-  private transformEntry(entry: any): CMSBusinessGoal {
+  private transformEntry(entry: any, enrichedRecommendedMachines?: any[]): CMSBusinessGoal {
     const fields = entry.fields || {};
     
     console.log(`[contentfulBusinessGoalAdapter] Transforming entry for: ${fields.title}`);
@@ -144,7 +195,8 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
         url: fields.video.fields?.file?.url || null,
         title: fields.video.fields?.title || fields.title
       } : undefined,
-      recommendedMachines: fields.recommendedMachines ? fields.recommendedMachines.map((machine: any) => ({
+      // Use enriched machines if provided, otherwise fall back to original transformation
+      recommendedMachines: enrichedRecommendedMachines || (fields.recommendedMachines ? fields.recommendedMachines.map((machine: any) => ({
         id: machine.sys?.id || '',
         slug: machine.fields?.slug || '',
         title: machine.fields?.title || '',
@@ -161,7 +213,7 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
           url: `https:${machine.fields.machineThumbnail.fields?.file?.url || ''}`,
           alt: machine.fields.machineThumbnail.fields?.description || machine.fields?.title || 'Machine thumbnail'
         } : undefined
-      })) : [],
+      })) : []),
       displayOrder: fields.displayOrder || 0,
       showOnHomepage: fields.showOnHomepage || false,
       homepageOrder: fields.homepageOrder || 0
