@@ -150,15 +150,15 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
         title: machine.fields?.title || '',
         description: machine.fields?.description || '',
         image: machine.fields?.image ? {
-          url: machine.fields.image.fields?.file?.url || '',
+          url: `https:${machine.fields.image.fields?.file?.url || ''}`,
           alt: machine.fields.image.fields?.description || machine.fields?.title || 'Machine image'
         } : undefined,
         thumbnail: machine.fields?.thumbnail ? {
-          url: machine.fields.thumbnail.fields?.file?.url || '',
+          url: `https:${machine.fields.thumbnail.fields?.file?.url || ''}`,
           alt: machine.fields.thumbnail.fields?.description || machine.fields?.title || 'Machine thumbnail'
         } : undefined,
         machineThumbnail: machine.fields?.machineThumbnail ? {
-          url: machine.fields.machineThumbnail.fields?.file?.url || '',
+          url: `https:${machine.fields.machineThumbnail.fields?.file?.url || ''}`,
           alt: machine.fields.machineThumbnail.fields?.description || machine.fields?.title || 'Machine thumbnail'
         } : undefined
       })) : [],
