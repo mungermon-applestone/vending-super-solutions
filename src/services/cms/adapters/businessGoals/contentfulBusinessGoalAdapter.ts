@@ -125,7 +125,7 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
       console.log(`[contentfulBusinessGoalAdapter] No features found or features is not an array`);
     }
 
-    // Transform recommended machines by processing reference data directly
+    // Transform recommended machines directly from reference data
     let recommendedMachines = [];
     if (fields.recommendedMachines && Array.isArray(fields.recommendedMachines)) {
       console.log(`[contentfulBusinessGoalAdapter] Processing ${fields.recommendedMachines.length} recommended machines`);
@@ -140,7 +140,7 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
         
         const machineFields = machineEntry.fields;
         
-        // Process machine data directly from reference fields
+        // Create base machine object with all required properties
         const transformedMachine = {
           id: machineEntry.sys?.id || '',
           slug: machineFields.slug || '',
@@ -149,8 +149,12 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
           type: machineFields.type || 'vending',
           temperature: machineFields.temperature || 'ambient',
           features: machineFields.features || [],
-          images: [],
-          specs: {}
+          images: [] as any[],
+          specs: {},
+          // Add the image properties that were missing
+          machineThumbnail: undefined as any,
+          thumbnail: undefined as any,
+          image: undefined as any
         };
 
         // Handle machine thumbnail - check for machineThumbnail first
