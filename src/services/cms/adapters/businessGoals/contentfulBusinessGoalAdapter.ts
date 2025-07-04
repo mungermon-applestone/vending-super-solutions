@@ -3,7 +3,6 @@ import { EntrySkeletonType, createClient } from 'contentful';
 import { CMSBusinessGoal } from '@/types/cms';
 import { BusinessGoalAdapter, BusinessGoalCreateInput, BusinessGoalUpdateInput } from './types';
 import { getContentfulClient } from '../../utils/contentfulClient';
-import { transformContentfulEntry } from '@/utils/cms/transformers/machineTransformer';
 
 export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
   async getAll(options?: Record<string, any>): Promise<CMSBusinessGoal[]> {
@@ -126,7 +125,7 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
       console.log(`[contentfulBusinessGoalAdapter] No features found or features is not an array`);
     }
 
-    // Transform recommended machines using the proven transformer
+    // Transform recommended machines by processing reference data directly
     let recommendedMachines = [];
     if (fields.recommendedMachines && Array.isArray(fields.recommendedMachines)) {
       console.log(`[contentfulBusinessGoalAdapter] Processing ${fields.recommendedMachines.length} recommended machines`);
@@ -139,26 +138,99 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
           return null;
         }
         
-        try {
-          // Use the proven transformer to get consistent image handling
-          const transformedMachine = transformContentfulEntry(machineEntry);
-          console.log(`[contentfulBusinessGoalAdapter] Transformed machine ${index}:`, transformedMachine);
-          return transformedMachine;
-        } catch (error) {
-          console.error(`[contentfulBusinessGoalAdapter] Error transforming machine ${index}:`, error);
-          // Fallback to basic transformation if the proven transformer fails
-          return {
-            id: machineEntry.sys?.id || '',
-            slug: machineEntry.fields?.slug || '',
-            title: machineEntry.fields?.title || '',
-            description: machineEntry.fields?.description || '',
-            type: machineEntry.fields?.type || 'vending',
-            temperature: machineEntry.fields?.temperature || 'ambient',
-            features: machineEntry.fields?.features || [],
-            images: [],
-            specs: {}
+        const machineFields = machineEntry.fields;
+        
+        // Process machine data directly from reference fields
+        const transformedMachine = {
+          id: machineEntry.sys?.id || '',
+          slug: machineFields.slug || '',
+          title: machineFields.title || '',
+          description: machineFields.description || '',
+          type: machineFields.type || 'vending',
+          temperature: machineFields.temperature || 'ambient',
+          features: machineFields.features || [],
+          images: [],
+          specs: {}
+        };
+
+        // Handle machine thumbnail - check for machineThumbnail first
+        if (machineFields.machineThumbnail && machineFields.machineThumbnail.fields) {
+          const thumbFields = machineFields.machineThumbnail.fields;
+          let thumbUrl = thumbFields.file?.url || '';
+          if (thumbUrl && !thumbUrl.startsWith('http')) {
+            thumbUrl = `https:${thumbUrl}`;
+          }
+          
+          transformedMachine.machineThumbnail = {
+            id: machineFields.machineThumbnail.sys?.id || 'machineThumbnail',
+            url: thumbUrl,
+            alt: thumbFields.description || thumbFields.title || transformedMachine.title
           };
+          
+          console.log(`[contentfulBusinessGoalAdapter] Added machineThumbnail for ${transformedMachine.title}:`, transformedMachine.machineThumbnail);
         }
+
+        // Handle regular thumbnail
+        if (machineFields.thumbnail && machineFields.thumbnail.fields) {
+          const thumbFields = machineFields.thumbnail.fields;
+          let thumbUrl = thumbFields.file?.url || '';
+          if (thumbUrl && !thumbUrl.startsWith('http')) {
+            thumbUrl = `https:${thumbUrl}`;
+          }
+          
+          transformedMachine.thumbnail = {
+            id: machineFields.thumbnail.sys?.id || 'thumbnail',
+            url: thumbUrl,
+            alt: thumbFields.description || thumbFields.title || transformedMachine.title
+          };
+          
+          console.log(`[contentfulBusinessGoalAdapter] Added thumbnail for ${transformedMachine.title}:`, transformedMachine.thumbnail);
+        }
+
+        // Handle main image as fallback
+        if (machineFields.image && machineFields.image.fields) {
+          const imageFields = machineFields.image.fields;
+          let imageUrl = imageFields.file?.url || '';
+          if (imageUrl && !imageUrl.startsWith('http')) {
+            imageUrl = `https:${imageUrl}`;
+          }
+          
+          transformedMachine.image = {
+            id: machineFields.image.sys?.id || 'image',
+            url: imageUrl,
+            alt: imageFields.description || imageFields.title || transformedMachine.title
+          };
+          
+          console.log(`[contentfulBusinessGoalAdapter] Added image for ${transformedMachine.title}:`, transformedMachine.image);
+        }
+
+        // Handle images array if present
+        if (machineFields.images && Array.isArray(machineFields.images)) {
+          transformedMachine.images = machineFields.images.map((img: any) => {
+            if (!img || !img.fields) return null;
+            
+            let imageUrl = img.fields.file?.url || '';
+            if (imageUrl && !imageUrl.startsWith('http')) {
+              imageUrl = `https:${imageUrl}`;
+            }
+            
+            return {
+              id: img.sys?.id || '',
+              url: imageUrl,
+              alt: img.fields.description || img.fields.title || transformedMachine.title
+            };
+          }).filter(Boolean);
+        }
+        
+        console.log(`[contentfulBusinessGoalAdapter] Final transformed machine ${index}:`, {
+          title: transformedMachine.title,
+          hasMachineThumbnail: !!transformedMachine.machineThumbnail,
+          hasThumbnail: !!transformedMachine.thumbnail,
+          hasImage: !!transformedMachine.image,
+          hasImages: transformedMachine.images.length > 0
+        });
+        
+        return transformedMachine;
       }).filter(Boolean); // Remove any null entries
       
       console.log(`[contentfulBusinessGoalAdapter] Final recommended machines:`, recommendedMachines);
