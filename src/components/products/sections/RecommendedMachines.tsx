@@ -1,8 +1,6 @@
 
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
 import Image from '@/components/common/Image';
 
 interface Machine {
@@ -86,45 +84,47 @@ const RecommendedMachines = ({ machines }: RecommendedMachinesProps) => {
             });
             
             return (
-              <div key={machine.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="aspect-video w-full overflow-hidden bg-white flex items-center justify-center">
-                  {imageToUse ? (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Image
-                        src={imageToUse.url}
-                        alt={imageToUse.alt || machine.title}
-                        className="w-full h-full"
-                        objectFit="contain"
-                        isThumbnail={!!machine.machineThumbnail || !!machine.thumbnail}
-                        onError={(e) => {
-                          console.error(`[RecommendedMachines] Failed to load image for machine ${machine.title}:`, {
-                            url: imageToUse.url,
-                            error: e,
-                            imageSource: machine.machineThumbnail ? 'machineThumbnail' : 
-                                        (machine.thumbnail ? 'thumbnail' : 'regular image')
-                          });
-                          // Fallback to placeholder
-                          (e.target as HTMLImageElement).src = '/placeholder.svg';
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                      <span className="text-gray-400">No image available</span>
-                    </div>
-                  )}
+              <Link 
+                key={machine.id}
+                to={`/machines/${machine.slug}`}
+                className="block h-full"
+                onClick={() => window.scrollTo(0, 0)}
+                aria-label={`View details for ${machine.title}`}
+              >
+                <div className="bg-white rounded-lg shadow-md overflow-hidden h-full cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                  <div className="aspect-video w-full overflow-hidden bg-white flex items-center justify-center">
+                    {imageToUse ? (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Image
+                          src={imageToUse.url}
+                          alt={imageToUse.alt || machine.title}
+                          className="w-full h-full"
+                          objectFit="contain"
+                          isThumbnail={!!machine.machineThumbnail || !!machine.thumbnail}
+                          onError={(e) => {
+                            console.error(`[RecommendedMachines] Failed to load image for machine ${machine.title}:`, {
+                              url: imageToUse.url,
+                              error: e,
+                              imageSource: machine.machineThumbnail ? 'machineThumbnail' : 
+                                          (machine.thumbnail ? 'thumbnail' : 'regular image')
+                            });
+                            // Fallback to placeholder
+                            (e.target as HTMLImageElement).src = '/placeholder.svg';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                        <span className="text-gray-400">No image available</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold mb-3">{machine.title}</h3>
+                    <p className="text-gray-600 line-clamp-2">{machine.description}</p>
+                  </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-3">{machine.title}</h3>
-                  <p className="text-gray-600 mb-4 line-clamp-2">{machine.description}</p>
-                  <Button asChild variant="ghost" className="text-vending-blue hover:text-vending-blue-dark">
-                    <Link to={`/machines/${machine.slug}`} className="flex items-center">
-                      View details
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
+              </Link>
             );
           })}
         </div>
