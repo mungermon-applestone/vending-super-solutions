@@ -3,6 +3,7 @@ import { EntrySkeletonType, createClient } from 'contentful';
 import { CMSBusinessGoal } from '@/types/cms';
 import { BusinessGoalAdapter, BusinessGoalCreateInput, BusinessGoalUpdateInput } from './types';
 import { getContentfulClient } from '../../utils/contentfulClient';
+import { transformContentfulEntry } from '@/utils/cms/transformers/machineTransformer';
 
 export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
   async getAll(options?: Record<string, any>): Promise<CMSBusinessGoal[]> {
@@ -12,7 +13,7 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
       const client = await getContentfulClient();
       const entries = await client.getEntries({
         content_type: 'businessGoal',
-        include: 2, // Include linked entries like features
+        include: 2,
         limit: 1000,
         ...options
       });
@@ -27,18 +28,16 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
   }
 
   async getBySlug(slug: string): Promise<CMSBusinessGoal | null> {
-    console.log('[contentfulBusinessGoalAdapter] Fetching business goal with slug:', JSON.stringify(slug));
+    console.log('[contentfulBusinessGoalAdapter] Fetching business goal with slug:', slug);
     
     try {
       const client = await getContentfulClient();
       const entries = await client.getEntries({
         content_type: 'businessGoal',
         'fields.slug': slug,
-        include: 3, // Increase include level to ensure we get linked features
+        include: 2,
         limit: 1
       });
-
-      console.log('[contentfulBusinessGoalAdapter] Raw response for slug lookup:', JSON.stringify(entries, null, 2));
 
       if (entries.items.length === 0) {
         console.log('[contentfulBusinessGoalAdapter] No business goal found with slug:', slug);
@@ -47,8 +46,6 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
 
       const businessGoal = this.transformEntry(entries.items[0]);
       console.log('[contentfulBusinessGoalAdapter] Found business goal:', businessGoal.title);
-      console.log('[contentfulBusinessGoalAdapter] Raw features field:', entries.items[0].fields.features);
-      console.log('[contentfulBusinessGoalAdapter] Transformed features data:', businessGoal.features);
       
       return businessGoal;
     } catch (error) {
@@ -60,7 +57,7 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
   async getById(id: string): Promise<CMSBusinessGoal | null> {
     try {
       const client = await getContentfulClient();
-      const entry = await client.getEntry(id, { include: 3 });
+      const entry = await client.getEntry(id, { include: 2 });
       return this.transformEntry(entry);
     } catch (error) {
       console.error('[contentfulBusinessGoalAdapter] Error fetching business goal by ID:', error);
@@ -84,8 +81,6 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
     const fields = entry.fields || {};
     
     console.log(`[contentfulBusinessGoalAdapter] Transforming entry for: ${fields.title}`);
-    console.log(`[contentfulBusinessGoalAdapter] Raw features field:`, fields.features);
-    console.log(`[contentfulBusinessGoalAdapter] Features is array:`, Array.isArray(fields.features));
     
     // Transform features if they exist
     let features = undefined;
@@ -93,8 +88,6 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
       console.log(`[contentfulBusinessGoalAdapter] Processing ${fields.features.length} feature entries`);
       
       features = fields.features.map((featureEntry: any, index: number) => {
-        console.log(`[contentfulBusinessGoalAdapter] Processing feature ${index}:`, featureEntry);
-        
         if (!featureEntry || !featureEntry.fields) {
           console.warn(`[contentfulBusinessGoalAdapter] Feature ${index} has no fields`);
           return null;
@@ -102,7 +95,7 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
         
         const featureFields = featureEntry.fields;
         
-        const transformedFeature = {
+        return {
           id: featureEntry.sys?.id || Math.random().toString(36).substring(2, 9),
           title: featureFields.title || '',
           description: featureFields.description || '',
@@ -113,14 +106,57 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
             alt: featureFields.screenshot.fields?.description || featureFields.title || 'Feature screenshot'
           } : undefined
         };
-        
-        console.log(`[contentfulBusinessGoalAdapter] Transformed feature ${index}:`, transformedFeature);
-        return transformedFeature;
-      }).filter(Boolean); // Remove any null entries
+      }).filter(Boolean);
+    }
+
+    // Transform recommended machines using the proven pattern from product adapter
+    let recommendedMachines: any[] = [];
+    if (fields.recommendedMachines && Array.isArray(fields.recommendedMachines)) {
+      console.log(`[contentfulBusinessGoalAdapter] Processing ${fields.recommendedMachines.length} recommended machines`);
       
-      console.log(`[contentfulBusinessGoalAdapter] Final features array:`, features);
-    } else {
-      console.log(`[contentfulBusinessGoalAdapter] No features found or features is not an array`);
+      recommendedMachines = fields.recommendedMachines
+        .filter(machine => {
+          if (!machine || !machine.fields) {
+            console.warn(`[contentfulBusinessGoalAdapter] Invalid machine in recommendedMachines:`, machine);
+            return false;
+          }
+          return true;
+        })
+        .map(machine => {
+          try {
+            console.log(`[contentfulBusinessGoalAdapter] Processing machine ${machine.fields?.title || 'unknown'} using transformer`);
+            
+            // Use the proven machine transformer
+            const transformedMachine = transformContentfulEntry(machine);
+            
+            // Return the exact format expected by RecommendedMachines component
+            return {
+              id: transformedMachine.id,
+              slug: transformedMachine.slug,
+              title: transformedMachine.title,
+              description: transformedMachine.description || '',
+              // Standard image (highest quality, used as fallback)
+              image: transformedMachine.images && transformedMachine.images.length > 0 ? {
+                url: transformedMachine.images[0].url,
+                alt: transformedMachine.images[0].alt || transformedMachine.title
+              } : undefined,
+              // Regular thumbnail (if available)
+              thumbnail: transformedMachine.thumbnail ? {
+                url: transformedMachine.thumbnail.url,
+                alt: transformedMachine.thumbnail.alt || transformedMachine.title
+              } : undefined,
+              // Machine-specific thumbnail (highest priority)
+              machineThumbnail: machine.fields.machineThumbnail ? {
+                url: `https:${machine.fields.machineThumbnail.fields?.file?.url || ''}`,
+                alt: machine.fields.machineThumbnail.fields?.title || transformedMachine.title
+              } : undefined
+            };
+          } catch (err) {
+            console.error(`[contentfulBusinessGoalAdapter] Error processing recommended machine:`, err);
+            return null;
+          }
+        })
+        .filter(Boolean);
     }
 
     return {
@@ -144,24 +180,7 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
         url: fields.video.fields?.file?.url || null,
         title: fields.video.fields?.title || fields.title
       } : undefined,
-      recommendedMachines: fields.recommendedMachines ? fields.recommendedMachines.map((machine: any) => ({
-        id: machine.sys?.id || '',
-        slug: machine.fields?.slug || '',
-        title: machine.fields?.title || '',
-        description: machine.fields?.description || '',
-        image: machine.fields?.image ? {
-          url: machine.fields.image.fields?.file?.url || '',
-          alt: machine.fields.image.fields?.description || machine.fields?.title || 'Machine image'
-        } : undefined,
-        thumbnail: machine.fields?.thumbnail ? {
-          url: machine.fields.thumbnail.fields?.file?.url || '',
-          alt: machine.fields.thumbnail.fields?.description || machine.fields?.title || 'Machine thumbnail'
-        } : undefined,
-        machineThumbnail: machine.fields?.machineThumbnail ? {
-          url: machine.fields.machineThumbnail.fields?.file?.url || '',
-          alt: machine.fields.machineThumbnail.fields?.description || machine.fields?.title || 'Machine thumbnail'
-        } : undefined
-      })) : [],
+      recommendedMachines: recommendedMachines,
       displayOrder: fields.displayOrder || 0,
       showOnHomepage: fields.showOnHomepage || false,
       homepageOrder: fields.homepageOrder || 0
