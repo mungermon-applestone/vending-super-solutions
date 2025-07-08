@@ -10,6 +10,7 @@ import { CONTENTFUL_CONFIG, isContentfulConfigured } from '@/config/cms';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 import ExportHeroSlidesButton from '@/components/export/ExportHeroSlidesButton';
+import { SHOW_EXPORT_FEATURES } from '@/config/featureFlags';
 
 const Home = () => {
   console.log('[Home] CMS Configuration status:', {
@@ -25,12 +26,14 @@ const Home = () => {
 
   return (
     <>
-      {/* Export Button - positioned above hero slider */}
-      <div className="container mx-auto px-4 pt-4">
-        <div className="flex justify-end">
-          <ExportHeroSlidesButton sliderId="home-slider" />
+      {/* Export Button - positioned above hero slider (hidden from public) */}
+      {SHOW_EXPORT_FEATURES && (
+        <div className="container mx-auto px-4 pt-4">
+          <div className="flex justify-end">
+            <ExportHeroSlidesButton sliderId="home-slider" />
+          </div>
         </div>
-      </div>
+      )}
       
       <HeroSlider sliderId="home-slider" />
       <FeaturesSection />
