@@ -40,7 +40,21 @@ export function useContentfulMachines() {
         
         const machines = entries.map(transformContentfulEntry);
         console.log('[useContentfulMachines] Transformed machines:', machines);
-        return machines;
+        
+        // Sort machines by display order, then by title
+        const sortedMachines = machines.sort((a, b) => {
+          const orderA = a.displayOrder ?? 999;
+          const orderB = b.displayOrder ?? 999;
+          
+          if (orderA !== orderB) {
+            return orderA - orderB;
+          }
+          
+          return a.title.localeCompare(b.title);
+        });
+        
+        console.log('[useContentfulMachines] Sorted machines by display order:', sortedMachines);
+        return sortedMachines;
         
       } catch (error) {
         console.error('[CRITICAL] Machine fetch failed', {

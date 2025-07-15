@@ -19,6 +19,10 @@ export interface ContentfulEntry {
     description?: string;
     temperature?: string;
     features?: string[];
+    displayOrder?: number;
+    visible?: boolean;
+    showOnHomepage?: boolean;
+    homepageOrder?: number;
     images?: Array<{
       sys?: {
         id: string;
@@ -92,6 +96,10 @@ export interface ContentfulEntry {
   connectivity?: string;
   manufacturer?: string;
   warranty?: string;
+  displayOrder?: number;
+  visible?: boolean;
+  showOnHomepage?: boolean;
+  homepageOrder?: number;
   specs?: {
     dimensions?: string;
     weight?: string;
