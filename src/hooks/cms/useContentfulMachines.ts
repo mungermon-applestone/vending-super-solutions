@@ -19,7 +19,7 @@ import { toast } from 'sonner';
  */
 export function useContentfulMachines() {
   return useQuery({
-    queryKey: ['contentful', 'machines'],
+    queryKey: ['contentful', 'machines', Date.now()], // Cache bust to force fresh data
     queryFn: async () => {
       console.log('[useContentfulMachines] Fetching all machines');
       try {
@@ -41,10 +41,17 @@ export function useContentfulMachines() {
         const machines = entries.map(transformContentfulEntry);
         console.log('[useContentfulMachines] Transformed machines:', machines);
         
+        // Debug: Show machine data before sorting
+        machines.forEach(machine => {
+          console.log(`📋 [SORTING] Machine "${machine.title}" has displayOrder: ${machine.displayOrder}`);
+        });
+
         // Sort machines by display order, then by title
         const sortedMachines = machines.sort((a, b) => {
           const orderA = a.displayOrder ?? 999;
           const orderB = b.displayOrder ?? 999;
+          
+          console.log(`🔀 [SORTING] Comparing "${a.title}" (${orderA}) vs "${b.title}" (${orderB})`);
           
           if (orderA !== orderB) {
             return orderA - orderB;
@@ -53,7 +60,7 @@ export function useContentfulMachines() {
           return a.title.localeCompare(b.title);
         });
         
-        console.log('[useContentfulMachines] Sorted machines by display order:', sortedMachines);
+        console.log('🎯 [SORTING] Final sorted order:', sortedMachines.map(m => `${m.title} (${m.displayOrder})`));
         return sortedMachines;
         
       } catch (error) {

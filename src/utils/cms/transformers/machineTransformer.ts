@@ -10,7 +10,9 @@ import { validateMachineData } from '../validation/machineValidation';
  * @returns A standardized CMSMachine object
  */
 export const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => {
-  console.log('Transforming entry:', entry);
+  console.log('🔄 [TRANSFORMER] Raw Contentful entry:', entry);
+  console.log('🔄 [TRANSFORMER] Entry fields:', entry.fields);
+  console.log('🔄 [TRANSFORMER] Entry displayOrder field:', entry.fields?.displayOrder || entry.displayOrder);
   
   // Handle nested Contentful structure - fields may be at top level or in fields property
   const fields = entry.fields || entry;
@@ -82,6 +84,8 @@ export const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => 
     showOnHomepage: fields.showOnHomepage || false,
     homepageOrder: fields.homepageOrder || null
   };
+
+  console.log(`🏷️ [TRANSFORMER] Machine "${title}" final displayOrder:`, machineData.displayOrder);
   
   // Validate before returning
   try {
