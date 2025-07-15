@@ -1,7 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
+import { Button } from '@/components/ui/button';
+import { ChevronRight, Server, HardDrive } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { useMachines } from '@/hooks/useMachinesData';
 import { Wifi } from '@/components/ui/Wifi';
 import { CMSMachine } from '@/types/cms';
@@ -9,7 +12,6 @@ import PageHero from '@/components/common/PageHero';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import { SimpleContactCTA } from '@/components/common';
 import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
-import MachineCard from '@/components/machines/MachineCard';
 
 const MachinesLanding = () => {
   const location = useLocation();
@@ -31,6 +33,46 @@ const MachinesLanding = () => {
     }
   }, [location.hash]);
 
+  const renderMachineCard = (machine) => {
+    const machineImage = machine.images?.[0]?.url || 'https://placehold.co/600x400?text=No+Image';
+    const machineAlt = machine.images?.[0]?.alt || machine.title;
+    
+    return (
+      <Card key={machine.id} className="overflow-hidden hover:shadow-xl transition-shadow">
+        <div className="relative h-48">
+          <img 
+            src={machineImage} 
+            alt={machineAlt} 
+            className="w-full h-full object-cover"
+          />
+          {machine.temperature && (
+            <div className="absolute top-0 right-0 bg-vending-teal/90 text-white px-3 py-1 rounded-bl-lg text-sm font-medium">
+              {machine.temperature.charAt(0).toUpperCase() + machine.temperature.slice(1)}
+            </div>
+          )}
+        </div>
+        <CardContent className="p-6">
+          <div className="flex items-start mb-2">
+            <div className="bg-vending-blue-light p-2 rounded-full mr-3">
+              {machine.type === 'vending' ? (
+                <Server className="h-4 w-4 text-vending-blue" />
+              ) : (
+                <HardDrive className="h-4 w-4 text-vending-blue" />
+              )}
+            </div>
+            <h3 className="text-xl font-semibold">{machine.title}</h3>
+          </div>
+          <p className="text-gray-600 mb-4 line-clamp-2">{machine.description}</p>
+          
+          <Button asChild variant="outline" className="w-full">
+            <Link to={`/machines/${machine.type}/${machine.slug}`} className="flex items-center justify-center">
+              View Specifications <ChevronRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <>
@@ -72,9 +114,7 @@ const MachinesLanding = () => {
             </div>
           ) : vendingMachines.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {vendingMachines.map((machine) => (
-                <MachineCard key={machine.id} machine={machine} />
-              ))}
+              {vendingMachines.map(renderMachineCard)}
             </div>
           ) : (
             <div className="text-center py-10">
@@ -109,9 +149,7 @@ const MachinesLanding = () => {
             </div>
           ) : smartLockers.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {smartLockers.map((machine) => (
-                <MachineCard key={machine.id} machine={machine} />
-              ))}
+              {smartLockers.map(renderMachineCard)}
             </div>
           ) : (
             <div className="text-center py-10">

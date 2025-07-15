@@ -31,7 +31,5 @@ export function adaptMachineData(machineData: any): CMSMachine {
           height: machineData.thumbnail.height || 300,
         }
       : undefined,
-    // Ensure comingSoonRibbon is properly handled
-    comingSoonRibbon: machineData?.comingSoonRibbon || false,
   } as CMSMachine;
 }
