@@ -12,6 +12,7 @@ export interface ContentfulEntry {
   description?: string;
   temperature?: string;
   features?: string[];
+  comingSoonRibbon?: boolean;
   fields?: {
     title?: string;
     slug?: string;
@@ -19,6 +20,7 @@ export interface ContentfulEntry {
     description?: string;
     temperature?: string;
     features?: string[];
+    comingSoonRibbon?: boolean;
     images?: Array<{
       sys?: {
         id: string;
