@@ -133,6 +133,29 @@ if (typeof window !== 'undefined' && !window._runtimeConfigLoaded) {
         window._runtimeConfig = config;
         window._runtimeConfigLoaded = true;
         
+        // Update the synchronous CONTENTFUL_CONFIG object
+        if (config.VITE_CONTENTFUL_SPACE_ID) {
+          CONTENTFUL_CONFIG.SPACE_ID = config.VITE_CONTENTFUL_SPACE_ID;
+        }
+        if (config.VITE_CONTENTFUL_DELIVERY_TOKEN) {
+          CONTENTFUL_CONFIG.DELIVERY_TOKEN = config.VITE_CONTENTFUL_DELIVERY_TOKEN;
+        }
+        if (config.VITE_CONTENTFUL_PREVIEW_TOKEN) {
+          CONTENTFUL_CONFIG.PREVIEW_TOKEN = config.VITE_CONTENTFUL_PREVIEW_TOKEN;
+        }
+        if (config.VITE_CONTENTFUL_MANAGEMENT_TOKEN) {
+          CONTENTFUL_CONFIG.MANAGEMENT_TOKEN = config.VITE_CONTENTFUL_MANAGEMENT_TOKEN;
+        }
+        if (config.VITE_CONTENTFUL_ENVIRONMENT_ID) {
+          CONTENTFUL_CONFIG.ENVIRONMENT_ID = config.VITE_CONTENTFUL_ENVIRONMENT_ID;
+        }
+        
+        console.log('[cms.ts] Updated synchronous CONTENTFUL_CONFIG:', {
+          hasSpaceId: !!CONTENTFUL_CONFIG.SPACE_ID,
+          hasDeliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
+          environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID
+        });
+        
         // Dispatch event to notify waiting promises
         window.dispatchEvent(new CustomEvent('runtime-config-loaded'));
         
@@ -161,13 +184,13 @@ export async function getContentfulConfig() {
   };
 }
 
-// Sync fallback for legacy code - will be empty until runtime config loads
+// Sync fallback for legacy code - populate from import.meta.env initially, then update from runtime config
 export const CONTENTFUL_CONFIG = {
-  SPACE_ID: '',
-  DELIVERY_TOKEN: '',
-  PREVIEW_TOKEN: '',
-  MANAGEMENT_TOKEN: '',
-  ENVIRONMENT_ID: 'master'
+  SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
+  DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || '',
+  PREVIEW_TOKEN: import.meta.env.VITE_CONTENTFUL_PREVIEW_TOKEN || '',
+  MANAGEMENT_TOKEN: import.meta.env.VITE_CONTENTFUL_MANAGEMENT_TOKEN || '',
+  ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
 };
 
 export const IS_DEVELOPMENT = import.meta.env.DEV || false;
@@ -216,6 +239,23 @@ export function isContentfulConfigured() {
     return true;
   }
   
+  // Check runtime config first if available
+  if (typeof window !== 'undefined' && window._runtimeConfig) {
+    const hasRuntimeConfig = !!(window._runtimeConfig.VITE_CONTENTFUL_SPACE_ID && window._runtimeConfig.VITE_CONTENTFUL_DELIVERY_TOKEN);
+    if (hasRuntimeConfig) {
+      return true;
+    }
+  }
+  
+  // Check window.env as fallback
+  if (typeof window !== 'undefined' && window.env) {
+    const hasWindowEnv = !!(window.env.VITE_CONTENTFUL_SPACE_ID && window.env.VITE_CONTENTFUL_DELIVERY_TOKEN);
+    if (hasWindowEnv) {
+      return true;
+    }
+  }
+  
+  // Check the synchronous config object
   const config = checkContentfulConfig();
   
   // Additional check for placeholder values
