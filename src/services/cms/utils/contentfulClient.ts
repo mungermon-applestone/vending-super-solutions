@@ -1,5 +1,5 @@
 import { createClient } from 'contentful';
-import { CONTENTFUL_CONFIG, logContentfulConfig } from '@/config/cms';
+import { CONTENTFUL_CONFIG, getContentfulConfig, logContentfulConfig } from '@/config/cms';
 import { toast } from 'sonner';
 
 let contentfulClient: any = null;
@@ -26,10 +26,17 @@ export const getContentfulClient = async (forceRefresh = false) => {
 
   try {
     console.log('[contentfulClient] Creating new client');
-    logContentfulConfig();
+    
+    // Get fresh configuration that waits for runtime config
+    const config = await getContentfulConfig();
+    console.log('[contentfulClient] Got config:', {
+      hasSpaceId: !!config.SPACE_ID,
+      hasDeliveryToken: !!config.DELIVERY_TOKEN,
+      environment: config.ENVIRONMENT_ID
+    });
     
     // Extra check to ensure we have credentials
-    if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
+    if (!config.SPACE_ID || !config.DELIVERY_TOKEN) {
       console.error('[contentfulClient] Missing Contentful configuration');
       
       // Check if we have window.env credentials
@@ -50,11 +57,11 @@ export const getContentfulClient = async (forceRefresh = false) => {
         throw new Error('Contentful is not configured. Please set your Space ID and Delivery Token in the environment variables.');
       }
     } else {
-      // Create client with CONTENTFUL_CONFIG
+      // Create client with fresh config
       contentfulClient = createClient({
-        space: CONTENTFUL_CONFIG.SPACE_ID,
-        accessToken: CONTENTFUL_CONFIG.DELIVERY_TOKEN,
-        environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master',
+        space: config.SPACE_ID,
+        accessToken: config.DELIVERY_TOKEN,
+        environment: config.ENVIRONMENT_ID || 'master',
         retryOnError: true,
       });
     }
@@ -69,9 +76,9 @@ export const getContentfulClient = async (forceRefresh = false) => {
     if (typeof window !== 'undefined') {
       try {
         const credentialsToSave = {
-          VITE_CONTENTFUL_SPACE_ID: CONTENTFUL_CONFIG.SPACE_ID || window.env?.VITE_CONTENTFUL_SPACE_ID,
-          VITE_CONTENTFUL_DELIVERY_TOKEN: CONTENTFUL_CONFIG.DELIVERY_TOKEN || window.env?.VITE_CONTENTFUL_DELIVERY_TOKEN,
-          VITE_CONTENTFUL_ENVIRONMENT_ID: CONTENTFUL_CONFIG.ENVIRONMENT_ID || window.env?.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
+          VITE_CONTENTFUL_SPACE_ID: config.SPACE_ID || window.env?.VITE_CONTENTFUL_SPACE_ID,
+          VITE_CONTENTFUL_DELIVERY_TOKEN: config.DELIVERY_TOKEN || window.env?.VITE_CONTENTFUL_DELIVERY_TOKEN,
+          VITE_CONTENTFUL_ENVIRONMENT_ID: config.ENVIRONMENT_ID || window.env?.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
         };
         
         if (credentialsToSave.VITE_CONTENTFUL_SPACE_ID && credentialsToSave.VITE_CONTENTFUL_DELIVERY_TOKEN) {
@@ -114,7 +121,8 @@ export const testContentfulConnection = async (silent = false) => {
       console.log('[testContentfulConnection] Testing Contentful connection');
     }
     
-    if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
+    const config = await getContentfulConfig();
+    if (!config.SPACE_ID || !config.DELIVERY_TOKEN) {
       console.error('[testContentfulConnection] Missing Contentful configuration');
       return { 
         success: false, 

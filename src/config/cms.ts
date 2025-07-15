@@ -5,8 +5,56 @@ const ENV_STORAGE_KEY = 'vending-cms-env-variables';
 // 1. import.meta.env (build-time environment variables)
 // 2. window.env (runtime environment variables from env-config.js)
 // 3. localStorage (fallback for development only)
-function getEnvVariable(key: string): string {
+
+// Promise to track runtime config loading
+let runtimeConfigPromise: Promise<void> | null = null;
+
+// Function to wait for runtime config to be loaded
+function waitForRuntimeConfig(): Promise<void> {
+  if (typeof window === 'undefined') {
+    return Promise.resolve();
+  }
+
+  // If already loaded, return immediately
+  if (window._runtimeConfigLoaded) {
+    return Promise.resolve();
+  }
+
+  // If we already have a promise, return it
+  if (runtimeConfigPromise) {
+    return runtimeConfigPromise;
+  }
+
+  // Create new promise to load runtime config
+  runtimeConfigPromise = new Promise((resolve) => {
+    // Check if it's already loaded
+    if (window._runtimeConfigLoaded) {
+      resolve();
+      return;
+    }
+
+    // Listen for config loaded event
+    const handleConfigLoaded = () => {
+      window.removeEventListener('runtime-config-loaded', handleConfigLoaded);
+      resolve();
+    };
+    window.addEventListener('runtime-config-loaded', handleConfigLoaded);
+
+    // Also resolve after a timeout to prevent hanging
+    setTimeout(() => {
+      window.removeEventListener('runtime-config-loaded', handleConfigLoaded);
+      resolve();
+    }, 5000); // 5 second timeout
+  });
+
+  return runtimeConfigPromise;
+}
+
+async function getEnvVariable(key: string): Promise<string> {
   console.log(`[getEnvVariable] Looking for ${key}`);
+  
+  // Wait for runtime config to be loaded
+  await waitForRuntimeConfig();
   
   // First check for runtime environment variables from window.env
   if (typeof window !== 'undefined' && window.env && window.env[key]) {
@@ -85,6 +133,9 @@ if (typeof window !== 'undefined' && !window._runtimeConfigLoaded) {
         window._runtimeConfig = config;
         window._runtimeConfigLoaded = true;
         
+        // Dispatch event to notify waiting promises
+        window.dispatchEvent(new CustomEvent('runtime-config-loaded'));
+        
         // Force refresh of Contentful if we just loaded new config
         if (typeof window._refreshContentfulAfterConfig === 'function') {
           window._refreshContentfulAfterConfig()
@@ -99,13 +150,24 @@ if (typeof window !== 'undefined' && !window._runtimeConfigLoaded) {
   }
 }
 
-// Contentful Configuration
+// Async function to get Contentful configuration
+export async function getContentfulConfig() {
+  return {
+    SPACE_ID: await getEnvVariable('VITE_CONTENTFUL_SPACE_ID'),
+    DELIVERY_TOKEN: await getEnvVariable('VITE_CONTENTFUL_DELIVERY_TOKEN'),
+    PREVIEW_TOKEN: await getEnvVariable('VITE_CONTENTFUL_PREVIEW_TOKEN'),
+    MANAGEMENT_TOKEN: await getEnvVariable('VITE_CONTENTFUL_MANAGEMENT_TOKEN'),
+    ENVIRONMENT_ID: (await getEnvVariable('VITE_CONTENTFUL_ENVIRONMENT_ID')) || 'master'
+  };
+}
+
+// Sync fallback for legacy code - will be empty until runtime config loads
 export const CONTENTFUL_CONFIG = {
-  SPACE_ID: getEnvVariable('VITE_CONTENTFUL_SPACE_ID'),
-  DELIVERY_TOKEN: getEnvVariable('VITE_CONTENTFUL_DELIVERY_TOKEN'),
-  PREVIEW_TOKEN: getEnvVariable('VITE_CONTENTFUL_PREVIEW_TOKEN'),
-  MANAGEMENT_TOKEN: getEnvVariable('VITE_CONTENTFUL_MANAGEMENT_TOKEN'),
-  ENVIRONMENT_ID: getEnvVariable('VITE_CONTENTFUL_ENVIRONMENT_ID') || 'master'
+  SPACE_ID: '',
+  DELIVERY_TOKEN: '',
+  PREVIEW_TOKEN: '',
+  MANAGEMENT_TOKEN: '',
+  ENVIRONMENT_ID: 'master'
 };
 
 export const IS_DEVELOPMENT = import.meta.env.DEV || false;

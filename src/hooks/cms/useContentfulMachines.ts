@@ -19,7 +19,7 @@ import { toast } from 'sonner';
  */
 export function useContentfulMachines() {
   return useQuery({
-    queryKey: ['contentful', 'machines', Date.now()], // Cache bust to force fresh data
+    queryKey: ['contentful', 'machines'],
     queryFn: async () => {
       console.log('[useContentfulMachines] Fetching all machines');
       try {
