@@ -1,80 +1,87 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { HomePageContent } from '@/types/homePageContent';
 import { fetchContentfulEntries } from '@/services/cms/utils/contentfulClient';
-import { CONTENTFUL_CONFIG } from '@/config/cms';
+import { CONTENTFUL_CONFIG, getEnvVariable } from '@/config/cms';
 import { toast } from 'sonner';
 
-// Define fallback content with VERY obvious text to easily identify when fallbacks are being used
+// Define clean fallback content for production use
 const fallbackHomeContent: HomePageContent = {
-  productCategoriesTitle: "[FALLBACK] Featured Product Categories",
-  productCategoriesDescription: "[FALLBACK] Find the perfect vending solution for your product type.",
-  businessGoalsTitle: "[FALLBACK] Business Goals We Help You Achieve",
-  businessGoalsDescription: "[FALLBACK] Tailored solutions to meet your specific business objectives.",
-  availableMachines: "[FALLBACK] Available Machines",
-  availableMachinesDescription: "[FALLBACK] Explore our range of cutting-edge vending machines compatible with our software solution.",
+  productCategoriesTitle: "Featured Product Categories",
+  productCategoriesDescription: "Find the perfect vending solution for your product type.",
+  businessGoalsTitle: "Business Goals We Help You Achieve",
+  businessGoalsDescription: "Tailored solutions to meet your specific business objectives.",
+  availableMachines: "Available Machines",
+  availableMachinesDescription: "Explore our range of cutting-edge vending machines compatible with our software solution.",
   
   // New features section fallbacks
-  featuresSectionTitle: "[FALLBACK] Versatile Software for Every Vending Need",
-  featuresSectionDescription: "[FALLBACK] Our solution adapts to your business requirements, whether you're an operator, enterprise, or brand looking to expand your vending presence.",
+  featuresSectionTitle: "Versatile Software for Every Vending Need",
+  featuresSectionDescription: "Our solution adapts to your business requirements, whether you're an operator, enterprise, or brand looking to expand your vending presence.",
   
   // Feature 1 fallback
-  feature1Title: "[FALLBACK] Multiple Product Types",
-  feature1Description: "[FALLBACK] From grocery and fresh food to vape products and collectibles, you can sell a diverse array of products.",
+  feature1Title: "Multiple Product Types",
+  feature1Description: "From grocery and fresh food to vape products and collectibles, you can sell a diverse array of products.",
   feature1icon: "ShoppingCart",
   feature1url: "/products",
   
   // Feature 2 fallback
-  feature2Title: "[FALLBACK] Business Goal Focused",
-  feature2Description: "[FALLBACK] Meet revenue-producing, creative objectives with custom solutions for BOPIS, loss prevention, marketing, and more.",
+  feature2Title: "Business Goal Focused",
+  feature2Description: "Meet revenue-producing, creative objectives with custom solutions for BOPIS, loss prevention, marketing, and more.",
   feature2Icon: "Award",
   feature2url: "/business-goals",
   
   // Feature 3 fallback
-  feature3Title: "[FALLBACK] Hardware Flexibility",
-  feature3Description: "[FALLBACK] Compatible with various vending machines and lockers from leading global manufacturers.",
+  feature3Title: "Hardware Flexibility",
+  feature3Description: "Compatible with various vending machines and lockers from leading global manufacturers.",
   feature3Icon: "Globe",
   feature3url: "/machines",
   
   // Feature 4 fallback
-  feature4Title: "[FALLBACK] Advanced Analytics",
-  feature4Description: "[FALLBACK] Tune up your operations with up-to-the-second reporting and analytics.",
+  feature4Title: "Advanced Analytics",
+  feature4Description: "Tune up your operations with up-to-the-second reporting and analytics.",
   feature4Icon: "BarChart3",
   feature4url: "/technology",
   
   // Feature 5 fallback
-  feature5Title: "[FALLBACK] Enterprise Security",
-  feature5Description: "[FALLBACK] We don't collect any retail customer PII and observe rigorous security protocols.",
+  feature5Title: "Enterprise Security",
+  feature5Description: "We don't collect any retail customer PII and observe rigorous security protocols.",
   feature5Icon: "Shield",
   feature5url: "/technology",
   
   // Feature 6 fallback
-  feature6Title: "[FALLBACK] Seamless Integration",
-  feature6Description: "[FALLBACK] Open standards allow our solution to connect to your existing systems.",
+  feature6Title: "Seamless Integration",
+  feature6Description: "Open standards allow our solution to connect to your existing systems.",
   feature6Icon: "Zap",
   feature6url: "/contact"
 };
 
 export function useHomePageContent() {
+  const queryClient = useQueryClient();
+  
   console.log('[useHomePageContent] Initializing hook');
-  console.log('[useHomePageContent] Contentful config:', {
-    spaceId: CONTENTFUL_CONFIG.SPACE_ID || 'NOT SET',
-    hasDeliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
-    environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID
-  });
   
   return useQuery({
     queryKey: ['homePageContent'],
     queryFn: async () => {
       console.log('[useHomePageContent] Fetching data from Contentful');
+      
+      // Clear any existing cache to ensure fresh data
+      queryClient.removeQueries({ queryKey: ['homePageContent'] });
+      
       try {
+        // Get runtime config values
+        const spaceId = await getEnvVariable('VITE_CONTENTFUL_SPACE_ID');
+        const deliveryToken = await getEnvVariable('VITE_CONTENTFUL_DELIVERY_TOKEN');
+        
+        console.log('[useHomePageContent] Runtime config check:', {
+          hasSpaceId: !!spaceId,
+          hasDeliveryToken: !!deliveryToken,
+          spaceIdPreview: spaceId ? spaceId.substring(0, 8) + '...' : 'NOT SET'
+        });
+        
         // Check if Contentful is configured
-        if (!CONTENTFUL_CONFIG.SPACE_ID || !CONTENTFUL_CONFIG.DELIVERY_TOKEN) {
+        if (!spaceId || !deliveryToken) {
           console.warn('[useHomePageContent] Contentful is not configured, using fallback content');
-          toast.error('Contentful is not configured properly. Check your environment variables.', {
-            id: 'contentful-error',
-            duration: 5000,
-          });
           return fallbackHomeContent;
         }
         
