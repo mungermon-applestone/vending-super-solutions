@@ -50,7 +50,7 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
           <div className="relative">
             <div className="relative bg-white rounded-lg shadow-xl p-8 overflow-hidden">
               {machine.images && machine.images[0] ? (
-                <div className="w-full h-auto flex items-center justify-center">
+                <div className="relative w-full h-auto flex items-center justify-center overflow-hidden">
                   <Image 
                     src={machine.images[0].url} 
                     alt={machine.images[0].alt || machine.title} 
@@ -59,17 +59,18 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
                     isThumbnail={false}
                     priority={true}
                   />
+                  {machine.comingSoonRibbon && <ComingSoonRibbon />}
                 </div>
               ) : (
-                <div className="aspect-square bg-gray-100 flex items-center justify-center">
+                <div className="relative aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
                   {type === 'vending' ? (
                     <Server className="h-20 w-20 text-gray-400" />
                   ) : (
                     <HardDrive className="h-20 w-20 text-gray-400" />
                   )}
+                  {machine.comingSoonRibbon && <ComingSoonRibbon />}
                 </div>
               )}
-              {machine.comingSoonRibbon && <ComingSoonRibbon />}
             </div>
           </div>
         </div>
