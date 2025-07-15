@@ -5,6 +5,7 @@ import { Server, HardDrive } from 'lucide-react';
 import { CMSMachine } from '@/types/cms';
 import Image from '@/components/common/Image';
 import { Link } from 'react-router-dom';
+import ComingSoonRibbon from '@/components/ui/ComingSoonRibbon';
 
 interface MachineDetailHeroProps {
   machine: CMSMachine;
@@ -47,19 +48,17 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
             </div>
           </div>
           <div className="relative">
-            <div className="bg-white rounded-lg shadow-xl p-8 overflow-hidden">
+            <div className="relative bg-white rounded-lg shadow-xl p-8 overflow-hidden">
               {machine.images && machine.images[0] ? (
-                <div className="aspect-square w-full flex items-center justify-center">
-                  <div className="w-full h-full">
-                    <Image 
-                      src={machine.images[0].url} 
-                      alt={machine.images[0].alt || machine.title} 
-                      className="w-full h-full"
-                      objectFit="contain"
-                      isThumbnail={false}
-                      priority={true}
-                    />
-                  </div>
+                <div className="w-full h-auto flex items-center justify-center">
+                  <Image 
+                    src={machine.images[0].url} 
+                    alt={machine.images[0].alt || machine.title} 
+                    className="w-full h-auto max-h-96"
+                    objectFit="contain"
+                    isThumbnail={false}
+                    priority={true}
+                  />
                 </div>
               ) : (
                 <div className="aspect-square bg-gray-100 flex items-center justify-center">
@@ -70,6 +69,7 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
                   )}
                 </div>
               )}
+              {machine.comingSoonRibbon && <ComingSoonRibbon />}
             </div>
           </div>
         </div>
