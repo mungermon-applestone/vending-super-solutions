@@ -21,7 +21,7 @@ const fallbackHomeContent: HomePageContent = {
   // Feature 1 fallback
   feature1Title: "Multiple Product Types",
   feature1Description: "From grocery and fresh food to vape products and collectibles, you can sell a diverse array of products.",
-  feature1icon: "ShoppingCart",
+  feature1Icon: "ShoppingCart",
   feature1url: "/products",
   
   // Feature 2 fallback
@@ -115,7 +115,7 @@ export function useHomePageContent() {
             // Map feature cards fields - matching exact field names from Contentful
             feature1Title: content.feature1Title || fallbackHomeContent.feature1Title,
             feature1Description: content.feature1Description || fallbackHomeContent.feature1Description,
-            feature1icon: content.feature1Icon || fallbackHomeContent.feature1icon,
+            feature1Icon: content.feature1Icon || fallbackHomeContent.feature1Icon,
             feature1url: content.feature1url || fallbackHomeContent.feature1url,
             
             feature2Title: content.feature2Title || fallbackHomeContent.feature2Title,

@@ -18,7 +18,7 @@ export interface HomePageContent {
   featuresSectionDescription?: string;
   feature1Title?: string;
   feature1Description?: string;
-  feature1icon?: string; // Note: Using the exact field name from Contentful
+  feature1Icon?: string;
   feature1url?: string;
   feature2Title?: string;
   feature2Description?: string;

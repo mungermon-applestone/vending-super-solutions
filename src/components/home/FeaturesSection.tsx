@@ -93,7 +93,7 @@ const FeaturesSection = () => {
     {
       title: homeContent?.feature1Title || '',
       description: homeContent?.feature1Description || '',
-      icon: getIconComponent(homeContent?.feature1icon),
+      icon: getIconComponent(homeContent?.feature1Icon),
       url: homeContent?.feature1url
     },
     {
