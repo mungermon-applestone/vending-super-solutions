@@ -76,6 +76,7 @@ export const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => 
     features: features,
     images: images,
     thumbnail: thumbnail, // Add thumbnail to the returned machine object
+    comingSoonRibbon: fields.comingSoonRibbon || false,
     specs: specs
   };
   

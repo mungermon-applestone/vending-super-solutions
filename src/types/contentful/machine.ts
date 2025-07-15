@@ -1,4 +1,3 @@
-
 import { CMSMachine, CMSImage } from '@/types/cms';
 
 export interface ContentfulEntry {
@@ -49,6 +48,7 @@ export interface ContentfulEntry {
     connectivity?: string;
     manufacturer?: string;
     warranty?: string;
+    comingSoonRibbon?: boolean;
     specs?: {
       dimensions?: string;
       weight?: string;
@@ -92,6 +92,7 @@ export interface ContentfulEntry {
   connectivity?: string;
   manufacturer?: string;
   warranty?: string;
+  comingSoonRibbon?: boolean;
   specs?: {
     dimensions?: string;
     weight?: string;
@@ -105,4 +106,3 @@ export interface ContentfulEntry {
     [key: string]: string | undefined;
   };
 }
-
