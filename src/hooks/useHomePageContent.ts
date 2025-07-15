@@ -56,17 +56,12 @@ const fallbackHomeContent: HomePageContent = {
 };
 
 export function useHomePageContent() {
-  const queryClient = useQueryClient();
-  
   console.log('[useHomePageContent] Initializing hook');
   
   return useQuery({
     queryKey: ['homePageContent'],
     queryFn: async () => {
       console.log('[useHomePageContent] Fetching data from Contentful');
-      
-      // Clear any existing cache to ensure fresh data
-      queryClient.removeQueries({ queryKey: ['homePageContent'] });
       
       try {
         // Get runtime config values
@@ -165,6 +160,7 @@ export function useHomePageContent() {
         return fallbackHomeContent;
       }
     },
+    initialData: fallbackHomeContent, // Provide fallback content immediately
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     refetchOnWindowFocus: false
   });
