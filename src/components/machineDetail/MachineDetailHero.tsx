@@ -5,7 +5,6 @@ import { Server, HardDrive } from 'lucide-react';
 import { CMSMachine } from '@/types/cms';
 import Image from '@/components/common/Image';
 import { Link } from 'react-router-dom';
-import ComingSoonRibbon from '@/components/ui/ComingSoonRibbon';
 
 interface MachineDetailHeroProps {
   machine: CMSMachine;
@@ -50,7 +49,7 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
           <div className="relative">
             <div className="bg-white rounded-lg shadow-xl p-8 overflow-hidden">
               {machine.images && machine.images[0] ? (
-                <div className="aspect-square w-full flex items-center justify-center relative overflow-hidden">
+                <div className="aspect-square w-full flex items-center justify-center">
                   <div className="w-full h-full">
                     <Image 
                       src={machine.images[0].url} 
@@ -61,16 +60,14 @@ const MachineDetailHero: React.FC<MachineDetailHeroProps> = ({ machine }) => {
                       priority={true}
                     />
                   </div>
-                  {machine.comingSoonRibbon && <ComingSoonRibbon />}
                 </div>
               ) : (
-                <div className="aspect-square bg-gray-100 flex items-center justify-center relative overflow-hidden">
+                <div className="aspect-square bg-gray-100 flex items-center justify-center">
                   {type === 'vending' ? (
                     <Server className="h-20 w-20 text-gray-400" />
                   ) : (
                     <HardDrive className="h-20 w-20 text-gray-400" />
                   )}
-                  {machine.comingSoonRibbon && <ComingSoonRibbon />}
                 </div>
               )}
             </div>
