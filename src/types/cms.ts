@@ -69,6 +69,7 @@ export interface CMSMachine {
   displayOrder?: number;
   showOnHomepage?: boolean;
   homepageOrder?: number;
+  comingSoonRibbon?: boolean;
 }
 
 export interface CMSTestimonial {

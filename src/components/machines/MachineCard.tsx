@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Server, HardDrive } from 'lucide-react';
 import Image from '@/components/common/Image';
+import ComingSoonRibbon from '@/components/ui/ComingSoonRibbon';
 
 interface MachineCardProps {
   machine: {
@@ -21,6 +22,7 @@ interface MachineCardProps {
       url: string;
       alt?: string;
     };
+    comingSoonRibbon?: boolean;
   };
 }
 
@@ -47,7 +49,7 @@ const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
         key={machine.id} 
         className="overflow-hidden flex flex-col h-full cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
       >
-        <div className="relative h-48 bg-gray-50 flex items-center justify-center">
+        <div className="relative h-48 bg-gray-50 flex items-center justify-center overflow-hidden">
           {hasThumbnail ? (
             <Image 
               src={machine.thumbnail.url} 
@@ -78,6 +80,7 @@ const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
               {machine.temperature}
             </div>
           )}
+          {machine.comingSoonRibbon && <ComingSoonRibbon />}
         </div>
         <CardHeader>
           <CardTitle className="text-xl">{machine.title || 'Unnamed Machine'}</CardTitle>
