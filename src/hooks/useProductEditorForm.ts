@@ -5,7 +5,7 @@ import { UseToastReturn } from '@/hooks/use-toast';
 import { NavigateFunction } from 'react-router-dom';
 import { useProductType } from '@/hooks/cms/useProductTypes';
 import { ProductFormData } from '@/types/forms';
-import { createProduct, updateProduct } from '@/services/cms/products';
+// Note: Product creation/updating is now handled via Contentful CMS
 
 /**
  * Custom hook for handling product editor form state and operations
@@ -171,16 +171,15 @@ export const useProductEditorForm = (
       
       console.log('[useProductEditorForm] Cleaned data for submission:', formattedData);
       
-      if (isCreating) {
-        console.log('[useProductEditorForm] Creating new product');
-        await createProduct(formattedData, toast);
-        navigate('/admin/products');
-      } else if (productSlug && productSlug !== 'new') {
-        console.log(`[useProductEditorForm] Updating product: ${productSlug}`);
-        
-        await updateProduct(formattedData, productSlug, toast);
-        navigate('/admin/products');
-      }
+      // Product creation/updating is now handled via Contentful CMS
+      toast.toast({
+        title: "Content Management via Contentful",
+        description: "Product management is now handled through Contentful CMS. Please use the Contentful interface for content updates.",
+        variant: "destructive"
+      });
+      
+      console.log('[useProductEditorForm] Product operations now use Contentful CMS');
+      navigate('/admin/products');
     } catch (error) {
       console.error('[useProductEditorForm] Error saving product:', error);
       // Error toast is handled in the service functions
