@@ -54,23 +54,30 @@ export const contentfulHelpDeskArticlePreviewAdapter = {
    */
   async getBySlug(slug: string): Promise<ContentfulHelpDeskArticle | null> {
     try {
-      // Convert slug back to a title format for searching
-      const titleFromSlug = slug.replace(/-/g, ' ');
+      // URL decode the slug in case it contains encoded characters
+      const decodedSlug = decodeURIComponent(slug);
       
       const response = await contentfulPreviewClient.getEntries({
         content_type: 'helpDeskArticle',
         include: 2,
       });
 
-      // Find article by matching title converted to slug
+      // Find article by matching either:
+      // 1. Exact title match (for direct articleTitle URLs)
+      // 2. Slug-converted title match (for slug URLs)
       const article = response.items.find((item: any) => {
         const title = item.fields.articleTitle;
         if (!title) return false;
+        
+        // Direct title match (URL decoded)
+        if (title === decodedSlug) return true;
+        
+        // Slug format match
         const articleSlug = title.toLowerCase()
           .replace(/[^a-z0-9\s-]/g, '')
           .replace(/\s+/g, '-')
           .trim();
-        return articleSlug === slug;
+        return articleSlug === decodedSlug.toLowerCase();
       });
 
       return article ? article as unknown as ContentfulHelpDeskArticle : null;
