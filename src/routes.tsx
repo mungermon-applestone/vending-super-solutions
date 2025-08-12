@@ -19,6 +19,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import { Navigate } from "react-router-dom";
 import { ProductPreview } from "./pages/preview/ProductPreview";
+import { HelpDeskArticlePreview } from "./pages/preview/HelpDeskArticlePreview";
 
 /**
  * Router Configuration
@@ -106,6 +107,10 @@ export const router = createBrowserRouter([
       {
         path: "/preview/products/:slug",
         element: <ProductPreview />,
+      },
+      {
+        path: "/preview/help-desk-articles/:slug",
+        element: <HelpDeskArticlePreview />,
       },
       // Redirect all admin routes to Contentful
       {
