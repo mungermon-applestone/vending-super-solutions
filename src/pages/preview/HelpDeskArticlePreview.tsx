@@ -105,32 +105,19 @@ export function HelpDeskArticlePreview() {
                     </span>
                   </div>
                   
-                  {article.fields.category && (
+                  {article.fields.sectionCategory && (
                     <Badge variant="secondary">
-                      {article.fields.category}
+                      {article.fields.sectionCategory}
                     </Badge>
                   )}
                   
-                  {article.fields.status && (
-                    <Badge variant={article.fields.status === 'published' ? 'default' : 'outline'}>
-                      {article.fields.status}
+                  {article.fields.headingCategory && (
+                    <Badge variant="outline">
+                      {article.fields.headingCategory}
                     </Badge>
                   )}
                 </div>
 
-                {/* Tags */}
-                {article.fields.tags && article.fields.tags.length > 0 && (
-                  <div className="mt-4">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Tag className="h-4 w-4 text-muted-foreground" />
-                      {article.fields.tags.map((tag, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </CardHeader>
@@ -139,9 +126,9 @@ export function HelpDeskArticlePreview() {
         {/* Article Content */}
         <Card>
           <CardContent className="p-8">
-            {article.fields.content ? (
+            {article.fields.articleContent ? (
               <div className="prose prose-lg max-w-none">
-                {documentToReactComponents(article.fields.content, richTextOptions)}
+                {documentToReactComponents(article.fields.articleContent, richTextOptions)}
               </div>
             ) : (
               <p className="text-muted-foreground italic">No content available</p>
@@ -162,7 +149,7 @@ export function HelpDeskArticlePreview() {
             <div><strong>Created:</strong> {new Date(article.sys.createdAt).toLocaleString()}</div>
             <div><strong>Updated:</strong> {new Date(article.sys.updatedAt).toLocaleString()}</div>
             <div><strong>Published:</strong> {article.sys.publishedAt ? new Date(article.sys.publishedAt).toLocaleString() : 'Draft'}</div>
-            <div><strong>Slug:</strong> {article.fields.slug}</div>
+            <div><strong>Title Slug:</strong> {article.fields.articleTitle?.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').trim()}</div>
           </CardContent>
         </Card>
       </div>

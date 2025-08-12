@@ -7,12 +7,9 @@ import { contentfulPreviewClient } from '@/services/cms/utils/contentfulPreviewC
 
 export interface HelpDeskArticleFields {
   articleTitle: string;
-  slug: string;
-  content: any; // Rich text content
-  category?: string;
-  tags?: string[];
-  lastModified?: string;
-  status?: string;
+  articleContent: any; // Rich text content
+  sectionCategory?: string;
+  headingCategory?: string;
 }
 
 export interface ContentfulHelpDeskArticle {
@@ -53,18 +50,30 @@ export const contentfulHelpDeskArticlePreviewAdapter = {
   },
 
   /**
-   * Get Help Desk Article by slug (preview)
+   * Get Help Desk Article by title slug (preview)
    */
   async getBySlug(slug: string): Promise<ContentfulHelpDeskArticle | null> {
     try {
+      // Convert slug back to a title format for searching
+      const titleFromSlug = slug.replace(/-/g, ' ');
+      
       const response = await contentfulPreviewClient.getEntries({
         content_type: 'helpDeskArticle',
-        'fields.slug': slug,
         include: 2,
-        limit: 1,
       });
 
-      return response.items.length > 0 ? response.items[0] as unknown as ContentfulHelpDeskArticle : null;
+      // Find article by matching title converted to slug
+      const article = response.items.find((item: any) => {
+        const title = item.fields.articleTitle;
+        if (!title) return false;
+        const articleSlug = title.toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .trim();
+        return articleSlug === slug;
+      });
+
+      return article ? article as unknown as ContentfulHelpDeskArticle : null;
     } catch (error) {
       console.error('[Help Desk Article Preview] Error fetching article by slug:', error);
       throw error;
