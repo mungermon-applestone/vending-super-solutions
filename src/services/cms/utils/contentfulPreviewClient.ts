@@ -3,7 +3,7 @@
  */
 
 import { createClient } from 'contentful';
-import { getContentfulConfig } from '@/config/cms';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 let previewClientInstance: any = null;
 
@@ -12,18 +12,36 @@ let previewClientInstance: any = null;
  */
 async function getPreviewClient() {
   if (!previewClientInstance) {
-    const config = await getContentfulConfig();
-    
-    if (!config.PREVIEW_TOKEN) {
-      throw new Error('Missing Contentful Preview Token in configuration');
+    try {
+      // Get config from our edge function
+      const supabase = createSupabaseClient(
+        import.meta.env.VITE_SUPABASE_URL,
+        import.meta.env.VITE_SUPABASE_ANON_KEY
+      );
+      
+      const { data, error } = await supabase.functions.invoke('get-contentful-config');
+      
+      if (error) {
+        console.error('[Preview Client] Failed to get config from edge function:', error);
+        throw new Error('Failed to get Contentful configuration');
+      }
+      
+      if (!data.VITE_CONTENTFUL_PREVIEW_TOKEN) {
+        throw new Error('Missing Contentful Preview Token in configuration');
+      }
+      
+      previewClientInstance = createClient({
+        space: data.VITE_CONTENTFUL_SPACE_ID || '',
+        accessToken: data.VITE_CONTENTFUL_PREVIEW_TOKEN,
+        environment: data.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master',
+        host: 'preview.contentful.com', // Preview API endpoint
+      });
+      
+      console.log('[Preview Client] Successfully created preview client');
+    } catch (error) {
+      console.error('[Preview Client] Error creating client:', error);
+      throw error;
     }
-    
-    previewClientInstance = createClient({
-      space: config.SPACE_ID || '',
-      accessToken: config.PREVIEW_TOKEN,
-      environment: config.ENVIRONMENT_ID || 'master',
-      host: 'preview.contentful.com', // Preview API endpoint
-    });
   }
   
   return previewClientInstance;
