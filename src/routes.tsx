@@ -22,6 +22,7 @@ import { ProductPreview } from "./pages/preview/ProductPreview";
 import { HelpDeskArticlePreview } from "./pages/preview/HelpDeskArticlePreview";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import KnowledgeBaseArticle from "./pages/KnowledgeBaseArticle";
+import KnowledgeBaseSinglePage from "./pages/KnowledgeBaseSinglePage";
 
 /**
  * Router Configuration
@@ -117,6 +118,10 @@ export const router = createBrowserRouter([
       {
         path: "/knowledge-base",
         element: <KnowledgeBase />,
+      },
+      {
+        path: "/knowledge-base/single-page",
+        element: <KnowledgeBaseSinglePage />,
       },
       {
         path: "/knowledge-base/:slug",

@@ -3,7 +3,7 @@ import { useHelpDeskArticlesByCategory } from "@/hooks/useHelpDeskArticles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Search, FileText, ArrowRight } from "lucide-react";
+import { BookOpen, Search, FileText, ArrowRight, FileStack } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import SEO from "@/components/seo/SEO";
@@ -122,6 +122,16 @@ const KnowledgeBase: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 h-12 text-lg"
               />
+            </div>
+            
+            {/* Single Page View Link */}
+            <div className="mt-6 text-center">
+              <Button asChild variant="outline" size="sm">
+                <Link to="/knowledge-base/single-page">
+                  <FileStack className="h-4 w-4 mr-2" />
+                  View As Single Page (May Take a Moment to Load)
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
