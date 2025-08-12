@@ -18,6 +18,7 @@ import ContentfulBlogPostDetail from "./pages/ContentfulBlogPostDetail";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import { Navigate } from "react-router-dom";
+import { ProductPreview } from "./pages/preview/ProductPreview";
 
 /**
  * Router Configuration
@@ -100,6 +101,11 @@ export const router = createBrowserRouter([
       {
         path: "/terms",
         element: <TermsOfService />,
+      },
+      // Preview routes for Contentful drafts
+      {
+        path: "/preview/products/:slug",
+        element: <ProductPreview />,
       },
       // Redirect all admin routes to Contentful
       {
