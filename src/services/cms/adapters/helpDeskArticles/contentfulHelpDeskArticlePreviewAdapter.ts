@@ -54,12 +54,24 @@ export const contentfulHelpDeskArticlePreviewAdapter = {
    */
   async getBySlug(slug: string): Promise<ContentfulHelpDeskArticle | null> {
     try {
+      console.log('[HelpDeskArticlePreviewAdapter] getBySlug called with:', slug);
+      
       // URL decode the slug in case it contains encoded characters
       const decodedSlug = decodeURIComponent(slug);
+      console.log('[HelpDeskArticlePreviewAdapter] Decoded slug:', decodedSlug);
       
       const response = await contentfulPreviewClient.getEntries({
         content_type: 'helpDeskArticle',
         include: 2,
+      });
+      
+      console.log('[HelpDeskArticlePreviewAdapter] Contentful response:', {
+        total: response.total,
+        items: response.items.length,
+        articles: response.items.map((item: any) => ({
+          id: item.sys.id,
+          title: item.fields.articleTitle
+        }))
       });
 
       // Find article by matching either:

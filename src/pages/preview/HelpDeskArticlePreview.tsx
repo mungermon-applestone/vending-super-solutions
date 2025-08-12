@@ -44,11 +44,20 @@ const richTextOptions = {
 export function HelpDeskArticlePreview() {
   const { slug } = useParams<{ slug: string }>();
 
+  console.log('[HelpDeskArticlePreview] Component loaded with slug:', slug);
+
   const { data: article, isLoading, error } = useQuery({
     queryKey: ['helpDeskArticle', 'preview', slug],
-    queryFn: () => contentfulHelpDeskArticlePreviewAdapter.getBySlug(slug!),
+    queryFn: async () => {
+      console.log('[HelpDeskArticlePreview] Fetching article for slug:', slug);
+      const result = await contentfulHelpDeskArticlePreviewAdapter.getBySlug(slug!);
+      console.log('[HelpDeskArticlePreview] Received article:', result);
+      return result;
+    },
     enabled: !!slug,
   });
+
+  console.log('[HelpDeskArticlePreview] Query state:', { isLoading, error, hasArticle: !!article });
 
   if (isLoading) {
     return (
