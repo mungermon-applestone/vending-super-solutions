@@ -118,7 +118,6 @@ export const getRichTextRenderOptions = ({ includedAssets, contentIncludes }: Ri
                 className="w-full h-full object-cover"
               />
             </AspectRatio>
-            {title && <p className="text-sm text-gray-500 mt-2">{title}</p>}
           </div>
         );
       } catch (err) {
