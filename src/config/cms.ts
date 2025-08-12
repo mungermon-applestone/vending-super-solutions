@@ -296,5 +296,6 @@ export const CMS_MODELS = {
   BLOG_CATEGORY: 'blogCategory',
   BLOG_TAG: 'blogTag',
   BLOG_AUTHOR: 'blogAuthor',
-  BLOG_PAGE_CONTENT: 'blogPageContent'
+  BLOG_PAGE_CONTENT: 'blogPageContent',
+  HELP_DESK_ARTICLE: 'helpDeskArticle'
 };

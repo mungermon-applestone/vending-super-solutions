@@ -20,6 +20,8 @@ import TermsOfService from "./pages/TermsOfService";
 import { Navigate } from "react-router-dom";
 import { ProductPreview } from "./pages/preview/ProductPreview";
 import { HelpDeskArticlePreview } from "./pages/preview/HelpDeskArticlePreview";
+import KnowledgeBase from "./pages/KnowledgeBase";
+import KnowledgeBaseArticle from "./pages/KnowledgeBaseArticle";
 
 /**
  * Router Configuration
@@ -111,6 +113,14 @@ export const router = createBrowserRouter([
       {
         path: "/preview/help-desk-articles/:slug",
         element: <HelpDeskArticlePreview />,
+      },
+      {
+        path: "/knowledge-base",
+        element: <KnowledgeBase />,
+      },
+      {
+        path: "/knowledge-base/:slug",
+        element: <KnowledgeBaseArticle />,
       },
       // Redirect all admin routes to Contentful
       {
