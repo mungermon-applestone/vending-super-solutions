@@ -111,13 +111,13 @@ export const getRichTextRenderOptions = ({ includedAssets, contentIncludes }: Ri
 
         return (
           <div className="my-8">
-            <AspectRatio ratio={16/9} className="overflow-hidden rounded-md border border-gray-200">
+            <div className="flex justify-center rounded-md border border-gray-200 bg-gray-50 p-4">
               <Image 
                 src={fullUrl}
                 alt={title || 'Content image'}
-                className="w-full h-full object-cover"
+                className="max-w-full h-auto object-contain rounded"
               />
-            </AspectRatio>
+            </div>
           </div>
         );
       } catch (err) {
