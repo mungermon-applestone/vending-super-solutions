@@ -7,6 +7,7 @@ import { BookOpen, Search, FileText, ArrowRight, FileStack, Edit2 } from "lucide
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import SEO from "@/components/seo/SEO";
+import { createContentfulEditHandler } from "@/utils/contentful/urlHelpers";
 
 const KnowledgeBase: React.FC = () => {
   const { data: articlesByCategory, isLoading, error } = useHelpDeskArticlesByCategory({ enableToasts: true });
@@ -188,7 +189,7 @@ const KnowledgeBase: React.FC = () => {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => window.open(`https://app.contentful.com/spaces/${import.meta.env.VITE_CONTENTFUL_SPACE_ID}/entries/${article.sys.id}`, '_blank')}
+                                  onClick={createContentfulEditHandler(article.sys.id)}
                                   className="text-xs h-7"
                                 >
                                   <Edit2 className="h-3 w-3 mr-1" />

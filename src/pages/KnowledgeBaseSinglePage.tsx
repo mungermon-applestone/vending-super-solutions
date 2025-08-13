@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import SEO from "@/components/seo/SEO";
 import { renderRichText } from "@/utils/contentful/richTextRenderer";
+import { createContentfulEditHandler } from "@/utils/contentful/urlHelpers";
 
 const KnowledgeBaseSinglePage: React.FC = () => {
   const { data: articlesByCategory, isLoading, error } = useHelpDeskArticlesByCategory({ enableToasts: true });
@@ -229,7 +230,7 @@ const KnowledgeBaseSinglePage: React.FC = () => {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => window.open(`https://app.contentful.com/spaces/${import.meta.env.VITE_CONTENTFUL_SPACE_ID}/entries/${article.sys.id}`, '_blank')}
+                                      onClick={createContentfulEditHandler(article.sys.id)}
                                       className="text-xs h-7 ml-4"
                                     >
                                       <Edit2 className="h-3 w-3 mr-1" />

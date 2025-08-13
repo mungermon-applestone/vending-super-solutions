@@ -8,6 +8,7 @@ import { ArrowLeft, Calendar, Tag, Clock, Edit2 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import SEO from "@/components/seo/SEO";
 import { renderRichText } from "@/utils/contentful/richTextRenderer";
+import { createContentfulEditHandler } from "@/utils/contentful/urlHelpers";
 
 const KnowledgeBaseArticle: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -145,7 +146,7 @@ const KnowledgeBaseArticle: React.FC = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(`https://app.contentful.com/spaces/${import.meta.env.VITE_CONTENTFUL_SPACE_ID}/entries/${article.sys.id}`, '_blank')}
+                    onClick={createContentfulEditHandler(article.sys.id)}
                     className="shrink-0"
                   >
                     <Edit2 className="h-4 w-4 mr-2" />
