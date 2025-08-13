@@ -3,7 +3,7 @@ import { useHelpDeskArticlesByCategory } from "@/hooks/useHelpDeskArticles";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Search, FileText, ArrowRight, FileStack } from "lucide-react";
+import { BookOpen, Search, FileText, ArrowRight, FileStack, Edit2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import SEO from "@/components/seo/SEO";
@@ -177,11 +177,24 @@ const KnowledgeBase: React.FC = () => {
                             </CardHeader>
                             
                             <CardContent className="pt-0">
-                              {article.fields.headingCategory && (
-                                <Badge variant="outline" className="text-xs">
-                                  {article.fields.headingCategory}
-                                </Badge>
-                              )}
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  {article.fields.headingCategory && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {article.fields.headingCategory}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => window.open(`https://app.contentful.com/spaces/${import.meta.env.VITE_CONTENTFUL_SPACE_ID}/entries/${article.sys.id}`, '_blank')}
+                                  className="text-xs h-7"
+                                >
+                                  <Edit2 className="h-3 w-3 mr-1" />
+                                  Edit in Contentful
+                                </Button>
+                              </div>
                             </CardContent>
                           </Card>
                         );

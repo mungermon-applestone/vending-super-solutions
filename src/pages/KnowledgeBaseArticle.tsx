@@ -4,7 +4,7 @@ import { useHelpDeskArticleBySlug } from "@/hooks/useHelpDeskArticles";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, Tag, Clock } from "lucide-react";
+import { ArrowLeft, Calendar, Tag, Clock, Edit2 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import SEO from "@/components/seo/SEO";
 import { renderRichText } from "@/utils/contentful/richTextRenderer";
@@ -138,9 +138,20 @@ const KnowledgeBaseArticle: React.FC = () => {
                 </div>
 
                 {/* Title */}
-                <h1 className="text-3xl md:text-4xl font-bold leading-tight">
-                  {article.fields.articleTitle}
-                </h1>
+                <div className="flex items-start justify-between gap-4">
+                  <h1 className="text-3xl md:text-4xl font-bold leading-tight flex-1">
+                    {article.fields.articleTitle}
+                  </h1>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(`https://app.contentful.com/spaces/${import.meta.env.VITE_CONTENTFUL_SPACE_ID}/entries/${article.sys.id}`, '_blank')}
+                    className="shrink-0"
+                  >
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Edit in Contentful
+                  </Button>
+                </div>
 
                 {/* Meta Information */}
                 <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">

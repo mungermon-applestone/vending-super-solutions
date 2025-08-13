@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useHelpDeskArticlesByCategory } from "@/hooks/useHelpDeskArticles";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { BookOpen, ArrowLeft, Menu } from "lucide-react";
+import { BookOpen, ArrowLeft, Menu, Edit2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -222,9 +222,20 @@ const KnowledgeBaseSinglePage: React.FC = () => {
                                 className="scroll-mt-24 border rounded-lg p-6 bg-card"
                               >
                                 <header className="mb-6">
-                                  <h3 className="text-2xl font-semibold mb-2">
-                                    {article.fields.articleTitle}
-                                  </h3>
+                                  <div className="flex items-start justify-between mb-2">
+                                    <h3 className="text-2xl font-semibold flex-1">
+                                      {article.fields.articleTitle}
+                                    </h3>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => window.open(`https://app.contentful.com/spaces/${import.meta.env.VITE_CONTENTFUL_SPACE_ID}/entries/${article.sys.id}`, '_blank')}
+                                      className="text-xs h-7 ml-4"
+                                    >
+                                      <Edit2 className="h-3 w-3 mr-1" />
+                                      Edit
+                                    </Button>
+                                  </div>
                                   {article.fields.headingCategory && (
                                     <Badge variant="outline" className="text-xs">
                                       {article.fields.headingCategory}
