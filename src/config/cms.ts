@@ -174,7 +174,7 @@ if (typeof window !== 'undefined' && !window._runtimeConfigLoaded) {
 }
 
 // Export the getEnvVariable function for external use
-export { getEnvVariable };
+export { getEnvVariable, waitForRuntimeConfig };
 
 // Async function to get Contentful configuration
 export async function getContentfulConfig() {
