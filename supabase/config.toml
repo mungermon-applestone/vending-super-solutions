@@ -2,3 +2,5 @@
 project_id = "rwvlvooojegpebognnzn"
 
 [functions.send-contact-email-ses]
+
+[functions.send-support-request]

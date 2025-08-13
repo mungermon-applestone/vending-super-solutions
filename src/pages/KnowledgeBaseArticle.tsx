@@ -9,6 +9,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import SEO from "@/components/seo/SEO";
 import { renderRichText } from "@/utils/contentful/richTextRenderer";
 import { createContentfulEditHandler } from "@/utils/contentful/urlHelpers";
+import SupportRequestForm from "@/components/support/SupportRequestForm";
 
 const KnowledgeBaseArticle: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -203,14 +204,21 @@ const KnowledgeBaseArticle: React.FC = () => {
                   </Link>
                 </Button>
                 
-                <div className="text-sm text-muted-foreground text-center sm:text-right">
-                  <p>Was this article helpful?</p>
-                  <p className="mt-1">
-                    <Link to="/contact" className="text-primary hover:underline">
-                      Contact us
-                    </Link>
-                    {" "}if you need additional assistance.
-                  </p>
+                <div className="space-y-6">
+                  <div className="text-sm text-muted-foreground text-center">
+                    <p>Was this article helpful?</p>
+                  </div>
+                  
+                  <div className="border-t pt-6">
+                    <SupportRequestForm 
+                      formTitle="Need Additional Help?"
+                      context={{
+                        articleTitle: article.fields.articleTitle,
+                        articleSlug: slug,
+                        pageUrl: window.location.href
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
