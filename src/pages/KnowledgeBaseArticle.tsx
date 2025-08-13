@@ -208,21 +208,37 @@ const KnowledgeBaseArticle: React.FC = () => {
                   <div className="text-sm text-muted-foreground text-center">
                     <p>Was this article helpful?</p>
                   </div>
-                  
-                  <div className="border-t pt-6">
-                    <SupportRequestForm 
-                      formTitle="Need Additional Help?"
-                      context={{
-                        articleTitle: article.fields.articleTitle,
-                        articleSlug: slug,
-                        pageUrl: window.location.href
-                      }}
-                    />
-                  </div>
                 </div>
               </div>
             </div>
           </div>
+          
+          {/* Support Request Section */}
+          <section className="bg-blue-50 py-12">
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-white rounded-lg shadow-lg p-8">
+                  <div className="text-center mb-8">
+                    <h2 className="text-2xl font-bold text-vending-blue-dark mb-2">
+                      Need Additional Help?
+                    </h2>
+                    <p className="text-gray-600">
+                      If this article didn't answer your question, submit a support request and we'll get back to you quickly.
+                    </p>
+                  </div>
+                  
+                  <SupportRequestForm 
+                    formTitle=""
+                    context={{
+                      articleTitle: article.fields.articleTitle,
+                      articleSlug: slug,
+                      pageUrl: window.location.href
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </>
