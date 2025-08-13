@@ -23,6 +23,7 @@ import { HelpDeskArticlePreview } from "./pages/preview/HelpDeskArticlePreview";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import KnowledgeBaseArticle from "./pages/KnowledgeBaseArticle";
 import KnowledgeBaseSinglePage from "./pages/KnowledgeBaseSinglePage";
+import AdminMissingImages from "./pages/AdminMissingImages";
 
 /**
  * Router Configuration
@@ -126,6 +127,10 @@ export const router = createBrowserRouter([
       {
         path: "/knowledge-base/:slug",
         element: <KnowledgeBaseArticle />,
+      },
+      {
+        path: "/admin/missing-images",
+        element: <AdminMissingImages />,
       },
       // Redirect all admin routes to Contentful
       {
