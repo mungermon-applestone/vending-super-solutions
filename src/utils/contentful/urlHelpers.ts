@@ -2,7 +2,7 @@
  * Utilities for generating Contentful URLs
  */
 
-import { getContentfulConfig } from '@/services/cms/utils/cmsInfo';
+import { CONTENTFUL_CONFIG } from '@/config/cms';
 
 /**
  * Generate a direct link to edit a Contentful entry
@@ -10,25 +10,22 @@ import { getContentfulConfig } from '@/services/cms/utils/cmsInfo';
  * @returns Promise<string> - The direct edit URL
  */
 export async function getContentfulEditUrl(entryId: string): Promise<string> {
-  const config = await getContentfulConfig();
-  
-  console.log('[getContentfulEditUrl] Debug info:', {
-    entryId,
-    spaceId: config.space_id,
-    environmentId: config.environment_id,
-    hasSpaceId: !!config.space_id
+  console.log('[getContentfulEditUrl] Starting with entryId:', entryId);
+  console.log('[getContentfulEditUrl] CONTENTFUL_CONFIG:', {
+    SPACE_ID: CONTENTFUL_CONFIG.SPACE_ID,
+    ENVIRONMENT_ID: CONTENTFUL_CONFIG.ENVIRONMENT_ID
   });
   
-  if (!config.space_id) {
-    console.warn('Contentful Space ID not found in environment variables');
+  if (!CONTENTFUL_CONFIG.SPACE_ID) {
+    console.warn('Contentful Space ID not found in CONTENTFUL_CONFIG');
     return 'https://app.contentful.com/';
   }
   
-  const spaceId = config.space_id;
-  const environmentId = config.environment_id || 'master';
+  const spaceId = CONTENTFUL_CONFIG.SPACE_ID;
+  const environmentId = CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master';
   
-  // Contentful edit URL format - corrected to include the /editor suffix
-  const editUrl = `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries/${entryId}/editor`;
+  // Contentful edit URL format - try without /editor suffix first
+  const editUrl = `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries/${entryId}`;
   
   console.log('[getContentfulEditUrl] Generated URL:', editUrl);
   
@@ -41,9 +38,23 @@ export async function getContentfulEditUrl(entryId: string): Promise<string> {
  * @returns Function that opens the edit URL
  */
 export function createContentfulEditHandler(entryId: string) {
-  return async () => {
+  return () => {
     try {
-      const editUrl = await getContentfulEditUrl(entryId);
+      console.log('[createContentfulEditHandler] Creating handler for entryId:', entryId);
+      
+      if (!CONTENTFUL_CONFIG.SPACE_ID) {
+        console.warn('Contentful Space ID not configured');
+        window.open('https://app.contentful.com/', '_blank');
+        return;
+      }
+      
+      const spaceId = CONTENTFUL_CONFIG.SPACE_ID;
+      const environmentId = CONTENTFUL_CONFIG.ENVIRONMENT_ID || 'master';
+      
+      // Try the direct URL format that should work
+      const editUrl = `https://app.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries/${entryId}`;
+      
+      console.log('[createContentfulEditHandler] Opening URL:', editUrl);
       window.open(editUrl, '_blank');
     } catch (error) {
       console.error('Failed to open Contentful edit URL:', error);
