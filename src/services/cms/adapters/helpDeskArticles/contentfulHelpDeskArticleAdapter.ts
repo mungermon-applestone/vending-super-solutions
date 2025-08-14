@@ -10,6 +10,7 @@ export interface HelpDeskArticleFields {
   articleContent: any; // Rich text content
   sectionCategory?: string;
   headingCategory?: string;
+  orderWithinSection?: number;
 }
 
 export interface ContentfulHelpDeskArticle {
@@ -41,7 +42,7 @@ export const contentfulHelpDeskArticleAdapter = {
       const response = await client.getEntries({
         content_type: 'helpDeskArticle',
         include: 2,
-        order: 'fields.sectionCategory,fields.articleTitle',
+        order: 'fields.sectionCategory,fields.orderWithinSection,fields.articleTitle',
       });
       
       return response.items as unknown as ContentfulHelpDeskArticle[];

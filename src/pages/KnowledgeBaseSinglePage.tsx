@@ -11,6 +11,7 @@ import { renderRichText } from "@/utils/contentful/richTextRenderer";
 import { createContentfulEditHandler } from "@/utils/contentful/urlHelpers";
 import { useCustomerAuth } from '@/context/CustomerAuthContext';
 import CustomerLayout from '@/components/layout/CustomerLayout';
+import { sortArticlesByCategory } from "@/utils/knowledgeBaseUtils";
 
 const KnowledgeBaseSinglePage: React.FC = () => {
   const { data: articlesByCategory, isLoading, error } = useHelpDeskArticlesByCategory({ enableToasts: true });
@@ -86,7 +87,7 @@ const KnowledgeBaseSinglePage: React.FC = () => {
     );
   }
 
-  const sortedCategories = Object.entries(articlesByCategory).sort(([a], [b]) => a.localeCompare(b));
+  const sortedCategories = sortArticlesByCategory(articlesByCategory);
 
   const content = (
     <>

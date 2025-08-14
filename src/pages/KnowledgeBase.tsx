@@ -10,30 +10,39 @@ import SEO from "@/components/seo/SEO";
 import { createContentfulEditHandler } from "@/utils/contentful/urlHelpers";
 import { useCustomerAuth } from '@/context/CustomerAuthContext';
 import CustomerLayout from '@/components/layout/CustomerLayout';
+import { sortArticlesByCategory } from "@/utils/knowledgeBaseUtils";
 
 const KnowledgeBase: React.FC = () => {
   const { data: articlesByCategory, isLoading, error } = useHelpDeskArticlesByCategory({ enableToasts: true });
   const [searchTerm, setSearchTerm] = React.useState("");
   const { isCustomerAuthenticated } = useCustomerAuth();
 
-  // Filter articles based on search term
+  // Filter articles based on search term and apply sorting
   const filteredCategories = React.useMemo(() => {
-    if (!articlesByCategory || !searchTerm) return articlesByCategory;
+    if (!articlesByCategory) return [];
 
-    const filtered: Record<string, typeof articlesByCategory[string]> = {};
+    let dataToProcess = articlesByCategory;
     
-    Object.entries(articlesByCategory).forEach(([category, articles]) => {
-      const matchingArticles = articles.filter(article =>
-        article.fields.articleTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        category.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    // Filter if search term is present
+    if (searchTerm) {
+      const filtered: Record<string, typeof articlesByCategory[string]> = {};
       
-      if (matchingArticles.length > 0) {
-        filtered[category] = matchingArticles;
-      }
-    });
+      Object.entries(articlesByCategory).forEach(([category, articles]) => {
+        const matchingArticles = articles.filter(article =>
+          article.fields.articleTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          category.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        
+        if (matchingArticles.length > 0) {
+          filtered[category] = matchingArticles;
+        }
+      });
+      
+      dataToProcess = filtered;
+    }
     
-    return filtered;
+    // Apply sorting to filtered/unfiltered data
+    return sortArticlesByCategory(dataToProcess);
   }, [articlesByCategory, searchTerm]);
 
   // Get total article count
@@ -142,11 +151,9 @@ const KnowledgeBase: React.FC = () => {
 
         {/* Articles by Category */}
         <div className="container mx-auto px-4 pb-16">
-          {filteredCategories && Object.keys(filteredCategories).length > 0 ? (
+          {filteredCategories && filteredCategories.length > 0 ? (
             <div className="space-y-12">
-              {Object.entries(filteredCategories)
-                .sort(([a], [b]) => a.localeCompare(b))
-                .map(([category, articles]) => (
+              {filteredCategories.map(([category, articles]) => (
                   <section key={category} className="max-w-6xl mx-auto">
                     <div className="mb-8">
                       <h2 className="text-2xl font-bold mb-2 flex items-center gap-3">
