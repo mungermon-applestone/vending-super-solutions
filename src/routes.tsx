@@ -124,39 +124,6 @@ export const router = createBrowserRouter([
         path: "/customer-login",
         element: <CustomerLogin />,
       },
-      // Protected customer routes
-      {
-        path: "/knowledge-base",
-        element: (
-          <CustomerProtectedRoute>
-            <KnowledgeBase />
-          </CustomerProtectedRoute>
-        ),
-      },
-      {
-        path: "/knowledge-base/single-page",
-        element: (
-          <CustomerProtectedRoute>
-            <KnowledgeBaseSinglePage />
-          </CustomerProtectedRoute>
-        ),
-      },
-      {
-        path: "/knowledge-base/:slug",
-        element: (
-          <CustomerProtectedRoute>
-            <KnowledgeBaseArticle />
-          </CustomerProtectedRoute>
-        ),
-      },
-      {
-        path: "/support-ticket",
-        element: (
-          <CustomerProtectedRoute>
-            <CustomerSupportTicket />
-          </CustomerProtectedRoute>
-        ),
-      },
       {
         path: "/admin/missing-images",
         element: <AdminMissingImages />,
@@ -171,5 +138,38 @@ export const router = createBrowserRouter([
         element: <Navigate to="https://app.contentful.com" replace />,
       },
     ],
+  },
+  // Customer portal routes (separate from main layout)
+  {
+    path: "/knowledge-base",
+    element: (
+      <CustomerProtectedRoute>
+        <KnowledgeBase />
+      </CustomerProtectedRoute>
+    ),
+  },
+  {
+    path: "/knowledge-base/single-page",
+    element: (
+      <CustomerProtectedRoute>
+        <KnowledgeBaseSinglePage />
+      </CustomerProtectedRoute>
+    ),
+  },
+  {
+    path: "/knowledge-base/:slug",
+    element: (
+      <CustomerProtectedRoute>
+        <KnowledgeBaseArticle />
+      </CustomerProtectedRoute>
+    ),
+  },
+  {
+    path: "/support-ticket",
+    element: (
+      <CustomerProtectedRoute>
+        <CustomerSupportTicket />
+      </CustomerProtectedRoute>
+    ),
   },
 ]);

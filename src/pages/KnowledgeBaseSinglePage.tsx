@@ -271,13 +271,8 @@ const KnowledgeBaseSinglePage: React.FC = () => {
     </>
   );
 
-  // If customer is authenticated, wrap with customer layout
-  if (isCustomerAuthenticated) {
-    return <CustomerLayout>{content}</CustomerLayout>;
-  }
-
-  // Otherwise return content as-is (this should never happen due to protected route)
-  return content;
+  // Always wrap with customer layout since this is a protected route
+  return <CustomerLayout>{content}</CustomerLayout>;
 };
 
 export default KnowledgeBaseSinglePage;
