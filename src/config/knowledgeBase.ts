@@ -5,7 +5,7 @@
 
 export const KNOWLEDGE_BASE_SECTION_ORDER = [
   'Overview',
-  'Before you start', 
+  'Before You Start', 
   'Administrative Console',
   'Loader Application',
   'Reports',
