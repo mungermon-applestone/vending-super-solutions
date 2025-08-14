@@ -9,12 +9,15 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/componen
 import SEO from "@/components/seo/SEO";
 import { renderRichText } from "@/utils/contentful/richTextRenderer";
 import { createContentfulEditHandler } from "@/utils/contentful/urlHelpers";
+import { useCustomerAuth } from '@/context/CustomerAuthContext';
+import CustomerLayout from '@/components/layout/CustomerLayout';
 
 const KnowledgeBaseSinglePage: React.FC = () => {
   const { data: articlesByCategory, isLoading, error } = useHelpDeskArticlesByCategory({ enableToasts: true });
   const [activeSection, setActiveSection] = React.useState<string>("");
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const sectionRefs = useRef<Record<string, HTMLElement>>({});
+  const { isCustomerAuthenticated } = useCustomerAuth();
 
   // Generate anchor ID from text
   const generateAnchorId = (text: string) => {
@@ -85,9 +88,9 @@ const KnowledgeBaseSinglePage: React.FC = () => {
 
   const sortedCategories = Object.entries(articlesByCategory).sort(([a], [b]) => a.localeCompare(b));
 
-  return (
+  const content = (
     <>
-      <SEO 
+      <SEO
         title="Knowledge Base - Complete Guide"
         description="Complete knowledge base with all help articles on a single page. Browse all topics and articles in one convenient location."
         type="website"
@@ -267,6 +270,14 @@ const KnowledgeBaseSinglePage: React.FC = () => {
       </div>
     </>
   );
+
+  // If customer is authenticated, wrap with customer layout
+  if (isCustomerAuthenticated) {
+    return <CustomerLayout>{content}</CustomerLayout>;
+  }
+
+  // Otherwise return content as-is (this should never happen due to protected route)
+  return content;
 };
 
 export default KnowledgeBaseSinglePage;

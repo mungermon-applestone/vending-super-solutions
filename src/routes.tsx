@@ -24,6 +24,9 @@ import KnowledgeBase from "./pages/KnowledgeBase";
 import KnowledgeBaseArticle from "./pages/KnowledgeBaseArticle";
 import KnowledgeBaseSinglePage from "./pages/KnowledgeBaseSinglePage";
 import AdminMissingImages from "./pages/AdminMissingImages";
+import CustomerLogin from "./pages/CustomerLogin";
+import CustomerSupportTicket from "./pages/CustomerSupportTicket";
+import CustomerProtectedRoute from "./components/auth/CustomerProtectedRoute";
 
 /**
  * Router Configuration
@@ -116,17 +119,43 @@ export const router = createBrowserRouter([
         path: "/preview/help-desk-articles/:slug",
         element: <HelpDeskArticlePreview />,
       },
+      // Customer login route (not protected)
+      {
+        path: "/customer-login",
+        element: <CustomerLogin />,
+      },
+      // Protected customer routes
       {
         path: "/knowledge-base",
-        element: <KnowledgeBase />,
+        element: (
+          <CustomerProtectedRoute>
+            <KnowledgeBase />
+          </CustomerProtectedRoute>
+        ),
       },
       {
         path: "/knowledge-base/single-page",
-        element: <KnowledgeBaseSinglePage />,
+        element: (
+          <CustomerProtectedRoute>
+            <KnowledgeBaseSinglePage />
+          </CustomerProtectedRoute>
+        ),
       },
       {
         path: "/knowledge-base/:slug",
-        element: <KnowledgeBaseArticle />,
+        element: (
+          <CustomerProtectedRoute>
+            <KnowledgeBaseArticle />
+          </CustomerProtectedRoute>
+        ),
+      },
+      {
+        path: "/support-ticket",
+        element: (
+          <CustomerProtectedRoute>
+            <CustomerSupportTicket />
+          </CustomerProtectedRoute>
+        ),
       },
       {
         path: "/admin/missing-images",

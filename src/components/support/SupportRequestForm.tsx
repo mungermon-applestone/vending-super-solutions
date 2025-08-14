@@ -18,6 +18,7 @@ export interface SupportRequestFormProps {
     articleTitle?: string;
     articleSlug?: string;
     pageUrl?: string;
+    customerPortal?: boolean;
   };
   /** Callback function when form is submitted successfully */
   onSuccess?: () => void;

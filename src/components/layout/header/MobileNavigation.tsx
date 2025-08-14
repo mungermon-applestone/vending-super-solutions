@@ -66,6 +66,13 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
             path="/contact" 
             onClick={onClose} 
           />
+          <div className="border-t pt-4 mt-4">
+            <MobileNavItem 
+              title="Customer Login"
+              path="/customer-login" 
+              onClick={onClose} 
+            />
+          </div>
         </nav>
       </div>
     </div>

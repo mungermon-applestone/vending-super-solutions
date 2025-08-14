@@ -10,10 +10,13 @@ import SEO from "@/components/seo/SEO";
 import { renderRichText } from "@/utils/contentful/richTextRenderer";
 import { createContentfulEditHandler } from "@/utils/contentful/urlHelpers";
 import SupportRequestForm from "@/components/support/SupportRequestForm";
+import { useCustomerAuth } from '@/context/CustomerAuthContext';
+import CustomerLayout from '@/components/layout/CustomerLayout';
 
 const KnowledgeBaseArticle: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { isCustomerAuthenticated } = useCustomerAuth();
   
   const { data: article, isLoading, error } = useHelpDeskArticleBySlug(
     slug ? decodeURIComponent(slug) : undefined,
@@ -79,9 +82,9 @@ const KnowledgeBaseArticle: React.FC = () => {
   const publishedDate = article.sys.publishedAt ? new Date(article.sys.publishedAt) : null;
   const updatedDate = new Date(article.sys.updatedAt);
 
-  return (
+  const content = (
     <>
-      <SEO 
+      <SEO
         title={`${article.fields.articleTitle} - Knowledge Base`}
         description={`Learn about ${article.fields.articleTitle}. Find step-by-step instructions and helpful information in our knowledge base.`}
         type="article"
@@ -243,6 +246,14 @@ const KnowledgeBaseArticle: React.FC = () => {
       </div>
     </>
   );
+
+  // If customer is authenticated, wrap with customer layout
+  if (isCustomerAuthenticated) {
+    return <CustomerLayout>{content}</CustomerLayout>;
+  }
+
+  // Otherwise return content as-is (this should never happen due to protected route)
+  return content;
 };
 
 export default KnowledgeBaseArticle;

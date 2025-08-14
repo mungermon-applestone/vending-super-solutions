@@ -8,10 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import SEO from "@/components/seo/SEO";
 import { createContentfulEditHandler } from "@/utils/contentful/urlHelpers";
+import { useCustomerAuth } from '@/context/CustomerAuthContext';
+import CustomerLayout from '@/components/layout/CustomerLayout';
 
 const KnowledgeBase: React.FC = () => {
   const { data: articlesByCategory, isLoading, error } = useHelpDeskArticlesByCategory({ enableToasts: true });
   const [searchTerm, setSearchTerm] = React.useState("");
+  const { isCustomerAuthenticated } = useCustomerAuth();
 
   // Filter articles based on search term
   const filteredCategories = React.useMemo(() => {
@@ -70,7 +73,7 @@ const KnowledgeBase: React.FC = () => {
     );
   }
 
-  return (
+  const content = (
     <>
       <SEO 
         title="Knowledge Base - Help Center"
@@ -238,6 +241,14 @@ const KnowledgeBase: React.FC = () => {
       </div>
     </>
   );
+
+  // If customer is authenticated, wrap with customer layout
+  if (isCustomerAuthenticated) {
+    return <CustomerLayout>{content}</CustomerLayout>;
+  }
+
+  // Otherwise return content as-is (this should never happen due to protected route)
+  return content;
 };
 
 export default KnowledgeBase;

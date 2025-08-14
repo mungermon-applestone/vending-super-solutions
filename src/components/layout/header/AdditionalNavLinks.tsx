@@ -77,6 +77,13 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
       >
         <Link to="/contact">{navigationContent.contact}</Link>
       </Button>
+      <Button 
+        asChild
+        variant="outline"
+        className="ml-2"
+      >
+        <Link to="/customer-login">Customer Login</Link>
+      </Button>
     </div>
   );
 };

@@ -6,6 +6,7 @@ import './index.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { BreadcrumbProvider } from './context/BreadcrumbContext';
+import { CustomerAuthProvider } from './context/CustomerAuthContext';
 import { reportWebVitals, sendToAnalytics } from './utils/webVitalsMonitoring';
 import { toast } from 'sonner';
 import { optimizeForBots, isBot } from './utils/botDetection';
@@ -152,9 +153,11 @@ const renderApp = () => {
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <BreadcrumbProvider>
-              <App />
-            </BreadcrumbProvider>
+            <CustomerAuthProvider>
+              <BreadcrumbProvider>
+                <App />
+              </BreadcrumbProvider>
+            </CustomerAuthProvider>
           </AuthProvider>
         </QueryClientProvider>
       </HelmetProvider>
