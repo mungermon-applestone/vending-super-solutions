@@ -133,18 +133,9 @@ if (typeof window !== 'undefined' && !window._runtimeConfigLoaded) {
         window._runtimeConfig = config;
         window._runtimeConfigLoaded = true;
         
-        // Update the synchronous CONTENTFUL_CONFIG object
+        // Update only public configuration in the synchronous CONTENTFUL_CONFIG object
         if (config.VITE_CONTENTFUL_SPACE_ID) {
           CONTENTFUL_CONFIG.SPACE_ID = config.VITE_CONTENTFUL_SPACE_ID;
-        }
-        if (config.VITE_CONTENTFUL_DELIVERY_TOKEN) {
-          CONTENTFUL_CONFIG.DELIVERY_TOKEN = config.VITE_CONTENTFUL_DELIVERY_TOKEN;
-        }
-        if (config.VITE_CONTENTFUL_PREVIEW_TOKEN) {
-          CONTENTFUL_CONFIG.PREVIEW_TOKEN = config.VITE_CONTENTFUL_PREVIEW_TOKEN;
-        }
-        if (config.VITE_CONTENTFUL_MANAGEMENT_TOKEN) {
-          CONTENTFUL_CONFIG.MANAGEMENT_TOKEN = config.VITE_CONTENTFUL_MANAGEMENT_TOKEN;
         }
         if (config.VITE_CONTENTFUL_ENVIRONMENT_ID) {
           CONTENTFUL_CONFIG.ENVIRONMENT_ID = config.VITE_CONTENTFUL_ENVIRONMENT_ID;
@@ -152,7 +143,6 @@ if (typeof window !== 'undefined' && !window._runtimeConfigLoaded) {
         
         console.log('[cms.ts] Updated synchronous CONTENTFUL_CONFIG:', {
           hasSpaceId: !!CONTENTFUL_CONFIG.SPACE_ID,
-          hasDeliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
           environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID
         });
         
@@ -176,23 +166,58 @@ if (typeof window !== 'undefined' && !window._runtimeConfigLoaded) {
 // Export the getEnvVariable function for external use
 export { getEnvVariable, waitForRuntimeConfig };
 
-// Async function to get Contentful configuration
+// Secure function to get Contentful configuration using edge function (admin only)
 export async function getContentfulConfig() {
-  return {
-    SPACE_ID: await getEnvVariable('VITE_CONTENTFUL_SPACE_ID'),
-    DELIVERY_TOKEN: await getEnvVariable('VITE_CONTENTFUL_DELIVERY_TOKEN'),
-    PREVIEW_TOKEN: await getEnvVariable('VITE_CONTENTFUL_PREVIEW_TOKEN'),
-    MANAGEMENT_TOKEN: await getEnvVariable('VITE_CONTENTFUL_MANAGEMENT_TOKEN'),
-    ENVIRONMENT_ID: (await getEnvVariable('VITE_CONTENTFUL_ENVIRONMENT_ID')) || 'master'
-  };
+  try {
+    // Import Supabase client
+    const { supabase } = await import('@/integrations/supabase/client');
+    
+    // Get current user session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      throw new Error('Authentication required for Contentful configuration');
+    }
+
+    // Call secure edge function with auth token
+    const { data, error } = await supabase.functions.invoke('get-contentful-config', {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (error) {
+      console.error('[getContentfulConfig] Edge function error:', error);
+      throw new Error('Failed to get Contentful configuration');
+    }
+
+    return {
+      SPACE_ID: data.VITE_CONTENTFUL_SPACE_ID || '',
+      DELIVERY_TOKEN: data.VITE_CONTENTFUL_DELIVERY_TOKEN || '',
+      PREVIEW_TOKEN: data.VITE_CONTENTFUL_PREVIEW_TOKEN || '',
+      MANAGEMENT_TOKEN: data.VITE_CONTENTFUL_MANAGEMENT_TOKEN || '',
+      ENVIRONMENT_ID: data.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
+    };
+  } catch (error) {
+    console.error('[getContentfulConfig] Error:', error);
+    // Return public-only configuration for non-admin users
+    return {
+      SPACE_ID: await getEnvVariable('VITE_CONTENTFUL_SPACE_ID'),
+      DELIVERY_TOKEN: '', // Sensitive - not accessible client-side
+      PREVIEW_TOKEN: '', // Sensitive - not accessible client-side
+      MANAGEMENT_TOKEN: '', // Sensitive - not accessible client-side
+      ENVIRONMENT_ID: (await getEnvVariable('VITE_CONTENTFUL_ENVIRONMENT_ID')) || 'master'
+    };
+  }
 }
 
-// Sync fallback for legacy code - populate from import.meta.env initially, then update from runtime config
+// Sync fallback for legacy code - only contains public configuration
+// Sensitive tokens are now only accessible through secure edge function
 export const CONTENTFUL_CONFIG = {
   SPACE_ID: import.meta.env.VITE_CONTENTFUL_SPACE_ID || '',
-  DELIVERY_TOKEN: import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN || '',
-  PREVIEW_TOKEN: import.meta.env.VITE_CONTENTFUL_PREVIEW_TOKEN || '',
-  MANAGEMENT_TOKEN: import.meta.env.VITE_CONTENTFUL_MANAGEMENT_TOKEN || '',
+  DELIVERY_TOKEN: '', // Removed - use getContentfulConfig() for admin access
+  PREVIEW_TOKEN: '', // Removed - use getContentfulConfig() for admin access  
+  MANAGEMENT_TOKEN: '', // Removed - use getContentfulConfig() for admin access
   ENVIRONMENT_ID: import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
 };
 
@@ -223,11 +248,13 @@ export function isPreviewEnvironment() {
 }
 
 export function checkContentfulConfig() {
-  const { SPACE_ID, DELIVERY_TOKEN } = CONTENTFUL_CONFIG;
+  const { SPACE_ID } = CONTENTFUL_CONFIG;
   const missingValues = [];
   
   if (!SPACE_ID) missingValues.push('CONTENTFUL_SPACE_ID');
-  if (!DELIVERY_TOKEN) missingValues.push('CONTENTFUL_DELIVERY_TOKEN');
+  
+  // Note: DELIVERY_TOKEN is no longer checked here as it's secured server-side
+  // Admin users can access it through getContentfulConfig()
   
   return {
     isConfigured: missingValues.length === 0,
@@ -242,29 +269,28 @@ export function isContentfulConfigured() {
     return true;
   }
   
-  // Check runtime config first if available
+  // Check runtime config first if available (public config only)
   if (typeof window !== 'undefined' && window._runtimeConfig) {
-    const hasRuntimeConfig = !!(window._runtimeConfig.VITE_CONTENTFUL_SPACE_ID && window._runtimeConfig.VITE_CONTENTFUL_DELIVERY_TOKEN);
+    const hasRuntimeConfig = !!window._runtimeConfig.VITE_CONTENTFUL_SPACE_ID;
     if (hasRuntimeConfig) {
       return true;
     }
   }
   
-  // Check window.env as fallback
+  // Check window.env as fallback (public config only)
   if (typeof window !== 'undefined' && window.env) {
-    const hasWindowEnv = !!(window.env.VITE_CONTENTFUL_SPACE_ID && window.env.VITE_CONTENTFUL_DELIVERY_TOKEN);
+    const hasWindowEnv = !!window.env.VITE_CONTENTFUL_SPACE_ID;
     if (hasWindowEnv) {
       return true;
     }
   }
   
-  // Check the synchronous config object
+  // Check the synchronous config object (public config only)
   const config = checkContentfulConfig();
   
   // Additional check for placeholder values
   const hasPlaceholders = 
     CONTENTFUL_CONFIG.SPACE_ID?.includes('{{') || 
-    CONTENTFUL_CONFIG.DELIVERY_TOKEN?.includes('{{') ||
     CONTENTFUL_CONFIG.ENVIRONMENT_ID?.includes('{{');
   
   if (hasPlaceholders) {
@@ -279,14 +305,12 @@ export function isContentfulConfigured() {
 export function logContentfulConfig() {
   console.log('[cms.ts] Current Contentful configuration:', {
     spaceId: CONTENTFUL_CONFIG.SPACE_ID,
-    hasDeliveryToken: !!CONTENTFUL_CONFIG.DELIVERY_TOKEN,
-    deliveryTokenPreview: CONTENTFUL_CONFIG.DELIVERY_TOKEN ? 
-      `${CONTENTFUL_CONFIG.DELIVERY_TOKEN.substring(0, 4)}...` : 'not set',
     environment: CONTENTFUL_CONFIG.ENVIRONMENT_ID,
     isConfigured: isContentfulConfigured(),
     isPreview: isPreviewEnvironment(),
     windowEnvExists: typeof window !== 'undefined' && !!window.env,
-    source: typeof window !== 'undefined' ? window._contentfulInitializedSource : undefined
+    source: typeof window !== 'undefined' ? window._contentfulInitializedSource : undefined,
+    note: 'Sensitive tokens are now secured server-side via edge function'
   });
 }
 
