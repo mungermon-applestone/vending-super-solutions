@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useNavigationContent } from '@/hooks/cms/useNavigationContent';
+import { LogIn } from 'lucide-react';
 
 interface AdditionalNavLinksProps {
   isAboutActive?: boolean;
@@ -79,10 +80,13 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
       </Button>
       <Button 
         asChild
-        variant="outline"
-        className="ml-2"
+        variant="default"
+        className="ml-2 bg-vending-blue hover:bg-vending-blue-dark text-white border-0 gap-2"
       >
-        <Link to="/customer-login">Customer Login</Link>
+        <Link to="/customer-login">
+          <LogIn className="h-4 w-4" />
+          Customer Login
+        </Link>
       </Button>
     </div>
   );

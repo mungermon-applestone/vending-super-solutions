@@ -1,8 +1,10 @@
 
 import React from 'react';
 import MobileNavItem from './MobileNavItem';
-import { X } from 'lucide-react';
+import { X, LogIn } from 'lucide-react';
 import { useNavigationContent } from '@/hooks/cms/useNavigationContent';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface MobileNavigationProps {
   isOpen: boolean;
@@ -67,11 +69,17 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
             onClick={onClose} 
           />
           <div className="border-t pt-4 mt-4">
-            <MobileNavItem 
-              title="Customer Login"
-              path="/customer-login" 
-              onClick={onClose} 
-            />
+            <Button 
+              asChild
+              variant="default"
+              className="w-full bg-vending-blue hover:bg-vending-blue-dark text-white gap-2"
+              onClick={onClose}
+            >
+              <Link to="/customer-login">
+                <LogIn className="h-4 w-4" />
+                Customer Login
+              </Link>
+            </Button>
           </div>
         </nav>
       </div>
