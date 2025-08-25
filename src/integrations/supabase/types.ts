@@ -137,21 +137,6 @@ export type Database = {
         }
         Relationships: []
       }
-      Secrets: {
-        Row: {
-          name: string
-          value: string
-        }
-        Insert: {
-          name: string
-          value: string
-        }
-        Update: {
-          name?: string
-          value?: string
-        }
-        Relationships: []
-      }
       technologies: {
         Row: {
           created_at: string
