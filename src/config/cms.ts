@@ -169,6 +169,20 @@ export { getEnvVariable, waitForRuntimeConfig };
 // Secure function to get Contentful configuration using edge function (admin only)
 export async function getContentfulConfig() {
   try {
+    // In preview environments, use runtime config directly without authentication
+    if (isPreviewEnvironment()) {
+      console.log('[getContentfulConfig] Preview environment detected, using runtime config');
+      await waitForRuntimeConfig();
+      
+      return {
+        SPACE_ID: await getEnvVariable('VITE_CONTENTFUL_SPACE_ID'),
+        DELIVERY_TOKEN: await getEnvVariable('VITE_CONTENTFUL_DELIVERY_TOKEN'),
+        PREVIEW_TOKEN: await getEnvVariable('VITE_CONTENTFUL_PREVIEW_TOKEN'),
+        MANAGEMENT_TOKEN: await getEnvVariable('VITE_CONTENTFUL_MANAGEMENT_TOKEN'),
+        ENVIRONMENT_ID: (await getEnvVariable('VITE_CONTENTFUL_ENVIRONMENT_ID')) || 'master'
+      };
+    }
+
     // Import Supabase client
     const { supabase } = await import('@/integrations/supabase/client');
     
@@ -200,13 +214,30 @@ export async function getContentfulConfig() {
     };
   } catch (error) {
     console.error('[getContentfulConfig] Error:', error);
+    // Fallback: try runtime config for all tokens
+    await waitForRuntimeConfig();
+    
+    const runtimeConfig = {
+      SPACE_ID: await getEnvVariable('VITE_CONTENTFUL_SPACE_ID'),
+      DELIVERY_TOKEN: await getEnvVariable('VITE_CONTENTFUL_DELIVERY_TOKEN'),
+      PREVIEW_TOKEN: await getEnvVariable('VITE_CONTENTFUL_PREVIEW_TOKEN'),
+      MANAGEMENT_TOKEN: await getEnvVariable('VITE_CONTENTFUL_MANAGEMENT_TOKEN'),
+      ENVIRONMENT_ID: (await getEnvVariable('VITE_CONTENTFUL_ENVIRONMENT_ID')) || 'master'
+    };
+    
+    // If runtime config has tokens, use it; otherwise return public-only
+    if (runtimeConfig.DELIVERY_TOKEN) {
+      console.log('[getContentfulConfig] Using runtime config fallback with tokens');
+      return runtimeConfig;
+    }
+    
     // Return public-only configuration for non-admin users
     return {
-      SPACE_ID: await getEnvVariable('VITE_CONTENTFUL_SPACE_ID'),
+      SPACE_ID: runtimeConfig.SPACE_ID,
       DELIVERY_TOKEN: '', // Sensitive - not accessible client-side
       PREVIEW_TOKEN: '', // Sensitive - not accessible client-side
       MANAGEMENT_TOKEN: '', // Sensitive - not accessible client-side
-      ENVIRONMENT_ID: (await getEnvVariable('VITE_CONTENTFUL_ENVIRONMENT_ID')) || 'master'
+      ENVIRONMENT_ID: runtimeConfig.ENVIRONMENT_ID
     };
   }
 }

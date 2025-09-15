@@ -35,36 +35,42 @@ export const getContentfulClient = async (forceRefresh = false) => {
       environment: config.ENVIRONMENT_ID
     });
     
-    // Extra check to ensure we have credentials
-    if (!config.SPACE_ID || !config.DELIVERY_TOKEN) {
-      console.error('[contentfulClient] Missing Contentful configuration');
+    // Check credentials and try multiple fallback sources
+    let spaceId = config.SPACE_ID;
+    let accessToken = config.DELIVERY_TOKEN;
+    let environmentId = config.ENVIRONMENT_ID || 'master';
+
+    // If we don't have credentials from secure config, try runtime sources
+    if (!spaceId || !accessToken) {
+      console.log('[contentfulClient] Missing secure config, trying runtime sources');
       
-      // Check if we have window.env credentials
-      if (typeof window !== 'undefined' && window.env) {
-        console.log('[contentfulClient] Trying window.env credentials');
-        if (!window.env.VITE_CONTENTFUL_SPACE_ID || !window.env.VITE_CONTENTFUL_DELIVERY_TOKEN) {
-          throw new Error('Contentful is not configured. Please set your Space ID and Delivery Token in the environment variables.');
-        }
-        
-        // Create client with window.env credentials
-        contentfulClient = createClient({
-          space: window.env.VITE_CONTENTFUL_SPACE_ID,
-          accessToken: window.env.VITE_CONTENTFUL_DELIVERY_TOKEN,
-          environment: window.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master',
-          retryOnError: true,
-        });
-      } else {
-        throw new Error('Contentful is not configured. Please set your Space ID and Delivery Token in the environment variables.');
+      // Try window._runtimeConfig first
+      if (typeof window !== 'undefined' && window._runtimeConfig) {
+        spaceId = spaceId || window._runtimeConfig.VITE_CONTENTFUL_SPACE_ID;
+        accessToken = accessToken || window._runtimeConfig.VITE_CONTENTFUL_DELIVERY_TOKEN;
+        environmentId = environmentId || window._runtimeConfig.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
       }
-    } else {
-      // Create client with fresh config
-      contentfulClient = createClient({
-        space: config.SPACE_ID,
-        accessToken: config.DELIVERY_TOKEN,
-        environment: config.ENVIRONMENT_ID || 'master',
-        retryOnError: true,
-      });
+      
+      // Try window.env as fallback
+      if ((!spaceId || !accessToken) && typeof window !== 'undefined' && window.env) {
+        spaceId = spaceId || window.env.VITE_CONTENTFUL_SPACE_ID;
+        accessToken = accessToken || window.env.VITE_CONTENTFUL_DELIVERY_TOKEN;
+        environmentId = environmentId || window.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master';
+      }
     }
+
+    // Final validation
+    if (!spaceId || !accessToken) {
+      throw new Error('Contentful is not configured. Please set your Space ID and Delivery Token in the environment variables.');
+    }
+
+    // Create client with available credentials
+    contentfulClient = createClient({
+      space: spaceId,
+      accessToken: accessToken,
+      environment: environmentId,
+      retryOnError: true,
+    });
 
     // Reset connection attempts on successful creation
     connectionAttempts = 0;
@@ -76,15 +82,13 @@ export const getContentfulClient = async (forceRefresh = false) => {
     if (typeof window !== 'undefined') {
       try {
         const credentialsToSave = {
-          VITE_CONTENTFUL_SPACE_ID: config.SPACE_ID || window.env?.VITE_CONTENTFUL_SPACE_ID,
-          VITE_CONTENTFUL_DELIVERY_TOKEN: config.DELIVERY_TOKEN || window.env?.VITE_CONTENTFUL_DELIVERY_TOKEN,
-          VITE_CONTENTFUL_ENVIRONMENT_ID: config.ENVIRONMENT_ID || window.env?.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
+          VITE_CONTENTFUL_SPACE_ID: spaceId,
+          VITE_CONTENTFUL_DELIVERY_TOKEN: accessToken,
+          VITE_CONTENTFUL_ENVIRONMENT_ID: environmentId
         };
         
-        if (credentialsToSave.VITE_CONTENTFUL_SPACE_ID && credentialsToSave.VITE_CONTENTFUL_DELIVERY_TOKEN) {
-          localStorage.setItem('contentful_credentials', JSON.stringify(credentialsToSave));
-          console.log('[contentfulClient] Saved working credentials to localStorage');
-        }
+        localStorage.setItem('contentful_credentials', JSON.stringify(credentialsToSave));
+        console.log('[contentfulClient] Saved working credentials to localStorage');
       } catch (storageError) {
         console.warn('[contentfulClient] Could not save credentials to localStorage:', storageError);
       }
@@ -121,16 +125,7 @@ export const testContentfulConnection = async (silent = false) => {
       console.log('[testContentfulConnection] Testing Contentful connection');
     }
     
-    const config = await getContentfulConfig();
-    if (!config.SPACE_ID || !config.DELIVERY_TOKEN) {
-      console.error('[testContentfulConnection] Missing Contentful configuration');
-      return { 
-        success: false, 
-        message: 'Contentful is not configured. Please set your Space ID and Delivery Token.'
-      };
-    }
-    
-    // Always get a fresh client for the test
+    // Always get a fresh client for the test, but don't require config validation upfront
     const client = await getContentfulClient(false);
     
     // Make a simple request to verify the connection works
