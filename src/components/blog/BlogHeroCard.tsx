@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Calendar } from "lucide-react";
 import { ContentfulBlogPost } from "@/hooks/useContentfulBlogPosts";
 import Image from "@/components/common/Image";
+import RichTextPreview from "./RichTextPreview";
 
 interface BlogHeroCardProps {
   post: ContentfulBlogPost;
@@ -16,15 +17,15 @@ const BlogHeroCard: React.FC<BlogHeroCardProps> = ({ post }) => {
     post.featuredImage?.url || placeholder;
 
   return (
-    <div className="relative bg-white rounded-2xl shadow-lg md:flex mb-10 overflow-hidden min-h-[340px]">
-      <div className="md:flex-shrink-0 w-full md:w-5/12 h-60 md:h-auto relative">
+    <div className="relative bg-white rounded-2xl shadow-lg md:flex mb-10 overflow-hidden min-h-[420px]">
+      <div className="md:flex-shrink-0 w-full md:w-5/12 h-64 md:h-auto relative">
         <Image
           src={imageUrl}
           alt={post.featuredImage?.title || post.title}
           className="object-cover w-full h-full"
         />
       </div>
-      <div className="flex flex-col p-8 justify-center md:w-7/12">
+      <div className="flex flex-col p-8 justify-between md:w-7/12">
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
           <Calendar className="w-4 h-4 mr-1 inline" />
           {post.publishDate && (
@@ -42,12 +43,18 @@ const BlogHeroCard: React.FC<BlogHeroCardProps> = ({ post }) => {
             {post.title}
           </Link>
         </h2>
-        <p className="text-gray-600 text-base mb-6 line-clamp-3">
-          {post.excerpt ||
-            (typeof post.content === "string"
-              ? post.content.slice(0, 140) + "..."
-              : "No excerpt available")}
-        </p>
+        <div className="text-gray-600 text-base mb-6 flex-1 overflow-hidden">
+          {post.content && typeof post.content === 'object' ? (
+            <RichTextPreview content={post.content} maxParagraphs={3} />
+          ) : (
+            <p>
+              {post.excerpt ||
+                (typeof post.content === "string"
+                  ? post.content.slice(0, 200) + "..."
+                  : "No excerpt available")}
+            </p>
+          )}
+        </div>
         <Link
           to={`/blog/${post.slug}`}
           className="inline-flex items-center mt-auto text-primary hover:underline text-base font-medium group"
