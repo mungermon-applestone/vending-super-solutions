@@ -97,15 +97,15 @@ const BlogPageContent: React.FC = () => {
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {olderPosts.map((post) => (
                   <Card key={post.id} className="flex flex-col h-full shadow-md hover:shadow-lg transition-shadow">
-                    {post.featuredImage?.url && (
-                      <div className="relative w-full h-48 rounded-t-lg overflow-hidden">
-                        <Image
-                          src={post.featuredImage.url}
-                          alt={post.featuredImage.title || post.title}
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-                    )}
+                     {post.featuredImage?.url && (
+                       <div className="relative w-full h-48 overflow-hidden flex-shrink-0">
+                         <Image
+                           src={post.featuredImage.url}
+                           alt={post.featuredImage.title || post.title}
+                           className="absolute inset-0 w-full h-full object-cover"
+                         />
+                       </div>
+                     )}
                     <CardHeader className="py-3 px-4">
                       <CardTitle className="text-lg leading-tight mb-1">
                         <Link to={`/blog/${post.slug}`} className="hover:underline">
