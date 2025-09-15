@@ -28,11 +28,14 @@ const ContentfulBlogPostHeader: React.FC<ContentfulBlogPostHeaderProps> = ({
 }) => (
   <header className="mb-8">
     {featuredImage && (
-      <Image
-        src={getImageUrl(featuredImage)}
-        alt={getImageTitle(featuredImage, title)}
-        className="mb-8 w-full max-h-[320px] rounded-xl object-cover"
-      />
+      <div className="mb-8 w-full h-[320px] bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center">
+        <Image
+          src={getImageUrl(featuredImage)}
+          alt={getImageTitle(featuredImage, title)}
+          className="w-full h-full"
+          objectFit="contain"
+        />
+      </div>
     )}
     <h1 className="text-3xl sm:text-4xl font-bold mb-4">{title}</h1>
     <div className="flex items-center text-gray-500 mb-4">
