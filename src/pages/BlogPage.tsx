@@ -99,11 +99,11 @@ const BlogPageContent: React.FC = () => {
                   <Card key={post.id} className="flex flex-col h-full shadow-md hover:shadow-lg transition-shadow">
                      {post.featuredImage?.url && (
                        <div className="relative w-full h-48 overflow-hidden flex-shrink-0">
-                         <Image
-                           src={post.featuredImage.url}
-                           alt={post.featuredImage.title || post.title}
-                           className="absolute inset-0 w-full h-full object-cover"
-                         />
+                          <Image
+                            src={post.featuredImage.url}
+                            alt={post.featuredImage.title || post.title}
+                            className="w-full h-full object-cover"
+                          />
                        </div>
                      )}
                     <CardHeader className="py-3 px-4">
