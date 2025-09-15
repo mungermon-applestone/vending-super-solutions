@@ -78,6 +78,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
       >
         <Link to="/contact">{navigationContent.contact}</Link>
       </Button>
+      {/* TODO: Uncomment when ready to implement customer login functionality
       <Button 
         asChild
         variant="default"
@@ -88,6 +89,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
           Customer Login
         </Link>
       </Button>
+      */}
     </div>
   );
 };
