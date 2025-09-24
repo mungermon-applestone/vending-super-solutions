@@ -6,3 +6,5 @@ project_id = "rwvlvooojegpebognnzn"
 [functions.send-support-request]
 
 [functions.get-contentful-config]
+
+[functions.translate-content]

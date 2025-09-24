@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { translationService } from '@/services/translation/translationService';
 
 export type Language = {
   code: string;
@@ -17,6 +18,8 @@ export type LanguageContextType = {
   changeLanguage: (languageCode: string) => void;
   isTranslating: boolean;
   setIsTranslating: (translating: boolean) => void;
+  translateText: (text: string, context?: string) => Promise<string>;
+  isTranslationEnabled: boolean;
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -53,12 +56,31 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     }
   };
 
+  const translateText = async (text: string, context?: string): Promise<string> => {
+    try {
+      setIsTranslating(true);
+      const translatedText = await translationService.translateSingle(
+        text, 
+        currentLanguage, 
+        context
+      );
+      return translatedText;
+    } catch (error) {
+      console.error('[LanguageContext] Translation failed:', error);
+      return text; // Fallback to original text
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
   const value: LanguageContextType = {
     currentLanguage,
     availableLanguages: SUPPORTED_LANGUAGES,
     changeLanguage,
     isTranslating,
     setIsTranslating,
+    translateText,
+    isTranslationEnabled: currentLanguage !== 'en',
   };
 
   return (
