@@ -5,6 +5,7 @@ import { X, LogIn } from 'lucide-react';
 import { useNavigationContent } from '@/hooks/cms/useNavigationContent';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import LanguageSelector from '@/components/language/LanguageSelector';
 
 interface MobileNavigationProps {
   isOpen: boolean;
@@ -68,6 +69,17 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
             path="/contact" 
             onClick={onClose} 
           />
+          
+          {/* Language selector for mobile */}
+          <div className="border-t pt-4 mt-4">
+            <div className="px-3 pb-2">
+              <span className="text-sm font-medium text-foreground">Language</span>
+            </div>
+            <div className="px-3">
+              <LanguageSelector />
+            </div>
+          </div>
+          
           {/* TODO: Uncomment when ready to implement customer login functionality
           <div className="border-t pt-4 mt-4">
             <Button 

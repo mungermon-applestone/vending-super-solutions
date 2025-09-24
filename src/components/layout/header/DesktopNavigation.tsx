@@ -8,6 +8,7 @@ import {
 import TechnologyDropdown from './TechnologyDropdown';
 import ProductsDropdown from './ProductsDropdown';
 import AdditionalNavLinks from './AdditionalNavLinks';
+import LanguageSelector from '@/components/language/LanguageSelector';
 
 const DesktopNavigation = () => {
   const location = useLocation();
@@ -28,6 +29,11 @@ const DesktopNavigation = () => {
       
       {/* Additional navigation links */}
       <AdditionalNavLinks isAboutActive={isAboutActive} />
+      
+      {/* Language selector */}
+      <div className="ml-4 pl-4 border-l border-border">
+        <LanguageSelector />
+      </div>
     </nav>
   );
 };

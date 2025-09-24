@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import ScrollToTop from '../common/ScrollToTop';
+import TranslationDisclaimer from '@/components/language/TranslationDisclaimer';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -32,6 +33,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="flex flex-col min-h-screen">
       <ScrollToTop />
       <Header />
+      <TranslationDisclaimer />
       <main className="flex-grow">
         {children || <Outlet />}
       </main>

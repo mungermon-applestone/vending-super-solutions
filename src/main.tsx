@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { BreadcrumbProvider } from './context/BreadcrumbContext';
 import { CustomerAuthProvider } from './context/CustomerAuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { reportWebVitals, sendToAnalytics } from './utils/webVitalsMonitoring';
 import { toast } from 'sonner';
 import { optimizeForBots, isBot } from './utils/botDetection';
@@ -155,7 +156,9 @@ const renderApp = () => {
           <AuthProvider>
             <CustomerAuthProvider>
               <BreadcrumbProvider>
-                <App />
+                <LanguageProvider>
+                  <App />
+                </LanguageProvider>
               </BreadcrumbProvider>
             </CustomerAuthProvider>
           </AuthProvider>
