@@ -11,6 +11,7 @@ import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 import ExportHeroSlidesButton from '@/components/export/ExportHeroSlidesButton';
 import { SHOW_EXPORT_FEATURES } from '@/config/featureFlags';
+import TranslationDemo from '@/components/translation/TranslationDemo';
 
 const Home = () => {
   console.log('[Home] CMS Configuration status:', {
@@ -36,6 +37,14 @@ const Home = () => {
       )}
       
       <HeroSlider sliderId="home-slider" />
+      
+      {/* Translation Demo Section */}
+      <section className="py-16 bg-background/50">
+        <div className="container mx-auto px-4">
+          <TranslationDemo />
+        </div>
+      </section>
+      
       <FeaturesSection />
       <ProductTypesSection />
       <BusinessGoalsSection />
