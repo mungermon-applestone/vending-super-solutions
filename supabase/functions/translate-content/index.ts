@@ -67,60 +67,69 @@ serve(async (req) => {
       }
     }
 
-    // Translate uncached texts using OpenAI
+    // Translate uncached texts using Google Translate
     if (textsToTranslate.length > 0) {
-      console.log(`Translating ${textsToTranslate.length} uncached texts with OpenAI`);
+      console.log(`Translating ${textsToTranslate.length} uncached texts with Google Translate`);
       
-      const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-      if (!openAIApiKey) {
-        throw new Error('OpenAI API key not configured');
+      const googleApiKey = Deno.env.get('GOOGLE_TRANSLATE_API_KEY');
+      if (!googleApiKey) {
+        throw new Error('Google Translate API key not configured');
       }
 
-      // Prepare context-aware prompt for better translations
-      const systemPrompt = `You are a professional translator. Translate the provided texts from English to ${targetLanguage}. 
-      ${context ? `Context: ${context}` : ''}
-      
-      Important guidelines:
-      - Maintain the original tone and style
-      - Preserve any technical terms appropriately
-      - Keep proper nouns unchanged unless they have standard translations
-      - Return ONLY the translated text, no explanations
-      - If translating multiple texts, separate each translation with "|||"`;
+      // Map target language to Google Translate language codes if needed
+      const languageMap: { [key: string]: string } = {
+        'es': 'es',
+        'fr': 'fr',
+        'de': 'de',
+        'it': 'it',
+        'pt': 'pt',
+        'ru': 'ru',
+        'ja': 'ja',
+        'ko': 'ko',
+        'zh': 'zh-CN',
+        'ar': 'ar',
+        'hi': 'hi',
+        'nl': 'nl',
+        'sv': 'sv',
+        'no': 'no',
+        'da': 'da',
+        'fi': 'fi',
+        'pl': 'pl',
+        'tr': 'tr',
+        'th': 'th',
+        'vi': 'vi'
+      };
 
-      const userPrompt = textsToTranslate.join('\n\n---\n\n');
+      const googleLangCode = languageMap[targetLanguage] || targetLanguage;
+      const translations: string[] = [];
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-          temperature: 0.3,
-          max_tokens: 4000,
-        }),
-      });
+      // Translate each text individually for better accuracy
+      for (const text of textsToTranslate) {
+        const response = await fetch(`https://translation.googleapis.com/language/translate/v2?key=${googleApiKey}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            q: text,
+            source: 'en',
+            target: googleLangCode,
+            format: 'text'
+          }),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('OpenAI API error:', errorData);
-        throw new Error(`OpenAI API error: ${errorData.error?.message || response.statusText}`);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Google Translate API error:', errorData);
+          throw new Error(`Google Translate API error: ${response.statusText}`);
+        }
+
+        const translateResponse = await response.json();
+        const translatedText = translateResponse.data?.translations?.[0]?.translatedText || text;
+        translations.push(translatedText);
       }
 
-      const aiResponse = await response.json();
-      const translatedContent = aiResponse.choices[0].message.content;
-      
-      // Split translations if multiple texts were translated
-      const translations = textsToTranslate.length > 1 
-        ? translatedContent.split('|||').map((t: string) => t.trim())
-        : [translatedContent.trim()];
-
-      console.log(`Received ${translations.length} translations from OpenAI`);
+      console.log(`Received ${translations.length} translations from Google Translate`);
 
       // Store new translations in cache and add to results
       const cacheInserts = [];
