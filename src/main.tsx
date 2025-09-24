@@ -153,15 +153,15 @@ const renderApp = () => {
     <React.StrictMode>
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <CustomerAuthProvider>
-              <BreadcrumbProvider>
-                <LanguageProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <CustomerAuthProvider>
+                <BreadcrumbProvider>
                   <App />
-                </LanguageProvider>
-              </BreadcrumbProvider>
-            </CustomerAuthProvider>
-          </AuthProvider>
+                </BreadcrumbProvider>
+              </CustomerAuthProvider>
+            </AuthProvider>
+          </LanguageProvider>
         </QueryClientProvider>
       </HelmetProvider>
     </React.StrictMode>
