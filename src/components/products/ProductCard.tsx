@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import Image from '@/components/common/Image';
 import { CMSProductType } from '@/types/cms';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
 
 interface ProductCardProps {
   product: CMSProductType;
@@ -34,6 +35,13 @@ interface ProductCardProps {
 const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [imageError, setImageError] = React.useState(false);
+  
+  // Translate product content
+  const { translatedContent } = useTranslatedCMSContent(product, 'product');
+  
+  // Use translated content if available, otherwise use original
+  const displayTitle = translatedContent?.title || product?.title;
+  const displayDescription = translatedContent?.description || product?.description;
   
   // Guard against null or undefined product
   if (!product) {
@@ -113,13 +121,13 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
             className="text-xl font-semibold mb-3" 
             itemProp="name"
           >
-            {product.title}
+            {displayTitle || product.title}
           </h3>
           <p 
             className="text-gray-600 mb-4 line-clamp-3 flex-grow" 
             itemProp="description"
           >
-            {product.description}
+            {displayDescription || product.description}
           </p>
           
           {/* SEO structured data that must be preserved */}
@@ -189,13 +197,13 @@ const ProductCard = ({ product, isVisible = true }: ProductCardProps) => {
             className="text-xl font-semibold mb-3" 
             itemProp="name"
           >
-            {product.title}
+            {displayTitle || product.title}
           </h3>
           <p 
             className="text-gray-600 mb-4 line-clamp-3 flex-grow" 
             itemProp="description"
           >
-            {product.description}
+            {displayDescription || product.description}
           </p>
           
           {/* SEO structured data that must be preserved */}

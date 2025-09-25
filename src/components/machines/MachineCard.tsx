@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Server, HardDrive } from 'lucide-react';
 import Image from '@/components/common/Image';
+import { useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
 
 interface MachineCardProps {
   machine: {
@@ -25,6 +26,13 @@ interface MachineCardProps {
 }
 
 const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
+  // Translate machine content
+  const { translatedContent } = useTranslatedCMSContent(machine, 'machine');
+  
+  // Use translated content if available, otherwise use original
+  const displayTitle = translatedContent?.title || machine.title;
+  const displayDescription = translatedContent?.description || machine.description;
+  
   // Determine which image to use - thumbnail has priority
   const hasImages = machine.images && machine.images.length > 0;
   const hasThumbnail = !!machine.thumbnail;
@@ -80,11 +88,11 @@ const MachineCard: React.FC<MachineCardProps> = ({ machine }) => {
           )}
         </div>
         <CardHeader>
-          <CardTitle className="text-xl">{machine.title || 'Unnamed Machine'}</CardTitle>
+          <CardTitle className="text-xl">{displayTitle || 'Unnamed Machine'}</CardTitle>
         </CardHeader>
         <CardContent className="flex-grow">
           <p className="text-gray-600 line-clamp-3">
-            {machine.description || 'No description available'}
+            {displayDescription || 'No description available'}
           </p>
         </CardContent>
       </Card>

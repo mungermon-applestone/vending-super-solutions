@@ -7,6 +7,7 @@ import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary
 import { Testimonial } from '@/types/testimonial';
 import { useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
 import TranslatableText from '@/components/translation/TranslatableText';
+import TranslatedTestimonial from './TranslatedTestimonial';
 
 interface ContentfulTestimonialsCarouselProps {
   data: ContentfulTestimonialSection | null;
@@ -140,37 +141,8 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
             
             {/* Testimonial content area */}
             <div className="relative">
-              {/* Star rating - maintain consistent styling */}
-              <div className="flex mb-6 justify-center">
-                {Array.from({ length: testimonials[activeIndex].rating || 5 }).map((_, i) => (
-                  <Star key={i} className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                ))}
-                {Array.from({ length: 5 - (testimonials[activeIndex].rating || 5) }).map((_, i) => (
-                  <Star key={i} className="h-5 w-5 text-gray-300" />
-                ))}
-              </div>
-              
               {/* Quote text with consistent styling */}
-              <blockquote className="text-xl md:text-2xl text-center font-medium text-gray-700 mb-8">
-                "{testimonials[activeIndex].quote}"
-              </blockquote>
-              
-              {/* Author information with consistent styling */}
-              <div className="text-center">
-                {testimonials[activeIndex].avatar && (
-                  <img 
-                    src={testimonials[activeIndex].avatar} 
-                    alt={testimonials[activeIndex].name} 
-                    className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
-                  />
-                )}
-                <div className="font-semibold text-lg">{testimonials[activeIndex].name}</div>
-                <div className="text-vending-gray-dark">
-                  {testimonials[activeIndex].position && testimonials[activeIndex].company ? 
-                    `${testimonials[activeIndex].position}, ${testimonials[activeIndex].company}` :
-                    testimonials[activeIndex].company}
-                </div>
-              </div>
+              <TranslatedTestimonial testimonial={testimonials[activeIndex]} />
             </div>
             
             {/* Navigation arrows - position and styling must be maintained */}
