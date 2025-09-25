@@ -1,10 +1,13 @@
-
 project_id = "rwvlvooojegpebognnzn"
 
 [functions.send-contact-email-ses]
+verify_jwt = false
 
 [functions.send-support-request]
 
 [functions.get-contentful-config]
 
 [functions.translate-content]
+
+[functions.ses-selftest]
+verify_jwt = false

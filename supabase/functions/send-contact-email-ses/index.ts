@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { AwsClient } from "https://esm.sh/aws4fetch@1.0.16";
 
 // Set up CORS headers for browser requests
 const corsHeaders = {
@@ -9,138 +10,14 @@ const corsHeaders = {
 // Email validation regex
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-// Fixed AWS SigV4 signing implementation for SES
-async function signRequest(
-  method: string,
-  url: string,
-  headers: Record<string, string>,
-  body: string,
-  region: string,
-  accessKeyId: string,
-  secretAccessKey: string
-) {
-  const encoder = new TextEncoder();
-  
-  // Create canonical request
-  const parsedUrl = new URL(url);
-  const host = parsedUrl.hostname;
-  const path = parsedUrl.pathname;
-  
-  // Create timestamp in AWS format - CRITICAL FIX
-  const now = new Date();
-  const timestamp = now.toISOString().replace(/[:\-]|\.\d{3}/g, '');
-  const date = timestamp.substring(0, 8);
-  
-  console.log('SigV4 Debug - Timestamp:', timestamp, 'Date:', date);
-  
-  headers['host'] = host;
-  headers['x-amz-date'] = timestamp;
-  
-  // Sort headers case-insensitively - CRITICAL FIX
-  const sortedHeaderKeys = Object.keys(headers).sort((a, b) => 
-    a.toLowerCase().localeCompare(b.toLowerCase())
-  );
-  const canonicalHeaders = sortedHeaderKeys
-    .map(key => `${key.toLowerCase()}:${headers[key].toString().trim()}`)
-    .join('\n') + '\n';
-  const signedHeaders = sortedHeaderKeys
-    .map(key => key.toLowerCase())
-    .join(';');
-  
-  console.log('SigV4 Debug - Canonical Headers:', canonicalHeaders);
-  console.log('SigV4 Debug - Signed Headers:', signedHeaders);
-  
-  // Create payload hash
-  const payloadHash = await crypto.subtle.digest('SHA-256', encoder.encode(body));
-  const payloadHashHex = Array.from(new Uint8Array(payloadHash))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-  
-  console.log('SigV4 Debug - Payload Hash:', payloadHashHex);
-  
-  // Create canonical request
-  const canonicalRequest = [
-    method,
-    path,
-    '', // query string (empty for SES POST requests)
-    canonicalHeaders,
-    signedHeaders,
-    payloadHashHex
-  ].join('\n');
-  
-  console.log('SigV4 Debug - Canonical Request:', canonicalRequest);
-  
-  // Create string to sign
-  const algorithm = 'AWS4-HMAC-SHA256';
-  const credentialScope = `${date}/${region}/ses/aws4_request`;
-  const canonicalRequestHash = await crypto.subtle.digest('SHA-256', encoder.encode(canonicalRequest));
-  const canonicalRequestHashHex = Array.from(new Uint8Array(canonicalRequestHash))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-  
-  const stringToSign = [
-    algorithm,
-    timestamp,
-    credentialScope,
-    canonicalRequestHashHex
-  ].join('\n');
-  
-  console.log('SigV4 Debug - String to Sign:', stringToSign);
-  
-  // Create signature
-  const signingKey = await getSignatureKey(secretAccessKey, date, region, 'ses');
-  const signature = await crypto.subtle.sign('HMAC', signingKey, encoder.encode(stringToSign));
-  const signatureHex = Array.from(new Uint8Array(signature))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-  
-  // Create authorization header
-  const authorization = `${algorithm} Credential=${accessKeyId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signatureHex}`;
-  
-  console.log('SigV4 Debug - Authorization Header:', authorization);
-  
-  return authorization;
-}
-
-async function getSignatureKey(key: string, dateStamp: string, regionName: string, serviceName: string) {
-  const encoder = new TextEncoder();
-  
-  const kDate = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode('AWS4' + key),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  const kDateSigned = await crypto.subtle.sign('HMAC', kDate, encoder.encode(dateStamp));
-  
-  const kRegion = await crypto.subtle.importKey(
-    'raw',
-    kDateSigned,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  const kRegionSigned = await crypto.subtle.sign('HMAC', kRegion, encoder.encode(regionName));
-  
-  const kService = await crypto.subtle.importKey(
-    'raw',
-    kRegionSigned,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  const kServiceSigned = await crypto.subtle.sign('HMAC', kService, encoder.encode(serviceName));
-  
-  const kSigning = await crypto.subtle.importKey(
-    'raw',
-    kServiceSigned,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  
-  return kSigning;
+// AWS client via aws4fetch (handles SigV4 correctly in Edge/Deno)
+function createAws(region: string, accessKeyId: string, secretAccessKey: string) {
+  return new AwsClient({
+    region,
+    service: "ses",
+    accessKeyId: accessKeyId.trim(),
+    secretAccessKey: secretAccessKey.trim(),
+  });
 }
 
 // Send email using AWS SES API
@@ -155,56 +32,37 @@ async function sendSESEmail(
   accessKeyId: string,
   secretAccessKey: string
 ) {
-  const primaryEndpoint = `https://email.${region}.amazonaws.com`;
-  const fallbackEndpoint = `https://ses.${region}.amazonaws.com`;
-  
+  const primaryEndpoint = `https://email.${region}.amazonaws.com/`;
+  const fallbackEndpoint = `https://ses.${region}.amazonaws.com/`;
+
   // Create SES API request body
   const params = new URLSearchParams();
   params.append('Action', 'SendEmail');
   params.append('Version', '2010-12-01');
   params.append('Source', fromEmail);
   params.append('Destination.ToAddresses.member.1', toEmail);
-  params.append('ReplyToAddresses.member.1', replyToEmail);
+  if (replyToEmail) params.append('ReplyToAddresses.member.1', replyToEmail);
   params.append('Message.Subject.Data', subject);
   params.append('Message.Subject.Charset', 'UTF-8');
   params.append('Message.Body.Html.Data', htmlContent);
   params.append('Message.Body.Html.Charset', 'UTF-8');
   params.append('Message.Body.Text.Data', textContent);
   params.append('Message.Body.Text.Charset', 'UTF-8');
-  
+
   const body = params.toString();
-  
-  const baseHeaders: Record<string, string> = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-  };
-  
+  const aws = createAws(region, accessKeyId, secretAccessKey);
+
   async function sendTo(endpoint: string): Promise<string> {
-    const headers: Record<string, string> = { ...baseHeaders };
-    const authorization = await signRequest(
-      'POST',
-      endpoint + '/',
-      headers,
-      body,
-      region,
-      accessKeyId,
-      secretAccessKey
-    );
-    
-    headers['Authorization'] = authorization;
-    
     console.log('Attempting SES request to:', endpoint);
-    const res = await fetch(endpoint + '/', {
+    const res = await aws.fetch(endpoint, {
       method: 'POST',
-      headers,
-      body
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
     });
-    
     const text = await res.text();
-    
     if (!res.ok) {
       throw new Error(`SES API error (${endpoint}): ${res.status} ${res.statusText} - ${text}`);
     }
-    
     return text;
   }
 
@@ -396,6 +254,23 @@ serve(async (req) => {
       replyTo: email,
       region
     });
+
+    // Debug mode: do not send, just return config used
+    if (formData && formData.debug === true) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          debug: {
+            endpointPrimary: `https://email.${region}.amazonaws.com/`,
+            endpointFallback: `https://ses.${region}.amazonaws.com/`,
+            region,
+            emailFrom,
+            emailTo,
+          }
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
 
     try {
       const response = await sendSESEmail(
