@@ -29,16 +29,16 @@ async function signRequest(
   
   // Create timestamp in correct AWS format (YYYYMMDDTHHMMSSZ)
   const now = new Date();
-  const timestamp = now.toISOString().replace(/[:-]|\.\d{3}/g, '') + 'Z';
+  const iso = now.toISOString().replace(/\.\d{3}Z$/, 'Z'); // e.g., 2025-09-25T12:51:36Z
+  const timestamp = iso.replace(/[:-]/g, ''); // 20250925T125136Z
   const date = timestamp.substring(0, 8); // YYYYMMDD
-  
   console.log('SigV4 Debug - Timestamp:', timestamp, 'Date:', date);
   
   headers['host'] = host;
   headers['x-amz-date'] = timestamp;
   
   // Sort headers and create canonical headers
-  const sortedHeaderKeys = Object.keys(headers).sort();
+  const sortedHeaderKeys = Object.keys(headers).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
   const canonicalHeaders = sortedHeaderKeys.map(key => `${key.toLowerCase()}:${headers[key].trim()}`).join('\n') + '\n';
   const signedHeaders = sortedHeaderKeys.map(key => key.toLowerCase()).join(';');
   
@@ -144,7 +144,8 @@ async function sendSESEmail(
   accessKeyId: string,
   secretAccessKey: string
 ) {
-  const sesEndpoint = `https://ses.${region}.amazonaws.com`;
+  const primaryEndpoint = `https://email.${region}.amazonaws.com`;
+  const fallbackEndpoint = `https://ses.${region}.amazonaws.com`;
   
   // Create SES API request body
   const params = new URLSearchParams();
@@ -162,38 +163,54 @@ async function sendSESEmail(
   
   const body = params.toString();
   
-  const headers: Record<string, string> = {
+  const baseHeaders: Record<string, string> = {
     'Content-Type': 'application/x-www-form-urlencoded',
-    'Content-Length': body.length.toString(),
   };
   
-  // Sign the request
-  const authorization = await signRequest(
-    'POST',
-    sesEndpoint + '/',
-    headers,
-    body,
-    region,
-    accessKeyId,
-    secretAccessKey
-  );
-  
-  headers['Authorization'] = authorization;
-  
-  // Make the request
-  const response = await fetch(sesEndpoint + '/', {
-    method: 'POST',
-    headers,
-    body
-  });
-  
-  const responseText = await response.text();
-  
-  if (!response.ok) {
-    throw new Error(`SES API error: ${response.status} ${response.statusText} - ${responseText}`);
+  async function sendTo(endpoint: string): Promise<string> {
+    const headers: Record<string, string> = { ...baseHeaders };
+    const authorization = await signRequest(
+      'POST',
+      endpoint + '/',
+      headers,
+      body,
+      region,
+      accessKeyId,
+      secretAccessKey
+    );
+    
+    headers['Authorization'] = authorization;
+    
+    console.log('Attempting SES request to:', endpoint);
+    const res = await fetch(endpoint + '/', {
+      method: 'POST',
+      headers,
+      body
+    });
+    
+    const text = await res.text();
+    
+    if (!res.ok) {
+      throw new Error(`SES API error (${endpoint}): ${res.status} ${res.statusText} - ${text}`);
+    }
+    
+    return text;
   }
-  
-  return responseText;
+
+  try {
+    // Try primary endpoint first (email.<region>.amazonaws.com)
+    return await sendTo(primaryEndpoint);
+  } catch (primaryErr) {
+    console.error('Primary SES endpoint failed:', primaryErr);
+    console.log('Falling back to alternate SES endpoint:', fallbackEndpoint);
+    try {
+      return await sendTo(fallbackEndpoint);
+    } catch (fallbackErr) {
+      console.error('Fallback SES endpoint also failed:', fallbackErr);
+      // Re-throw with combined info
+      throw new Error(`SES request failed. Primary error: ${primaryErr instanceof Error ? primaryErr.message : String(primaryErr)} | Fallback error: ${fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)}`);
+    }
+  }
 }
 
 // Main request handler
