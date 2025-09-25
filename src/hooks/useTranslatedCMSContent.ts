@@ -22,16 +22,45 @@ export function useTranslatedCMSContent<T extends Record<string, any>>(
     
     const texts: string[] = [];
     
-    const extractTexts = (obj: any, prefix = '') => {
+    // Fields that should not be translated (URLs, IDs, technical fields)
+    const skipFields = new Set([
+      'url', 'src', 'href', 'id', 'slug', 'sys', 'contentType',
+      'createdAt', 'updatedAt', 'publishedAt', 'revision',
+      'imageUrl', 'thumbnailUrl', 'videoUrl', 'audioUrl',
+      'link', 'linkUrl', 'buttonUrl', 'ctaUrl'
+    ]);
+    
+    // Check if a string looks like a URL
+    const isUrl = (str: string): boolean => {
+      return /^https?:\/\//.test(str) || 
+             /^\/\//.test(str) || 
+             str.includes('ctfassets.net') ||
+             str.includes('images.unsplash.com');
+    };
+    
+    // Check if a field key suggests it contains technical data
+    const isTechnicalField = (key: string): boolean => {
+      const lowerKey = key.toLowerCase();
+      return skipFields.has(lowerKey) || 
+             lowerKey.includes('url') || 
+             lowerKey.includes('id') ||
+             lowerKey.endsWith('_id') ||
+             lowerKey.startsWith('sys');
+    };
+    
+    const extractTexts = (obj: any, prefix = '', parentKey = '') => {
       if (typeof obj === 'string' && obj.trim()) {
-        texts.push(obj);
+        // Skip if this looks like a URL or technical field
+        if (!isUrl(obj) && !isTechnicalField(parentKey)) {
+          texts.push(obj);
+        }
       } else if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
         Object.entries(obj).forEach(([key, value]) => {
-          extractTexts(value, prefix ? `${prefix}.${key}` : key);
+          extractTexts(value, prefix ? `${prefix}.${key}` : key, key);
         });
       } else if (Array.isArray(obj)) {
         obj.forEach((item, index) => {
-          extractTexts(item, `${prefix}[${index}]`);
+          extractTexts(item, `${prefix}[${index}]`, parentKey);
         });
       }
     };
@@ -53,17 +82,45 @@ export function useTranslatedCMSContent<T extends Record<string, any>>(
 
     let translationIndex = 0;
     
-    const translateObject = (obj: any): any => {
+    // Same field checking logic as extraction
+    const skipFields = new Set([
+      'url', 'src', 'href', 'id', 'slug', 'sys', 'contentType',
+      'createdAt', 'updatedAt', 'publishedAt', 'revision',
+      'imageUrl', 'thumbnailUrl', 'videoUrl', 'audioUrl',
+      'link', 'linkUrl', 'buttonUrl', 'ctaUrl'
+    ]);
+    
+    const isUrl = (str: string): boolean => {
+      return /^https?:\/\//.test(str) || 
+             /^\/\//.test(str) || 
+             str.includes('ctfassets.net') ||
+             str.includes('images.unsplash.com');
+    };
+    
+    const isTechnicalField = (key: string): boolean => {
+      const lowerKey = key.toLowerCase();
+      return skipFields.has(lowerKey) || 
+             lowerKey.includes('url') || 
+             lowerKey.includes('id') ||
+             lowerKey.endsWith('_id') ||
+             lowerKey.startsWith('sys');
+    };
+    
+    const translateObject = (obj: any, parentKey = ''): any => {
       if (typeof obj === 'string' && obj.trim()) {
+        // Skip translation if this looks like a URL or technical field
+        if (isUrl(obj) || isTechnicalField(parentKey)) {
+          return obj; // Return original value
+        }
         return translations[translationIndex++] || obj;
       } else if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
         const translated: any = {};
         Object.entries(obj).forEach(([key, value]) => {
-          translated[key] = translateObject(value);
+          translated[key] = translateObject(value, key);
         });
         return translated;
       } else if (Array.isArray(obj)) {
-        return obj.map(item => translateObject(item));
+        return obj.map(item => translateObject(item, parentKey));
       }
       return obj;
     };
