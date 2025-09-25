@@ -2,6 +2,8 @@
 import React from 'react';
 import EmbeddedContactForm from './EmbeddedContactForm';
 import { trackEvent } from '@/utils/analytics';
+import TranslatableText from '@/components/translation/TranslatableText';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ContactSectionProps {
   title?: string;
@@ -49,6 +51,10 @@ const ContactSection: React.FC<ContactSectionProps> = ({
   secondaryButtonText,
   onCtaClick
 }) => {
+  const { translated: formTitle } = useTranslation("Send Us a Message", {
+    context: "contact-form",
+    fallbackToOriginal: true
+  });
   // Track section view for analytics
   React.useEffect(() => {
     trackEvent('contact_section_view', {
@@ -64,10 +70,14 @@ const ContactSection: React.FC<ContactSectionProps> = ({
           {/* Left side content */}
           <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
             <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-              {title}
+              <TranslatableText context="contact-section" as="span">
+                {title}
+              </TranslatableText>
             </h2>
             <p className="text-lg text-gray-600">
-              {description}
+              <TranslatableText context="contact-section" as="span">
+                {description}
+              </TranslatableText>
             </p>
           </div>
           
@@ -75,7 +85,7 @@ const ContactSection: React.FC<ContactSectionProps> = ({
           <div className="md:w-1/2 w-full">
             <div className="bg-white rounded-lg shadow-lg p-6">
               <EmbeddedContactForm 
-                title="Send Us a Message" 
+                title={formTitle}
                 variant={formVariant}
                 formType={formType}
                 className="w-full"
