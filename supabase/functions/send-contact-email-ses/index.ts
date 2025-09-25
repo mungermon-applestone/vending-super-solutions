@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 // Set up CORS headers for browser requests
@@ -10,7 +9,7 @@ const corsHeaders = {
 // Email validation regex
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-// AWS SigV4 signing implementation for SES
+// Fixed AWS SigV4 signing implementation for SES
 async function signRequest(
   method: string,
   url: string,
@@ -27,31 +26,39 @@ async function signRequest(
   const host = parsedUrl.hostname;
   const path = parsedUrl.pathname;
   
-  // Create timestamp in correct AWS format (YYYYMMDDTHHMMSSZ)
+  // Create timestamp in AWS format - CRITICAL FIX
   const now = new Date();
-  const iso = now.toISOString().replace(/\.\d{3}Z$/, 'Z'); // e.g., 2025-09-25T12:51:36Z
-  const timestamp = iso.replace(/[:-]/g, ''); // 20250925T125136Z
-  const date = timestamp.substring(0, 8); // YYYYMMDD
+  const timestamp = now.toISOString().replace(/[:\-]|\.\d{3}/g, '');
+  const date = timestamp.substring(0, 8);
+  
   console.log('SigV4 Debug - Timestamp:', timestamp, 'Date:', date);
   
   headers['host'] = host;
   headers['x-amz-date'] = timestamp;
   
-  // Sort headers and create canonical headers
-  const sortedHeaderKeys = Object.keys(headers).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-  const canonicalHeaders = sortedHeaderKeys.map(key => `${key.toLowerCase()}:${headers[key].trim()}`).join('\n') + '\n';
-  const signedHeaders = sortedHeaderKeys.map(key => key.toLowerCase()).join(';');
+  // Sort headers case-insensitively - CRITICAL FIX
+  const sortedHeaderKeys = Object.keys(headers).sort((a, b) => 
+    a.toLowerCase().localeCompare(b.toLowerCase())
+  );
+  const canonicalHeaders = sortedHeaderKeys
+    .map(key => `${key.toLowerCase()}:${headers[key].toString().trim()}`)
+    .join('\n') + '\n';
+  const signedHeaders = sortedHeaderKeys
+    .map(key => key.toLowerCase())
+    .join(';');
   
   console.log('SigV4 Debug - Canonical Headers:', canonicalHeaders);
   console.log('SigV4 Debug - Signed Headers:', signedHeaders);
   
   // Create payload hash
   const payloadHash = await crypto.subtle.digest('SHA-256', encoder.encode(body));
-  const payloadHashHex = Array.from(new Uint8Array(payloadHash)).map(b => b.toString(16).padStart(2, '0')).join('');
+  const payloadHashHex = Array.from(new Uint8Array(payloadHash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
   
   console.log('SigV4 Debug - Payload Hash:', payloadHashHex);
   
-  // Create canonical request (note: query string is empty for SES)
+  // Create canonical request
   const canonicalRequest = [
     method,
     path,
@@ -67,7 +74,9 @@ async function signRequest(
   const algorithm = 'AWS4-HMAC-SHA256';
   const credentialScope = `${date}/${region}/ses/aws4_request`;
   const canonicalRequestHash = await crypto.subtle.digest('SHA-256', encoder.encode(canonicalRequest));
-  const canonicalRequestHashHex = Array.from(new Uint8Array(canonicalRequestHash)).map(b => b.toString(16).padStart(2, '0')).join('');
+  const canonicalRequestHashHex = Array.from(new Uint8Array(canonicalRequestHash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
   
   const stringToSign = [
     algorithm,
@@ -81,7 +90,9 @@ async function signRequest(
   // Create signature
   const signingKey = await getSignatureKey(secretAccessKey, date, region, 'ses');
   const signature = await crypto.subtle.sign('HMAC', signingKey, encoder.encode(stringToSign));
-  const signatureHex = Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+  const signatureHex = Array.from(new Uint8Array(signature))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
   
   // Create authorization header
   const authorization = `${algorithm} Credential=${accessKeyId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signatureHex}`;
