@@ -9,6 +9,7 @@ import { useTestimonialSection } from './useTestimonialSection';
 import { useHeroSlides } from './useHeroSlides';
 import { useHomePageContent } from '@/hooks/useHomePageContent'; // Import the hook
 import { useHelpDeskArticles, useHelpDeskArticlesByCategory, useHelpDeskArticleBySlug } from '@/hooks/useHelpDeskArticles';
+import { useTranslatedNavigationContent } from './useTranslatedNavigationContent';
 
 export {
   useProductTypes, 
@@ -25,5 +26,6 @@ export {
   useHomePageContent, // Export the hook
   useHelpDeskArticles,
   useHelpDeskArticlesByCategory,
-  useHelpDeskArticleBySlug
+  useHelpDeskArticleBySlug,
+  useTranslatedNavigationContent
 };

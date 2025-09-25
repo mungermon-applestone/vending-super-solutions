@@ -7,6 +7,7 @@ import {
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import { useNavigationContent } from '@/hooks/cms/useNavigationContent';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface TechnologyDropdownProps {
   isActive: boolean;
@@ -27,7 +28,13 @@ const TechnologyDropdown: React.FC<TechnologyDropdownProps> = ({ isActive }) => 
         )}
       >
         <Link to="/technology">
-          {navigationContent.isLoading ? "Technology" : navigationContent.technology}
+          {navigationContent.isLoading ? (
+            <TranslatableText context="navigation">Technology</TranslatableText>
+          ) : (
+            <TranslatableText context="navigation">
+              {navigationContent.technology}
+            </TranslatableText>
+          )}
         </Link>
       </NavigationMenuLink>
     </NavigationMenuItem>

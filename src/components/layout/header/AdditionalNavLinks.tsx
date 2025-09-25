@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useNavigationContent } from '@/hooks/cms/useNavigationContent';
 import { LogIn } from 'lucide-react';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface AdditionalNavLinksProps {
   isAboutActive?: boolean;
@@ -48,35 +49,55 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         variant="ghost"
         className={getButtonStyles(isMachinesActive)}
       >
-        <Link to="/machines">{navigationContent.machines}</Link>
+        <Link to="/machines">
+          <TranslatableText context="navigation">
+            {navigationContent.machines}
+          </TranslatableText>
+        </Link>
       </Button>
       <Button 
         asChild 
         className={getButtonStyles(isBusinessActive)}
         variant="ghost"
       >
-        <Link to="/business-goals">{navigationContent.businessGoals}</Link>
+        <Link to="/business-goals">
+          <TranslatableText context="navigation">
+            {navigationContent.businessGoals}
+          </TranslatableText>
+        </Link>
       </Button>
       <Button 
         asChild 
         className={getButtonStyles(isAboutActive || false)}
         variant="ghost"
       >
-        <Link to="/about">{navigationContent.about}</Link>
+        <Link to="/about">
+          <TranslatableText context="navigation">
+            {navigationContent.about}
+          </TranslatableText>
+        </Link>
       </Button>
       <Button 
         asChild
         className={getButtonStyles(isBlogActive)}
         variant="ghost"
       >
-        <Link to="/blog">{navigationContent.blog}</Link>
+        <Link to="/blog">
+          <TranslatableText context="navigation">
+            {navigationContent.blog}
+          </TranslatableText>
+        </Link>
       </Button>
       <Button 
         asChild
         className={getButtonStyles(isContactActive)}
         variant="ghost"
       >
-        <Link to="/contact">{navigationContent.contact}</Link>
+        <Link to="/contact">
+          <TranslatableText context="navigation">
+            {navigationContent.contact}
+          </TranslatableText>
+        </Link>
       </Button>
       {/* TODO: Uncomment when ready to implement customer login functionality
       <Button 
