@@ -2,24 +2,30 @@
 import React, { useEffect } from 'react';
 import { CMSTechnologySection } from '@/types/cms';
 import TechnologySection from './TechnologySection';
+import { useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
 
 interface TechnologySectionsProps {
   sections: CMSTechnologySection[];
 }
 
 const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => {
+  const { translatedContent: translatedSections, isLoading: isTranslating } = useTranslatedCMSContent(sections, 'technology-sections');
+  
+  // Use translated content if available, fallback to original
+  const displaySections = translatedSections || sections;
+
   useEffect(() => {
     console.log('[TechnologySections] Rendering sections:', {
-      sectionsCount: sections?.length || 0,
-      sectionsData: sections?.map(s => ({
+      sectionsCount: displaySections?.length || 0,
+      sectionsData: displaySections?.map(s => ({
         id: s.id,
         title: s.title,
         hasImage: !!s.sectionImage || !!s.image
       }))
     });
-  }, [sections]);
+  }, [displaySections]);
 
-  if (!sections || sections.length === 0) {
+  if (!displaySections || displaySections.length === 0) {
     console.warn('[TechnologySections] No sections provided');
     return (
       <div className="py-12 text-center">
@@ -29,7 +35,7 @@ const TechnologySections: React.FC<TechnologySectionsProps> = ({ sections }) => 
   }
 
   // Filter out invalid sections first
-  const validSections = sections.filter(section => {
+  const validSections = displaySections.filter(section => {
     const isValid = section && section.id && section.title;
     if (!isValid) {
       console.warn('[TechnologySections] Found invalid section, skipping:', section);

@@ -11,6 +11,7 @@ import SimpleContactCTA from '@/components/common/SimpleContactCTA';
 import ProductVideoSection from '@/components/products/ProductVideoSection';
 import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
 import ProductDetailSEO from '@/components/seo/ProductDetailSEO';
+import { useTranslatedProduct } from '@/hooks/useTranslatedProduct';
 
 /**
  * Product detail page that displays detailed information about a specific product
@@ -18,6 +19,10 @@ import ProductDetailSEO from '@/components/seo/ProductDetailSEO';
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: product, isLoading, error } = useContentfulProductType(slug || '');
+  const { translatedContent: translatedProduct, isLoading: isTranslating } = useTranslatedProduct(product);
+  
+  // Use translated content if available, fallback to original
+  const displayProduct = translatedProduct || product;
   
   // Scroll to top when the component mounts
   useEffect(() => {
@@ -26,12 +31,12 @@ const ProductDetail = () => {
   
   // Log product data for debugging
   useEffect(() => {
-    if (product) {
-      console.log('[ProductDetail] Loaded product data:', product);
+    if (displayProduct) {
+      console.log('[ProductDetail] Loaded product data:', displayProduct);
     } else if (!isLoading) {
       console.log('[ProductDetail] No product data found for slug:', slug);
     }
-  }, [product, isLoading, slug]);
+  }, [displayProduct, isLoading, slug]);
 
   // Loading state
   if (isLoading) {
@@ -62,7 +67,7 @@ const ProductDetail = () => {
   }
 
   // Not found state
-  if (!product) {
+  if (!displayProduct) {
     return (
       <div className="container py-16">
         <div className="max-w-2xl mx-auto text-center">
@@ -80,20 +85,20 @@ const ProductDetail = () => {
   }
 
   // Prepare the image URL for the hero section
-  const heroImage = product.image?.url || '/placeholder.svg';
+  const heroImage = displayProduct.image?.url || '/placeholder.svg';
   
   // Prepare benefits list (ensure it's an array)
-  const benefits = Array.isArray(product.benefits) ? product.benefits : [];
+  const benefits = Array.isArray(displayProduct.benefits) ? displayProduct.benefits : [];
   
   // Check if product has examples - with proper typing
   // @ts-ignore - Handling potential missing examples property
-  const productExamples = product.examples || [];
+  const productExamples = displayProduct.examples || [];
   const hasExamples = productExamples && Array.isArray(productExamples) && productExamples.length > 0;
 
   // Log information about recommended machines
-  if (product.recommendedMachines) {
-    console.log('[ProductDetail] Number of recommended machines:', product.recommendedMachines.length);
-    product.recommendedMachines.forEach((machine, index) => {
+  if (displayProduct.recommendedMachines) {
+    console.log('[ProductDetail] Number of recommended machines:', displayProduct.recommendedMachines.length);
+    displayProduct.recommendedMachines.forEach((machine, index) => {
       console.log(`[ProductDetail] Machine ${index + 1}:`, {
         id: machine.id,
         title: machine.title,
@@ -109,7 +114,7 @@ const ProductDetail = () => {
   return (
     <>
       {/* Add SEO component */}
-      <ProductDetailSEO product={product} />
+      <ProductDetailSEO product={displayProduct} />
 
       {/* Back Navigation */}
       <div className="bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
@@ -125,28 +130,28 @@ const ProductDetail = () => {
 
       {/* Hero Section */}
       <ProductHeroSection
-        productType={product.title}
-        description={product.description}
+        productType={displayProduct.title}
+        description={displayProduct.description}
         image={heroImage}
         benefits={benefits}
       />
 
       {/* Video Section - With orientation property check */}
-      {product.video && (
+      {displayProduct.video && (
         <ProductVideoSection
-          title={product.video.title || "See Our Solution in Action"}
-          description={product.video.description || "Watch how our solution can transform your business"}
-          videoId={product.video.youtubeId}
-          videoUrl={product.video.url}
-          thumbnailImage={product.video.thumbnailImage?.url || heroImage}
-          orientation={product.video.orientation || 'horizontal'}
+          title={displayProduct.video.title || "See Our Solution in Action"}
+          description={displayProduct.video.description || "Watch how our solution can transform your business"}
+          videoId={displayProduct.video.youtubeId}
+          videoUrl={displayProduct.video.url}
+          thumbnailImage={displayProduct.video.thumbnailImage?.url || heroImage}
+          orientation={displayProduct.video.orientation || 'horizontal'}
         />
       )}
 
       {/* Features Section - Updated to use our new component without extra heading */}
-      {product.features && product.features.length > 0 && (
+      {displayProduct.features && displayProduct.features.length > 0 && (
         <section className="py-12 bg-gray-50">
-          <ProductFeaturesList features={product.features} />
+          <ProductFeaturesList features={displayProduct.features} />
         </section>
       )}
 
@@ -162,8 +167,8 @@ const ProductDetail = () => {
       )}
 
       {/* Recommended Machines Section */}
-      {product.recommendedMachines && product.recommendedMachines.length > 0 && (
-        <RecommendedMachines machines={product.recommendedMachines} />
+      {displayProduct.recommendedMachines && displayProduct.recommendedMachines.length > 0 && (
+        <RecommendedMachines machines={displayProduct.recommendedMachines} />
       )}
 
       {/* Single CTA Section */}

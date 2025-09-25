@@ -10,29 +10,35 @@ import BusinessGoalInquiry from '@/components/businessGoals/BusinessGoalInquiry'
 import { ArrowLeft } from 'lucide-react';
 import { getAssetUrl, getAssetAlt } from '@/utils/contentful/dataExtractors';
 import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
+import { useTranslatedBusinessGoal } from '@/hooks/useTranslatedBusinessGoal';
 
 interface BusinessGoalDetailProps {
   businessGoal: CMSBusinessGoal;
 }
 
 const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal }) => {
+  const { translatedContent: translatedBusinessGoal, isLoading: isTranslating } = useTranslatedBusinessGoal(businessGoal);
+  
   if (!businessGoal) {
     return <div>No business goal data available</div>;
   }
 
-  console.log('[BusinessGoalDetail] Rendering business goal:', businessGoal);
-  console.log('[BusinessGoalDetail] Benefits data:', businessGoal.benefits);
-  console.log('[BusinessGoalDetail] Features data:', businessGoal.features);
+  // Use translated content if available, fallback to original
+  const displayBusinessGoal = translatedBusinessGoal || businessGoal;
+
+  console.log('[BusinessGoalDetail] Rendering business goal:', displayBusinessGoal);
+  console.log('[BusinessGoalDetail] Benefits data:', displayBusinessGoal.benefits);
+  console.log('[BusinessGoalDetail] Features data:', displayBusinessGoal.features);
 
   // Extract image URL and alt text
-  const imageUrl = businessGoal.image?.url || businessGoal.image_url || '';
-  const imageAlt = businessGoal.image?.alt || businessGoal.image_alt || businessGoal.title;
+  const imageUrl = displayBusinessGoal.image?.url || displayBusinessGoal.image_url || '';
+  const imageAlt = displayBusinessGoal.image?.alt || displayBusinessGoal.image_alt || displayBusinessGoal.title;
 
   // Default icon if none provided
-  const iconComponent = businessGoal.icon ? (
+  const iconComponent = displayBusinessGoal.icon ? (
     <div 
       className="text-white" 
-      dangerouslySetInnerHTML={{ __html: businessGoal.icon }} 
+      dangerouslySetInnerHTML={{ __html: displayBusinessGoal.icon }} 
     />
   ) : (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -42,12 +48,12 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
   );
 
   // Process video data
-  const videoData = businessGoal.video;
+  const videoData = displayBusinessGoal.video;
   
   // Enhanced logging for debugging image issues
-  if (businessGoal.recommendedMachines && businessGoal.recommendedMachines.length > 0) {
+  if (displayBusinessGoal.recommendedMachines && displayBusinessGoal.recommendedMachines.length > 0) {
     console.log('[BusinessGoalDetail] Recommended machines with image data:', 
-      businessGoal.recommendedMachines.map(machine => ({
+      displayBusinessGoal.recommendedMachines.map(machine => ({
         title: machine.title,
         hasImage: !!machine.image,
         imageUrl: machine.image?.url,
@@ -61,7 +67,7 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
   
   // Log details about video and machines for debugging
   console.log('[BusinessGoalDetail] Video data:', videoData);
-  console.log('[BusinessGoalDetail] Recommended machines:', businessGoal.recommendedMachines);
+  console.log('[BusinessGoalDetail] Recommended machines:', displayBusinessGoal.recommendedMachines);
 
   return (
     <div>
@@ -75,24 +81,24 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
 
       {/* Hero Section */}
       <BusinessGoalHero 
-        title={businessGoal.title}
-        description={businessGoal.description}
+        title={displayBusinessGoal.title}
+        description={displayBusinessGoal.description}
         icon={iconComponent}
         image={imageUrl}
       />
       
       {/* Benefits Section */}
-      {businessGoal.benefits && businessGoal.benefits.length > 0 && (
+      {displayBusinessGoal.benefits && displayBusinessGoal.benefits.length > 0 && (
         <BusinessGoalKeyBenefits 
-          benefits={businessGoal.benefits}
+          benefits={displayBusinessGoal.benefits}
           title="Key Benefits"
         />
       )}
 
       {/* Features Section */}
-      {businessGoal.features && businessGoal.features.length > 0 && (
+      {displayBusinessGoal.features && displayBusinessGoal.features.length > 0 && (
         <BusinessGoalFeatures 
-          features={businessGoal.features}
+          features={displayBusinessGoal.features}
           sectionTitle="Key Features"
           sectionDescription="Our platform provides specialized features to help you achieve this business goal effectively."
         />
@@ -108,8 +114,8 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
       )}
       
       {/* Recommended Machines Section */}
-      {businessGoal.recommendedMachines && businessGoal.recommendedMachines.length > 0 && (
-        <RecommendedMachines machines={businessGoal.recommendedMachines} />
+      {displayBusinessGoal.recommendedMachines && displayBusinessGoal.recommendedMachines.length > 0 && (
+        <RecommendedMachines machines={displayBusinessGoal.recommendedMachines} />
       )}
 
       {/* Call to Action */}

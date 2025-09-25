@@ -8,46 +8,52 @@ import MachineDetailGallery from './MachineDetailGallery';
 import MachineDetailDeployments from './MachineDetailDeployments';
 import MachineDetailInquiry from './MachineDetailInquiry';
 import MachineDetailSEO from '@/components/seo/MachineDetailSEO';
+import { useTranslatedMachine } from '@/hooks/useTranslatedMachine';
 
 interface MachineDetailProps {
   machine: CMSMachine;
 }
 
 const MachineDetail: React.FC<MachineDetailProps> = ({ machine }) => {
+  const { translatedContent: translatedMachine, isLoading: isTranslating } = useTranslatedMachine(machine);
+  
+  // Use translated content if available, fallback to original
+  const displayMachine = translatedMachine || machine;
+
   return (
     <>
       {/* Add SEO optimization */}
-      <MachineDetailSEO machine={machine} />
+      <MachineDetailSEO machine={displayMachine} />
       
       {/* Hero Section */}
-      <MachineDetailHero machine={machine} />
+      <MachineDetailHero machine={displayMachine} />
 
       {/* Gallery Section */}
       <MachineDetailGallery 
-        title={machine.title}
-        images={machine.images || []}
+        title={displayMachine.title}
+        images={displayMachine.images || []}
       />
 
       {/* Features Section */}
       <MachineDetailFeatures
-        features={machine.features || []}
+        features={displayMachine.features || []}
       />
 
       {/* Specifications Section */}
       <MachineDetailSpecifications
-        specs={machine.specs || {}}
+        specs={displayMachine.specs || {}}
       />
 
       {/* Deployments Examples */}
-      {machine.deploymentExamples && machine.deploymentExamples.length > 0 && (
+      {displayMachine.deploymentExamples && displayMachine.deploymentExamples.length > 0 && (
         <MachineDetailDeployments
-          deploymentExamples={machine.deploymentExamples}
+          deploymentExamples={displayMachine.deploymentExamples}
         />
       )}
 
       {/* Inquiry Section */}
       <MachineDetailInquiry 
-        machineTitle={machine.title}
+        machineTitle={displayMachine.title}
       />
     </>
   );
