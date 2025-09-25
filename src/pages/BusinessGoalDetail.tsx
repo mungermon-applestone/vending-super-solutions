@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CMSBusinessGoal } from '@/types/cms';
 import { Link } from 'react-router-dom';
@@ -11,6 +10,7 @@ import { ArrowLeft } from 'lucide-react';
 import { getAssetUrl, getAssetAlt } from '@/utils/contentful/dataExtractors';
 import RecommendedMachines from '@/components/products/sections/RecommendedMachines';
 import { useTranslatedBusinessGoal } from '@/hooks/useTranslatedBusinessGoal';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface BusinessGoalDetailProps {
   businessGoal: CMSBusinessGoal;
@@ -75,7 +75,7 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
       <div className="container mx-auto px-4 py-6">
         <Link to="/business-goals" className="inline-flex items-center text-blue-600 hover:text-blue-800">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Business Goals
+          <TranslatableText context="business-goal-detail">Back to Business Goals</TranslatableText>
         </Link>
       </div>
 

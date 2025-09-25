@@ -3,6 +3,7 @@ import { CMSFeature } from '@/types/cms';
 import { Check } from 'lucide-react';
 import MachineTypeIcon from '@/components/common/MachineTypeIcon';
 import Image from '@/components/common/Image';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface BusinessGoalFeaturesProps {
   features: CMSFeature[];
@@ -45,10 +46,10 @@ const BusinessGoalFeatures = ({
     <section className="py-16 bg-white">
       <div className="container-wide">
         <h2 className="text-3xl font-bold text-center text-vending-blue-dark mb-4">
-          {sectionTitle}
+          <TranslatableText context="business-goal-features">{sectionTitle}</TranslatableText>
         </h2>
         <p className="text-center text-xl text-gray-700 mb-12 max-w-3xl mx-auto">
-          {sectionDescription}
+          <TranslatableText context="business-goal-features">{sectionDescription}</TranslatableText>
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface BusinessGoalVideoProps {
   video: {
@@ -96,8 +97,12 @@ const BusinessGoalVideoSection: React.FC<BusinessGoalVideoProps> = ({
     <section className="py-16 bg-white">
       <div className="container mx-auto">
         <div className="max-w-6xl mx-auto text-center mb-10">
-          <h2 className="text-3xl font-bold mb-4 text-vending-blue-dark">{title}</h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">{description}</p>
+          <h2 className="text-3xl font-bold mb-4 text-vending-blue-dark">
+            <TranslatableText context="business-goal-video">{title}</TranslatableText>
+          </h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            <TranslatableText context="business-goal-video">{description}</TranslatableText>
+          </p>
         </div>
         
         {videoLoading && !videoError && (

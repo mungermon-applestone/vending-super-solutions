@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { trackEvent } from '@/utils/analytics';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface SimpleContactCTAProps {
   title?: string;
@@ -71,19 +72,23 @@ const SimpleContactCTA: React.FC<SimpleContactCTAProps> = ({
     <section className={`bg-vending-blue-light py-16 ${className}`}>
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">{title}</h2>
-          <p className="text-lg text-gray-600 mb-8">{description}</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <TranslatableText context="contact-cta">{title}</TranslatableText>
+          </h2>
+          <p className="text-lg text-gray-600 mb-8">
+            <TranslatableText context="contact-cta">{description}</TranslatableText>
+          </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button 
               size="lg"
               className="flex items-center"
               onClick={handlePrimaryClick}
             >
-              {primaryButtonText} <ArrowRight className="ml-2 h-5 w-5" />
+              <TranslatableText context="contact-cta">{primaryButtonText}</TranslatableText> <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button asChild variant="outline" size="lg">
               <Link to={secondaryButtonUrl}>
-                {secondaryButtonText}
+                <TranslatableText context="contact-cta">{secondaryButtonText}</TranslatableText>
               </Link>
             </Button>
           </div>
