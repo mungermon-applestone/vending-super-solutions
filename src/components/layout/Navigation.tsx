@@ -3,6 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 const Navigation = () => {
   const location = useLocation();
@@ -19,26 +20,26 @@ const Navigation = () => {
       <div className="container-wide flex items-center justify-between h-16">
         <div className="flex items-center">
           <Link to="/" className="text-2xl font-bold text-vending-blue">
-            VendingCMS
+            Applestone Solutions
           </Link>
         </div>
         
         <div className="hidden md:flex items-center space-x-1">
           <NavLink to="/" active={isActive('/')}>
-            Home
+            <TranslatableText context="navigation">Home</TranslatableText>
           </NavLink>
           <NavLink to="/products" active={isActive('/products')}>
-            Products
+            <TranslatableText context="navigation">Products</TranslatableText>
           </NavLink>
           <NavLink to="/machines" active={isActive('/machines')}>
-            Machines
+            <TranslatableText context="navigation">Machines</TranslatableText>
           </NavLink>
           <NavLink to="/business-goals" active={isActive('/business-goals')}>
-            Business Goals
+            <TranslatableText context="navigation">Business Goals</TranslatableText>
           </NavLink>
           <Button asChild>
             <Link to="/contact" className="ml-2">
-              Contact
+              <TranslatableText context="navigation">Contact</TranslatableText>
             </Link>
           </Button>
         </div>

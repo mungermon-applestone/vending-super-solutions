@@ -9,6 +9,7 @@ import {
   Zap 
 } from 'lucide-react';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -133,10 +134,14 @@ const FeaturesSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            {homeContent?.featuresSectionTitle || "Versatile Software for Every Vending Need"}
+            {homeContent?.featuresSectionTitle || (
+              <TranslatableText context="features-section">Versatile Software for Every Vending Need</TranslatableText>
+            )}
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            {homeContent?.featuresSectionDescription || "Our solution adapts to your business requirements, whether you're an operator, enterprise, or brand looking to expand your vending presence."}
+            {homeContent?.featuresSectionDescription || (
+              <TranslatableText context="features-section">Our solution adapts to your business requirements, whether you're an operator, enterprise, or brand looking to expand your vending presence.</TranslatableText>
+            )}
           </p>
         </div>
         

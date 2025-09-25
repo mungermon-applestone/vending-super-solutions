@@ -6,6 +6,7 @@ import { useHomePageContent } from '@/hooks/useHomePageContent';
 import ProductCard from '@/components/products/ProductCard';
 import { useFeaturedProducts } from '@/hooks/cms/useFeaturedItems';
 import { Skeleton } from '@/components/ui/skeleton';
+import TranslatableText from '@/components/translation/TranslatableText';
 import {
   Carousel,
   CarouselContent,
@@ -103,14 +104,20 @@ const ProductTypesSection = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-              {homeContent?.productCategoriesTitle || "Featured Product Categories"}
+              {homeContent?.productCategoriesTitle || (
+                <TranslatableText context="product-section">Featured Product Categories</TranslatableText>
+              )}
             </h2>
             <p className="subtitle max-w-2xl">
-              {homeContent?.productCategoriesDescription || "Find the perfect vending solution for your product type."}
+              {homeContent?.productCategoriesDescription || (
+                <TranslatableText context="product-section">Find the perfect vending solution for your product type.</TranslatableText>
+              )}
             </p>
           </div>
           <Button asChild className="mt-4 md:mt-0">
-            <Link to="/products">View All Product Types</Link>
+            <Link to="/products">
+              <TranslatableText context="product-section">View All Product Types</TranslatableText>
+            </Link>
           </Button>
         </div>
         
