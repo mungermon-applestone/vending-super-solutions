@@ -10,6 +10,7 @@ import { useHeroSlides } from './useHeroSlides';
 import { useHomePageContent } from '@/hooks/useHomePageContent'; // Import the hook
 import { useHelpDeskArticles, useHelpDeskArticlesByCategory, useHelpDeskArticleBySlug } from '@/hooks/useHelpDeskArticles';
 import { useTranslatedNavigationContent } from './useTranslatedNavigationContent';
+import { useTranslatedCMSContent, useTranslatedHeroSlide, useTranslatedFeatures } from '@/hooks/useTranslatedCMSContent';
 
 export {
   useProductTypes, 
@@ -27,5 +28,8 @@ export {
   useHelpDeskArticles,
   useHelpDeskArticlesByCategory,
   useHelpDeskArticleBySlug,
-  useTranslatedNavigationContent
+  useTranslatedNavigationContent,
+  useTranslatedCMSContent,
+  useTranslatedHeroSlide,
+  useTranslatedFeatures
 };

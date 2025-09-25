@@ -3,20 +3,23 @@ import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
+import { useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
 import BusinessGoalsCompact from '../businessGoals/BusinessGoalsCompact';
 import ContentfulConfigWarning from '../machines/ContentfulConfigWarning';
 import { isContentfulConfigured } from '@/config/cms';
 import { validateContentfulClient, refreshContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { CANONICAL_SLUG_MAP } from '@/services/cms/utils/slug/common';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 const BusinessGoalsSection = () => {
   const { data: homeContent, error, refetch } = useHomePageContent();
+  const { translatedContent: translatedHomeContent } = useTranslatedCMSContent(homeContent, 'business-goals');
   const isConfigured = isContentfulConfigured();
   
   console.log('[BusinessGoalsSection] Content:', homeContent);
   
   // Using canonical URL slugs
-  const businessGoals = [
+  const rawBusinessGoals = [
     {
       icon: "vending",
       title: "Expand Footprint",
@@ -66,6 +69,10 @@ const BusinessGoalsSection = () => {
       slug: "customer-satisfaction"
     }
   ];
+
+  // Translate business goals
+  const { translatedContent: translatedBusinessGoals } = useTranslatedCMSContent(rawBusinessGoals, 'business-goals-list');
+  const businessGoals = translatedBusinessGoals || rawBusinessGoals;
   
   // Handler for retrying connection and refetching data
   const handleRetry = useCallback(async () => {
@@ -96,14 +103,20 @@ const BusinessGoalsSection = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-              {homeContent?.businessGoalsTitle || "Business Goals We Help You Achieve"}
+              {translatedHomeContent?.businessGoalsTitle || (
+                <TranslatableText context="business-goals">Business Goals We Help You Achieve</TranslatableText>
+              )}
             </h2>
             <p className="subtitle max-w-2xl">
-              {homeContent?.businessGoalsDescription || "Tailored solutions to meet your specific business objectives."}
+              {translatedHomeContent?.businessGoalsDescription || (
+                <TranslatableText context="business-goals">Tailored solutions to meet your specific business objectives.</TranslatableText>
+              )}
             </p>
           </div>
           <Button asChild className="mt-4 md:mt-0">
-            <Link to="/business-goals">Explore All Business Goals</Link>
+            <Link to="/business-goals">
+              <TranslatableText context="business-goals">Explore All Business Goals</TranslatableText>
+            </Link>
           </Button>
         </div>
         

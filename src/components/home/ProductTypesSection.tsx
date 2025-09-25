@@ -6,6 +6,7 @@ import { useHomePageContent } from '@/hooks/useHomePageContent';
 import ProductCard from '@/components/products/ProductCard';
 import { useFeaturedProducts } from '@/hooks/cms/useFeaturedItems';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
 import TranslatableText from '@/components/translation/TranslatableText';
 import {
   Carousel,
@@ -17,6 +18,7 @@ import {
 
 const ProductTypesSection = () => {
   const { data: homeContent } = useHomePageContent();
+  const { translatedContent: translatedHomeContent } = useTranslatedCMSContent(homeContent, 'product-types');
   
   console.log('[ProductTypesSection] Content:', homeContent);
 
@@ -104,12 +106,12 @@ const ProductTypesSection = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-              {homeContent?.productCategoriesTitle || (
+              {translatedHomeContent?.productCategoriesTitle || (
                 <TranslatableText context="product-section">Featured Product Categories</TranslatableText>
               )}
             </h2>
             <p className="subtitle max-w-2xl">
-              {homeContent?.productCategoriesDescription || (
+              {translatedHomeContent?.productCategoriesDescription || (
                 <TranslatableText context="product-section">Find the perfect vending solution for your product type.</TranslatableText>
               )}
             </p>
@@ -134,8 +136,12 @@ const ProductTypesSection = () => {
           </div>
         ) : error ? (
           <div className="text-center py-8">
-            <p className="text-red-500 mb-4">Error loading product types</p>
-            <p className="text-sm text-gray-500">Using fallback product data</p>
+            <p className="text-red-500 mb-4">
+              <TranslatableText context="product-section">Error loading product types</TranslatableText>
+            </p>
+            <p className="text-sm text-gray-500">
+              <TranslatableText context="product-section">Using fallback product data</TranslatableText>
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
               {displayProductTypes.slice(0, 4).map((product) => (
                 <ProductCard key={product.id} product={product} />

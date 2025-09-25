@@ -9,6 +9,7 @@ import {
   Zap 
 } from 'lucide-react';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
+import { useTranslatedFeatures } from '@/hooks/useTranslatedCMSContent';
 import TranslatableText from '@/components/translation/TranslatableText';
 
 interface FeatureCardProps {
@@ -90,7 +91,7 @@ const FeaturesSection = () => {
   };
   
   // Feature data from Contentful
-  const featuresData = [
+  const rawFeaturesData = [
     {
       title: homeContent?.feature1Title || '',
       description: homeContent?.feature1Description || '',
@@ -128,6 +129,16 @@ const FeaturesSection = () => {
       url: homeContent?.feature6url
     }
   ];
+
+  // Translate the features data
+  const { translatedFeatures } = useTranslatedFeatures(rawFeaturesData);
+  
+  // Combine translated data with original icons and URLs
+  const featuresData = translatedFeatures.map((feature, index) => ({
+    ...feature,
+    icon: rawFeaturesData[index].icon,
+    url: rawFeaturesData[index].url
+  }));
 
   return (
     <section className="py-16 bg-white">
