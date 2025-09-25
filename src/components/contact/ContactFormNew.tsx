@@ -10,6 +10,8 @@ import { createMailtoLink, formatEmailBody } from '@/services/email/emailService
 import { emailConfig } from '@/services/email/emailConfig';
 import { supabase } from "@/integrations/supabase/client";
 import { Spinner } from '@/components/ui/spinner';
+import TranslatableText from '@/components/translation/TranslatableText';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export interface ContactFormNewProps {
   /** Form title */
@@ -54,6 +56,19 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
   initialValues = {}
 }) => {
   const { toast } = useToast();
+  
+  // Translation hooks for dynamic text
+  const { translated: missingInfoTitle } = useTranslation("Missing information", { context: "contact-form-messages" });
+  const { translated: missingInfoDesc } = useTranslation("Please fill in all required fields", { context: "contact-form-messages" });
+  const { translated: errorTitle } = useTranslation("Error", { context: "contact-form-messages" });
+  const { translated: errorDesc } = useTranslation("There was a problem sending your message. Please try again or contact us directly.", { context: "contact-form-messages" });
+  const { translated: messageSentTitle } = useTranslation("Message sent!", { context: "contact-form-messages" });
+  const { translated: messageSentDesc } = useTranslation("Thank you for your message. We'll get back to you soon.", { context: "contact-form-messages" });
+  const { translated: sendingText } = useTranslation("Sending Message...", { context: "contact-form-buttons" });
+  const { translated: sendButtonText } = useTranslation("Send Message", { context: "contact-form-buttons" });
+  const { translated: messagePreparedTitle } = useTranslation("Message prepared", { context: "contact-form-messages" });
+  const { translated: messagePreparedDesc } = useTranslation("Your email client has been opened with the message. Please send the email to complete your inquiry.", { context: "contact-form-messages" });
+  const { translated: emailClientErrorDesc } = useTranslation("We couldn't send your message or open your email client. Please contact us directly.", { context: "contact-form-messages" });
   const [name, setName] = useState(initialValues.name || '');
   const [email, setEmail] = useState(initialValues.email || '');
   const [phone, setPhone] = useState(initialValues.phone || '');
@@ -80,8 +95,8 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
     // Basic validation
     if (!name || !email || !message) {
       toast({
-        title: "Missing information",
-        description: "Please fill in all required fields",
+        title: missingInfoTitle,
+        description: missingInfoDesc,
         variant: "destructive",
       });
       return;
@@ -132,8 +147,8 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
         
         // Otherwise show a general error
         toast({
-          title: "Error",
-          description: "There was a problem sending your message. Please try again or contact us directly.",
+          title: errorTitle,
+          description: errorDesc,
           variant: "destructive",
         });
         
@@ -143,8 +158,8 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
       
       // If we got here, the submission was successful
       toast({
-        title: "Message sent!",
-        description: "Thank you for your message. We'll get back to you soon.",
+        title: messageSentTitle,
+        description: messageSentDesc,
       });
       
       // Track successful submission
@@ -214,8 +229,8 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
       
       // Show success message
       toast({
-        title: "Message prepared",
-        description: "Your email client has been opened with the message. Please send the email to complete your inquiry.",
+        title: messagePreparedTitle,
+        description: messagePreparedDesc,
       });
       
       // Track successful opening of email client
@@ -245,8 +260,8 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
       setSubmitError("We couldn't send your message or open your email client. Please contact us directly at " + emailConfig.defaultRecipient);
       
       toast({
-        title: "Error",
-        description: "We couldn't send your message or open your email client. Please contact us directly.",
+        title: errorTitle,
+        description: emailClientErrorDesc,
         variant: "destructive",
       });
     }
@@ -275,7 +290,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Your Name*
+                    <TranslatableText context="contact-form-labels">Your Name*</TranslatableText>
                   </label>
                   <Input 
                     id="name" 
@@ -290,7 +305,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
                 </div>
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address*
+                    <TranslatableText context="contact-form-labels">Email Address*</TranslatableText>
                   </label>
                   <Input 
                     id="email" 
@@ -308,7 +323,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
               <>
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Your Name*
+                    <TranslatableText context="contact-form-labels">Your Name*</TranslatableText>
                   </label>
                   <Input 
                     id="name" 
@@ -323,7 +338,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
                 </div>
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address*
+                    <TranslatableText context="contact-form-labels">Email Address*</TranslatableText>
                   </label>
                   <Input 
                     id="email" 
@@ -344,7 +359,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone Number
+                      <TranslatableText context="contact-form-labels">Phone Number</TranslatableText>
                     </label>
                     <Input 
                       id="phone" 
@@ -358,7 +373,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
                   </div>
                   <div>
                     <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
-                      Company
+                      <TranslatableText context="contact-form-labels">Company</TranslatableText>
                     </label>
                     <Input 
                       id="company" 
@@ -373,7 +388,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
                 </div>
                 <div>
                   <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject
+                    <TranslatableText context="contact-form-labels">Subject</TranslatableText>
                   </label>
                   <Input 
                     id="subject" 
@@ -390,7 +405,7 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
             
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                Message*
+                <TranslatableText context="contact-form-labels">Message*</TranslatableText>
               </label>
               <Textarea 
                 id="message" 
@@ -418,9 +433,9 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
               {submitting ? (
                 <span className="flex items-center justify-center">
                   <Spinner size="sm" className="mr-2" />
-                  Sending Message...
+                  {sendingText}
                 </span>
-              ) : 'Send Message'}
+              ) : sendButtonText}
             </Button>
           </form>
         ) : (
@@ -428,15 +443,17 @@ const ContactFormNew: React.FC<ContactFormNewProps> = ({
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 mb-4">
               <Check className="h-6 w-6 text-green-600" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Message Sent!</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              <TranslatableText context="contact-form-messages">Message Sent!</TranslatableText>
+            </h3>
             <p className="text-gray-600 mb-6">
-              Thank you for your message. We'll get back to you as soon as possible.
+              <TranslatableText context="contact-form-messages">Thank you for your message. We'll get back to you as soon as possible.</TranslatableText>
             </p>
             <Button 
               variant="outline" 
               onClick={handleReset}
             >
-              Send Another Message
+              <TranslatableText context="contact-form-buttons">Send Another Message</TranslatableText>
             </Button>
           </div>
         )}
