@@ -5,6 +5,8 @@ import { ContentfulTestimonialSection } from '@/types/contentful/testimonial';
 import { transformTestimonials } from '@/hooks/cms/transformers/testimonialTransformer';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import { Testimonial } from '@/types/testimonial';
+import { useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface ContentfulTestimonialsCarouselProps {
   data: ContentfulTestimonialSection | null;
@@ -17,6 +19,9 @@ const ContentfulTestimonialsCarousel: React.FC<ContentfulTestimonialsCarouselPro
   isLoading,
   error
 }) => {
+  // Translate CMS content when available
+  const { translatedContent } = useTranslatedCMSContent(data?.fields, 'testimonials-section');
+
   // Enhanced logging to help debug
   console.log('[ContentfulTestimonialsCarousel] Props received:', {
     hasData: !!data,
@@ -63,8 +68,9 @@ const ContentfulTestimonialsCarousel: React.FC<ContentfulTestimonialsCarouselPro
     return null;
   }
 
-  const title = data.fields?.title || 'Trusted by Industry Leaders';
-  const subtitle = data.fields?.subtitle || 'Hear what our clients have to say about our vending software solutions.';
+  // Use translated CMS content if available, otherwise use translatable fallbacks
+  const title = translatedContent?.title || data?.fields?.title;
+  const subtitle = translatedContent?.subtitle || data?.fields?.subtitle;
 
   return (
     <ContentfulErrorBoundary contentType="Testimonials">
@@ -105,10 +111,22 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
         {/* Section header with consistent styling */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-vending-blue-dark mb-4">
-            {title}
+            {title ? (
+              title
+            ) : (
+              <TranslatableText context="testimonials-section">
+                Trusted by Industry Leaders
+              </TranslatableText>
+            )}
           </h2>
           <p className="subtitle mx-auto">
-            {subtitle}
+            {subtitle ? (
+              subtitle
+            ) : (
+              <TranslatableText context="testimonials-section">
+                Hear what our clients have to say about our vending software solutions.
+              </TranslatableText>
+            )}
           </p>
         </div>
         
