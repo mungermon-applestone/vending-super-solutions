@@ -13,11 +13,15 @@ const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 // Initialize SES client
 const createSESClient = () => {
+  const region = Deno.env.get('AWS_REGION') || 'us-east-1';
+  const accessKeyId = Deno.env.get('AWS_ACCESS_KEY_ID') || '';
+  const secretAccessKey = Deno.env.get('AWS_SECRET_ACCESS_KEY') || '';
+  
   return new SESClient({
-    region: Deno.env.get('AWS_REGION') || 'us-east-1',
+    region,
     credentials: {
-      accessKeyId: Deno.env.get('AWS_ACCESS_KEY_ID') || '',
-      secretAccessKey: Deno.env.get('AWS_SECRET_ACCESS_KEY') || '',
+      accessKeyId,
+      secretAccessKey,
     },
   });
 };
