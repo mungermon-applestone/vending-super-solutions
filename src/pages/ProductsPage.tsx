@@ -21,6 +21,7 @@ import ContentfulTestimonialsCarousel from '@/components/testimonials/Contentful
 import ProductsHero from '@/components/products/sections/ProductsHero';
 import { ContactSection } from '@/components/common';
 import ProductsPageSEO from '@/components/seo/ProductsPageSEO';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 // Fallback page content with hero fields and navigation link text
 const fallbackPageContent = {
@@ -197,11 +198,11 @@ const ProductsPage = () => {
         {displayContent?.categoriesSectionTitle && (
           <div className="max-w-2xl mx-auto text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {displayContent.categoriesSectionTitle}
+              <TranslatableText context="categories-section">{displayContent.categoriesSectionTitle}</TranslatableText>
             </h2>
             {displayContent.categoriesSectionDescription && (
               <p className="text-lg text-gray-600">
-                {displayContent.categoriesSectionDescription}
+                <TranslatableText context="categories-section">{displayContent.categoriesSectionDescription}</TranslatableText>
               </p>
             )}
           </div>

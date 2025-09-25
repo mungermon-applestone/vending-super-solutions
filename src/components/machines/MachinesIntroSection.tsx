@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
 
 export interface MachinesIntroSectionProps {
   title?: string;
@@ -16,10 +17,18 @@ const MachinesIntroSection: React.FC<MachinesIntroSectionProps> = ({
   introDescription,
   id
 }) => {
-  // Use title or introTitle, with title taking precedence if both are provided
-  const displayTitle = title || introTitle || '';
-  // Use description or introDescription, with description taking precedence if both are provided
-  const displayDescription = description || introDescription || '';
+  // Create content object for translation
+  const contentToTranslate = {
+    title: title || introTitle || '',
+    description: description || introDescription || ''
+  };
+  
+  // Translate the content
+  const { translatedContent } = useTranslatedCMSContent(contentToTranslate, 'machines-intro');
+  
+  // Use translated content
+  const displayTitle = translatedContent?.title || '';
+  const displayDescription = translatedContent?.description || '';
 
   return (
     <section id={id} className="py-12 bg-white">

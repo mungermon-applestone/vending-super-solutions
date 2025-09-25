@@ -6,6 +6,7 @@ import { ExternalLink } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 import { ProductsPageContent } from '@/hooks/cms/useProductsPageContent';
 import ContentfulHero from '@/components/contentful/ContentfulHero';
+import { useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
 
 interface ProductsHeroProps {
   pageContent?: ProductsPageContent;
@@ -14,6 +15,9 @@ interface ProductsHeroProps {
 }
 
 export default function ProductsHero({ pageContent, isLoading, error }: ProductsHeroProps) {
+  // Translate the pageContent if it exists
+  const { translatedContent } = useTranslatedCMSContent(pageContent, 'products-hero');
+  
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -22,11 +26,12 @@ export default function ProductsHero({ pageContent, isLoading, error }: Products
     );
   }
 
-  if (error || !pageContent || !pageContent.heroTitle) {
+  if (error || !translatedContent || !translatedContent.heroTitle) {
     console.error("[ProductsHero] Using fallback hero content:", { 
       error, 
       hasPageContent: !!pageContent, 
-      hasHeroTitle: pageContent?.heroTitle ? true : false 
+      hasTranslatedContent: !!translatedContent,
+      hasHeroTitle: translatedContent?.heroTitle ? true : false 
     });
     
     // Fallback content
@@ -70,24 +75,24 @@ export default function ProductsHero({ pageContent, isLoading, error }: Products
   }
 
   console.log('[ProductsHero] Rendering with Contentful hero content:', {
-    title: pageContent.heroTitle,
-    hasDescription: !!pageContent.heroDescription,
-    hasImage: !!pageContent.heroImage,
-    primaryButton: pageContent.heroPrimaryButtonText,
-    secondaryButton: pageContent.heroSecondaryButtonText
+    title: translatedContent.heroTitle,
+    hasDescription: !!translatedContent.heroDescription,
+    hasImage: !!translatedContent.heroImage,
+    primaryButton: translatedContent.heroPrimaryButtonText,
+    secondaryButton: translatedContent.heroSecondaryButtonText
   });
 
-  // Use the reusable ContentfulHero component with direct page content
+  // Use the reusable ContentfulHero component with translated page content
   return (
     <ContentfulHero
-      title={pageContent.heroTitle}
-      description={pageContent.heroDescription}
-      image={pageContent.heroImage?.fields?.file?.url}
-      altText={pageContent.heroImage?.fields?.title || "Products"}
-      primaryButtonText={pageContent.heroPrimaryButtonText}
-      primaryButtonUrl={pageContent.heroPrimaryButtonUrl}
-      secondaryButtonText={pageContent.heroSecondaryButtonText}
-      secondaryButtonUrl={pageContent.heroSecondaryButtonUrl}
+      title={translatedContent.heroTitle}
+      description={translatedContent.heroDescription}
+      image={translatedContent.heroImage?.fields?.file?.url}
+      altText={translatedContent.heroImage?.fields?.title || "Products"}
+      primaryButtonText={translatedContent.heroPrimaryButtonText}
+      primaryButtonUrl={translatedContent.heroPrimaryButtonUrl}
+      secondaryButtonText={translatedContent.heroSecondaryButtonText}
+      secondaryButtonUrl={translatedContent.heroSecondaryButtonUrl}
     />
   );
 }

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import MachineCard from './MachineCard';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface MachineGridProps {
   machines: any[];
@@ -21,7 +22,11 @@ const MachineGrid: React.FC<MachineGridProps> = ({ machines, title }) => {
   
   return (
     <div className="mb-16">
-      {title && <h3 className="text-2xl font-semibold mb-6">{title}</h3>}
+      {title && (
+        <h3 className="text-2xl font-semibold mb-6">
+          <TranslatableText context="machine-section">{title}</TranslatableText>
+        </h3>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {machines.map((machine) => (
           <MachineCard key={machine.id} machine={machine} />

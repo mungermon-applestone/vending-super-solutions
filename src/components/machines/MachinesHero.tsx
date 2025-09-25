@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
 
 export interface MachinesHeroProps {
   title?: string;
@@ -28,11 +29,14 @@ const MachinesHero: React.FC<MachinesHeroProps> = ({
   isLoading,
   error
 }) => {
-  // Use direct props first, then fall back to pageContent
-  const displayTitle = title || pageContent?.heroTitle || '';
+  // Translate the pageContent if it exists
+  const { translatedContent } = useTranslatedCMSContent(pageContent, 'machines-hero');
+  
+  // Use direct props first, then fall back to translated pageContent
+  const displayTitle = title || translatedContent?.heroTitle || '';
   // Changed from heroSubtitle to heroDescription to match the content type
-  const displaySubtitle = subtitle || pageContent?.heroDescription || '';
-  const displayImageUrl = imageUrl || (pageContent?.heroImage?.fields?.file?.url ? `https:${pageContent.heroImage.fields.file.url}` : undefined);
+  const displaySubtitle = subtitle || translatedContent?.heroDescription || '';
+  const displayImageUrl = imageUrl || (translatedContent?.heroImage?.fields?.file?.url ? `https:${translatedContent.heroImage.fields.file.url}` : undefined);
   
   return (
     <section className="relative bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light py-16 md:py-20 overflow-hidden">
