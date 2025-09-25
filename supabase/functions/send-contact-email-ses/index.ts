@@ -27,30 +27,41 @@ async function signRequest(
   const host = parsedUrl.hostname;
   const path = parsedUrl.pathname;
   
-  const timestamp = new Date().toISOString().replace(/[:-]|\.\d{3}/g, '');
-  const date = timestamp.substr(0, 8);
+  // Create timestamp in correct AWS format (YYYYMMDDTHHMMSSZ)
+  const now = new Date();
+  const timestamp = now.toISOString().replace(/[:-]|\.\d{3}/g, '') + 'Z';
+  const date = timestamp.substring(0, 8); // YYYYMMDD
+  
+  console.log('SigV4 Debug - Timestamp:', timestamp, 'Date:', date);
   
   headers['host'] = host;
   headers['x-amz-date'] = timestamp;
   
-  // Sort headers
-  const sortedHeaders = Object.keys(headers).sort().map(key => `${key.toLowerCase()}:${headers[key]}`).join('\n');
-  const signedHeaders = Object.keys(headers).sort().map(key => key.toLowerCase()).join(';');
+  // Sort headers and create canonical headers
+  const sortedHeaderKeys = Object.keys(headers).sort();
+  const canonicalHeaders = sortedHeaderKeys.map(key => `${key.toLowerCase()}:${headers[key].trim()}`).join('\n') + '\n';
+  const signedHeaders = sortedHeaderKeys.map(key => key.toLowerCase()).join(';');
+  
+  console.log('SigV4 Debug - Canonical Headers:', canonicalHeaders);
+  console.log('SigV4 Debug - Signed Headers:', signedHeaders);
   
   // Create payload hash
   const payloadHash = await crypto.subtle.digest('SHA-256', encoder.encode(body));
   const payloadHashHex = Array.from(new Uint8Array(payloadHash)).map(b => b.toString(16).padStart(2, '0')).join('');
   
-  // Create canonical request
+  console.log('SigV4 Debug - Payload Hash:', payloadHashHex);
+  
+  // Create canonical request (note: query string is empty for SES)
   const canonicalRequest = [
     method,
     path,
-    '', // query string
-    sortedHeaders,
-    '',
+    '', // query string (empty for SES POST requests)
+    canonicalHeaders,
     signedHeaders,
     payloadHashHex
   ].join('\n');
+  
+  console.log('SigV4 Debug - Canonical Request:', canonicalRequest);
   
   // Create string to sign
   const algorithm = 'AWS4-HMAC-SHA256';
@@ -65,6 +76,8 @@ async function signRequest(
     canonicalRequestHashHex
   ].join('\n');
   
+  console.log('SigV4 Debug - String to Sign:', stringToSign);
+  
   // Create signature
   const signingKey = await getSignatureKey(secretAccessKey, date, region, 'ses');
   const signature = await crypto.subtle.sign('HMAC', signingKey, encoder.encode(stringToSign));
@@ -72,6 +85,8 @@ async function signRequest(
   
   // Create authorization header
   const authorization = `${algorithm} Credential=${accessKeyId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signatureHex}`;
+  
+  console.log('SigV4 Debug - Authorization Header:', authorization);
   
   return authorization;
 }
@@ -315,16 +330,43 @@ serve(async (req) => {
       Form type: ${formType || 'Contact Form'}
     `;
 
-    // Create SES client and send email
+    // Validate AWS credentials
     const region = Deno.env.get('AWS_REGION') || 'us-east-1';
     const accessKeyId = Deno.env.get('AWS_ACCESS_KEY_ID') || '';
     const secretAccessKey = Deno.env.get('AWS_SECRET_ACCESS_KEY') || '';
+
+    console.log('AWS Configuration:', {
+      region,
+      accessKeyIdPresent: !!accessKeyId,
+      secretAccessKeyPresent: !!secretAccessKey,
+      accessKeyIdLength: accessKeyId.length,
+      secretAccessKeyLength: secretAccessKey.length
+    });
+
+    if (!accessKeyId || !secretAccessKey) {
+      console.error('Missing AWS credentials:', {
+        accessKeyId: !!accessKeyId,
+        secretAccessKey: !!secretAccessKey
+      });
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Server configuration error: Missing AWS credentials', 
+          fallback: true 
+        }),
+        { 
+          status: 500, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
 
     console.log('Sending email with SES:', {
       from: emailFrom,
       to: emailTo,
       subject: emailSubject,
-      replyTo: email
+      replyTo: email,
+      region
     });
 
     try {
@@ -349,13 +391,26 @@ serve(async (req) => {
         }
       );
     } catch (sendError) {
-      console.error('SES error details:', JSON.stringify(sendError, null, 2));
+      // Enhanced error logging for SES errors
+      console.error('SES error occurred:', sendError);
+      
+      if (sendError instanceof Error) {
+        console.error('SES error message:', sendError.message);
+        console.error('SES error stack:', sendError.stack);
+        console.error('SES error name:', sendError.name);
+      }
+      
+      // Log additional error properties if they exist
+      const errorObj = sendError as any;
+      if (errorObj.cause) console.error('SES error cause:', errorObj.cause);
+      if (errorObj.code) console.error('SES error code:', errorObj.code);
+      if (errorObj.statusCode) console.error('SES error statusCode:', errorObj.statusCode);
       
       return new Response(
         JSON.stringify({ 
           success: false, 
           error: sendError instanceof Error ? sendError.message : 'Error sending email',
-          details: sendError,
+          errorType: sendError instanceof Error ? sendError.name : typeof sendError,
           fallback: true 
         }),
         { 
