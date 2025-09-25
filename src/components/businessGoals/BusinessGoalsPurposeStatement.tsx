@@ -1,5 +1,6 @@
 
 import React from 'react';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface BusinessGoalsPurposeStatementProps {
   heading?: string;
@@ -24,10 +25,10 @@ const BusinessGoalsPurposeStatement: React.FC<BusinessGoalsPurposeStatementProps
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6 text-vending-blue-dark">
-            {displayHeading}
+            <TranslatableText context="business-goals">{displayHeading}</TranslatableText>
           </h2>
           <p className="text-xl text-gray-700">
-            {displayContent}
+            <TranslatableText context="business-goals">{displayContent}</TranslatableText>
           </p>
         </div>
       </div>

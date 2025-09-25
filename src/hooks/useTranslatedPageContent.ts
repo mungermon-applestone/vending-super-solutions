@@ -7,3 +7,7 @@ export const useTranslatedMachinesPageContent = (pageContent: any) => {
 export const useTranslatedProductsPageContent = (pageContent: any) => {
   return useTranslatedCMSContent(pageContent, 'products-page');
 };
+
+export const useTranslatedBusinessGoalsPageContent = (pageContent: any) => {
+  return useTranslatedCMSContent(pageContent, 'business-goals-page');
+};

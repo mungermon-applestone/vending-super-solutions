@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { CMSBusinessGoal } from '@/types/cms';
 import { Spinner } from '@/components/ui/spinner';
 import Image from '@/components/common/Image';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface BusinessGoalsGridProps {
   goals: CMSBusinessGoal[];
@@ -30,12 +31,18 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
   if (isLoading) {
     return (
       <div className="text-center p-8">
-        <h2 className="text-xl font-medium mb-4">{title}</h2>
-        <p className="text-gray-500 mb-6">{description}</p>
+        <h2 className="text-xl font-medium mb-4">
+          <TranslatableText context="business-goals">{title}</TranslatableText>
+        </h2>
+        <p className="text-gray-500 mb-6">
+          <TranslatableText context="business-goals">{description}</TranslatableText>
+        </p>
         <div className="flex justify-center">
           <Spinner size="lg" />
         </div>
-        <p className="mt-4 text-gray-500">Loading business goals...</p>
+        <p className="mt-4 text-gray-500">
+          <TranslatableText context="business-goals">Loading business goals...</TranslatableText>
+        </p>
       </div>
     );
   }
@@ -43,8 +50,14 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
   if (error) {
     return (
       <div className="text-center p-8">
-        <h2 className="text-xl font-medium mb-4">{title}</h2>
-        <p className="text-red-500 mb-6">Error loading business goals: {error.message}</p>
+        <h2 className="text-xl font-medium mb-4">
+          <TranslatableText context="business-goals">{title}</TranslatableText>
+        </h2>
+        <p className="text-red-500 mb-6">
+          <TranslatableText context="business-goals">
+            {`Error loading business goals: ${error.message}`}
+          </TranslatableText>
+        </p>
       </div>
     );
   }
@@ -52,12 +65,18 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
   if (!goals || goals.length === 0) {
     return (
       <div className="text-center p-8">
-        <h2 className="text-xl font-medium mb-4">{title}</h2>
-        <p className="text-gray-500 mb-6">{description}</p>
+        <h2 className="text-xl font-medium mb-4">
+          <TranslatableText context="business-goals">{title}</TranslatableText>
+        </h2>
+        <p className="text-gray-500 mb-6">
+          <TranslatableText context="business-goals">{description}</TranslatableText>
+        </p>
         <div className="flex justify-center">
           <Spinner size="lg" />
         </div>
-        <p className="mt-4 text-gray-500">Loading business goals...</p>
+        <p className="mt-4 text-gray-500">
+          <TranslatableText context="business-goals">Loading business goals...</TranslatableText>
+        </p>
       </div>
     );
   }
@@ -109,9 +128,13 @@ const BusinessGoalsGrid: React.FC<BusinessGoalsGridProps> = ({
                 )}
               </div>
               <div className={contentClass}>
-                <h3 className="text-xl font-semibold mb-2">{goal.title}</h3>
+                <h3 className="text-xl font-semibold mb-2">
+                  <TranslatableText context="business-goals">{goal.title}</TranslatableText>
+                </h3>
                 {!ultraCompact && (
-                  <p className="text-gray-600 line-clamp-2">{goal.description}</p>
+                  <p className="text-gray-600 line-clamp-2">
+                    <TranslatableText context="business-goals">{goal.description}</TranslatableText>
+                  </p>
                 )}
               </div>
             </Card>

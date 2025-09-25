@@ -2,6 +2,7 @@
 import React from 'react';
 import { Check } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface BusinessGoalKeyBenefitsProps {
   title?: string;
@@ -24,9 +25,13 @@ const BusinessGoalKeyBenefits: React.FC<BusinessGoalKeyBenefitsProps> = ({
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto">
         <div className="max-w-4xl mx-auto text-center mb-12">
-          <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">{title}</h2>
+          <h2 className="text-3xl font-bold text-vending-blue-dark mb-4">
+            <TranslatableText context="business-goals">{title}</TranslatableText>
+          </h2>
           {description && (
-            <p className="text-lg text-gray-700">{description}</p>
+            <p className="text-lg text-gray-700">
+              <TranslatableText context="business-goals">{description}</TranslatableText>
+            </p>
           )}
         </div>
 
@@ -41,7 +46,9 @@ const BusinessGoalKeyBenefits: React.FC<BusinessGoalKeyBenefitsProps> = ({
                         <Check className="h-4 w-4 text-white" />
                       </div>
                     </div>
-                    <p className="ml-3 text-base text-gray-700">{benefit}</p>
+                    <p className="ml-3 text-base text-gray-700">
+                      <TranslatableText context="business-goals">{benefit}</TranslatableText>
+                    </p>
                   </div>
                 </CardContent>
               </Card>

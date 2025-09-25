@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface HeroContentProps {
   title?: string;
@@ -63,20 +64,22 @@ const BusinessGoalsHero: React.FC<BusinessGoalsHeroProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-vending-blue-dark">
-                Business Goals
+                <TranslatableText context="business-goals">Business Goals</TranslatableText>
               </h1>
               <p className="text-xl text-gray-700 max-w-2xl">
-                Transform your business operations with innovative vending solutions designed to meet your specific objectives.
+                <TranslatableText context="business-goals">
+                  Transform your business operations with innovative vending solutions designed to meet your specific objectives.
+                </TranslatableText>
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
                 <Button asChild size="lg">
                   <Link to="/contact">
-                    Request Information <ExternalLink className="ml-2 h-5 w-5" />
+                    <TranslatableText context="business-goals">Request Information</TranslatableText> <ExternalLink className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg">
                   <Link to="#goals-section">
-                    Explore Goals
+                    <TranslatableText context="business-goals">Explore Goals</TranslatableText>
                   </Link>
                 </Button>
               </div>
@@ -103,16 +106,18 @@ const BusinessGoalsHero: React.FC<BusinessGoalsHeroProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight text-vending-blue-dark">
-              {heroContent.title}
+              <TranslatableText context="business-goals">{heroContent.title}</TranslatableText>
             </h1>
             <p className="text-xl text-gray-700 max-w-2xl">
-              {heroContent.subtitle}
+              <TranslatableText context="business-goals">{heroContent.subtitle}</TranslatableText>
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
               {heroContent.primaryButtonUrl && (
                 <Button asChild size="lg">
                   <Link to={heroContent.primaryButtonUrl}>
-                    {heroContent.primaryButtonText || "Request Information"}
+                    <TranslatableText context="business-goals">
+                      {heroContent.primaryButtonText || "Request Information"}
+                    </TranslatableText>
                     {heroContent.primaryButtonText?.includes('Demo') && (
                       <ExternalLink className="ml-2 h-5 w-5" />
                     )}
@@ -122,7 +127,9 @@ const BusinessGoalsHero: React.FC<BusinessGoalsHeroProps> = ({
               {heroContent.secondaryButtonUrl && (
                 <Button asChild variant="outline" size="lg">
                   <Link to={heroContent.secondaryButtonUrl}>
-                    {heroContent.secondaryButtonText || "Explore Goals"}
+                    <TranslatableText context="business-goals">
+                      {heroContent.secondaryButtonText || "Explore Goals"}
+                    </TranslatableText>
                   </Link>
                 </Button>
               )}
@@ -138,7 +145,9 @@ const BusinessGoalsHero: React.FC<BusinessGoalsHeroProps> = ({
                 />
               ) : (
                 <div className="flex items-center justify-center p-12">
-                  <p className="text-gray-400">No image available</p>
+                  <p className="text-gray-400">
+                    <TranslatableText context="business-goals">No image available</TranslatableText>
+                  </p>
                 </div>
               )}
             </div>
