@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { SESClient, SendEmailCommand } from "npm:@aws-sdk/client-ses@3.0.0";
+import { SESClient, SendEmailCommand } from "https://esm.sh/@aws-sdk/client-ses@3.554.0";
 
 // Set up CORS headers for browser requests
 const corsHeaders = {

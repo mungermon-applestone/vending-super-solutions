@@ -194,7 +194,7 @@ serve(async (req) => {
     console.error('Error in translate-content function:', error);
     
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Translation service error',
       translations: [] 
     }), {
       status: 500,
