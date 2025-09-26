@@ -10,6 +10,7 @@ import { useContentfulInit } from '@/hooks/useContentfulInit';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 const Blog = () => {
   const { isInitialized, error: initError } = useContentfulInit();
@@ -28,14 +29,18 @@ const Blog = () => {
     return (
       <div className="container mx-auto py-10">
         <Alert variant="destructive" className="mb-6">
-          <AlertTitle>Error Loading Blog Posts</AlertTitle>
+          <AlertTitle>
+            <TranslatableText context="blog">Error Loading Blog Posts</TranslatableText>
+          </AlertTitle>
           <AlertDescription>
-            {initError?.message || postsError?.message || 'An unknown error occurred'}
+            <TranslatableText context="blog">
+              {initError?.message || postsError?.message || 'An unknown error occurred'}
+            </TranslatableText>
           </AlertDescription>
         </Alert>
         <Button onClick={() => refetch()} className="mt-4">
           <RefreshCw className="mr-2 h-4 w-4" />
-          Retry
+          <TranslatableText context="blog">Retry</TranslatableText>
         </Button>
       </div>
     );
@@ -51,8 +56,12 @@ const Blog = () => {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-4xl font-bold mb-2">Updates</h1>
-      <p className="text-gray-600 mb-8 text-lg">The latest news, product notes, and insights from our team</p>
+      <h1 className="text-4xl font-bold mb-2">
+        <TranslatableText context="blog">Updates</TranslatableText>
+      </h1>
+      <p className="text-gray-600 mb-8 text-lg">
+        <TranslatableText context="blog">The latest news, product notes, and insights from our team</TranslatableText>
+      </p>
       
       {posts.length > 0 ? (
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -62,7 +71,9 @@ const Blog = () => {
         </div>
       ) : (
         <div className="text-center py-16">
-          <p className="text-gray-500">No blog posts found</p>
+          <p className="text-gray-500">
+            <TranslatableText context="blog">No blog posts found</TranslatableText>
+          </p>
         </div>
       )}
     </div>
@@ -98,7 +109,7 @@ const BlogPostCard = ({ post }: { post: ContentfulBlogPost }) => {
       <CardFooter className="text-sm text-gray-500">
         {post.publishDate && (
           <time dateTime={post.publishDate}>
-            Published {formatDistanceToNow(new Date(post.publishDate), { addSuffix: true })}
+            <TranslatableText context="blog">Published</TranslatableText> {formatDistanceToNow(new Date(post.publishDate), { addSuffix: true })}
           </time>
         )}
       </CardFooter>

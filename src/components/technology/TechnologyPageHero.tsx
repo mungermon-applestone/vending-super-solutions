@@ -2,6 +2,7 @@
 import React from 'react';
 import { useContentfulTechnologyPageContent, TechnologyPageContent } from '@/hooks/cms/useContentfulTechnologyPageContent';
 import ContentfulHero from '@/components/contentful/ContentfulHero';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface TechnologyPageHeroProps {
   entryId?: string;
@@ -42,13 +43,13 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({ entryId }) => {
     
     return (
       <ContentfulHero
-        title={fallbackHero.title}
-        description={fallbackHero.description}
+        title={<TranslatableText context="technology-hero">{fallbackHero.title}</TranslatableText>}
+        description={<TranslatableText context="technology-hero">{fallbackHero.description}</TranslatableText>}
         image={fallbackHero.image}
-        altText={fallbackHero.altText}
-        primaryButtonText={fallbackHero.primaryButtonText}
+        altText={<TranslatableText context="technology-hero">{fallbackHero.altText}</TranslatableText>}
+        primaryButtonText={<TranslatableText context="technology-hero">{fallbackHero.primaryButtonText}</TranslatableText>}
         primaryButtonUrl={fallbackHero.primaryButtonUrl}
-        secondaryButtonText={fallbackHero.secondaryButtonText}
+        secondaryButtonText={<TranslatableText context="technology-hero">{fallbackHero.secondaryButtonText}</TranslatableText>}
         secondaryButtonUrl={fallbackHero.secondaryButtonUrl}
       />
     );

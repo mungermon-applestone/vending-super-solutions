@@ -10,6 +10,7 @@ import { ContactSection } from '@/components/common';
 import { useTestimonialSection } from '@/hooks/cms/useTestimonialSection';
 import ContentfulTestimonialsCarousel from '@/components/testimonials/ContentfulTestimonialsCarousel';
 import SEO from '@/components/seo/SEO';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 // Fallback content for when Contentful is not configured
 const fallbackPageContent = {
@@ -65,9 +66,13 @@ const TechnologyPage = () => {
         <div className="container mx-auto px-4 py-8">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error Loading Content</AlertTitle>
+            <AlertTitle>
+              <TranslatableText context="technology-page">Error Loading Content</TranslatableText>
+            </AlertTitle>
             <AlertDescription>
-              {error instanceof Error ? error.message : 'An unexpected error occurred'}
+              <TranslatableText context="technology-page">
+                {error instanceof Error ? error.message : 'An unexpected error occurred'}
+              </TranslatableText>
             </AlertDescription>
           </Alert>
         </div>
@@ -97,9 +102,13 @@ const TechnologyPage = () => {
       <div className="container mx-auto px-4 py-8">
         {displayContent && (
           <div className="max-w-4xl mx-auto text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">{displayContent.introTitle}</h1>
+            <h1 className="text-4xl font-bold mb-4">
+              <TranslatableText context="technology-page">{displayContent.introTitle}</TranslatableText>
+            </h1>
             {displayContent.introDescription && (
-              <p className="text-lg text-muted-foreground">{displayContent.introDescription}</p>
+              <p className="text-lg text-muted-foreground">
+                <TranslatableText context="technology-page">{displayContent.introDescription}</TranslatableText>
+              </p>
             )}
           </div>
         )}

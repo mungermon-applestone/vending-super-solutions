@@ -3,15 +3,16 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 export interface ContentfulHeroProps {
-  title?: string;
-  description?: string;
+  title?: string | React.ReactNode;
+  description?: string | React.ReactNode;
   image?: string;
-  altText?: string;
-  primaryButtonText?: string;
+  altText?: string | React.ReactNode;
+  primaryButtonText?: string | React.ReactNode;
   primaryButtonUrl?: string;
-  secondaryButtonText?: string;
+  secondaryButtonText?: string | React.ReactNode;
   secondaryButtonUrl?: string;
 }
 
@@ -70,12 +71,14 @@ const ContentfulHero: React.FC<ContentfulHeroProps> = ({
               {image ? (
                 <img 
                   src={image}
-                  alt={altText}
+                  alt={typeof altText === 'string' ? altText : 'Hero image'}
                   className="w-full h-auto object-cover"
                 />
               ) : (
                 <div className="flex items-center justify-center p-12">
-                  <p className="text-gray-400">No image available</p>
+                  <p className="text-gray-400">
+                    <TranslatableText context="hero">No image available</TranslatableText>
+                  </p>
                 </div>
               )}
             </div>

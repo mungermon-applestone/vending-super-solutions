@@ -7,6 +7,7 @@ import { useBreadcrumbs } from '@/context/BreadcrumbContext';
 import BlogSchemaData from '@/components/blog/BlogSchemaData';
 import SEO from '@/components/seo/SEO';
 import { SimpleContactCTA } from '@/components/common';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -40,11 +41,19 @@ const BlogPost = () => {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild>
+                  <Link to="/">
+                    <TranslatableText context="navigation">Home</TranslatableText>
+                  </Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/blog">Blog</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild>
+                  <Link to="/blog">
+                    <TranslatableText context="navigation">Blog</TranslatableText>
+                  </Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -54,8 +63,12 @@ const BlogPost = () => {
           </Breadcrumb>
         </nav>
 
-        <h1 className="text-3xl font-bold mb-6">Blog Post: {slug}</h1>
-        <p>The blog post content will appear here.</p>
+        <h1 className="text-3xl font-bold mb-6">
+          <TranslatableText context="blog-post">Blog Post:</TranslatableText> {slug}
+        </h1>
+        <p>
+          <TranslatableText context="blog-post">The blog post content will appear here.</TranslatableText>
+        </p>
 
         <div className="mt-16">
           <SimpleContactCTA />
