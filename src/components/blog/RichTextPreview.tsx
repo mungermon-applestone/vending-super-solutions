@@ -1,6 +1,6 @@
 import React from "react";
 import { Document } from "@contentful/rich-text-types";
-import { renderRichText } from '@/utils/contentful/richTextRenderer';
+import TranslatedRichText from './TranslatedRichText';
 
 interface RichTextPreviewProps {
   content?: Document;
@@ -25,7 +25,7 @@ const RichTextPreview: React.FC<RichTextPreviewProps> = ({
 
   return (
     <div className="prose prose-slate max-w-none [&>*:last-child]:mb-0">
-      {renderRichText(limitedContent, { includedAssets })}
+      <TranslatedRichText content={limitedContent} includedAssets={includedAssets} context="blog-preview" />
     </div>
   );
 };

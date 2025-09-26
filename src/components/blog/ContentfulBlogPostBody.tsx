@@ -1,7 +1,8 @@
 
 import React from "react";
 import { Document } from "@contentful/rich-text-types";
-import { renderRichText } from '@/utils/contentful/richTextRenderer';
+import TranslatedRichText from './TranslatedRichText';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface ContentfulBlogPostBodyProps {
   content?: Document;
@@ -23,9 +24,9 @@ const ContentfulBlogPostBody: React.FC<ContentfulBlogPostBodyProps> = ({
   return (
     <div className="prose max-w-none prose-slate mb-12">
       {content ? (
-        renderRichText(content, { includedAssets })
+        <TranslatedRichText content={content} includedAssets={includedAssets} />
       ) : (
-        <p>No content available for this blog post.</p>
+        <p><TranslatableText context="blog-article">No content available for this blog post.</TranslatableText></p>
       )}
     </div>
   );

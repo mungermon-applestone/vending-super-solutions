@@ -3,6 +3,7 @@ import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface AdjacentBlogPost {
   slug: string;
@@ -23,14 +24,20 @@ const ContentfulBlogPostFooter: React.FC<ContentfulBlogPostFooterProps> = ({
         <Button variant="outline" asChild>
           <Link to={`/blog/${previousPost.slug}`} className="flex items-center">
             <ChevronLeft className="h-4 w-4 mr-2" />
-            <span className="hidden md:inline">Previous:</span> {previousPost.title}
+            <span className="hidden md:inline">
+              <TranslatableText context="blog-article-nav">Previous:</TranslatableText>
+            </span> 
+            <TranslatableText context="blog-article-nav">{previousPost.title}</TranslatableText>
           </Link>
         </Button>
       ) : <div></div>}
       {nextPost ? (
         <Button variant="outline" asChild>
           <Link to={`/blog/${nextPost.slug}`} className="flex items-center">
-            <span className="hidden md:inline">Next:</span> {nextPost.title}
+            <span className="hidden md:inline">
+              <TranslatableText context="blog-article-nav">Next:</TranslatableText>
+            </span> 
+            <TranslatableText context="blog-article-nav">{nextPost.title}</TranslatableText>
             <ChevronRight className="h-4 w-4 ml-2" />
           </Link>
         </Button>

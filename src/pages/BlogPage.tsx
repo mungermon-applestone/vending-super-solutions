@@ -11,6 +11,7 @@ import ContentfulErrorBoundary from "@/components/common/ContentfulErrorBoundary
 import ContentfulFallbackMessage from "@/components/common/ContentfulFallbackMessage";
 import ContentfulInitializer from "@/components/blog/ContentfulInitializer";
 import { SimpleContactCTA } from "@/components/common";
+import TranslatableText from '@/components/translation/TranslatableText';
 
 const BlogPage: React.FC = () => {
   return (
@@ -78,9 +79,11 @@ const BlogPageContent: React.FC = () => {
       <div className="flex flex-col min-h-screen">
         <div className="container mx-auto px-4 py-12 flex-grow">
           <div className="max-w-3xl mx-auto text-center mb-12">
-            <h1 className="text-4xl font-bold mb-5">What's New</h1>
+            <h1 className="text-4xl font-bold mb-5">
+              <TranslatableText context="blog">What's New</TranslatableText>
+            </h1>
             <p className="text-lg text-gray-600">
-              Insights, news, and updates from our team.
+              <TranslatableText context="blog">Insights, news, and updates from our team.</TranslatableText>
             </p>
           </div>
 
@@ -91,7 +94,9 @@ const BlogPageContent: React.FC = () => {
           )}
 
           <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-8">Latest Articles</h2>
+            <h2 className="text-2xl font-bold mb-8">
+              <TranslatableText context="blog">Latest Articles</TranslatableText>
+            </h2>
             
             {olderPosts.length > 0 ? (
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -110,13 +115,15 @@ const BlogPageContent: React.FC = () => {
                     <CardHeader className="py-3 px-4">
                       <CardTitle className="text-lg leading-tight mb-1">
                         <Link to={`/blog/${post.slug}`} className="hover:underline">
-                          {post.title}
+                          <TranslatableText context="blog-listing">{post.title}</TranslatableText>
                         </Link>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="flex-grow px-4 py-1">
                       <p className="text-gray-600 text-sm line-clamp-3">
-                        {post.excerpt || 'Read more about this post...'}
+                        <TranslatableText context="blog-listing">
+                          {post.excerpt || 'Read more about this post...'}
+                        </TranslatableText>
                       </p>
                     </CardContent>
                     {post.publishDate && (
@@ -131,9 +138,13 @@ const BlogPageContent: React.FC = () => {
               </div>
             ) : !latestPost ? (
               <div className="text-center py-16">
-                <p className="text-gray-500 mb-4">We're working on creating great content for you!</p>
+                <p className="text-gray-500 mb-4">
+                  <TranslatableText context="blog">We're working on creating great content for you!</TranslatableText>
+                </p>
                 <Button asChild variant="outline">
-                  <Link to="/">Return to Homepage</Link>
+                  <Link to="/">
+                    <TranslatableText context="blog">Return to Homepage</TranslatableText>
+                  </Link>
                 </Button>
               </div>
             ) : null}

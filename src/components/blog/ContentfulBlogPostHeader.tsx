@@ -2,6 +2,7 @@
 import React from "react";
 import { formatDistanceToNow } from "date-fns";
 import Image from "@/components/common/Image";
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface ContentfulBlogPostHeaderProps {
   title: string;
@@ -37,14 +38,18 @@ const ContentfulBlogPostHeader: React.FC<ContentfulBlogPostHeaderProps> = ({
         />
       </div>
     )}
-    <h1 className="text-3xl sm:text-4xl font-bold mb-4">{title}</h1>
+    <h1 className="text-3xl sm:text-4xl font-bold mb-4">
+      <TranslatableText context="blog-article-title">{title}</TranslatableText>
+    </h1>
     <div className="flex items-center text-gray-500 mb-4">
       {publishDate ? (
         <time dateTime={publishDate}>
-          Published {formatDistanceToNow(new Date(publishDate), { addSuffix: true })}
+          <TranslatableText context="blog-article-meta">Published</TranslatableText> {formatDistanceToNow(new Date(publishDate), { addSuffix: true })}
         </time>
       ) : (
-        <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Draft</span>
+        <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">
+          <TranslatableText context="blog-article-meta">Draft</TranslatableText>
+        </span>
       )}
     </div>
   </header>

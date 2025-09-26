@@ -5,6 +5,7 @@ import { Calendar } from "lucide-react";
 import { ContentfulBlogPost } from "@/hooks/useContentfulBlogPosts";
 import Image from "@/components/common/Image";
 import RichTextPreview from "./RichTextPreview";
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface BlogHeroCardProps {
   post: ContentfulBlogPost;
@@ -40,7 +41,7 @@ const BlogHeroCard: React.FC<BlogHeroCardProps> = ({ post }) => {
         </div>
         <h2 className="text-2xl md:text-3xl font-bold mb-4 leading-tight">
           <Link to={`/blog/${post.slug}`} className="hover:underline">
-            {post.title}
+            <TranslatableText context="blog-listing">{post.title}</TranslatableText>
           </Link>
         </h2>
         <div className="text-gray-600 text-base mb-6 flex-1 overflow-hidden">
@@ -48,10 +49,12 @@ const BlogHeroCard: React.FC<BlogHeroCardProps> = ({ post }) => {
             <RichTextPreview content={post.content} maxParagraphs={3} />
           ) : (
             <p>
-              {post.excerpt ||
-                (typeof post.content === "string"
-                  ? post.content.slice(0, 200) + "..."
-                  : "No excerpt available")}
+              <TranslatableText context="blog-listing">
+                {post.excerpt ||
+                  (typeof post.content === "string"
+                    ? post.content.slice(0, 200) + "..."
+                    : "No excerpt available")}
+              </TranslatableText>
             </p>
           )}
         </div>
@@ -59,7 +62,7 @@ const BlogHeroCard: React.FC<BlogHeroCardProps> = ({ post }) => {
           to={`/blog/${post.slug}`}
           className="inline-flex items-center mt-auto text-primary hover:underline text-base font-medium group"
         >
-          Read more
+          <TranslatableText context="blog-listing">Read more</TranslatableText>
           <svg
             className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1"
             fill="none"
