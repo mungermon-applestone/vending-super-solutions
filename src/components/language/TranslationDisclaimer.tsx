@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { X, Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 const TranslationDisclaimer: React.FC = () => {
   const { currentLanguage } = useLanguage();
@@ -37,7 +38,9 @@ const TranslationDisclaimer: React.FC = () => {
           <div className="flex items-center gap-2 text-sm text-accent-foreground">
             <Languages className="h-4 w-4 flex-shrink-0" />
             <span>
-              Automatically translated from English - you may see some translation errors.
+              <TranslatableText context="translation-disclaimer">
+                Automatically translated from English - you may see some translation errors.
+              </TranslatableText>
             </span>
           </div>
           <Button
