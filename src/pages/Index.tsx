@@ -7,7 +7,7 @@ import BusinessGoalsSection from '@/components/home/BusinessGoalsSection';
 import AvailableMachinesSection from '@/components/home/AvailableMachinesSection';
 import { ContactSection } from '@/components/common';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
-import TranslationDemo from '@/components/translation/TranslationDemo';
+
 import LanguageMetaTags from '@/components/seo/LanguageMetaTags';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -32,9 +32,6 @@ const Index = () => {
         canonicalUrl={window.location.origin}
       />
       <HeroSlider sliderId="home-slider" />
-      <div className="container mx-auto px-4 py-8">
-        <TranslationDemo />
-      </div>
       <FeaturesSection />
       <ProductTypesSection />
       <BusinessGoalsSection />
