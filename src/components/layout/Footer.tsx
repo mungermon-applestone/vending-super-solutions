@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import FooterLinks from './FooterLinks';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface FooterProps {
   // Add any props here if needed
@@ -55,20 +56,36 @@ const Footer: React.FC<FooterProps> = () => {
           </div>
           
           <div className="text-center">
-            <h3 className="font-semibold text-gray-900 mb-3">Solutions</h3>
+            <h3 className="font-semibold text-gray-900 mb-3">
+              <TranslatableText context="footer">Solutions</TranslatableText>
+            </h3>
             <ul className="space-y-2">
-              <li><Link to="/products" className="text-gray-600 hover:text-vending-blue">Products</Link></li>
-              <li><Link to="/machines" className="text-gray-600 hover:text-vending-blue">Machines</Link></li>
-              <li><Link to="/technology" className="text-gray-600 hover:text-vending-blue">Technology</Link></li>
+              <li><Link to="/products" className="text-gray-600 hover:text-vending-blue">
+                <TranslatableText context="footer">Products</TranslatableText>
+              </Link></li>
+              <li><Link to="/machines" className="text-gray-600 hover:text-vending-blue">
+                <TranslatableText context="footer">Machines</TranslatableText>
+              </Link></li>
+              <li><Link to="/technology" className="text-gray-600 hover:text-vending-blue">
+                <TranslatableText context="footer">Technology</TranslatableText>
+              </Link></li>
             </ul>
           </div>
           
           <div className="text-center">
-            <h3 className="font-semibold text-gray-900 mb-3">Company</h3>
+            <h3 className="font-semibold text-gray-900 mb-3">
+              <TranslatableText context="footer">Company</TranslatableText>
+            </h3>
             <ul className="space-y-2">
-              <li><Link to="/about" className="text-gray-600 hover:text-vending-blue">About Us</Link></li>
-              <li><Link to="/blog" className="text-gray-600 hover:text-vending-blue">Blog</Link></li>
-              <li><Link to="/contact" className="text-gray-600 hover:text-vending-blue">Contact</Link></li>
+              <li><Link to="/about" className="text-gray-600 hover:text-vending-blue">
+                <TranslatableText context="footer">About Us</TranslatableText>
+              </Link></li>
+              <li><Link to="/blog" className="text-gray-600 hover:text-vending-blue">
+                <TranslatableText context="footer">Blog</TranslatableText>
+              </Link></li>
+              <li><Link to="/contact" className="text-gray-600 hover:text-vending-blue">
+                <TranslatableText context="footer">Contact</TranslatableText>
+              </Link></li>
             </ul>
           </div>
         </div>

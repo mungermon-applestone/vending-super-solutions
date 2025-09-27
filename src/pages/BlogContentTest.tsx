@@ -1,13 +1,14 @@
 
 import React from 'react';
 import { useContentfulBlogPostBySlug } from '@/hooks/useContentfulBlogPostBySlug';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 const BlogContentTest: React.FC = () => {
   // Using a hardcoded slug for testing purposes
   const { data: post, isLoading, error } = useContentfulBlogPostBySlug({ slug: 'test-blog-post' });
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error instanceof Error ? error.message : 'Unknown error'}</div>;
+  if (isLoading) return <div><TranslatableText context="loading">Loading...</TranslatableText></div>;
+  if (error) return <div><TranslatableText context="error">{error instanceof Error ? error.message : 'Unknown error'}</TranslatableText></div>;
 
   // Debugging: Log the entire post object to console
   console.log('Full post object:', post);

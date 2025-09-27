@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/useTranslation';
 
 type SpinnerProps = {
   size?: 'sm' | 'md' | 'lg';
@@ -8,6 +9,11 @@ type SpinnerProps = {
 };
 
 export const Spinner = ({ size = 'md', className }: SpinnerProps) => {
+  const { translated: loadingText } = useTranslation("Loading", { 
+    context: "ui-components",
+    fallbackToOriginal: true 
+  });
+
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-6 w-6',
@@ -23,7 +29,7 @@ export const Spinner = ({ size = 'md', className }: SpinnerProps) => {
           className
         )}
         role="status"
-        aria-label="Loading"
+        aria-label={loadingText}
       />
     </div>
   );
