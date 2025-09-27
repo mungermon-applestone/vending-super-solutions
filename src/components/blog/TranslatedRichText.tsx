@@ -52,18 +52,25 @@ const TranslatedRichText: React.FC<TranslatedRichTextProps> = ({
   includedAssets = [],
   context = 'blog-richtext' 
 }) => {
-  // Early return for invalid content to maintain consistent hook calls
-  if (!content || !content.content || !Array.isArray(content.content)) {
-    return null;
-  }
+  // Determine content validity but do NOT return early to keep hook order stable
+  const isValidContent = !!(content && content.content && Array.isArray(content.content));
 
-  const textNodes = React.useMemo(() => extractAllText(content), [content]);
+  const textNodes = React.useMemo(() => (isValidContent ? extractAllText(content) : []), [content, isValidContent]);
   
-  const { translations, isLoading } = useBatchTranslation(textNodes, { context });
+  const { translations, isLoading } = useBatchTranslation(textNodes, { context, enabled: isValidContent && textNodes.length > 0 });
+  
+  // Debug: verify stable path between renders
+  console.debug('[TranslatedRichText]', { isValidContent, textCount: textNodes.length, enabled: isValidContent && textNodes.length > 0 });
   
   // Show loading state for longer content
-  if (isLoading && textNodes.join(' ').length > 20) {
+  const totalLength = React.useMemo(() => textNodes.reduce((acc, t) => acc + t.length + 1, 0), [textNodes]);
+  if (isLoading && totalLength > 20) {
     return <div className="animate-pulse bg-muted h-16 rounded w-full" />;
+  }
+  
+  // Guard: if content is invalid, render nothing after hooks have executed
+  if (!isValidContent) {
+    return null;
   }
   
   // Create a mapping from original text to translated text
@@ -89,7 +96,12 @@ const TranslatedRichText: React.FC<TranslatedRichTextProps> = ({
     }
   };
   
-  return <>{documentToReactComponents(content, renderOptions)}</>;
+  try {
+    return <>{documentToReactComponents(content, renderOptions)}</>;
+  } catch (error) {
+    console.error('[TranslatedRichText] Rendering error:', error);
+    return <div className="text-muted-foreground text-sm">Failed to render content.</div>;
+  }
 };
 
 export default TranslatedRichText;
