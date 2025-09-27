@@ -99,14 +99,6 @@ const TranslatedRichText: React.FC<TranslatedRichTextProps> = ({
   
   // Show loading state for longer content
   const totalLength = React.useMemo(() => textNodes.reduce((acc, t) => acc + t.length + 1, 0), [textNodes]);
-  if (isLoading && totalLength > 20) {
-    return <div className="animate-pulse bg-muted h-16 rounded w-full" />;
-  }
-  
-  // Guard: if content is invalid, render nothing after hooks have executed
-  if (!isValidContent) {
-    return null;
-  }
   
   // Create a mapping from original text to translated text
   const translationMap = React.useMemo(() => {
@@ -131,6 +123,16 @@ const TranslatedRichText: React.FC<TranslatedRichTextProps> = ({
       return content;
     }
   }, [content, isValidContent, translationMap]);
+  
+  // Now handle loading/invalid states AFTER all hooks have been called
+  if (isLoading && totalLength > 20) {
+    return <div className="animate-pulse bg-muted h-16 rounded w-full" />;
+  }
+  
+  // Guard: if content is invalid, render nothing after hooks have executed
+  if (!isValidContent) {
+    return null;
+  }
   
   // Get base render options
   const renderOptions = getRichTextRenderOptions({ includedAssets });
