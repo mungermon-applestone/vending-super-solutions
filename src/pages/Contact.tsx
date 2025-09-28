@@ -6,6 +6,8 @@ import FAQSection from '@/components/contact/FAQSection';
 import ContactCards from '@/components/contact/ContactCards';
 import PageHero from '@/components/common/PageHero';
 import ContactPageSEO from '@/components/seo/ContactPageSEO';
+import { useTranslation } from '@/hooks/useTranslation';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 const Contact: React.FC = () => {
   const { processedData, isLoading } = useContactFAQ();
@@ -23,6 +25,20 @@ const Contact: React.FC = () => {
     }));
   }, [processedData?.faqItems]);
 
+  // Translations for hero and FAQ title
+  const { translated: heroTitle } = useTranslation(
+    processedData?.introTitle || 'Contact Us',
+    { context: 'contact-page' }
+  );
+  const { translated: heroSubtitle } = useTranslation(
+    processedData?.introDescription || 'Get in touch with our team to learn more about our vending solutions.',
+    { context: 'contact-page' }
+  );
+  const { translated: faqTitle } = useTranslation(
+    processedData?.faqSectionTitle || 'Frequently Asked Questions',
+    { context: 'faq' }
+  );
+
   return (
     <>
       {/* Add proper SEO */}
@@ -30,8 +46,8 @@ const Contact: React.FC = () => {
       
       {/* Hero Section */}
       <PageHero
-        title="Contact Us"
-        subtitle="Get in touch with our team to learn more about our vending solutions."
+        title={heroTitle}
+        subtitle={heroSubtitle}
         className="bg-blue-50"
       />
 
@@ -44,7 +60,9 @@ const Contact: React.FC = () => {
             
             {/* Contact Cards */}
             <div className="flex-1 space-y-6">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Other Ways to Reach Us</h2>
+              <TranslatableText context="contact-cards" as="h2" className="text-2xl font-semibold text-gray-800 mb-4">
+                Other Ways to Reach Us
+              </TranslatableText>
               {/* Pass processedData directly to ContactCards */}
               <ContactCards data={processedData || {}} />
             </div>
@@ -54,7 +72,7 @@ const Contact: React.FC = () => {
 
       {/* FAQ Section */}
       <FAQSection 
-        title="Frequently Asked Questions" 
+        title={faqTitle} 
         faqs={contentfulFaqs} 
         isLoading={isLoading} 
       />
