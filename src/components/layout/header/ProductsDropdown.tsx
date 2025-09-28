@@ -26,7 +26,7 @@ const ProductsDropdown: React.FC<ProductsDropdownProps> = ({ isActive }) => {
         )}
       >
         <Link to="/products">
-          <NavigationButtonWrapper text="Sell Any Product">
+          <NavigationButtonWrapper originalText="Sell Any Product" context="navigation">
             <TranslatableText context="navigation">Sell Any Product</TranslatableText>
           </NavigationButtonWrapper>
         </Link>

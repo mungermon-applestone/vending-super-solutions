@@ -56,7 +56,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         className={getButtonStyles(isMachinesActive)}
       >
         <Link to="/machines">
-          <NavigationButtonWrapper text={navigationContent.machines}>
+          <NavigationButtonWrapper originalText={navigationContent.machines} context="navigation">
             <TranslatableText context="navigation">
               {navigationContent.machines}
             </TranslatableText>
@@ -69,7 +69,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         variant="ghost"
       >
         <Link to="/business-goals">
-          <NavigationButtonWrapper text={navigationContent.businessGoals}>
+          <NavigationButtonWrapper originalText={navigationContent.businessGoals} context="navigation">
             <TranslatableText context="navigation">
               {navigationContent.businessGoals}
             </TranslatableText>
@@ -82,7 +82,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         variant="ghost"
       >
         <Link to="/about">
-          <NavigationButtonWrapper text={navigationContent.about}>
+          <NavigationButtonWrapper originalText={navigationContent.about} context="navigation">
             <TranslatableText context="navigation">
               {navigationContent.about}
             </TranslatableText>
@@ -95,7 +95,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         variant="ghost"
       >
         <Link to="/blog">
-          <NavigationButtonWrapper text={navigationContent.blog}>
+          <NavigationButtonWrapper originalText={navigationContent.blog} context="navigation">
             <TranslatableText context="navigation">
               {navigationContent.blog}
             </TranslatableText>
@@ -108,7 +108,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         variant="ghost"
       >
         <Link to="/contact">
-          <NavigationButtonWrapper text={navigationContent.contact}>
+          <NavigationButtonWrapper originalText={navigationContent.contact} context="navigation">
             <TranslatableText context="navigation">
               {navigationContent.contact}
             </TranslatableText>

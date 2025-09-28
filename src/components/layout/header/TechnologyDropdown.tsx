@@ -29,7 +29,10 @@ const TechnologyDropdown: React.FC<TechnologyDropdownProps> = ({ isActive }) => 
         )}
       >
         <Link to="/technology">
-          <NavigationButtonWrapper text={navigationContent.isLoading ? "Technology" : navigationContent.technology}>
+          <NavigationButtonWrapper 
+            originalText={navigationContent.isLoading ? "Technology" : navigationContent.technology} 
+            context="navigation"
+          >
             {navigationContent.isLoading ? (
               <TranslatableText context="navigation">Technology</TranslatableText>
             ) : (

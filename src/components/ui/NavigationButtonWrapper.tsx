@@ -2,10 +2,12 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { getWordCount } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface NavigationButtonWrapperProps {
   children: React.ReactNode;
-  text: string;
+  originalText: string;
+  context?: string;
   className?: string;
 }
 
@@ -15,12 +17,16 @@ interface NavigationButtonWrapperProps {
  */
 const NavigationButtonWrapper: React.FC<NavigationButtonWrapperProps> = ({
   children,
-  text,
+  originalText,
+  context,
   className
 }) => {
   const { currentLanguage } = useLanguage();
+  const { translated } = useTranslation(originalText, { context, enabled: !!originalText });
   
-  const shouldWrap = currentLanguage !== 'en' && getWordCount(text) > 3;
+  // Use the translated text or fallback to original text for word counting
+  const textToCount = translated || originalText;
+  const shouldWrap = currentLanguage !== 'en' && getWordCount(textToCount) > 3;
   
   return (
     <div className={cn(
