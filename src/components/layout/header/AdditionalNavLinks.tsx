@@ -105,7 +105,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
       
       {/* Language selector positioned below contact button on desktop */}
       {!isMobile && (
-        <div className="absolute top-full right-0 mt-2 z-50">
+        <div className="absolute top-full right-0 mt-4 z-50">
           <LanguageSelector />
         </div>
       )}
