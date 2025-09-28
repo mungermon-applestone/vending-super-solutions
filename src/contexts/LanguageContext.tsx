@@ -11,6 +11,7 @@ export const SUPPORTED_LANGUAGES: Language[] = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
   { code: 'es', name: 'Español', flag: '🇪🇸' },
   { code: 'pt', name: 'Português', flag: '🇧🇷' },
+  { code: 'zh', name: '简体中文', flag: '🇨🇳' },
 ];
 
 export type LanguageContextType = {
