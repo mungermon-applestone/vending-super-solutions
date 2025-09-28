@@ -9,7 +9,7 @@ import {
   Zap 
 } from 'lucide-react';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
-import { useTranslatedFeatures } from '@/hooks/useTranslatedCMSContent';
+import { useTranslatedFeatures, useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
 import TranslatableText from '@/components/translation/TranslatableText';
 
 interface FeatureCardProps {
@@ -69,6 +69,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, url
  */
 const FeaturesSection = () => {
   const { data: homeContent } = useHomePageContent();
+  const { translatedContent: translatedHomeContent } = useTranslatedCMSContent(homeContent, 'features-section');
 
   // Function to get the appropriate icon component based on the icon name from Contentful
   const getIconComponent = (iconName: string | undefined) => {
@@ -145,12 +146,12 @@ const FeaturesSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            {homeContent?.featuresSectionTitle || (
+            {translatedHomeContent?.featuresSectionTitle || (
               <TranslatableText context="features-section">Versatile Software for Every Vending Need</TranslatableText>
             )}
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            {homeContent?.featuresSectionDescription || (
+            {translatedHomeContent?.featuresSectionDescription || (
               <TranslatableText context="features-section">Our solution adapts to your business requirements, whether you're an operator, enterprise, or brand looking to expand your vending presence.</TranslatableText>
             )}
           </p>
