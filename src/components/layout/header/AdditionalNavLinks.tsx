@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils';
 import { useNavigationContent } from '@/hooks/cms/useNavigationContent';
 import { LogIn } from 'lucide-react';
 import TranslatableText from '@/components/translation/TranslatableText';
+import LanguageSelector from '@/components/language/LanguageSelector';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AdditionalNavLinksProps {
   isAboutActive?: boolean;
@@ -14,6 +16,7 @@ interface AdditionalNavLinksProps {
 const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
   const location = useLocation();
   const navigationContent = useNavigationContent();
+  const isMobile = useIsMobile();
   
   const isBlogActive = location.pathname.startsWith('/blog');
   const isBusinessActive = location.pathname.startsWith('/business') || location.pathname.startsWith('/business-goals');
@@ -43,7 +46,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
   }
   
   return (
-    <div className="flex items-center space-x-2">
+    <div className="relative flex items-center space-x-2">
       <Button 
         asChild 
         variant="ghost"
@@ -99,6 +102,14 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
           </TranslatableText>
         </Link>
       </Button>
+      
+      {/* Language selector positioned below contact button on desktop */}
+      {!isMobile && (
+        <div className="absolute top-full right-0 mt-2 z-50">
+          <LanguageSelector />
+        </div>
+      )}
+      
       {/* TODO: Uncomment when ready to implement customer login functionality
       <Button 
         asChild
