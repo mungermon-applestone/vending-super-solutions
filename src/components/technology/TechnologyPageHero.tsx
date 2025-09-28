@@ -3,6 +3,7 @@ import React from 'react';
 import { useContentfulTechnologyPageContent, TechnologyPageContent } from '@/hooks/cms/useContentfulTechnologyPageContent';
 import ContentfulHero from '@/components/contentful/ContentfulHero';
 import TranslatableText from '@/components/translation/TranslatableText';
+import { useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
 
 interface TechnologyPageHeroProps {
   entryId?: string;
@@ -55,15 +56,18 @@ const TechnologyPageHero: React.FC<TechnologyPageHeroProps> = ({ entryId }) => {
     );
   }
 
+  // Translate the Contentful content
+  const { translatedContent } = useTranslatedCMSContent(pageContent, 'technology-hero');
+
   return (
     <ContentfulHero
-      title={pageContent.heroTitle}
-      description={pageContent.heroDescription}
+      title={translatedContent?.heroTitle || pageContent.heroTitle}
+      description={translatedContent?.heroDescription || pageContent.heroDescription}
       image={pageContent.heroImage?.fields?.file?.url}
-      altText={pageContent.heroImage?.fields?.title || "Technology"}
-      primaryButtonText={pageContent.heroPrimaryButtonText}
+      altText={translatedContent?.heroImage?.fields?.title || pageContent.heroImage?.fields?.title || "Technology"}
+      primaryButtonText={translatedContent?.heroPrimaryButtonText || pageContent.heroPrimaryButtonText}
       primaryButtonUrl={pageContent.heroPrimaryButtonUrl}
-      secondaryButtonText={pageContent.heroSecondaryButtonText}
+      secondaryButtonText={translatedContent?.heroSecondaryButtonText || pageContent.heroSecondaryButtonText}
       secondaryButtonUrl={pageContent.heroSecondaryButtonUrl}
     />
   );
