@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 interface ContactCardsProps {
   data: {
@@ -24,10 +25,18 @@ const ContactCards = ({ data }: ContactCardsProps) => {
           <Mail className="h-6 w-6" />
         </div>
         <div>
-          <h3 className="text-lg font-medium mb-1">{data.emailCardTitle || 'Email Us'}</h3>
+          <h3 className="text-lg font-medium mb-1">
+            <TranslatableText context="contact-cards">
+              {data.emailCardTitle || 'Email Us'}
+            </TranslatableText>
+          </h3>
           <p className="text-gray-600">{data.emailAddress || 'support@applestonesolutions.com'}</p>
           {data.emailResponseTime && (
-            <p className="text-gray-400 text-sm">{data.emailResponseTime}</p>
+            <p className="text-gray-400 text-sm">
+              <TranslatableText context="contact-cards">
+                {data.emailResponseTime}
+              </TranslatableText>
+            </p>
           )}
         </div>
       </div>
@@ -36,10 +45,18 @@ const ContactCards = ({ data }: ContactCardsProps) => {
           <Phone className="h-6 w-6" />
         </div>
         <div>
-          <h3 className="text-lg font-medium mb-1">{data.phoneCardTitle || 'Call Us'}</h3>
+          <h3 className="text-lg font-medium mb-1">
+            <TranslatableText context="contact-cards">
+              {data.phoneCardTitle || 'Call Us'}
+            </TranslatableText>
+          </h3>
           <p className="text-gray-600">{data.phoneNumber || '(555) 123-4567'}</p>
           {data.phoneAvailability && (
-            <p className="text-gray-400 text-sm">{data.phoneAvailability}</p>
+            <p className="text-gray-400 text-sm">
+              <TranslatableText context="contact-cards">
+                {data.phoneAvailability}
+              </TranslatableText>
+            </p>
           )}
         </div>
       </div>
@@ -48,10 +65,18 @@ const ContactCards = ({ data }: ContactCardsProps) => {
           <MapPin className="h-6 w-6" />
         </div>
         <div>
-          <h3 className="text-lg font-medium mb-1">{data.addressCardTitle || 'Mailing Address'}</h3>
+          <h3 className="text-lg font-medium mb-1">
+            <TranslatableText context="contact-cards">
+              {data.addressCardTitle || 'Mailing Address'}
+            </TranslatableText>
+          </h3>
           <p className="text-gray-600 whitespace-pre-line">{data.address || '3607 Main St.\nStone Ridge, NY 12484'}</p>
           {data.addressType && (
-            <p className="text-gray-400 text-sm">{data.addressType}</p>
+            <p className="text-gray-400 text-sm">
+              <TranslatableText context="contact-cards">
+                {data.addressType}
+              </TranslatableText>
+            </p>
           )}
         </div>
       </div>

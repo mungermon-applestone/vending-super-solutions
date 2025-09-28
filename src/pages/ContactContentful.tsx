@@ -17,6 +17,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { Document } from '@contentful/rich-text-types';
 import { ContentfulRichTextDocument } from '@/types/contentful';
+import TranslatableText from '@/components/translation/TranslatableText';
 
 const ContactContentful = () => {
   const { processedData, isLoading, error, rawData } = useContactFAQ();
@@ -72,11 +73,11 @@ const ContactContentful = () => {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
+                  <BreadcrumbLink asChild><Link to="/"><TranslatableText context="breadcrumb">Home</TranslatableText></Link></BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink aria-current="page">Contact</BreadcrumbLink>
+                  <BreadcrumbLink aria-current="page"><TranslatableText context="breadcrumb">Contact</TranslatableText></BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -86,18 +87,26 @@ const ContactContentful = () => {
             {/* Info section */}
             <div className="flex-1">
               <h1 className="text-4xl md:text-5xl font-bold text-vending-blue-dark mb-6">
-                {processedData.introTitle || 'Get in Touch'}
+                <TranslatableText context="contact-page">
+                  {processedData.introTitle || 'Get in Touch'}
+                </TranslatableText>
               </h1>
               <p className="text-lg text-gray-700 mb-8 max-w-lg">
-                {processedData.introDescription ||
-                  'Have questions about our vending solutions? Ready to transform your retail operations? Contact our team today.'}
+                <TranslatableText context="contact-page">
+                  {processedData.introDescription ||
+                    'Have questions about our vending solutions? Ready to transform your retail operations? Contact our team today.'}
+                </TranslatableText>
               </p>
               <ContactCards data={processedData} />
             </div>
             
             {/* FAQ Accordion replacing the form */}
             <div className="flex-1 bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-2xl font-semibold mb-4">{processedData.faqSectionTitle || 'Frequently Asked Questions'}</h2>
+              <h2 className="text-2xl font-semibold mb-4">
+                <TranslatableText context="faq">
+                  {processedData.faqSectionTitle || 'Frequently Asked Questions'}
+                </TranslatableText>
+              </h2>
               {processedData.faqItems && processedData.faqItems.length > 0 ? (
                 <Accordion type="single" collapsible className="w-full">
                   {processedData.faqItems.map((faq, index) => (
@@ -115,26 +124,44 @@ const ContactContentful = () => {
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="faq-1">
                     <AccordionTrigger className="text-left text-base">
-                      What types of businesses use your vending solutions?
+                      <TranslatableText context="faq">
+                        What types of businesses use your vending solutions?
+                      </TranslatableText>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="text-sm">Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.</div>
+                      <div className="text-sm">
+                        <TranslatableText context="faq">
+                          Our vending solutions are used by a wide range of businesses, including retail stores, grocers, hospitals, universities, corporate offices, and more.
+                        </TranslatableText>
+                      </div>
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="faq-2">
                     <AccordionTrigger className="text-left text-base">
-                      How quickly can your solutions be deployed?
+                      <TranslatableText context="faq">
+                        How quickly can your solutions be deployed?
+                      </TranslatableText>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="text-sm">Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.</div>
+                      <div className="text-sm">
+                        <TranslatableText context="faq">
+                          Depending on your specific needs, our solutions can typically be deployed within 2-6 weeks after the initial consultation and agreement.
+                        </TranslatableText>
+                      </div>
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="faq-3">
                     <AccordionTrigger className="text-left text-base">
-                      Do you offer installation and maintenance services?
+                      <TranslatableText context="faq">
+                        Do you offer installation and maintenance services?
+                      </TranslatableText>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="text-sm">Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.</div>
+                      <div className="text-sm">
+                        <TranslatableText context="faq">
+                          Yes, we provide complete installation services and offer various maintenance packages to ensure your vending machines operate optimally.
+                        </TranslatableText>
+                      </div>
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>

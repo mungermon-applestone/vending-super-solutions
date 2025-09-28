@@ -3,6 +3,7 @@ import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { ContentfulResponse, ContentfulContactPageFields, ContentfulRichTextDocument } from '@/types/contentful';
 import { Document } from '@contentful/rich-text-types';
 import useContentful from '@/hooks/useContentful';
+import { useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
 
 interface FAQItem {
   id: string;
@@ -186,5 +187,8 @@ export function useContactFAQ() {
     };
   }, [data]);
 
-  return { data, processedData, isLoading, error, rawData: data };
+  // Use translation hook for the processed data
+  const { translatedContent: translatedData } = useTranslatedCMSContent(processedData, 'contact-page');
+
+  return { data, processedData: translatedData || processedData, isLoading, error, rawData: data };
 }
