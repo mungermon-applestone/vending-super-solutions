@@ -42,21 +42,69 @@ const FAQSection: React.FC<FAQSectionProps> = ({
 
   // Helper function to render content based on its type
   const renderFAQContent = (content: any) => {
+    // Add debugging to help identify content structure issues
+    console.log('FAQ Content type:', typeof content, 'Content:', content);
+    
+    // Handle translated string content (most common after translation)
     if (typeof content === 'string') {
-      return <p>{content}</p>;
-    } else if (typeof content === 'object' && content !== null && 'nodeType' in content) {
-      try {
-        return documentToReactComponents(content as Document);
-      } catch (error) {
-        console.error('Error rendering rich text content:', error);
-        return <p className="text-red-500">Error rendering content</p>;
-      }
-    } else if (Array.isArray(content?.content)) {
-      // Handle nested content structure
-      return <div>{renderRichText(content, { includedAssets: [] })}</div>;
+      return (
+        <div className="prose prose-gray max-w-none">
+          <p>{content}</p>
+        </div>
+      );
     }
     
-    return <p className="text-gray-500">Content not available</p>;
+    // Handle rich text Document objects from Contentful
+    if (typeof content === 'object' && content !== null) {
+      // Check if it's a Contentful Document with nodeType
+      if ('nodeType' in content) {
+        try {
+          return (
+            <div className="prose prose-gray max-w-none">
+              {documentToReactComponents(content as Document)}
+            </div>
+          );
+        } catch (error) {
+          console.error('Error rendering rich text Document:', error, content);
+          // Fallback to extracting text content if rich text fails
+          if (content.content && Array.isArray(content.content)) {
+            const textContent = content.content
+              .map((node: any) => node.content?.[0]?.value || '')
+              .join(' ');
+            return <p>{textContent || 'Content not available'}</p>;
+          }
+          return <p className="text-red-500">Error rendering rich text content</p>;
+        }
+      }
+      
+      // Handle nested content structure (fallback)
+      if (Array.isArray(content?.content)) {
+        try {
+          return (
+            <div className="prose prose-gray max-w-none">
+              {renderRichText(content, { includedAssets: [] })}
+            </div>
+          );
+        } catch (error) {
+          console.error('Error rendering nested content:', error, content);
+          return <p className="text-red-500">Error rendering nested content</p>;
+        }
+      }
+      
+      // Handle object with text fields (translated content structure)
+      if (content.value || content.text) {
+        return <p>{content.value || content.text}</p>;
+      }
+    }
+    
+    // Handle null/undefined content
+    if (!content) {
+      return <p className="text-gray-500">No content available</p>;
+    }
+    
+    // Final fallback - try to stringify the content
+    console.warn('Unhandled FAQ content type:', typeof content, content);
+    return <p className="text-gray-500">Content format not supported</p>;
   };
 
   return (
