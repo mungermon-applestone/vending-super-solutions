@@ -8,6 +8,7 @@ import { LogIn } from 'lucide-react';
 import TranslatableText from '@/components/translation/TranslatableText';
 import LanguageSelector from '@/components/language/LanguageSelector';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AdditionalNavLinksProps {
   isAboutActive?: boolean;
@@ -17,6 +18,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
   const location = useLocation();
   const navigationContent = useNavigationContent();
   const isMobile = useIsMobile();
+  const { currentLanguage } = useLanguage();
   
   const isBlogActive = location.pathname.startsWith('/blog');
   const isBusinessActive = location.pathname.startsWith('/business') || location.pathname.startsWith('/business-goals');
@@ -105,7 +107,9 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
       
       {/* Language selector positioned below contact button on desktop */}
       {!isMobile && (
-        <div className="absolute top-full right-0 mt-4 z-50">
+        <div className={`absolute top-full right-0 z-50 ${
+          currentLanguage !== 'en' ? 'mt-12' : 'mt-4'
+        }`}>
           <LanguageSelector />
         </div>
       )}
