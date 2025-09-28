@@ -18,6 +18,8 @@ export const SUPPORTED_LANGUAGES: Language[] = [
   { code: 'nl', name: 'Nederlands', flag: '🇳🇱' },
   { code: 'ja', name: '日本語', flag: '🇯🇵' },
   { code: 'ko', name: '한국어', flag: '🇰🇷' },
+  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
+  { code: 'tl', name: 'Tagalog', flag: '🇵🇭' },
 ];
 
 export type LanguageContextType = {
