@@ -7,6 +7,7 @@ import { useNavigationContent } from '@/hooks/cms/useNavigationContent';
 import { LogIn } from 'lucide-react';
 import TranslatableText from '@/components/translation/TranslatableText';
 import LanguageSelector from '@/components/language/LanguageSelector';
+import NavigationButtonWrapper from '@/components/ui/NavigationButtonWrapper';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -55,9 +56,11 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         className={getButtonStyles(isMachinesActive)}
       >
         <Link to="/machines">
-          <TranslatableText context="navigation">
-            {navigationContent.machines}
-          </TranslatableText>
+          <NavigationButtonWrapper text={navigationContent.machines}>
+            <TranslatableText context="navigation">
+              {navigationContent.machines}
+            </TranslatableText>
+          </NavigationButtonWrapper>
         </Link>
       </Button>
       <Button 
@@ -66,9 +69,11 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         variant="ghost"
       >
         <Link to="/business-goals">
-          <TranslatableText context="navigation">
-            {navigationContent.businessGoals}
-          </TranslatableText>
+          <NavigationButtonWrapper text={navigationContent.businessGoals}>
+            <TranslatableText context="navigation">
+              {navigationContent.businessGoals}
+            </TranslatableText>
+          </NavigationButtonWrapper>
         </Link>
       </Button>
       <Button 
@@ -77,9 +82,11 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         variant="ghost"
       >
         <Link to="/about">
-          <TranslatableText context="navigation">
-            {navigationContent.about}
-          </TranslatableText>
+          <NavigationButtonWrapper text={navigationContent.about}>
+            <TranslatableText context="navigation">
+              {navigationContent.about}
+            </TranslatableText>
+          </NavigationButtonWrapper>
         </Link>
       </Button>
       <Button 
@@ -88,9 +95,11 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         variant="ghost"
       >
         <Link to="/blog">
-          <TranslatableText context="navigation">
-            {navigationContent.blog}
-          </TranslatableText>
+          <NavigationButtonWrapper text={navigationContent.blog}>
+            <TranslatableText context="navigation">
+              {navigationContent.blog}
+            </TranslatableText>
+          </NavigationButtonWrapper>
         </Link>
       </Button>
       <Button 
@@ -99,9 +108,11 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         variant="ghost"
       >
         <Link to="/contact">
-          <TranslatableText context="navigation">
-            {navigationContent.contact}
-          </TranslatableText>
+          <NavigationButtonWrapper text={navigationContent.contact}>
+            <TranslatableText context="navigation">
+              {navigationContent.contact}
+            </TranslatableText>
+          </NavigationButtonWrapper>
         </Link>
       </Button>
       

@@ -18,3 +18,8 @@ export function generateSlug(text: string): string {
     .replace(/^-+/, '')          // Trim - from start of text
     .replace(/-+$/, '');         // Trim - from end of text
 }
+
+// Utility function to count words in text
+export function getWordCount(text: string): number {
+  return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+}

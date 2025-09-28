@@ -7,6 +7,7 @@ import {
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import TranslatableText from '@/components/translation/TranslatableText';
+import NavigationButtonWrapper from '@/components/ui/NavigationButtonWrapper';
 
 interface ProductsDropdownProps {
   isActive: boolean;
@@ -25,7 +26,9 @@ const ProductsDropdown: React.FC<ProductsDropdownProps> = ({ isActive }) => {
         )}
       >
         <Link to="/products">
-          <TranslatableText context="navigation">Sell Any Product</TranslatableText>
+          <NavigationButtonWrapper text="Sell Any Product">
+            <TranslatableText context="navigation">Sell Any Product</TranslatableText>
+          </NavigationButtonWrapper>
         </Link>
       </NavigationMenuLink>
     </NavigationMenuItem>
