@@ -68,8 +68,9 @@ export const useTranslationStatus = (options: TranslationStatusOptions = {}): Tr
       }
     },
     enabled: showTranslationUI && sampleTexts.length > 0,
-    staleTime: 30 * 1000, // 30 seconds
-    gcTime: 60 * 1000, // 1 minute
+    staleTime: 5 * 60 * 1000, // 5 minutes - check status less frequently
+    gcTime: 15 * 60 * 1000, // 15 minutes
+    refetchOnMount: false,
   });
 
   return {
@@ -107,7 +108,8 @@ export const usePreloadTranslations = (texts: string[], context: string = 'prelo
       }
     },
     enabled: showTranslationUI && texts.length > 0,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 30 * 60 * 1000, // 30 minutes - preloaded translations stay fresh longer
+    gcTime: 60 * 60 * 1000, // 60 minutes
+    refetchOnMount: false,
   });
 };
