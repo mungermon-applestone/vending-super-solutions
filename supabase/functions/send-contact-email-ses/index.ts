@@ -10,6 +10,26 @@ const corsHeaders = {
 // Email validation regex
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+// Input validation constraints
+const MAX_NAME_LENGTH = 100;
+const MAX_EMAIL_LENGTH = 255;
+const MAX_PHONE_LENGTH = 50;
+const MAX_COMPANY_LENGTH = 200;
+const MAX_SUBJECT_LENGTH = 200;
+const MAX_MESSAGE_LENGTH = 5000;
+
+// HTML escape function to prevent XSS in email content
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
 // AWS client via aws4fetch (handles SigV4 correctly in Edge/Deno)
 function createAws(region: string, accessKeyId: string, secretAccessKey: string) {
   return new AwsClient({
@@ -101,11 +121,91 @@ serve(async (req) => {
       formType
     });
 
+    // Validate required fields
     if (!name || !email || !message) {
       return new Response(
         JSON.stringify({ 
           success: false, 
           error: 'Missing required fields' 
+        }),
+        { 
+          status: 400, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
+    // Validate field lengths
+    if (name.length > MAX_NAME_LENGTH) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Name must be less than ${MAX_NAME_LENGTH} characters` 
+        }),
+        { 
+          status: 400, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
+    if (email.length > MAX_EMAIL_LENGTH) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Email must be less than ${MAX_EMAIL_LENGTH} characters` 
+        }),
+        { 
+          status: 400, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
+    if (phone && phone.length > MAX_PHONE_LENGTH) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Phone must be less than ${MAX_PHONE_LENGTH} characters` 
+        }),
+        { 
+          status: 400, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
+    if (company && company.length > MAX_COMPANY_LENGTH) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Company must be less than ${MAX_COMPANY_LENGTH} characters` 
+        }),
+        { 
+          status: 400, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
+    if (subject && subject.length > MAX_SUBJECT_LENGTH) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Subject must be less than ${MAX_SUBJECT_LENGTH} characters` 
+        }),
+        { 
+          status: 400, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
+    }
+
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Message must be less than ${MAX_MESSAGE_LENGTH} characters` 
         }),
         { 
           status: 400, 
@@ -139,7 +239,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Server configuration error: Missing email configuration', 
+          error: 'Email service temporarily unavailable', 
           fallback: true 
         }),
         { 
@@ -155,7 +255,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Server configuration error: Invalid recipient email format', 
+          error: 'Email service temporarily unavailable', 
           fallback: true 
         }),
         { 
@@ -170,7 +270,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Server configuration error: Invalid sender email format', 
+          error: 'Email service temporarily unavailable', 
           fallback: true 
         }),
         { 
@@ -185,18 +285,19 @@ serve(async (req) => {
       ? `${formType || 'Contact Form'}: ${subject}`
       : `${formType || 'Contact Form'} Submission`;
 
-    // Build HTML email content
+    // Build HTML email content with proper escaping
     const htmlContent = `
-      <h2>New message from ${name}</h2>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
-      ${company ? `<p><strong>Company:</strong> ${company}</p>` : ''}
+      <h2>New message from ${escapeHtml(name)}</h2>
+      <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+      <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+      ${phone ? `<p><strong>Phone:</strong> ${escapeHtml(phone)}</p>` : ''}
+      ${company ? `<p><strong>Company:</strong> ${escapeHtml(company)}</p>` : ''}
+      ${subject ? `<p><strong>Subject:</strong> ${escapeHtml(subject)}</p>` : ''}
       <h3>Message:</h3>
-      <p>${message.replace(/\n/g, '<br>')}</p>
+      <p>${escapeHtml(message).replace(/\n/g, '<br>')}</p>
       <hr>
-      <p><small>Sent from: ${location || 'Website'}</small></p>
-      <p><small>Form type: ${formType || 'Contact Form'}</small></p>
+      <p><small>Sent from: ${escapeHtml(location || 'Website')}</small></p>
+      <p><small>Form type: ${escapeHtml(formType || 'Contact Form')}</small></p>
     `;
 
     // Build text email content (fallback for non-HTML email clients)
@@ -237,7 +338,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Server configuration error: Missing AWS credentials', 
+          error: 'Email service temporarily unavailable', 
           fallback: true 
         }),
         { 
@@ -312,8 +413,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: sendError instanceof Error ? sendError.message : 'Error sending email',
-          errorType: sendError instanceof Error ? sendError.name : typeof sendError,
+          error: 'Failed to send email. Please try again later.',
           fallback: true 
         }),
         { 
@@ -329,7 +429,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Service temporarily unavailable. Please try again later.',
         fallback: true 
       }),
       { 

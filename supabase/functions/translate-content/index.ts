@@ -26,6 +26,31 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const authHeader = req.headers.get('Authorization');
+    
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const authClient = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+    
+    const { data: { user }, error: authError } = await authClient.auth.getUser();
+    
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Invalid authentication' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { texts, targetLanguage, context }: TranslationRequest = await req.json();
     
     if (!texts || !Array.isArray(texts) || texts.length === 0) {
@@ -36,12 +61,11 @@ serve(async (req) => {
       throw new Error('Target language is required');
     }
 
-    console.log(`Translating ${texts.length} texts to ${targetLanguage}`);
+    console.log(`User ${user.id} translating ${texts.length} texts to ${targetLanguage}`);
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Initialize Supabase client with service role for database operations
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const results: TranslationResult[] = [];
     const textsToTranslate: string[] = [];
@@ -193,8 +217,9 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in translate-content function:', error);
     
+    // Return generic error message to client, log details server-side
     return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : 'Translation service error',
+      error: 'Translation service temporarily unavailable',
       translations: [] 
     }), {
       status: 500,
