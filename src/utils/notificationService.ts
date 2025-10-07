@@ -124,7 +124,7 @@ export async function getCurrentPushSubscription(): Promise<PushSubscription | n
 }
 
 // Helper function to convert a base64 string to a Uint8Array
-function urlB64ToUint8Array(base64String: string): Uint8Array {
+function urlB64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding)
     .replace(/-/g, '+')

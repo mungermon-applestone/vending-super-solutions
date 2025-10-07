@@ -19,6 +19,45 @@ interface TranslationResult {
   cached: boolean;
 }
 
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW_MS = 60000; // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 30; // 30 requests per minute per IP
+const MAX_TEXTS_PER_REQUEST = 50; // Maximum 50 texts per request
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+function getClientIP(req: Request): string {
+  return req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+         req.headers.get('x-real-ip') || 
+         'unknown';
+}
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - 1 };
+  }
+
+  if (record.count >= MAX_REQUESTS_PER_WINDOW) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  record.count++;
+  return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - record.count };
+}
+
+// Clean up old rate limit entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, record] of rateLimitMap.entries()) {
+    if (now > record.resetTime) {
+      rateLimitMap.delete(ip);
+    }
+  }
+}, 300000);
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -26,42 +65,66 @@ serve(async (req) => {
   }
 
   try {
-    // Verify authentication
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const authHeader = req.headers.get('Authorization');
+    // Get client IP for rate limiting
+    const clientIP = getClientIP(req);
     
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Authentication required' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const authClient = createClient(supabaseUrl, supabaseKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
+    // Check rate limit
+    const { allowed, remaining } = checkRateLimit(clientIP);
     
-    const { data: { user }, error: authError } = await authClient.auth.getUser();
-    
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Invalid authentication' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    if (!allowed) {
+      console.warn(`Rate limit exceeded for IP: ${clientIP}`);
+      return new Response(JSON.stringify({ 
+        error: 'Rate limit exceeded. Please try again later.',
+        translations: [] 
+      }), {
+        status: 429,
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'X-RateLimit-Remaining': '0',
+          'Retry-After': '60'
+        },
       });
     }
 
     const { texts, targetLanguage, context }: TranslationRequest = await req.json();
+    
+    // Validate request
+    if (!texts || !Array.isArray(texts) || texts.length === 0) {
+      return new Response(JSON.stringify({ 
+        error: 'Invalid request: texts array is required',
+        translations: [] 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (texts.length > MAX_TEXTS_PER_REQUEST) {
+      return new Response(JSON.stringify({ 
+        error: `Too many texts in request. Maximum ${MAX_TEXTS_PER_REQUEST} allowed.`,
+        translations: [] 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     
     if (!texts || !Array.isArray(texts) || texts.length === 0) {
       throw new Error('Invalid texts array provided');
     }
 
     if (!targetLanguage) {
-      throw new Error('Target language is required');
+      return new Response(JSON.stringify({ 
+        error: 'Target language is required',
+        translations: [] 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    console.log(`User ${user.id} translating ${texts.length} texts to ${targetLanguage}`);
+    console.log(`[${clientIP}] Translating ${texts.length} texts to ${targetLanguage} (Rate limit remaining: ${remaining})`);
 
     // Initialize Supabase client with service role for database operations
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -210,7 +273,8 @@ serve(async (req) => {
     }), {
       headers: { 
         ...corsHeaders, 
-        'Content-Type': 'application/json' 
+        'Content-Type': 'application/json',
+        'X-RateLimit-Remaining': remaining.toString()
       },
     });
 

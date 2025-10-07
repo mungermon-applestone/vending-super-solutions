@@ -8,6 +8,7 @@ verify_jwt = false
 [functions.get-contentful-config]
 
 [functions.translate-content]
+verify_jwt = false
 
 [functions.ses-selftest]
 verify_jwt = false
