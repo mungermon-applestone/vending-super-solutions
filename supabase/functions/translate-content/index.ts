@@ -127,31 +127,50 @@ serve(async (req) => {
     console.log(`[${clientIP}] Translating ${texts.length} texts to ${targetLanguage} (Rate limit remaining: ${remaining})`);
 
     // Initialize Supabase client with service role for database operations
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing Supabase environment variables');
+      return new Response(JSON.stringify({ 
+        error: 'Service configuration error',
+        translations: [] 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const results: TranslationResult[] = [];
     const textsToTranslate: string[] = [];
     
     // Check cache for existing translations
-    for (const text of texts) {
-      const { data: cachedTranslation } = await supabase
-        .from('translations')
-        .select('translated_text')
-        .eq('source_text', text)
-        .eq('target_language', targetLanguage)
-        .maybeSingle();
+    try {
+      for (const text of texts) {
+        const { data: cachedTranslation } = await supabase
+          .from('translations')
+          .select('translated_text')
+          .eq('source_text', text)
+          .eq('target_language', targetLanguage)
+          .maybeSingle();
 
-      if (cachedTranslation) {
-        console.log(`Found cached translation for: ${text.substring(0, 50)}...`);
-        results.push({
-          original: text,
-          translated: cachedTranslation.translated_text,
-          cached: true
-        });
-      } else {
-        textsToTranslate.push(text);
+        if (cachedTranslation) {
+          console.log(`Found cached translation for: ${text.substring(0, 50)}...`);
+          results.push({
+            original: text,
+            translated: cachedTranslation.translated_text,
+            cached: true
+          });
+        } else {
+          textsToTranslate.push(text);
+        }
       }
+    } catch (cacheError) {
+      console.error('Cache lookup error:', cacheError);
+      // If cache fails, translate all texts
+      textsToTranslate.push(...texts);
     }
 
     // Translate uncached texts using Google Translate
@@ -241,15 +260,20 @@ serve(async (req) => {
 
       // Batch insert into cache
       if (cacheInserts.length > 0) {
-        const { error: insertError } = await supabase
-          .from('translations')
-          .insert(cacheInserts);
+        try {
+          const { error: insertError } = await supabase
+            .from('translations')
+            .insert(cacheInserts);
 
-        if (insertError) {
-          console.error('Error caching translations:', insertError);
+          if (insertError) {
+            console.error('Error caching translations:', insertError);
+            // Don't throw error - translation still succeeded
+          } else {
+            console.log(`Cached ${cacheInserts.length} new translations`);
+          }
+        } catch (cacheError) {
+          console.error('Cache insert exception:', cacheError);
           // Don't throw error - translation still succeeded
-        } else {
-          console.log(`Cached ${cacheInserts.length} new translations`);
         }
       }
     }
