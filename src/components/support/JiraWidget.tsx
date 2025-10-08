@@ -22,29 +22,30 @@ const JiraWidget: React.FC<JiraWidgetProps> = ({ className }) => {
     );
 
     if (existingScript) {
+      console.log('Jira widget script already loaded');
       setIsLoading(false);
       return;
     }
 
-    // Create and configure the Jira widget script
+    console.log('Loading Jira Service Desk widget script...');
+
+    // Create and load the Jira widget script
     const script = document.createElement('script');
     script.src = 'https://jsd-widget.atlassian.com/assets/embed.js';
-    script.setAttribute('data-jsd-embedded', '');
-    script.setAttribute('data-key', '7958a0ed-fe48-4e2b-b9f5-32eb7f1451c9');
-    script.setAttribute('data-base-url', 'https://jsd-widget.atlassian.com');
     script.async = true;
 
     // Handle successful script load
     script.onload = () => {
+      console.log('Jira widget script loaded successfully');
       setIsLoading(false);
       setHasError(false);
     };
 
     // Handle script load error
     script.onerror = () => {
+      console.error('Failed to load Jira Service Desk widget');
       setIsLoading(false);
       setHasError(true);
-      console.error('Failed to load Jira Service Desk widget');
     };
 
     // Append script to document
@@ -85,10 +86,13 @@ const JiraWidget: React.FC<JiraWidgetProps> = ({ className }) => {
         </div>
       )}
       
-      {/* Container for Jira widget to mount into */}
+      {/* Container for Jira widget - data attributes tell the script where to mount */}
       <div 
-        id="jira-widget-container" 
-        className={`min-h-[500px] ${isLoading ? 'hidden' : ''}`}
+        id="jira-widget-container"
+        data-jsd-embedded=""
+        data-key="7958a0ed-fe48-4e2b-b9f5-32eb7f1451c9"
+        data-base-url="https://jsd-widget.atlassian.com"
+        className="min-h-[500px] w-full"
       />
     </div>
   );
