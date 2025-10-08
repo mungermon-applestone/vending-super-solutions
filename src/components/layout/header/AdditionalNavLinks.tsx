@@ -125,7 +125,6 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         </div>
       )}
       
-      {/* TODO: Uncomment when ready to implement customer login functionality
       <Button 
         asChild
         variant="default"
@@ -136,7 +135,6 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
           Customer Login
         </Link>
       </Button>
-      */}
     </div>
   );
 };

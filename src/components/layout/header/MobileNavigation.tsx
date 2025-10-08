@@ -80,7 +80,6 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
             </div>
           </div>
           
-          {/* TODO: Uncomment when ready to implement customer login functionality
           <div className="border-t pt-4 mt-4">
             <Button 
               asChild
@@ -94,7 +93,6 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
               </Link>
             </Button>
           </div>
-          */}
         </nav>
       </div>
     </div>
