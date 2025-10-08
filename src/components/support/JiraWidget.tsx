@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 
 interface JiraWidgetProps {
@@ -14,48 +14,47 @@ interface JiraWidgetProps {
 const JiraWidget: React.FC<JiraWidgetProps> = ({ className }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-
+  const containerRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    // Check if script is already loaded
-    const existingScript = document.querySelector(
-      'script[src="https://jsd-widget.atlassian.com/assets/embed.js"]'
-    );
-
-    if (existingScript) {
-      console.log('Jira widget script already loaded');
-      setIsLoading(false);
+    const container = containerRef.current;
+    if (!container) {
+      console.warn('JiraWidget: container not found');
       return;
     }
 
-    console.log('Loading Jira Service Desk widget script...');
+    setIsLoading(true);
+    setHasError(false);
 
-    // Create and load the Jira widget script
+    // Cleanup any previous content inside the container
+    container.innerHTML = '';
+
+    // Create and configure the Jira widget script and place it inside the container
     const script = document.createElement('script');
     script.src = 'https://jsd-widget.atlassian.com/assets/embed.js';
     script.async = true;
+    script.setAttribute('data-jsd-embedded', '');
+    script.setAttribute('data-key', '7958a0ed-fe48-4e2b-b9f5-32eb7f1451c9');
+    script.setAttribute('data-base-url', 'https://jsd-widget.atlassian.com');
 
-    // Handle successful script load
     script.onload = () => {
-      console.log('Jira widget script loaded successfully');
+      console.log('Jira widget script loaded successfully (embedded)');
       setIsLoading(false);
-      setHasError(false);
     };
 
-    // Handle script load error
     script.onerror = () => {
-      console.error('Failed to load Jira Service Desk widget');
-      setIsLoading(false);
+      console.error('Failed to load Jira Service Desk widget (embedded)');
       setHasError(true);
+      setIsLoading(false);
     };
 
-    // Append script to document
-    document.body.appendChild(script);
+    container.appendChild(script);
 
-    // Cleanup function
+    // Cleanup: remove any content we injected in the container
     return () => {
-      // Only remove if we added it
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
+      try {
+        container.innerHTML = '';
+      } catch (e) {
+        // no-op
       }
     };
   }, []);
@@ -89,9 +88,7 @@ const JiraWidget: React.FC<JiraWidgetProps> = ({ className }) => {
       {/* Container for Jira widget - data attributes tell the script where to mount */}
       <div 
         id="jira-widget-container"
-        data-jsd-embedded=""
-        data-key="7958a0ed-fe48-4e2b-b9f5-32eb7f1451c9"
-        data-base-url="https://jsd-widget.atlassian.com"
+        ref={containerRef}
         className="min-h-[500px] w-full"
       />
     </div>
