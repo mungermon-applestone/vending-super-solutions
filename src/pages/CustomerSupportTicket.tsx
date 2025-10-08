@@ -25,7 +25,10 @@ const CustomerSupportTicket = () => {
             </div>
 
             {/* Jira Service Desk Widget */}
-            <div className="bg-white rounded-lg shadow-lg p-8">
+            <div className="mt-4">
+              <p className="text-sm text-gray-600 text-center mb-4">
+                The support widget opens at the bottom-right of this page.
+              </p>
               <JiraWidget />
             </div>
           </div>
