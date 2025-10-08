@@ -1,6 +1,6 @@
 import React from 'react';
 import SEO from '@/components/seo/SEO';
-import SupportRequestForm from '@/components/support/SupportRequestForm';
+import JiraWidget from '@/components/support/JiraWidget';
 import CustomerLayout from '@/components/layout/CustomerLayout';
 
 const CustomerSupportTicket = () => {
@@ -24,15 +24,9 @@ const CustomerSupportTicket = () => {
               </p>
             </div>
 
-            {/* Support Form */}
+            {/* Jira Service Desk Widget */}
             <div className="bg-white rounded-lg shadow-lg p-8">
-              <SupportRequestForm 
-                formTitle=""
-                context={{
-                  customerPortal: true,
-                  pageUrl: window.location.href
-                }}
-              />
+              <JiraWidget />
             </div>
           </div>
         </div>

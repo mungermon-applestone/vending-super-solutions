@@ -1,3 +1,14 @@
+/**
+ * PRESERVED AS FALLBACK OPTION
+ * 
+ * This component is currently not in use but has been preserved
+ * as a fallback option in case we need to revert from the Jira
+ * Service Desk widget integration.
+ * 
+ * To re-enable: Replace JiraWidget with SupportRequestForm in
+ * src/pages/CustomerSupportTicket.tsx
+ */
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
