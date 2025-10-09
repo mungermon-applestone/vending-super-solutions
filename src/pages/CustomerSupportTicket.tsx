@@ -20,27 +20,16 @@ const CustomerSupportTicket = () => {
                 Submit Support Ticket
               </h1>
               <p className="text-lg text-gray-600">
-                Need help? Click the button below to open our support portal where you can submit tickets, track existing requests, and browse our knowledge base.
+                Need help? A floating help button will appear in the bottom-right corner where you can submit tickets, track existing requests, and browse our knowledge base.
               </p>
             </div>
 
-            {/* Jira Service Portal */}
+            {/* Jira Service Management Widget */}
             <div className="mt-8">
-              {/* 
-                TODO: Replace with your actual Jira Issue Collector script URL
-                
-                To get your collector URL:
-                1. Go to Jira Service Management
-                2. Navigate to Project settings > Issue collectors
-                3. Create or edit a collector
-                4. Copy the script src URL from the embed code
-                
-                It should look like:
-                https://[your-domain].atlassian.net/s/[hash]/[collector-id]/[hash]/_.js?collectorId=xxxxx
-              */}
               <JiraWidget 
-                collectorUrl="https://applestonesolutions.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-T/azc3hx/b/8/c95134bc67d3a521bb3f4331beb9b804/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-US&collectorId=YOUR_COLLECTOR_ID"
-                buttonText="Submit Support Ticket"
+                widgetKey="7958a0ed-fe48-4e2b-b9f5-32eb7f1451c9"
+                baseUrl="https://jsd-widget.atlassian.com"
+                scriptSrc="https://jsd-widget.atlassian.com/assets/embed.js"
               />
               
               {/* Fallback direct link */}
