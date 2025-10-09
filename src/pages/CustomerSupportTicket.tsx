@@ -28,7 +28,7 @@ const CustomerSupportTicket = () => {
             <div className="mt-8">
               <JiraWidget 
                 portalUrl="https://applestonesolutions.atlassian.net/servicedesk/customer/portal/1"
-                mode="popover"
+                mode="direct"
                 buttonText="Submit Support Ticket"
               />
               
