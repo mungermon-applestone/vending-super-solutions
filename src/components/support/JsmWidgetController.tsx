@@ -15,14 +15,29 @@ const JsmWidgetController = () => {
     // Show widget only on the support ticket page
     if (location.pathname === '/support-ticket') {
       document.body.classList.add('show-jsm-widget');
+      
+      // Auto-open the widget after a short delay to ensure it's fully loaded
+      const autoOpenTimer = setTimeout(() => {
+        const widgetTrigger = 
+          document.querySelector('#atlwdg-trigger') ||
+          document.querySelector('[id^="atlwdg-"]') ||
+          document.querySelector('.atlwdg-trigger');
+        
+        if (widgetTrigger) {
+          (widgetTrigger as HTMLElement).click();
+          console.log('JSM widget auto-opened');
+        } else {
+          console.warn('JSM widget trigger not found');
+        }
+      }, 800);
+      
+      return () => {
+        clearTimeout(autoOpenTimer);
+        document.body.classList.remove('show-jsm-widget');
+      };
     } else {
       document.body.classList.remove('show-jsm-widget');
     }
-
-    // Cleanup on unmount
-    return () => {
-      document.body.classList.remove('show-jsm-widget');
-    };
   }, [location.pathname]);
 
   return null; // This component doesn't render anything

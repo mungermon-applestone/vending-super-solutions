@@ -19,7 +19,7 @@ const CustomerSupportTicket = () => {
                 Submit Support Ticket
               </h1>
               <p className="text-lg text-gray-600">
-                Need help? A floating help button will appear in the bottom-right corner where you can submit tickets, track existing requests, and browse our knowledge base.
+                The support form will open automatically. You can submit tickets, track existing requests, and browse our knowledge base.
               </p>
             </div>
 
