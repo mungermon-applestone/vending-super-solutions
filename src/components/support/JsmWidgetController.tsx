@@ -19,6 +19,8 @@ const JsmWidgetController = () => {
       // Auto-open the widget after a short delay to ensure it's fully loaded
       const autoOpenTimer = setTimeout(() => {
         const widgetTrigger = 
+          document.querySelector('#help-button') ||
+          document.querySelector('#button-container #help-button') ||
           document.querySelector('#atlwdg-trigger') ||
           document.querySelector('[id^="atlwdg-"]') ||
           document.querySelector('.atlwdg-trigger');
@@ -29,7 +31,7 @@ const JsmWidgetController = () => {
         } else {
           console.warn('JSM widget trigger not found');
         }
-      }, 800);
+      }, 1000);
       
       return () => {
         clearTimeout(autoOpenTimer);
