@@ -16,25 +16,46 @@ const JsmWidgetController = () => {
     if (location.pathname === '/support-ticket') {
       document.body.classList.add('show-jsm-widget');
       
-      // Auto-open the widget after a short delay to ensure it's fully loaded
-      const autoOpenTimer = setTimeout(() => {
-        const widgetTrigger = 
-          document.querySelector('#help-button') ||
-          document.querySelector('#button-container #help-button') ||
-          document.querySelector('#atlwdg-trigger') ||
-          document.querySelector('[id^="atlwdg-"]') ||
-          document.querySelector('.atlwdg-trigger');
-        
-        if (widgetTrigger) {
-          (widgetTrigger as HTMLElement).click();
-          console.log('JSM widget auto-opened');
-        } else {
-          console.warn('JSM widget trigger not found');
+      // Use the official JSM API to open the widget
+      const openWidget = () => {
+        if ((window as any).JiraWidget?.show) {
+          (window as any).JiraWidget.show();
+          console.log('JSM widget opened via API');
         }
-      }, 1000);
+      };
+      
+      // Try to open immediately if API is ready
+      if ((window as any).JiraWidget?.show) {
+        openWidget();
+      } else {
+        // Listen for the ready event
+        const onReady = () => {
+          openWidget();
+          window.removeEventListener('jsm:ready', onReady);
+        };
+        window.addEventListener('jsm:ready', onReady);
+        
+        // Fallback polling with timeout
+        const startTime = Date.now();
+        const pollInterval = setInterval(() => {
+          if ((window as any).JiraWidget?.show) {
+            clearInterval(pollInterval);
+            openWidget();
+          }
+          if (Date.now() - startTime > 5000) {
+            clearInterval(pollInterval);
+            console.warn('JSM widget API not available after 5s');
+          }
+        }, 250);
+        
+        return () => {
+          window.removeEventListener('jsm:ready', onReady);
+          clearInterval(pollInterval);
+          document.body.classList.remove('show-jsm-widget');
+        };
+      }
       
       return () => {
-        clearTimeout(autoOpenTimer);
         document.body.classList.remove('show-jsm-widget');
       };
     } else {
