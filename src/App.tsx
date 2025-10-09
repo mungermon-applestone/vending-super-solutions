@@ -34,7 +34,6 @@ const App: React.FC = () => {
   return (
     <HelmetProvider>
       <Suspense fallback={<LoadingFallback />}>
-        <JsmWidgetController />
         <RouterProvider router={router} />
       </Suspense>
       <Toaster position="top-right" />
