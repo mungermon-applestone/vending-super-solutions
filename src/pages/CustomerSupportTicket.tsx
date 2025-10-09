@@ -26,9 +26,20 @@ const CustomerSupportTicket = () => {
 
             {/* Jira Service Portal */}
             <div className="mt-8">
+              {/* 
+                TODO: Replace with your actual Jira Issue Collector script URL
+                
+                To get your collector URL:
+                1. Go to Jira Service Management
+                2. Navigate to Project settings > Issue collectors
+                3. Create or edit a collector
+                4. Copy the script src URL from the embed code
+                
+                It should look like:
+                https://[your-domain].atlassian.net/s/[hash]/[collector-id]/[hash]/_.js?collectorId=xxxxx
+              */}
               <JiraWidget 
-                portalUrl="https://applestonesolutions.atlassian.net/servicedesk/customer/portal/1"
-                mode="direct"
+                collectorUrl="https://applestonesolutions.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-T/azc3hx/b/8/c95134bc67d3a521bb3f4331beb9b804/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-US&collectorId=YOUR_COLLECTOR_ID"
                 buttonText="Submit Support Ticket"
               />
               

@@ -1,150 +1,139 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { ExternalLink, Headset } from 'lucide-react';
+import { Headset } from 'lucide-react';
 
 /**
  * JiraWidget Component Props
  * 
- * @property {string} portalUrl - Direct URL to your Jira Service Management portal
- *   Example: "https://applestonesolutions.atlassian.net/servicedesk/customer/portal/1"
+ * @property {string} collectorUrl - The Jira Issue Collector script URL
+ *   Example: "https://applestonesolutions.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-T/-k4bwq9/b/8/c95134bc67d3a521bb3f4331beb9b804/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-US&collectorId=12345678"
  *   
- *   To find your portal URL:
+ *   To find your collector URL:
  *   1. Go to Jira Service Management
- *   2. Navigate to Project settings > Customer portal
- *   3. Copy the portal URL
+ *   2. Navigate to Project settings > Issue collectors
+ *   3. Create or edit a collector
+ *   4. Copy the script URL from the embed code
  * 
- * @property {'popover' | 'direct' | 'button'} mode - Integration mode (default: 'popover')
- *   - 'popover': Opens portal in a large dialog with iframe
- *   - 'direct': Opens portal in new tab when button is clicked
- *   - 'button': Same as direct (opens in new tab)
- * 
- * @property {string} buttonText - Custom button text (default: 'Open Support Portal')
+ * @property {string} buttonText - Custom button text (default: 'Submit Support Ticket')
  * @property {string} className - Optional CSS classes
+ * @property {Record<string, any>} fieldValues - Pre-populate form fields (optional)
  */
 interface JiraWidgetProps {
-  portalUrl: string;
-  mode?: 'popover' | 'direct' | 'button';
+  collectorUrl: string;
   buttonText?: string;
   className?: string;
+  fieldValues?: Record<string, any>;
 }
 
 /**
  * JiraWidget Component
  * 
- * Provides integration with Jira Service Management portal.
- * Displays the portal in an iframe dialog or opens it in a new tab.
+ * Loads the Jira Issue Collector script and provides a button to trigger it.
+ * The collector will appear as an overlay/modal on the page when triggered.
  * 
- * No Jira configuration required - works immediately!
+ * This is the standard Jira Issue Collector implementation used by thousands of sites.
  */
 const JiraWidget: React.FC<JiraWidgetProps> = ({
-  portalUrl,
-  mode = 'popover',
-  buttonText = 'Open Support Portal',
+  collectorUrl,
+  buttonText = 'Submit Support Ticket',
   className = '',
+  fieldValues = {},
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [iframeError, setIframeError] = useState(false);
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [isScriptError, setIsScriptError] = useState(false);
 
-  // Handle direct link mode (opens in new tab)
-  if (mode === 'direct' || mode === 'button') {
+  useEffect(() => {
+    // Check if script already exists
+    const existingScript = document.querySelector(`script[src="${collectorUrl}"]`);
+    
+    if (existingScript) {
+      setIsScriptLoaded(true);
+      return;
+    }
+
+    // Configure the collector BEFORE loading the script
+    // This tells Jira to use a custom trigger instead of auto-showing
+    (window as any).ATL_JQ_PAGE_PROPS = {
+      triggerFunction: function(showCollectorDialog: () => void) {
+        // Store the trigger function globally so our button can call it
+        (window as any).showJiraCollector = showCollectorDialog;
+      },
+      fieldValues: fieldValues,
+    };
+
+    // Create and inject the Jira collector script
+    const script = document.createElement('script');
+    script.src = collectorUrl;
+    script.async = true;
+    script.defer = true;
+    script.type = 'text/javascript';
+    
+    script.onload = () => {
+      setIsScriptLoaded(true);
+      console.log('Jira Issue Collector loaded successfully');
+    };
+    
+    script.onerror = () => {
+      setIsScriptError(true);
+      console.error('Failed to load Jira Issue Collector script');
+    };
+
+    document.body.appendChild(script);
+
+    // Cleanup on unmount
+    return () => {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+      delete (window as any).ATL_JQ_PAGE_PROPS;
+      delete (window as any).showJiraCollector;
+    };
+  }, [collectorUrl, fieldValues]);
+
+  const handleOpenCollector = () => {
+    if ((window as any).showJiraCollector) {
+      (window as any).showJiraCollector();
+    } else {
+      console.warn('Jira collector not ready yet');
+    }
+  };
+
+  if (isScriptError) {
     return (
       <div className={`text-center ${className}`}>
-        <Button
-          size="lg"
-          onClick={() => window.open(portalUrl, '_blank', 'noopener,noreferrer')}
-          className="gap-2"
-        >
-          <Headset className="h-5 w-5" />
-          {buttonText}
-          <ExternalLink className="h-4 w-4" />
-        </Button>
-        
-        <p className="text-sm text-muted-foreground mt-4">
-          Opens in a new tab
+        <p className="text-sm text-destructive mb-2">
+          Unable to load support form. Please check the collector URL.
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Contact your administrator if this problem persists.
         </p>
       </div>
     );
   }
 
-  // Handle popover mode (iframe in dialog)
   return (
     <div className={`text-center ${className}`}>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
-          <Button size="lg" className="gap-2">
-            <Headset className="h-5 w-5" />
-            {buttonText}
-          </Button>
-        </DialogTrigger>
-        
-        <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0">
-          <DialogHeader className="px-6 pt-6 pb-4">
-            <DialogTitle>Support Portal</DialogTitle>
-            <DialogDescription>
-              Submit tickets, track requests, and browse our knowledge base
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex-1 px-6 pb-6 flex flex-col gap-4">
-            {/* Open in New Tab Button */}
-            <div className="flex justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(portalUrl, '_blank', 'noopener,noreferrer')}
-                className="gap-2"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Open in New Tab
-              </Button>
-            </div>
-            
-            {/* Iframe Container */}
-            {!iframeError ? (
-              <div className="flex-1 border rounded-lg overflow-hidden bg-background">
-                <iframe
-                  src={portalUrl}
-                  className="w-full h-full"
-                  title="Jira Support Portal"
-                  allow="clipboard-write"
-                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
-                  onError={() => setIframeError(true)}
-                />
-              </div>
-            ) : (
-              <div className="flex-1 flex items-center justify-center border rounded-lg bg-destructive/10">
-                <div className="text-center max-w-md p-6">
-                  <h3 className="text-lg font-semibold text-destructive mb-2">
-                    Unable to Load Portal
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    The portal cannot be displayed in this window. This may be due to browser security settings.
-                  </p>
-                  <Button
-                    onClick={() => window.open(portalUrl, '_blank', 'noopener,noreferrer')}
-                    className="gap-2"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Open in New Tab Instead
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <Button
+        size="lg"
+        onClick={handleOpenCollector}
+        disabled={!isScriptLoaded}
+        className="gap-2"
+      >
+        <Headset className="h-5 w-5" />
+        {buttonText}
+      </Button>
       
-      <p className="text-sm text-muted-foreground mt-4">
-        Opens the support portal in a large window
-      </p>
+      {!isScriptLoaded && !isScriptError && (
+        <p className="text-sm text-muted-foreground mt-4">
+          Loading support form...
+        </p>
+      )}
+      
+      {isScriptLoaded && (
+        <p className="text-sm text-muted-foreground mt-4">
+          Click to open the support ticket form
+        </p>
+      )}
     </div>
   );
 };
