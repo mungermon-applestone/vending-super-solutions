@@ -5,6 +5,7 @@ import { router } from './routes';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
+import JsmWidgetController from '@/components/support/JsmWidgetController';
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -33,6 +34,7 @@ const App: React.FC = () => {
   return (
     <HelmetProvider>
       <Suspense fallback={<LoadingFallback />}>
+        <JsmWidgetController />
         <RouterProvider router={router} />
       </Suspense>
       <Toaster position="top-right" />

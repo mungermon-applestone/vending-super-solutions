@@ -257,3 +257,18 @@ img[loading="lazy"] {
   height: 100%;
   object-fit: contain;
 }
+
+/* Jira Service Management Widget Visibility Control */
+/* Hide JSM widget by default on all pages */
+#atlwdg-trigger,
+[id^="atlwdg-"],
+.atlwdg-trigger {
+  display: none !important;
+}
+
+/* Show widget only when on support ticket page */
+body.show-jsm-widget #atlwdg-trigger,
+body.show-jsm-widget [id^="atlwdg-"],
+body.show-jsm-widget .atlwdg-trigger {
+  display: block !important;
+}

@@ -1,6 +1,5 @@
 import React from 'react';
 import SEO from '@/components/seo/SEO';
-import JiraWidget from '@/components/support/JiraWidget';
 import CustomerLayout from '@/components/layout/CustomerLayout';
 
 const CustomerSupportTicket = () => {
@@ -24,28 +23,19 @@ const CustomerSupportTicket = () => {
               </p>
             </div>
 
-            {/* Jira Service Management Widget */}
-            <div className="mt-8">
-              <JiraWidget 
-                widgetKey="7958a0ed-fe48-4e2b-b9f5-32eb7f1451c9"
-                baseUrl="https://jsd-widget.atlassian.com"
-                scriptSrc="https://jsd-widget.atlassian.com/assets/embed.js"
-              />
-              
-              {/* Fallback direct link */}
-              <div className="mt-8 pt-6 border-t text-center">
-                <p className="text-sm text-muted-foreground">
-                  Having trouble?{' '}
-                  <a 
-                    href="https://applestonesolutions.atlassian.net/servicedesk/customer/portal/1"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Open support portal directly
-                  </a>
-                </p>
-              </div>
+            {/* Fallback direct link */}
+            <div className="mt-8 pt-6 border-t text-center">
+              <p className="text-sm text-muted-foreground">
+                Having trouble?{' '}
+                <a 
+                  href="https://applestonesolutions.atlassian.net/servicedesk/customer/portal/1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Open support portal directly
+                </a>
+              </p>
             </div>
           </div>
         </div>
