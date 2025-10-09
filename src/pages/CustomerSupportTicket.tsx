@@ -20,16 +20,32 @@ const CustomerSupportTicket = () => {
                 Submit Support Ticket
               </h1>
               <p className="text-lg text-gray-600">
-                Need help? Submit a support request and our team will get back to you quickly.
+                Need help? Click the button below to open our support portal where you can submit tickets, track existing requests, and browse our knowledge base.
               </p>
             </div>
 
-            {/* Jira Service Desk Widget */}
-            <div className="mt-4">
-              <p className="text-sm text-gray-600 text-center mb-4">
-                The support widget opens at the bottom-right of this page.
-              </p>
-              <JiraWidget />
+            {/* Jira Service Portal */}
+            <div className="mt-8">
+              <JiraWidget 
+                portalUrl="https://applestonesolutions.atlassian.net/servicedesk/customer/portal/1"
+                mode="popover"
+                buttonText="Submit Support Ticket"
+              />
+              
+              {/* Fallback direct link */}
+              <div className="mt-8 pt-6 border-t text-center">
+                <p className="text-sm text-muted-foreground">
+                  Having trouble?{' '}
+                  <a 
+                    href="https://applestonesolutions.atlassian.net/servicedesk/customer/portal/1"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    Open support portal directly
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
         </div>
