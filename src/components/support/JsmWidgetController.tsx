@@ -4,66 +4,63 @@ import { useLocation } from 'react-router-dom';
 /**
  * JsmWidgetController
  * 
- * Controls the visibility of the Jira Service Management widget based on the current route.
- * The widget script is loaded globally in index.html, but this component adds/removes
- * a CSS class to show/hide it only on specific routes.
+ * Controls the JSM widget opening based on route or user action.
+ * Uses the official Atlassian JSM API (window.JiraWidget) to open the widget.
+ * The floating button remains hidden via CSS; we only use the overlay.
  */
 const JsmWidgetController = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Show widget only on the support ticket page
-    if (location.pathname === '/support-ticket') {
-      document.body.classList.add('show-jsm-widget');
-      
-      // Use the official JSM API to open the widget
-      const openWidget = () => {
-        if ((window as any).JiraWidget?.show) {
-          (window as any).JiraWidget.show();
-          console.log('JSM widget opened via API');
-        }
-      };
-      
-      // Try to open immediately if API is ready
-      if ((window as any).JiraWidget?.show) {
-        openWidget();
-      } else {
-        // Listen for the ready event
-        const onReady = () => {
-          openWidget();
-          window.removeEventListener('jsm:ready', onReady);
-        };
-        window.addEventListener('jsm:ready', onReady);
-        
-        // Fallback polling with timeout
-        const startTime = Date.now();
-        const pollInterval = setInterval(() => {
-          if ((window as any).JiraWidget?.show) {
-            clearInterval(pollInterval);
-            openWidget();
-          }
-          if (Date.now() - startTime > 5000) {
-            clearInterval(pollInterval);
-            console.warn('JSM widget API not available after 5s');
-          }
-        }, 250);
-        
-        return () => {
-          window.removeEventListener('jsm:ready', onReady);
-          clearInterval(pollInterval);
-          document.body.classList.remove('show-jsm-widget');
-        };
-      }
-      
-      return () => {
-        document.body.classList.remove('show-jsm-widget');
-      };
-    } else {
-      document.body.classList.remove('show-jsm-widget');
-    }
-  }, [location.pathname]);
+    const searchParams = new URLSearchParams(location.search);
+    const shouldOpen = 
+      location.pathname === '/support-ticket' ||
+      searchParams.get('open') === '1' ||
+      sessionStorage.getItem('jsm_open_on_load') === '1';
 
-  return null; // This component doesn't render anything
+    if (!shouldOpen) return;
+
+    const openWidget = () => {
+      const api = (window as any).JiraWidget;
+      if (api?.show) {
+        api.show();
+        sessionStorage.removeItem('jsm_open_on_load');
+        console.log('JSM widget opened via API');
+      }
+    };
+
+    // Try immediately if API is ready
+    if ((window as any).JiraWidget?.show) {
+      openWidget();
+    } else {
+      // Listen for ready event
+      const onReady = () => {
+        openWidget();
+        window.removeEventListener('jsm:ready', onReady);
+      };
+      window.addEventListener('jsm:ready', onReady);
+
+      // Fallback polling (5s max)
+      const startTime = Date.now();
+      const pollInterval = setInterval(() => {
+        if ((window as any).JiraWidget?.show) {
+          clearInterval(pollInterval);
+          openWidget();
+        }
+        if (Date.now() - startTime > 5000) {
+          clearInterval(pollInterval);
+          console.warn('JSM widget API not available after 5s');
+        }
+      }, 250);
+
+      return () => {
+        window.removeEventListener('jsm:ready', onReady);
+        clearInterval(pollInterval);
+      };
+    }
+  }, [location.pathname, location.search]);
+
+  return null;
 };
 
 export default JsmWidgetController;

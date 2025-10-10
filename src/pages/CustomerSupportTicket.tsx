@@ -1,8 +1,18 @@
 import React from 'react';
 import SEO from '@/components/seo/SEO';
 import CustomerLayout from '@/components/layout/CustomerLayout';
+import { Button } from '@/components/ui/button';
 
 const CustomerSupportTicket = () => {
+  const handleOpenWidget = () => {
+    const api = (window as any).JiraWidget;
+    if (api?.show) {
+      api.show();
+    } else {
+      console.warn('JSM widget not ready');
+    }
+  };
+
   return (
     <CustomerLayout>
       <SEO 
@@ -21,6 +31,13 @@ const CustomerSupportTicket = () => {
               <p className="text-lg text-gray-600">
                 The support form will open automatically. You can submit tickets, track existing requests, and browse our knowledge base.
               </p>
+            </div>
+
+            {/* Manual trigger button */}
+            <div className="text-center mb-8">
+              <Button onClick={handleOpenWidget} size="lg">
+                Open Support Form
+              </Button>
             </div>
 
             {/* Fallback direct link */}
