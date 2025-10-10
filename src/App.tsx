@@ -5,7 +5,6 @@ import { router } from './routes';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
-import JsmWidgetController from '@/components/support/JsmWidgetController';
 
 // Loading fallback component
 const LoadingFallback = () => (

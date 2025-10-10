@@ -5,7 +5,6 @@ import Header from './Header';
 import Footer from './Footer';
 import ScrollToTop from '../common/ScrollToTop';
 import TranslationDisclaimer from '@/components/language/TranslationDisclaimer';
-import JsmWidgetController from '@/components/support/JsmWidgetController';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -32,7 +31,6 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen">
-      <JsmWidgetController />
       <ScrollToTop />
       <Header />
       <TranslationDisclaimer />

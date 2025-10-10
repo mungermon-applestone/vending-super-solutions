@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogOut, FileText, MessageSquare } from 'lucide-react';
 import { useCustomerAuth } from '@/context/CustomerAuthContext';
-import JsmWidgetController from '@/components/support/JsmWidgetController';
 
 interface CustomerLayoutProps {
   children: React.ReactNode;
@@ -18,20 +17,8 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
     navigate('/');
   };
 
-  const handleSupportClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    const api = (window as any).JiraWidget;
-    if (api?.show) {
-      api.show();
-    } else {
-      sessionStorage.setItem('jsm_open_on_load', '1');
-      navigate('/support-ticket');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <JsmWidgetController />
       {/* Customer Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4">
@@ -53,9 +40,11 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
                 </Link>
               </Button>
               
-              <Button variant="ghost" onClick={handleSupportClick} className="flex items-center space-x-2">
-                <MessageSquare className="h-4 w-4" />
-                <span>Submit Support Ticket</span>
+              <Button asChild variant="ghost">
+                <Link to="/support-ticket" className="flex items-center space-x-2">
+                  <MessageSquare className="h-4 w-4" />
+                  <span>Submit Support Ticket</span>
+                </Link>
               </Button>
 
               <Button 

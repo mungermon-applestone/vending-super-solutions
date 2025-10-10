@@ -1,18 +1,9 @@
 import React from 'react';
 import SEO from '@/components/seo/SEO';
 import CustomerLayout from '@/components/layout/CustomerLayout';
-import { Button } from '@/components/ui/button';
+import SupportRequestForm from '@/components/support/SupportRequestForm';
 
 const CustomerSupportTicket = () => {
-  const handleOpenWidget = () => {
-    const api = (window as any).JiraWidget;
-    if (api?.show) {
-      api.show();
-    } else {
-      console.warn('JSM widget not ready');
-    }
-  };
-
   return (
     <CustomerLayout>
       <SEO 
@@ -29,28 +20,33 @@ const CustomerSupportTicket = () => {
                 Submit Support Ticket
               </h1>
               <p className="text-lg text-gray-600">
-                The support form will open automatically. You can submit tickets, track existing requests, and browse our knowledge base.
+                Fill out this form to submit a support request. You can also track or manage existing tickets in our Support Portal.
               </p>
             </div>
 
-            {/* Manual trigger button */}
-            <div className="text-center mb-8">
-              <Button onClick={handleOpenWidget} size="lg">
-                Open Support Form
-              </Button>
-            </div>
+            {/* Support Request Form */}
+            <SupportRequestForm
+              formTitle="Support Request"
+              context={{
+                customerPortal: true,
+                pageUrl: window.location.href
+              }}
+              onSuccess={() => {
+                console.log('Support request submitted successfully');
+              }}
+            />
 
-            {/* Fallback direct link */}
+            {/* Link to Support Portal for tracking */}
             <div className="mt-8 pt-6 border-t text-center">
               <p className="text-sm text-muted-foreground">
-                Having trouble?{' '}
+                Need to track existing tickets?{' '}
                 <a 
                   href="https://applestonesolutions.atlassian.net/servicedesk/customer/portal/1"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
                 >
-                  Open support portal directly
+                  Visit our Support Portal
                 </a>
               </p>
             </div>
