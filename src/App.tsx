@@ -3,7 +3,8 @@ import React, { lazy, Suspense } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
 import { HelmetProvider } from 'react-helmet-async';
-import { Toaster } from 'sonner';
+import { Toaster as SonnerToaster } from 'sonner';
+import { Toaster as ShadToaster } from '@/components/ui/toaster';
 import { Spinner } from '@/components/ui/spinner';
 
 // Loading fallback component
@@ -35,7 +36,8 @@ const App: React.FC = () => {
       <Suspense fallback={<LoadingFallback />}>
         <RouterProvider router={router} />
       </Suspense>
-      <Toaster position="top-right" />
+      <ShadToaster />
+      <SonnerToaster position="top-right" />
     </HelmetProvider>
   );
 };
