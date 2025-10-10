@@ -181,23 +181,10 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
 
       setSubmitted(true);
       
-      // Show success toast with Jira link if available
-      const issueUrl = data?.issueUrl;
+      // Show success toast
       toast({
         title: "Support request submitted",
-        description: issueUrl 
-          ? "We've received your request. Click here to view it in Jira."
-          : "We've received your request and will respond as soon as possible.",
-        action: issueUrl ? (
-          <a 
-            href={issueUrl} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-sm font-medium underline"
-          >
-            View in Jira
-          </a>
-        ) : undefined,
+        description: "We've received your request and will respond as soon as possible via email.",
       });
 
       if (onSuccess) {

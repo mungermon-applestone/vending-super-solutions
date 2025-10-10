@@ -269,8 +269,7 @@ serve(async (req) => {
         success: true, 
         message: 'Support request submitted successfully',
         requestId: requestId,
-        issueKey: issueKey,
-        issueUrl: `https://${jiraDomain}/browse/${issueKey}`
+        issueKey: issueKey
       }),
       { 
         status: 200, 
