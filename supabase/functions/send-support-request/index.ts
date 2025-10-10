@@ -62,10 +62,10 @@ serve(async (req) => {
     let jiraDomain = Deno.env.get('JIRA_DOMAIN');
     const jiraEmail = Deno.env.get('JIRA_USER_EMAIL');
     const jiraToken = Deno.env.get('JIRA_API_TOKEN');
-    const jiraProjectKey = Deno.env.get('JIRA_PROJECT_KEY');
+    const jiraServiceDeskId = Deno.env.get('JIRA_SERVICE_DESK_ID');
     const jiraRequestTypeId = Deno.env.get('JIRA_REQUEST_TYPE_ID');
 
-    if (!jiraDomain || !jiraEmail || !jiraToken || !jiraProjectKey) {
+    if (!jiraDomain || !jiraEmail || !jiraToken || !jiraServiceDeskId || !jiraRequestTypeId) {
       console.error('Missing Jira configuration');
       return new Response(
         JSON.stringify({ 
@@ -79,115 +79,58 @@ serve(async (req) => {
       );
     }
 
-    // Sanitize domain - remove protocol if present
-    jiraDomain = jiraDomain.replace(/^https?:\/\//, '');
-    console.log('Sanitized Jira domain:', jiraDomain);
+    // Normalize domain - remove protocol and trailing slashes
+    jiraDomain = jiraDomain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+    console.log('Normalized Jira domain:', jiraDomain);
 
-    // Helper function to build Atlassian Document Format (ADF) description
-    const buildAdfDescription = (data: SupportRequestData) => {
-      const content: any[] = [];
-
-      // Add description paragraphs
-      const descriptionParagraphs = data.description.split('\n\n').filter(p => p.trim());
-      descriptionParagraphs.forEach(paragraph => {
-        content.push({
-          type: 'paragraph',
-          content: [{ type: 'text', text: paragraph }]
-        });
-      });
-
-      // Add contact email
-      content.push({
-        type: 'paragraph',
-        content: [
-          { type: 'text', text: 'Contact Email: ', marks: [{ type: 'strong' }] },
-          { type: 'text', text: data.email || 'Not provided' }
-        ]
-      });
-
-      // Add context information if present
+    // Helper function to build plain text description for JSM
+    const buildDescription = (data: SupportRequestData) => {
+      let description = data.description + '\n\n';
+      description += `Contact Email: ${data.email || 'Not provided'}\n\n`;
+      
       if (data.context) {
-        content.push({
-          type: 'paragraph',
-          content: [{ type: 'text', text: 'Context Information:', marks: [{ type: 'strong' }] }]
-        });
-
+        description += 'Context Information:\n';
         if (data.context.articleTitle) {
-          content.push({
-            type: 'paragraph',
-            content: [{ type: 'text', text: `- Article: ${data.context.articleTitle}` }]
-          });
+          description += `- Article: ${data.context.articleTitle}\n`;
         }
         if (data.context.articleSlug) {
-          content.push({
-            type: 'paragraph',
-            content: [{ type: 'text', text: `- Article Slug: ${data.context.articleSlug}` }]
-          });
+          description += `- Article Slug: ${data.context.articleSlug}\n`;
         }
         if (data.context.pageUrl) {
-          content.push({
-            type: 'paragraph',
-            content: [{ type: 'text', text: `- Page URL: ${data.context.pageUrl}` }]
-          });
+          description += `- Page URL: ${data.context.pageUrl}\n`;
         }
+        description += '\n';
       }
 
-      // Add metadata
-      content.push({
-        type: 'paragraph',
-        content: [{ type: 'text', text: '---' }]
-      });
-      content.push({
-        type: 'paragraph',
-        content: [{ type: 'text', text: `Request submitted: ${new Date().toISOString()}` }]
-      });
-
-      // Add attachment info if present
+      description += `---\n`;
+      description += `Request submitted: ${new Date().toISOString()}`;
+      
       if (data.attachment) {
-        content.push({
-          type: 'paragraph',
-          content: [{ 
-            type: 'text', 
-            text: `Attachment: ${data.attachment.fileName} (${Math.round(data.attachment.fileSize / 1024)}KB)` 
-          }]
-        });
+        description += `\nAttachment: ${data.attachment.fileName} (${Math.round(data.attachment.fileSize / 1024)}KB)`;
       }
 
-      return {
-        type: 'doc',
-        version: 1,
-        content
-      };
+      return description;
     };
 
     // Create Basic Auth header
     const authString = btoa(`${jiraEmail}:${jiraToken}`);
     const authHeader = `Basic ${authString}`;
 
-    // Build Jira issue payload with ADF description
-    const issuePayload: any = {
-      fields: {
-        project: {
-          key: jiraProjectKey
-        },
+    // Build JSM request payload
+    const requestPayload = {
+      serviceDeskId: jiraServiceDeskId,
+      requestTypeId: jiraRequestTypeId,
+      requestFieldValues: {
         summary: requestData.subject,
-        description: buildAdfDescription(requestData),
-        issuetype: {
-          name: 'Task'
-        }
+        description: buildDescription(requestData)
       }
     };
 
-    // Add request type if using Jira Service Management
-    if (jiraRequestTypeId) {
-      issuePayload.fields.customfield_10010 = jiraRequestTypeId; // JSM request type field
-    }
+    console.log('Creating JSM request with payload:', JSON.stringify(requestPayload, null, 2));
 
-    console.log('Creating Jira issue with payload:', JSON.stringify(issuePayload, null, 2));
-
-    // Create Jira issue
-    const createIssueResponse = await fetch(
-      `https://${jiraDomain}/rest/api/3/issue`,
+    // Create JSM request using Service Management API
+    const createRequestResponse = await fetch(
+      `https://${jiraDomain}/rest/servicedeskapi/request`,
       {
         method: 'POST',
         headers: {
@@ -195,28 +138,28 @@ serve(async (req) => {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify(issuePayload)
+        body: JSON.stringify(requestPayload)
       }
     );
 
-    const responseText = await createIssueResponse.text();
-    console.log('Jira API response status:', createIssueResponse.status);
-    console.log('Jira API response:', responseText);
+    const responseText = await createRequestResponse.text();
+    console.log('JSM API response status:', createRequestResponse.status);
+    console.log('JSM API response:', responseText);
 
-    if (!createIssueResponse.ok) {
-      throw new Error(`Jira API error (${createIssueResponse.status}): ${responseText}`);
+    if (!createRequestResponse.ok) {
+      throw new Error(`JSM API error (${createRequestResponse.status}): ${responseText}`);
     }
 
-    const issueData = JSON.parse(responseText);
-    const issueKey = issueData.key;
-    const issueId = issueData.id;
+    const requestData_response = JSON.parse(responseText);
+    const issueKey = requestData_response.issueKey;
+    const requestId = requestData_response.requestId;
     
-    console.log(`Jira issue created successfully: ${issueKey}`);
+    console.log(`JSM request created successfully: ${issueKey} (ID: ${requestId})`);
 
     // Upload attachment if present
-    if (requestData.attachment && issueKey) {
+    if (requestData.attachment && requestId) {
       try {
-        console.log(`Uploading attachment to issue ${issueKey}...`);
+        console.log(`Uploading attachment to request ${requestId}...`);
         
         // Convert base64 to binary
         const binaryData = Uint8Array.from(atob(requestData.attachment.base64Data), c => c.charCodeAt(0));
@@ -227,7 +170,7 @@ serve(async (req) => {
         formData.append('file', blob, requestData.attachment.fileName);
 
         const attachmentResponse = await fetch(
-          `https://${jiraDomain}/rest/api/3/issue/${issueKey}/attachments`,
+          `https://${jiraDomain}/rest/servicedeskapi/request/${requestId}/attachment`,
           {
             method: 'POST',
             headers: {
@@ -255,6 +198,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         message: 'Support request submitted successfully',
+        requestId: requestId,
         issueKey: issueKey,
         issueUrl: `https://${jiraDomain}/browse/${issueKey}`
       }),
