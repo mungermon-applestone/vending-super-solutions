@@ -153,9 +153,15 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
           context: context?.articleSlug || 'unknown'
         });
         
+        // Check for specific Jira 400 error about request type
+        const errorMessage = data?.error || '';
+        const isRequestTypeError = errorMessage.includes('request type') || errorMessage.includes('requestTypeNotFound');
+        
         toast({
           title: "Submission failed",
-          description: data?.error || "Unable to submit your support request. Please try again or contact us directly.",
+          description: isRequestTypeError 
+            ? "There was a configuration issue with the support system. Please try again in a moment or contact us directly."
+            : errorMessage || "Unable to submit your support request. Please try again or contact us directly.",
           variant: "destructive",
         });
         return;
@@ -170,9 +176,23 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
 
       setSubmitted(true);
       
+      // Show success toast with Jira link if available
+      const issueUrl = data?.issueUrl;
       toast({
         title: "Support request submitted",
-        description: "We've received your request and will respond as soon as possible.",
+        description: issueUrl 
+          ? "We've received your request. Click here to view it in Jira."
+          : "We've received your request and will respond as soon as possible.",
+        action: issueUrl ? (
+          <a 
+            href={issueUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-sm font-medium underline"
+          >
+            View in Jira
+          </a>
+        ) : undefined,
       });
 
       if (onSuccess) {

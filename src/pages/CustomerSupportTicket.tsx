@@ -41,7 +41,7 @@ const CustomerSupportTicket = () => {
               <p className="text-sm text-muted-foreground">
                 Need to track existing tickets?{' '}
                 <a 
-                  href="https://applestonesolutions.atlassian.net/servicedesk/customer/portal/1"
+                  href="https://applestone.atlassian.net/servicedesk/customer/portal/34"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
