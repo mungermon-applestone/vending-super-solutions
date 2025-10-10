@@ -82,6 +82,10 @@ serve(async (req) => {
     // Normalize domain - remove protocol and trailing slashes
     jiraDomain = jiraDomain.replace(/^https?:\/\//, '').replace(/\/+$/, '');
     console.log('Normalized Jira domain:', jiraDomain);
+    console.log('Using JSM config:', { 
+      serviceDeskId: jiraServiceDeskId, 
+      requestTypeId: jiraRequestTypeId 
+    });
 
     // Helper function to build plain text description for JSM
     const buildDescription = (data: SupportRequestData) => {
@@ -147,7 +151,73 @@ serve(async (req) => {
     console.log('JSM API response:', responseText);
 
     if (!createRequestResponse.ok) {
-      throw new Error(`JSM API error (${createRequestResponse.status}): ${responseText}`);
+      // Parse error to check if it's a request type issue
+      let errorData;
+      try {
+        errorData = JSON.parse(responseText);
+      } catch {
+        errorData = { errorMessage: responseText };
+      }
+
+      // Check if this is a "request type not found" error
+      const isRequestTypeError = 
+        createRequestResponse.status === 400 && 
+        (errorData.i18nErrorMessage?.i18nKey === 'sd.customerview.error.requestTypeNotFound' ||
+         errorData.errorMessage?.includes('request type'));
+
+      if (isRequestTypeError) {
+        console.log('Request type not found. Fetching available request types...');
+        
+        // Fetch available request types for this service desk
+        try {
+          const requestTypesResponse = await fetch(
+            `https://${jiraDomain}/rest/servicedeskapi/servicedesk/${jiraServiceDeskId}/requesttype`,
+            {
+              method: 'GET',
+              headers: {
+                'Authorization': authHeader,
+                'Accept': 'application/json'
+              }
+            }
+          );
+
+          if (requestTypesResponse.ok) {
+            const requestTypesData = await requestTypesResponse.json();
+            const availableTypes = requestTypesData.values?.map((rt: any) => ({
+              id: rt.id,
+              name: rt.name
+            })) || [];
+            
+            console.log('Available request types:', JSON.stringify(availableTypes, null, 2));
+            
+            return new Response(
+              JSON.stringify({ 
+                success: false, 
+                error: `Request type "${jiraRequestTypeId}" not found. Please update JIRA_REQUEST_TYPE_ID to one of the available IDs.`,
+                requestTypes: availableTypes
+              }),
+              { 
+                status: 200, 
+                headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+              }
+            );
+          }
+        } catch (rtError) {
+          console.error('Failed to fetch request types:', rtError);
+        }
+      }
+
+      // Return error with details but don't throw (return 200 so client can read error)
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Jira API error (${createRequestResponse.status}): ${errorData.errorMessage || responseText}`
+        }),
+        { 
+          status: 200, 
+          headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+        }
+      );
     }
 
     const requestData_response = JSON.parse(responseText);

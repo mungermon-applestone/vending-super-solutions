@@ -146,6 +146,11 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
       if (error || (data && !data.success)) {
         console.error('Error submitting support request:', error || data.error);
         
+        // Log available request types if provided
+        if (data?.requestTypes) {
+          console.log('Available Jira request types:', data.requestTypes);
+        }
+        
         // Track submission error
         trackEvent('form_submit_error', {
           form_type: 'Support Request',
@@ -160,7 +165,7 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
         toast({
           title: "Submission failed",
           description: isRequestTypeError 
-            ? "There was a configuration issue with the support system. Please try again in a moment or contact us directly."
+            ? "There was a configuration issue with the support system. Please check the console for available request types."
             : errorMessage || "Unable to submit your support request. Please try again or contact us directly.",
           variant: "destructive",
         });
