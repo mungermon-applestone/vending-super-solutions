@@ -59,7 +59,7 @@ serve(async (req) => {
     }
 
     // Get Jira configuration from environment
-    const jiraDomain = Deno.env.get('JIRA_DOMAIN');
+    let jiraDomain = Deno.env.get('JIRA_DOMAIN');
     const jiraEmail = Deno.env.get('JIRA_USER_EMAIL');
     const jiraToken = Deno.env.get('JIRA_API_TOKEN');
     const jiraProjectKey = Deno.env.get('JIRA_PROJECT_KEY');
@@ -78,6 +78,10 @@ serve(async (req) => {
         }
       );
     }
+
+    // Sanitize domain - remove protocol if present
+    jiraDomain = jiraDomain.replace(/^https?:\/\//, '');
+    console.log('Sanitized Jira domain:', jiraDomain);
 
     // Build Jira issue description
     let description = requestData.description + '\n\n';
