@@ -83,43 +83,95 @@ serve(async (req) => {
     jiraDomain = jiraDomain.replace(/^https?:\/\//, '');
     console.log('Sanitized Jira domain:', jiraDomain);
 
-    // Build Jira issue description
-    let description = requestData.description + '\n\n';
-    description += `*Contact Email:* ${requestData.email || 'Not provided'}\n\n`;
-    
-    if (requestData.context) {
-      description += '*Context Information:*\n';
-      if (requestData.context.articleTitle) {
-        description += `- Article: ${requestData.context.articleTitle}\n`;
-      }
-      if (requestData.context.articleSlug) {
-        description += `- Article Slug: ${requestData.context.articleSlug}\n`;
-      }
-      if (requestData.context.pageUrl) {
-        description += `- Page URL: ${requestData.context.pageUrl}\n`;
-      }
-      description += '\n';
-    }
+    // Helper function to build Atlassian Document Format (ADF) description
+    const buildAdfDescription = (data: SupportRequestData) => {
+      const content: any[] = [];
 
-    description += `---\n`;
-    description += `Request submitted: ${new Date().toISOString()}`;
-    
-    if (requestData.attachment) {
-      description += `\nAttachment: ${requestData.attachment.fileName} (${Math.round(requestData.attachment.fileSize / 1024)}KB)`;
-    }
+      // Add description paragraphs
+      const descriptionParagraphs = data.description.split('\n\n').filter(p => p.trim());
+      descriptionParagraphs.forEach(paragraph => {
+        content.push({
+          type: 'paragraph',
+          content: [{ type: 'text', text: paragraph }]
+        });
+      });
+
+      // Add contact email
+      content.push({
+        type: 'paragraph',
+        content: [
+          { type: 'text', text: 'Contact Email: ', marks: [{ type: 'strong' }] },
+          { type: 'text', text: data.email || 'Not provided' }
+        ]
+      });
+
+      // Add context information if present
+      if (data.context) {
+        content.push({
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Context Information:', marks: [{ type: 'strong' }] }]
+        });
+
+        if (data.context.articleTitle) {
+          content.push({
+            type: 'paragraph',
+            content: [{ type: 'text', text: `- Article: ${data.context.articleTitle}` }]
+          });
+        }
+        if (data.context.articleSlug) {
+          content.push({
+            type: 'paragraph',
+            content: [{ type: 'text', text: `- Article Slug: ${data.context.articleSlug}` }]
+          });
+        }
+        if (data.context.pageUrl) {
+          content.push({
+            type: 'paragraph',
+            content: [{ type: 'text', text: `- Page URL: ${data.context.pageUrl}` }]
+          });
+        }
+      }
+
+      // Add metadata
+      content.push({
+        type: 'paragraph',
+        content: [{ type: 'text', text: '---' }]
+      });
+      content.push({
+        type: 'paragraph',
+        content: [{ type: 'text', text: `Request submitted: ${new Date().toISOString()}` }]
+      });
+
+      // Add attachment info if present
+      if (data.attachment) {
+        content.push({
+          type: 'paragraph',
+          content: [{ 
+            type: 'text', 
+            text: `Attachment: ${data.attachment.fileName} (${Math.round(data.attachment.fileSize / 1024)}KB)` 
+          }]
+        });
+      }
+
+      return {
+        type: 'doc',
+        version: 1,
+        content
+      };
+    };
 
     // Create Basic Auth header
     const authString = btoa(`${jiraEmail}:${jiraToken}`);
     const authHeader = `Basic ${authString}`;
 
-    // Build Jira issue payload
+    // Build Jira issue payload with ADF description
     const issuePayload: any = {
       fields: {
         project: {
           key: jiraProjectKey
         },
         summary: requestData.subject,
-        description: description,
+        description: buildAdfDescription(requestData),
         issuetype: {
           name: 'Task'
         }
