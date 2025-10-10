@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { SESClient, SendEmailCommand } from "https://esm.sh/@aws-sdk/client-ses@3.554.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -59,19 +58,19 @@ serve(async (req) => {
       );
     }
 
-    // Get AWS SES configuration from environment
-    const awsAccessKeyId = Deno.env.get('AWS_ACCESS_KEY_ID');
-    const awsSecretAccessKey = Deno.env.get('AWS_SECRET_ACCESS_KEY');
-    const awsRegion = Deno.env.get('AWS_REGION');
-    const fromEmail = Deno.env.get('SES_FROM_EMAIL');
-    const supportEmail = 'support@applestonesolutions.com';
+    // Get Jira configuration from environment
+    const jiraDomain = Deno.env.get('JIRA_DOMAIN');
+    const jiraEmail = Deno.env.get('JIRA_USER_EMAIL');
+    const jiraToken = Deno.env.get('JIRA_API_TOKEN');
+    const jiraProjectKey = Deno.env.get('JIRA_PROJECT_KEY');
+    const jiraRequestTypeId = Deno.env.get('JIRA_REQUEST_TYPE_ID');
 
-    if (!awsAccessKeyId || !awsSecretAccessKey || !awsRegion || !fromEmail) {
-      console.error('Missing AWS SES configuration');
+    if (!jiraDomain || !jiraEmail || !jiraToken || !jiraProjectKey) {
+      console.error('Missing Jira configuration');
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Email service configuration error' 
+          error: 'Jira service configuration error' 
         }),
         { 
           status: 500, 
@@ -80,169 +79,128 @@ serve(async (req) => {
       );
     }
 
-    // Initialize AWS SES client
-    const sesClient = new SESClient({
-      region: awsRegion,
-      credentials: {
-        accessKeyId: awsAccessKeyId,
-        secretAccessKey: awsSecretAccessKey,
-      },
-    });
-
-    // Build email content
-    let emailText = `Support Request Details:\n\n`;
-    emailText += `Subject: ${requestData.subject}\n\n`;
-    emailText += `Description:\n${requestData.description}\n\n`;
-    emailText += `Contact Email: ${requestData.email || 'Not provided'}\n\n`;
+    // Build Jira issue description
+    let description = requestData.description + '\n\n';
+    description += `*Contact Email:* ${requestData.email || 'Not provided'}\n\n`;
     
     if (requestData.context) {
-      emailText += `Context Information:\n`;
+      description += '*Context Information:*\n';
       if (requestData.context.articleTitle) {
-        emailText += `- Article: ${requestData.context.articleTitle}\n`;
+        description += `- Article: ${requestData.context.articleTitle}\n`;
       }
       if (requestData.context.articleSlug) {
-        emailText += `- Article Slug: ${requestData.context.articleSlug}\n`;
+        description += `- Article Slug: ${requestData.context.articleSlug}\n`;
       }
       if (requestData.context.pageUrl) {
-        emailText += `- Page URL: ${requestData.context.pageUrl}\n`;
+        description += `- Page URL: ${requestData.context.pageUrl}\n`;
       }
-      emailText += `\n`;
+      description += '\n';
     }
 
-    emailText += `---\n`;
-    emailText += `Request submitted: ${new Date().toISOString()}\n`;
+    description += `---\n`;
+    description += `Request submitted: ${new Date().toISOString()}`;
     
     if (requestData.attachment) {
-      emailText += `Attachment: ${requestData.attachment.fileName} (${Math.round(requestData.attachment.fileSize / 1024)}KB)\n`;
+      description += `\nAttachment: ${requestData.attachment.fileName} (${Math.round(requestData.attachment.fileSize / 1024)}KB)`;
     }
 
-    // Build HTML email content
-    let emailHtml = `
-      <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-          <h2>Support Request</h2>
-          
-          <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
-            <h3 style="margin-top: 0;">Subject: ${requestData.subject}</h3>
-            <p><strong>Description:</strong></p>
-            <p style="white-space: pre-wrap;">${requestData.description}</p>
-            <p><strong>Contact Email:</strong> ${requestData.email || 'Not provided'}</p>
-          </div>
-    `;
+    // Create Basic Auth header
+    const authString = btoa(`${jiraEmail}:${jiraToken}`);
+    const authHeader = `Basic ${authString}`;
 
-    if (requestData.context) {
-      emailHtml += `
-        <div style="background-color: #e8f4fd; padding: 15px; border-radius: 5px; margin: 15px 0;">
-          <h4 style="margin-top: 0;">Context Information</h4>
-      `;
-      if (requestData.context.articleTitle) {
-        emailHtml += `<p><strong>Article:</strong> ${requestData.context.articleTitle}</p>`;
-      }
-      if (requestData.context.articleSlug) {
-        emailHtml += `<p><strong>Article Slug:</strong> ${requestData.context.articleSlug}</p>`;
-      }
-      if (requestData.context.pageUrl) {
-        emailHtml += `<p><strong>Page URL:</strong> <a href="${requestData.context.pageUrl}">${requestData.context.pageUrl}</a></p>`;
-      }
-      emailHtml += `</div>`;
-    }
-
-    if (requestData.attachment) {
-      emailHtml += `
-        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0;">
-          <h4 style="margin-top: 0;">Attachment</h4>
-          <p><strong>File:</strong> ${requestData.attachment.fileName}</p>
-          <p><strong>Size:</strong> ${Math.round(requestData.attachment.fileSize / 1024)}KB</p>
-          <p><strong>Type:</strong> ${requestData.attachment.fileType}</p>
-        </div>
-      `;
-    }
-
-    emailHtml += `
-          <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
-          <p style="color: #666; font-size: 12px;">
-            Request submitted: ${new Date().toLocaleString()}<br>
-            This is an automated message from the support request system.
-          </p>
-        </body>
-      </html>
-    `;
-
-    // Prepare email parameters
-    const emailParams = {
-      Source: fromEmail,
-      Destination: {
-        ToAddresses: [supportEmail],
-      },
-      Message: {
-        Subject: {
-          Data: `Support Request: ${requestData.subject}`,
+    // Build Jira issue payload
+    const issuePayload: any = {
+      fields: {
+        project: {
+          key: jiraProjectKey
         },
-        Body: {
-          Text: {
-            Data: emailText,
-          },
-          Html: {
-            Data: emailHtml,
-          },
-        },
-      },
+        summary: requestData.subject,
+        description: description,
+        issuetype: {
+          name: 'Task'
+        }
+      }
     };
 
-    // Add attachment if present
-    if (requestData.attachment) {
-      const attachmentData = `Content-Type: ${requestData.attachment.fileType}; name="${requestData.attachment.fileName}"\nContent-Transfer-Encoding: base64\nContent-Disposition: attachment; filename="${requestData.attachment.fileName}"\n\n${requestData.attachment.base64Data}`;
-      
-      // For SES with attachments, we need to use raw email format
-      const boundary = `boundary-${Date.now()}`;
-      const rawMessage = `Subject: Support Request: ${requestData.subject}
-From: ${fromEmail}
-To: ${supportEmail}
-MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="${boundary}"
+    // Add request type if using Jira Service Management
+    if (jiraRequestTypeId) {
+      issuePayload.fields.customfield_10010 = jiraRequestTypeId; // JSM request type field
+    }
 
---${boundary}
-Content-Type: multipart/alternative; boundary="alt-${boundary}"
+    console.log('Creating Jira issue with payload:', JSON.stringify(issuePayload, null, 2));
 
---alt-${boundary}
-Content-Type: text/plain; charset=UTF-8
-
-${emailText}
-
---alt-${boundary}
-Content-Type: text/html; charset=UTF-8
-
-${emailHtml}
-
---alt-${boundary}--
-
---${boundary}
-${attachmentData}
-
---${boundary}--`;
-
-      const rawEmailParams = {
-        Source: fromEmail,
-        Destinations: [supportEmail],
-        RawMessage: {
-          Data: new TextEncoder().encode(rawMessage),
+    // Create Jira issue
+    const createIssueResponse = await fetch(
+      `https://${jiraDomain}/rest/api/3/issue`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': authHeader,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-      };
+        body: JSON.stringify(issuePayload)
+      }
+    );
 
-      const sendRawEmailCommand = new (await import("https://esm.sh/@aws-sdk/client-ses@3.554.0")).SendRawEmailCommand(rawEmailParams);
-      const response = await sesClient.send(sendRawEmailCommand);
-      console.log('Email sent successfully with attachment:', response);
-    } else {
-      // Send regular email without attachment
-      const sendEmailCommand = new SendEmailCommand(emailParams);
-      const response = await sesClient.send(sendEmailCommand);
-      console.log('Email sent successfully:', response);
+    const responseText = await createIssueResponse.text();
+    console.log('Jira API response status:', createIssueResponse.status);
+    console.log('Jira API response:', responseText);
+
+    if (!createIssueResponse.ok) {
+      throw new Error(`Jira API error (${createIssueResponse.status}): ${responseText}`);
+    }
+
+    const issueData = JSON.parse(responseText);
+    const issueKey = issueData.key;
+    const issueId = issueData.id;
+    
+    console.log(`Jira issue created successfully: ${issueKey}`);
+
+    // Upload attachment if present
+    if (requestData.attachment && issueKey) {
+      try {
+        console.log(`Uploading attachment to issue ${issueKey}...`);
+        
+        // Convert base64 to binary
+        const binaryData = Uint8Array.from(atob(requestData.attachment.base64Data), c => c.charCodeAt(0));
+        
+        // Create form data for attachment
+        const formData = new FormData();
+        const blob = new Blob([binaryData], { type: requestData.attachment.fileType });
+        formData.append('file', blob, requestData.attachment.fileName);
+
+        const attachmentResponse = await fetch(
+          `https://${jiraDomain}/rest/api/3/issue/${issueKey}/attachments`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': authHeader,
+              'X-Atlassian-Token': 'no-check'
+            },
+            body: formData
+          }
+        );
+
+        if (attachmentResponse.ok) {
+          console.log('Attachment uploaded successfully');
+        } else {
+          const attachmentError = await attachmentResponse.text();
+          console.error('Failed to upload attachment:', attachmentError);
+          // Don't fail the whole request if attachment upload fails
+        }
+      } catch (attachmentError) {
+        console.error('Error uploading attachment:', attachmentError);
+        // Don't fail the whole request if attachment upload fails
+      }
     }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Support request submitted successfully' 
+        message: 'Support request submitted successfully',
+        issueKey: issueKey,
+        issueUrl: `https://${jiraDomain}/browse/${issueKey}`
       }),
       { 
         status: 200, 
