@@ -111,10 +111,10 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!subject.trim() || !description.trim()) {
+    if (!subject.trim() || !description.trim() || !email.trim()) {
       toast({
         title: "Required fields missing",
-        description: "Please fill in both subject and description fields",
+        description: "Please fill in all required fields",
         variant: "destructive",
       });
       return;
@@ -133,7 +133,7 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
       const formData = {
         subject: subject.trim(),
         description: description.trim(),
-        email: email.trim() || 'Not provided',
+        email: email.trim(),
         context,
         attachment: attachedFile
       };
@@ -284,13 +284,14 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">Your Email Address</Label>
+          <Label htmlFor="email">Your Email Address *</Label>
           <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="your.email@example.com (optional but recommended)"
+            placeholder="your.email@example.com"
+            required
           />
         </div>
 
