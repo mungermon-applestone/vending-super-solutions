@@ -333,7 +333,6 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
         <Button 
           type="submit" 
           disabled={isSubmitting || isUploading}
-          className="w-full"
         >
           {isSubmitting ? (
             <>
