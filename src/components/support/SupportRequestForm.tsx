@@ -246,17 +246,13 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
 
   return (
     <div className={`space-y-6 ${className}`}>
-      <div>
-        <h3 className="text-lg font-semibold">{formTitle}</h3>
-        <p className="text-muted-foreground text-sm mt-1">
-          Need help? Submit a support request and we'll get back to you as soon as possible.
-        </p>
-        {context?.articleTitle && (
-          <p className="text-xs text-muted-foreground mt-1">
+      {context?.articleTitle && (
+        <div className="mb-4">
+          <p className="text-xs text-muted-foreground">
             Regarding: <span className="font-medium">{context.articleTitle}</span>
           </p>
-        )}
-      </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">

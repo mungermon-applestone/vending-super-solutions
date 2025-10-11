@@ -20,7 +20,7 @@ const CustomerSupportTicket = () => {
                 Submit Support Ticket
               </h1>
               <p className="text-lg text-gray-600">
-                Fill out this form to submit a support request. You can also track or manage existing tickets in our Support Portal.
+                Fill out this form to submit a support request.
               </p>
             </div>
 
