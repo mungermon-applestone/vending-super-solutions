@@ -36,20 +36,6 @@ const CustomerSupportTicket = () => {
               }}
             />
 
-            {/* Link to Support Portal for tracking */}
-            <div className="mt-8 pt-6 border-t text-center">
-              <p className="text-sm text-muted-foreground">
-                Need to track existing tickets?{' '}
-                <a 
-                  href="https://applestone.atlassian.net/servicedesk/customer/portal/34"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  Visit our Support Portal
-                </a>
-              </p>
-            </div>
           </div>
         </div>
       </div>
