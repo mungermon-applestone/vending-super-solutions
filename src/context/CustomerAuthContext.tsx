@@ -130,24 +130,16 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (error) {
         console.error('Edge function error:', error);
         setIsLoading(false);
-
-        const status = (error as any)?.status;
-        const message = (error as any)?.message || '';
-
-        if (status === 429 || message.includes('Too many login attempts')) {
+        
+        // Check if we still got data back (Edge Function returned JSON with non-2xx status)
+        if (data && !data.success) {
           return {
             success: false,
-            error: message || 'Too many login attempts. Please try again in 15 minutes.'
+            error: data.error || 'Authentication failed'
           };
         }
-
-        if (status === 401) {
-          return {
-            success: false,
-            error: 'Invalid email or password'
-          };
-        }
-
+        
+        // True connection error - couldn't reach the function
         return { 
           success: false, 
           error: 'Unable to connect to authentication service' 
