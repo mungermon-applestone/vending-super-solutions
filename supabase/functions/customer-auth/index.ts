@@ -9,6 +9,7 @@ const allowedOrigins = [
 const allowedOriginPatterns = [
   /^https:\/\/.*\.lovable\.app$/,
   /^https:\/\/.*\.lovable\.dev$/,
+  /^https:\/\/.*\.lovableproject\.com$/,
 ];
 
 function getCorsHeaders(origin: string | null): Record<string, string> {
