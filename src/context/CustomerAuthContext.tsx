@@ -131,11 +131,53 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
         console.error('Edge function error:', error);
         setIsLoading(false);
         
-        // Check if we still got data back (Edge Function returned JSON with non-2xx status)
-        if (data && !data.success) {
+        // Try to extract status and message from Supabase Functions error context
+        const httpError: any = error as any;
+        const ctx = httpError?.context;
+        const status: number | undefined = ctx?.status ?? httpError?.status ?? httpError?.code;
+
+        let extractedMessage: string | undefined;
+        try {
+          if (typeof ctx === 'string') {
+            const parsed = JSON.parse(ctx);
+            extractedMessage = parsed?.error || parsed?.message || parsed?.body?.error || parsed?.body?.message;
+          } else if (typeof ctx === 'object' && ctx) {
+            extractedMessage = ctx?.error || ctx?.message || ctx?.body?.error || ctx?.body?.message;
+          }
+        } catch (_) {
+          // ignore JSON parse errors
+        }
+        // Fallbacks
+        if (!extractedMessage && (httpError?.message && typeof httpError.message === 'string')) {
+          extractedMessage = httpError.message;
+        }
+        if (!extractedMessage && data && (data as any).error) {
+          extractedMessage = (data as any).error;
+        }
+
+        // Minimal debug log (no credentials)
+        console.debug('[customerLogin] Functions error', { status, msg: extractedMessage });
+
+        const msg = (extractedMessage || '').toLowerCase();
+        if (status === 429 || msg.includes('too many')) {
           return {
             success: false,
-            error: data.error || 'Authentication failed'
+            error: extractedMessage || 'Too many login attempts. Please try again in 15 minutes.'
+          };
+        }
+
+        if (status === 401 || msg.includes('invalid')) {
+          return {
+            success: false,
+            error: 'Invalid email or password'
+          };
+        }
+
+        // If the edge function returned a structured error message, surface it
+        if (extractedMessage) {
+          return {
+            success: false,
+            error: extractedMessage
           };
         }
         
