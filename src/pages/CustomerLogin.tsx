@@ -9,7 +9,7 @@ import { useCustomerAuth } from '@/context/CustomerAuthContext';
 import SEO from '@/components/seo/SEO';
 
 const CustomerLogin = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { customerLogin, isLoading } = useCustomerAuth();
@@ -19,17 +19,24 @@ const CustomerLogin = () => {
     e.preventDefault();
     setError('');
 
-    if (!username || !password) {
-      setError('Please enter both username and password');
+    if (!email || !password) {
+      setError('Please enter both email and password');
       return;
     }
 
-    const success = await customerLogin(username, password);
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    const result = await customerLogin(email, password);
     
-    if (success) {
+    if (result.success) {
       navigate('/knowledge-base');
     } else {
-      setError('Invalid credentials. Use demo/customer for demo access.');
+      setError(result.error || 'Authentication failed. Please try again.');
     }
   };
 
@@ -63,13 +70,16 @@ const CustomerLogin = () => {
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
+                  <Label htmlFor="email">Email Address</Label>
                   <Input
-                    id="username"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter your username"
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setError(''); // Clear error when user starts typing
+                    }}
+                    placeholder="Enter your email address"
                     disabled={isLoading}
                   />
                 </div>
@@ -80,7 +90,10 @@ const CustomerLogin = () => {
                     id="password"
                     type="password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setError(''); // Clear error when user starts typing
+                    }}
                     placeholder="Enter your password"
                     disabled={isLoading}
                   />
@@ -93,10 +106,6 @@ const CustomerLogin = () => {
                 >
                   {isLoading ? 'Signing in...' : 'Sign In'}
                 </Button>
-
-                <div className="text-sm text-gray-500 text-center mt-4">
-                  <p>Demo credentials: username: <strong>demo</strong>, password: <strong>customer</strong></p>
-                </div>
               </form>
             </CardContent>
           </Card>
