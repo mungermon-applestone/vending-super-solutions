@@ -32,6 +32,36 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_logs: {
+        Row: {
+          email: string
+          failure_reason: string | null
+          id: string
+          ip_address: string | null
+          success: boolean
+          timestamp: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          email: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          success: boolean
+          timestamp?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          email?: string
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+          timestamp?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       business_goals: {
         Row: {
           created_at: string
@@ -74,6 +104,39 @@ export type Database = {
           id?: string
           space_id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      login_attempts: {
+        Row: {
+          attempt_count: number | null
+          created_at: string | null
+          email: string
+          first_attempt_at: string | null
+          id: string
+          ip_address: string | null
+          last_attempt_at: string | null
+          locked_until: string | null
+        }
+        Insert: {
+          attempt_count?: number | null
+          created_at?: string | null
+          email: string
+          first_attempt_at?: string | null
+          id?: string
+          ip_address?: string | null
+          last_attempt_at?: string | null
+          locked_until?: string | null
+        }
+        Update: {
+          attempt_count?: number | null
+          created_at?: string | null
+          email?: string
+          first_attempt_at?: string | null
+          id?: string
+          ip_address?: string | null
+          last_attempt_at?: string | null
+          locked_until?: string | null
         }
         Relationships: []
       }

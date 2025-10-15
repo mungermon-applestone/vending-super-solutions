@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useCustomerAuth } from '@/context/CustomerAuthContext';
 import TranslatableText from '@/components/translation/TranslatableText';
+import SessionTimeoutWarning from './SessionTimeoutWarning';
 
 interface CustomerProtectedRouteProps {
   children: React.ReactNode;
@@ -27,7 +28,12 @@ const CustomerProtectedRoute: React.FC<CustomerProtectedRouteProps> = ({ childre
     return <Navigate to="/customer-login" replace />;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <SessionTimeoutWarning />
+      {children}
+    </>
+  );
 };
 
 export default CustomerProtectedRoute;
