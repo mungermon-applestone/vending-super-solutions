@@ -171,6 +171,55 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
           }
         }
         
+        // Parse Supabase Functions error context when 'data' isn't available
+        const httpError: any = error as any;
+        const ctx = httpError?.context;
+
+        let status: number | undefined = ctx?.status ?? httpError?.status ?? httpError?.code;
+        let extractedMessage: string | undefined;
+
+        try {
+          if (typeof ctx === 'string') {
+            const parsed = JSON.parse(ctx);
+            extractedMessage = parsed?.error || parsed?.message || parsed?.body?.error || parsed?.body?.message;
+            status = parsed?.status ?? status;
+          } else if (typeof ctx === 'object' && ctx) {
+            extractedMessage = ctx?.error || ctx?.message || ctx?.body?.error || ctx?.body?.message;
+            status = ctx?.status ?? status;
+          }
+        } catch {
+          // ignore JSON parse errors
+        }
+
+        if (!extractedMessage && httpError?.message && typeof httpError.message === 'string') {
+          extractedMessage = httpError.message;
+        }
+
+        const msg = (extractedMessage || '').toLowerCase();
+
+        console.debug('[customerLogin] Functions error parsed', { hasData: Boolean(data), status, msg: extractedMessage });
+
+        if (status === 429 || msg.includes('too many') || msg.includes('rate limit') || msg.includes('locked')) {
+          return {
+            success: false,
+            error: extractedMessage || 'Too many login attempts. Please try again in 15 minutes.'
+          };
+        }
+
+        if (status === 401 || status === 403 || msg.includes('invalid') || msg.includes('unauthorized')) {
+          return {
+            success: false,
+            error: 'Invalid email or password'
+          };
+        }
+
+        if (extractedMessage) {
+          return {
+            success: false,
+            error: extractedMessage
+          };
+        }
+        
         // True connection error - couldn't reach the function or parse response
         return { 
           success: false, 
