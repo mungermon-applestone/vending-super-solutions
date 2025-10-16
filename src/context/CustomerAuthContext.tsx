@@ -128,102 +128,122 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
       });
 
       if (error) {
-        console.error('Edge function error:', error);
         setIsLoading(false);
-        
-        // For non-2xx responses, Supabase still populates 'data' with the JSON response
-        // Check data first before parsing the generic error object
-        if (data) {
-          const responseData = data as any;
-          
-          // Extract the actual error message from the Edge Function response
-          const errorMessage = responseData.error || responseData.message;
-          const isRateLimited = errorMessage?.toLowerCase().includes('too many');
-          const isInvalidCreds = errorMessage?.toLowerCase().includes('invalid');
-          
-          console.debug('[customerLogin] Edge Function response', { 
-            hasData: true, 
-            errorMessage,
-            isRateLimited,
-            isInvalidCreds
-          });
-          
-          if (isRateLimited) {
-            return {
-              success: false,
-              error: errorMessage || 'Too many login attempts. Please try again in 15 minutes.'
-            };
-          }
-          
-          if (isInvalidCreds) {
-            return {
-              success: false,
-              error: errorMessage || 'Invalid email or password'
-            };
-          }
-          
-          // Return any other specific error from the Edge Function
-          if (errorMessage) {
-            return {
-              success: false,
-              error: errorMessage
-            };
-          }
-        }
-        
-        // Parse Supabase Functions error context when 'data' isn't available
-        const httpError: any = error as any;
-        const ctx = httpError?.context;
 
-        let status: number | undefined = ctx?.status ?? httpError?.status ?? httpError?.code;
-        let extractedMessage: string | undefined;
-
+        // Debug the shapes (sanitized)
         try {
-          if (typeof ctx === 'string') {
-            const parsed = JSON.parse(ctx);
-            extractedMessage = parsed?.error || parsed?.message || parsed?.body?.error || parsed?.body?.message;
-            status = parsed?.status ?? status;
-          } else if (typeof ctx === 'object' && ctx) {
-            extractedMessage = ctx?.error || ctx?.message || ctx?.body?.error || ctx?.body?.message;
-            status = ctx?.status ?? status;
+          console.debug('[customerLogin] raw invoke result', {
+            hasData: Boolean(data),
+            dataType: typeof data,
+            errorName: (error as any)?.name,
+            ctxType: typeof (error as any)?.context,
+          });
+        } catch {}
+
+        // Helper to extract message from various shapes
+        const tryExtractFromAny = (v: unknown): { msg?: string } => {
+          if (!v) return {};
+          if (typeof v === 'string') {
+            try {
+              const parsed = JSON.parse(v);
+              return { msg: parsed?.error || parsed?.message || parsed?.body?.error || parsed?.body?.message };
+            } catch {
+              return {};
+            }
           }
-        } catch {
-          // ignore JSON parse errors
+          if (typeof v === 'object') {
+            const obj = v as any;
+            return { msg: obj?.error || obj?.message || obj?.body?.error || obj?.body?.message };
+          }
+          return {};
+        };
+
+        let extractedMessage: string | undefined;
+        let status: number | undefined;
+
+        // 1) Try data-first (Edge Function JSON often lives here even on non-2xx)
+        if (data) {
+          const { msg } = tryExtractFromAny(data);
+          if (msg) extractedMessage = msg;
         }
 
-        if (!extractedMessage && httpError?.message && typeof httpError.message === 'string') {
-          extractedMessage = httpError.message;
+        // 2) Robustly parse FunctionsHttpError.context when data is empty or unhelpful
+        if (!extractedMessage) {
+          const httpError: any = error as any;
+          const ctx = httpError?.context;
+
+          // Some versions expose a direct status/code
+          status = (ctx && (ctx.status ?? ctx.code)) ?? httpError?.status ?? httpError?.code;
+
+          if (typeof ctx === 'string') {
+            try {
+              const parsed = JSON.parse(ctx);
+              extractedMessage =
+                parsed?.error || parsed?.message || parsed?.body?.error || parsed?.body?.message;
+              status = parsed?.status ?? status;
+            } catch {/* ignore */}
+          } else if (typeof ctx === 'object' && ctx) {
+            // Many functions put details in ctx.body
+            const { msg } = tryExtractFromAny((ctx as any).body ?? ctx);
+            if (msg) extractedMessage = msg;
+
+            // Some shapes carry status at ctx.response?.status
+            if (!status && (ctx as any).response?.status) {
+              status = (ctx as any).response.status;
+            }
+            // Also consider top-level fields
+            if (!extractedMessage) {
+              extractedMessage =
+                (ctx as any)?.error ||
+                (ctx as any)?.message ||
+                (ctx as any)?.body?.error ||
+                (ctx as any)?.body?.message;
+            }
+            if (!status && ((ctx as any)?.status || (ctx as any)?.code)) {
+              status = (ctx as any)?.status ?? (ctx as any)?.code;
+            }
+          }
+
+          // Final fallback to the error message string
+          if (!extractedMessage && httpError?.message && typeof httpError.message === 'string') {
+            extractedMessage = httpError.message;
+          }
         }
 
         const msg = (extractedMessage || '').toLowerCase();
 
-        console.debug('[customerLogin] Functions error parsed', { hasData: Boolean(data), status, msg: extractedMessage });
+        // Final debug with derived status/message
+        try {
+          console.debug('[customerLogin] invoke parse (derived)', { status, msg: extractedMessage });
+        } catch {}
 
+        // 3) Prefer status mapping even if message is missing
         if (status === 429 || msg.includes('too many') || msg.includes('rate limit') || msg.includes('locked')) {
           return {
             success: false,
-            error: extractedMessage || 'Too many login attempts. Please try again in 15 minutes.'
+            error: extractedMessage || 'Too many login attempts. Please try again in 15 minutes.',
           };
         }
 
         if (status === 401 || status === 403 || msg.includes('invalid') || msg.includes('unauthorized')) {
           return {
             success: false,
-            error: 'Invalid email or password'
+            error: 'Invalid email or password',
           };
         }
 
+        // 4) If we at least have a message, surface it
         if (extractedMessage) {
           return {
             success: false,
-            error: extractedMessage
+            error: extractedMessage,
           };
         }
-        
-        // True connection error - couldn't reach the function or parse response
-        return { 
-          success: false, 
-          error: 'Unable to connect to authentication service' 
+
+        // 5) True connectivity/parse failure fallback
+        return {
+          success: false,
+          error: 'Unable to connect to authentication service',
         };
       }
 
