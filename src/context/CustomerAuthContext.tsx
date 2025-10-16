@@ -131,57 +131,47 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
         console.error('Edge function error:', error);
         setIsLoading(false);
         
-        // Try to extract status and message from Supabase Functions error context
-        const httpError: any = error as any;
-        const ctx = httpError?.context;
-        const status: number | undefined = ctx?.status ?? httpError?.status ?? httpError?.code;
-
-        let extractedMessage: string | undefined;
-        try {
-          if (typeof ctx === 'string') {
-            const parsed = JSON.parse(ctx);
-            extractedMessage = parsed?.error || parsed?.message || parsed?.body?.error || parsed?.body?.message;
-          } else if (typeof ctx === 'object' && ctx) {
-            extractedMessage = ctx?.error || ctx?.message || ctx?.body?.error || ctx?.body?.message;
+        // For non-2xx responses, Supabase still populates 'data' with the JSON response
+        // Check data first before parsing the generic error object
+        if (data) {
+          const responseData = data as any;
+          
+          // Extract the actual error message from the Edge Function response
+          const errorMessage = responseData.error || responseData.message;
+          const isRateLimited = errorMessage?.toLowerCase().includes('too many');
+          const isInvalidCreds = errorMessage?.toLowerCase().includes('invalid');
+          
+          console.debug('[customerLogin] Edge Function response', { 
+            hasData: true, 
+            errorMessage,
+            isRateLimited,
+            isInvalidCreds
+          });
+          
+          if (isRateLimited) {
+            return {
+              success: false,
+              error: errorMessage || 'Too many login attempts. Please try again in 15 minutes.'
+            };
           }
-        } catch (_) {
-          // ignore JSON parse errors
-        }
-        // Fallbacks
-        if (!extractedMessage && (httpError?.message && typeof httpError.message === 'string')) {
-          extractedMessage = httpError.message;
-        }
-        if (!extractedMessage && data && (data as any).error) {
-          extractedMessage = (data as any).error;
-        }
-
-        // Minimal debug log (no credentials)
-        console.debug('[customerLogin] Functions error', { status, msg: extractedMessage });
-
-        const msg = (extractedMessage || '').toLowerCase();
-        if (status === 429 || msg.includes('too many')) {
-          return {
-            success: false,
-            error: extractedMessage || 'Too many login attempts. Please try again in 15 minutes.'
-          };
-        }
-
-        if (status === 401 || msg.includes('invalid')) {
-          return {
-            success: false,
-            error: 'Invalid email or password'
-          };
-        }
-
-        // If the edge function returned a structured error message, surface it
-        if (extractedMessage) {
-          return {
-            success: false,
-            error: extractedMessage
-          };
+          
+          if (isInvalidCreds) {
+            return {
+              success: false,
+              error: errorMessage || 'Invalid email or password'
+            };
+          }
+          
+          // Return any other specific error from the Edge Function
+          if (errorMessage) {
+            return {
+              success: false,
+              error: errorMessage
+            };
+          }
         }
         
-        // True connection error - couldn't reach the function
+        // True connection error - couldn't reach the function or parse response
         return { 
           success: false, 
           error: 'Unable to connect to authentication service' 
