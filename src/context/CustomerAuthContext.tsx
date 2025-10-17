@@ -210,15 +210,51 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
           }
         }
 
+        // Suppress generic Functions message
+        if (extractedMessage?.toLowerCase().includes('edge function returned a non-2xx status code')) {
+          extractedMessage = undefined;
+        }
+
         const msg = (extractedMessage || '').toLowerCase();
 
         // Final debug with derived status/message
         try {
-          console.debug('[customerLogin] invoke parse (derived)', { status, msg: extractedMessage });
+          console.debug('[customerLogin] invoke parse (derived)', { status, msg: extractedMessage, suppressedGeneric: !extractedMessage });
+        } catch {}
+
+        // Client-side fallback counter
+        const ATTEMPTS_KEY = 'customerAuthLoginAttempts';
+        const LOCKOUT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+        
+        let attemptsData: { count: number; firstAttemptAt: number } | null = null;
+        try {
+          const stored = sessionStorage.getItem(ATTEMPTS_KEY);
+          if (stored) {
+            attemptsData = JSON.parse(stored);
+            // Reset if window expired
+            if (attemptsData && Date.now() - attemptsData.firstAttemptAt > LOCKOUT_WINDOW_MS) {
+              attemptsData = null;
+            }
+          }
+        } catch {}
+
+        // Increment counter
+        if (!attemptsData) {
+          attemptsData = { count: 1, firstAttemptAt: Date.now() };
+        } else {
+          attemptsData.count += 1;
+        }
+
+        try {
+          sessionStorage.setItem(ATTEMPTS_KEY, JSON.stringify(attemptsData));
         } catch {}
 
         // 3) Prefer status mapping even if message is missing
         if (status === 429 || msg.includes('too many') || msg.includes('rate limit') || msg.includes('locked')) {
+          // Clear counter on server 429
+          try {
+            sessionStorage.removeItem(ATTEMPTS_KEY);
+          } catch {}
           return {
             success: false,
             error: extractedMessage || 'Too many login attempts. Please try again in 15 minutes.',
@@ -229,6 +265,14 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
           return {
             success: false,
             error: 'Invalid email or password',
+          };
+        }
+
+        // Client-side fallback: if >= 5 attempts and no clear status/message
+        if (attemptsData.count >= 5 && !status && !extractedMessage) {
+          return {
+            success: false,
+            error: 'Too many login attempts. Please try again in 15 minutes.',
           };
         }
 
@@ -262,6 +306,11 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
           userId: user.userId,
           loginTime: Date.now(),
         }));
+        
+        // Clear login attempts on success
+        try {
+          sessionStorage.removeItem('customerAuthLoginAttempts');
+        } catch {}
         
         setIsCustomerAuthenticated(true);
         setCustomerUser(user);
