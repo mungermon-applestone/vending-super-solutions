@@ -47,11 +47,17 @@ interface ErrorResponse {
   message: string;
 }
 
-const API_SECRET = "TkJ5Mk94N9N37yt9N}";
+// Load API secret from environment variable for security
+const API_SECRET = Deno.env.get('CUSTOMER_AUTH_API_SECRET') ?? '';
 const API_ENDPOINTS = [
   "https://api.applestoneoem.com",
   "https://api.fastcorpadmin.com"
 ];
+
+// Validate that required secrets are present
+if (!API_SECRET) {
+  console.error('CRITICAL: CUSTOMER_AUTH_API_SECRET environment variable is not set');
+}
 
 const RATE_LIMIT_ATTEMPTS = 5;
 const RATE_LIMIT_WINDOW_MINUTES = 15;
