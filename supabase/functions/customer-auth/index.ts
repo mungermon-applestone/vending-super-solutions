@@ -54,11 +54,6 @@ const API_ENDPOINTS = [
   "https://api.fastcorpadmin.com"
 ];
 
-// Validate that required secrets are present
-if (!API_SECRET) {
-  console.error('CRITICAL: CUSTOMER_AUTH_API_SECRET environment variable is not set');
-}
-
 const RATE_LIMIT_ATTEMPTS = 5;
 const RATE_LIMIT_WINDOW_MINUTES = 15;
 const LOCKOUT_DURATION_MINUTES = 15;
@@ -298,13 +293,60 @@ serve(async (req) => {
     const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     const userAgent = req.headers.get('user-agent') || 'unknown';
 
-    // Validate input
+    // Validate input presence
     if (!email || !password) {
       await logAuthAttempt(email || 'unknown', ipAddress, userAgent, false, 'Missing credentials');
       return new Response(
         JSON.stringify({ 
           success: false, 
           error: 'Email and password are required' 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email) || email.length > 255) {
+      await logAuthAttempt(email, ipAddress, userAgent, false, 'Invalid email format');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid email format' 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Validate password length
+    if (password.length < 1 || password.length > 128) {
+      await logAuthAttempt(email, ipAddress, userAgent, false, 'Invalid password length');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid password length' 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Check for potentially malicious characters
+    const hasInvalidChars = /[<>{}\\;]/.test(email + password);
+    if (hasInvalidChars) {
+      await logAuthAttempt(email, ipAddress, userAgent, false, 'Invalid characters in credentials');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid characters in credentials' 
         }),
         { 
           status: 400, 

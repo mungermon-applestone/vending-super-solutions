@@ -49,6 +49,13 @@ This document outlines the security measures in place to protect customer creden
   - `https://www.applestonesolutions.com`
   - `*.lovable.app`, `*.lovable.dev`, `*.lovableproject.com`
 
+### Input Validation
+- **Email format validation**: RFC 5322 compliant regex pattern
+- **Length limits**: Email ≤ 255 characters, password ≤ 128 characters
+- **Character restrictions**: Blocks injection characters (`<`, `>`, `{`, `}`, `\`, `;`)
+- **Early rejection**: Validation happens before rate limiting (performance optimization)
+- **Protection against**: Log injection, DoS via oversized inputs, database bloat
+
 ## 🔐 Secret Management
 
 ### CRITICAL: API Secrets
@@ -56,20 +63,22 @@ This document outlines the security measures in place to protect customer creden
 
 All API secrets must be stored as Supabase secrets:
 
-1. **CUSTOMER_AUTH_API_SECRET**: Used by customer-auth edge function
+1. **CUSTOMER_AUTH_API_SECRET**: ✅ Currently configured
+   - Used by customer-auth edge function
    - Required for authentication with external APIs
-   - Must be set in Supabase Dashboard → Edge Functions → Secrets
+   - Properly loaded from Supabase Edge Function Secrets
+   - To rotate: Update in Supabase Dashboard → Edge Functions → Secrets, then redeploy
 
 2. **Other Required Secrets**:
-   - SUPABASE_URL
-   - SUPABASE_SERVICE_ROLE_KEY
-   - SUPABASE_ANON_KEY
+   - SUPABASE_URL ✅
+   - SUPABASE_SERVICE_ROLE_KEY ✅
+   - SUPABASE_ANON_KEY ✅
 
-### How to Add Secrets
+### How to Add/Update Secrets
 1. Go to Supabase Dashboard
 2. Navigate to Edge Functions → Secrets
-3. Add the secret name and value
-4. Redeploy edge functions
+3. Add or update the secret name and value
+4. Redeploy edge functions (automatic on next deployment)
 
 ## 🚨 Known Issues & Mitigations
 
@@ -95,21 +104,26 @@ When making changes to authentication code:
 - [ ] Never store passwords client-side
 - [ ] Use environment variables for secrets
 - [ ] Sanitize user inputs before rendering
-- [ ] Validate all inputs server-side
+- [ ] Validate all inputs server-side (format, length, characters)
+- [ ] Validate email format and length limits (≤ 255 chars)
+- [ ] Check for injection characters in all inputs
 - [ ] Check rate limiting is functioning
 - [ ] Verify CORS headers are correct
 - [ ] Ensure HTTPS is used for all requests
 - [ ] Test session timeout behavior
 - [ ] Review CSP after adding new external resources
+- [ ] Verify edge function logs are free of misleading errors
 
 ## 🔍 Security Audit Trail
 
-### Last Audit: 2025-10-17
+### Last Audit: 2025-10-17 (Updated)
 **Findings**:
-1. ✅ Fixed: Moved hardcoded API secret to environment variable
+1. ✅ Fixed: API secret properly configured in Supabase secrets
 2. ✅ Fixed: Added Content Security Policy header
-3. ⚠️ Accepted Risk: sessionStorage usage (mitigated by CSP)
-4. ⚠️ Future: Consider password strength requirements
+3. ✅ Fixed: Removed misleading boot-time secret check in edge function
+4. ✅ Fixed: Added comprehensive input validation to edge function
+5. ⚠️ Accepted Risk: sessionStorage usage (mitigated by CSP)
+6. ⚠️ Future: Consider password strength requirements
 
 ### Testing Performed
 - ✅ Rate limiting (5 attempts, 15-min lockout)
@@ -117,6 +131,8 @@ When making changes to authentication code:
 - ✅ Session timeouts (15 min inactivity, 2 hours absolute)
 - ✅ Email sanitization in logs
 - ✅ No passwords in console/network logs
+- ✅ Input validation (malformed emails, excessive length, special characters)
+- ✅ Edge function logs clear of false errors
 
 ## 📞 Reporting Security Issues
 
