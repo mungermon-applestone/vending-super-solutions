@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogOut, FileText, MessageSquare, ShieldCheck } from 'lucide-react';
@@ -9,8 +9,15 @@ interface CustomerLayoutProps {
 }
 
 const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
-  const { customerLogout } = useCustomerAuth();
+  const { customerLogout, customerUser } = useCustomerAuth();
   const navigate = useNavigate();
+
+  const adminConsoleUrl = useMemo(() => {
+    if (customerUser?.email?.toLowerCase().includes('fastcorp')) {
+      return 'https://console.fastcorpadmin.com/';
+    }
+    return 'https://console.applestoneoem.com/';
+  }, [customerUser?.email]);
 
   const handleLogout = () => {
     customerLogout();
@@ -47,7 +54,7 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
               </Button>
 
               <Button asChild variant="ghost">
-                <a href="https://console.applestoneoem.com/" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2">
+                <a href={adminConsoleUrl} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2">
                   <ShieldCheck className="h-4 w-4" />
                   <span>Admin Console Login</span>
                 </a>
