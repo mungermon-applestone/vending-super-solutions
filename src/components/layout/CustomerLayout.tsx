@@ -24,11 +24,10 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to="/knowledge-base" className="flex flex-col">
+            <Link to="/knowledge-base" className="flex items-center">
               <h1 className="text-xl font-bold text-vending-blue-dark">
-                Applestone Solutions
+                Applestone Solutions Customer Portal
               </h1>
-              <span className="text-xs text-gray-500">Customer Portal</span>
             </Link>
 
             {/* Customer Navigation */}
