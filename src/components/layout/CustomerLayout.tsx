@@ -13,7 +13,8 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
 
   const adminConsoleUrl = useMemo(() => {
-    if (customerUser?.email?.toLowerCase().includes('fastcorp')) {
+    const email = customerUser?.email?.toLowerCase() || '';
+    if (email.includes('fastcorp') || email.includes('vape') || email.includes('vapebox') || email.includes('chick-fil-a')) {
       return 'https://console.fastcorpadmin.com/';
     }
     return 'https://console.applestoneoem.com/';
