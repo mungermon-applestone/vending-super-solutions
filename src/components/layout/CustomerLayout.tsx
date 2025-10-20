@@ -25,7 +25,7 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/knowledge-base" className="flex items-center">
-              <h1 className="text-xl font-bold text-vending-blue-dark">
+              <h1 className="text-xl font-bold text-vending-blue-dark m-0">
                 Applestone Solutions Customer Portal
               </h1>
             </Link>
