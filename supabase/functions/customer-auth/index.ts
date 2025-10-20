@@ -219,6 +219,8 @@ async function authenticateUser(email: string, password: string): Promise<any> {
   };
 
   let lastError: Error | null = null;
+  let lastStatus: number | null = null;
+  let lastResponseBody: any = null;
 
   // Try each endpoint
   for (const baseUrl of API_ENDPOINTS) {
@@ -235,6 +237,11 @@ async function authenticateUser(email: string, password: string): Promise<any> {
       });
 
       const data = await response.json();
+      lastStatus = response.status;
+      lastResponseBody = data;
+
+      // Log the response for debugging
+      console.log(`Response from ${baseUrl}: status=${response.status}, body=${JSON.stringify(data).substring(0, 200)}`);
 
       // If we get a 403, it's an authentication error - don't try other endpoints
       if (response.status === 403) {
@@ -243,6 +250,30 @@ async function authenticateUser(email: string, password: string): Promise<any> {
           success: false,
           error: 'Invalid email or password'
         };
+      }
+
+      // Check for 400 errors that might indicate validation/format issues
+      if (response.status === 400) {
+        const errorMessage = data?.message || data?.error || JSON.stringify(data);
+        const lowerMessage = errorMessage.toLowerCase();
+        
+        // If the error suggests invalid format or validation issues, treat as credential error
+        if (lowerMessage.includes('invalid') || 
+            lowerMessage.includes('format') || 
+            lowerMessage.includes('character') ||
+            lowerMessage.includes('validation') ||
+            lowerMessage.includes('email')) {
+          console.log(`Backend validation error (400) for ${sanitizedEmail}: ${errorMessage}`);
+          return {
+            success: false,
+            error: 'Invalid email or password format'
+          };
+        }
+        
+        // Otherwise, try next endpoint
+        console.log(`Error 400 from ${baseUrl}: ${errorMessage}, trying next endpoint`);
+        lastError = new Error(`Bad request: ${errorMessage}`);
+        continue;
       }
 
       // If successful
@@ -260,19 +291,30 @@ async function authenticateUser(email: string, password: string): Promise<any> {
         };
       }
 
-      // For other errors (400, 500), try next endpoint
-      console.log(`Error ${response.status} from ${baseUrl}, trying next endpoint`);
-      lastError = new Error(`Server error: ${response.status}`);
+      // For other errors (500, etc.), try next endpoint
+      const errorMsg = data?.message || data?.error || `Server error: ${response.status}`;
+      console.log(`Error ${response.status} from ${baseUrl}: ${errorMsg}, trying next endpoint`);
+      lastError = new Error(errorMsg);
       
     } catch (error) {
       const sanitizedEmail = email.substring(0, 3) + '***@...';
-      console.error(`Network error for ${sanitizedEmail} with ${baseUrl}`);
+      console.error(`Network error for ${sanitizedEmail} with ${baseUrl}:`, error);
       lastError = error as Error;
       // Continue to next endpoint
     }
   }
 
   // If we've tried all endpoints and none worked
+  console.error(`All endpoints failed. Last status: ${lastStatus}, Last error: ${lastError?.message}`);
+  
+  // Provide more specific error messages based on what we learned
+  if (lastStatus === 400) {
+    return {
+      success: false,
+      error: 'Invalid email or password format'
+    };
+  }
+  
   return {
     success: false,
     error: 'Unable to connect to authentication service'
