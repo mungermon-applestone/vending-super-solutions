@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, FileText, MessageSquare } from 'lucide-react';
+import { LogOut, FileText, MessageSquare, ShieldCheck } from 'lucide-react';
 import { useCustomerAuth } from '@/context/CustomerAuthContext';
 
 interface CustomerLayoutProps {
@@ -46,7 +46,14 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
                 </Link>
               </Button>
 
-              <Button 
+              <Button asChild variant="ghost">
+                <Link to="/admin-login" className="flex items-center space-x-2">
+                  <ShieldCheck className="h-4 w-4" />
+                  <span>Admin Console Login</span>
+                </Link>
+              </Button>
+
+              <Button
                 variant="outline" 
                 onClick={handleLogout}
                 className="flex items-center space-x-2"
