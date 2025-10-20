@@ -84,7 +84,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
             >
               <Link to="/customer-login">
                 <LogIn className="h-4 w-4" />
-                Customer Login
+                Customer Center
               </Link>
             </Button>
           </div>
