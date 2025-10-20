@@ -47,10 +47,10 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
               </Button>
 
               <Button asChild variant="ghost">
-                <Link to="/admin-login" className="flex items-center space-x-2">
+                <a href="https://console.applestoneoem.com/" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2">
                   <ShieldCheck className="h-4 w-4" />
                   <span>Admin Console Login</span>
-                </Link>
+                </a>
               </Button>
 
               <Button
