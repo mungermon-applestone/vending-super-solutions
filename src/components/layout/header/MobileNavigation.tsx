@@ -60,11 +60,6 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
             onClick={onClose} 
           />
           <MobileNavItem 
-            title={translatedNav.isLoading ? translatedNav.loading : translatedNav.about} 
-            path="/about" 
-            onClick={onClose} 
-          />
-          <MobileNavItem 
             title={translatedNav.isLoading ? translatedNav.loading : translatedNav.contact} 
             path="/contact" 
             onClick={onClose} 

@@ -77,19 +77,6 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         </Link>
       </Button>
       <Button 
-        asChild 
-        className={getButtonStyles(isAboutActive || false)}
-        variant="ghost"
-      >
-        <Link to="/about">
-          <NavigationButtonWrapper originalText={navigationContent.about} context="navigation">
-            <TranslatableText context="navigation">
-              {navigationContent.about}
-            </TranslatableText>
-          </NavigationButtonWrapper>
-        </Link>
-      </Button>
-      <Button 
         asChild
         className={getButtonStyles(isBlogActive)}
         variant="ghost"
