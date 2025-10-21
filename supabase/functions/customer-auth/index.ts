@@ -381,18 +381,19 @@ serve(async (req) => {
       );
     }
 
-    // Check for potentially malicious characters
-    const hasInvalidChars = /[<>{}\\;]/.test(email + password);
-    if (hasInvalidChars) {
-      await logAuthAttempt(email, ipAddress, userAgent, false, 'Invalid characters in credentials');
+    // Check for potentially malicious characters in email only
+    // Passwords can contain special characters and are never logged, so they're safe
+    const hasInvalidEmailChars = /[<>{}\\;]/.test(email);
+    if (hasInvalidEmailChars) {
+      await logAuthAttempt(email, ipAddress, userAgent, false, 'Invalid characters in email');
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Invalid characters in credentials' 
+          error: 'Invalid email format' 
         }),
         { 
           status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
