@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import SEO from '@/components/seo/SEO';
 import CustomerLayout from '@/components/layout/CustomerLayout';
 import SupportRequestForm from '@/components/support/SupportRequestForm';
 
 const CustomerSupportTicket = () => {
+  const [submitted, setSubmitted] = useState(false);
+
   return (
     <CustomerLayout>
       <SEO 
@@ -19,9 +21,11 @@ const CustomerSupportTicket = () => {
               <h1 className="text-3xl font-bold text-vending-blue-dark mb-4">
                 Submit Support Ticket
               </h1>
-              <p className="text-lg text-gray-600">
-                Fill out this form to submit a support request.
-              </p>
+              {!submitted && (
+                <p className="text-lg text-gray-600">
+                  Fill out this form to submit a support request.
+                </p>
+              )}
             </div>
 
             {/* Support Request Form */}
@@ -32,6 +36,7 @@ const CustomerSupportTicket = () => {
                 pageUrl: window.location.href
               }}
               onSuccess={() => {
+                setSubmitted(true);
                 console.log('Support request submitted successfully');
               }}
             />
