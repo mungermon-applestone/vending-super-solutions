@@ -222,14 +222,14 @@ serve(async (req) => {
 
     const requestData_response = JSON.parse(responseText);
     const issueKey = requestData_response.issueKey;
-    const requestId = requestData_response.requestId;
+    const issueId = requestData_response.issueId;
     
-    console.log(`JSM request created successfully: ${issueKey} (ID: ${requestId})`);
+    console.log(`JSM request created successfully: ${issueKey} (ID: ${issueId})`);
 
     // Upload attachment if present
-    if (requestData.attachment && requestId) {
+    if (requestData.attachment && issueId) {
       try {
-        console.log(`Uploading attachment to request ${requestId}...`);
+        console.log(`Uploading attachment to issue ${issueKey} (${issueId})...`);
         
         // Convert base64 to binary
         const binaryData = Uint8Array.from(atob(requestData.attachment.base64Data), c => c.charCodeAt(0));
@@ -240,7 +240,7 @@ serve(async (req) => {
         formData.append('file', blob, requestData.attachment.fileName);
 
         const attachmentResponse = await fetch(
-          `https://${jiraDomain}/rest/servicedeskapi/request/${requestId}/attachment`,
+          `https://${jiraDomain}/rest/api/2/issue/${issueKey}/attachments`,
           {
             method: 'POST',
             headers: {
@@ -268,7 +268,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         message: 'Support request submitted successfully',
-        requestId: requestId,
+        issueId: issueId,
         issueKey: issueKey
       }),
       { 
