@@ -282,12 +282,16 @@ async function authenticateUser(email: string, password: string): Promise<any> {
         console.log(`Authentication successful for ${sanitizedEmail}`);
         const cognitoData = data as CognitoResponse;
         
+        // Determine admin domain based on which endpoint succeeded
+        const adminDomain = baseUrl.includes('fastcorpadmin') ? 'fastcorpadmin' : 'applestoneoem';
+        
         return {
           success: true,
           user: {
             email: cognitoData.body.idToken.payload.email,
             username: cognitoData.body.idToken.payload['cognito:username'],
-            userId: cognitoData.body.idToken.payload.sub
+            userId: cognitoData.body.idToken.payload.sub,
+            adminDomain
           }
         };
       }

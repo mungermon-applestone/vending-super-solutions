@@ -35,6 +35,7 @@ interface CustomerUser {
   email: string;
   username: string;
   userId: string;
+  adminDomain: string;
 }
 
 interface CustomerAuthContextType {
@@ -135,10 +136,10 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const sessionData = sessionStorage.getItem('customerAuth');
     if (sessionData) {
       try {
-        const { isAuthenticated, email, username, userId } = JSON.parse(sessionData);
+        const { isAuthenticated, email, username, userId, adminDomain } = JSON.parse(sessionData);
         if (isAuthenticated && email) {
           setIsCustomerAuthenticated(true);
-          setCustomerUser({ email, username, userId });
+          setCustomerUser({ email, username, userId, adminDomain: adminDomain || 'applestoneoem' });
         }
       } catch (error) {
         console.error('Error parsing session data:', error);
@@ -413,7 +414,8 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
         const user: CustomerUser = {
           email: data.user.email,
           username: data.user.username,
-          userId: data.user.userId
+          userId: data.user.userId,
+          adminDomain: data.user.adminDomain || 'applestoneoem'
         };
         
         // Store authenticated session with timestamp for timeout tracking
@@ -422,6 +424,7 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
           email: user.email,
           username: user.username,
           userId: user.userId,
+          adminDomain: user.adminDomain,
           loginTime: Date.now(), // Used for absolute timeout and inactivity tracking
         }));
         
