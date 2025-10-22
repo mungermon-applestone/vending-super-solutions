@@ -221,6 +221,7 @@ async function authenticateUser(email: string, password: string): Promise<any> {
   let lastError: Error | null = null;
   let lastStatus: number | null = null;
   let lastResponseBody: any = null;
+  let forbiddenCount = 0; // Track how many 403s we receive
 
   // Try each endpoint
   for (const baseUrl of API_ENDPOINTS) {
@@ -243,13 +244,13 @@ async function authenticateUser(email: string, password: string): Promise<any> {
       // Log the response for debugging
       console.log(`Response from ${baseUrl}: status=${response.status}, body=${JSON.stringify(data).substring(0, 200)}`);
 
-      // If we get a 403, it's an authentication error - don't try other endpoints
+      // If we get a 403, track it and continue to next endpoint
+      // The credentials might be valid for a different domain
       if (response.status === 403) {
-        console.log(`Authentication failed with 403 for ${sanitizedEmail}`);
-        return {
-          success: false,
-          error: 'Invalid email or password'
-        };
+        forbiddenCount++;
+        console.log(`Authentication failed with 403 for ${sanitizedEmail} at ${baseUrl}, trying next endpoint`);
+        lastError = new Error(data?.message || 'Invalid credentials for this domain');
+        continue;
       }
 
       // Check for 400 errors that might indicate validation/format issues
@@ -306,6 +307,14 @@ async function authenticateUser(email: string, password: string): Promise<any> {
 
   // If we've tried all endpoints and none worked
   console.error(`All endpoints failed. Last status: ${lastStatus}, Last error: ${lastError?.message}`);
+  
+  // If all endpoints returned 403, the credentials are truly invalid
+  if (forbiddenCount === API_ENDPOINTS.length) {
+    return {
+      success: false,
+      error: 'Invalid email or password'
+    };
+  }
   
   // Provide more specific error messages based on what we learned
   if (lastStatus === 400) {
