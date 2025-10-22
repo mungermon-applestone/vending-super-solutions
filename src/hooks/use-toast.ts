@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 5
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_REMOVE_DELAY = 5000
 
 type ToasterToast = ToastProps & {
   id: string
@@ -155,10 +155,25 @@ function toast(props: ToastOptions) {
       ...props,
       open: true,
       onOpenChange: (open) => {
-        if (!open) dismiss()
+        if (!open) {
+          dismiss()
+          // Schedule removal after animation completes
+          setTimeout(() => {
+            dispatch({ type: actionTypes.REMOVE_TOAST, toastId: id })
+          }, 300)
+        }
       },
     },
   })
+
+  // Auto-dismiss after duration
+  const duration = (props as any).duration ?? TOAST_REMOVE_DELAY
+  if (duration !== Infinity) {
+    const timeoutId = setTimeout(() => {
+      dismiss()
+    }, duration)
+    toastTimeouts.set(id, timeoutId)
+  }
 
   return {
     id,
