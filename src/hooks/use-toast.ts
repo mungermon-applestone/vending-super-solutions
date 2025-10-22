@@ -44,7 +44,7 @@ type ActionType = typeof actionTypes
 type Action =
   | {
       type: ActionType["ADD_TOAST"]
-      toast: ToastOptions
+      toast: ToasterToast
     }
   | {
       type: ActionType["UPDATE_TOAST"]
@@ -72,8 +72,8 @@ const reducer = (state: State, action: Action): State => {
         ...state,
         toasts: [
           ...state.toasts,
-          { ...action.toast, id: genId() },
-        ].slice(0, TOAST_LIMIT),
+          action.toast,
+        ].slice(-TOAST_LIMIT),
       }
 
     case actionTypes.UPDATE_TOAST:
@@ -153,6 +153,7 @@ function toast(props: ToastOptions) {
     type: actionTypes.ADD_TOAST,
     toast: {
       ...props,
+      id,
       open: true,
       onOpenChange: (open) => {
         if (!open) {
@@ -193,7 +194,7 @@ function useToast(): UseToastReturn {
         listeners.splice(index, 1)
       }
     }
-  }, [state])
+  }, [])
 
   return {
     ...state,
