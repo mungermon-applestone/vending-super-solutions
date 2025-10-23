@@ -127,7 +127,8 @@ serve(async (req) => {
       requestFieldValues: {
         summary: requestData.subject,
         description: buildDescription(requestData)
-      }
+      },
+      raiseOnBehalfOf: requestData.email
     };
 
     console.log('Creating JSM request with payload:', JSON.stringify(requestPayload, null, 2));
