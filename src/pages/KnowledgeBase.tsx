@@ -165,7 +165,7 @@ const KnowledgeBase: React.FC = () => {
                       </p>
                     </div>
                     
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                       {articles.map((article) => {
                         const slug = article.fields.articleTitle
                           .toLowerCase()
@@ -188,24 +188,11 @@ const KnowledgeBase: React.FC = () => {
                             </CardHeader>
                             
                             <CardContent className="pt-0">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  {article.fields.headingCategory && (
-                                    <Badge variant="outline" className="text-xs">
-                                      {article.fields.headingCategory}
-                                    </Badge>
-                                  )}
-                                </div>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={createContentfulEditHandler(article.sys.id)}
-                                  className="text-xs h-7"
-                                >
-                                  <Edit2 className="h-3 w-3 mr-1" />
-                                  Edit in Contentful
-                                </Button>
-                              </div>
+                              {article.fields.headingCategory && (
+                                <Badge variant="outline" className="text-xs">
+                                  {article.fields.headingCategory}
+                                </Badge>
+                              )}
                             </CardContent>
                           </Card>
                         );
