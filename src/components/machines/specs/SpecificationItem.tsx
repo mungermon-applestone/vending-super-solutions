@@ -29,8 +29,11 @@ const SpecificationItem: React.FC<SpecificationItemProps> = ({
 
 // Helper function to make a spec label more readable
 export const formatSpecLabel = (key: string): string => {
+  // First, handle camelCase by inserting space before uppercase letters
+  let formatted = key.replace(/([a-z])([A-Z])/g, '$1 $2');
+  
   // Replace underscores and hyphens with spaces
-  let formatted = key.replace(/[_-]/g, ' ');
+  formatted = formatted.replace(/[_-]/g, ' ');
   
   // Capitalize first letter of each word
   formatted = formatted.replace(/\w\S*/g, (txt) => {
