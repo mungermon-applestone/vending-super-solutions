@@ -6,6 +6,7 @@ const corsHeaders = {
 };
 
 interface SupportRequestData {
+  firstName: string;
   subject: string;
   description: string;
   email: string;
@@ -45,11 +46,11 @@ serve(async (req) => {
     console.log('Request data received:', JSON.stringify(requestData, null, 2));
 
     // Validate required fields
-    if (!requestData.subject?.trim() || !requestData.description?.trim()) {
+    if (!requestData.firstName?.trim() || !requestData.subject?.trim() || !requestData.description?.trim()) {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Subject and description are required' 
+          error: 'First name, subject, and description are required' 
         }),
         { 
           status: 400, 
@@ -90,7 +91,9 @@ serve(async (req) => {
     // Helper function to build plain text description for JSM
     const buildDescription = (data: SupportRequestData) => {
       let description = data.description + '\n\n';
-      description += `Contact Email: ${data.email || 'Not provided'}\n\n`;
+      description += 'Contact Information:\n';
+      description += `- Name: ${data.firstName}\n`;
+      description += `- Email: ${data.email || 'Not provided'}\n\n`;
       
       if (data.context) {
         description += 'Context Information:\n';

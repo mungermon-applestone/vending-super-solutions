@@ -56,6 +56,7 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
   onSuccess,
   className = ""
 }) => {
+  const [firstName, setFirstName] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
   const [email, setEmail] = useState('');
@@ -111,7 +112,7 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!subject.trim() || !description.trim() || !email.trim()) {
+    if (!firstName.trim() || !subject.trim() || !description.trim() || !email.trim()) {
       toast({
         title: "Required fields missing",
         description: "Please fill in all required fields",
@@ -131,6 +132,7 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
       });
 
       const formData = {
+        firstName: firstName.trim(),
         subject: subject.trim(),
         description: description.trim(),
         email: email.trim(),
@@ -212,6 +214,7 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
 
   const handleReset = () => {
     setSubmitted(false);
+    setFirstName('');
     setSubject('');
     setDescription('');
     setEmail('');
@@ -255,6 +258,18 @@ const SupportRequestForm: React.FC<SupportRequestFormProps> = ({
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="firstName">First Name *</Label>
+          <Input
+            id="firstName"
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="Your first name"
+            required
+          />
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="subject">Subject *</Label>
           <Input
