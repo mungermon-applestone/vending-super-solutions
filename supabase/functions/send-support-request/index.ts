@@ -123,6 +123,97 @@ serve(async (req) => {
     const authString = btoa(`${jiraEmail}:${jiraToken}`);
     const authHeader = `Basic ${authString}`;
 
+    // Helper function to search for existing customer
+    const findCustomerByEmail = async (email: string) => {
+      try {
+        const searchResponse = await fetch(
+          `https://${jiraDomain}/rest/api/3/user/search?query=${encodeURIComponent(email)}`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': authHeader,
+              'Accept': 'application/json'
+            }
+          }
+        );
+
+        if (searchResponse.ok) {
+          const users = await searchResponse.json();
+          // Find customer account (accountType: "customer")
+          return users.find((user: any) => 
+            user.emailAddress?.toLowerCase() === email.toLowerCase() &&
+            user.accountType === 'customer'
+          );
+        }
+        return null;
+      } catch (error) {
+        console.error('Error searching for customer:', error);
+        return null;
+      }
+    };
+
+    // Helper function to create customer with proper display name
+    const createCustomer = async (email: string, displayName: string) => {
+      try {
+        console.log(`Creating customer with displayName: "${displayName}" and email: ${email}`);
+        
+        const createResponse = await fetch(
+          `https://${jiraDomain}/rest/servicedeskapi/servicedesk/${jiraServiceDeskId}/customer`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': authHeader,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              email: email,
+              displayName: displayName,
+              fullName: displayName
+            })
+          }
+        );
+
+        if (createResponse.ok) {
+          const customer = await createResponse.json();
+          console.log(`Customer created successfully:`, customer);
+          return customer;
+        } else {
+          const errorText = await createResponse.text();
+          console.error(`Failed to create customer (${createResponse.status}):`, errorText);
+          return null;
+        }
+      } catch (error) {
+        console.error('Error creating customer:', error);
+        return null;
+      }
+    };
+
+    // Ensure customer exists with proper display name before creating ticket
+    if (requestData.email) {
+      console.log(`Checking if customer exists for email: ${requestData.email}`);
+      
+      const existingCustomer = await findCustomerByEmail(requestData.email);
+      
+      if (!existingCustomer) {
+        console.log('Customer not found, creating new customer account...');
+        const newCustomer = await createCustomer(requestData.email, requestData.firstName);
+        
+        if (newCustomer) {
+          console.log(`Customer created with displayName: ${requestData.firstName}`);
+        } else {
+          console.warn('Failed to create customer account, proceeding with raiseOnBehalfOf (customer will be auto-created by Jira)');
+        }
+      } else {
+        console.log(`Customer already exists with displayName: ${existingCustomer.displayName}`);
+        
+        // Optional: Log if display name doesn't match (we won't update it to avoid overwriting user preferences)
+        if (existingCustomer.displayName === requestData.email) {
+          console.log('Note: Existing customer display name is their email address. Consider updating it manually in Jira if needed.');
+        }
+      }
+    }
+
     // Build JSM request payload
     const requestPayload = {
       serviceDeskId: jiraServiceDeskId,
