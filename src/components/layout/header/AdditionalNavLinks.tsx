@@ -112,7 +112,8 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
         </div>
       )}
       
-      <Button 
+      {/* Temporarily hidden for public release - uncomment after publishing */}
+      {/* <Button 
         asChild
         variant="default"
         className="ml-2 bg-vending-blue hover:bg-vending-blue-dark text-white border-0 gap-2"
@@ -121,7 +122,7 @@ const AdditionalNavLinks = ({ isAboutActive }: AdditionalNavLinksProps) => {
           <LogIn className="h-4 w-4" />
           Customer Center
         </Link>
-      </Button>
+      </Button> */}
     </div>
   );
 };
