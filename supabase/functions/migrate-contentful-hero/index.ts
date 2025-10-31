@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/contentful-management@11.52.1';
+import contentfulManagement from 'https://esm.sh/contentful-management@11.52.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
     const TARGET_FIELD = 'heroDescription2';
 
     // Create Contentful Management client
-    const client = createClient({
+    const client = contentfulManagement.createClient({
       accessToken: MANAGEMENT_TOKEN
     });
 
