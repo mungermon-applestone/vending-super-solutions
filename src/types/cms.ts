@@ -88,6 +88,7 @@ export interface CMSBusinessGoal {
   title: string;
   slug: string;
   description: string;
+  heroDescription2?: any;  // RichText field for hero display
   image?: CMSImage;
   icon?: string;
   benefits?: string[];

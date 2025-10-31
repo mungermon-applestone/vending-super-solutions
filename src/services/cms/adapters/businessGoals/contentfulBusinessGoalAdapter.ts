@@ -164,6 +164,7 @@ export class ContentfulBusinessGoalAdapter implements BusinessGoalAdapter {
       title: fields.title || '',
       slug: fields.slug || '',
       description: fields.description || '',
+      heroDescription2: fields.heroDescription2 || null,
       image: fields.image ? {
         id: fields.image.sys?.id || 'image',
         url: fields.image.fields?.file?.url || '',

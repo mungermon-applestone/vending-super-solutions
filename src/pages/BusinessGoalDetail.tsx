@@ -83,6 +83,7 @@ const BusinessGoalDetail: React.FC<BusinessGoalDetailProps> = ({ businessGoal })
       <BusinessGoalHero 
         title={displayBusinessGoal.title}
         description={displayBusinessGoal.description}
+        heroDescription2={displayBusinessGoal.heroDescription2}
         icon={iconComponent}
         image={imageUrl}
       />

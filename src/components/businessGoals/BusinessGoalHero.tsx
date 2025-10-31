@@ -1,12 +1,13 @@
-
 import { ReactNode } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 
 interface BusinessGoalHeroProps {
   title: string;
-  description: string;
+  description?: string;
+  heroDescription2?: any;
   icon: ReactNode;
   image: string;
   primaryAction?: React.ReactNode;
@@ -15,7 +16,8 @@ interface BusinessGoalHeroProps {
 
 const BusinessGoalHero = ({ 
   title, 
-  description, 
+  description,
+  heroDescription2, 
   icon, 
   image,
   primaryAction,
@@ -38,6 +40,11 @@ const BusinessGoalHero = ({
     </Button>
   );
 
+  // Render RichText if available, fallback to plain description
+  const renderedDescription = heroDescription2 
+    ? documentToReactComponents(heroDescription2)
+    : description;
+
   return (
     <section className="py-16 md:py-24 bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light">
       <div className="container-wide">
@@ -51,9 +58,9 @@ const BusinessGoalHero = ({
                 {title}
               </h1>
             </div>
-            <p className="text-xl text-gray-700 mb-8 max-w-2xl">
-              {description}
-            </p>
+            <div className="text-xl text-gray-700 mb-8 max-w-2xl">
+              {renderedDescription}
+            </div>
             <div className="flex flex-wrap gap-4">
               {primaryAction || defaultPrimaryAction}
               {secondaryAction || defaultSecondaryAction}
