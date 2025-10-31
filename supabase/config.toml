@@ -1,5 +1,8 @@
 project_id = "rwvlvooojegpebognnzn"
 
+[functions.migrate-contentful-hero]
+verify_jwt = false
+
 [functions.send-contact-email-ses]
 verify_jwt = false
 

@@ -24,6 +24,7 @@ import KnowledgeBase from "./pages/KnowledgeBase";
 import KnowledgeBaseArticle from "./pages/KnowledgeBaseArticle";
 import KnowledgeBaseSinglePage from "./pages/KnowledgeBaseSinglePage";
 import AdminMissingImages from "./pages/AdminMissingImages";
+import AdminContentfulMigration from "./pages/AdminContentfulMigration";
 import CustomerLogin from "./pages/CustomerLogin";
 import CustomerSupportTicket from "./pages/CustomerSupportTicket";
 import CustomerProtectedRoute from "./components/auth/CustomerProtectedRoute";
@@ -127,6 +128,10 @@ export const router = createBrowserRouter([
       {
         path: "/admin/missing-images",
         element: <AdminMissingImages />,
+      },
+      {
+        path: "/admin/contentful-migration",
+        element: <AdminContentfulMigration />,
       },
       // Redirect all admin routes to Contentful
       {
