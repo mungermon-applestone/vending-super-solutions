@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
+import { getRichTextRenderOptions } from '@/utils/contentful/richTextRenderer';
 
 interface BusinessGoalHeroProps {
   title: string;
@@ -42,7 +43,10 @@ const BusinessGoalHero = ({
 
   // Render RichText if available, fallback to plain description
   const renderedDescription = heroDescription2 
-    ? documentToReactComponents(heroDescription2)
+    ? documentToReactComponents(heroDescription2, getRichTextRenderOptions({ 
+        includedAssets: [],
+        contentIncludes: undefined 
+      }))
     : description;
 
   return (
