@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
 
     // Configuration
     const CONTENT_TYPE_ID = 'businessGoal';
-    const SOURCE_FIELD = 'heroDescription';
+    const SOURCE_FIELD = 'description';
     const TARGET_FIELD = 'heroDescription2';
 
     // Create Contentful Management client
