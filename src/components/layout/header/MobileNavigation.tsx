@@ -75,8 +75,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
             </div>
           </div>
           
-          {/* Temporarily hidden for public release - uncomment after publishing */}
-          {/* <div className="border-t pt-4 mt-4">
+          <div className="border-t pt-4 mt-4">
             <Button 
               asChild
               variant="default"
@@ -88,7 +87,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ isOpen, onClose }) 
                 Customer Center
               </Link>
             </Button>
-          </div> */}
+          </div>
         </nav>
       </div>
     </div>
