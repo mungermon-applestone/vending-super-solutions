@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
     console.log(`📡 Connecting to Contentful space: ${SPACE_ID}, environment: ${ENVIRONMENT_ID}`);
 
     // Configuration
-    const CONTENT_TYPE_ID = 'businessGoalsPageContent';
+    const CONTENT_TYPE_ID = 'businessGoal';
     const SOURCE_FIELD = 'heroDescription';
     const TARGET_FIELD = 'heroDescription2';
 
