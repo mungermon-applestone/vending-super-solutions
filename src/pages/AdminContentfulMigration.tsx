@@ -1,5 +1,7 @@
 import React from 'react';
 import { ContentfulMigration } from '@/components/admin/ContentfulMigration';
+import { ContentfulExportButton } from '@/components/admin/ContentfulExportButton';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import SEO from '@/components/seo/SEO';
 
 const AdminContentfulMigration: React.FC = () => {
@@ -16,14 +18,28 @@ const AdminContentfulMigration: React.FC = () => {
           <div className="max-w-4xl mx-auto">
             <div className="mb-8">
               <h1 className="text-3xl font-bold tracking-tight">
-                Contentful Migration Tool
+                Contentful Admin Tools
               </h1>
               <p className="text-muted-foreground mt-2">
-                Migrate Business Goals hero description from plain text to RichText format.
+                Manage Contentful content migrations and exports.
               </p>
             </div>
             
-            <ContentfulMigration />
+            <div className="space-y-8">
+              <ContentfulMigration />
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Export Content</CardTitle>
+                  <CardDescription>
+                    Export all Contentful content to a structured XML file for backup or migration purposes.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ContentfulExportButton />
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>
