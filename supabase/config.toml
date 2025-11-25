@@ -20,3 +20,4 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.export-contentful-xml]
+verify_jwt = false
