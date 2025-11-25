@@ -35,44 +35,6 @@ Deno.serve(async (req) => {
   try {
     console.log('[export-contentful-xml] Starting export process');
 
-    // Authenticate user
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      console.error('[export-contentful-xml] Missing authorization header');
-      return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-
-    if (userError || !user) {
-      console.error('[export-contentful-xml] Invalid token:', userError);
-      return new Response(
-        JSON.stringify({ error: 'Invalid token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Check if user is admin
-    const { data: isAdmin, error: adminError } = await supabase.rpc('is_admin', { uid: user.id });
-
-    if (adminError || !isAdmin) {
-      console.error('[export-contentful-xml] User is not admin');
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized: Admin access required' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log('[export-contentful-xml] Admin authenticated successfully');
-
     // Get Contentful configuration
     const spaceId = Deno.env.get('VITE_CONTENTFUL_SPACE_ID');
     const deliveryToken = Deno.env.get('VITE_CONTENTFUL_DELIVERY_TOKEN');
