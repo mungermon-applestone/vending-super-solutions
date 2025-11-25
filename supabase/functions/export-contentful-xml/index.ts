@@ -37,10 +37,10 @@ Deno.serve(async (req) => {
 
     // Get Contentful configuration
     const spaceId = Deno.env.get('VITE_CONTENTFUL_SPACE_ID');
-    const deliveryToken = Deno.env.get('VITE_CONTENTFUL_DELIVERY_TOKEN');
+    const managementToken = Deno.env.get('CONTENTFUL_MANAGEMENT_TOKEN');
     const environmentId = Deno.env.get('VITE_CONTENTFUL_ENVIRONMENT_ID') || 'master';
 
-    if (!spaceId || !deliveryToken) {
+    if (!spaceId || !managementToken) {
       console.error('[export-contentful-xml] Missing Contentful configuration');
       return new Response(
         JSON.stringify({ error: 'Contentful configuration not found' }),
@@ -51,10 +51,10 @@ Deno.serve(async (req) => {
     console.log('[export-contentful-xml] Fetching content types from Contentful');
 
     // Fetch all content types
-    const contentTypesUrl = `https://cdn.contentful.com/spaces/${spaceId}/environments/${environmentId}/content_types`;
+    const contentTypesUrl = `https://api.contentful.com/spaces/${spaceId}/environments/${environmentId}/content_types`;
     const contentTypesResponse = await fetch(contentTypesUrl, {
       headers: {
-        'Authorization': `Bearer ${deliveryToken}`,
+        'Authorization': `Bearer ${managementToken}`,
       },
     });
 
@@ -68,10 +68,10 @@ Deno.serve(async (req) => {
     console.log(`[export-contentful-xml] Found ${contentTypes.length} content types`);
 
     // Fetch all entries for all content types
-    const entriesUrl = `https://cdn.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries?limit=1000`;
+    const entriesUrl = `https://api.contentful.com/spaces/${spaceId}/environments/${environmentId}/entries?limit=1000`;
     const entriesResponse = await fetch(entriesUrl, {
       headers: {
-        'Authorization': `Bearer ${deliveryToken}`,
+        'Authorization': `Bearer ${managementToken}`,
       },
     });
 
