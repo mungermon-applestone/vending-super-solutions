@@ -18,3 +18,5 @@ verify_jwt = false
 
 [functions.customer-auth]
 verify_jwt = false
+
+[functions.export-contentful-xml]
