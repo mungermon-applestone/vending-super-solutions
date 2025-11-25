@@ -12,20 +12,14 @@ export function ContentfulExportButton() {
       setIsExporting(true);
       console.log('[ContentfulExportButton] Starting export...');
 
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast.error('You must be logged in to export content');
+      console.log('[ContentfulExportButton] Calling edge function...');
+      const { data, error } = await supabase.functions.invoke('export-contentful-xml');
+
+      if (error) {
+        console.error('[ContentfulExportButton] Error:', error);
+        toast.error('Failed to export content: ' + error.message);
         return;
       }
-
-      console.log('[ContentfulExportButton] Calling edge function...');
-      
-      const { data, error } = await supabase.functions.invoke('export-contentful-xml', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
 
       if (error) {
         console.error('[ContentfulExportButton] Error:', error);
