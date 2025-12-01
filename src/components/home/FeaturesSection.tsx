@@ -3,10 +3,12 @@ import React from 'react';
 import { 
   ShoppingCart, 
   Award, 
-  Globe, 
-  BarChart3, 
-  Shield, 
-  Zap 
+  Cpu,
+  CreditCard,
+  Wifi,
+  UserCheck,
+  Package,
+  Truck
 } from 'lucide-react';
 import { useHomePageContent } from '@/hooks/useHomePageContent';
 import { useTranslatedFeatures, useTranslatedCMSContent } from '@/hooks/useTranslatedCMSContent';
@@ -50,16 +52,15 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, url
  * Features Section Component
  * 
  * IMPORTANT REGRESSION PREVENTION NOTES:
- * - This component MUST display exactly 6 feature cards in a specific 3x2 grid layout
- * - DO NOT reduce to fewer cards or change the layout without explicit instructions
- * - This design has been explicitly approved and confirmed by the client
+ * - This component displays 8 feature cards showcasing integration capabilities
  * - Each feature card maintains consistent styling and structure:
  *   - Icon with circular blue background at top
  *   - Heading below icon
  *   - Description text at bottom
  * 
  * Layout specifications:
- * - Uses grid layout with 3 columns on large screens (lg:grid-cols-3)
+ * - Uses grid layout with 4 columns on extra-large screens (xl:grid-cols-4)
+ * - 3 columns on large screens (lg:grid-cols-3)
  * - 2 columns on medium screens (md:grid-cols-2)
  * - Single column on mobile (grid-cols-1)
  * - Cards have consistent shadow and hover effects
@@ -78,14 +79,18 @@ const FeaturesSection = () => {
         return <ShoppingCart className="h-8 w-8 text-vending-blue" />;
       case 'Award':
         return <Award className="h-8 w-8 text-vending-blue" />;
-      case 'Globe':
-        return <Globe className="h-8 w-8 text-vending-blue" />;
-      case 'BarChart3':
-        return <BarChart3 className="h-8 w-8 text-vending-blue" />;
-      case 'Shield':
-        return <Shield className="h-8 w-8 text-vending-blue" />;
-      case 'Zap':
-        return <Zap className="h-8 w-8 text-vending-blue" />;
+      case 'Cpu':
+        return <Cpu className="h-8 w-8 text-vending-blue" />;
+      case 'CreditCard':
+        return <CreditCard className="h-8 w-8 text-vending-blue" />;
+      case 'Wifi':
+        return <Wifi className="h-8 w-8 text-vending-blue" />;
+      case 'UserCheck':
+        return <UserCheck className="h-8 w-8 text-vending-blue" />;
+      case 'Package':
+        return <Package className="h-8 w-8 text-vending-blue" />;
+      case 'Truck':
+        return <Truck className="h-8 w-8 text-vending-blue" />;
       default:
         return <ShoppingCart className="h-8 w-8 text-vending-blue" />;
     }
@@ -128,6 +133,18 @@ const FeaturesSection = () => {
       description: homeContent?.feature6Description || '',
       icon: getIconComponent(homeContent?.feature6Icon),
       url: homeContent?.feature6url
+    },
+    {
+      title: homeContent?.feature7Title || '',
+      description: homeContent?.feature7Description || '',
+      icon: getIconComponent(homeContent?.feature7Icon),
+      url: homeContent?.feature7url
+    },
+    {
+      title: homeContent?.feature8Title || '',
+      description: homeContent?.feature8Description || '',
+      icon: getIconComponent(homeContent?.feature8Icon),
+      url: homeContent?.feature8url
     }
   ];
 
@@ -147,7 +164,7 @@ const FeaturesSection = () => {
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             {translatedHomeContent?.featuresSectionTitle || (
-              <TranslatableText context="features-section">Versatile Software for Every Vending Need</TranslatableText>
+              <TranslatableText context="features-section">Versatile, Flexible, Integration-Ready</TranslatableText>
             )}
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
@@ -157,8 +174,7 @@ const FeaturesSection = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* IMPORTANT: Do not remove or modify these 6 cards without explicit client approval */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {featuresData.map((feature, index) => (
             <FeatureCard 
               key={index}

@@ -40,6 +40,14 @@ export interface HomePageContent {
   feature6Description?: string;
   feature6Icon?: string; // Note: This is Text in Contentful rather than Symbol
   feature6url?: string;
+  feature7Title?: string;
+  feature7Description?: string;
+  feature7Icon?: string;
+  feature7url?: string;
+  feature8Title?: string;
+  feature8Description?: string;
+  feature8Icon?: string;
+  feature8url?: string;
   
   // CTA fields were removed from Contentful
 }

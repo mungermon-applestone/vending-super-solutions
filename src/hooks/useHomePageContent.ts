@@ -15,44 +15,56 @@ const fallbackHomeContent: HomePageContent = {
   availableMachinesDescription: "Explore our range of cutting-edge vending machines compatible with our software solution.",
   
   // New features section fallbacks
-  featuresSectionTitle: "Versatile Software for Every Vending Need",
+  featuresSectionTitle: "Versatile, Flexible, Integration-Ready",
   featuresSectionDescription: "Our solution adapts to your business requirements, whether you're an operator, enterprise, or brand looking to expand your vending presence.",
   
   // Feature 1 fallback
-  feature1Title: "Multiple Product Types",
-  feature1Description: "From grocery and fresh food to vape products and collectibles, you can sell a diverse array of products.",
+  feature1Title: "Point-of-Sale",
+  feature1Description: "Push and pull product data",
   feature1Icon: "ShoppingCart",
-  feature1url: "/products",
+  feature1url: "",
   
   // Feature 2 fallback
-  feature2Title: "Business Goal Focused",
-  feature2Description: "Meet revenue-producing, creative objectives with custom solutions for BOPIS, loss prevention, marketing, and more.",
+  feature2Title: "Loyalty Programs",
+  feature2Description: "Reward customer engagement and retention",
   feature2Icon: "Award",
-  feature2url: "/business-goals",
+  feature2url: "",
   
   // Feature 3 fallback
-  feature3Title: "Hardware Flexibility",
-  feature3Description: "Compatible with various vending machines and lockers from leading global manufacturers.",
-  feature3Icon: "Globe",
-  feature3url: "/machines",
+  feature3Title: "Existing Hardware",
+  feature3Description: "Compatible with current equipment",
+  feature3Icon: "Cpu",
+  feature3url: "",
   
   // Feature 4 fallback
-  feature4Title: "Advanced Analytics",
-  feature4Description: "Tune up your operations with up-to-the-second reporting and analytics.",
-  feature4Icon: "BarChart3",
-  feature4url: "/technology",
+  feature4Title: "Payment Processors",
+  feature4Description: "All major hardware and processing providers",
+  feature4Icon: "CreditCard",
+  feature4url: "",
   
   // Feature 5 fallback
-  feature5Title: "Enterprise Security",
-  feature5Description: "We don't collect any retail customer PII and observe rigorous security protocols.",
-  feature5Icon: "Shield",
-  feature5url: "/technology",
+  feature5Title: "IoT",
+  feature5Description: "Connected device integration",
+  feature5Icon: "Wifi",
+  feature5url: "",
   
   // Feature 6 fallback
-  feature6Title: "Seamless Integration",
-  feature6Description: "Open standards allow our solution to connect to your existing systems.",
-  feature6Icon: "Zap",
-  feature6url: "/contact"
+  feature6Title: "Identity Verification",
+  feature6Description: "Hardware or software-based",
+  feature6Icon: "UserCheck",
+  feature6url: "",
+  
+  // Feature 7 fallback
+  feature7Title: "Warehouse Management",
+  feature7Description: "Inventory system integration",
+  feature7Icon: "Package",
+  feature7url: "",
+  
+  // Feature 8 fallback
+  feature8Title: "Logistics",
+  feature8Description: "Bar code tracking and last mile",
+  feature8Icon: "Truck",
+  feature8url: ""
 };
 
 export function useHomePageContent() {
@@ -136,7 +148,17 @@ export function useHomePageContent() {
             feature6Title: content.feature6Title || fallbackHomeContent.feature6Title,
             feature6Description: content.feature6Description || fallbackHomeContent.feature6Description,
             feature6Icon: content.feature6Icon || fallbackHomeContent.feature6Icon,
-            feature6url: content.feature6url || fallbackHomeContent.feature6url
+            feature6url: content.feature6url || fallbackHomeContent.feature6url,
+            
+            feature7Title: content.feature7Title || fallbackHomeContent.feature7Title,
+            feature7Description: content.feature7Description || fallbackHomeContent.feature7Description,
+            feature7Icon: content.feature7Icon || fallbackHomeContent.feature7Icon,
+            feature7url: content.feature7url || fallbackHomeContent.feature7url,
+            
+            feature8Title: content.feature8Title || fallbackHomeContent.feature8Title,
+            feature8Description: content.feature8Description || fallbackHomeContent.feature8Description,
+            feature8Icon: content.feature8Icon || fallbackHomeContent.feature8Icon,
+            feature8url: content.feature8url || fallbackHomeContent.feature8url
           };
           
           console.log('[useHomePageContent] Mapped content from Contentful:', mappedContent);
