@@ -4,8 +4,21 @@ import { Link } from "react-router-dom";
 import { Calendar } from "lucide-react";
 import { ContentfulBlogPost } from "@/hooks/useContentfulBlogPosts";
 import Image from "@/components/common/Image";
-import RichTextPreview from "./RichTextPreview";
 import TranslatableText from '@/components/translation/TranslatableText';
+
+const extractPlainText = (content: any): string => {
+  if (!content?.content) return '';
+  
+  const extractText = (node: any): string => {
+    if (node.nodeType === 'text') return node.value || '';
+    if (node.content && Array.isArray(node.content)) {
+      return node.content.map(extractText).join('');
+    }
+    return '';
+  };
+  
+  return content.content.map(extractText).join(' ').trim();
+};
 
 interface BlogHeroCardProps {
   post: ContentfulBlogPost;
@@ -46,18 +59,20 @@ const BlogHeroCard: React.FC<BlogHeroCardProps> = ({ post }) => {
           </Link>
         </h2>
         <div className="text-gray-600 text-base mb-6 flex-1 overflow-hidden">
-          {post.content && typeof post.content === 'object' ? (
-            <RichTextPreview content={post.content} maxParagraphs={3} />
-          ) : (
-            <p>
-              <TranslatableText context="blog-listing">
-                {post.excerpt ||
-                  (typeof post.content === "string"
-                    ? post.content.slice(0, 200) + "..."
-                    : "No excerpt available")}
-              </TranslatableText>
-            </p>
-          )}
+          <p>
+            <TranslatableText context="blog-listing">
+              {post.excerpt || (() => {
+                const plainText = typeof post.content === 'object' 
+                  ? extractPlainText(post.content)
+                  : typeof post.content === 'string' 
+                    ? post.content 
+                    : '';
+                return plainText.length > 500 
+                  ? plainText.slice(0, 500) + '...' 
+                  : plainText || 'No excerpt available';
+              })()}
+            </TranslatableText>
+          </p>
         </div>
         <Link
           to={`/blog/${post.slug}`}
