@@ -61,7 +61,7 @@ const BlogHeroCard: React.FC<BlogHeroCardProps> = ({ post }) => {
         <div className="text-gray-600 text-base mb-6 flex-1 overflow-hidden">
           <p>
             <TranslatableText context="blog-listing">
-              {post.excerpt || (() => {
+              {(() => {
                 const plainText = typeof post.content === 'object' 
                   ? extractPlainText(post.content)
                   : typeof post.content === 'string' 
@@ -69,7 +69,7 @@ const BlogHeroCard: React.FC<BlogHeroCardProps> = ({ post }) => {
                     : '';
                 return plainText.length > 500 
                   ? plainText.slice(0, 500) + '...' 
-                  : plainText || 'No excerpt available';
+                  : plainText || post.excerpt || 'No excerpt available';
               })()}
             </TranslatableText>
           </p>
