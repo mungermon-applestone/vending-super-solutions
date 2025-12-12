@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { 
   ShoppingCart, 
   Award, 
@@ -168,9 +169,11 @@ const FeaturesSection = () => {
             )}
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            {translatedHomeContent?.featuresSectionDescription || (
-              <TranslatableText context="features-section">Our solution adapts to your business requirements, whether you're an operator, enterprise, or brand looking to expand your vending presence.</TranslatableText>
-            )}
+            <TranslatableText context="features-section">Our software fits right in with your current stack. If you're an OEM or retail solution provider,</TranslatableText>{' '}
+            <Link to="/contact" className="text-primary hover:underline font-medium">
+              <TranslatableText context="features-section">partner with us</TranslatableText>
+            </Link>{' '}
+            <TranslatableText context="features-section">and instantly add smart markets to your product line.</TranslatableText>
           </p>
         </div>
         
