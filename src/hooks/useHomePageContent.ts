@@ -16,7 +16,7 @@ const fallbackHomeContent: HomePageContent = {
   
   // New features section fallbacks
   featuresSectionTitle: "Versatile, Flexible, Integration-Ready",
-  featuresSectionDescription: "Our solution adapts to your business requirements, whether you're an operator, enterprise, or brand looking to expand your vending presence.",
+  featuresSectionDescription: "Our software fits right in with your current stack. If you're an OEM or retail solution provider, partner with us and instantly add smart markets to your product line.",
   
   // Feature 1 fallback
   feature1Title: "Point-of-Sale",
