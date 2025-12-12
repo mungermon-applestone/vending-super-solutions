@@ -173,7 +173,7 @@ const FeaturesSection = () => {
             <Link to="/contact" className="text-primary hover:underline font-medium">
               <TranslatableText context="features-section">partner with us</TranslatableText>
             </Link>{' '}
-            <TranslatableText context="features-section">and instantly add smart markets to your product line.</TranslatableText>
+            <TranslatableText context="features-section">and instantly add self-service to your product line.</TranslatableText>
           </p>
         </div>
         
