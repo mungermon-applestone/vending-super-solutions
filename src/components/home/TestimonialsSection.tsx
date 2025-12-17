@@ -60,23 +60,43 @@ const TestimonialsSection = () => {
   
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('left');
+  const [isAnimating, setIsAnimating] = useState(false);
   
   // Auto-cycle through testimonials
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || isAnimating) return;
     
     const interval = setInterval(() => {
+      setSlideDirection('left');
+      setIsAnimating(true);
       setActiveIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
     }, 5000);
     
     return () => clearInterval(interval);
-  }, [testimonials.length, isPaused]);
+  }, [testimonials.length, isPaused, isAnimating]);
+  
+  // Handle animation completion
+  useEffect(() => {
+    if (isAnimating) {
+      const timer = setTimeout(() => {
+        setIsAnimating(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isAnimating, activeIndex]);
   
   const nextTestimonial = () => {
+    if (isAnimating) return;
+    setSlideDirection('left');
+    setIsAnimating(true);
     setActiveIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
   };
   
   const prevTestimonial = () => {
+    if (isAnimating) return;
+    setSlideDirection('right');
+    setIsAnimating(true);
     setActiveIndex((prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length);
   };
   
@@ -105,35 +125,45 @@ const TestimonialsSection = () => {
               "
             </div>
             
-            {/* Testimonial content area */}
-            <div className="relative">
-              {/* Star rating - maintain consistent styling */}
-              <div className="flex mb-6 justify-center">
-                {Array.from({ length: testimonials[activeIndex].stars }).map((_, i) => (
-                  <Star key={i} className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                ))}
-                {Array.from({ length: 5 - testimonials[activeIndex].stars }).map((_, i) => (
-                  <Star key={i} className="h-5 w-5 text-gray-300" />
-                ))}
-              </div>
-              
-              {/* Quote text with consistent styling */}
-              <blockquote className="text-xl md:text-2xl text-center font-medium text-gray-700 mb-8">
-                "{testimonials[activeIndex].quote}"
-              </blockquote>
-              
-              {/* Author information with consistent styling */}
-              <div className="text-center">
-                {testimonials[activeIndex].image && (
-                  <img 
-                    src={testimonials[activeIndex].image} 
-                    alt={testimonials[activeIndex].name} 
-                    className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
-                  />
-                )}
-                <div className="font-semibold text-lg">{testimonials[activeIndex].name}</div>
-                <div className="text-vending-gray-dark">
-                  {testimonials[activeIndex].title}, {testimonials[activeIndex].company}
+            {/* Testimonial content area with slide animation */}
+            <div className="relative overflow-hidden">
+              <div 
+                className={`transition-all duration-300 ease-in-out ${
+                  isAnimating 
+                    ? slideDirection === 'left' 
+                      ? '-translate-x-full opacity-0' 
+                      : 'translate-x-full opacity-0'
+                    : 'translate-x-0 opacity-100'
+                }`}
+              >
+                {/* Star rating - maintain consistent styling */}
+                <div className="flex mb-6 justify-center">
+                  {Array.from({ length: testimonials[activeIndex].stars }).map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                  ))}
+                  {Array.from({ length: 5 - testimonials[activeIndex].stars }).map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-gray-300" />
+                  ))}
+                </div>
+                
+                {/* Quote text with consistent styling */}
+                <blockquote className="text-xl md:text-2xl text-center font-medium text-gray-700 mb-8">
+                  "{testimonials[activeIndex].quote}"
+                </blockquote>
+                
+                {/* Author information with consistent styling */}
+                <div className="text-center">
+                  {testimonials[activeIndex].image && (
+                    <img 
+                      src={testimonials[activeIndex].image} 
+                      alt={testimonials[activeIndex].name} 
+                      className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
+                    />
+                  )}
+                  <div className="font-semibold text-lg">{testimonials[activeIndex].name}</div>
+                  <div className="text-vending-gray-dark">
+                    {testimonials[activeIndex].title}, {testimonials[activeIndex].company}
+                  </div>
                 </div>
               </div>
             </div>
