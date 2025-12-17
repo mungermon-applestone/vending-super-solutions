@@ -98,23 +98,43 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('left');
+  const [isAnimating, setIsAnimating] = useState(false);
   
   // Auto-cycle through testimonials
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || isAnimating) return;
     
     const interval = setInterval(() => {
+      setSlideDirection('left');
+      setIsAnimating(true);
       setActiveIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
     }, 5000);
     
     return () => clearInterval(interval);
-  }, [testimonials.length, isPaused]);
+  }, [testimonials.length, isPaused, isAnimating]);
+  
+  // Handle animation completion
+  useEffect(() => {
+    if (isAnimating) {
+      const timer = setTimeout(() => {
+        setIsAnimating(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isAnimating, activeIndex]);
   
   const nextTestimonial = () => {
+    if (isAnimating) return;
+    setSlideDirection('left');
+    setIsAnimating(true);
     setActiveIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
   };
   
   const prevTestimonial = () => {
+    if (isAnimating) return;
+    setSlideDirection('right');
+    setIsAnimating(true);
     setActiveIndex((prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length);
   };
 
@@ -155,10 +175,20 @@ const TestimonialsCarousel: React.FC<TestimonialsCarouselProps> = ({
               "
             </div>
             
-            {/* Testimonial content area */}
-            <div className="relative">
-              {/* Quote text with consistent styling */}
-              <TranslatedTestimonial testimonial={testimonials[activeIndex]} />
+            {/* Testimonial content area with slide animation */}
+            <div className="relative overflow-hidden">
+              <div 
+                className={`transition-all duration-300 ease-in-out ${
+                  isAnimating 
+                    ? slideDirection === 'left' 
+                      ? '-translate-x-full opacity-0' 
+                      : 'translate-x-full opacity-0'
+                    : 'translate-x-0 opacity-100'
+                }`}
+              >
+                {/* Quote text with consistent styling */}
+                <TranslatedTestimonial testimonial={testimonials[activeIndex]} />
+              </div>
             </div>
             
             {/* Navigation arrows - position and styling must be maintained */}
