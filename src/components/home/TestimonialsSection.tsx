@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 
 interface Testimonial {
@@ -59,6 +59,18 @@ const TestimonialsSection = () => {
   ];
   
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  
+  // Auto-cycle through testimonials
+  useEffect(() => {
+    if (isPaused) return;
+    
+    const interval = setInterval(() => {
+      setActiveIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [testimonials.length, isPaused]);
   
   const nextTestimonial = () => {
     setActiveIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
@@ -83,7 +95,11 @@ const TestimonialsSection = () => {
         
         {/* Testimonial card with consistent styling */}
         <div className="max-w-4xl mx-auto">
-          <div className="relative bg-white rounded-xl p-8 md:p-12 shadow-lg">
+          <div 
+            className="relative bg-white rounded-xl p-8 md:p-12 shadow-lg"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
             {/* Quote mark decoration - position must be maintained */}
             <div className="absolute top-6 left-6 text-6xl text-vending-blue-light leading-none font-serif opacity-40">
               "
