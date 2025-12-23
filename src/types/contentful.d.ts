@@ -134,6 +134,12 @@ export interface PrivacyPolicyFields {
   aboutUsNavigation?: string;
 }
 
+export interface PromotionalContentFields {
+  promotionalStrip?: string;
+  promotionalStripStartDate?: string;
+  promotionalStripEndDate?: string;
+}
+
 export interface ContentfulFAQItem {
   sys: {
     id: string;
