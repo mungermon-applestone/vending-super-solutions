@@ -12,14 +12,14 @@ const PromotionalStrip: React.FC = () => {
   return (
     <div className="bg-gradient-to-r from-primary via-primary/95 to-primary text-primary-foreground relative overflow-hidden">
       {/* Desktop: Static centered text */}
-      <div className="hidden md:block container mx-auto px-4 py-2">
-        <p className="text-center text-sm font-medium tracking-wide">
+      <div className="hidden md:flex items-center justify-center container mx-auto px-4 py-2.5">
+        <p className="text-center text-base font-medium tracking-wide">
           {data.text}
         </p>
       </div>
       
       {/* Mobile: Marquee scrolling animation */}
-      <div className="md:hidden py-2 overflow-hidden">
+      <div className="md:hidden py-2.5 overflow-hidden flex items-center">
         <div className="animate-marquee whitespace-nowrap">
           <span className="text-sm font-medium tracking-wide mx-8">
             {data.text}
