@@ -7,10 +7,11 @@ import { useTechnologies, useTechnology } from './useTechnologies';
 import { useTestimonials } from './useTestimonials';
 import { useTestimonialSection } from './useTestimonialSection';
 import { useHeroSlides } from './useHeroSlides';
-import { useHomePageContent } from '@/hooks/useHomePageContent'; // Import the hook
+import { useHomePageContent } from '@/hooks/useHomePageContent';
 import { useHelpDeskArticles, useHelpDeskArticlesByCategory, useHelpDeskArticleBySlug } from '@/hooks/useHelpDeskArticles';
 import { useTranslatedNavigationContent } from './useTranslatedNavigationContent';
 import { useTranslatedCMSContent, useTranslatedHeroSlide, useTranslatedFeatures } from '@/hooks/useTranslatedCMSContent';
+import { usePromotionalStrip } from './usePromotionalStrip';
 
 export {
   useProductTypes, 
@@ -24,12 +25,13 @@ export {
   useTestimonials,
   useTestimonialSection,
   useHeroSlides,
-  useHomePageContent, // Export the hook
+  useHomePageContent,
   useHelpDeskArticles,
   useHelpDeskArticlesByCategory,
   useHelpDeskArticleBySlug,
   useTranslatedNavigationContent,
   useTranslatedCMSContent,
   useTranslatedHeroSlide,
-  useTranslatedFeatures
+  useTranslatedFeatures,
+  usePromotionalStrip
 };
