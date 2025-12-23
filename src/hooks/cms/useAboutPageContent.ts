@@ -4,19 +4,18 @@ import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 
 export interface AboutPageContent {
   navigationLinkText: string;
-  // Add other about page fields as needed
 }
 
 export function useAboutPageContent() {
   return useQuery({
-    queryKey: ['contentful', 'about'],
+    queryKey: ['contentful', 'about-from-privacy'],
     queryFn: async () => {
       try {
-        console.log('[useAboutPageContent] Fetching about page content');
+        console.log('[useAboutPageContent] Fetching about content from privacyPolicy');
         const client = await getContentfulClient();
         
         const entries = await client.getEntries({
-          content_type: 'about',
+          content_type: 'privacyPolicy',
           limit: 1
         });
 
@@ -29,7 +28,7 @@ export function useAboutPageContent() {
 
         const fields = entries.items[0].fields as any;
         return {
-          navigationLinkText: fields.navigationLinkText || 'About',
+          navigationLinkText: fields.aboutUsNavigation || 'About',
         };
       } catch (error) {
         console.error('[useAboutPageContent] Error:', error);

@@ -127,6 +127,13 @@ export interface AboutPageFields {
   bodyContent?: Document | ContentfulRichTextDocument;
 }
 
+export interface PrivacyPolicyFields {
+  privacyMainText?: Document | ContentfulRichTextDocument;
+  termsOfUse?: Document | ContentfulRichTextDocument;
+  aboutUsMainText?: Document | ContentfulRichTextDocument;
+  aboutUsNavigation?: string;
+}
+
 export interface ContentfulFAQItem {
   sys: {
     id: string;
