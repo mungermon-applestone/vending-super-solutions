@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import ContentfulErrorBoundary from '@/components/common/ContentfulErrorBoundary';
 import useContentful from '@/hooks/useContentful';
-import { ContentfulResponse, AboutPageFields } from '@/types/contentful';
+import { ContentfulResponse, PrivacyPolicyFields } from '@/types/contentful';
 import { renderRichText } from '@/utils/contentful/richTextRenderer';
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Link } from 'react-router-dom';
@@ -14,14 +14,19 @@ import SEO from '@/components/seo/SEO';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
 
 const About = () => {
-  const { data, isLoading, error, isContentReady, refetch } = useContentful<ContentfulResponse<AboutPageFields>>({
-    queryKey: ['about', '3Dn6DWVQR0VzhcQL6gdU0H'],
+  const { data, isLoading, error, isContentReady, refetch } = useContentful<ContentfulResponse<PrivacyPolicyFields>>({
+    queryKey: ['about-page-content'],
     queryFn: async () => {
       const client = await getContentfulClient();
-      const response = await client.getEntry('3Dn6DWVQR0VzhcQL6gdU0H', {
+      const entries = await client.getEntries({
+        content_type: 'privacyPolicy',
         include: 10,
+        limit: 1
       });
-      return response as unknown as ContentfulResponse<AboutPageFields>;
+      if (!entries.items.length) {
+        throw new Error('No privacy policy entry found');
+      }
+      return entries.items[0] as unknown as ContentfulResponse<PrivacyPolicyFields>;
     }
   });
 
@@ -79,15 +84,15 @@ const About = () => {
         ) : (
           <ContentfulErrorBoundary contentType="About page">
             <div className="prose max-w-none">
-              {isContentReady && data?.fields && 'bodyContent' in data.fields && data.fields.bodyContent ? (
+              {isContentReady && data?.fields && 'aboutUsMainText' in data.fields && data.fields.aboutUsMainText ? (
                 <>
-                  {renderRichText(data.fields.bodyContent as Document, {
+                  {renderRichText(data.fields.aboutUsMainText as Document, {
                     includedAssets,
                     contentIncludes: data.includes
                   })}
                 </>
               ) : (
-                <p className="text-gray-500">
+                <p className="text-muted-foreground">
                   No content available. Please check the Contentful entry for the About page.
                 </p>
               )}
