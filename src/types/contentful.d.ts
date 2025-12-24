@@ -139,6 +139,12 @@ export interface PromotionalContentFields {
   promotionalStripWithLink?: Document;
   promotionalStripStartDate?: string;
   promotionalStripEndDate?: string;
+  popoverTitle?: string;
+  popoverBody?: Document;
+  popoverImage?: ContentfulAsset;
+  popoverStartDate?: string;
+  popoverEndDate?: string;
+  popoverTarget?: 'Home Page' | 'Product Landing Page' | 'Machines Landing Page' | 'Business Goals Landing Page' | 'Technology Landing Page';
 }
 
 export interface ContentfulFAQItem {

@@ -6,6 +6,7 @@ import Footer from './Footer';
 import ScrollToTop from '../common/ScrollToTop';
 import TranslationDisclaimer from '@/components/language/TranslationDisclaimer';
 import PromotionalStrip from './PromotionalStrip';
+import PromotionalPopover from './PromotionalPopover';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -34,6 +35,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="flex flex-col min-h-screen">
       <ScrollToTop />
       <PromotionalStrip />
+      <PromotionalPopover />
       <Header />
       <TranslationDisclaimer />
       <main className="flex-grow">
