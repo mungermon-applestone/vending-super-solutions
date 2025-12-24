@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { X } from 'lucide-react';
 import { usePromotionalPopover } from '@/hooks/cms/usePromotionalPopover';
 import { documentToReactComponents, Options } from '@contentful/rich-text-react-renderer';
@@ -57,6 +58,7 @@ const getRichTextOptions = (): Options => ({
 const PromotionalPopover: React.FC = () => {
   const { data, isLoading } = usePromotionalPopover();
   const location = useLocation();
+  const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [secondsRemaining, setSecondsRemaining] = useState(AUTO_CLOSE_SECONDS);
 
@@ -64,13 +66,14 @@ const PromotionalPopover: React.FC = () => {
   const shouldShow = useCallback(() => {
     if (!data || !data.isActive) return false;
     if (location.pathname !== data.targetRoute) return false;
+    if (isMobile) return false; // Don't show on mobile devices
     
     // Check if already dismissed this session
     const dismissed = sessionStorage.getItem(STORAGE_KEY);
     if (dismissed === 'true') return false;
     
     return true;
-  }, [data, location.pathname]);
+  }, [data, location.pathname, isMobile]);
 
   // Open popover when conditions are met
   useEffect(() => {
