@@ -113,11 +113,12 @@ const PromotionalPopover: React.FC = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleDismiss()}>
-      <DialogContent className="sm:max-w-[560px] p-0 gap-0 overflow-hidden">
+      <DialogContent className="sm:max-w-[560px] p-0 gap-0 overflow-hidden data-[state=open]:duration-300 data-[state=closed]:duration-200">
         {/* Large prominent close button */}
         <button
           onClick={handleDismiss}
-          className="absolute right-4 top-4 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-muted hover:bg-muted/80 transition-colors"
+          className="absolute right-4 top-4 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-muted hover:bg-muted/80 transition-colors animate-fade-in"
+          style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}
           aria-label="Close promotional popover"
         >
           <X className="h-5 w-5" />
@@ -125,7 +126,7 @@ const PromotionalPopover: React.FC = () => {
 
         {/* Featured image */}
         {data.imageUrl && (
-          <div className="w-full max-h-[280px] overflow-hidden bg-muted/30">
+          <div className="w-full max-h-[280px] overflow-hidden bg-muted/30 animate-fade-in">
             <img
               src={data.imageUrl}
               alt={data.title}
@@ -137,13 +138,19 @@ const PromotionalPopover: React.FC = () => {
         {/* Content */}
         <div className="p-6 pt-5">
           <DialogHeader className="mb-5">
-            <DialogTitle className="text-xl font-bold pr-10">
+            <DialogTitle 
+              className="text-xl font-bold pr-10 animate-fade-in"
+              style={{ animationDelay: '100ms', animationFillMode: 'backwards' }}
+            >
               {data.title}
             </DialogTitle>
           </DialogHeader>
 
           {/* Rich text body */}
-          <div className="text-muted-foreground text-sm leading-relaxed">
+          <div 
+            className="text-muted-foreground text-sm leading-relaxed animate-fade-in"
+            style={{ animationDelay: '150ms', animationFillMode: 'backwards' }}
+          >
             {documentToReactComponents(data.body, getRichTextOptions())}
           </div>
         </div>
@@ -151,7 +158,10 @@ const PromotionalPopover: React.FC = () => {
         {/* Countdown progress bar */}
         <div className="px-6 pb-6">
           <div className="flex items-center gap-3">
-            <Progress value={progressValue} className="h-2 flex-1" />
+            <Progress 
+              value={progressValue} 
+              className="h-2 flex-1 [&>div]:transition-all [&>div]:duration-1000 [&>div]:ease-linear" 
+            />
             <span className="text-xs text-muted-foreground whitespace-nowrap">
               {secondsRemaining}s
             </span>
