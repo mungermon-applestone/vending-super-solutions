@@ -2,9 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 import { isWithinInterval, parseISO, startOfDay, endOfDay } from 'date-fns';
 import { PromotionalContentFields } from '@/types/contentful';
+import { Document } from '@contentful/rich-text-types';
 
 export interface PromotionalStripData {
-  text: string;
+  richText: Document;
   isActive: boolean;
 }
 
@@ -42,12 +43,12 @@ export function usePromotionalStrip() {
         }
 
         const fields = entries.items[0].fields as PromotionalContentFields;
-        const text = fields.promotionalStrip;
+        const richText = fields.promotionalStripWithLink as Document;
         const startDate = fields.promotionalStripStartDate;
         const endDate = fields.promotionalStripEndDate;
 
-        if (!text) {
-          console.log('[usePromotionalStrip] No promotional strip text');
+        if (!richText) {
+          console.log('[usePromotionalStrip] No promotional strip rich text');
           return null;
         }
 
@@ -55,7 +56,7 @@ export function usePromotionalStrip() {
         console.log('[usePromotionalStrip] Promo active:', isActive, { startDate, endDate });
 
         return {
-          text,
+          richText,
           isActive
         };
       } catch (error) {

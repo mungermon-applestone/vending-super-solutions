@@ -136,6 +136,7 @@ export interface PrivacyPolicyFields {
 
 export interface PromotionalContentFields {
   promotionalStrip?: string;
+  promotionalStripWithLink?: Document;
   promotionalStripStartDate?: string;
   promotionalStripEndDate?: string;
 }
