@@ -1,3 +1,4 @@
+import { isTrackingAllowed } from './privacy';
 
 /**
  * Google Analytics 4 integration utility
@@ -10,6 +11,7 @@
  * - Maintain consistent console logging patterns for debugging
  * - Always check for gtag existence before calling methods
  * - Preserve the error handling in each method
+ * - Always check isTrackingAllowed() to respect Do Not Track preferences
  * 
  * Form Tracking Events:
  * - form_view: When a form becomes visible
@@ -35,6 +37,10 @@ declare global {
  * @param title - The page title
  */
 export const trackPageView = (path: string, title?: string): void => {
+  if (!isTrackingAllowed()) {
+    return;
+  }
+
   if (!window.gtag) {
     console.warn('[Analytics] Google Analytics not initialized');
     return;
@@ -60,6 +66,10 @@ export const trackPageView = (path: string, title?: string): void => {
  * @param params - Additional parameters to include
  */
 export const trackEvent = (eventName: string, params?: Record<string, any>): void => {
+  if (!isTrackingAllowed()) {
+    return;
+  }
+
   if (!window.gtag) {
     console.warn('[Analytics] Google Analytics not initialized');
     return;
@@ -135,6 +145,10 @@ export const trackFormError = (formType: string, errorMessage: string, formLocat
  * @param properties - User properties to set
  */
 export const setUserProperties = (properties: Record<string, any>): void => {
+  if (!isTrackingAllowed()) {
+    return;
+  }
+
   if (!window.gtag) {
     console.warn('[Analytics] Google Analytics not initialized');
     return;
