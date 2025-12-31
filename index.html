@@ -15,13 +15,29 @@
     <link rel="manifest" href="/manifest.json" />
     <title>Applestone Solutions</title>
     
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9CQNGZV49F"></script>
+    <!-- Google tag (gtag.js) - Only load if Do Not Track is not enabled -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-9CQNGZV49F');
+      (function() {
+        // Check for Do Not Track preference
+        var dnt = navigator.doNotTrack === '1' || navigator.doNotTrack === 'yes' || window.doNotTrack === '1';
+        
+        if (!dnt) {
+          // Load Google Analytics
+          var script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-9CQNGZV49F';
+          document.head.appendChild(script);
+          
+          // Initialize dataLayer and gtag
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', 'G-9CQNGZV49F');
+        } else {
+          console.log('[Privacy] Do Not Track enabled - Google Analytics not loaded');
+        }
+      })();
     </script>
     
     <!-- Preload critical fonts to prevent layout shift -->
