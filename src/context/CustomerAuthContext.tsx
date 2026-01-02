@@ -131,22 +131,80 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return () => clearInterval(interval);
   }, [lastActivity, isCustomerAuthenticated]);
 
-  // Check for existing session on mount
-  useEffect(() => {
+  // Validate session token with server
+  const validateSession = async (): Promise<boolean> => {
     const sessionData = sessionStorage.getItem('customerAuth');
-    if (sessionData) {
-      try {
-        const { isAuthenticated, email, username, userId, adminDomain } = JSON.parse(sessionData);
-        if (isAuthenticated && email) {
-          setIsCustomerAuthenticated(true);
-          setCustomerUser({ email, username, userId, adminDomain: adminDomain || 'applestoneoem' });
-        }
-      } catch (error) {
-        console.error('Error parsing session data:', error);
+    if (!sessionData) return false;
+    
+    try {
+      const parsed = JSON.parse(sessionData);
+      const { sessionToken } = parsed;
+      
+      if (!sessionToken) {
+        // No token = legacy session, invalidate it
         sessionStorage.removeItem('customerAuth');
+        return false;
       }
+      
+      const response = await fetch(
+        `https://rwvlvooojegpebognnzn.supabase.co/functions/v1/customer-auth/validate`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionToken}`,
+          },
+        }
+      );
+      
+      const result = await response.json();
+      
+      if (result.valid && result.user) {
+        return true;
+      } else {
+        // Invalid token, clear session
+        sessionStorage.removeItem('customerAuth');
+        return false;
+      }
+    } catch (error) {
+      console.error('Session validation error:', error);
+      // On network error, allow offline access but mark for revalidation
+      return true;
     }
-    setIsLoading(false);
+  };
+
+  // Check for existing session on mount with server-side validation
+  useEffect(() => {
+    const checkSession = async () => {
+      const sessionData = sessionStorage.getItem('customerAuth');
+      if (sessionData) {
+        try {
+          const { isAuthenticated, email, username, userId, adminDomain, sessionToken } = JSON.parse(sessionData);
+          
+          if (isAuthenticated && email && sessionToken) {
+            // Validate token with server
+            const isValid = await validateSession();
+            
+            if (isValid) {
+              setIsCustomerAuthenticated(true);
+              setCustomerUser({ email, username, userId, adminDomain: adminDomain || 'applestoneoem' });
+            } else {
+              // Token invalid, clear state
+              sessionStorage.removeItem('customerAuth');
+            }
+          } else if (isAuthenticated && email && !sessionToken) {
+            // Legacy session without token - invalidate
+            sessionStorage.removeItem('customerAuth');
+          }
+        } catch (error) {
+          console.error('Error parsing session data:', error);
+          sessionStorage.removeItem('customerAuth');
+        }
+      }
+      setIsLoading(false);
+    };
+    
+    checkSession();
   }, []);
 
   /**
@@ -418,7 +476,7 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
           adminDomain: data.user.adminDomain || 'applestoneoem'
         };
         
-        // Store authenticated session with timestamp for timeout tracking
+        // Store authenticated session with JWT token for server-side validation
         sessionStorage.setItem('customerAuth', JSON.stringify({
           isAuthenticated: true,
           email: user.email,
@@ -426,6 +484,7 @@ export const CustomerAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
           userId: user.userId,
           adminDomain: user.adminDomain,
           loginTime: Date.now(), // Used for absolute timeout and inactivity tracking
+          sessionToken: data.sessionToken, // JWT for server-side validation
         }));
         
         /**
