@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { create, verify } from "https://deno.land/x/djwt@v3.0.2/mod.ts";
 
 const allowedOrigins = [
   'https://applestonesolutions.com',
@@ -57,6 +58,78 @@ const API_ENDPOINTS = [
 const RATE_LIMIT_ATTEMPTS = 5;
 const RATE_LIMIT_WINDOW_MINUTES = 15;
 const LOCKOUT_DURATION_MINUTES = 15;
+const SESSION_EXPIRY_HOURS = 2;
+
+// JWT secret for session tokens
+const JWT_SECRET = Deno.env.get('JWT_SECRET') ?? '';
+
+// Create crypto key for JWT signing
+async function getJwtKey(): Promise<CryptoKey> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(JWT_SECRET);
+  return await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"]
+  );
+}
+
+// Generate a session token
+async function generateSessionToken(user: {
+  email: string;
+  username: string;
+  userId: string;
+  adminDomain: string;
+}): Promise<string> {
+  const key = await getJwtKey();
+  const now = Math.floor(Date.now() / 1000);
+  const exp = now + (SESSION_EXPIRY_HOURS * 60 * 60);
+  
+  const payload = {
+    sub: user.userId,
+    email: user.email,
+    username: user.username,
+    adminDomain: user.adminDomain,
+    iat: now,
+    exp: exp,
+  };
+  
+  return await create({ alg: "HS256", typ: "JWT" }, payload, key);
+}
+
+// Validate a session token
+async function validateSessionToken(token: string): Promise<{ valid: boolean; user?: any; error?: string }> {
+  if (!JWT_SECRET) {
+    console.error('JWT_SECRET not configured');
+    return { valid: false, error: 'Server configuration error' };
+  }
+  
+  try {
+    const key = await getJwtKey();
+    const payload = await verify(token, key);
+    
+    // Check expiration
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp && (payload.exp as number) < now) {
+      return { valid: false, error: 'Session expired' };
+    }
+    
+    return {
+      valid: true,
+      user: {
+        userId: payload.sub,
+        email: payload.email,
+        username: payload.username,
+        adminDomain: payload.adminDomain,
+      }
+    };
+  } catch (error) {
+    console.error('Token validation error:', error);
+    return { valid: false, error: 'Invalid session token' };
+  }
+}
 
 // Initialize Supabase client for database operations
 const supabaseAdmin = createClient(
@@ -285,14 +358,20 @@ async function authenticateUser(email: string, password: string): Promise<any> {
         // Determine admin domain based on which endpoint succeeded
         const adminDomain = baseUrl.includes('fastcorpadmin') ? 'fastcorpadmin' : 'applestoneoem';
         
+        const user = {
+          email: cognitoData.body.idToken.payload.email,
+          username: cognitoData.body.idToken.payload['cognito:username'],
+          userId: cognitoData.body.idToken.payload.sub,
+          adminDomain
+        };
+        
+        // Generate session token
+        const sessionToken = await generateSessionToken(user);
+        
         return {
           success: true,
-          user: {
-            email: cognitoData.body.idToken.payload.email,
-            username: cognitoData.body.idToken.payload['cognito:username'],
-            userId: cognitoData.body.idToken.payload.sub,
-            adminDomain
-          }
+          user,
+          sessionToken
         };
       }
 
@@ -341,6 +420,39 @@ serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  const url = new URL(req.url);
+  const path = url.pathname.split('/').pop();
+
+  // Handle session validation endpoint
+  if (path === 'validate') {
+    try {
+      const authHeader = req.headers.get('authorization');
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return new Response(
+          JSON.stringify({ valid: false, error: 'No session token provided' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      const token = authHeader.substring(7);
+      const result = await validateSessionToken(token);
+      
+      return new Response(
+        JSON.stringify(result),
+        { 
+          status: result.valid ? 200 : 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    } catch (error) {
+      console.error('Error validating session:', error);
+      return new Response(
+        JSON.stringify({ valid: false, error: 'Validation failed' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
   }
 
   try {
