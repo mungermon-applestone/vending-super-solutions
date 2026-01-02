@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { BlogPost } from '@/types/blog';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -34,7 +34,13 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({
       </header>
       
       <div className="prose max-w-none prose-slate">
-        <div dangerouslySetInnerHTML={{ __html: post.content }} />
+        <div dangerouslySetInnerHTML={{ 
+          __html: DOMPurify.sanitize(post.content, {
+            ALLOWED_TAGS: ['p', 'b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code', 'pre', 'blockquote', 'img', 'br', 'hr', 'span', 'div', 'table', 'thead', 'tbody', 'tr', 'th', 'td'],
+            ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'title', 'class'],
+            ALLOW_DATA_ATTR: false
+          })
+        }} />
       </div>
       
       <footer className="mt-12 pt-8 border-t border-gray-200">
