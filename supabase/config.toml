@@ -12,3 +12,6 @@ verify_jwt = false
 
 [functions.customer-auth]
 verify_jwt = false
+
+[functions.validate-preview]
+verify_jwt = false

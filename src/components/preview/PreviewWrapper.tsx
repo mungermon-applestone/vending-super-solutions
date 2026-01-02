@@ -18,10 +18,26 @@ export function PreviewWrapper({ children }: PreviewWrapperProps) {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    const valid = token ? validatePreviewToken(token) : false;
-    setIsValidToken(valid);
-    setIsChecking(false);
+    const checkToken = async () => {
+      const token = searchParams.get('token');
+      if (!token) {
+        setIsValidToken(false);
+        setIsChecking(false);
+        return;
+      }
+
+      try {
+        const valid = await validatePreviewToken(token);
+        setIsValidToken(valid);
+      } catch (error) {
+        console.error('Token validation error:', error);
+        setIsValidToken(false);
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkToken();
   }, [searchParams]);
 
   if (isChecking) {
