@@ -20,6 +20,8 @@ export interface HeroSlide {
   backgroundClass?: string;
   slideTransitionEffect?: string;
   slideDuration?: number;
+  featureItems?: string[];
+  badgeText?: string;
 }
 
 export function useHeroSlides(sliderId: string = 'home-slider') {
@@ -82,7 +84,9 @@ export function useHeroSlides(sliderId: string = 'home-slider') {
             secondaryButtonUrl: entry.fields.secondaryButtonUrl as string,
             backgroundClass: entry.fields.backgroundClass as string,
             slideTransitionEffect: entry.fields.transitionEffect as string,
-            slideDuration: entry.fields.slideDuration as number || 5
+            slideDuration: entry.fields.slideDuration as number || 5,
+            featureItems: entry.fields.featureItems as string[] || undefined,
+            badgeText: entry.fields.badgeText as string || undefined
           } as HeroSlide;
         });
         
