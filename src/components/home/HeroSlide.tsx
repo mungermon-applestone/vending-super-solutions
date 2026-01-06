@@ -12,6 +12,15 @@ interface HeroSlideProps {
   slide: HeroSlideType;
 }
 
+const DEFAULT_FEATURES = [
+  "Hardware Agnostic",
+  "Real-time Inventory",
+  "Multiple Payment Options",
+  "Advanced Analytics"
+];
+
+const DEFAULT_BADGE_TEXT = "Works with multiple machine models";
+
 const HeroSlide: React.FC<HeroSlideProps> = ({ slide }) => {
   const { translatedContent: translatedSlide } = useTranslatedHeroSlide(slide);
   
@@ -23,8 +32,13 @@ const HeroSlide: React.FC<HeroSlideProps> = ({ slide }) => {
     primaryButtonUrl,
     secondaryButtonText,
     secondaryButtonUrl,
-    backgroundClass = "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light"
+    backgroundClass = "bg-gradient-to-br from-vending-blue-light via-white to-vending-teal-light",
+    featureItems,
+    badgeText
   } = translatedSlide || slide;
+
+  const features = featureItems?.length ? featureItems : DEFAULT_FEATURES;
+  const badge = badgeText ?? DEFAULT_BADGE_TEXT;
 
   return (
     <div className={backgroundClass}>
@@ -57,30 +71,14 @@ const HeroSlide: React.FC<HeroSlideProps> = ({ slide }) => {
             </div>
             {/* Feature grid - 2x2 on desktop, stacked on mobile */}
             <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="text-vending-teal h-5 w-5" />
-                <span className="text-gray-700">
-                  <TranslatableText context="hero-features">Hardware Agnostic</TranslatableText>
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="text-vending-teal h-5 w-5" />
-                <span className="text-gray-700">
-                  <TranslatableText context="hero-features">Real-time Inventory</TranslatableText>
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="text-vending-teal h-5 w-5" />
-                <span className="text-gray-700">
-                  <TranslatableText context="hero-features">Multiple Payment Options</TranslatableText>
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="text-vending-teal h-5 w-5" />
-                <span className="text-gray-700">
-                  <TranslatableText context="hero-features">Advanced Analytics</TranslatableText>
-                </span>
-              </div>
+              {features.map((feature, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <CheckCircle className="text-vending-teal h-5 w-5" />
+                  <span className="text-gray-700">
+                    <TranslatableText context="hero-features">{feature}</TranslatableText>
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
           
@@ -99,11 +97,13 @@ const HeroSlide: React.FC<HeroSlideProps> = ({ slide }) => {
               </div>
             </div>
             {/* Badge overlay - Desktop only */}
-            <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
-              <p className="font-bold">
-                <TranslatableText context="hero-badge">Works with multiple machine models</TranslatableText>
-              </p>
-            </div>
+            {badge && (
+              <div className="absolute -bottom-6 -right-6 bg-vending-teal text-white p-4 rounded-lg shadow-lg hidden md:block">
+                <p className="font-bold">
+                  <TranslatableText context="hero-badge">{badge}</TranslatableText>
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
