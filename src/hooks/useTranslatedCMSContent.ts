@@ -137,9 +137,87 @@ export function useTranslatedCMSContent<T extends Record<string, any>>(
 
 /**
  * Specialized hook for translating hero slide content
+ * Handles featureItems array and badgeText with proper translation contexts
  */
 export function useTranslatedHeroSlide(slide: any) {
-  return useTranslatedCMSContent(slide, 'hero-slide');
+  const { currentLanguage } = useLanguage();
+  
+  // Extract texts to translate: featureItems + badgeText + other text fields
+  const textsToTranslate = useMemo(() => {
+    if (!slide || currentLanguage === 'en') return [];
+    
+    const texts: string[] = [];
+    
+    // Add feature items
+    if (slide.featureItems?.length) {
+      texts.push(...slide.featureItems.filter((item: string) => item?.trim()));
+    }
+    
+    // Add badge text
+    if (slide.badgeText?.trim()) {
+      texts.push(slide.badgeText);
+    }
+    
+    // Add title and subtitle
+    if (slide.title?.trim()) texts.push(slide.title);
+    if (slide.subtitle?.trim()) texts.push(slide.subtitle);
+    if (slide.primaryButtonText?.trim()) texts.push(slide.primaryButtonText);
+    if (slide.secondaryButtonText?.trim()) texts.push(slide.secondaryButtonText);
+    
+    return texts;
+  }, [slide, currentLanguage]);
+
+  const { translations, isLoading, error } = useBatchTranslation(textsToTranslate, {
+    context: 'hero-slide',
+    enabled: textsToTranslate.length > 0
+  });
+
+  // Reconstruct the slide with translations
+  const translatedContent = useMemo(() => {
+    if (!slide) return null;
+    if (currentLanguage === 'en') return slide;
+    if (!translations || translations.length === 0) return slide;
+
+    let index = 0;
+    const translated = { ...slide };
+
+    // Translate feature items
+    if (slide.featureItems?.length) {
+      translated.featureItems = slide.featureItems.map((item: string) => {
+        if (item?.trim()) {
+          return translations[index++] || item;
+        }
+        return item;
+      });
+    }
+
+    // Translate badge text
+    if (slide.badgeText?.trim()) {
+      translated.badgeText = translations[index++] || slide.badgeText;
+    }
+
+    // Translate other fields
+    if (slide.title?.trim()) {
+      translated.title = translations[index++] || slide.title;
+    }
+    if (slide.subtitle?.trim()) {
+      translated.subtitle = translations[index++] || slide.subtitle;
+    }
+    if (slide.primaryButtonText?.trim()) {
+      translated.primaryButtonText = translations[index++] || slide.primaryButtonText;
+    }
+    if (slide.secondaryButtonText?.trim()) {
+      translated.secondaryButtonText = translations[index++] || slide.secondaryButtonText;
+    }
+
+    return translated;
+  }, [slide, translations, currentLanguage]);
+
+  return {
+    translatedContent,
+    isLoading,
+    error
+  };
 }
 
 /**
