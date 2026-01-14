@@ -6,6 +6,7 @@ import ProductsPage from "./pages/ProductsPage";
 import BusinessGoalsPage from "./pages/BusinessGoalsPage";
 import BusinessGoalDetailPage from "./pages/BusinessGoalDetailPage";
 import MachinesPage from "./pages/MachinesPage";
+import MachinesPresentationPage from "./pages/MachinesPresentationPage";
 import TechnologyPage from "./pages/TechnologyPage";
 import TechnologyDetailPage from "./pages/TechnologyDetailPage";
 import MachineDetail from "./pages/MachineDetail";
@@ -133,6 +134,11 @@ export const router = createBrowserRouter([
         element: <Navigate to="https://app.contentful.com" replace />,
       },
     ],
+  },
+  // Machines presentation view (no layout - clean for screenshots)
+  {
+    path: "/machines/presentation",
+    element: <MachinesPresentationPage />,
   },
   // Customer portal routes (separate from main layout)
   {
