@@ -32,7 +32,7 @@ const BlogHeroCard: React.FC<BlogHeroCardProps> = ({ post }) => {
 
   return (
     <div className="relative bg-white rounded-2xl shadow-lg md:flex mb-10 overflow-hidden min-h-[420px]">
-      <div className="md:flex-shrink-0 w-full md:w-5/12 h-64 md:h-full min-h-[280px] relative bg-muted flex items-center justify-center overflow-hidden">
+      <div className="md:flex-shrink-0 w-full md:w-5/12 h-64 md:h-auto md:max-h-[320px] relative bg-muted flex items-center justify-center overflow-hidden">
         <Image
           src={imageUrl}
           alt={post.featuredImage?.title || post.title}
