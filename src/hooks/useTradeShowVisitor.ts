@@ -17,7 +17,7 @@ const TRADE_SHOW_CONFIGS: Record<string, TradeShowConfig> = {
   },
   annualmeatconference: {
     param: 'annualmeatconference',
-    message: "Welcome, Annual Meat Conference Attendees! Great to meet you at the show!",
+    message: "Hello, Annual Meat Conference visitors! Glad you stopped by our booth!",
   },
 };
 
