@@ -15,9 +15,9 @@ const TRADE_SHOW_CONFIGS: Record<string, TradeShowConfig> = {
     param: 'tradeshow',
     message: "Welcome, Trade Show Visitors! Glad you stopped by our booth!",
   },
-  nama2025: {
-    param: 'nama2025',
-    message: "Welcome, NAMA 2025 Attendees! Great to meet you at the show!",
+  annualmeatconference: {
+    param: 'annualmeatconference',
+    message: "Welcome, Annual Meat Conference Attendees! Great to meet you at the show!",
   },
 };
 
