@@ -18,9 +18,10 @@ interface UseScreenCaptureOptions {
 
 const POLL_INTERVAL_MS = 250;       // 4fps
 const SAMPLE_SIZE = 5000;
-const STABLE_THRESHOLD = 0.005;     // 0.5% — frames considered "same"
-const STABLE_COUNT_NEEDED = 3;      // ~750ms of stability
-const SETTLE_TIMEOUT_MS = 5000;     // force capture after 5s of settling
+const PIXEL_CHANGE_THRESHOLD = 0.08; // per-pixel: 8% RGB diff = "changed"
+const STABLE_THRESHOLD = 0.003;      // 0.3% changed-pixel ratio = "same"
+const STABLE_COUNT_NEEDED = 3;       // ~750ms of stability
+const SETTLE_TIMEOUT_MS = 5000;      // force capture after 5s of settling
 
 export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
   const { changeThreshold = 0.05 } = options;
