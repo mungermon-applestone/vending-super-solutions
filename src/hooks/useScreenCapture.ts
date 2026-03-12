@@ -214,6 +214,17 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     setSteps((prev) => prev.map((s) => (s.id === id ? { ...s, description } : s)));
   }, []);
 
+  const updateStepImage = useCallback((id: string, blob: Blob) => {
+    const url = URL.createObjectURL(blob);
+    setSteps((prev) =>
+      prev.map((s) => {
+        if (s.id !== id) return s;
+        URL.revokeObjectURL(s.thumbnailUrl);
+        return { ...s, blob, thumbnailUrl: url };
+      })
+    );
+  }, []);
+
   const clearSteps = useCallback(() => {
     steps.forEach((s) => URL.revokeObjectURL(s.thumbnailUrl));
     setSteps([]);
