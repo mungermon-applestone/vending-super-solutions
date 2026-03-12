@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useScreenCapture } from '@/hooks/useScreenCapture';
-import CaptureControls from '@/components/doc-builder/CaptureControls';
+import CaptureControls, { type CaptureMode } from '@/components/doc-builder/CaptureControls';
 import CapturePreview from '@/components/doc-builder/CapturePreview';
 import ScreenshotTimeline from '@/components/doc-builder/ScreenshotTimeline';
 import PublishForm from '@/components/doc-builder/PublishForm';
