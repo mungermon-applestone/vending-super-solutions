@@ -1,18 +1,21 @@
 
 import { CapturedStep } from '@/hooks/useScreenCapture';
 import { Button } from '@/components/ui/button';
-import { X, GripVertical, ArrowUp, ArrowDown } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { X, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface ScreenshotTimelineProps {
   steps: CapturedStep[];
   onRemove: (id: string) => void;
   onReorder: (steps: CapturedStep[]) => void;
+  onUpdateDescription: (id: string, description: string) => void;
 }
 
 export default function ScreenshotTimeline({
   steps,
   onRemove,
   onReorder,
+  onUpdateDescription,
 }: ScreenshotTimelineProps) {
   if (steps.length === 0) {
     return (
@@ -35,16 +38,16 @@ export default function ScreenshotTimeline({
       <h3 className="text-sm font-medium text-foreground">
         Captured Steps ({steps.length})
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="space-y-6">
         {steps.map((step, index) => (
           <div
             key={step.id}
             className="relative group rounded-lg border border-border bg-card overflow-hidden"
           >
-            <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
+            <div className="absolute top-2 left-2 z-10 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
               Step {index + 1}
             </div>
-            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <Button
                 size="icon"
                 variant="secondary"
@@ -75,8 +78,16 @@ export default function ScreenshotTimeline({
             <img
               src={step.thumbnailUrl}
               alt={`Step ${index + 1}`}
-              className="w-full aspect-video object-cover object-top"
+              className="w-full object-contain"
             />
+            <div className="p-3 border-t border-border">
+              <Textarea
+                placeholder={`Step ${index + 1}: Describe what the user should do here…`}
+                value={step.description}
+                onChange={(e) => onUpdateDescription(step.id, e.target.value)}
+                className="min-h-[60px] resize-y text-sm"
+              />
+            </div>
           </div>
         ))}
       </div>

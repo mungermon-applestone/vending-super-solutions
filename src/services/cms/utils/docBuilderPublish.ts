@@ -114,11 +114,10 @@ async function createContentfulAsset(
 /**
  * Build the Rich Text document with embedded asset blocks and placeholder paragraphs
  */
-function buildRichTextDocument(assetIds: string[]): object {
+function buildRichTextDocument(assetIds: string[], descriptions: string[]): object {
   const content: any[] = [];
 
   assetIds.forEach((assetId, index) => {
-    // Embedded asset block
     content.push({
       nodeType: 'embedded-asset-block',
       data: {
@@ -133,15 +132,17 @@ function buildRichTextDocument(assetIds: string[]): object {
       content: [],
     });
 
-    // Placeholder paragraph
+    const text = descriptions[index]?.trim() || `Step ${index + 1}: Describe what the user should do here.`;
+    const marks = descriptions[index]?.trim() ? [] : [{ type: 'italic' }];
+
     content.push({
       nodeType: 'paragraph',
       data: {},
       content: [
         {
           nodeType: 'text',
-          value: `Step ${index + 1}: Describe what the user should do here.`,
-          marks: [{ type: 'italic' }],
+          value: text,
+          marks,
           data: {},
         },
       ],
@@ -195,7 +196,8 @@ export async function publishDocToContentful(options: PublishOptions): Promise<{
 
     // 3. Build rich text and create entry
     console.log('[docBuilderPublish] Creating helpDeskArticle entry…');
-    const richText = buildRichTextDocument(assetIds);
+    const descriptions = sortedSteps.map((s) => s.description || '');
+    const richText = buildRichTextDocument(assetIds, descriptions);
 
     const baseUrl = `https://api.contentful.com/spaces/${config.SPACE_ID}/environments/${config.ENVIRONMENT_ID}`;
     const headers = {

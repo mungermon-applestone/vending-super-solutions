@@ -6,6 +6,7 @@ export interface CapturedStep {
   thumbnailUrl: string;
   timestamp: number;
   order: number;
+  description: string;
 }
 
 interface UseScreenCaptureOptions {
@@ -102,6 +103,7 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
         thumbnailUrl: url,
         timestamp: Date.now(),
         order,
+        description: '',
       };
       setSteps((prev) => [...prev, step]);
       setCaptureCount((c) => c + 1);
@@ -171,6 +173,10 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     setSteps(newSteps.map((s, i) => ({ ...s, order: i })));
   }, []);
 
+  const updateStepDescription = useCallback((id: string, description: string) => {
+    setSteps((prev) => prev.map((s) => (s.id === id ? { ...s, description } : s)));
+  }, []);
+
   const clearSteps = useCallback(() => {
     steps.forEach((s) => URL.revokeObjectURL(s.thumbnailUrl));
     setSteps([]);
@@ -194,6 +200,7 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     stopCapture,
     removeStep,
     reorderSteps,
+    updateStepDescription,
     clearSteps,
     videoRef,
   };
