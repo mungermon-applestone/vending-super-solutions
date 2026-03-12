@@ -105,6 +105,18 @@ export default function ScreenshotTimeline({
           </div>
         ))}
       </div>
+
+      {croppingStep && (
+        <ImageCropper
+          open={!!croppingStepId}
+          imageUrl={croppingStep.thumbnailUrl}
+          onClose={() => setCroppingStepId(null)}
+          onCrop={(blob) => {
+            onUpdateImage(croppingStepId!, blob);
+            setCroppingStepId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -248,6 +248,7 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     removeStep,
     reorderSteps,
     updateStepDescription,
+    updateStepImage,
     clearSteps,
     videoRef,
   };
