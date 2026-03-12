@@ -9,18 +9,21 @@ export interface CapturedStep {
   description: string;
 }
 
+type CapturePhase = 'watching' | 'settling';
+
 interface UseScreenCaptureOptions {
-  sensitivity?: number; // 0-1, lower = more sensitive. Default 0.15
-  debounceMs?: number;  // Minimum ms between captures. Default 2000
-  sampleSize?: number;  // Number of pixels to sample. Default 1000
+  /** Change threshold (0-1). Lower = more sensitive. Default 0.05 */
+  changeThreshold?: number;
 }
 
+const POLL_INTERVAL_MS = 250;       // 4fps
+const SAMPLE_SIZE = 5000;
+const STABLE_THRESHOLD = 0.005;     // 0.5% — frames considered "same"
+const STABLE_COUNT_NEEDED = 3;      // ~750ms of stability
+const SETTLE_TIMEOUT_MS = 5000;     // force capture after 5s of settling
+
 export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
-  const {
-    sensitivity = 0.15,
-    debounceMs = 2000,
-    sampleSize = 1000,
-  } = options;
+  const { changeThreshold = 0.05 } = options;
 
   const [isCapturing, setIsCapturing] = useState(false);
   const [steps, setSteps] = useState<CapturedStep[]>([]);
@@ -29,22 +32,26 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
   const streamRef = useRef<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const prevFrameRef = useRef<ImageData | null>(null);
   const intervalRef = useRef<number | null>(null);
-  const lastCaptureTimeRef = useRef<number>(0);
-  const sensitivityRef = useRef(sensitivity);
   const orderCounterRef = useRef(0);
 
-  // Keep sensitivity ref in sync
+  // State machine refs
+  const phaseRef = useRef<CapturePhase>('watching');
+  const lastCapturedFrameRef = useRef<ImageData | null>(null);
+  const prevFrameRef = useRef<ImageData | null>(null);
+  const stableCountRef = useRef(0);
+  const settleStartRef = useRef(0);
+  const changeThresholdRef = useRef(changeThreshold);
+
   useEffect(() => {
-    sensitivityRef.current = sensitivity;
-  }, [sensitivity]);
+    changeThresholdRef.current = changeThreshold;
+  }, [changeThreshold]);
 
   const compareFrames = useCallback((current: ImageData, previous: ImageData): number => {
     const { data: curr } = current;
     const { data: prev } = previous;
     const totalPixels = current.width * current.height;
-    const step = Math.max(1, Math.floor(totalPixels / sampleSize));
+    const step = Math.max(1, Math.floor(totalPixels / SAMPLE_SIZE));
 
     let totalDiff = 0;
     let samplesChecked = 0;
@@ -59,7 +66,25 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     }
 
     return samplesChecked > 0 ? totalDiff / samplesChecked : 0;
-  }, [sampleSize]);
+  }, []);
+
+  const saveCapture = useCallback((canvas: HTMLCanvasElement) => {
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const order = orderCounterRef.current++;
+      const newStep: CapturedStep = {
+        id: `step-${Date.now()}-${order}`,
+        blob,
+        thumbnailUrl: url,
+        timestamp: Date.now(),
+        order,
+        description: '',
+      };
+      setSteps((prev) => [...prev, newStep]);
+      setCaptureCount((c) => c + 1);
+    }, 'image/png');
+  }, []);
 
   const captureFrame = useCallback(() => {
     const video = videoRef.current;
@@ -75,40 +100,48 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
 
     const currentFrame = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    if (!prevFrameRef.current) {
-      // First frame — always capture
+    // First frame — always capture
+    if (!lastCapturedFrameRef.current) {
+      lastCapturedFrameRef.current = currentFrame;
       prevFrameRef.current = currentFrame;
       saveCapture(canvas);
       return;
     }
 
-    const diff = compareFrames(currentFrame, prevFrameRef.current);
     const now = Date.now();
 
-    if (diff > sensitivityRef.current && (now - lastCaptureTimeRef.current) > debounceMs) {
+    if (phaseRef.current === 'watching') {
+      // Compare to last CAPTURED frame
+      const diff = compareFrames(currentFrame, lastCapturedFrameRef.current);
+      if (diff > changeThresholdRef.current) {
+        // Significant change detected — start settling
+        phaseRef.current = 'settling';
+        stableCountRef.current = 0;
+        settleStartRef.current = now;
+        prevFrameRef.current = currentFrame;
+      }
+    } else if (phaseRef.current === 'settling') {
+      // Compare consecutive frames to detect stability
+      const consecutiveDiff = compareFrames(currentFrame, prevFrameRef.current!);
       prevFrameRef.current = currentFrame;
-      lastCaptureTimeRef.current = now;
-      saveCapture(canvas);
-    }
-  }, [compareFrames, debounceMs]);
 
-  const saveCapture = useCallback((canvas: HTMLCanvasElement) => {
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const order = orderCounterRef.current++;
-      const step: CapturedStep = {
-        id: `step-${Date.now()}-${order}`,
-        blob,
-        thumbnailUrl: url,
-        timestamp: Date.now(),
-        order,
-        description: '',
-      };
-      setSteps((prev) => [...prev, step]);
-      setCaptureCount((c) => c + 1);
-    }, 'image/png');
-  }, []);
+      if (consecutiveDiff < STABLE_THRESHOLD) {
+        stableCountRef.current++;
+      } else {
+        stableCountRef.current = 0;
+      }
+
+      const timedOut = (now - settleStartRef.current) > SETTLE_TIMEOUT_MS;
+
+      if (stableCountRef.current >= STABLE_COUNT_NEEDED || timedOut) {
+        // Screen is stable (or timed out) — capture
+        lastCapturedFrameRef.current = currentFrame;
+        phaseRef.current = 'watching';
+        stableCountRef.current = 0;
+        saveCapture(canvas);
+      }
+    }
+  }, [compareFrames, saveCapture]);
 
   const startCapture = useCallback(async () => {
     try {
@@ -127,16 +160,16 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
       const canvas = document.createElement('canvas');
       canvasRef.current = canvas;
 
+      lastCapturedFrameRef.current = null;
       prevFrameRef.current = null;
-      lastCaptureTimeRef.current = 0;
+      phaseRef.current = 'watching';
+      stableCountRef.current = 0;
       orderCounterRef.current = 0;
 
       setIsCapturing(true);
 
-      // Check frames at ~1fps
-      intervalRef.current = window.setInterval(captureFrame, 1000);
+      intervalRef.current = window.setInterval(captureFrame, POLL_INTERVAL_MS);
 
-      // Stop if user ends share via browser UI
       stream.getVideoTracks()[0].addEventListener('ended', () => {
         stopCapture();
       });
@@ -184,11 +217,10 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     orderCounterRef.current = 0;
   }, [steps]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       stopCapture();
-      steps.forEach((s) => URL.revokeObjectURL(s.thumbnailUrl));
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     };
   }, []);
 

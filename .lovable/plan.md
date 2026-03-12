@@ -1,53 +1,117 @@
 
+## Trade Show Welcome Message - Options Analysis
 
-# Fixing the Screen Capture Algorithm
+### Overview
+You want visitors who scan a QR code at your trade show booth to see a special welcome message when they arrive at your site.
 
-## Root Cause Analysis
+---
 
-I identified **five problems** causing missed screenshots:
+### Recommended Approach: URL Parameter with Dynamic Banner
 
-1. **Sensitivity slider is inverted**: Sliding right increases the threshold (requires MORE pixel change to trigger). "Max sensitivity" at 40% actually means "ignore everything under 40% different" — the opposite of what users expect. That's why you got fewer captures at "max sensitivity."
+**The Best Solution: Use a URL parameter (e.g., `?ref=tradeshow`) that triggers a special welcome banner.**
 
-2. **Captures mid-transition**: The algorithm triggers on the first frame that differs, which catches loading spinners and partial renders instead of the final settled screen.
+**Why this is the best approach:**
+1. **Single QR code** - Link to `https://yoursite.com?ref=tradeshow`
+2. **Full site experience** - Visitors see the welcome message AND can explore your entire site
+3. **Easy to track** - You can monitor how many visitors came from the trade show
+4. **Reusable** - Can be adapted for future events with different parameters
+5. **Leverages existing infrastructure** - Similar pattern to your promotional strip system
 
-3. **1fps polling is too slow**: If a page transition completes in under 1 second, the algorithm might compare two near-identical settled frames and miss the change entirely.
+---
 
-4. **2-second debounce drops real changes**: Rapid navigation (clicking through menus) within 2 seconds causes steps to be silently discarded.
+### Implementation Plan
 
-5. **Only 1000 pixel samples**: On a 1920×1080 display (~2M pixels), sampling 1000 is very sparse. Subtle but meaningful changes (like a sidebar item highlighting or a section expanding) can be missed.
+#### Step 1: Create Trade Show Welcome Banner Component
 
-## Solution: "Detect Change, Wait for Stability, Then Capture"
+**New File: `src/components/layout/TradeShowBanner.tsx`**
 
-Instead of capturing the instant a difference is detected, use a two-phase approach:
+A prominent, visually distinct banner that:
+- Checks for `?ref=tradeshow` (or similar) in the URL
+- Displays a customizable welcome message (e.g., "Welcome, Trade Show Visitors!")
+- Is dismissible (stores in sessionStorage so it doesn't reappear during their visit)
+- Has eye-catching styling (different from the promotional strip)
+- Positioned at the very top of the page, above the promotional strip
+
+---
+
+#### Step 2: Create Hook to Detect Trade Show Visitors
+
+**New File: `src/hooks/useTradeShowVisitor.ts`**
 
 ```text
-Phase 1: WATCHING — compare each frame to last captured frame
-  → If diff > low threshold (3-5%) → enter SETTLING phase
-
-Phase 2: SETTLING — compare consecutive frames to each other
-  → If consecutive frames are nearly identical for ~800ms → screen is stable → CAPTURE
-  → If change keeps happening (animation/spinner) → keep waiting
-  → After 5s timeout → capture anyway (handles infinite animations)
+- Checks URL for trade show parameter (?ref=tradeshow)
+- Stores flag in sessionStorage to persist across page navigation
+- Returns { isTradeShowVisitor, message, dismiss }
 ```
 
-This naturally filters out loading spinners — the algorithm waits for the spinner to finish before capturing.
+---
 
-## Specific Changes
+#### Step 3: Integrate into Layout
 
-### `useScreenCapture.ts` — rewrite capture algorithm
-- **Increase poll rate** to 4fps (250ms interval) for better temporal resolution
-- **Increase sample size** to 5000 pixels for better spatial coverage
-- **Add state machine**: `watching` → `settling` → `capture`
-  - `watching`: compare current frame to last *captured* frame; if diff > `changeThreshold` (3%), enter settling
-  - `settling`: compare consecutive frames; if diff < `stableThreshold` (0.5%) for 3+ consecutive checks (~750ms), capture. Timeout at 5s forces capture.
-- **Remove debounce** — the settling phase replaces it naturally
-- **Fix sensitivity direction**: slider controls `changeThreshold`; sliding RIGHT = more sensitive (lower threshold)
+**File: `src/components/layout/Layout.tsx`**
 
-### `CaptureControls.tsx` — fix slider UX
-- Invert the slider so right = more sensitive
-- Change label to show "Low / High" instead of raw percentage
-- Adjust range: slider maps to changeThreshold of 1%–10% (right = 1% = very sensitive)
+Add the TradeShowBanner component above the PromotionalStrip:
 
-### `DocBuilder.tsx` — update default sensitivity
-- Default to 0.05 (5% change threshold) which is a good middle ground
+```text
+<TradeShowBanner />    <-- NEW
+<PromotionalStrip />
+<PromotionalPopover />
+<Header />
+...
+```
 
+---
+
+### QR Code URL Format
+
+Your QR code would link to:
+```
+https://vending-super-solutions.lovable.app?ref=tradeshow
+```
+
+Or for a specific trade show:
+```
+https://vending-super-solutions.lovable.app?ref=nama2025
+```
+
+---
+
+### Banner Design Concept
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│  🎉  Welcome, Trade Show Visitors! Glad you stopped by our booth! │  ✕
+└────────────────────────────────────────────────────────────────────┘
+```
+
+- Bold, welcoming colors (could use brand accent color)
+- Dismissible with X button
+- Message can be customized in the component or made configurable via Contentful
+
+---
+
+### Alternative Approaches (Not Recommended)
+
+| Approach | Pros | Cons |
+|----------|------|------|
+| Dedicated landing page | Simple to implement | Visitors miss the full site; need to maintain separate page |
+| Modify home page permanently | No development needed | All visitors see the message, not just trade show |
+
+---
+
+### Files to Create/Modify
+
+| File | Action | Description |
+|------|--------|-------------|
+| `src/hooks/useTradeShowVisitor.ts` | Create | Hook to detect and manage trade show visitor state |
+| `src/components/layout/TradeShowBanner.tsx` | Create | Welcome banner component |
+| `src/components/layout/Layout.tsx` | Modify | Add banner to layout |
+
+---
+
+### Optional Enhancements
+
+1. **Configurable via Contentful** - Make the message editable in your CMS
+2. **Multiple trade shows** - Support different messages for different events (e.g., `?ref=nama` vs `?ref=ces`)
+3. **Analytics tracking** - Log trade show visitors for reporting
+4. **Expiration** - Auto-hide the banner after X days from the event
