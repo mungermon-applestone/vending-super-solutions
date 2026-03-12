@@ -1,25 +1,17 @@
 
 
-# Create Admin Account for Doc Builder
+# Fix: Add Admin User to `admin_users` Table
 
-## What needs to happen
+## Problem
+The edge function successfully authenticates user `6533fe93-1171-417d-9d3b-4f370804949b` (`munger@applestonesolutions.com`), but the `is_admin()` check returns false because the `admin_users` table is empty. This causes the 403 response.
 
-1. **Create a Supabase auth user** for `munger@applestonesolutions.com` — this must be done in the Supabase Dashboard since we cannot create auth users via SQL.
+## Solution
+Insert a single row into `public.admin_users`:
 
-2. **Insert the user into `admin_users`** — once the auth user exists, we insert their UUID into the `admin_users` table so the `is_admin()` function returns true.
+```sql
+INSERT INTO public.admin_users (user_id)
+VALUES ('6533fe93-1171-417d-9d3b-4f370804949b');
+```
 
-## Steps
-
-### Step 1: Create the auth user (manual — Dashboard)
-Go to the [Supabase Users page](https://supabase.com/dashboard/project/rwvlvooojegpebognnzn/auth/users) and click **"Add user" → "Create new user"**. Enter:
-- Email: `munger@applestonesolutions.com`
-- Password: choose a password you'll remember
-- Check "Auto Confirm" so the account is immediately active
-
-### Step 2: Insert into admin_users (I'll do this)
-Once you've created the user and share the UUID (or just confirm it's done), I'll insert the row into `admin_users` using the user's UUID.
-
----
-
-No code changes needed — this is purely a data/config task. Let me know once you've created the user in the dashboard and I'll add the admin row.
+No code changes needed — just a database insert. After this, retrying the publish should proceed past the admin check and create the Contentful draft.
 
