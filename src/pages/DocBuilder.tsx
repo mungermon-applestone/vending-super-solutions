@@ -22,7 +22,7 @@ export default function DocBuilder() {
     reorderSteps,
     updateStepDescription,
     clearSteps,
-  } = useScreenCapture({ sensitivity });
+  } = useScreenCapture({ changeThreshold: sensitivity });
 
   const handlePublish = async (data: {
     articleTitle: string;
