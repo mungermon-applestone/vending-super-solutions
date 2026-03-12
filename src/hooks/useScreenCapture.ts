@@ -234,6 +234,20 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     );
   }, []);
 
+  const manualCapture = useCallback(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || video.readyState < 2) return;
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    saveCapture(canvas);
+  }, [saveCapture]);
+
   const clearSteps = useCallback(() => {
     steps.forEach((s) => URL.revokeObjectURL(s.thumbnailUrl));
     setSteps([]);
