@@ -26,7 +26,12 @@ const STABLE_COUNT_NEEDED = 3;       // ~750ms of stability
 const SETTLE_TIMEOUT_MS = 5000;      // force capture after 5s of settling
 
 export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
-  const { changeThreshold = 0.05 } = options;
+  const { changeThreshold = 0.05, mode = 'auto' } = options;
+  const modeRef = useRef(mode);
+
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
 
   const [isCapturing, setIsCapturing] = useState(false);
   const [steps, setSteps] = useState<CapturedStep[]>([]);
