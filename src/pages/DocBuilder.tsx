@@ -51,6 +51,7 @@ function LoginGate({ onAuthenticated }: { onAuthenticated: () => void }) {
 export default function DocBuilder() {
   const { session } = useAuth();
   const [sensitivity, setSensitivity] = useState(0.02);
+  const [captureMode, setCaptureMode] = useState<CaptureMode>('auto');
   const [isPublishing, setIsPublishing] = useState(false);
   const [, forceUpdate] = useState(0);
 
