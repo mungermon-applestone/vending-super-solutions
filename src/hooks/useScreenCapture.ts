@@ -6,6 +6,7 @@ export interface CapturedStep {
   thumbnailUrl: string;
   timestamp: number;
   order: number;
+  description: string;
 }
 
 interface UseScreenCaptureOptions {
