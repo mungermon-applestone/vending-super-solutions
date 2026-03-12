@@ -179,7 +179,9 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
 
       setIsCapturing(true);
 
-      intervalRef.current = window.setInterval(captureFrame, POLL_INTERVAL_MS);
+      if (modeRef.current === 'auto') {
+        intervalRef.current = window.setInterval(captureFrame, POLL_INTERVAL_MS);
+      }
 
       stream.getVideoTracks()[0].addEventListener('ended', () => {
         stopCapture();
