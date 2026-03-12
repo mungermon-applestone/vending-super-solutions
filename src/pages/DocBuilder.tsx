@@ -20,6 +20,7 @@ export default function DocBuilder() {
     stopCapture,
     removeStep,
     reorderSteps,
+    updateStepDescription,
     clearSteps,
   } = useScreenCapture({ sensitivity });
 
