@@ -27,6 +27,7 @@ import KnowledgeBaseSinglePage from "./pages/KnowledgeBaseSinglePage";
 import CustomerLogin from "./pages/CustomerLogin";
 import CustomerSupportTicket from "./pages/CustomerSupportTicket";
 import CustomerProtectedRoute from "./components/auth/CustomerProtectedRoute";
+import DocBuilder from "./pages/DocBuilder";
 
 /**
  * Router Configuration
@@ -125,6 +126,10 @@ export const router = createBrowserRouter([
         element: <CustomerLogin />,
       },
       // Redirect all admin routes to Contentful
+      {
+        path: "/doc-builder",
+        element: <DocBuilder />,
+      },
       {
         path: "/admin",
         element: <Navigate to="https://app.contentful.com" replace />,
