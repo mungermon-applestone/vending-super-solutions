@@ -27,6 +27,7 @@ import KnowledgeBaseSinglePage from "./pages/KnowledgeBaseSinglePage";
 import CustomerLogin from "./pages/CustomerLogin";
 import CustomerSupportTicket from "./pages/CustomerSupportTicket";
 import CustomerProtectedRoute from "./components/auth/CustomerProtectedRoute";
+import DocBuilder from "./pages/DocBuilder";
 
 /**
  * Router Configuration
