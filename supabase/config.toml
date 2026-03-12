@@ -15,3 +15,6 @@ verify_jwt = false
 
 [functions.validate-preview]
 verify_jwt = false
+
+[functions.publish-doc-to-contentful]
+verify_jwt = false
