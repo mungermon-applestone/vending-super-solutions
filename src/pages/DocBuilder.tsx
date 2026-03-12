@@ -113,10 +113,13 @@ export default function DocBuilder() {
         isCapturing={isCapturing}
         captureCount={captureCount}
         sensitivity={sensitivity}
+        captureMode={captureMode}
+        onCaptureModeChange={setCaptureMode}
         onSensitivityChange={setSensitivity}
         onStart={startCapture}
         onStop={stopCapture}
         onClear={clearSteps}
+        onManualCapture={manualCapture}
       />
 
       <CapturePreview isCapturing={isCapturing} />
