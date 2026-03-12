@@ -54,7 +54,7 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     const totalPixels = current.width * current.height;
     const step = Math.max(1, Math.floor(totalPixels / SAMPLE_SIZE));
 
-    let totalDiff = 0;
+    let changedPixels = 0;
     let samplesChecked = 0;
 
     for (let i = 0; i < totalPixels; i += step) {
@@ -62,11 +62,14 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
       const rDiff = Math.abs(curr[idx] - prev[idx]);
       const gDiff = Math.abs(curr[idx + 1] - prev[idx + 1]);
       const bDiff = Math.abs(curr[idx + 2] - prev[idx + 2]);
-      totalDiff += (rDiff + gDiff + bDiff) / (3 * 255);
+      const pixelDiff = (rDiff + gDiff + bDiff) / (3 * 255);
+      if (pixelDiff > PIXEL_CHANGE_THRESHOLD) {
+        changedPixels++;
+      }
       samplesChecked++;
     }
 
-    return samplesChecked > 0 ? totalDiff / samplesChecked : 0;
+    return samplesChecked > 0 ? changedPixels / samplesChecked : 0;
   }, []);
 
   const saveCapture = useCallback((canvas: HTMLCanvasElement) => {

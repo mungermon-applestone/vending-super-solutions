@@ -22,9 +22,11 @@ export default function CaptureControls({
   onStop,
   onClear,
 }: CaptureControlsProps) {
-  // Slider goes 1–10. Value represents changeThreshold percentage.
-  // RIGHT = low number = more sensitive (inverted for UX).
-  const sliderValue = Math.round(sensitivity * 100); // 1–10
+  // Slider 1–10. Maps to changeThreshold 0.5%–5%.
+  // RIGHT = low threshold = more sensitive (inverted for UX).
+  // Convert sensitivity (0.005–0.05) to slider position (1–10).
+  const sliderStep = Math.round(sensitivity * 200); // 1–10
+  const displaySlider = Math.max(1, Math.min(10, 11 - sliderStep));
 
   return (
     <div className="flex flex-col gap-4 p-4 rounded-lg border border-border bg-card">
@@ -62,8 +64,8 @@ export default function CaptureControls({
         </label>
         <span className="text-xs text-muted-foreground">Low</span>
         <Slider
-          value={[11 - sliderValue]}
-          onValueChange={([v]) => onSensitivityChange((11 - v) / 100)}
+          value={[displaySlider]}
+          onValueChange={([v]) => onSensitivityChange((11 - v) / 200)}
           min={1}
           max={10}
           step={1}
