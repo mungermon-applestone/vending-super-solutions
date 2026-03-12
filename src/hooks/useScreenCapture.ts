@@ -14,6 +14,8 @@ type CapturePhase = 'watching' | 'settling';
 interface UseScreenCaptureOptions {
   /** Change threshold (0-1). Lower = more sensitive. Default 0.05 */
   changeThreshold?: number;
+  /** Capture mode. 'auto' polls for changes, 'manual' waits for user trigger. Default 'auto' */
+  mode?: 'auto' | 'manual';
 }
 
 const POLL_INTERVAL_MS = 250;       // 4fps
