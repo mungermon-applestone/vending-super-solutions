@@ -66,7 +66,8 @@ export default function DocBuilder() {
     updateStepDescription,
     updateStepImage,
     clearSteps,
-  } = useScreenCapture({ changeThreshold: sensitivity });
+    manualCapture,
+  } = useScreenCapture({ changeThreshold: sensitivity, mode: captureMode });
 
   const handlePublish = async (data: {
     articleTitle: string;
