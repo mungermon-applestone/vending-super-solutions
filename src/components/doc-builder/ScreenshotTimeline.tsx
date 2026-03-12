@@ -1,14 +1,17 @@
 
+import { useState } from 'react';
 import { CapturedStep } from '@/hooks/useScreenCapture';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { X, ArrowUp, ArrowDown } from 'lucide-react';
+import { X, ArrowUp, ArrowDown, Crop } from 'lucide-react';
+import ImageCropper from './ImageCropper';
 
 interface ScreenshotTimelineProps {
   steps: CapturedStep[];
   onRemove: (id: string) => void;
   onReorder: (steps: CapturedStep[]) => void;
   onUpdateDescription: (id: string, description: string) => void;
+  onUpdateImage: (id: string, blob: Blob) => void;
 }
 
 export default function ScreenshotTimeline({
