@@ -14,6 +14,8 @@ type CapturePhase = 'watching' | 'settling';
 interface UseScreenCaptureOptions {
   /** Change threshold (0-1). Lower = more sensitive. Default 0.05 */
   changeThreshold?: number;
+  /** Capture mode. 'auto' polls for changes, 'manual' waits for user trigger. Default 'auto' */
+  mode?: 'auto' | 'manual';
 }
 
 const POLL_INTERVAL_MS = 250;       // 4fps
@@ -24,7 +26,12 @@ const STABLE_COUNT_NEEDED = 3;       // ~750ms of stability
 const SETTLE_TIMEOUT_MS = 5000;      // force capture after 5s of settling
 
 export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
-  const { changeThreshold = 0.05 } = options;
+  const { changeThreshold = 0.05, mode = 'auto' } = options;
+  const modeRef = useRef(mode);
+
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
 
   const [isCapturing, setIsCapturing] = useState(false);
   const [steps, setSteps] = useState<CapturedStep[]>([]);
@@ -172,7 +179,9 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
 
       setIsCapturing(true);
 
-      intervalRef.current = window.setInterval(captureFrame, POLL_INTERVAL_MS);
+      if (modeRef.current === 'auto') {
+        intervalRef.current = window.setInterval(captureFrame, POLL_INTERVAL_MS);
+      }
 
       stream.getVideoTracks()[0].addEventListener('ended', () => {
         stopCapture();
@@ -225,6 +234,20 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     );
   }, []);
 
+  const manualCapture = useCallback(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || video.readyState < 2) return;
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    saveCapture(canvas);
+  }, [saveCapture]);
+
   const clearSteps = useCallback(() => {
     steps.forEach((s) => URL.revokeObjectURL(s.thumbnailUrl));
     setSteps([]);
@@ -250,6 +273,7 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     updateStepDescription,
     updateStepImage,
     clearSteps,
+    manualCapture,
     videoRef,
   };
 }

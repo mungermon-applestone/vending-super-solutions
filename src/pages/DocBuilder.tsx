@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useScreenCapture } from '@/hooks/useScreenCapture';
-import CaptureControls from '@/components/doc-builder/CaptureControls';
+import CaptureControls, { type CaptureMode } from '@/components/doc-builder/CaptureControls';
 import CapturePreview from '@/components/doc-builder/CapturePreview';
 import ScreenshotTimeline from '@/components/doc-builder/ScreenshotTimeline';
 import PublishForm from '@/components/doc-builder/PublishForm';
@@ -51,6 +51,7 @@ function LoginGate({ onAuthenticated }: { onAuthenticated: () => void }) {
 export default function DocBuilder() {
   const { session } = useAuth();
   const [sensitivity, setSensitivity] = useState(0.02);
+  const [captureMode, setCaptureMode] = useState<CaptureMode>('auto');
   const [isPublishing, setIsPublishing] = useState(false);
   const [, forceUpdate] = useState(0);
 
@@ -65,7 +66,8 @@ export default function DocBuilder() {
     updateStepDescription,
     updateStepImage,
     clearSteps,
-  } = useScreenCapture({ changeThreshold: sensitivity });
+    manualCapture,
+  } = useScreenCapture({ changeThreshold: sensitivity, mode: captureMode });
 
   const handlePublish = async (data: {
     articleTitle: string;
@@ -111,10 +113,13 @@ export default function DocBuilder() {
         isCapturing={isCapturing}
         captureCount={captureCount}
         sensitivity={sensitivity}
+        captureMode={captureMode}
+        onCaptureModeChange={setCaptureMode}
         onSensitivityChange={setSensitivity}
         onStart={startCapture}
         onStop={stopCapture}
         onClear={clearSteps}
+        onManualCapture={manualCapture}
       />
 
       <CapturePreview isCapturing={isCapturing} />
