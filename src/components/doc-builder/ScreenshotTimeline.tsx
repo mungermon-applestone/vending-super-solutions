@@ -74,6 +74,14 @@ export default function ScreenshotTimeline({
               </Button>
               <Button
                 size="icon"
+                variant="secondary"
+                className="h-6 w-6"
+                onClick={() => setCroppingStepId(step.id)}
+              >
+                <Crop className="h-3 w-3" />
+              </Button>
+              <Button
+                size="icon"
                 variant="destructive"
                 className="h-6 w-6"
                 onClick={() => onRemove(step.id)}
