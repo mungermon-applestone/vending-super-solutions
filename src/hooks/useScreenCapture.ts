@@ -103,6 +103,7 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
         thumbnailUrl: url,
         timestamp: Date.now(),
         order,
+        description: '',
       };
       setSteps((prev) => [...prev, step]);
       setCaptureCount((c) => c + 1);
