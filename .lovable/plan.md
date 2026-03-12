@@ -1,117 +1,89 @@
 
-## Trade Show Welcome Message - Options Analysis
 
-### Overview
-You want visitors who scan a QR code at your trade show booth to see a special welcome message when they arrive at your site.
+# Documentation Builder — Screen Share + Auto-Capture → Contentful
 
----
+## What We're Building
 
-### Recommended Approach: URL Parameter with Dynamic Banner
+A `/doc-builder` route that lets you share a browser tab, automatically captures screenshots when the screen changes, sequences them vertically with placeholder text, and publishes the result directly as a Contentful `helpDeskArticle` with embedded asset blocks.
 
-**The Best Solution: Use a URL parameter (e.g., `?ref=tradeshow`) that triggers a special welcome banner.**
-
-**Why this is the best approach:**
-1. **Single QR code** - Link to `https://yoursite.com?ref=tradeshow`
-2. **Full site experience** - Visitors see the welcome message AND can explore your entire site
-3. **Easy to track** - You can monitor how many visitors came from the trade show
-4. **Reusable** - Can be adapted for future events with different parameters
-5. **Leverages existing infrastructure** - Similar pattern to your promotional strip system
-
----
-
-### Implementation Plan
-
-#### Step 1: Create Trade Show Welcome Banner Component
-
-**New File: `src/components/layout/TradeShowBanner.tsx`**
-
-A prominent, visually distinct banner that:
-- Checks for `?ref=tradeshow` (or similar) in the URL
-- Displays a customizable welcome message (e.g., "Welcome, Trade Show Visitors!")
-- Is dismissible (stores in sessionStorage so it doesn't reappear during their visit)
-- Has eye-catching styling (different from the promotional strip)
-- Positioned at the very top of the page, above the promotional strip
-
----
-
-#### Step 2: Create Hook to Detect Trade Show Visitors
-
-**New File: `src/hooks/useTradeShowVisitor.ts`**
+## How It Works
 
 ```text
-- Checks URL for trade show parameter (?ref=tradeshow)
-- Stores flag in sessionStorage to persist across page navigation
-- Returns { isTradeShowVisitor, message, dismiss }
+┌─────────────────────────────────────────────┐
+│  /doc-builder                               │
+│                                             │
+│  [Start Capture] ← getDisplayMedia()        │
+│                                             │
+│  ┌─ Live preview of shared tab ───────────┐ │
+│  │  (hidden canvas for frame comparison)  │ │
+│  └────────────────────────────────────────┘ │
+│                                             │
+│  Auto-detected captures:                    │
+│  ┌──────────┐  ┌──────────┐                 │
+│  │ Step 1   │  │ Step 2   │  ...            │
+│  │ [delete] │  │ [delete] │                 │
+│  └──────────┘  └──────────┘                 │
+│                                             │
+│  Article Title: [________________]          │
+│  Section Category: [____________]           │
+│  Heading Category: [____________]           │
+│                                             │
+│  [Preview] [Publish to Contentful]          │
+└─────────────────────────────────────────────┘
 ```
 
----
+## Architecture
 
-#### Step 3: Integrate into Layout
+### 1. Screen Capture Engine
+- Use `navigator.mediaDevices.getDisplayMedia({ video: true })` to capture a browser tab
+- Draw frames to a hidden canvas at ~1fps interval
+- Compare consecutive frames using pixel sampling (compute difference ratio)
+- When difference exceeds threshold (~15%), save canvas as PNG blob — this is a new "step"
+- Add debounce (~2 seconds) to avoid capturing mid-transition states
 
-**File: `src/components/layout/Layout.tsx`**
+### 2. Screenshot Storage
+- Create a **Supabase Storage bucket** (`doc-builder-screenshots`, public) for uploading captured PNGs
+- Each capture session gets a UUID prefix for organization
+- Images are uploaded as the user captures, giving us permanent URLs for Contentful
 
-Add the TradeShowBanner component above the PromotionalStrip:
+### 3. Contentful Publishing (via existing Management API)
+- Upload each screenshot as a **Contentful Asset** using the Management API (already have `VITE_CONTENTFUL_MANAGEMENT_TOKEN`)
+- Create a `helpDeskArticle` entry with Rich Text body containing:
+  - For each step: an `embedded-asset-block` node pointing to the uploaded asset, followed by a paragraph with placeholder text ("Step N: Describe what the user should do here.")
+- Publish the entry (or leave as draft — user's choice)
 
-```text
-<TradeShowBanner />    <-- NEW
-<PromotionalStrip />
-<PromotionalPopover />
-<Header />
-...
-```
+### 4. UI Components
 
----
+| Component | Purpose |
+|---|---|
+| `DocBuilder` (page) | Main page at `/doc-builder` |
+| `CaptureControls` | Start/stop screen share, sensitivity slider |
+| `CapturePreview` | Live video feed + capture count |
+| `ScreenshotTimeline` | Ordered list of captures with reorder/delete |
+| `PublishForm` | Title, section category, heading category, publish button |
+| `PublishPreview` | Modal showing the article as it will appear |
 
-### QR Code URL Format
+### 5. Database Migration
+- Create `doc-builder-screenshots` storage bucket (public, for Contentful to reference)
 
-Your QR code would link to:
-```
-https://vending-super-solutions.lovable.app?ref=tradeshow
-```
+## Key Technical Details
 
-Or for a specific trade show:
-```
-https://vending-super-solutions.lovable.app?ref=nama2025
-```
+- **Frame comparison**: Sample ~1000 random pixels per frame, compute mean absolute difference. Threshold triggers capture. This avoids comparing every pixel while still detecting meaningful changes.
+- **Contentful Rich Text structure**: The `articleContent` field expects a `Document` node with `embedded-asset-block` nodes for images — the content model already allows this node type.
+- **Asset upload flow**: Upload image to Contentful via Management API → process → create asset → publish asset → reference in entry's rich text.
+- **Reordering**: Users can drag-reorder or delete captures before publishing.
+- **The Management API client** already exists in `src/services/cms/utils/contentfulManagement.ts` — we'll extend it with `createAsset` and `createEntry` methods.
 
----
+## Files to Create/Modify
 
-### Banner Design Concept
+- `src/pages/DocBuilder.tsx` — main page
+- `src/components/doc-builder/CaptureControls.tsx`
+- `src/components/doc-builder/CapturePreview.tsx`
+- `src/components/doc-builder/ScreenshotTimeline.tsx`
+- `src/components/doc-builder/PublishForm.tsx`
+- `src/components/doc-builder/PublishPreview.tsx`
+- `src/hooks/useScreenCapture.ts` — screen share + change detection logic
+- `src/services/cms/utils/contentfulManagement.ts` — add `createAsset`, `createEntry` methods
+- `src/routes.tsx` — add `/doc-builder` route
+- SQL migration — create storage bucket
 
-```
-┌────────────────────────────────────────────────────────────────────┐
-│  🎉  Welcome, Trade Show Visitors! Glad you stopped by our booth! │  ✕
-└────────────────────────────────────────────────────────────────────┘
-```
-
-- Bold, welcoming colors (could use brand accent color)
-- Dismissible with X button
-- Message can be customized in the component or made configurable via Contentful
-
----
-
-### Alternative Approaches (Not Recommended)
-
-| Approach | Pros | Cons |
-|----------|------|------|
-| Dedicated landing page | Simple to implement | Visitors miss the full site; need to maintain separate page |
-| Modify home page permanently | No development needed | All visitors see the message, not just trade show |
-
----
-
-### Files to Create/Modify
-
-| File | Action | Description |
-|------|--------|-------------|
-| `src/hooks/useTradeShowVisitor.ts` | Create | Hook to detect and manage trade show visitor state |
-| `src/components/layout/TradeShowBanner.tsx` | Create | Welcome banner component |
-| `src/components/layout/Layout.tsx` | Modify | Add banner to layout |
-
----
-
-### Optional Enhancements
-
-1. **Configurable via Contentful** - Make the message editable in your CMS
-2. **Multiple trade shows** - Support different messages for different events (e.g., `?ref=nama` vs `?ref=ces`)
-3. **Analytics tracking** - Log trade show visitors for reporting
-4. **Expiration** - Auto-hide the banner after X days from the event
