@@ -127,6 +127,10 @@ export const router = createBrowserRouter([
       },
       // Redirect all admin routes to Contentful
       {
+        path: "/doc-builder",
+        element: <DocBuilder />,
+      },
+      {
         path: "/admin",
         element: <Navigate to="https://app.contentful.com" replace />,
       },
