@@ -9,7 +9,7 @@ export default function CapturePreview({ isCapturing }: CapturePreviewProps) {
   return (
     <div className="rounded-lg border border-border bg-muted/30 p-6 text-center">
       <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-        <span className="h-3 w-3 rounded-full bg-red-500 animate-pulse" />
+        <span className="h-3 w-3 rounded-full bg-destructive animate-pulse" />
         Screen sharing active — navigate the shared tab to auto-capture screenshots
       </div>
       <p className="text-xs text-muted-foreground mt-2">

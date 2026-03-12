@@ -46,7 +46,7 @@ export default function CaptureControls({
 
         {isCapturing && (
           <span className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+            <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
             Capturing… {captureCount} screenshot{captureCount !== 1 ? 's' : ''}
           </span>
         )}
