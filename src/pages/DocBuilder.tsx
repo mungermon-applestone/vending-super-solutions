@@ -9,7 +9,7 @@ import { publishDocToContentful } from '@/services/cms/utils/docBuilderPublish';
 import { toast } from 'sonner';
 
 export default function DocBuilder() {
-  const [sensitivity, setSensitivity] = useState(0.05);
+  const [sensitivity, setSensitivity] = useState(0.02);
   const [isPublishing, setIsPublishing] = useState(false);
 
   const {

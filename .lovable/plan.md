@@ -1,45 +1,117 @@
 
+## Trade Show Welcome Message - Options Analysis
 
-# Fixing Missed Screen Captures — Pixel Ratio Detection
+### Overview
+You want visitors who scan a QR code at your trade show booth to see a special welcome message when they arrive at your site.
 
-## Problem
+---
 
-The current algorithm averages pixel differences across the entire screen. When navigating between pages in a sidebar-based app, ~70% of the screen (sidebar, header) stays identical while only ~30% (content area) changes. This dampens the average difference significantly — a major page navigation might only register as 4-6% average change, barely clearing the 5% threshold even at max sensitivity.
+### Recommended Approach: URL Parameter with Dynamic Banner
 
-This explains why it missed 2 of 6 screens: pages that share the same layout but differ only in the content area produce a small average diff.
+**The Best Solution: Use a URL parameter (e.g., `?ref=tradeshow`) that triggers a special welcome banner.**
 
-## Solution: Switch to Changed-Pixel Ratio
+**Why this is the best approach:**
+1. **Single QR code** - Link to `https://yoursite.com?ref=tradeshow`
+2. **Full site experience** - Visitors see the welcome message AND can explore your entire site
+3. **Easy to track** - You can monitor how many visitors came from the trade show
+4. **Reusable** - Can be adapted for future events with different parameters
+5. **Leverages existing infrastructure** - Similar pattern to your promotional strip system
 
-Instead of averaging RGB differences across all samples, **count what fraction of sampled pixels changed meaningfully**. A pixel counts as "changed" if its RGB difference exceeds a per-pixel threshold (e.g., 10% of max brightness).
+---
 
-This way, if 25% of the screen changes (content area swap), the score is 0.25 regardless of how static the sidebar is. Much more reliable for sidebar-based apps.
+### Implementation Plan
 
-## Changes
+#### Step 1: Create Trade Show Welcome Banner Component
 
-### `src/hooks/useScreenCapture.ts`
+**New File: `src/components/layout/TradeShowBanner.tsx`**
 
-**Replace `compareFrames`** with a changed-pixel-ratio approach:
-- For each sampled pixel, compute its normalized RGB diff
-- If that diff exceeds a per-pixel threshold (0.08), count it as "changed"
-- Return the ratio of changed pixels to total sampled pixels
-- This makes the score directly represent "what % of the screen changed"
+A prominent, visually distinct banner that:
+- Checks for `?ref=tradeshow` (or similar) in the URL
+- Displays a customizable welcome message (e.g., "Welcome, Trade Show Visitors!")
+- Is dismissible (stores in sessionStorage so it doesn't reappear during their visit)
+- Has eye-catching styling (different from the promotional strip)
+- Positioned at the very top of the page, above the promotional strip
 
-**Lower default thresholds:**
-- `changeThreshold` default: 0.05 → 0.02 (trigger on 2% of screen pixels changing)
-- `STABLE_THRESHOLD`: 0.005 → 0.003 (tighter stability detection)
-- Add a `PIXEL_CHANGE_THRESHOLD` constant of 0.08 (per-pixel sensitivity)
+---
 
-### `src/pages/DocBuilder.tsx`
-- Update default sensitivity from 0.05 to 0.02
+#### Step 2: Create Hook to Detect Trade Show Visitors
 
-### `src/components/doc-builder/CaptureControls.tsx`  
-- Adjust slider range to map 0.5%–5% (was 1%–10%) so the full range is useful for this new metric
-- Keep the inverted UX (right = more sensitive = lower threshold)
+**New File: `src/hooks/useTradeShowVisitor.ts`**
 
-## Why This Works
+```text
+- Checks URL for trade show parameter (?ref=tradeshow)
+- Stores flag in sessionStorage to persist across page navigation
+- Returns { isTradeShowVisitor, message, dismiss }
+```
 
-Current (average diff): sidebar nav produces ~5% avg → borderline detection
-New (pixel ratio): sidebar nav changes ~25-35% of pixels → 0.25-0.35 score → easily detected at 2% threshold
+---
 
-The "standard details" inline expand was caught because it triggered enough pixel change even with averaging. The missed screens were likely pages with very similar layouts where only the data table content differed.
+#### Step 3: Integrate into Layout
 
+**File: `src/components/layout/Layout.tsx`**
+
+Add the TradeShowBanner component above the PromotionalStrip:
+
+```text
+<TradeShowBanner />    <-- NEW
+<PromotionalStrip />
+<PromotionalPopover />
+<Header />
+...
+```
+
+---
+
+### QR Code URL Format
+
+Your QR code would link to:
+```
+https://vending-super-solutions.lovable.app?ref=tradeshow
+```
+
+Or for a specific trade show:
+```
+https://vending-super-solutions.lovable.app?ref=nama2025
+```
+
+---
+
+### Banner Design Concept
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│  🎉  Welcome, Trade Show Visitors! Glad you stopped by our booth! │  ✕
+└────────────────────────────────────────────────────────────────────┘
+```
+
+- Bold, welcoming colors (could use brand accent color)
+- Dismissible with X button
+- Message can be customized in the component or made configurable via Contentful
+
+---
+
+### Alternative Approaches (Not Recommended)
+
+| Approach | Pros | Cons |
+|----------|------|------|
+| Dedicated landing page | Simple to implement | Visitors miss the full site; need to maintain separate page |
+| Modify home page permanently | No development needed | All visitors see the message, not just trade show |
+
+---
+
+### Files to Create/Modify
+
+| File | Action | Description |
+|------|--------|-------------|
+| `src/hooks/useTradeShowVisitor.ts` | Create | Hook to detect and manage trade show visitor state |
+| `src/components/layout/TradeShowBanner.tsx` | Create | Welcome banner component |
+| `src/components/layout/Layout.tsx` | Modify | Add banner to layout |
+
+---
+
+### Optional Enhancements
+
+1. **Configurable via Contentful** - Make the message editable in your CMS
+2. **Multiple trade shows** - Support different messages for different events (e.g., `?ref=nama` vs `?ref=ces`)
+3. **Analytics tracking** - Log trade show visitors for reporting
+4. **Expiration** - Auto-hide the banner after X days from the event
