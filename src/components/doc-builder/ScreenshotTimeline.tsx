@@ -19,7 +19,10 @@ export default function ScreenshotTimeline({
   onRemove,
   onReorder,
   onUpdateDescription,
+  onUpdateImage,
 }: ScreenshotTimelineProps) {
+  const [croppingStepId, setCroppingStepId] = useState<string | null>(null);
+  const croppingStep = steps.find((s) => s.id === croppingStepId);
   if (steps.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-border p-8 text-center text-muted-foreground">
