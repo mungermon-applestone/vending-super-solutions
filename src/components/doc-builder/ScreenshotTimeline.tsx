@@ -1,14 +1,17 @@
 
+import { useState } from 'react';
 import { CapturedStep } from '@/hooks/useScreenCapture';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { X, ArrowUp, ArrowDown } from 'lucide-react';
+import { X, ArrowUp, ArrowDown, Crop } from 'lucide-react';
+import ImageCropper from './ImageCropper';
 
 interface ScreenshotTimelineProps {
   steps: CapturedStep[];
   onRemove: (id: string) => void;
   onReorder: (steps: CapturedStep[]) => void;
   onUpdateDescription: (id: string, description: string) => void;
+  onUpdateImage: (id: string, blob: Blob) => void;
 }
 
 export default function ScreenshotTimeline({
@@ -16,7 +19,10 @@ export default function ScreenshotTimeline({
   onRemove,
   onReorder,
   onUpdateDescription,
+  onUpdateImage,
 }: ScreenshotTimelineProps) {
+  const [croppingStepId, setCroppingStepId] = useState<string | null>(null);
+  const croppingStep = steps.find((s) => s.id === croppingStepId);
   if (steps.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-border p-8 text-center text-muted-foreground">
@@ -68,6 +74,14 @@ export default function ScreenshotTimeline({
               </Button>
               <Button
                 size="icon"
+                variant="secondary"
+                className="h-6 w-6"
+                onClick={() => setCroppingStepId(step.id)}
+              >
+                <Crop className="h-3 w-3" />
+              </Button>
+              <Button
+                size="icon"
                 variant="destructive"
                 className="h-6 w-6"
                 onClick={() => onRemove(step.id)}
@@ -91,6 +105,18 @@ export default function ScreenshotTimeline({
           </div>
         ))}
       </div>
+
+      {croppingStep && (
+        <ImageCropper
+          open={!!croppingStepId}
+          imageUrl={croppingStep.thumbnailUrl}
+          onClose={() => setCroppingStepId(null)}
+          onCrop={(blob) => {
+            onUpdateImage(croppingStepId!, blob);
+            setCroppingStepId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

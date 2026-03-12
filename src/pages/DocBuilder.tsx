@@ -63,6 +63,7 @@ export default function DocBuilder() {
     removeStep,
     reorderSteps,
     updateStepDescription,
+    updateStepImage,
     clearSteps,
   } = useScreenCapture({ changeThreshold: sensitivity });
 
@@ -123,6 +124,7 @@ export default function DocBuilder() {
         onRemove={removeStep}
         onReorder={reorderSteps}
         onUpdateDescription={updateStepDescription}
+        onUpdateImage={updateStepImage}
       />
 
       {steps.length > 0 && !isCapturing && (
