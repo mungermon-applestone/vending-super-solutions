@@ -196,7 +196,8 @@ export async function publishDocToContentful(options: PublishOptions): Promise<{
 
     // 3. Build rich text and create entry
     console.log('[docBuilderPublish] Creating helpDeskArticle entry…');
-    const richText = buildRichTextDocument(assetIds);
+    const descriptions = sortedSteps.map((s) => s.description || '');
+    const richText = buildRichTextDocument(assetIds, descriptions);
 
     const baseUrl = `https://api.contentful.com/spaces/${config.SPACE_ID}/environments/${config.ENVIRONMENT_ID}`;
     const headers = {

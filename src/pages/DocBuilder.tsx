@@ -76,6 +76,7 @@ export default function DocBuilder() {
         steps={steps}
         onRemove={removeStep}
         onReorder={reorderSteps}
+        onUpdateDescription={updateStepDescription}
       />
 
       {steps.length > 0 && !isCapturing && (

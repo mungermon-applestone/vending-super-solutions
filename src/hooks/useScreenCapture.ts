@@ -200,6 +200,7 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     stopCapture,
     removeStep,
     reorderSteps,
+    updateStepDescription,
     clearSteps,
     videoRef,
   };
