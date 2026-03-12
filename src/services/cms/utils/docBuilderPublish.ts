@@ -44,12 +44,18 @@ export async function publishDocToContentful(options: PublishOptions): Promise<{
     const stepsPayload: { publicUrl: string; description: string; order: number }[] = [];
 
     for (let i = 0; i < sortedSteps.length; i++) {
-      const url = await uploadToStorage(sortedSteps[i].blob, sessionId, i);
-      stepsPayload.push({
-        publicUrl: url,
-        description: sortedSteps[i].description || '',
-        order: sortedSteps[i].order,
-      });
+      console.log(`[docBuilderPublish] Uploading step ${i + 1}/${sortedSteps.length}…`);
+      try {
+        const url = await uploadToStorage(sortedSteps[i].blob, sessionId, i);
+        stepsPayload.push({
+          publicUrl: url,
+          description: sortedSteps[i].description || '',
+          order: sortedSteps[i].order,
+        });
+      } catch (uploadErr) {
+        console.error(`[docBuilderPublish] Step ${i + 1} upload failed:`, uploadErr);
+        return { success: false, error: `Screenshot upload failed at step ${i + 1}: ${uploadErr instanceof Error ? uploadErr.message : 'Unknown error'}` };
+      }
     }
 
     // 2. Call edge function to create Contentful entry

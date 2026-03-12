@@ -146,23 +146,25 @@ Deno.serve(async (req) => {
       );
     }
 
+    const token = authHeader.replace("Bearer ", "");
+
+    // Use service role to verify user and check admin status
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } =
-      await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !userData?.user) {
+      console.error("[publish-doc-to-contentful] Auth error:", userError);
       return new Response(
         JSON.stringify({ success: false, error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const userId = claimsData.claims.sub;
+    const userId = userData.user.id;
+    console.log(`[publish-doc-to-contentful] Authenticated user: ${userId}`);
 
     // Admin check
     const { data: isAdmin } = await supabase.rpc("is_admin", { uid: userId });
