@@ -63,6 +63,7 @@ export default function DocBuilder() {
     removeStep,
     reorderSteps,
     updateStepDescription,
+    updateStepImage,
     clearSteps,
   } = useScreenCapture({ changeThreshold: sensitivity });
 
