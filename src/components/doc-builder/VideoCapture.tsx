@@ -88,20 +88,17 @@ export default function VideoCapture({
           <CardContent className="p-4 space-y-4">
             <div className="flex flex-col gap-2">
               <p className="text-sm font-medium text-foreground">Upload a video file</p>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <Button variant="outline" asChild className="gap-2">
-                  <span>
-                    <Upload className="h-4 w-4" />
-                    Choose Video
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={handleFileUpload}
-                      className="sr-only"
-                    />
-                  </span>
-                </Button>
-              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="video/*"
+                onChange={handleFileUpload}
+                className="sr-only"
+              />
+              <Button variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="h-4 w-4" />
+                Choose Video
+              </Button>
             </div>
 
             <div className="flex items-center gap-2">
