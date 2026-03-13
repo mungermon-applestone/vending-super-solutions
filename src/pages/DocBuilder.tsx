@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useScreenCapture } from '@/hooks/useScreenCapture';
 import CaptureControls, { type CaptureMode } from '@/components/doc-builder/CaptureControls';
 import CapturePreview from '@/components/doc-builder/CapturePreview';
+import VideoCapture from '@/components/doc-builder/VideoCapture';
 import ScreenshotTimeline from '@/components/doc-builder/ScreenshotTimeline';
 import PublishForm from '@/components/doc-builder/PublishForm';
 import { publishDocToContentful } from '@/services/cms/utils/docBuilderPublish';
@@ -11,6 +12,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 function LoginGate({ onAuthenticated }: { onAuthenticated: () => void }) {
   const { signIn, isLoading } = useAuth();
@@ -60,6 +62,7 @@ export default function DocBuilder() {
     steps,
     captureCount,
     startCapture,
+    startVideoCapture,
     stopCapture,
     removeStep,
     reorderSteps,
@@ -105,24 +108,47 @@ export default function DocBuilder() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">Documentation Builder</h1>
         <p className="text-muted-foreground mt-1">
-          Share your screen, navigate through the steps, and publish directly to Contentful as a Help Desk Article.
+          Capture screenshots from a live screen share or a video recording, then publish to Contentful.
         </p>
       </div>
 
-      <CaptureControls
-        isCapturing={isCapturing}
-        captureCount={captureCount}
-        sensitivity={sensitivity}
-        captureMode={captureMode}
-        onCaptureModeChange={setCaptureMode}
-        onSensitivityChange={setSensitivity}
-        onStart={startCapture}
-        onStop={stopCapture}
-        onClear={clearSteps}
-        onManualCapture={manualCapture}
-      />
+      <Tabs defaultValue="screen" className="w-full">
+        <TabsList>
+          <TabsTrigger value="screen" disabled={isCapturing}>Screen Capture</TabsTrigger>
+          <TabsTrigger value="video" disabled={isCapturing}>Video Import</TabsTrigger>
+        </TabsList>
 
-      <CapturePreview isCapturing={isCapturing} />
+        <TabsContent value="screen" className="space-y-4 mt-4">
+          <CaptureControls
+            isCapturing={isCapturing}
+            captureCount={captureCount}
+            sensitivity={sensitivity}
+            captureMode={captureMode}
+            onCaptureModeChange={setCaptureMode}
+            onSensitivityChange={setSensitivity}
+            onStart={startCapture}
+            onStop={stopCapture}
+            onClear={clearSteps}
+            onManualCapture={manualCapture}
+          />
+          <CapturePreview isCapturing={isCapturing} />
+        </TabsContent>
+
+        <TabsContent value="video" className="mt-4">
+          <VideoCapture
+            isCapturing={isCapturing}
+            captureCount={captureCount}
+            sensitivity={sensitivity}
+            captureMode={captureMode}
+            onCaptureModeChange={setCaptureMode}
+            onSensitivityChange={setSensitivity}
+            onStartVideoCapture={startVideoCapture}
+            onStop={stopCapture}
+            onClear={clearSteps}
+            onManualCapture={manualCapture}
+          />
+        </TabsContent>
+      </Tabs>
 
       <ScreenshotTimeline
         steps={steps}
