@@ -18,15 +18,16 @@ interface UseScreenCaptureOptions {
   mode?: 'auto' | 'manual';
 }
 
-const POLL_INTERVAL_MS = 250;       // 4fps
+const POLL_INTERVAL_MS = 150;       // ~7fps
 const SAMPLE_SIZE = 5000;
-const PIXEL_CHANGE_THRESHOLD = 0.08; // per-pixel: 8% RGB diff = "changed"
-const STABLE_THRESHOLD = 0.003;      // 0.3% changed-pixel ratio = "same"
-const STABLE_COUNT_NEEDED = 3;       // ~750ms of stability
-const SETTLE_TIMEOUT_MS = 5000;      // force capture after 5s of settling
+const PIXEL_CHANGE_THRESHOLD = 0.04; // per-pixel: 4% RGB diff = "changed"
+const STABLE_THRESHOLD = 0.002;      // 0.2% changed-pixel ratio = "same"
+const STABLE_COUNT_NEEDED = 2;       // ~300ms of stability
+const SETTLE_TIMEOUT_MS = 3000;      // force capture after 3s of settling
+const MIN_CAPTURE_COOLDOWN_MS = 1500; // minimum 1.5s between captures
 
 export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
-  const { changeThreshold = 0.05, mode = 'auto' } = options;
+  const { changeThreshold = 0.02, mode = 'auto' } = options;
   const modeRef = useRef(mode);
 
   useEffect(() => {
@@ -50,6 +51,7 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
   const stableCountRef = useRef(0);
   const settleStartRef = useRef(0);
   const changeThresholdRef = useRef(changeThreshold);
+  const lastCaptureTimeRef = useRef(0);
 
   useEffect(() => {
     changeThresholdRef.current = changeThreshold;
@@ -145,11 +147,15 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
       const timedOut = (now - settleStartRef.current) > SETTLE_TIMEOUT_MS;
 
       if (stableCountRef.current >= STABLE_COUNT_NEEDED || timedOut) {
-        // Screen is stable (or timed out) — capture
-        lastCapturedFrameRef.current = currentFrame;
-        phaseRef.current = 'watching';
-        stableCountRef.current = 0;
-        saveCapture(canvas);
+        const timeSinceLastCapture = now - lastCaptureTimeRef.current;
+        if (timeSinceLastCapture >= MIN_CAPTURE_COOLDOWN_MS) {
+          // Screen is stable (or timed out) — capture
+          lastCapturedFrameRef.current = currentFrame;
+          phaseRef.current = 'watching';
+          stableCountRef.current = 0;
+          lastCaptureTimeRef.current = now;
+          saveCapture(canvas);
+        }
       }
     }
   }, [compareFrames, saveCapture]);
