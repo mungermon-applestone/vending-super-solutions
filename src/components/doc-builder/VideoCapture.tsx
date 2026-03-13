@@ -48,6 +48,8 @@ export default function VideoCapture({
   const sliderStep = Math.round(sensitivity * 200);
   const displaySlider = Math.max(1, Math.min(10, 11 - sliderStep));
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
