@@ -1,10 +1,10 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Upload, Link, Play, StopCircle, Camera, Trash2 } from 'lucide-react';
+import { Upload, Link, Play, StopCircle, Camera, Trash2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { CaptureMode } from './CaptureControls';
 
@@ -14,6 +14,20 @@ function transformGoogleDriveUrl(url: string): string {
     return `https://drive.google.com/uc?export=download&id=${match[1]}`;
   }
   return url;
+}
+
+function isGoogleDriveUrl(url: string): boolean {
+  return /drive\.google\.com/i.test(url);
+}
+
+function getMediaErrorMessage(code: number | undefined): string {
+  switch (code) {
+    case 1: return 'Video loading was aborted.';
+    case 2: return 'A network error prevented the video from loading.';
+    case 3: return 'The video format is not supported by your browser. Try converting to MP4 (H.264).';
+    case 4: return 'The video URL could not be loaded. It may be blocked by CORS or require authentication.';
+    default: return 'An unknown error occurred while loading the video.';
+  }
 }
 
 interface VideoCaptureProps {
@@ -43,12 +57,22 @@ export default function VideoCapture({
 }: VideoCaptureProps) {
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [urlInput, setUrlInput] = useState('');
+  const [isVideoReady, setIsVideoReady] = useState(false);
+  const [videoError, setVideoError] = useState<string | null>(null);
   const videoElRef = useRef<HTMLVideoElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sliderStep = Math.round(sensitivity * 200);
   const displaySlider = Math.max(1, Math.min(10, 11 - sliderStep));
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Reset ready state when source changes
+  useEffect(() => {
+    setIsVideoReady(false);
+    setVideoError(null);
+    if (videoSrc && videoElRef.current) {
+      videoElRef.current.load();
+    }
+  }, [videoSrc]);
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,44 +81,54 @@ export default function VideoCapture({
       toast.error('Please select a video file.');
       return;
     }
-    if (videoSrc) URL.revokeObjectURL(videoSrc);
+    if (videoSrc && videoSrc.startsWith('blob:')) URL.revokeObjectURL(videoSrc);
     const url = URL.createObjectURL(file);
     setVideoSrc(url);
   }, [videoSrc]);
 
   const handleUrlLoad = useCallback(() => {
     if (!urlInput.trim()) return;
-    const transformed = transformGoogleDriveUrl(urlInput.trim());
+    const raw = urlInput.trim();
+    if (isGoogleDriveUrl(raw)) {
+      toast.warning('Google Drive links are usually blocked by browser security (CORS). If the video doesn\'t load, download it and upload locally.', { duration: 6000 });
+    }
+    const transformed = transformGoogleDriveUrl(raw);
     setVideoSrc(transformed);
   }, [urlInput]);
 
   const handleStart = useCallback(() => {
     const video = videoElRef.current;
-    if (!video) return;
-    if (video.readyState < 2) {
-      toast.error('Video is not ready yet. Wait for it to load.');
-      return;
-    }
+    if (!video || !isVideoReady) return;
     video.currentTime = 0;
     video.play();
     onStartVideoCapture(video);
-  }, [onStartVideoCapture]);
+  }, [onStartVideoCapture, isVideoReady]);
+
+  const handleVideoError = useCallback(() => {
+    const video = videoElRef.current;
+    const code = video?.error?.code;
+    const msg = getMediaErrorMessage(code);
+    setVideoError(msg);
+    toast.error(msg + ' Try downloading the video and uploading it directly.');
+  }, []);
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="video/*"
+        onChange={handleFileUpload}
+        className="sr-only"
+      />
+
       {/* Video source input */}
       {!videoSrc && (
         <Card>
           <CardContent className="p-4 space-y-4">
             <div className="flex flex-col gap-2">
               <p className="text-sm font-medium text-foreground">Upload a video file</p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="video/*"
-                onChange={handleFileUpload}
-                className="sr-only"
-              />
               <Button variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()}>
                 <Upload className="h-4 w-4" />
                 Choose Video
@@ -109,13 +143,16 @@ export default function VideoCapture({
 
             <div className="flex flex-col gap-2">
               <p className="text-sm font-medium text-foreground">Paste a direct video URL</p>
-              <p className="text-xs text-muted-foreground">
-                Note: Google Drive and most cloud storage URLs are blocked by browser security (CORS).
-                For best results, download the video first and upload it using the file picker above.
-              </p>
+              <div className="flex items-start gap-2 p-2 rounded-md bg-muted/50 border border-border">
+                <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  Google Drive and most cloud storage URLs are blocked by browser security (CORS).
+                  For best results, <strong>download the video first</strong> and upload it using the file picker above.
+                </p>
+              </div>
               <div className="flex gap-2">
                 <Input
-                  placeholder="https://drive.google.com/file/d/…/view"
+                  placeholder="https://example.com/video.mp4"
                   value={urlInput}
                   onChange={(e) => setUrlInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleUrlLoad()}
@@ -137,15 +174,23 @@ export default function VideoCapture({
             <CardContent className="p-4">
               <video
                 ref={videoElRef}
-                key={videoSrc}
                 src={videoSrc}
                 controls
                 muted
-                {...(!videoSrc.startsWith('blob:') ? { crossOrigin: 'anonymous' as const } : {})}
+                playsInline
+                preload="auto"
                 className="w-full max-h-[400px] rounded-md bg-black"
+                onLoadedMetadata={() => setIsVideoReady(true)}
+                onCanPlay={() => setIsVideoReady(true)}
                 onLoadedData={() => toast.success('Video loaded successfully.')}
-                onError={() => toast.error('Failed to load video. The URL may be blocked by CORS. Try downloading and uploading the file directly.')}
+                onError={handleVideoError}
               />
+              {videoError && (
+                <div className="flex items-start gap-2 mt-2 p-2 rounded-md bg-destructive/10 border border-destructive/30">
+                  <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                  <p className="text-xs text-destructive">{videoError} Download the video and upload it locally for best results.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -163,9 +208,9 @@ export default function VideoCapture({
               </ToggleGroup>
 
               {!isCapturing ? (
-                <Button onClick={handleStart} className="gap-2">
+                <Button onClick={handleStart} className="gap-2" disabled={!isVideoReady}>
                   <Play className="h-4 w-4" />
-                  Start Capture from Video
+                  {isVideoReady ? 'Start Capture from Video' : 'Loading video…'}
                 </Button>
               ) : (
                 <>
@@ -193,6 +238,8 @@ export default function VideoCapture({
                     if (videoSrc.startsWith('blob:')) URL.revokeObjectURL(videoSrc);
                     setVideoSrc(null);
                     setUrlInput('');
+                    setIsVideoReady(false);
+                    setVideoError(null);
                   }}
                   variant="ghost"
                   className="gap-2 text-muted-foreground"

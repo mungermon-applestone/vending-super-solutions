@@ -39,7 +39,7 @@ const EnhancedSEO: React.FC<EnhancedSEOProps> = ({
       ))}
       
       {/* Security headers */}
-      <meta httpEquiv="Content-Security-Policy-Report-Only" content="default-src 'self'; img-src 'self' https://images.ctfassets.net data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cdn.contentful.com" />
+      <meta httpEquiv="Content-Security-Policy-Report-Only" content="default-src 'self'; img-src 'self' https://images.ctfassets.net data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; media-src 'self' blob: data: https:; connect-src 'self' https://cdn.contentful.com" />
       
       {/* SEO controls */}
       {noindex && <meta name="robots" content="noindex,nofollow" />}
