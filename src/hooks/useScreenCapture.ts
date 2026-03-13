@@ -27,7 +27,7 @@ const SETTLE_TIMEOUT_MS = 3000;      // force capture after 3s of settling
 const MIN_CAPTURE_COOLDOWN_MS = 1500; // minimum 1.5s between captures
 
 export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
-  const { changeThreshold = 0.05, mode = 'auto' } = options;
+  const { changeThreshold = 0.02, mode = 'auto' } = options;
   const modeRef = useRef(mode);
 
   useEffect(() => {
