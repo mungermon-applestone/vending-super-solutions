@@ -108,8 +108,11 @@ export default function VideoCapture({
             </div>
 
             <div className="flex flex-col gap-2">
-              <p className="text-sm font-medium text-foreground">Paste a video URL</p>
-              <p className="text-xs text-muted-foreground">Google Drive share links are automatically converted.</p>
+              <p className="text-sm font-medium text-foreground">Paste a direct video URL</p>
+              <p className="text-xs text-muted-foreground">
+                Note: Google Drive and most cloud storage URLs are blocked by browser security (CORS).
+                For best results, download the video first and upload it using the file picker above.
+              </p>
               <div className="flex gap-2">
                 <Input
                   placeholder="https://drive.google.com/file/d/…/view"
