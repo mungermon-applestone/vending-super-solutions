@@ -59,6 +59,7 @@ export default function VideoCapture({
   const [urlInput, setUrlInput] = useState('');
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [videoError, setVideoError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const videoElRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
