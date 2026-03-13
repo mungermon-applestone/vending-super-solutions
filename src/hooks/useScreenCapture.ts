@@ -160,6 +160,25 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     }
   }, [compareFrames, saveCapture]);
 
+  const initCapture = useCallback((video: HTMLVideoElement) => {
+    const canvas = document.createElement('canvas');
+    canvasRef.current = canvas;
+    videoRef.current = video;
+
+    lastCapturedFrameRef.current = null;
+    prevFrameRef.current = null;
+    phaseRef.current = 'watching';
+    stableCountRef.current = 0;
+    orderCounterRef.current = 0;
+    lastCaptureTimeRef.current = 0;
+
+    setIsCapturing(true);
+
+    if (modeRef.current === 'auto') {
+      intervalRef.current = window.setInterval(captureFrame, POLL_INTERVAL_MS);
+    }
+  }, [captureFrame]);
+
   const startCapture = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -172,22 +191,8 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
       video.srcObject = stream;
       video.muted = true;
       await video.play();
-      videoRef.current = video;
 
-      const canvas = document.createElement('canvas');
-      canvasRef.current = canvas;
-
-      lastCapturedFrameRef.current = null;
-      prevFrameRef.current = null;
-      phaseRef.current = 'watching';
-      stableCountRef.current = 0;
-      orderCounterRef.current = 0;
-
-      setIsCapturing(true);
-
-      if (modeRef.current === 'auto') {
-        intervalRef.current = window.setInterval(captureFrame, POLL_INTERVAL_MS);
-      }
+      initCapture(video);
 
       stream.getVideoTracks()[0].addEventListener('ended', () => {
         stopCapture();
@@ -195,7 +200,17 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     } catch (err) {
       console.error('[useScreenCapture] Failed to start capture:', err);
     }
-  }, [captureFrame]);
+  }, [initCapture, stopCapture]);
+
+  const startVideoCapture = useCallback((video: HTMLVideoElement) => {
+    initCapture(video);
+
+    const handleEnd = () => {
+      stopCapture();
+      video.removeEventListener('ended', handleEnd);
+    };
+    video.addEventListener('ended', handleEnd);
+  }, [initCapture, stopCapture]);
 
   const stopCapture = useCallback(() => {
     if (intervalRef.current) {
