@@ -288,6 +288,7 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     steps,
     captureCount,
     startCapture,
+    startVideoCapture,
     stopCapture,
     removeStep,
     reorderSteps,
