@@ -59,6 +59,7 @@ export default function VideoCapture({
   const [urlInput, setUrlInput] = useState('');
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [videoError, setVideoError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const videoElRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -127,12 +128,35 @@ export default function VideoCapture({
       {!videoSrc && (
         <Card>
           <CardContent className="p-4 space-y-4">
-            <div className="flex flex-col gap-2">
-              <p className="text-sm font-medium text-foreground">Upload a video file</p>
-              <Button variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()}>
-                <Upload className="h-4 w-4" />
-                Choose Video
-              </Button>
+            <div
+              className={`flex flex-col items-center justify-center gap-3 p-8 rounded-lg border-2 border-dashed transition-colors cursor-pointer ${
+                isDragging
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-primary/50 hover:bg-muted/30'
+              }`}
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragEnter={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                const file = e.dataTransfer.files?.[0];
+                if (file && file.type.startsWith('video/')) {
+                  if (videoSrc && videoSrc.startsWith('blob:')) URL.revokeObjectURL(videoSrc);
+                  setVideoSrc(URL.createObjectURL(file));
+                } else {
+                  toast.error('Please drop a video file.');
+                }
+              }}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className={`h-8 w-8 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
+              <div className="text-center">
+                <p className="text-sm font-medium text-foreground">
+                  {isDragging ? 'Drop video here' : 'Drag & drop a video file'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
