@@ -160,6 +160,22 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     }
   }, [compareFrames, saveCapture]);
 
+  const stopCapture = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+      videoRef.current = null;
+    }
+    setIsCapturing(false);
+  }, []);
+
   const initCapture = useCallback((video: HTMLVideoElement) => {
     const canvas = document.createElement('canvas');
     canvasRef.current = canvas;
@@ -211,22 +227,6 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     };
     video.addEventListener('ended', handleEnd);
   }, [initCapture, stopCapture]);
-
-  const stopCapture = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-    }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-      videoRef.current = null;
-    }
-    setIsCapturing(false);
-  }, []);
 
   const removeStep = useCallback((id: string) => {
     setSteps((prev) => {
