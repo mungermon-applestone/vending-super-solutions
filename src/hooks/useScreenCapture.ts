@@ -147,11 +147,15 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
       const timedOut = (now - settleStartRef.current) > SETTLE_TIMEOUT_MS;
 
       if (stableCountRef.current >= STABLE_COUNT_NEEDED || timedOut) {
-        // Screen is stable (or timed out) — capture
-        lastCapturedFrameRef.current = currentFrame;
-        phaseRef.current = 'watching';
-        stableCountRef.current = 0;
-        saveCapture(canvas);
+        const timeSinceLastCapture = now - lastCaptureTimeRef.current;
+        if (timeSinceLastCapture >= MIN_CAPTURE_COOLDOWN_MS) {
+          // Screen is stable (or timed out) — capture
+          lastCapturedFrameRef.current = currentFrame;
+          phaseRef.current = 'watching';
+          stableCountRef.current = 0;
+          lastCaptureTimeRef.current = now;
+          saveCapture(canvas);
+        }
       }
     }
   }, [compareFrames, saveCapture]);
