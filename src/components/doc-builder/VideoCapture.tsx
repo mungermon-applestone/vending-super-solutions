@@ -48,6 +48,8 @@ export default function VideoCapture({
   const sliderStep = Math.round(sensitivity * 200);
   const displaySlider = Math.max(1, Math.min(10, 11 - sliderStep));
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -86,20 +88,17 @@ export default function VideoCapture({
           <CardContent className="p-4 space-y-4">
             <div className="flex flex-col gap-2">
               <p className="text-sm font-medium text-foreground">Upload a video file</p>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <Button variant="outline" asChild className="gap-2">
-                  <span>
-                    <Upload className="h-4 w-4" />
-                    Choose Video
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={handleFileUpload}
-                      className="sr-only"
-                    />
-                  </span>
-                </Button>
-              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="video/*"
+                onChange={handleFileUpload}
+                className="sr-only"
+              />
+              <Button variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="h-4 w-4" />
+                Choose Video
+              </Button>
             </div>
 
             <div className="flex items-center gap-2">
@@ -109,8 +108,11 @@ export default function VideoCapture({
             </div>
 
             <div className="flex flex-col gap-2">
-              <p className="text-sm font-medium text-foreground">Paste a video URL</p>
-              <p className="text-xs text-muted-foreground">Google Drive share links are automatically converted.</p>
+              <p className="text-sm font-medium text-foreground">Paste a direct video URL</p>
+              <p className="text-xs text-muted-foreground">
+                Note: Google Drive and most cloud storage URLs are blocked by browser security (CORS).
+                For best results, download the video first and upload it using the file picker above.
+              </p>
               <div className="flex gap-2">
                 <Input
                   placeholder="https://drive.google.com/file/d/…/view"
@@ -135,12 +137,14 @@ export default function VideoCapture({
             <CardContent className="p-4">
               <video
                 ref={videoElRef}
+                key={videoSrc}
                 src={videoSrc}
                 controls
                 muted
-                crossOrigin="anonymous"
+                {...(!videoSrc.startsWith('blob:') ? { crossOrigin: 'anonymous' as const } : {})}
                 className="w-full max-h-[400px] rounded-md bg-black"
-                onError={() => toast.error('Failed to load video. The URL may be blocked by CORS. Try uploading the file directly.')}
+                onLoadedData={() => toast.success('Video loaded successfully.')}
+                onError={() => toast.error('Failed to load video. The URL may be blocked by CORS. Try downloading and uploading the file directly.')}
               />
             </CardContent>
           </Card>
