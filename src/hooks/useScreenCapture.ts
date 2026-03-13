@@ -160,43 +160,6 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     }
   }, [compareFrames, saveCapture]);
 
-  const startCapture = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: { displaySurface: 'browser' } as any,
-      });
-
-      streamRef.current = stream;
-
-      const video = document.createElement('video');
-      video.srcObject = stream;
-      video.muted = true;
-      await video.play();
-      videoRef.current = video;
-
-      const canvas = document.createElement('canvas');
-      canvasRef.current = canvas;
-
-      lastCapturedFrameRef.current = null;
-      prevFrameRef.current = null;
-      phaseRef.current = 'watching';
-      stableCountRef.current = 0;
-      orderCounterRef.current = 0;
-
-      setIsCapturing(true);
-
-      if (modeRef.current === 'auto') {
-        intervalRef.current = window.setInterval(captureFrame, POLL_INTERVAL_MS);
-      }
-
-      stream.getVideoTracks()[0].addEventListener('ended', () => {
-        stopCapture();
-      });
-    } catch (err) {
-      console.error('[useScreenCapture] Failed to start capture:', err);
-    }
-  }, [captureFrame]);
-
   const stopCapture = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -212,6 +175,58 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     }
     setIsCapturing(false);
   }, []);
+
+  const initCapture = useCallback((video: HTMLVideoElement) => {
+    const canvas = document.createElement('canvas');
+    canvasRef.current = canvas;
+    videoRef.current = video;
+
+    lastCapturedFrameRef.current = null;
+    prevFrameRef.current = null;
+    phaseRef.current = 'watching';
+    stableCountRef.current = 0;
+    orderCounterRef.current = 0;
+    lastCaptureTimeRef.current = 0;
+
+    setIsCapturing(true);
+
+    if (modeRef.current === 'auto') {
+      intervalRef.current = window.setInterval(captureFrame, POLL_INTERVAL_MS);
+    }
+  }, [captureFrame]);
+
+  const startCapture = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { displaySurface: 'browser' } as any,
+      });
+
+      streamRef.current = stream;
+
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.muted = true;
+      await video.play();
+
+      initCapture(video);
+
+      stream.getVideoTracks()[0].addEventListener('ended', () => {
+        stopCapture();
+      });
+    } catch (err) {
+      console.error('[useScreenCapture] Failed to start capture:', err);
+    }
+  }, [initCapture, stopCapture]);
+
+  const startVideoCapture = useCallback((video: HTMLVideoElement) => {
+    initCapture(video);
+
+    const handleEnd = () => {
+      stopCapture();
+      video.removeEventListener('ended', handleEnd);
+    };
+    video.addEventListener('ended', handleEnd);
+  }, [initCapture, stopCapture]);
 
   const removeStep = useCallback((id: string) => {
     setSteps((prev) => {
@@ -273,6 +288,7 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
     steps,
     captureCount,
     startCapture,
+    startVideoCapture,
     stopCapture,
     removeStep,
     reorderSteps,

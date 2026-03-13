@@ -1,51 +1,117 @@
 
+## Trade Show Welcome Message - Options Analysis
 
-# Video-Based Screenshot Capture
+### Overview
+You want visitors who scan a QR code at your trade show booth to see a special welcome message when they arrive at your site.
 
-## Concept
-Reuse the exact same change-detection algorithm from screen capture, but instead of `getDisplayMedia`, feed the engine a `<video>` element playing a user-provided video file or URL. The user loads a video (file upload or URL paste), plays it in-browser, and the same watching/settling/capture state machine extracts screenshots at each screen change — producing steps in the timeline just like screen capture does.
+---
 
-## Approach
+### Recommended Approach: URL Parameter with Dynamic Banner
 
-The core `captureFrame`, `compareFrames`, and `saveCapture` functions in `useScreenCapture` already work against a generic `<video>` element. The only screen-capture-specific code is `startCapture` (which calls `getDisplayMedia`). We'll add a parallel `startVideoCapture` method that attaches a user-provided video element instead.
+**The Best Solution: Use a URL parameter (e.g., `?ref=tradeshow`) that triggers a special welcome banner.**
 
-### New hook method: `startVideoCapture(videoElement: HTMLVideoElement)`
+**Why this is the best approach:**
+1. **Single QR code** - Link to `https://yoursite.com?ref=tradeshow`
+2. **Full site experience** - Visitors see the welcome message AND can explore your entire site
+3. **Easy to track** - You can monitor how many visitors came from the trade show
+4. **Reusable** - Can be adapted for future events with different parameters
+5. **Leverages existing infrastructure** - Similar pattern to your promotional strip system
 
-Added to `useScreenCapture.ts`:
-- Accepts an existing `<video>` element (already loaded with a source)
-- Sets up the same canvas + refs, resets state machine
-- Starts the polling interval (auto mode) or waits for manual triggers
-- Listens for the video's `ended`/`pause` events to auto-stop capture
-- No `MediaStream` involved — just reads frames from the video element
+---
 
-### New component: `VideoCapture.tsx`
+### Implementation Plan
 
-A panel in the DocBuilder page (sibling to `CaptureControls`) that lets the user:
-1. **Provide a video** — either drag-and-drop / file picker for local files, or paste a URL (Google Drive direct link, etc.)
-2. **Video player** — renders a `<video>` element with standard controls (play/pause/seek)
-3. **"Start Capture from Video" button** — begins the frame analysis while the video plays
-4. **Stop / status indicator** — same pattern as screen capture
+#### Step 1: Create Trade Show Welcome Banner Component
 
-The video player is visible so the user can watch playback and also manually capture at any point.
+**New File: `src/components/layout/TradeShowBanner.tsx`**
 
-### DocBuilder page changes
+A prominent, visually distinct banner that:
+- Checks for `?ref=tradeshow` (or similar) in the URL
+- Displays a customizable welcome message (e.g., "Welcome, Trade Show Visitors!")
+- Is dismissible (stores in sessionStorage so it doesn't reappear during their visit)
+- Has eye-catching styling (different from the promotional strip)
+- Positioned at the very top of the page, above the promotional strip
 
-- Add a source selector (toggle or tabs): **Screen Capture** | **Video Import**
-- When "Video Import" is selected, show the `VideoCapture` component instead of `CaptureControls` + `CapturePreview`
-- Both modes share the same `steps` array, `ScreenshotTimeline`, and `PublishForm`
+---
 
-### Files to create/modify
+#### Step 2: Create Hook to Detect Trade Show Visitors
 
-| File | Action |
-|---|---|
-| `src/hooks/useScreenCapture.ts` | Add `startVideoCapture(video: HTMLVideoElement)` method |
-| `src/components/doc-builder/VideoCapture.tsx` | **New** — video input + player + capture controls |
-| `src/pages/DocBuilder.tsx` | Add source tabs, integrate VideoCapture component |
+**New File: `src/hooks/useTradeShowVisitor.ts`**
 
-### Key detail: Google Drive URLs
+```text
+- Checks URL for trade show parameter (?ref=tradeshow)
+- Stores flag in sessionStorage to persist across page navigation
+- Returns { isTradeShowVisitor, message, dismiss }
+```
 
-Google Drive share links need transformation to get a direct video URL:
-`https://drive.google.com/file/d/{ID}/view` → `https://drive.google.com/uc?export=download&id={ID}`
+---
 
-We'll handle this automatically when a Google Drive URL is pasted. Note: CORS may block some URLs, so file upload is the primary path; URL paste is best-effort with a helpful error message if it fails.
+#### Step 3: Integrate into Layout
 
+**File: `src/components/layout/Layout.tsx`**
+
+Add the TradeShowBanner component above the PromotionalStrip:
+
+```text
+<TradeShowBanner />    <-- NEW
+<PromotionalStrip />
+<PromotionalPopover />
+<Header />
+...
+```
+
+---
+
+### QR Code URL Format
+
+Your QR code would link to:
+```
+https://vending-super-solutions.lovable.app?ref=tradeshow
+```
+
+Or for a specific trade show:
+```
+https://vending-super-solutions.lovable.app?ref=nama2025
+```
+
+---
+
+### Banner Design Concept
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│  🎉  Welcome, Trade Show Visitors! Glad you stopped by our booth! │  ✕
+└────────────────────────────────────────────────────────────────────┘
+```
+
+- Bold, welcoming colors (could use brand accent color)
+- Dismissible with X button
+- Message can be customized in the component or made configurable via Contentful
+
+---
+
+### Alternative Approaches (Not Recommended)
+
+| Approach | Pros | Cons |
+|----------|------|------|
+| Dedicated landing page | Simple to implement | Visitors miss the full site; need to maintain separate page |
+| Modify home page permanently | No development needed | All visitors see the message, not just trade show |
+
+---
+
+### Files to Create/Modify
+
+| File | Action | Description |
+|------|--------|-------------|
+| `src/hooks/useTradeShowVisitor.ts` | Create | Hook to detect and manage trade show visitor state |
+| `src/components/layout/TradeShowBanner.tsx` | Create | Welcome banner component |
+| `src/components/layout/Layout.tsx` | Modify | Add banner to layout |
+
+---
+
+### Optional Enhancements
+
+1. **Configurable via Contentful** - Make the message editable in your CMS
+2. **Multiple trade shows** - Support different messages for different events (e.g., `?ref=nama` vs `?ref=ces`)
+3. **Analytics tracking** - Log trade show visitors for reporting
+4. **Expiration** - Auto-hide the banner after X days from the event
