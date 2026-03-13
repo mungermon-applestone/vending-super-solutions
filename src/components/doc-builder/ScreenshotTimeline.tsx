@@ -50,9 +50,6 @@ export default function ScreenshotTimeline({
             key={step.id}
             className="relative group rounded-lg border border-border bg-card overflow-hidden"
           >
-            <div className="absolute top-2 left-2 z-10 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
-              Step {index + 1}
-            </div>
             <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <Button
                 size="icon"
