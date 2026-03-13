@@ -137,12 +137,14 @@ export default function VideoCapture({
             <CardContent className="p-4">
               <video
                 ref={videoElRef}
+                key={videoSrc}
                 src={videoSrc}
                 controls
                 muted
-                crossOrigin="anonymous"
+                {...(!videoSrc.startsWith('blob:') ? { crossOrigin: 'anonymous' as const } : {})}
                 className="w-full max-h-[400px] rounded-md bg-black"
-                onError={() => toast.error('Failed to load video. The URL may be blocked by CORS. Try uploading the file directly.')}
+                onLoadedData={() => toast.success('Video loaded successfully.')}
+                onError={() => toast.error('Failed to load video. The URL may be blocked by CORS. Try downloading and uploading the file directly.')}
               />
             </CardContent>
           </Card>
