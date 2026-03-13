@@ -59,12 +59,10 @@ export default function CaptureControls({
               <StopCircle className="h-4 w-4" />
               Stop Capture
             </Button>
-            {captureMode === 'manual' && (
-              <Button onClick={onManualCapture} variant="secondary" className="gap-2">
-                <Camera className="h-4 w-4" />
-                Capture Screenshot
-              </Button>
-            )}
+            <Button onClick={onManualCapture} variant="secondary" className="gap-2">
+              <Camera className="h-4 w-4" />
+              Capture Screenshot
+            </Button>
           </>
         )}
 
