@@ -51,6 +51,7 @@ export function useScreenCapture(options: UseScreenCaptureOptions = {}) {
   const stableCountRef = useRef(0);
   const settleStartRef = useRef(0);
   const changeThresholdRef = useRef(changeThreshold);
+  const lastCaptureTimeRef = useRef(0);
 
   useEffect(() => {
     changeThresholdRef.current = changeThreshold;
