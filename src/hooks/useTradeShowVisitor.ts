@@ -19,6 +19,10 @@ const TRADE_SHOW_CONFIGS: Record<string, TradeShowConfig> = {
     param: 'annualmeatconference',
     message: "Hello, Annual Meat Conference visitors! Glad you stopped by our booth!",
   },
+  nama: {
+    param: 'nama',
+    message: "Welcome, NAMA visitors, thanks for stopping by our booth!",
+  },
 };
 
 export interface UseTradeShowVisitorReturn {
