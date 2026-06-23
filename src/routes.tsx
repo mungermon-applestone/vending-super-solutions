@@ -28,6 +28,7 @@ import CustomerLogin from "./pages/CustomerLogin";
 import CustomerSupportTicket from "./pages/CustomerSupportTicket";
 import CustomerProtectedRoute from "./components/auth/CustomerProtectedRoute";
 import DocBuilder from "./pages/DocBuilder";
+import ExportHelpDeskArticles from "./pages/admin/ExportHelpDeskArticles";
 
 /**
  * Router Configuration
@@ -129,6 +130,10 @@ export const router = createBrowserRouter([
       {
         path: "/doc-builder",
         element: <DocBuilder />,
+      },
+      {
+        path: "/admin/export-help-desk",
+        element: <ExportHelpDeskArticles />,
       },
       {
         path: "/admin",
