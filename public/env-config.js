@@ -8,7 +8,7 @@
   
   // Token version - bump this whenever PREVIEW_CREDENTIALS token is rotated
   // to invalidate any stale token cached in user localStorage.
-  const CREDENTIALS_VERSION = '2026-06-24';
+  const CREDENTIALS_VERSION = '2026-06-24-b';
 
   // Hardcoded credentials for preview environments - these are known to work
   const PREVIEW_CREDENTIALS = {
@@ -18,9 +18,17 @@
   };
 
   // One-time cache-bust: drop stale cached credentials from prior token versions.
+  // Clears every key any part of the app uses to cache contentful tokens.
   try {
     if (localStorage.getItem('contentful_credentials_version') !== CREDENTIALS_VERSION) {
       localStorage.removeItem('contentful_credentials');
+      localStorage.removeItem('vending-cms-env-variables');
+      // Also purge any Service Worker caches that may hold stale contentful responses
+      if (typeof caches !== 'undefined' && caches.keys) {
+        caches.keys().then(function(names) {
+          names.forEach(function(n) { caches.delete(n); });
+        }).catch(function() {});
+      }
       localStorage.setItem('contentful_credentials_version', CREDENTIALS_VERSION);
       console.log('[env-config] Cleared stale cached contentful credentials');
     }
