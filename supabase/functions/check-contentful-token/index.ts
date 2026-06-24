@@ -51,7 +51,7 @@ serve(async (req) => {
 
   const spaceId = Deno.env.get("CONTENTFUL_SPACE_ID") ?? Deno.env.get("VITE_CONTENTFUL_SPACE_ID");
   const envId = Deno.env.get("CONTENTFUL_ENVIRONMENT_ID") ?? Deno.env.get("VITE_CONTENTFUL_ENVIRONMENT_ID") ?? "master";
-  const token = Deno.env.get("VITE_CONTENTFUL_DELIVERY_TOKEN");
+  const token = Deno.env.get("CONTENTFUL_DELIVERY_TOKEN") ?? Deno.env.get("VITE_CONTENTFUL_DELIVERY_TOKEN");
   const expiresAtRaw = Deno.env.get("CONTENTFUL_TOKEN_EXPIRES_AT"); // optional ISO date
 
   const report: Record<string, unknown> = { ok: true, checks: [] as unknown[] };
@@ -68,7 +68,14 @@ serve(async (req) => {
   // 1. Live API ping
   const url = `https://cdn.contentful.com/spaces/${spaceId}/environments/${envId}/content_types?limit=1`;
   const apiRes = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-  const apiCheck = { type: "api_ping", status: apiRes.status, ok: apiRes.ok };
+  const apiCheck = {
+    type: "api_ping",
+    status: apiRes.status,
+    ok: apiRes.ok,
+    spaceId,
+    environmentId: envId,
+    tokenTail: token.slice(-5),
+  };
   (report.checks as unknown[]).push(apiCheck);
 
   if (!apiRes.ok) {
