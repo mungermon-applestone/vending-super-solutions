@@ -96,7 +96,7 @@ function download(filename: string, content: string, mime: string) {
 }
 
 function LoginGate() {
-  const { signIn, isLoading } = useAuth();
+  const { signIn, signInWithGoogle, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -109,6 +109,21 @@ function LoginGate() {
     <div className="container mx-auto py-16 px-4 max-w-md">
       <h1 className="text-2xl font-bold text-foreground mb-2">Export Help Desk Articles</h1>
       <p className="text-muted-foreground mb-6">Sign in with your admin account to continue.</p>
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={() => signInWithGoogle()}
+        disabled={isLoading}
+      >
+        Continue with Google
+      </Button>
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">or</span>
+        </div>
+      </div>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <Label htmlFor="email">Email</Label>
@@ -125,6 +140,7 @@ function LoginGate() {
     </div>
   );
 }
+
 
 export default function ExportHelpDeskArticles() {
   const { session } = useAuth();

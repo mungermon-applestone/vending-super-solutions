@@ -13,8 +13,10 @@ interface AuthContextType {
     session: Session | null;
   } | undefined>;
   signUp: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
+
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -107,6 +109,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/doc-builder`,
+        },
+      });
+      if (error) {
+        toast({
+          title: 'Google sign-in failed',
+          description: error.message,
+          variant: 'destructive',
+        });
+        throw error;
+      }
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      throw error;
+    }
+  };
+
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
@@ -129,8 +153,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     signIn,
     signUp,
+    signInWithGoogle,
     signOut,
   };
+
 
   return (
     <AuthContext.Provider value={value}>
