@@ -8,7 +8,7 @@
   
   // Token version - bump this whenever PREVIEW_CREDENTIALS token is rotated
   // to invalidate any stale token cached in user localStorage.
-  const CREDENTIALS_VERSION = '2026-06-24-b';
+  const CREDENTIALS_VERSION = '2026-06-24-c';
 
   // Hardcoded credentials for preview environments - these are known to work
   const PREVIEW_CREDENTIALS = {
@@ -94,14 +94,27 @@
   
   // Apply credentials based on environment with enhanced fallback logic
   function applyCredentials() {
-    // First, check for production environment variables (set in deployment)
-    if (window.env.VITE_CONTENTFUL_SPACE_ID && window.env.VITE_CONTENTFUL_DELIVERY_TOKEN) {
-      console.log('[env-config] Using production environment variables');
-      window._contentfulInitializedSource = 'production-env';
-      return true;
-    }
-    
-    // Second, try localStorage for any saved credentials
+    // ALWAYS apply the current hardcoded credentials first — these are the
+    // authoritative token for both preview and production. This guarantees a
+    // rotated token reaches every environment as soon as the new build ships.
+    window.env.VITE_CONTENTFUL_SPACE_ID = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
+    window.env.VITE_CONTENTFUL_DELIVERY_TOKEN = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN;
+    window.env.VITE_CONTENTFUL_ENVIRONMENT_ID = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_ENVIRONMENT_ID;
+    window.env.spaceId = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID;
+    window.env.deliveryToken = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN;
+    window.env.environmentId = PREVIEW_CREDENTIALS.VITE_CONTENTFUL_ENVIRONMENT_ID;
+    window._contentfulInitializedSource = 'hardcoded-current';
+    try {
+      localStorage.setItem('contentful_credentials', JSON.stringify({
+        VITE_CONTENTFUL_SPACE_ID: PREVIEW_CREDENTIALS.VITE_CONTENTFUL_SPACE_ID,
+        VITE_CONTENTFUL_DELIVERY_TOKEN: PREVIEW_CREDENTIALS.VITE_CONTENTFUL_DELIVERY_TOKEN,
+        VITE_CONTENTFUL_ENVIRONMENT_ID: PREVIEW_CREDENTIALS.VITE_CONTENTFUL_ENVIRONMENT_ID
+      }));
+    } catch (e) {}
+    return true;
+
+    // (legacy fallback paths kept below for reference; unreachable)
+    // eslint-disable-next-line no-unreachable
     const storedCreds = loadCredentialsFromStorage();
     if (storedCreds) {
       window.env.VITE_CONTENTFUL_SPACE_ID = storedCreds.VITE_CONTENTFUL_SPACE_ID;
