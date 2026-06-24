@@ -1,37 +1,51 @@
-# Export Help Desk Articles for AI Gap Analysis
+## Goal
 
-Add a one-click export tool that pulls every `helpDeskArticle` entry from Contentful and downloads it as a single file you can feed to an AI (Claude, ChatGPT, Gemini) alongside your current software state.
+Let you sign into the admin tools (`/doc-builder`, `/admin/export-help-desk`) with your Google account instead of the lost password. Admin access stays gated by the `public.admin_users` table, so OAuth doesn't weaken security — it only changes how you prove who you are.
 
-## What you'll get
+## Why this is safe
 
-A new admin page at `/admin/export-help-desk` with two buttons:
+- Admin gating is server-side: RLS + the `is_admin(uid)` SECURITY DEFINER function check `admin_users.user_id`. The auth method (password vs Google) is irrelevant.
+- Google adds 2FA and removes the reused-password risk — net security improvement.
+- No client-side admin checks are introduced.
 
-1. **Download as Markdown** — one human/AI-readable `.md` file with every article (title, slug, category, body converted from Contentful Rich Text to plain Markdown). Best for pasting into an AI chat.
-2. **Download as JSON** — full structured dump (all fields, IDs, timestamps, tags). Best for programmatic diffing or re-importing later.
+## Steps
 
-Both include article count and export timestamp at the top.
+### 1. Enable Google provider in Supabase (you do this once, in the dashboard)
 
-## How it works (technical)
+I'll give exact instructions in chat. Summary:
+- Google Cloud Console → create OAuth Client ID (Web application)
+- Authorized redirect URI: `https://rwvlvooojegpebognnzn.supabase.co/auth/v1/callback`
+- Paste Client ID + Secret into Supabase Dashboard → Authentication → Providers → Google
+- Under Authentication → URL Configuration, add `https://applestonesolutions.com`, the preview URL, and `http://localhost:*` to allowed redirect URLs.
 
-- New page `src/pages/admin/ExportHelpDeskArticles.tsx`, gated by the existing admin check (`admin_users` table, same pattern as DocBuilder).
-- New Supabase edge function `supabase/functions/export-help-desk-articles/index.ts` that:
-  - Paginates through `/spaces/{space}/entries?content_type=helpDeskArticle&limit=1000&skip=N` via the Contentful gateway (reuses the existing `CONTENTFUL_SPACE_ID` / `CONTENTFUL_API_KEY` secrets already wired into `get-contentful-config`).
-  - Resolves linked assets (images) to URLs.
-  - Returns `{ articles: [...], count, exportedAt }`.
-- Frontend converts Rich Text → Markdown using `@contentful/rich-text-plain-text-renderer` (lightweight) plus a small custom walker for headings/lists/links, then triggers a browser download. JSON download is just `JSON.stringify` + Blob.
-- Route added to `src/routes.tsx` behind the admin guard.
+### 2. Add Google sign-in to the UI
 
-## Suggested AI workflow (after export)
+- Extend `AuthContext` with a `signInWithGoogle()` method that calls `supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/doc-builder' } })`.
+- Add a "Continue with Google" button to the login forms in `src/pages/DocBuilder.tsx` and `src/pages/admin/ExportHelpDeskArticles.tsx`, above the email/password fields, with a visual divider.
 
-1. Download the Markdown file.
-2. In Claude/ChatGPT, attach: (a) the exported `help-desk-articles.md`, (b) a description or sitemap of your current app features (e.g., the routes list from `src/routes.tsx` plus screenshots from DocBuilder).
-3. Prompt: *"Compare the documented features to the actual feature list. Produce a table of: (1) documented but removed/changed, (2) undocumented features needing new articles, (3) articles needing updates."*
+### 3. Link your Google identity to admin_users
 
-## Files changed
+Two clean options — I'd suggest **(a)**:
 
-- New: `src/pages/admin/ExportHelpDeskArticles.tsx`
-- New: `supabase/functions/export-help-desk-articles/index.ts`
-- Edit: `src/routes.tsx` (add admin route)
-- Add dep: `@contentful/rich-text-plain-text-renderer`
+**(a) Update the existing admin_users row** to your new Google user_id after your first Google sign-in. I'll provide a one-line migration once you've signed in once and we can read the new `auth.users.id` (visible in the Supabase dashboard → Authentication → Users).
 
-No DB migrations, no new secrets — Contentful credentials are already configured.
+**(b)** Insert a second `admin_users` row for the Google user_id, leaving the password row in place as a backup.
+
+### 4. Keep password login working
+
+The existing email/password form stays as a fallback. We don't delete the password row from `admin_users` unless you want to.
+
+## Technical notes
+
+- Files touched: `src/context/AuthContext.tsx`, `src/pages/DocBuilder.tsx`, `src/pages/admin/ExportHelpDeskArticles.tsx`.
+- One small migration after first Google login to update `admin_users.user_id`.
+- No edge function changes; `is_admin()` already works for any `auth.uid()`.
+- No changes to RLS policies or other admin gates.
+
+## What I need from you before building
+
+Just confirm the plan. After you approve:
+1. I'll implement the code changes.
+2. You'll enable Google in the Supabase dashboard (I'll walk you through it).
+3. You'll sign in with Google once.
+4. I'll run the migration to point `admin_users` at your Google user_id.
