@@ -6,12 +6,27 @@
   // Initialize window.env if it doesn't exist
   window.env = window.env || {};
   
+  // Token version - bump this whenever PREVIEW_CREDENTIALS token is rotated
+  // to invalidate any stale token cached in user localStorage.
+  const CREDENTIALS_VERSION = '2026-06-24';
+
   // Hardcoded credentials for preview environments - these are known to work
   const PREVIEW_CREDENTIALS = {
     VITE_CONTENTFUL_SPACE_ID: "al01e4yh2wq4",
-    VITE_CONTENTFUL_DELIVERY_TOKEN: "fxpQth03vfdKzI4VNT_fYg8cD5BwoTiGaa6INIyYync",
+    VITE_CONTENTFUL_DELIVERY_TOKEN: "Z5nFDjjfz2n_GN2JLDBVVH6rr96986sa2TaFCL5zkcI",
     VITE_CONTENTFUL_ENVIRONMENT_ID: "master"
   };
+
+  // One-time cache-bust: drop stale cached credentials from prior token versions.
+  try {
+    if (localStorage.getItem('contentful_credentials_version') !== CREDENTIALS_VERSION) {
+      localStorage.removeItem('contentful_credentials');
+      localStorage.setItem('contentful_credentials_version', CREDENTIALS_VERSION);
+      console.log('[env-config] Cleared stale cached contentful credentials');
+    }
+  } catch (e) {
+    console.warn('[env-config] Failed to check credentials version:', e);
+  }
 
   // Enhanced detection function for preview environments
   function isPreviewEnvironment() {
