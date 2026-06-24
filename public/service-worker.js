@@ -1,5 +1,5 @@
 // Service Worker for Vending Solutions
-const CACHE_NAME = 'vendingsolutions-v2';
+const CACHE_NAME = 'vendingsolutions-v3-2026-06-24b';
 
 // Assets to cache on install
 const STATIC_CACHE_URLS = [
