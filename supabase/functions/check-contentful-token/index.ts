@@ -68,7 +68,14 @@ serve(async (req) => {
   // 1. Live API ping
   const url = `https://cdn.contentful.com/spaces/${spaceId}/environments/${envId}/content_types?limit=1`;
   const apiRes = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-  const apiCheck = { type: "api_ping", status: apiRes.status, ok: apiRes.ok };
+  const apiCheck = {
+    type: "api_ping",
+    status: apiRes.status,
+    ok: apiRes.ok,
+    spaceId,
+    environmentId: envId,
+    tokenTail: token.slice(-5),
+  };
   (report.checks as unknown[]).push(apiCheck);
 
   if (!apiRes.ok) {
