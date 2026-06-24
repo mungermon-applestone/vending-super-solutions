@@ -4,13 +4,14 @@ The site's Contentful Content Delivery API (CDA) token can be set to expire. Whe
 
 ## Proactive monitoring
 
-A scheduled Supabase edge function (`check-contentful-token`) runs **daily at 13:00 UTC** and:
+A scheduled Supabase edge function (`check-contentful-token`) runs **daily at 13:00 UTC** and pings the Contentful CDA with the current token. On 401 (token rejected for any reason — rotated, revoked, expired) it emails an alert via AWS SES to `CONTENTFUL_ALERT_EMAIL` (falls back to `EMAIL_TO`).
 
-1. Pings the Contentful CDA with the current token.
-2. If the optional `CONTENTFUL_TOKEN_EXPIRES_AT` secret (ISO date, e.g. `2026-12-24`) is set, warns 14 / 7 / 3 / 1 days before expiry.
-3. On 401 or expiry, sends an email via AWS SES to `CONTENTFUL_ALERT_EMAIL` (falls back to `EMAIL_TO`).
+The active token (`June Delivery Token`, `…5zkcI`) has **no expiry** set in Contentful, so the cron is a failure-detector rather than an expiry-countdown. If a future token is created with an expiry date, set the `CONTENTFUL_TOKEN_EXPIRES_AT` secret (ISO date, e.g. `2027-06-24`) and the function will additionally warn at 14 / 7 / 3 / 1 days before expiry.
 
-To change the alert recipient, set the `CONTENTFUL_ALERT_EMAIL` secret in Supabase. To set/update the known expiry, set `CONTENTFUL_TOKEN_EXPIRES_AT` to the date Contentful displays for the active key.
+To change the alert recipient, set the `CONTENTFUL_ALERT_EMAIL` secret in Supabase.
+
+**Important:** the edge function reads `VITE_CONTENTFUL_DELIVERY_TOKEN` from Supabase secrets, NOT from the frontend bundle. After any token rotation, update that Supabase secret as well — otherwise the cron will email 401 alerts every morning even while the live site is fine.
+
 
 Manual test:
 
