@@ -1,51 +1,29 @@
-## Goal
+## Rotate the Contentful Delivery API Token
 
-Let you sign into the admin tools (`/doc-builder`, `/admin/export-help-desk`) with your Google account instead of the lost password. Admin access stays gated by the `public.admin_users` table, so OAuth doesn't weaken security — it only changes how you prove who you are.
+The public site is throwing `401 AccessTokenInvalid` because `VITE_CONTENTFUL_DELIVERY_TOKEN` (ending `…d7vf4`) is no longer valid in Contentful space `al01e4yh2wq4`. We'll mint a new Delivery token in Contentful and update the secret in Lovable.
 
-## Why this is safe
+### Step 1 — Get a new Delivery token from Contentful
 
-- Admin gating is server-side: RLS + the `is_admin(uid)` SECURITY DEFINER function check `admin_users.user_id`. The auth method (password vs Google) is irrelevant.
-- Google adds 2FA and removes the reused-password risk — net security improvement.
-- No client-side admin checks are introduced.
+1. Go to https://app.contentful.com and open the **Applestone** space.
+2. Top nav: **Settings → API keys**.
+3. You'll see existing API keys (each one has a *Content Delivery API token* and a *Content Preview API token*). Two options:
+   - **Preferred:** click the existing key that the site has been using (likely named something like "Website" or "Lovable"), then click **Regenerate** next to the *Content Delivery API - access token*. Copy the new token immediately — Contentful only shows it once.
+   - **Or:** click **Add API key**, name it (e.g. "Lovable Production"), save, and copy the *Content Delivery API - access token*.
+4. While you're on that screen, double-check the **Space ID** matches `al01e4yh2wq4` and the **Environment** includes `master` (or whatever env the site uses).
 
-## Steps
+### Step 2 — Update the secret in Lovable
 
-### 1. Enable Google provider in Supabase (you do this once, in the dashboard)
+Once you paste the new token to me, I'll update the `VITE_CONTENTFUL_DELIVERY_TOKEN` secret using the secrets tool. Because it's a `VITE_` prefixed build-time variable, the site will pick it up on the next build/preview reload — no code changes needed.
 
-I'll give exact instructions in chat. Summary:
-- Google Cloud Console → create OAuth Client ID (Web application)
-- Authorized redirect URI: `https://rwvlvooojegpebognnzn.supabase.co/auth/v1/callback`
-- Paste Client ID + Secret into Supabase Dashboard → Authentication → Providers → Google
-- Under Authentication → URL Configuration, add `https://applestonesolutions.com`, the preview URL, and `http://localhost:*` to allowed redirect URLs.
+If the new key has a different *Space ID* or *Environment ID* than what's currently stored, I'll also update `VITE_CONTENTFUL_SPACE_ID` and/or `VITE_CONTENTFUL_ENVIRONMENT_ID` at the same time.
 
-### 2. Add Google sign-in to the UI
+### Step 3 — Verify
 
-- Extend `AuthContext` with a `signInWithGoogle()` method that calls `supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/doc-builder' } })`.
-- Add a "Continue with Google" button to the login forms in `src/pages/DocBuilder.tsx` and `src/pages/admin/ExportHelpDeskArticles.tsx`, above the email/password fields, with a visual divider.
+After the secret is updated:
+1. Hard-refresh the preview / homepage.
+2. The red "Error loading page content" banner should disappear and Contentful-driven sections (hero, business goals, etc.) should render.
+3. If anything still 401s, we'll check the browser network tab for the failing request and confirm which token/space/env it's using.
 
-### 3. Link your Google identity to admin_users
-
-Two clean options — I'd suggest **(a)**:
-
-**(a) Update the existing admin_users row** to your new Google user_id after your first Google sign-in. I'll provide a one-line migration once you've signed in once and we can read the new `auth.users.id` (visible in the Supabase dashboard → Authentication → Users).
-
-**(b)** Insert a second `admin_users` row for the Google user_id, leaving the password row in place as a backup.
-
-### 4. Keep password login working
-
-The existing email/password form stays as a fallback. We don't delete the password row from `admin_users` unless you want to.
-
-## Technical notes
-
-- Files touched: `src/context/AuthContext.tsx`, `src/pages/DocBuilder.tsx`, `src/pages/admin/ExportHelpDeskArticles.tsx`.
-- One small migration after first Google login to update `admin_users.user_id`.
-- No edge function changes; `is_admin()` already works for any `auth.uid()`.
-- No changes to RLS policies or other admin gates.
-
-## What I need from you before building
-
-Just confirm the plan. After you approve:
-1. I'll implement the code changes.
-2. You'll enable Google in the Supabase dashboard (I'll walk you through it).
-3. You'll sign in with Google once.
-4. I'll run the migration to point `admin_users` at your Google user_id.
+### Notes / safety
+- The old token can be left active in Contentful until you confirm the new one works, then **revoke** it from the API keys screen so the leaked one can't be reused.
+- No code files change in this plan — it's purely a secret rotation.
