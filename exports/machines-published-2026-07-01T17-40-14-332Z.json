@@ -1,0 +1,802 @@
+{
+  "exportedAt": "2026-07-01T17:40:14.333Z",
+  "space": "al01e4yh2wq4",
+  "environment": "master",
+  "contentType": "machine",
+  "count": 13,
+  "items": [
+    {
+      "sys": {
+        "id": "70SBVzOP2lIJ70VtEo1xZL",
+        "type": "Entry",
+        "contentType": "machine",
+        "createdAt": "2025-07-15T20:06:54.053Z",
+        "updatedAt": "2026-07-01T17:32:59.919Z",
+        "locale": "en-US"
+      },
+      "fields": {
+        "title": "Smart Fridge (aka AI Cooler)",
+        "slug": "smart-fridge",
+        "type": "vending",
+        "temperature": "multi",
+        "description": "One of the fastest-growing hardware solutions in automated retail, smart fridges are convenient, easy-to-use micromarket centerpieces that lead to multi-product purchases and higher revenue.  These locking coolers feature payment devices, remote monitoring applications, and flexible temperature options for fresh or frozen food.",
+        "features": [
+          "AI-powered product recognition",
+          "Temperature Alerts",
+          "Inventory Alerts",
+          "Ad Display Option",
+          "Grab and Go"
+        ],
+        "images": [
+          {
+            "sys": {
+              "id": "1LNMTtD43VYDlQ4Af6HW5k",
+              "type": "Asset",
+              "createdAt": "2025-07-15T19:32:59.578Z",
+              "updatedAt": "2026-02-26T00:55:49.977Z",
+              "locale": "en-US"
+            },
+            "fields": {
+              "title": "smart-cooler",
+              "description": "image of a smart cooler, a refrigerator with a glass door and a payment device on the left side. ",
+              "file": {
+                "url": "//images.ctfassets.net/al01e4yh2wq4/1LNMTtD43VYDlQ4Af6HW5k/6a43a7ffebf63d91092417c06c7c80f4/generic-smart-fridge.png",
+                "details": {
+                  "size": 423163,
+                  "image": {
+                    "width": 800,
+                    "height": 800
+                  }
+                },
+                "fileName": "generic-smart-fridge.png",
+                "contentType": "image/png"
+              }
+            }
+          }
+        ],
+        "dimensions": "Information Coming Soon",
+        "weight": "Information Coming Soon",
+        "powerRequirements": "Information Coming Soon",
+        "capacity": "Information Coming Soon",
+        "paymentOptions": "Information Coming Soon",
+        "connectivity": "Information Coming Soon",
+        "manufacturer": "Information Coming Soon",
+        "warranty": "Information Coming Soon",
+        "visible": true,
+        "displayOrder": 9,
+        "showOnHomepage": false
+      }
+    },
+    {
+      "sys": {
+        "id": "6jJqGhuZxGARPPh0y5PMTZ",
+        "type": "Entry",
+        "contentType": "machine",
+        "createdAt": "2025-05-02T21:07:00.484Z",
+        "updatedAt": "2026-01-13T15:40:52.085Z",
+        "locale": "en-US"
+      },
+      "fields": {
+        "title": "Refrigerated Locker (21 Cell) ",
+        "slug": "21-cell-temp-locker",
+        "type": "locker",
+        "temperature": "refrigerated",
+        "description": "This model can operate at ambient or refrigerated temperatures. Its modular design consists of a control towner and as many 21-cell \"adders\" as you like. Applestone's softwre allows customers to pick up their orders with a QR code. ",
+        "features": [
+          "Refrigerated",
+          "Frozen",
+          "Ambient",
+          "QR-code Pickup",
+          "Modular Design"
+        ],
+        "images": [
+          {
+            "sys": {
+              "id": "7K41cTOv1h5xNw5zzUEnv0",
+              "type": "Asset",
+              "createdAt": "2025-05-02T21:05:06.659Z",
+              "updatedAt": "2025-05-02T21:05:32.819Z",
+              "locale": "en-US"
+            },
+            "fields": {
+              "title": "21-cell-zhilai-locker",
+              "description": "Image of a pickup locker with a touch-screen control tower and 21 locker cells. ",
+              "file": {
+                "url": "//images.ctfassets.net/al01e4yh2wq4/7K41cTOv1h5xNw5zzUEnv0/d8c6e6d2eeaffe6240c0c0c1bc55b0df/Screenshot_2025-05-02_at_5.02.25_PM.png",
+                "details": {
+                  "size": 1313524,
+                  "image": {
+                    "width": 1800,
+                    "height": 1838
+                  }
+                },
+                "fileName": "Screenshot 2025-05-02 at 5.02.25 PM.png",
+                "contentType": "image/png"
+              }
+            }
+          }
+        ],
+        "dimensions": "50.79\"(W) × 85.55\"(H) × 23.74\"(D) (adder)",
+        "weight": "440lbs/200kg (adder)",
+        "powerRequirements": "70 Watts @ 115V-60Hz (per add-on)",
+        "capacity": "10 compartment add-ons",
+        "paymentOptions": "Touchless",
+        "connectivity": "Wired, Cellular, or Wifi",
+        "manufacturer": "Call for Details",
+        "warranty": "1 year",
+        "visible": true,
+        "showOnHomepage": true
+      }
+    },
+    {
+      "sys": {
+        "id": "62Z8KyHm3dvSS3iLUrjpwW",
+        "type": "Entry",
+        "contentType": "machine",
+        "createdAt": "2025-05-07T01:20:19.016Z",
+        "updatedAt": "2026-01-06T15:10:30.004Z",
+        "locale": "en-US"
+      },
+      "fields": {
+        "title": "Large Capacity Refrigerated Machine",
+        "slug": "option-4-refrigerated",
+        "type": "vending",
+        "temperature": "refrigerated",
+        "description": "From our friends at DMVI, an absolute powerhouse of a refrigerated machine with an elevator dispensing mechanism and both pusher and spiral dispensing options. A favorite of our butcher shop clients, it's rugged, ready for custom wrapping, and can hold up to 200 1-lb packs of ground beef.",
+        "features": [
+          "Pusher Dispensing",
+          "Spiral Dispensing ",
+          "Refrigerated",
+          "Large Screen"
+        ],
+        "images": [
+          {
+            "sys": {
+              "id": "36YiRkA8Xw7aShdCFtCsJR",
+              "type": "Asset",
+              "createdAt": "2026-01-06T14:59:51.122Z",
+              "updatedAt": "2026-03-01T21:28:24.726Z",
+              "locale": "en-US"
+            },
+            "fields": {
+              "title": "fresh-food-vending-machine",
+              "description": "A vending machines with a picture of apples. ",
+              "file": {
+                "url": "//images.ctfassets.net/al01e4yh2wq4/36YiRkA8Xw7aShdCFtCsJR/548663487348bb4813f8b93b6b1da46f/zhilai-frozen-vending.png",
+                "details": {
+                  "size": 1652716,
+                  "image": {
+                    "width": 2248,
+                    "height": 1918
+                  }
+                },
+                "fileName": "zhilai-frozen-vending.png",
+                "contentType": "image/png"
+              }
+            }
+          }
+        ],
+        "dimensions": "H76” x W47 ⅓” x D32”",
+        "weight": "728 lbs.",
+        "powerRequirements": "100-240V 200 Watts @ 110V-60Hz",
+        "capacity": "200 1-lb. packs of ground beef (for example)",
+        "paymentOptions": "Credit, Debit, Tap",
+        "connectivity": "Wired, Wifi, Cellular",
+        "manufacturer": "DMVI",
+        "warranty": "1 Year",
+        "visible": true,
+        "displayOrder": 2,
+        "showOnHomepage": true,
+        "homepageOrder": 1
+      }
+    },
+    {
+      "sys": {
+        "id": "3tQIRzIcysQGBXnDXGoFYn",
+        "type": "Entry",
+        "contentType": "machine",
+        "createdAt": "2025-10-28T22:44:30.804Z",
+        "updatedAt": "2025-10-30T22:38:19.850Z",
+        "locale": "en-US"
+      },
+      "fields": {
+        "title": "Applestone High-Capacity Slim Machine",
+        "slug": "applestone-high-capacity-slim",
+        "type": "vending",
+        "temperature": "ambient",
+        "description": "Applestone's first custom-built machine! Designed to dispense pocket-sized packages like nicotine pouches or decks of collectible cards, it has a total capacity of 448 items. Ideal for convenience stores, dispensaries, sports facilities, bars and clubs, or any venue looking to offer automated sales of regulated products. ",
+        "features": [
+          "Durable steel construction",
+          "Custom branded wrap included",
+          "Touchless payment system",
+          "Phone app-based identity verification",
+          "32” touch-screen display",
+          "1 Year Warranty"
+        ],
+        "images": [
+          {
+            "sys": {
+              "id": "1TJT2w2gRxd41QzaCoUwSr",
+              "type": "Asset",
+              "createdAt": "2025-10-28T22:41:28.738Z",
+              "updatedAt": "2025-10-28T22:41:28.738Z",
+              "locale": "en-US"
+            },
+            "fields": {
+              "title": "Applestone High-Capacity Slim Machine",
+              "description": "vending machine with a blank touch screen",
+              "file": {
+                "url": "//images.ctfassets.net/al01e4yh2wq4/1TJT2w2gRxd41QzaCoUwSr/849102a44cf42bebc387e14831ee51cd/lQLPKGN3VyEF1l_NAtnNAZew7kVAp3qve_oI1_lN2YO5AA_407_729.png",
+                "details": {
+                  "size": 91737,
+                  "image": {
+                    "width": 407,
+                    "height": 729
+                  }
+                },
+                "fileName": "lQLPKGN3VyEF1l_NAtnNAZew7kVAp3qve_oI1_lN2YO5AA_407_729.png",
+                "contentType": "image/png"
+              }
+            }
+          }
+        ],
+        "dimensions": "H: 75.2\" x W: 31.5' x D: 17\"",
+        "weight": "Call for Info",
+        "powerRequirements": "110 V AC",
+        "capacity": "448 items",
+        "paymentOptions": "Credit, Debit, Tap",
+        "connectivity": "Wired, Wifi, Cellular Backup",
+        "manufacturer": "Call for Info",
+        "warranty": "1 Year",
+        "visible": true,
+        "displayOrder": 3,
+        "showOnHomepage": true,
+        "homepageOrder": 1
+      }
+    },
+    {
+      "sys": {
+        "id": "5dfKG1fNE1NgjBSMGbZW3i",
+        "type": "Entry",
+        "contentType": "machine",
+        "createdAt": "2025-05-29T15:26:29.634Z",
+        "updatedAt": "2025-10-10T16:15:57.286Z",
+        "locale": "en-US"
+      },
+      "fields": {
+        "title": "Frozen Food/Ice Cream Vending Machine",
+        "slug": "frozen-vending-machine-large-capacity",
+        "type": "vending",
+        "temperature": "frozen",
+        "description": "A large-capacity vending machine for frozen meat, fish, ice cream, prepared foods, and of course ice cubes and ice packs. Adjustable shelf widths and heights allow you to offer products of different sizes and shapes and find your ideal product mix.",
+        "images": [
+          {
+            "sys": {
+              "id": "2kgViqccNJR176VCFDI1jt",
+              "type": "Asset",
+              "createdAt": "2025-05-29T15:26:17.451Z",
+              "updatedAt": "2025-10-11T00:28:34.885Z",
+              "locale": "en-US"
+            },
+            "fields": {
+              "title": "ice-cream-frozen-vending",
+              "description": "A large floorstanding vending machine with a large-screen in front. Door has image of ice cream. ",
+              "file": {
+                "url": "//images.ctfassets.net/al01e4yh2wq4/2kgViqccNJR176VCFDI1jt/0325b77f495eca3df8e0d071d5e52f77/ice-cream-machine.png",
+                "details": {
+                  "size": 1030976,
+                  "image": {
+                    "width": 2248,
+                    "height": 1918
+                  }
+                },
+                "fileName": "ice-cream-machine.png",
+                "contentType": "image/png"
+              }
+            }
+          }
+        ],
+        "dimensions": "80 H X 45.2 W X 39.9 D (inches) / 2032 X 1150 X 1013 (mm) ",
+        "weight": "816 lbs. / 370 kg.",
+        "powerRequirements": "AC110V-120V, 60HZ",
+        "capacity": "150 1-lb. packs of ground beef",
+        "paymentOptions": "Credit, Debit, Tap",
+        "connectivity": "Wired, Wifi, Cellular Backup",
+        "manufacturer": "Call for Details ",
+        "warranty": "1 Year",
+        "visible": true,
+        "displayOrder": 1,
+        "showOnHomepage": true
+      }
+    },
+    {
+      "sys": {
+        "id": "3UWuWkOwHnEi2f9uoP9QIt",
+        "type": "Entry",
+        "contentType": "machine",
+        "createdAt": "2025-09-16T19:50:13.853Z",
+        "updatedAt": "2025-09-16T20:06:07.747Z",
+        "locale": "en-US"
+      },
+      "fields": {
+        "title": "Indoor/Outdoor Residental/Commercial Parcel Locker",
+        "slug": "indoor-outdoor-smart-parcel-locker",
+        "type": "locker",
+        "temperature": "ambient",
+        "description": "A flexible, beautiful solution for residential or commercial parcel pickup. Its large touch-screen makes it friendlier than typical small-screen pickup lockers. And, as with all Applestone-powered hardware, its screen is suitable for advertising, promotions, loyalty programs, and announcements. \n\nIt's also ready for outdoor use, thanks to its overhanging roof, security cameras, and lighting. ",
+        "features": [
+          "Residential",
+          "Commercial",
+          "Indoor",
+          "Outdoor",
+          "Roof",
+          "Large-screen",
+          "QR-code based retrieval",
+          "Security cameras",
+          "BOIPS-ready",
+          "Walk-up-and-buy capable",
+          "Creative branding",
+          "Fun and engaging"
+        ],
+        "images": [
+          {
+            "sys": {
+              "id": "46Vc9lxXHtnrHGyMTrvEOT",
+              "type": "Asset",
+              "createdAt": "2025-09-16T19:44:13.722Z",
+              "updatedAt": "2025-09-16T19:44:13.722Z",
+              "locale": "en-US"
+            },
+            "fields": {
+              "title": "indoor-outdoor-smart-parcel-locker",
+              "description": "image of a large locker array with an illuminated roof and a large touch-screen in the middle. ",
+              "file": {
+                "url": "//images.ctfassets.net/al01e4yh2wq4/46Vc9lxXHtnrHGyMTrvEOT/77f5e9025b224b93d585968228e3b723/locker-rendering-parcel.png",
+                "details": {
+                  "size": 1825807,
+                  "image": {
+                    "width": 1531,
+                    "height": 949
+                  }
+                },
+                "fileName": "locker-rendering-parcel.png",
+                "contentType": "image/png"
+              }
+            }
+          }
+        ],
+        "visible": true,
+        "showOnHomepage": true,
+        "homepageOrder": 1
+      }
+    },
+    {
+      "sys": {
+        "id": "28Nh59J9HgiDQ4OjPS7el3",
+        "type": "Entry",
+        "contentType": "machine",
+        "createdAt": "2025-04-18T19:59:38.675Z",
+        "updatedAt": "2025-07-15T20:29:29.484Z",
+        "locale": "en-US"
+      },
+      "fields": {
+        "title": "Slim Floorstanding Spiral Dispense Machine",
+        "slug": "divi-ss",
+        "type": "vending",
+        "temperature": "ambient",
+        "description": "From our partners at Fastcorp: Standing 74” tall with a compact 26 x 13” footprint, the space-efficient DIVI SS holds up to 504 products. Featuring a striking 32” high-definition touch screen, the DIVI SS from Fastcorp is an automated-retail powerhouse that delivers a visual merchandising punch!",
+        "features": [
+          "Durable steel construction",
+          "Custom branded wrap included",
+          "Up to 504 product capacity",
+          "Touchless payment system",
+          "Phone app-based identity verification",
+          "32” touch-screen display",
+          "1 Year Warranty"
+        ],
+        "images": [
+          {
+            "sys": {
+              "id": "78agEZfedKIfZpvQzwtUtT",
+              "type": "Asset",
+              "createdAt": "2025-04-18T19:52:58.207Z",
+              "updatedAt": "2025-06-12T20:38:50.723Z",
+              "locale": "en-US"
+            },
+            "fields": {
+              "title": "Divi-SS",
+              "description": "Slim floor-standing vending machine with spiral dispensing. ",
+              "file": {
+                "url": "//images.ctfassets.net/al01e4yh2wq4/78agEZfedKIfZpvQzwtUtT/ee78cd646c4824f36f295719c08a30a8/Divi_SS_angled_right_w_BG.jpg",
+                "details": {
+                  "size": 211747,
+                  "image": {
+                    "width": 1200,
+                    "height": 1200
+                  }
+                },
+                "fileName": "Divi SS angled right w:BG.jpg",
+                "contentType": "image/jpeg"
+              }
+            }
+          }
+        ],
+        "dimensions": "H: 74.8\" x W: 26.38\" x D: 13.78\"",
+        "weight": "268.96 lbs",
+        "powerRequirements": "120 V AC / 50 W",
+        "capacity": "24 SKU/504 max",
+        "paymentOptions": "Credit, Debit, Tap",
+        "connectivity": "Wired, Wifi, Cellular Backup",
+        "manufacturer": "Fastcorp",
+        "warranty": "1 Year",
+        "visible": true,
+        "displayOrder": 3,
+        "showOnHomepage": true,
+        "homepageOrder": 1
+      }
+    },
+    {
+      "sys": {
+        "id": "5JUQZmoSR5CsveMPj2Pmgc",
+        "type": "Entry",
+        "contentType": "machine",
+        "createdAt": "2025-05-02T21:00:16.945Z",
+        "updatedAt": "2025-06-26T20:11:49.484Z",
+        "locale": "en-US"
+      },
+      "fields": {
+        "title": "Refrigerator/Freezer Locker (10 Cell)",
+        "slug": "10-cell-temp-locker",
+        "type": "locker",
+        "temperature": "multi",
+        "description": "This model can operate at ambient, refrigerated, or frozen temperatures. It's modular design consists of a control towner and as many 10-cell \"adders\" as you like. Applestone's softwre allows customers to pick up their orders with a QR code. ",
+        "features": [
+          "Refrigerated",
+          "Frozen",
+          "Ambient",
+          "QR-code Pickup",
+          "Modular Design"
+        ],
+        "images": [
+          {
+            "sys": {
+              "id": "553syNMjWWlomo0IGEI2yr",
+              "type": "Asset",
+              "createdAt": "2025-05-02T20:56:15.060Z",
+              "updatedAt": "2025-05-02T20:56:15.060Z",
+              "locale": "en-US"
+            },
+            "fields": {
+              "title": "10-cell-locker",
+              "description": "Image of a pickup locker with a touch screen control tower and 10 locker cells. ",
+              "file": {
+                "url": "//images.ctfassets.net/al01e4yh2wq4/553syNMjWWlomo0IGEI2yr/e9e938a612d6c355ba8967596e22f230/Screenshot_2025-05-02_at_4.54.53_PM.png",
+                "details": {
+                  "size": 461166,
+                  "image": {
+                    "width": 844,
+                    "height": 1034
+                  }
+                },
+                "fileName": "Screenshot 2025-05-02 at 4.54.53 PM.png",
+                "contentType": "image/png"
+              }
+            }
+          }
+        ],
+        "dimensions": "50.79\"(W) × 85.55\"(H) × 23.74\"(D) (Adder)",
+        "weight": "440lbs/200kg (Adder)",
+        "powerRequirements": "70 Watts @ 115V-60Hz (per add-on)",
+        "capacity": "10 compartment add-ons",
+        "paymentOptions": "Touchless",
+        "connectivity": "Wired, Cellular, or Wifi",
+        "manufacturer": "Call for Details",
+        "warranty": "1 year",
+        "visible": true,
+        "showOnHomepage": true
+      }
+    },
+    {
+      "sys": {
+        "id": "1omUbnEhB6OeBFpwPFj1Ww",
+        "type": "Entry",
+        "contentType": "machine",
+        "createdAt": "2025-04-18T20:08:52.895Z",
+        "updatedAt": "2025-06-13T14:44:11.276Z",
+        "locale": "en-US"
+      },
+      "fields": {
+        "title": "Wall-Mounted Pusher Dispense Mechanism",
+        "slug": "wall-mounted-pusher",
+        "type": "vending",
+        "temperature": "ambient",
+        "description": "From our partners at Fastcorp: The DIVI wall-mounted machines are your “small but mighty” merchandising machine. The DIVI-WP utilizes a pusher dispensing mechanism for FIFO vending of simple, regular, product packages. Despite its small size, the WP boasts an impressive and eye-catching 32” high-definition screen, and a size-defying capacity of 16 SKUs and 192 products.",
+        "features": [
+          "Durable heavy steel construction",
+          "Custom branded wrap included",
+          "192 product capacity",
+          "Phone app-based identity verification",
+          "Touchless payment systems",
+          "32” touch screen display",
+          "Pusher FIFO dispensing mechanism",
+          "1 Year Warranty"
+        ],
+        "images": [
+          {
+            "sys": {
+              "id": "17lJoNGq5EsbIKuKJtgvo2",
+              "type": "Asset",
+              "createdAt": "2025-04-18T19:55:12.615Z",
+              "updatedAt": "2025-06-12T20:49:58.273Z",
+              "locale": "en-US"
+            },
+            "fields": {
+              "title": "Divi WP",
+              "description": "Image of wall-hanging vending machine with full-screen front. ",
+              "file": {
+                "url": "//images.ctfassets.net/al01e4yh2wq4/17lJoNGq5EsbIKuKJtgvo2/6cc444c9348ead008ba60a98bb3822e8/Divi_WP_angled_right_W_BG.jpg",
+                "details": {
+                  "size": 156102,
+                  "image": {
+                    "width": 1200,
+                    "height": 1200
+                  }
+                },
+                "fileName": "Divi WP angled right W:BG.jpg",
+                "contentType": "image/jpeg"
+              }
+            }
+          }
+        ],
+        "dimensions": "H: 41.34\" x W: 22.05\" x D: 12.01\"",
+        "weight": "110.23 lbs",
+        "powerRequirements": "120 V AC / 40 W",
+        "capacity": "16 SKU/192 max",
+        "paymentOptions": "Credit, Debit, Tap",
+        "connectivity": "Wired, Wifi, Cellular Backup",
+        "manufacturer": "Fastcorp",
+        "warranty": "1 Year",
+        "visible": true,
+        "displayOrder": 6
+      }
+    },
+    {
+      "sys": {
+        "id": "5LZBJGytdgqzvci4FiRcJT",
+        "type": "Entry",
+        "contentType": "machine",
+        "createdAt": "2025-04-18T19:57:21.187Z",
+        "updatedAt": "2025-06-13T14:40:22.528Z",
+        "locale": "en-US"
+      },
+      "fields": {
+        "title": "Floorstanding Spiral Dispensing Machine",
+        "slug": "divi-ss-l",
+        "type": "vending",
+        "temperature": "ambient",
+        "description": "From our partners at Fastcorp: The DIVI SS-L is a power house of merchandising magic providing a soft-touch for your fragile products or packaging. The helix spiral mechanism guides the product to an elevator which delivers it to an access window. The eye-catching 43” high-definition touch-screen provides opportunities for brand- enhancement, as well as additional advertising revenue. Despite being packed with features, the DIVI SS-L highly maneuverable, compact customer magnet.",
+        "images": [
+          {
+            "sys": {
+              "id": "1Fz2yyHlRwgGIFYKkJsKfp",
+              "type": "Asset",
+              "createdAt": "2025-04-18T19:51:59.448Z",
+              "updatedAt": "2025-06-12T20:42:39.986Z",
+              "locale": "en-US"
+            },
+            "fields": {
+              "title": "Divi SS-L",
+              "description": "Slim ambient vending machine with spiral dispensing.",
+              "file": {
+                "url": "//images.ctfassets.net/al01e4yh2wq4/1Fz2yyHlRwgGIFYKkJsKfp/b2a8b1f63edcb1304a4712c940c49037/DIVI_SS-L_front__BG.jpg",
+                "details": {
+                  "size": 164474,
+                  "image": {
+                    "width": 1200,
+                    "height": 1200
+                  }
+                },
+                "fileName": "DIVI SS-L front :BG.jpg",
+                "contentType": "image/jpeg"
+              }
+            }
+          }
+        ],
+        "dimensions": "H: 73.23\" x W: 45.52\" x D: 38.58\"",
+        "weight": "348.33 lbs",
+        "powerRequirements": "120 V AC / 150 W",
+        "capacity": "21 SKU/504 max",
+        "paymentOptions": "Credit, Debit, Tap",
+        "connectivity": "Wired, Wifi, Cellular Backup",
+        "manufacturer": "Fastcorp",
+        "warranty": "1 Year",
+        "visible": true,
+        "showOnHomepage": true,
+        "homepageOrder": 2
+      }
+    },
+    {
+      "sys": {
+        "id": "5SAZ7TUPsufgmUA2rwKAmE",
+        "type": "Entry",
+        "contentType": "machine",
+        "createdAt": "2025-04-18T19:58:43.953Z",
+        "updatedAt": "2025-06-13T14:38:36.166Z",
+        "locale": "en-US"
+      },
+      "fields": {
+        "title": "Slim Floorstanding Push-Dispense Machine",
+        "slug": "divi-sp",
+        "type": "vending",
+        "temperature": "ambient",
+        "description": "From our partners as Fastcorp: With a slim 26” x 14” footrprint, the DIVI SP Slim Standing Pusher offers a space-defying 288 product capacity. The narrow depth of the SP makes it ideal for an end-cap and the high resolution, 32” screen provides an eye-catching opportunity for brand reinforcement, impulse sales, and additional advertising revenue.",
+        "images": [
+          {
+            "sys": {
+              "id": "7CwprWSoV1lES0GW1YvGg6",
+              "type": "Asset",
+              "createdAt": "2025-04-18T19:55:37.874Z",
+              "updatedAt": "2025-06-12T20:17:38.130Z",
+              "locale": "en-US"
+            },
+            "fields": {
+              "title": "Divi-SP",
+              "description": "Slim floor-standing vending machine with large screen. ",
+              "file": {
+                "url": "//images.ctfassets.net/al01e4yh2wq4/7CwprWSoV1lES0GW1YvGg6/7aeff01d52a7622f82fecf8f9fd23d93/Divi_SP_angled_left_w_BG.jpg",
+                "details": {
+                  "size": 201767,
+                  "image": {
+                    "width": 1200,
+                    "height": 1200
+                  }
+                },
+                "fileName": "Divi SP angled left w:BG.jpg",
+                "contentType": "image/jpeg"
+              }
+            }
+          }
+        ],
+        "dimensions": "H: 74.8\" x W: 26.38\" x D: 13.78\"",
+        "weight": "268.96 lbs",
+        "powerRequirements": "120 V AC / 50 W",
+        "capacity": "24 SKU/288 max",
+        "paymentOptions": "Credit, Debit, Tap",
+        "connectivity": "Wired, Wifi, Cellular Backup",
+        "manufacturer": "Fastcorp",
+        "warranty": "1 Year",
+        "visible": true
+      }
+    },
+    {
+      "sys": {
+        "id": "4JoWRLTFwO8ZiseWLUuVaq",
+        "type": "Entry",
+        "contentType": "machine",
+        "createdAt": "2025-04-18T20:07:28.400Z",
+        "updatedAt": "2025-06-13T14:37:59.514Z",
+        "locale": "en-US"
+      },
+      "fields": {
+        "title": "Wall-Mounted Spiral Dispensing Machine",
+        "slug": "divi-ws",
+        "type": "vending",
+        "temperature": "ambient",
+        "description": "From our partners at Fastcorp: The DIVI Wall Mounted Machines are truly “small but mighty.” Ideal for compact spaces, the sleek DIVI-WS features a helix-spiral delivery mechanism to ensure trouble-free vending of non-conforming product packages day after day! Despite its compact size, the DIVI-WS will impress your customers with a striking 32” high-definition touch screen, and an astonishing capacity of 150 products.",
+        "features": [
+          "Durable steel construction",
+          "Custom branded wrap included",
+          "Carrying handles",
+          "Up to 10 SKUs, 150 product capacity",
+          "Helix Spiral dispensing mechanism",
+          "Touchless payment system",
+          "Phone app-based identity verification",
+          "32” touch-screen display",
+          "1 Year Warranty"
+        ],
+        "images": [
+          {
+            "sys": {
+              "id": "ridf0xU6YfOYQxFAdlUGm",
+              "type": "Asset",
+              "createdAt": "2025-04-18T17:03:33.469Z",
+              "updatedAt": "2025-06-12T20:47:39.912Z",
+              "locale": "en-US"
+            },
+            "fields": {
+              "title": "Divi WS Image",
+              "description": "Image of a wall-mounted vending machine with a large screen. ",
+              "file": {
+                "url": "//images.ctfassets.net/al01e4yh2wq4/ridf0xU6YfOYQxFAdlUGm/8aa17ca91d8e55dd52fdc395410737d8/Divi_WS_front_w_BG.jpg",
+                "details": {
+                  "size": 175085,
+                  "image": {
+                    "width": 1200,
+                    "height": 1200
+                  }
+                },
+                "fileName": "Divi WS front w:BG.jpg",
+                "contentType": "image/jpeg"
+              }
+            }
+          }
+        ],
+        "dimensions": "H: 41.34\" x W: 22.05\" x D: 10.43\"",
+        "weight": "103.62 lbs",
+        "powerRequirements": "120 V AC / 20 W",
+        "capacity": "10 SKU/150 max",
+        "paymentOptions": "Credit, Debit, Tap",
+        "connectivity": "Wired, Wifi, Cellular Backup",
+        "manufacturer": "Fastcorp",
+        "warranty": "1 Year",
+        "visible": true
+      }
+    },
+    {
+      "sys": {
+        "id": "260DKHMFcyG0WIOx8ExSqA",
+        "type": "Entry",
+        "contentType": "machine",
+        "createdAt": "2025-04-18T19:41:19.428Z",
+        "updatedAt": "2025-05-02T20:34:39.491Z",
+        "locale": "en-US"
+      },
+      "fields": {
+        "title": "Large-Capacity Floorstanding Machine",
+        "slug": "divi-lp-l",
+        "type": "vending",
+        "temperature": "ambient",
+        "description": "From our partners at Fastcorp: The DIVI L-PL takes your merchandising magic to the next level with an impressive 54” high-definition digital screen. Think about it as your own billboard - with instant delivery! The screen provides opportunities for brand-enhancement, as well as the potential for additional revenue from Out of Home Advertising. Casters make this power-house\nmaneuverable while the 48 cargo lanes carry a massive total capacity of 500 products!",
+        "features": [
+          "Durable steel construction",
+          "Custom branded wrap included",
+          "500 product capacity",
+          "Pusher dispensing mechanism",
+          "Touchless payment system",
+          "Phone app-based identity verification",
+          "54” touch-screen display",
+          "Inbuilt casters for maneuverability",
+          "1 Year Warranty"
+        ],
+        "images": [
+          {
+            "sys": {
+              "id": "bnAyl01QmGK8dsayK2L8e",
+              "type": "Asset",
+              "createdAt": "2025-04-18T19:39:51.254Z",
+              "updatedAt": "2025-06-12T20:11:47.537Z",
+              "locale": "en-US"
+            },
+            "fields": {
+              "title": "Divi-LP-L",
+              "description": "Large-capacity ambient temperature vending machine with large screen. ",
+              "file": {
+                "url": "//images.ctfassets.net/al01e4yh2wq4/bnAyl01QmGK8dsayK2L8e/9727f62a2cea86142ea20aaeb68e8f5e/Divi_LP-L_angled_right_w_BG.jpg",
+                "details": {
+                  "size": 125465,
+                  "image": {
+                    "width": 1200,
+                    "height": 1200
+                  }
+                },
+                "fileName": "Divi LP-L angled right w:BG.jpg",
+                "contentType": "image/jpeg"
+              }
+            }
+          }
+        ],
+        "dimensions": "H: 73.23\" x W: 45.52\" x D: 38.58\"",
+        "weight": "705 lbs",
+        "powerRequirements": "120 V AC",
+        "capacity": "48 SKU/500 max",
+        "paymentOptions": "Credit, Debit, Tap",
+        "connectivity": "Wired, Wifi, Cellular Backup",
+        "manufacturer": "Fastcorp",
+        "warranty": "1 Year",
+        "visible": true,
+        "showOnHomepage": true,
+        "homepageOrder": 2
+      }
+    }
+  ]
+}
