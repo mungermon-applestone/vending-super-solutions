@@ -8,7 +8,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "export:machines": "node scripts/export-published-machines.mjs"
   },
   "dependencies": {
     "@contentful/rich-text-react-renderer": "^15.19.6",
