@@ -126,6 +126,10 @@ const TechnologyPage = () => {
         )}
 
         <TechnologySections sections={sections} />
+
+        <CustomerMetricsSection />
+        
+
         
         {/* Add ContentfulTestimonialsCarousel */}
         <ContentfulTestimonialsCarousel 
