@@ -1,6 +1,5 @@
 import React from 'react';
 import TechnologySections from '@/components/technology/TechnologySections';
-import CustomerMetricsSection from '@/components/technology/CustomerMetricsSection';
 import { useContentfulTechnologyPageContent } from '@/hooks/cms/useContentfulTechnologyPageContent';
 import { useContentfulTechnologySections } from '@/hooks/cms/useContentfulTechnologySections';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -128,7 +127,7 @@ const TechnologyPage = () => {
 
         <TechnologySections sections={sections} />
 
-        <CustomerMetricsSection />
+
         
 
         
