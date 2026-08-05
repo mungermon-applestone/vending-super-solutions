@@ -53,7 +53,7 @@ const CustomerMetricsSection: React.FC = () => {
                   <TranslatableText context="technology-page">Customer Traffic by Hour</TranslatableText>
                 </p>
                 <ChartContainer config={chartConfig} className="h-[280px] w-full">
-                  <BarChart data={trafficData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                  <BarChart data={trafficData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid vertical={false} strokeDasharray="3 3" />
                     <XAxis
                       dataKey="hour"
@@ -61,9 +61,9 @@ const CustomerMetricsSection: React.FC = () => {
                       axisLine={false}
                       tickMargin={8}
                       interval="preserveStartEnd"
-                      minTickGap={12}
+                      minTickGap={4}
                     />
-                    <YAxis tickLine={false} axisLine={false} width={40} />
+                    <YAxis tickLine={false} axisLine={false} width={48} />
                     <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
                     <Bar dataKey="visitors" fill="var(--color-visitors)" radius={[4, 4, 0, 0]} />
                   </BarChart>
