@@ -128,7 +128,7 @@ const TechnologyPage = () => {
 
         <TechnologySections sections={sections} />
 
-        <CustomerMetricsSection />
+
         
 
         
