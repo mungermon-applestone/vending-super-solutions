@@ -157,7 +157,6 @@ async function main() {
       fields: Object.fromEntries([
         ...Object.entries(FIELDS).map(([k, v]) => [k, { 'en-US': v }]),
         ['images', { 'en-US': [link(assetId), link(EXISTING_FRIDGE_ASSET_ID)] }],
-        ['thumbnail', { 'en-US': link(assetId) }],
       ]),
     }),
   });
