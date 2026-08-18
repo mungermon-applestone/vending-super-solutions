@@ -81,6 +81,10 @@ export const router = createBrowserRouter([
         element: <MachineDetail />,
       },
       {
+        path: "/__combo-preview",
+        element: <ComboPreview />,
+      },
+      {
         path: "/technology",
         element: <TechnologyPage />,
       },
