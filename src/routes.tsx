@@ -29,7 +29,6 @@ import CustomerSupportTicket from "./pages/CustomerSupportTicket";
 import CustomerProtectedRoute from "./components/auth/CustomerProtectedRoute";
 import DocBuilder from "./pages/DocBuilder";
 import ExportHelpDeskArticles from "./pages/admin/ExportHelpDeskArticles";
-import ComboPreview from "./pages/__ComboPreview";
 
 /**
  * Router Configuration
@@ -80,10 +79,6 @@ export const router = createBrowserRouter([
       {
         path: "/machines/:machineId",
         element: <MachineDetail />,
-      },
-      {
-        path: "/__combo-preview",
-        element: <ComboPreview />,
       },
       {
         path: "/technology",
