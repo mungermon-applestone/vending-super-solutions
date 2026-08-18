@@ -10,7 +10,6 @@ import MachinesPresentationPage from "./pages/MachinesPresentationPage";
 import TechnologyPage from "./pages/TechnologyPage";
 import TechnologyDetailPage from "./pages/TechnologyDetailPage";
 import MachineDetail from "./pages/MachineDetail";
-import ComboPreview from "./pages/__ComboPreview";
 import Contact from "./pages/Contact";
 import ErrorPage from "./components/ErrorPage";
 import Layout from "./components/layout/Layout";
@@ -76,10 +75,6 @@ export const router = createBrowserRouter([
       {
         path: "/machines",
         element: <MachinesPage />,
-      },
-      {
-        path: "/__combo-preview",
-        element: <ComboPreview />,
       },
       {
         path: "/machines/:machineId",
