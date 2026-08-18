@@ -77,6 +77,10 @@ export const router = createBrowserRouter([
         element: <MachinesPage />,
       },
       {
+        path: "/__combo-preview",
+        element: <ComboPreview />,
+      },
+      {
         path: "/machines/:machineId",
         element: <MachineDetail />,
       },
