@@ -130,11 +130,15 @@ async function seedEntries() {
     });
 
     if (wasPublished) {
-      await cma(`${BASE}/entries/${entry.sys.id}/published`, {
-        method: 'PUT',
-        headers: { 'X-Contentful-Version': String(saved.sys.version) },
-      });
-      console.log(`- ${title}: updated + republished`);
+      try {
+        await cma(`${BASE}/entries/${entry.sys.id}/published`, {
+          method: 'PUT',
+          headers: { 'X-Contentful-Version': String(saved.sys.version) },
+        });
+        console.log(`- ${title}: updated + republished`);
+      } catch (err) {
+        console.warn(`- ${title}: updated but REPUBLISH FAILED -> ${err.message.split('\n')[0]}`);
+      }
     } else {
       console.log(`- ${title}: updated (left as draft)`);
     }
