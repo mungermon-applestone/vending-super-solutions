@@ -1,11 +1,28 @@
 import React from 'react';
 import { CMSMachine } from '@/types/cms';
 
+const DEFAULT_CUSTOMIZATION_TITLE = 'Customization Options';
+const DEFAULT_CUSTOMIZATION_TEXT =
+  'This machine can be customized with your branding, planogram, and digital signage.';
+const DEFAULT_SOFTWARE_TITLE = 'Software Compatibility';
+const DEFAULT_SOFTWARE_TEXT =
+  'Fully compatible with our vending management software, providing real-time inventory tracking, sales analytics, and remote management.';
+
 interface MachineDetailFeaturesProps {
   features: string[];
+  customizationTitle?: string;
+  customizationText?: string;
+  softwareCompatibilityTitle?: string;
+  softwareCompatibilityText?: string;
 }
 
-const MachineDetailFeatures: React.FC<MachineDetailFeaturesProps> = ({ features }) => {
+const MachineDetailFeatures: React.FC<MachineDetailFeaturesProps> = ({
+  features,
+  customizationTitle,
+  customizationText,
+  softwareCompatibilityTitle,
+  softwareCompatibilityText,
+}) => {
   // Split features into two columns for larger screens
   const midpoint = Math.ceil(features.length / 2);
   const leftColumnFeatures = features.slice(0, midpoint);
