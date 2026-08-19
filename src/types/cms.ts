@@ -69,6 +69,10 @@ export interface CMSMachine {
   displayOrder?: number;
   showOnHomepage?: boolean;
   homepageOrder?: number;
+  customizationTitle?: string;
+  customizationText?: string;
+  softwareCompatibilityTitle?: string;
+  softwareCompatibilityText?: string;
 }
 
 export interface CMSTestimonial {
