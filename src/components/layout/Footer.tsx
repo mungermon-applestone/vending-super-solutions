@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import FooterLinks from './FooterLinks';
 import TranslatableText from '@/components/translation/TranslatableText';
+import { getContentfulClient } from '@/services/cms/utils/contentfulClient';
 
 interface FooterProps {
   // Add any props here if needed
@@ -17,15 +18,11 @@ const Footer: React.FC<FooterProps> = () => {
       try {
         // Using the asset ID provided
         const assetId = "5BbotmmDZslyyhDHUtTYN3";
-        const response = await fetch(`https://cdn.contentful.com/spaces/${import.meta.env.VITE_CONTENTFUL_SPACE_ID}/environments/${import.meta.env.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'}/assets/${assetId}?access_token=${import.meta.env.VITE_CONTENTFUL_DELIVERY_TOKEN}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch logo');
-        }
-        
-        const data = await response.json();
-        if (data && data.fields && data.fields.file) {
-          setLogoUrl(`https:${data.fields.file.url}`);
+        const client = await getContentfulClient();
+        const asset = await client.getAsset(assetId);
+        const fileUrl = asset?.fields?.file?.url;
+        if (fileUrl) {
+          setLogoUrl(fileUrl.startsWith('//') ? `https:${fileUrl}` : fileUrl);
         }
       } catch (error) {
         console.error('Error fetching logo:', error);
