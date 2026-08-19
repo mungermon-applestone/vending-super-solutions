@@ -53,7 +53,7 @@ const MachineDetailFeatures: React.FC<MachineDetailFeaturesProps> = ({ features 
               <div className="bg-vending-gray p-6 rounded-lg">
                 <h3 className="text-lg font-medium mb-3">Customization Options</h3>
                 <p className="text-gray-700">
-                  This machine can be customized with your branding, specific product configurations, and optional features like cashless payment systems.
+                  This machine can be customized with your branding, planogram, digital signage.
                 </p>
               </div>
               <div className="bg-vending-gray p-6 rounded-lg">
