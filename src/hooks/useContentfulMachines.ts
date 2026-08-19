@@ -31,6 +31,10 @@ export interface ContentfulMachine {
   warranty?: string;
   specs?: Record<string, string>;
   visible?: boolean;
+  customizationTitle?: string;
+  customizationText?: string;
+  softwareCompatibilityTitle?: string;
+  softwareCompatibilityText?: string;
 }
 
 // Map Contentful machine to our app's machine format
