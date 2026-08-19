@@ -1,10 +1,8 @@
 // CMS Configuration
-const ENV_STORAGE_KEY = 'vending-cms-env-variables';
-
 // Environment variable priority:
-// 1. import.meta.env (build-time environment variables)
-// 2. window.env (runtime environment variables from env-config.js)
-// 3. localStorage (fallback for development only)
+// 1. window._runtimeConfig (fresh /api/runtime-config response)
+// 2. window.env (bootstrap fallback from env-config.js)
+// 3. import.meta.env (build-time fallback)
 
 // Promise to track runtime config loading
 let runtimeConfigPromise: Promise<void> | null = null;
@@ -56,19 +54,8 @@ async function getEnvVariable(key: string): Promise<string> {
   // Wait for runtime config to be loaded
   await waitForRuntimeConfig();
   
-  // First check for runtime environment variables from window.env
-  if (typeof window !== 'undefined' && window.env && window.env[key]) {
-    console.log(`[getEnvVariable] Found ${key} in window.env`);
-    return window.env[key];
-  }
-  
-  // Then check import.meta.env
-  if (import.meta.env && import.meta.env[key]) {
-    console.log(`[getEnvVariable] Found ${key} in import.meta.env`);
-    return import.meta.env[key];
-  }
-  
-  // Check for publicly available runtime config
+  // Prefer the no-cache runtime response so a token rotation takes effect
+  // without requiring a new build or restoring stale browser state.
   if (typeof window !== 'undefined') {
     try {
       if (window._runtimeConfig && window._runtimeConfig[key]) {
@@ -79,39 +66,15 @@ async function getEnvVariable(key: string): Promise<string> {
       console.warn('[getEnvVariable] Error accessing runtime config:', e);
     }
   }
-  
-  // Finally check localStorage in development mode
-  if (typeof window !== 'undefined' && window.localStorage && import.meta.env.DEV) {
-    try {
-      const storedVars = window.localStorage.getItem(ENV_STORAGE_KEY);
-      if (storedVars) {
-        const parsedVars = JSON.parse(storedVars);
-        
-        // Check direct key match
-        if (parsedVars[key]) {
-          console.log(`[getEnvVariable] Found ${key} in localStorage`);
-          return parsedVars[key];
-        }
-        
-        // Check key names mapping
-        if (parsedVars.keyNames && parsedVars.keyNames[key]) {
-          const mappedKey = parsedVars.keyNames[key];
-          if (parsedVars[mappedKey]) {
-            console.log(`[getEnvVariable] Found ${key} via mapping in localStorage`);
-            return parsedVars[mappedKey];
-          }
-        }
-        
-        // Check for legacy keys without VITE_ prefix
-        const legacyKey = key.replace('VITE_', '');
-        if (parsedVars[legacyKey]) {
-          console.log(`[getEnvVariable] Found ${key} via legacy key in localStorage`);
-          return parsedVars[legacyKey];
-        }
-      }
-    } catch (e) {
-      console.error('[getEnvVariable] Error parsing stored variables:', e);
-    }
+
+  if (typeof window !== 'undefined' && window.env && window.env[key]) {
+    console.log(`[getEnvVariable] Found ${key} in window.env`);
+    return window.env[key];
+  }
+
+  if (import.meta.env && import.meta.env[key]) {
+    console.log(`[getEnvVariable] Found ${key} in import.meta.env`);
+    return import.meta.env[key];
   }
   
   console.log(`[getEnvVariable] Could not find ${key} in any source`);
@@ -123,7 +86,7 @@ if (typeof window !== 'undefined' && !window._runtimeConfigLoaded) {
   try {
     console.log('[cms.ts] Attempting to load runtime config from /api/runtime-config');
     
-    fetch('/api/runtime-config')
+    fetch('/api/runtime-config', { cache: 'no-store' })
       .then(response => {
         if (!response.ok) throw new Error(`HTTP error ${response.status}`);
         return response.json();
@@ -169,18 +132,19 @@ export { getEnvVariable, waitForRuntimeConfig };
 // Secure function to get Contentful configuration using edge function (admin only)
 export async function getContentfulConfig() {
   try {
+    await waitForRuntimeConfig();
+    const runtimeConfig = {
+      SPACE_ID: await getEnvVariable('VITE_CONTENTFUL_SPACE_ID'),
+      DELIVERY_TOKEN: await getEnvVariable('VITE_CONTENTFUL_DELIVERY_TOKEN'),
+      PREVIEW_TOKEN: await getEnvVariable('VITE_CONTENTFUL_PREVIEW_TOKEN'),
+      MANAGEMENT_TOKEN: await getEnvVariable('VITE_CONTENTFUL_MANAGEMENT_TOKEN'),
+      ENVIRONMENT_ID: (await getEnvVariable('VITE_CONTENTFUL_ENVIRONMENT_ID')) || 'master'
+    };
+
     // In preview environments, use runtime config directly without authentication
     if (isPreviewEnvironment()) {
       console.log('[getContentfulConfig] Preview environment detected, using runtime config');
-      await waitForRuntimeConfig();
-      
-      return {
-        SPACE_ID: await getEnvVariable('VITE_CONTENTFUL_SPACE_ID'),
-        DELIVERY_TOKEN: await getEnvVariable('VITE_CONTENTFUL_DELIVERY_TOKEN'),
-        PREVIEW_TOKEN: await getEnvVariable('VITE_CONTENTFUL_PREVIEW_TOKEN'),
-        MANAGEMENT_TOKEN: await getEnvVariable('VITE_CONTENTFUL_MANAGEMENT_TOKEN'),
-        ENVIRONMENT_ID: (await getEnvVariable('VITE_CONTENTFUL_ENVIRONMENT_ID')) || 'master'
-      };
+      return runtimeConfig;
     }
 
     // Import Supabase client
@@ -190,7 +154,7 @@ export async function getContentfulConfig() {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      throw new Error('Authentication required for Contentful configuration');
+      return runtimeConfig;
     }
 
     // Call secure edge function with auth token
@@ -206,18 +170,20 @@ export async function getContentfulConfig() {
     }
 
     return {
-      SPACE_ID: data.VITE_CONTENTFUL_SPACE_ID || '',
-      DELIVERY_TOKEN: data.VITE_CONTENTFUL_DELIVERY_TOKEN || '',
+      SPACE_ID: runtimeConfig.SPACE_ID || data.VITE_CONTENTFUL_SPACE_ID || '',
+      // Delivery API reads always use the fresh public runtime token. The
+      // authenticated endpoint is reserved for admin-only credentials.
+      DELIVERY_TOKEN: runtimeConfig.DELIVERY_TOKEN || data.VITE_CONTENTFUL_DELIVERY_TOKEN || '',
       PREVIEW_TOKEN: data.VITE_CONTENTFUL_PREVIEW_TOKEN || '',
       MANAGEMENT_TOKEN: data.VITE_CONTENTFUL_MANAGEMENT_TOKEN || '',
-      ENVIRONMENT_ID: data.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
+      ENVIRONMENT_ID: runtimeConfig.ENVIRONMENT_ID || data.VITE_CONTENTFUL_ENVIRONMENT_ID || 'master'
     };
   } catch (error) {
     console.error('[getContentfulConfig] Error:', error);
     // Fallback: try runtime config for all tokens
     await waitForRuntimeConfig();
     
-    const runtimeConfig = {
+    const fallbackConfig = {
       SPACE_ID: await getEnvVariable('VITE_CONTENTFUL_SPACE_ID'),
       DELIVERY_TOKEN: await getEnvVariable('VITE_CONTENTFUL_DELIVERY_TOKEN'),
       PREVIEW_TOKEN: await getEnvVariable('VITE_CONTENTFUL_PREVIEW_TOKEN'),
@@ -226,18 +192,18 @@ export async function getContentfulConfig() {
     };
     
     // If runtime config has tokens, use it; otherwise return public-only
-    if (runtimeConfig.DELIVERY_TOKEN) {
+    if (fallbackConfig.DELIVERY_TOKEN) {
       console.log('[getContentfulConfig] Using runtime config fallback with tokens');
-      return runtimeConfig;
+      return fallbackConfig;
     }
     
     // Return public-only configuration for non-admin users
     return {
-      SPACE_ID: runtimeConfig.SPACE_ID,
+      SPACE_ID: fallbackConfig.SPACE_ID,
       DELIVERY_TOKEN: '', // Sensitive - not accessible client-side
       PREVIEW_TOKEN: '', // Sensitive - not accessible client-side
       MANAGEMENT_TOKEN: '', // Sensitive - not accessible client-side
-      ENVIRONMENT_ID: runtimeConfig.ENVIRONMENT_ID
+      ENVIRONMENT_ID: fallbackConfig.ENVIRONMENT_ID
     };
   }
 }
