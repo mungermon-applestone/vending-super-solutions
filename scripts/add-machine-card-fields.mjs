@@ -106,8 +106,13 @@ async function seedEntries() {
 
   for (const entry of all) {
     const title = entry.fields?.title?.['en-US'] || entry.sys.id;
+    if (entry.sys.archivedVersion) {
+      console.log(`- ${title}: archived, skipped`);
+      continue;
+    }
     const wasPublished =
       !!entry.sys.publishedVersion && entry.sys.version === entry.sys.publishedVersion + 1;
+
 
     const fields = { ...entry.fields };
     let changed = false;
