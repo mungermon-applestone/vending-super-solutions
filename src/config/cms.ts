@@ -1,6 +1,4 @@
 // CMS Configuration
-const ENV_STORAGE_KEY = 'vending-cms-env-variables';
-
 // Environment variable priority:
 // 1. window._runtimeConfig (fresh /api/runtime-config response)
 // 2. window.env (bootstrap fallback from env-config.js)

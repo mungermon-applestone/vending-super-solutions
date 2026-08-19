@@ -36,30 +36,6 @@
     console.warn('[env-config] Failed to check credentials version:', e);
   }
 
-  // Enhanced detection function for preview environments
-  function isPreviewEnvironment() {
-    if (typeof window === 'undefined') return false;
-    
-    const hostname = window.location.hostname;
-    
-    // List of production domains (adjust these according to your actual production domains)
-    const productionDomains = [
-      'applestonesolutions.com',
-      'www.applestonesolutions.com'
-      // Add other production domains here if needed
-    ];
-    
-    // Check if current hostname is a production domain
-    for (const domain of productionDomains) {
-      if (hostname === domain || hostname.endsWith('.' + domain)) {
-        return false; // Not a preview environment
-      }
-    }
-    
-    // If not explicitly production, treat as preview
-    return true;
-  }
-  
   // Apply a build fallback immediately. The app then replaces it with the
   // no-cache /api/runtime-config response before creating a Contentful client.
   function applyCredentials() {
