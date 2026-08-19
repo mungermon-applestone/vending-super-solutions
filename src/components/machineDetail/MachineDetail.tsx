@@ -37,6 +37,10 @@ const MachineDetail: React.FC<MachineDetailProps> = ({ machine }) => {
       {/* Features Section */}
       <MachineDetailFeatures
         features={displayMachine.features || []}
+        customizationTitle={displayMachine.customizationTitle}
+        customizationText={displayMachine.customizationText}
+        softwareCompatibilityTitle={displayMachine.softwareCompatibilityTitle}
+        softwareCompatibilityText={displayMachine.softwareCompatibilityText}
       />
 
       {/* Specifications Section */}
