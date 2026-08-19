@@ -78,22 +78,6 @@ export const getContentfulClient = async (forceRefresh = false) => {
     
     console.log('[contentfulClient] Client created successfully');
     
-    // Save working credentials to localStorage
-    if (typeof window !== 'undefined') {
-      try {
-        const credentialsToSave = {
-          VITE_CONTENTFUL_SPACE_ID: spaceId,
-          VITE_CONTENTFUL_DELIVERY_TOKEN: accessToken,
-          VITE_CONTENTFUL_ENVIRONMENT_ID: environmentId
-        };
-        
-        localStorage.setItem('contentful_credentials', JSON.stringify(credentialsToSave));
-        console.log('[contentfulClient] Saved working credentials to localStorage');
-      } catch (storageError) {
-        console.warn('[contentfulClient] Could not save credentials to localStorage:', storageError);
-      }
-    }
-    
     return contentfulClient;
   } catch (error) {
     console.error('[contentfulClient] Error creating client:', error);
@@ -240,6 +224,9 @@ export const fetchContentfulEntries = async <T>(contentType: string, query: Reco
     return entries.items as T[];
   } catch (error) {
     console.error(`[fetchContentfulEntries] Error fetching entries of type ${contentType}:`, error);
+    if ((error as any)?.sys?.id === 'AccessTokenInvalid' || (error as any)?.status === 401) {
+      resetContentfulClient();
+    }
     
     if (process.env.NODE_ENV !== 'development') {
       toast.error(`Failed to fetch content: ${error instanceof Error ? error.message : 'Unknown error'}`, {
@@ -271,6 +258,9 @@ export const fetchContentfulEntry = async <T>(entryId: string, query: Record<str
     return entry as T;
   } catch (error) {
     console.error(`[fetchContentfulEntry] Error fetching entry ID ${entryId}:`, error);
+    if ((error as any)?.sys?.id === 'AccessTokenInvalid' || (error as any)?.status === 401) {
+      resetContentfulClient();
+    }
     
     // Only show toast if explicitly requested and not in development
     if (showErrorToast && process.env.NODE_ENV !== 'development') {

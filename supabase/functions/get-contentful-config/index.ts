@@ -64,7 +64,9 @@ serve(async (req) => {
     const config = {
       VITE_CONTENTFUL_SPACE_ID: Deno.env.get('VITE_CONTENTFUL_SPACE_ID') || '',
       VITE_CONTENTFUL_ENVIRONMENT_ID: Deno.env.get('VITE_CONTENTFUL_ENVIRONMENT_ID') || 'master',
-      VITE_CONTENTFUL_DELIVERY_TOKEN: Deno.env.get('VITE_CONTENTFUL_DELIVERY_TOKEN') || '',
+      // CONTENTFUL_DELIVERY_TOKEN is the canonical value shared with the
+      // health check; retain the VITE-prefixed name as a legacy fallback.
+      VITE_CONTENTFUL_DELIVERY_TOKEN: Deno.env.get('CONTENTFUL_DELIVERY_TOKEN') || Deno.env.get('VITE_CONTENTFUL_DELIVERY_TOKEN') || '',
       VITE_CONTENTFUL_PREVIEW_TOKEN: Deno.env.get('VITE_CONTENTFUL_PREVIEW_TOKEN') || '',
       VITE_CONTENTFUL_MANAGEMENT_TOKEN: Deno.env.get('VITE_CONTENTFUL_MANAGEMENT_TOKEN') || '',
     }
