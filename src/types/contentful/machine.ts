@@ -12,6 +12,10 @@ export interface ContentfulEntry {
   description?: string;
   temperature?: string;
   features?: string[];
+  customizationTitle?: string;
+  customizationText?: string;
+  softwareCompatibilityTitle?: string;
+  softwareCompatibilityText?: string;
   fields?: {
     title?: string;
     slug?: string;
@@ -23,6 +27,10 @@ export interface ContentfulEntry {
     visible?: boolean;
     showOnHomepage?: boolean;
     homepageOrder?: number;
+    customizationTitle?: string;
+    customizationText?: string;
+    softwareCompatibilityTitle?: string;
+    softwareCompatibilityText?: string;
     images?: Array<{
       sys?: {
         id: string;

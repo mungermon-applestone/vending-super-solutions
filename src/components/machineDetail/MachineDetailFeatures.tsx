@@ -1,11 +1,28 @@
 import React from 'react';
 import { CMSMachine } from '@/types/cms';
 
+const DEFAULT_CUSTOMIZATION_TITLE = 'Customization Options';
+const DEFAULT_CUSTOMIZATION_TEXT =
+  'This machine can be customized with your branding, planogram, and digital signage.';
+const DEFAULT_SOFTWARE_TITLE = 'Software Compatibility';
+const DEFAULT_SOFTWARE_TEXT =
+  'Fully compatible with our vending management software, providing real-time inventory tracking, sales analytics, and remote management.';
+
 interface MachineDetailFeaturesProps {
   features: string[];
+  customizationTitle?: string;
+  customizationText?: string;
+  softwareCompatibilityTitle?: string;
+  softwareCompatibilityText?: string;
 }
 
-const MachineDetailFeatures: React.FC<MachineDetailFeaturesProps> = ({ features }) => {
+const MachineDetailFeatures: React.FC<MachineDetailFeaturesProps> = ({
+  features,
+  customizationTitle,
+  customizationText,
+  softwareCompatibilityTitle,
+  softwareCompatibilityText,
+}) => {
   // Split features into two columns for larger screens
   const midpoint = Math.ceil(features.length / 2);
   const leftColumnFeatures = features.slice(0, midpoint);
@@ -48,18 +65,22 @@ const MachineDetailFeatures: React.FC<MachineDetailFeaturesProps> = ({ features 
               )}
             </div>
             
-            {/* Customization cards below - unchanged */}
+            {/* Customization cards - editable per machine in Contentful */}
             <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-vending-gray p-6 rounded-lg">
-                <h3 className="text-lg font-medium mb-3">Customization Options</h3>
-                <p className="text-gray-700">
-                  This machine can be customized with your branding, planogram, and digital signage.
+                <h3 className="text-lg font-medium mb-3">
+                  {customizationTitle || DEFAULT_CUSTOMIZATION_TITLE}
+                </h3>
+                <p className="text-gray-700 whitespace-pre-line">
+                  {customizationText || DEFAULT_CUSTOMIZATION_TEXT}
                 </p>
               </div>
               <div className="bg-vending-gray p-6 rounded-lg">
-                <h3 className="text-lg font-medium mb-3">Software Compatibility</h3>
-                <p className="text-gray-700">
-                  Fully compatible with our vending management software, providing real-time inventory tracking, sales analytics, and remote management.
+                <h3 className="text-lg font-medium mb-3">
+                  {softwareCompatibilityTitle || DEFAULT_SOFTWARE_TITLE}
+                </h3>
+                <p className="text-gray-700 whitespace-pre-line">
+                  {softwareCompatibilityText || DEFAULT_SOFTWARE_TEXT}
                 </p>
               </div>
             </div>

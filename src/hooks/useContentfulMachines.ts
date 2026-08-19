@@ -31,6 +31,10 @@ export interface ContentfulMachine {
   warranty?: string;
   specs?: Record<string, string>;
   visible?: boolean;
+  customizationTitle?: string;
+  customizationText?: string;
+  softwareCompatibilityTitle?: string;
+  softwareCompatibilityText?: string;
 }
 
 // Map Contentful machine to our app's machine format
@@ -65,6 +69,10 @@ export const mapContentfulMachine = (machine: ContentfulMachine) => {
     images: processedImages,
     specs: specs,
     visible: machine.visible !== false, // Default to true if not specified
+    customizationTitle: machine.customizationTitle,
+    customizationText: machine.customizationText,
+    softwareCompatibilityTitle: machine.softwareCompatibilityTitle,
+    softwareCompatibilityText: machine.softwareCompatibilityText,
   };
 };
 

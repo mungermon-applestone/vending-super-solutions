@@ -82,7 +82,11 @@ export const transformContentfulEntry = (entry: ContentfulEntry): CMSMachine => 
     displayOrder: fields.displayOrder || null,
     visible: fields.visible !== false,
     showOnHomepage: fields.showOnHomepage || false,
-    homepageOrder: fields.homepageOrder || null
+    homepageOrder: fields.homepageOrder || null,
+    customizationTitle: fields.customizationTitle || undefined,
+    customizationText: fields.customizationText || undefined,
+    softwareCompatibilityTitle: fields.softwareCompatibilityTitle || undefined,
+    softwareCompatibilityText: fields.softwareCompatibilityText || undefined
   };
 
   console.log(`🏷️ [TRANSFORMER] Machine "${title}" final displayOrder:`, machineData.displayOrder);

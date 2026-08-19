@@ -184,6 +184,34 @@ export const machineTemplate: ContentTypeTemplate = {
         type: 'Integer',
         required: false,
         localized: false,
+      },
+      {
+        id: 'customizationTitle',
+        name: 'Customization Options Title',
+        type: 'Symbol',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'customizationText',
+        name: 'Customization Options Text',
+        type: 'Text',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'softwareCompatibilityTitle',
+        name: 'Software Compatibility Title',
+        type: 'Symbol',
+        required: false,
+        localized: false,
+      },
+      {
+        id: 'softwareCompatibilityText',
+        name: 'Software Compatibility Text',
+        type: 'Text',
+        required: false,
+        localized: false,
       }
     ]
   }
