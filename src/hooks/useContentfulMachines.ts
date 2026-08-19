@@ -65,6 +65,10 @@ export const mapContentfulMachine = (machine: ContentfulMachine) => {
     images: processedImages,
     specs: specs,
     visible: machine.visible !== false, // Default to true if not specified
+    customizationTitle: machine.customizationTitle,
+    customizationText: machine.customizationText,
+    softwareCompatibilityTitle: machine.softwareCompatibilityTitle,
+    softwareCompatibilityText: machine.softwareCompatibilityText,
   };
 };
 
