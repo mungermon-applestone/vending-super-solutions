@@ -25,9 +25,17 @@ const NamaMembership: React.FC<NamaMembershipProps> = ({ variant = 'footer', cla
         src={namaLogo.url}
         alt="NAMA — National Automatic Merchandising Association"
         loading="lazy"
-        className={isPage ? 'h-12 w-auto' : 'h-9 w-auto'}
+        className={[
+          'block self-center object-contain shrink-0',
+          isPage ? 'h-12 w-auto' : 'h-9 w-auto',
+        ].join(' ')}
       />
-      <p className={`${isPage ? 'text-sm' : 'text-xs'} text-gray-500 not-prose`}>
+      <p
+        className={[
+          'self-center m-0 text-gray-500 not-prose',
+          isPage ? 'text-sm' : 'text-xs',
+        ].join(' ')}
+      >
         <TranslatableText context="footer">
           Applestone Solutions is a proud member of National Automatic Merchandising Association.
         </TranslatableText>
