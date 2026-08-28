@@ -12,7 +12,6 @@ import { Link } from 'react-router-dom';
 import AboutSchemaData from '@/components/about/AboutSchemaData';
 import SEO from '@/components/seo/SEO';
 import ContentfulFallbackMessage from '@/components/common/ContentfulFallbackMessage';
-import NamaMembership from '@/components/common/NamaMembership';
 
 const About = () => {
   const { data, isLoading, error, isContentReady, refetch } = useContentful<ContentfulResponse<PrivacyPolicyFields>>({
@@ -100,8 +99,6 @@ const About = () => {
             </div>
           </ContentfulErrorBoundary>
         )}
-
-        <NamaMembership variant="page" className="mt-12" />
       </div>
     </>
   );
