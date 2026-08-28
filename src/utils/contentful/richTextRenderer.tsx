@@ -146,9 +146,76 @@ export const getRichTextRenderOptions = ({ includedAssets, contentIncludes }: Ri
   },
 });
 
+const NAMA_TITLE_MATCH = /nama/i;
+
+const getPlainText = (node: any): string => {
+  if (!node) return '';
+  if (node.nodeType === 'text') return node.value || '';
+  return (node.content || []).map(getPlainText).join('');
+};
+
+/**
+ * Compact NAMA membership badge, matching the footer treatment.
+ */
+const NamaBadge: React.FC<{ src: string; alt: string; text: string }> = ({ src, alt, text }) => (
+  <div className="not-prose mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center sm:text-left">
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      className="block self-center h-12 w-auto object-contain shrink-0"
+    />
+    <p className="self-center m-0 text-sm text-gray-500">{text}</p>
+  </div>
+);
+
 export const renderRichText = (
   content: any,
   options: RichTextRendererOptions
 ) => {
+  const nodes = content?.content;
+
+  if (Array.isArray(nodes)) {
+    const idx = nodes.findIndex((n: any) => {
+      if (n?.nodeType !== 'embedded-asset-block') return false;
+      const assetId = n.data?.target?.sys?.id;
+      if (!assetId) return false;
+      const asset = findContentfulAsset(assetId, options.includedAssets, options.contentIncludes, n.data);
+      return NAMA_TITLE_MATCH.test(String(asset?.fields?.title || ''));
+    });
+
+    if (idx !== -1) {
+      const assetNode = nodes[idx];
+      const asset = findContentfulAsset(
+        assetNode.data.target.sys.id,
+        options.includedAssets,
+        options.contentIncludes,
+        assetNode.data
+      );
+      const url = normalizeContentfulUrl(asset?.fields?.file?.url || '');
+
+      const next = nodes[idx + 1];
+      const hasCaption = next?.nodeType === BLOCKS.PARAGRAPH && getPlainText(next).trim().length > 0;
+      const text = hasCaption ? getPlainText(next).trim() : '';
+
+      const remaining = nodes.filter((_: any, i: number) => i !== idx && !(hasCaption && i === idx + 1));
+      const trimmedDoc = { ...content, content: remaining };
+
+      return (
+        <>
+          {documentToReactComponents(trimmedDoc as any, getRichTextRenderOptions(options))}
+          {url && (
+            <NamaBadge
+              src={url}
+              alt={String(asset?.fields?.description || asset?.fields?.title || 'NAMA membership')}
+              text={text}
+            />
+          )}
+        </>
+      );
+    }
+  }
+
   return documentToReactComponents(content, getRichTextRenderOptions(options));
 };
+
