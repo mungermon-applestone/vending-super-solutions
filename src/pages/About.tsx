@@ -100,6 +100,8 @@ const About = () => {
             </div>
           </ContentfulErrorBoundary>
         )}
+
+        <NamaMembership variant="page" className="mt-12" />
       </div>
     </>
   );
