@@ -61,7 +61,7 @@ export async function subscribeToPushNotifications(
     // Create a new subscription
     const subscription = await window._swRegistration.pushManager.subscribe({
       userVisibleOnly: true, // Must be true for Chrome
-      applicationServerKey: applicationServerKeyArray
+      applicationServerKey: applicationServerKeyArray as BufferSource
     });
     
     console.log('Push notification subscription successful:', subscription);
