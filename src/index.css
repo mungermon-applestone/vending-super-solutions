@@ -185,7 +185,7 @@
 .image-container {
   position: relative;
   overflow: hidden;
-  background-color: #f3f4f6;
+  background-color: transparent;
 }
 
 /* Optimize animations */
