@@ -110,7 +110,7 @@ const Image: React.FC<ImageProps> = ({
       // If it's a Contentful image without parameters, add optimization
       if (isContentfulImage) {
         const width = isThumbnail ? 400 : 1200;
-        return `${url}?w=${width}&q=80&fm=webp&fit=pad`;
+        return `${url}?w=${width}&q=80&fm=webp&fit=pad&bg=rgb:ffffff`;
       }
       
       // For Unsplash images, use their optimization API

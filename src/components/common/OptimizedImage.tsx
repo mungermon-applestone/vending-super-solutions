@@ -115,7 +115,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       
       // If it's a Contentful image without parameters, add optimization
       if (isContentfulImage) {
-        return `${url}?w=1200&q=80&fm=webp&fit=pad`;
+        return `${url}?w=1200&q=80&fm=webp&fit=pad&bg=rgb:ffffff`;
       }
       
       // For Unsplash images, use their optimization API
