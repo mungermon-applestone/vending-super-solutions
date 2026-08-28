@@ -207,7 +207,7 @@ export const renderRichText = (
           {url && (
             <NamaBadge
               src={url}
-              alt={String(asset?.fields?.description || asset?.fields?.title || 'NAMA membership')}
+              alt={String((asset?.fields as any)?.description || asset?.fields?.title || 'NAMA membership')}
               text={text}
             />
           )}
