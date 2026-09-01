@@ -34,11 +34,11 @@ const VALID_WIDTHS = [25, 33, 50, 66, 75, 100] as const;
 type ValidWidth = typeof VALID_WIDTHS[number];
 
 const WIDTH_CLASS_MAP: Record<ValidWidth, string> = {
-  25: 'w-1/4',
-  33: 'w-1/3',
-  50: 'w-1/2',
-  66: 'w-2/3',
-  75: 'w-3/4',
+  25: 'w-full sm:w-1/4',
+  33: 'w-full sm:w-1/3',
+  50: 'w-full sm:w-1/2',
+  66: 'w-full sm:w-2/3',
+  75: 'w-full sm:w-3/4',
   100: 'w-full',
 };
 
