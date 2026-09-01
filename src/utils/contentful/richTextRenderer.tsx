@@ -176,7 +176,8 @@ export const getRichTextRenderOptions = ({ includedAssets, contentIncludes }: Ri
           return <div className="text-red-500">Image not found (ID: {assetId})</div>;
         }
 
-        const { title, file, description } = asset.fields;
+        const { title, file } = asset.fields;
+        const description = (asset.fields as any).description as string | undefined;
 
         if (!file || !file.url) {
           console.error('Asset file or URL missing:', asset);
