@@ -1,9 +1,6 @@
-
 import React from 'react';
 import { BLOCKS, INLINES, MARKS } from '@contentful/rich-text-types';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import Image from '@/components/common/Image';
 import { ContentfulAsset } from '@/types/contentful';
 
 // Helper function to normalize Contentful URLs
@@ -12,6 +9,85 @@ export const normalizeContentfulUrl = (url: string): string => {
   return url.startsWith('//') 
     ? `https:${url}` 
     : url.startsWith('http') ? url : `https:${url}`;
+};
+
+// Append responsive sizing and modern format params to a Contentful image URL
+export const buildContentfulImageUrl = (url: string, widthPx?: number): string => {
+  const base = normalizeContentfulUrl(url);
+  if (!base) return '';
+  const params = new URLSearchParams();
+  if (widthPx && widthPx > 0) params.set('w', String(widthPx));
+  params.set('fm', 'webp');
+  params.set('q', '80');
+  const query = params.toString();
+  return query ? `${base}?${query}` : base;
+};
+
+interface ImageLayoutHints {
+  width: number;
+  align: 'left' | 'center' | 'right';
+  wrap: boolean;
+  caption: string;
+}
+
+const VALID_WIDTHS = [25, 33, 50, 66, 75, 100] as const;
+type ValidWidth = typeof VALID_WIDTHS[number];
+
+const WIDTH_CLASS_MAP: Record<ValidWidth, string> = {
+  25: 'w-1/4',
+  33: 'w-1/3',
+  50: 'w-1/2',
+  66: 'w-2/3',
+  75: 'w-3/4',
+  100: 'w-full',
+};
+
+const DEFAULT_CONTENT_WIDTH_PX = 1200;
+
+// Parse layout tokens out of an asset description.
+// Example: "Storefront cabinet | width:50 align:right wrap"
+export const parseImageLayoutHints = (description?: string): ImageLayoutHints => {
+  if (!description) {
+    return { width: 100, align: 'center', wrap: false, caption: '' };
+  }
+
+  const tokens = description.split(/\s+/).filter(Boolean);
+  let width: ValidWidth = 100;
+  let align: 'left' | 'center' | 'right' = 'center';
+  let wrap = false;
+  const consumed: number[] = [];
+
+  tokens.forEach((token, i) => {
+    const widthMatch = token.match(/^width:(\d+)$/i);
+    if (widthMatch) {
+      const value = parseInt(widthMatch[1], 10);
+      if (VALID_WIDTHS.includes(value as ValidWidth)) {
+        width = value as ValidWidth;
+        consumed.push(i);
+      }
+      return;
+    }
+
+    const alignMatch = token.match(/^align:(left|center|right)$/i);
+    if (alignMatch) {
+      align = alignMatch[1].toLowerCase() as 'left' | 'center' | 'right';
+      consumed.push(i);
+      return;
+    }
+
+    if (/^wrap$/i.test(token)) {
+      wrap = true;
+      consumed.push(i);
+    }
+  });
+
+  const caption = tokens
+    .filter((_, i) => !consumed.includes(i))
+    .join(' ')
+    .replace(/\s*\|\s*$/, '')
+    .trim();
+
+  return { width, align, wrap, caption };
 };
 
 // Helper to find an asset using multiple strategies
@@ -100,7 +176,7 @@ export const getRichTextRenderOptions = ({ includedAssets, contentIncludes }: Ri
           return <div className="text-red-500">Image not found (ID: {assetId})</div>;
         }
 
-        const { title, file } = asset.fields;
+        const { title, file, description } = asset.fields;
 
         if (!file || !file.url) {
           console.error('Asset file or URL missing:', asset);
@@ -108,17 +184,53 @@ export const getRichTextRenderOptions = ({ includedAssets, contentIncludes }: Ri
         }
 
         const fullUrl = normalizeContentfulUrl(file.url);
+        const hints = parseImageLayoutHints(description || (title as any));
+        const altText = title || hints.caption || 'Content image';
+
+        // Compute responsive width in pixels based on the hint.
+        const responsiveWidthPx = Math.round((hints.width / 100) * DEFAULT_CONTENT_WIDTH_PX);
+        const srcUrl = buildContentfulImageUrl(file.url, responsiveWidthPx);
+
+        // Alignment classes.
+        // Without wrap: center the block; with wrap: float and let text flow around it.
+        let alignmentClasses = '';
+        if (hints.wrap) {
+          alignmentClasses = hints.align === 'left'
+            ? 'float-left mr-6 mb-4'
+            : hints.align === 'right'
+              ? 'float-right ml-6 mb-4'
+              : 'mx-auto mb-4';
+        } else {
+          alignmentClasses = hints.align === 'left'
+            ? 'mr-auto'
+            : hints.align === 'right'
+              ? 'ml-auto'
+              : 'mx-auto';
+        }
+
+        const widthClass = WIDTH_CLASS_MAP[hints.width];
 
         return (
-          <div className="my-8">
-            <div className="flex justify-center rounded-md border border-gray-200 bg-gray-50 p-4">
-              <Image 
-                src={fullUrl}
-                alt={title || 'Content image'}
-                className="max-w-full h-auto object-contain rounded"
+          <figure className={`not-prose my-6 ${alignmentClasses} ${widthClass}`}>
+            <a
+              href={fullUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-md overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+            >
+              <img
+                src={srcUrl}
+                alt={altText}
+                loading="lazy"
+                className="w-full h-auto max-h-[500px] object-contain bg-white"
               />
-            </div>
-          </div>
+            </a>
+            {hints.caption && (
+              <figcaption className="mt-2 text-center text-sm text-gray-500">
+                {hints.caption}
+              </figcaption>
+            )}
+          </figure>
         );
       } catch (err) {
         console.error('Error rendering embedded asset:', err);
@@ -218,4 +330,3 @@ export const renderRichText = (
 
   return documentToReactComponents(content, getRichTextRenderOptions(options));
 };
-
