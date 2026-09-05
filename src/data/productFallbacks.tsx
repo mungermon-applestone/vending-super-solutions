@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { CMSProductType, MockImage } from '@/types/cms';
-import { ShoppingBag, ShieldCheck, Utensils, Tags, Truck, Clock, Sparkles, ThumbsUp, Pill } from 'lucide-react';
+import { ShoppingBag, ShieldCheck, Utensils, Tags, Truck, Clock, Sparkles, ThumbsUp } from 'lucide-react';
 
 // Helper function to ensure all images have IDs
 const createImage = (url: string, alt: string): MockImage => ({
