@@ -45,10 +45,10 @@ const ProductTypesSection = () => {
       path: "/products/grocery"
     },
     {
-      title: "Vape & Cannabis",
-      description: "Secure solutions for age-restricted products with ID verification and compliance features.",
-      image: "https://images.unsplash.com/photo-1560913210-91e811632701",
-      path: "/products/vape"
+      title: "Beverages",
+      description: "Chilled vending for bottled and canned drinks with real-time temperature and stock monitoring.",
+      image: "https://images.unsplash.com/photo-1544145945-f90425340c7e",
+      path: "/products/beverages"
     },
     {
       title: "Fresh Food",
