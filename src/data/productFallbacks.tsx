@@ -87,43 +87,6 @@ export const productFallbacks: Record<string, CMSProductType> = {
       thumbnailImage: createImage("https://images.unsplash.com/photo-1550989460-0adf9ea622e2", "Grocery Vending Video")
     }
   },
-  'vape': {
-    id: 'vape',
-    slug: 'vape',
-    title: "Vape",
-    description: "Secure vending solutions for vape products with robust age verification and compliance tracking.",
-    image: createImage("https://images.unsplash.com/photo-1560913210-91e811632701", "Vape products"),
-    benefits: [
-      "Secure age verification with multiple authentication methods",
-      "Compliance tracking and reporting for regulatory requirements",
-      "Inventory management with serialization tracking",
-      "Anti-theft features and security monitoring",
-      "Integration with state tracking systems where required",
-      "Product information display including warnings and ingredients"
-    ],
-    features: [
-      {
-        id: 'f2',
-        title: "Age Verification System",
-        description: "Multi-factor age verification including ID scanning, facial recognition, and credit card verification to ensure legal compliance.",
-        icon: <ShieldCheck className="h-6 w-6 text-vending-teal" />,
-        screenshot: createImage("https://images.unsplash.com/photo-1610374792793-f016b77ca51a", "Age Verification")
-      }
-    ],
-    examples: [
-      {
-        id: 'e2',
-        title: "Vape Shop Automation",
-        description: "Vape retailer expanded with unmanned satellite locations using secure vending machines.",
-        image: createImage("https://images.unsplash.com/photo-1588731247530-4076fc99173e", "Vape Shop Automation")
-      }
-    ],
-    video: {
-      title: "Secure Vape Vending Solutions",
-      description: "See how our vape vending technology ensures both convenience and regulatory compliance.",
-      thumbnailImage: createImage("https://images.unsplash.com/photo-1595402507356-b7417a2e31f6", "Vape Vending Video")
-    }
-  },
   'cosmetics': {
     id: 'cosmetics',
     slug: 'cosmetics',
@@ -167,47 +130,4 @@ export const productFallbacks: Record<string, CMSProductType> = {
       thumbnailImage: createImage("https://images.unsplash.com/photo-1512496015851-a90fb38ba796", "Cosmetics Vending Video")
     }
   },
-  'otc': {
-    id: 'otc',
-    slug: 'otc',
-    title: "OTC Products",
-    description: "Secure and compliant vending solutions for over-the-counter medications and health products with temperature control and expiration tracking.",
-    image: createImage("https://images.unsplash.com/photo-1584362917165-526a968579e8", "OTC products"),
-    benefits: [
-      "Compliant with pharmacy regulations",
-      "Secure product dispensing with verification",
-      "Temperature-controlled storage for sensitive medications",
-      "Expiration date tracking and automatic removal",
-      "Product information display for dosage and usage",
-      "Integration with pharmacy management systems"
-    ],
-    features: [
-      {
-        id: 'f4',
-        title: "Medication Safety Features",
-        description: "Built-in verification systems ensure proper handling and dispensing of OTC medications with appropriate usage guidelines displayed.",
-        icon: <Pill className="h-6 w-6 text-vending-teal" />,
-        screenshot: createImage("https://images.unsplash.com/photo-1584308666744-24d5c474f2ae", "Medication safety features")
-      },
-      {
-        title: "Compliance Management",
-        description: "Automated tracking of medication regulations and sales restrictions to ensure full compliance with local and federal laws.",
-        icon: <ShieldCheck className="h-6 w-6 text-vending-teal" />,
-        screenshot: createImage("https://images.unsplash.com/photo-1576602976047-174e57a47881", "Compliance management")
-      }
-    ],
-    examples: [
-      {
-        id: 'e4',
-        title: "24/7 Pharmacy Access",
-        description: "Pharmacy chain extended hours of operation with OTC medication vending machines in accessible locations.",
-        image: createImage("https://images.unsplash.com/photo-1587854692152-cbe660dbde88", "24/7 Pharmacy Access")
-      }
-    ],
-    video: {
-      title: "Next-Generation OTC Dispensing",
-      description: "See how our OTC vending solutions are transforming medication accessibility while maintaining strict compliance standards.",
-      thumbnailImage: createImage("https://images.unsplash.com/photo-1471864190281-a93a3070b6de", "OTC Vending Video")
-    }
-  }
 };
