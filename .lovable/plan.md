@@ -60,7 +60,11 @@ Suggested (phrase removed entirely):
 ## Not proposed for change
 
 - Blog "New Software for OEMs" mentions "pharmaceuticals" in a generic list of inventory categories — no product-line claim, recommend leaving as is.
-- Website backup copy stored in the code (used only if Contentful is unreachable) still has "Vape & Cannabis" and "OTC Products" placeholders. Recommend cleaning these up in the same pass so a Contentful outage can't surface them.
+
+## Also included
+
+Website backup copy stored in the code (used only if Contentful is unreachable) still has "Vape & Cannabis" and "OTC Products" placeholders. These get scrubbed in the same pass so a Contentful outage can't surface them.
+
 
 ## Technical details
 
