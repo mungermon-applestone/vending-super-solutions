@@ -134,20 +134,6 @@ export const mockProductTypes: CMSProductType[] = [
     ]
   },
   {
-    id: '2',
-    slug: 'vape',
-    title: "Vape & Cannabis",
-    description: "Secure solutions for age-restricted products with ID verification and compliance features.",
-    image: createImage("https://images.unsplash.com/photo-1560913210-91e811632701", "Vape products"),
-    benefits: [
-      "Age verification with multiple methods",
-      "Compliance reporting and audit trails",
-      "Secure dispensing mechanisms"
-    ],
-    features: [],
-    examples: []
-  },
-  {
     id: '3',
     slug: 'fresh-food',
     title: "Fresh Food",
