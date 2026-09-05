@@ -53,8 +53,9 @@ Suggested:
 Current:
 > When a prospect needs age verification for cannabis vending, temperature monitoring for fresh food, or RFID integration for tool cribs, you face two options: spend months on custom development or walk away from the deal.
 
-Suggested:
-> When a prospect needs age verification for restricted goods, temperature monitoring for fresh food, or RFID integration for tool cribs, you face two options: spend months on custom development or walk away from the deal.
+Suggested (phrase removed entirely):
+> When a prospect needs temperature monitoring for fresh food or RFID integration for tool cribs, you face two options: spend months on custom development or walk away from the deal.
+
 
 ## Not proposed for change
 
