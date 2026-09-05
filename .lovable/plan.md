@@ -70,4 +70,4 @@ Website backup copy stored in the code (used only if Contentful is unreachable) 
 
 - Contentful entries affected: `homePageContent 6LtA5vr8JVX8yo8uCmqLZ0` (feature1Description), `productsPageContent 5YfQbcsaDZ1NUPbujXXOdn` (heroDescription, purposeStatementDescription), `technologySection 751TUGlWyMDSjpJ26gJLry` (bulletPoints), `machine 3tQIRzIcysQGBXnDXGoFYn` (description), `blogPost 2fNFJGgDstz7I86PZ3X6lu` (rich-text content node).
 - Applied with a new `scripts/update-regulated-copy.mjs` using the Management API, same pattern as `scripts/unpublish-regulated-pages.mjs`; each entry is updated then republished, and the script logs before/after values.
-- Optional code cleanup: `src/data/productFallbacks.tsx` (`vape`, `otc` entries), `src/data/mockCmsData.ts`, `src/components/home/ProductTypesSection.tsx` and `MachineTypesSection.tsx` ("Vape & Cannabis" card, `/products/vape` link).
+- Code cleanup: `src/data/productFallbacks.tsx` (`vape`, `otc` entries), `src/data/mockCmsData.ts`, `src/components/home/ProductTypesSection.tsx` and `MachineTypesSection.tsx` ("Vape & Cannabis" card, `/products/vape` link).
