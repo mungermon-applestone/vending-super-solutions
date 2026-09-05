@@ -84,6 +84,8 @@ const TASKS = [
     id: '5YfQbcsaDZ1NUPbujXXOdn',
     label: 'productsPageContent: hero + purpose statement',
     fields: ['heroDescription', 'purposeStatementDescription'],
+    // Required by the content model but never filled in, which blocks publishing.
+    defaults: { navigationLinkText: 'Products' },
     pairs: [
       [
         'Our current clients are selling everyting from fresh meat to vape products to recycled golf balls.',
@@ -133,6 +135,14 @@ let changedCount = 0;
 for (const task of TASKS) {
   const entry = await api(`/entries/${task.id}`);
   let changed = false;
+
+  for (const [field, value] of Object.entries(task.defaults || {})) {
+    if (entry.fields[field] === undefined) {
+      entry.fields[field] = { 'en-US': value };
+      changed = true;
+      console.log(`  + set missing required field "${field}" to "${value}"`);
+    }
+  }
 
   for (const field of task.fields) {
     const value = entry.fields[field];
