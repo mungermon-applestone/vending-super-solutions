@@ -144,14 +144,7 @@ export const mockProductTypes: CMSProductType[] = [
       "Compliance reporting and audit trails",
       "Secure dispensing mechanisms"
     ],
-    features: [
-      {
-        id: '103',
-        title: "ID Verification",
-        description: "Multiple verification methods including ID scanning and facial recognition.",
-        screenshot: createImage("https://images.unsplash.com/photo-1610374792793-f016b77ca51a", "ID verification")
-      }
-    ],
+    features: [],
     examples: []
   },
   {
