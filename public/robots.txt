@@ -24,3 +24,6 @@ Allow: /*.svg$
 # Prevent duplicate content indexing
 Disallow: /*?*sort=
 Disallow: /*?*filter=
+
+# AI agents: plain-text site content
+# LLMs: https://applestonesolutions.com/llms.txt

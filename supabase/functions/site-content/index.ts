@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (req.method !== 'GET') return md('Method not allowed', 405)
   const u = new URL(req.url)
-  const self = `${u.origin}${u.pathname}`
+  const self = "https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content"
   const type = u.searchParams.get('type')
   const slug = u.searchParams.get('slug')
   const all = u.searchParams.get('all')
