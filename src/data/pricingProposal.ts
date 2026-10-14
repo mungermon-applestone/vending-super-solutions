@@ -16,7 +16,7 @@ export const pricingPlans = [
     features: ['Coupons, discounts and bundles', 'Sold/Expired and turnover', 'Restock lists', 'Buy online, pick up in store (BOPIS)'],
   },
   {
-    name: 'Enterprise', price: 59, seats: 'Unlimited',
+    name: 'Business', price: 59, seats: 'Unlimited',
     audience: 'Large operators and brand programs',
     introduction: 'Your brand. Your workflows. Your network.',
     includes: 'Everything in Pro, plus',
