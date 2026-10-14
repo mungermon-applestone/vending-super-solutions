@@ -77,6 +77,20 @@ export default function PricingPreviewPage() {
             </article>
           ))}
         </div>
+        <div className="mt-8 flex flex-col gap-5 rounded-lg border border-primary/30 bg-primary/5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
+          <div className="flex gap-4">
+            <Building2 className="h-6 w-6 shrink-0 text-primary" aria-hidden="true" />
+            <div>
+              <h3 className="mb-1 text-lg font-semibold">Enterprise deployments &amp; integrations</h3>
+              <p className="mb-0 max-w-2xl text-sm leading-6 text-muted-foreground">
+                Large fleets, custom hardware, API and back-office integrations, and private deployment are handled outside these tiers and priced per program.
+              </p>
+            </div>
+          </div>
+          <Button asChild className="shrink-0" variant="outline">
+            <Link to="/contact">Talk to us<ArrowRight aria-hidden="true" /></Link>
+          </Button>
+        </div>
       </section>
 
       <section className="border-t border-border bg-card py-12 md:py-16">
