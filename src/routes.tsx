@@ -1,5 +1,6 @@
 
 import { createBrowserRouter } from "react-router-dom";
+import { lazy } from "react";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import ProductsPage from "./pages/ProductsPage";
@@ -30,6 +31,11 @@ import CustomerProtectedRoute from "./components/auth/CustomerProtectedRoute";
 import DocBuilder from "./pages/DocBuilder";
 import ExportHelpDeskArticles from "./pages/admin/ExportHelpDeskArticles";
 
+// Both the module import and route are excluded from production.
+const PricingPreviewPage = import.meta.env.DEV
+  ? lazy(() => import("./pages/PricingPreviewPage"))
+  : null;
+
 /**
  * Router Configuration
  * 
@@ -52,6 +58,10 @@ export const router = createBrowserRouter([
     element: <Layout />,
     errorElement: <ErrorPage />,
     children: [
+      ...(PricingPreviewPage ? [{
+        path: "/pricing-preview",
+        element: <PricingPreviewPage />,
+      }] : []),
       {
         path: "/",
         element: <Home />,
