@@ -125,6 +125,8 @@ export default function PricingPreviewPage() {
                 </tr>
               </tbody>
             </table>
+          </div>
+          <p className="mb-0 mt-6 text-sm text-muted-foreground">Proposed pricing only. These tiers are not currently available to purchase.</p>
         </div>
       </section>
 
