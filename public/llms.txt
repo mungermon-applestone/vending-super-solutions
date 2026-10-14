@@ -1,0 +1,18 @@
+# Applestone Solutions
+
+> Applestone Solutions provides smart vending machines, AI coolers, temperature-controlled lockers and the cloud software platform that runs them, for operators, retailers and vending OEMs.
+
+The website (https://applestonesolutions.com) is a JavaScript app. Use the plain-text Markdown feed below instead — it is generated live from the site's published content.
+
+## Content
+- [Site index](https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content): every page with links to its Markdown version
+- [Everything in one file](https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content?all=1): full text of all published content
+- [Machines](https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content?type=machine)
+- [Product categories](https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content?type=productType)
+- [Technology](https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content?type=technologySection)
+- [Business goals](https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content?type=businessGoal)
+- [Blog posts](https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content?type=blogPost)
+- [Help desk articles](https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content?type=helpDeskArticle)
+- [About, privacy and terms](https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content?type=privacyPolicy)
+
+Single page: https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content?type=<type>&slug=<slug>
