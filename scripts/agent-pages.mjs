@@ -84,7 +84,7 @@ function mdToHtml(md) {
 }
 
 const firstSentence = (md) => {
-  const p = md.split('\n').find((l) => l.trim() && !/^(#|URL:|!\[|-|\d+\.|---|```)/.test(l.trim())) ?? ''
+  const p = md.split('\n').find((l) => l.trim().length > 40 && !/^(#|URL:|!\[|-|\d+\.|---|```)/.test(l.trim())) ?? ''
   const t = p.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/\*\*/g, '').trim()
   return t.length > 160 ? t.slice(0, 157).replace(/\s+\S*$/, '') + '…' : t
 }
@@ -108,7 +108,9 @@ function renderPage(shell, { path, title, description, body, markdownUrl }) {
       ${body}
       <p><small>Plain-text version for AI agents: <a href="${markdownUrl ?? '/llms.txt'}">${markdownUrl ? 'this page as Markdown' : '/llms.txt'}</a> · <a href="/llms.txt">all content</a></small></p>
     </main>`
-  return html.replace(/<div id="root">[\s\S]*?<\/main><\/div>/, `<div id="root">${main}</div>`)
+  const root = /<div id="root">(?:<\/div>|[\s\S]*?<\/main><\/div>)/
+  if (!root.test(html)) throw new Error('app shell root not found')
+  return html.replace(root, `<div id="root">${main}</div>`)
 }
 
 function write(file, content) {
