@@ -69,7 +69,7 @@ function mdToHtml(md) {
     const line = raw.trimEnd()
     let m
     if (!line.trim()) { close(); continue }
-    if ((m = line.match(/^(#{1,6})\s+(.*)/))) { close(); const n = Math.min(6, m[1].length + 1); out.push(`<h${n}>${inline(m[2])}</h${n}>`); continue }
+    if ((m = line.match(/^(#{1,6})\s+(.*)/))) { close(); const n = Math.max(1, Math.min(6, m[1].length - 1)); out.push(`<h${n}>${inline(m[2])}</h${n}>`); continue }
     if (line === '---') { close(); out.push('<hr>'); continue }
     if ((m = line.match(/^\s*(?:[-*]|\d+\.)\s+(.*)/))) {
       const t = /^\s*\d+\./.test(line) ? 'ol' : 'ul'
