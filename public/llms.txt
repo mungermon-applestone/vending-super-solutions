@@ -5,6 +5,7 @@
 The website (https://applestonesolutions.com) is a JavaScript app. Use the plain-text Markdown feed below instead — it is generated live from the site's published content.
 
 ## Content
+- [Full text on our own domain](https://applestonesolutions.com/llms-full.txt): snapshot of all published content, refreshed on every site publish
 - [Site index](https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content): every page with links to its Markdown version
 - [Everything in one file](https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content?all=1): full text of all published content
 - [Machines](https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content?type=machine)
@@ -16,3 +17,6 @@ The website (https://applestonesolutions.com) is a JavaScript app. Use the plain
 - [About, privacy and terms](https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content?type=privacyPolicy)
 
 Single page: https://rwvlvooojegpebognnzn.supabase.co/functions/v1/site-content?type=<type>&slug=<slug>
+
+## Contact
+Quotes and questions: info@applestonesolutions.com or https://applestonesolutions.com/contact
