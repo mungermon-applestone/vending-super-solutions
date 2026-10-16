@@ -1,29 +1,37 @@
-
 User-agent: *
 Allow: /
-
-# Prevent crawling of admin pages
 Disallow: /admin/
 Disallow: /api/
+Disallow: /doc-builder
+Disallow: /customer-login
+Disallow: /preview/
 Disallow: /*.json$
-
-# Define sitemap location
-Sitemap: https://applestonesolutions.com/sitemap.xml
-
-# Crawl delay to prevent server overload
-Crawl-delay: 10
-
-# Allow image indexing
-Allow: /*.jpg$
-Allow: /*.jpeg$
-Allow: /*.png$
-Allow: /*.gif$
-Allow: /*.webp$
-Allow: /*.svg$
-
-# Prevent duplicate content indexing
 Disallow: /*?*sort=
 Disallow: /*?*filter=
+Crawl-delay: 10
 
-# AI agents: plain-text site content
-# LLMs: https://applestonesolutions.com/llms.txt
+# AI assistants and AI search crawlers are welcome (no crawl delay)
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Applebot
+User-agent: CCBot
+User-agent: meta-externalagent
+User-agent: Amazonbot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /doc-builder
+Disallow: /customer-login
+Disallow: /preview/
+
+Sitemap: https://applestonesolutions.com/sitemap.xml
+
+# AI agents: plain-text site content at https://applestonesolutions.com/llms.txt
