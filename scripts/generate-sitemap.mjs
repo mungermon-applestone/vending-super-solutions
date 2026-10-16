@@ -25,6 +25,7 @@ async function fetchAll(ct) {
   const out = []
   for (let skip = 0; ; skip += 200) {
     const r = await fetch(`https://cdn.contentful.com/spaces/${SPACE}/environments/${ENV}/entries?content_type=${ct}&select=fields.slug,sys.updatedAt&limit=200&skip=${skip}`, { headers: { Authorization: `Bearer ${TOKEN}` } })
+    if (r.status === 400) return out // content type not in this space
     if (!r.ok) throw new Error(`${ct}: ${r.status}`)
     const j = await r.json()
     out.push(...j.items)
